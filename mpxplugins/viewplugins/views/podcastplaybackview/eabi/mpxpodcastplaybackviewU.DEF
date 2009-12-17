@@ -1,0 +1,5 @@
+EXPORTS
+	_ZN23CMPXPodcastPlaybackView4NewLEv @ 1 NONAME
+	_ZN23CMPXPodcastPlaybackView5NewLCEv @ 2 NONAME
+	_ZN26CMPXPodcastPlaybackViewImp14HandleCommandLEi @ 3 NONAME
+

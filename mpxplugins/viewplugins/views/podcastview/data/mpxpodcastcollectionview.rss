@@ -1,0 +1,912 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxpodcastcollectionview
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MPCV // 4 letter ID
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <CommonDialogs.hrh> 
+#include <CommonDialogs.rh> 
+#include <bldvariant.hrh>
+#include <pathconfiguration.hrh>
+
+#include <AiwCommon.hrh>
+#include <AiwCommon.rh>
+
+#include <mpxappui.hrh>
+#include <mpxpodcastcollectionview.loc>
+#include "mpxpodcastcollectionview.hrh"
+
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view
+// Podcast Collection view information resource.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_mpx_podcast_collection_view
+    {
+    menubar = r_mpx_podcast_collection_titles_view_menubar;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view_menubar
+// Podcast Collection view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_podcast_collection_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_podcast_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view_podcast_menu
+// Podcast Collection view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_podcast_collection_view_podcast_menu
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToNowPlaying;
+            txt = qtn_nmp_options_go_to_nowplaying;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdPodcasting;
+            txt = qtn_nmp_options_go_to_podcasting;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdLibraryDetails;
+            txt = qtn_mus_options_details_podcast_library;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+    
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_titles_view_menubar
+// Podcast Collection view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_podcast_collection_titles_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_1;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_publishdate_view_menubar
+// Podcast Collection view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_podcast_collection_publishdate_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_1;
+            }
+        };
+    }
+    
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view_menu_1
+// Podcast Collection view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_podcast_collection_view_menu_1
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToNowPlaying;
+            txt = qtn_nmp_options_go_to_nowplaying;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdFind;
+            txt = qtn_options_find;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXCmdUpnpPlayVia;
+            txt = qtn_nmp_options_play_via;
+            cascade = r_mpx_podcast_collection_play_via_sub_menu; 
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdUPnPAiwCmdCopyToExternalCriteria;
+            txt = "(copy to ext)";
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdDelete;
+            txt = qtn_mus_options_delete;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdPodcasting;
+            txt = qtn_nmp_options_go_to_podcasting;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdLibraryDetails;
+            txt = qtn_mus_options_details_podcast_library;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+#ifdef SINGLE_CLICK_INCLUDED
+// ---------------------------------------------------------------------------
+// r_mpx_collection_view_menubar_no_marking
+// Collection view menu bar without marking.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_podcast_collection_episodes_view_no_marking
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_3;
+            },
+        MENU_TITLE
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_2;
+            }
+        };
+    }
+#endif
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_episodes_view_menubar
+// Podcast Collection view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_podcast_collection_episodes_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_3;
+            },
+        MENU_TITLE 
+            {
+            menu_pane = R_AVKON_MENUPANE_MARKABLE_LIST;
+            },
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_podcast_collection_view_menu_2;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view_menu_2
+// Podcast Collection view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_podcast_collection_view_menu_2
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToNowPlaying;
+            txt = qtn_nmp_options_go_to_nowplaying;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdFind;
+            txt = qtn_options_find;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXCmdUpnpPlayVia;
+            txt = qtn_nmp_options_play_via;
+            cascade = r_mpx_podcast_collection_play_via_sub_menu; 
+            },    
+        MENU_ITEM
+            {
+            command = EMPXCmdUPnPAiwCmdCopyToExternalCriteria;
+            txt = "(copy to ext)";
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdSend;
+            txt = qtn_options_send_via;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdDelete;
+            txt = qtn_mus_options_delete;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdSetPlayed;
+            txt = qtn_nmp_options_set_to_played;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdSetUnplayed;
+            txt = qtn_nmp_options_set_to_unplayed;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collection_view_menu_3
+// Podcast Collection view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_podcast_collection_view_menu_3
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdEpisodeDetails;
+            txt = qtn_mus_options_details_episode;
+#ifdef SINGLE_CLICK_INCLUDED
+            flags = EEikMenuItemSpecific;            
+#endif
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdPodcasting;
+            txt = qtn_nmp_options_go_to_podcasting;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------------------------
+// r_mpx_podcast_collectionview_title
+// Title for Podcast Collection view.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_podcast_collection_view_title
+    {
+    buf = qtn_mp_title_my_podcast;
+    }
+
+            
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_nmp_unknown_title
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_mpx_qtn_nmp_unknown_title
+    {
+    buf = qtn_mp_list_unknown;
+    }   
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_collection_via_sub_menu
+// Collection view UPnP Play Via sub menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_podcast_collection_play_via_sub_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdUpnpPlayViaLocal;
+            txt = qtn_nmp_options_play_device;
+            flags = EEikMenuItemRadioStart;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXCmdUpnpPlayViaRemotePlayer;
+            txt = qtn_nmp_options_play_homenet;
+            flags = EEikMenuItemRadioEnd;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_upnp_copy_to_external_menu_interest
+// Copy to remote menu definition needed by AIW to display and handle the menu
+// ---------------------------------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_mpx_upnp_copy_to_external_menu_interest
+    {
+    items=
+        {
+        AIW_CRITERIA_ITEM
+            {
+            id = EMPXCmdUPnPAiwCmdCopyToExternalCriteria;
+            serviceCmd   = KAiwCmdUPnPCopy; //AIWCommon.hrh
+            serviceClass = KAiwClassMenu;   //AIWCommon.hrh
+            contentType  = "*";
+//            maxProviders = 1;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_delete_confirmation_query
+// Confirmation query dialog for deleting.
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_cui_delete_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_generic_confirmation_query
+// Generic confirmation query dialog.
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_collection_generic_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+#ifdef __ENABLE_MSK
+// ---------------------------------------------------------------------------
+// r_mpx_options_back_cba_no_action
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_options_back_cba_no_action
+    {
+    buttons = 
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_back;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_open;
+            }
+        };
+    }
+#else
+// ---------------------------------------------------------------------------
+// r_mpx_options_back_cba_no_action
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_options_back_cba_no_action
+    {
+    buttons = 
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_back;
+            }
+        };
+    }
+#endif // __ENABLE_MSK
+
+#ifdef __ENABLE_MSK
+// ---------------------------------------------------------------------------
+// r_mpx_options_exit_cba_no_action
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_options_exit_cba_no_action
+    {
+    buttons = 
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_exit;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_open;
+            }
+        };
+    }
+#else
+// ---------------------------------------------------------------------------
+// r_mpx_options_exit_cba_no_action
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_options_exit_cba_no_action
+    {
+    buttons = 
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            txt = text_softkey_exit;
+            }
+        };
+    }
+#endif // __ENABLE_MSK
+    
+// ---------------------------------------------------------------------------
+// r_mpx_cui_collection_details_headings
+// Headings for Collection Details popup
+// ---------------------------------------------------------------------------
+//
+#ifdef RD_MULTIPLE_DRIVE
+RESOURCE ARRAY r_mpx_podcast_cui_collection_details_headings
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_nmp_detail_number_of_episodes;
+            },
+        LBUF
+            {
+            txt = qtn_mp_details_duration;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_phone_memory;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_mass_memory;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_mmc;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_date_refresh;
+            }
+        };
+    }   
+#else
+RESOURCE ARRAY r_mpx_podcast_cui_collection_details_headings
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_nmp_detail_number_of_episodes;
+            },
+        LBUF
+            {
+            txt = qtn_mp_details_duration;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_phone_memory;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_memory_card;
+            },
+        LBUF
+            {
+            txt = qtn_nmp_details_date_refresh;
+            }
+        };
+    }   
+#endif // RD_MULTIPLE_DRIVE   
+ 
+
+// ---------------------------------------------------------------------------
+// r_mpx_collection_waitnote_softkeys_empty_stop
+// Softkeys used by generic wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE CBA r_mpx_collection_waitnote_softkeys_empty_stop
+    {
+    buttons=
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_empty;
+            },
+        CBA_BUTTON
+            {
+            id = EAknSoftkeyCancel;
+            txt = text_softkey_stop;
+            }
+        };
+    }
+    
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_query_common_conf_delete
+// Text for single item deletion confirmation query.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_query_common_conf_delete
+    {
+    buf = qtn_query_common_conf_delete;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_to_be_implemented
+// notes for To be implemented.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_qtn_to_be_implemented
+    {
+    buf = qtn_mpx_to_be_implemented;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_del_songs_query
+// Text for multiple tracks deletion confirmation query.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_del_songs_query
+    {
+    buf = qtn_nmp_del_songs_query;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_query_conf_delete_group
+// Text for group deletion confirmation query.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_query_conf_delete_group
+    {
+    buf = qtn_nmp_query_conf_delete_group;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_del_songs_wait_note
+// Text for multiple item deletion wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_del_songs_wait_note
+    {
+    buf = qtn_nmp_del_songs_wait_note;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_album_waiting_deleting
+// Text for single item deletion wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_album_waiting_deleting
+    {
+    buf = qtn_album_waiting_deleting;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_query_conf_delete_all
+// Text for group deletion wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_mus_query_conf_delete_all
+    {
+    buf = qtn_album_waiting_deleting;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_note_delete_fail
+// Text used when a delete fails due to a file in use error
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_note_delete_fail
+    {
+    buf = qtn_nmp_delete_file_open;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_collection_note_delete_fail
+// Text used when a delete fails due to a file in use error
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_note_delete_fail_multi_selection
+    {
+    buf = qtn_nmp_delete_mutl_file_open;
+    }
+        
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_title_collection_details
+// Text used for Collection Details title.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_title_collection_details
+    {
+    buf = qtn_nmp_title_collection_details1;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_phone_memory_root_path
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_phone_memory_root_path
+    {
+    buf = text_phone_memory_root_path;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_memory_card_root_path
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_memory_card_root_path
+    {
+    buf = text_memory_card_root_path;
+    }
+
+#ifdef RD_MULTIPLE_DRIVE
+// -----------------------------------------------------------------------------
+// r_mpx_cui_collection_details_card_unavailable_item
+// -----------------------------------------------------------------------------
+//	
+RESOURCE TBUF r_mpx_cui_collection_details_memory_unavailable
+    {
+    buf = qtn_nmp_memory_unavailable;
+    }	
+#endif // RD_MULTIPLE_DRIVE   
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_collection_details_card_unavailable_item
+// -----------------------------------------------------------------------------
+//	
+RESOURCE TBUF r_mpx_cui_collection_details_card_unavailable_item
+    {
+    buf = qtn_nmp_mmc_unavailable;
+    }	
+
+    
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_num_episodes
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_qtn_nmp_num_episodes
+    {
+    buf = qtn_nmp_num_episodes;
+    }
+ 
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_one_episode
+// ---------------------------------------------------------------------------
+//     
+RESOURCE TBUF r_mpx_qtn_nmp_one_episode
+    {
+    buf = qtn_nmp_one_episode;
+    }    
+   
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_no_episodes
+// ---------------------------------------------------------------------------
+//     
+RESOURCE TBUF r_mpx_qtn_nmp_no_episodes
+    {
+    buf = qtn_nmp_no_episodes;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_no_episodes_go_to_app
+// ---------------------------------------------------------------------------
+//      
+RESOURCE TBUF r_mpx_qtn_nmp_no_episodes_go_to_app
+    {
+    buf = qtn_nmp_no_episodes_go_to_app;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_query_send_invalid_songs_txt
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_query_send_invalid_songs_txt
+    {
+    buf = qtn_nmp_query_send_valid_songs1;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_send_all_invalid_songs_note_txt
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_send_all_invalid_songs_note_txt
+    {
+    buf = qtn_nmp_note_nothing_to_send;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_menu_play_via_on_device
+// Text used when Play via sub menu opens
+// This is local player type name
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_menu_play_via_on_device
+    {
+    buf = qtn_nmp_options_play_device;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_menu_play_via_home_net
+// Text used when Play via sub menu opens
+// This is remote player type name
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_menu_play_via_home_net
+    {
+    buf = qtn_nmp_options_play_homenet;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_note_remote_connection_failed
+// Text used when a remote connection failed and player reverts to Local
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_note_remote_connection_failed
+    {
+    buf = qtn_nmp_note_remote_connection_failed;
+    }
+
+
+// -----------------------------------------------------------------------------
+// r_mpx_collection_info_file_not_found
+// info note for file not found
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_collection_info_file_not_found
+    {
+    buf = qtn_mp_note_broken_file;
+    }  
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_nmp_del_batch_songs_wait_note
+// Text for group deletion wait note.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_del_batch_songs_wait_note
+    {
+    buf = qtn_nmp_del_batch_songs_wait_note;
+    }
+
+    
+//------------------------------------------------------------------------------
+// r_mpx_progress_note
+// Generic Progress note.      
+//------------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_progress_note
+    {
+    flags = EAknProgressNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = 0x1000;
+            control = AVKON_NOTE
+                {
+                layout = EProgressLayout;
+                };
+            }
+        };
+    }
+
+// End of File

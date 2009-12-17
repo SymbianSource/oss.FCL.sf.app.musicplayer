@@ -1,0 +1,176 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project FM TX features within 
+*				 mpxcommonplaybackview
+*
+*/
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    FMTX // 4 letter ID
+
+// INCLUDES
+#include <e32keys.h>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <bldvariant.hrh>
+
+#include <mpxcommonplaybackview.loc>
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// ---------------------------------------------------------------------------
+// r_mpx_fm_frequency_label
+// Label for FM Transmitter frequency
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_fm_frequency_label
+    {
+    buf = qtn_nmp_display_fm_freq;
+    }
+
+// ***********************************************************
+// *** Layouts for lowest portrait with Rocker key mapping ***
+// ***********************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 105; r = 6; B = 56; W = 82; J = ELayoutAlignRight;
+    }
+    
+// **************************************************************
+// *** Layouts for lowest portrait without Rocker key mapping ***
+// **************************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_without_rocker
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 105; r = 6; B = 56; W = 65; J = ELayoutAlignRight;
+    }  
+    
+// *************************************************************
+// *** Layouts for double portrait ***
+// *************************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_double_portrait
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 214; r = 10; B = 89; W = 128; J = ELayoutAlignRight;
+    }      
+    
+// *********************************************************
+// *** Layouts for Qvga portrait with Rocker key mapping ***
+// *********************************************************
+#if defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS)
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_portrait
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 134; r = 15; B = 66; W = 97; J = ELayoutAlignRight;
+    }  
+#else
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_portrait
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 66; W = 81; J = ELayoutAlignRight;
+    }    
+#endif  
+    
+// ***********************************************************
+// *** Layouts for Qvga portrait without Rocker key maping ***
+// ***********************************************************
+#if defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS)
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_portrait_without_rocker
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 134; r = 15; B = 66; W = 97; J = ELayoutAlignRight;
+    }   
+#else
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_portrait_without_rocker
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 66; W = 81; J = ELayoutAlignRight;
+    }   
+#endif 
+    
+// **********************************************************
+// *** Layouts for Qvga Landscape with Rocker key mapping ***
+// **********************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_landscape
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 205; r = 15; B = 186; W = 100; J = ELayoutAlignRight;
+    }   
+    
+// *************************************************************
+// *** Layouts for Qvga Landscape without Rocker key mapping ***
+// *************************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_fm_frequency_value_layout_qvga_landscape_without_rocker
+// Label layout for fm frequency.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_fm_frequency_value_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 205; r = 15; B = 186; W = 100; J = ELayoutAlignRight;
+    }
+
+// End of File
+

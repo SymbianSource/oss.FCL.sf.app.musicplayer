@@ -1,0 +1,64 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Local audio playback project specification
+*
+*/
+
+
+
+#include   <bldvariant.hrh>
+#include   <data_caging_paths.hrh>
+#include   <platform_paths.hrh>
+
+TARGET          mpxprogressdownloadsb.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x10207BCC
+
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_ECOM_PLUGIN
+
+VERSION 15.0
+
+SOURCEPATH      ../src
+SOURCE          mpxprogressdownloadsb.cpp
+SOURCE          mpxprogressdownloadsbproxy.cpp
+
+SOURCEPATH      ../data
+START RESOURCE  10207bcc.rss
+TARGET          mpxprogressdownloadsb.rsc
+END
+
+USERINCLUDE     ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         bafl.lib
+LIBRARY         ecom.lib
+LIBRARY         efsrv.lib
+LIBRARY         mmfcontrollerframework.lib 
+LIBRARY         audioequalizerutility.lib
+LIBRARY         customcommandutility.lib
+LIBRARY         apgrfx.lib
+LIBRARY         apmime.lib 
+LIBRARY         caf.lib
+LIBRARY         cafutils.lib
+LIBRARY         mpxcommon.lib
+LIBRARY         estor.lib
+LIBRARY         metadatautility.lib
+LIBRARY         EnhancedMediaClient.lib
+LIBRARY         mmfstandardcustomcommands.lib
+
+
+// End of File

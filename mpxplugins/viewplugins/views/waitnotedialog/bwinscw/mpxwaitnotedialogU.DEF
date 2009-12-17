@@ -1,0 +1,3 @@
+EXPORTS
+	?ConstructWaitNoteL@CMPXWaitNoteConstructor@@SAPAVCMPXWaitNoteDialog@@ABVTDesC16@@PAVMMPXWaitNoteObserver@@@Z @ 1 NONAME ; class CMPXWaitNoteDialog * CMPXWaitNoteConstructor::ConstructWaitNoteL(class TDesC16 const &, class MMPXWaitNoteObserver *)
+

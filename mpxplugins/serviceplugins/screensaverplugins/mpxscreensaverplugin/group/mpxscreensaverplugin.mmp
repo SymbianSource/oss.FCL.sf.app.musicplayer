@@ -1,0 +1,72 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxscreensaverplugin.
+*
+*/
+
+
+
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxscreensaverplugin.dll
+TARGETTYPE      PLUGIN 
+UID             0x10009D8D 0x101FFC13
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+VERSION 15.0
+
+START RESOURCE ../data/101ffc13.rss 
+TARGET      mpxscreensaverplugin.rsc
+END
+
+START RESOURCE  ../data/mpxscreensaverplugin.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS 
+END  // RESOURCE
+
+SOURCEPATH      ../src
+SOURCE          mpxscreensaverplugin.cpp
+SOURCE          mpxscreensaverpluginproxy.cpp
+SOURCE          mpxscreensaverplugincontainer.cpp
+
+USERINCLUDE     ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+LIBRARY         ecom.lib 
+LIBRARY         euser.lib
+LIBRARY         fbscli.lib 
+LIBRARY         cone.lib 
+LIBRARY         efsrv.lib 
+LIBRARY         bafl.lib
+LIBRARY         egul.lib 
+LIBRARY         aknskins.lib
+LIBRARY         aknicon.lib              // AknIconUtils 
+LIBRARY         aknlayout2scalable.lib   // Scalable UI
+LIBRARY         avkon.lib 
+LIBRARY         bitgdi.lib
+LIBRARY         gdi.lib
+LIBRARY         profileeng.lib
+LIBRARY         commonengine.lib         // string loader
+LIBRARY         mpxplaybackutility.lib
+LIBRARY         mpxcommon.lib
+LIBRARY         eikcoctl.lib
+// End of File
+

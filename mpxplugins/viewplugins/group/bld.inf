@@ -1,0 +1,25 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for MPX View Plugins.
+*
+*/
+
+
+#include "../plugins/group/bld.inf"
+#include "../views/group/bld.inf"
+
+PRJ_EXPORTS
+../icons/qgn_graf_mup_npv_defalbumart.svg	/epoc32/s60/icons/qgn_graf_mup_npv_defalbumart.svg
+../icons/qgn_graf_mup_podcast_art.svg		/epoc32/s60/icons/qgn_graf_mup_podcast_art.svg
+

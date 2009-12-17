@@ -1,0 +1,185 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxpdplaybackview
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MPPV // 4 letter ID
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <bldvariant.hrh>
+#include <mpxcommonplaybackview.mbg>
+#include <mpxcommonplaybackview.rsg>
+#include "mpxcommonplaybackview.hrh"
+#include <mpxcommonplaybackview.loc>
+#include <mpxpdplaybackview.loc>
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+// RESOURCE DEFINITIONS 
+
+// ---------------------------------------------------------------------------
+// r_mpx_pd_playback_view
+// Progressive Download Playback view information resource.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_mpx_pd_playback_view
+    {
+    menubar = r_mpx_pd_playback_view_menubar;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    toolbar = R_MPX_PBV_TOUCH_TOOLBAR;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pd_playback_view_menubar
+// Progressive Download Playback view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_pd_playback_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_mpx_pd_playback_view_menu;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pd_playback_view_menu
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_pd_playback_view_menu
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdResumeDownload;
+            txt = qtn_mus_options_resume_dl;
+            },
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdCancelDownload;
+            txt = qtn_mus_options_cancel_dl;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdFMTransmitter;
+            txt = qtn_nmp_go_to_fm_transmitter;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_download_status_buffering
+//    Text used when download content is buffering.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_download_status_buffering
+    {
+    buf = qtn_music_shop_status_buffering;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_download_status_paused
+//    Text used when download content is paused.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_download_status_paused
+    {
+    buf = qtn_music_shop_downloadstatus_paused;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_download_status_completed
+//    Text used when download content is completed.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_download_status_completed
+    {
+    buf = qtn_music_shop_downloadstatus_completed;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_download_status_interrupted
+//    Text used when download content is interrupted.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_download_status_interrupted
+    {
+    buf = qtn_music_shop_downloadstatus_stopped;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_conf_cancel_download_txt
+//    Confirmation query text for canceling download.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_conf_cancel_download_txt
+    {
+    buf = qtn_musicshop_note_cancel;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_download_played_all_content
+//    Text used when all download content has been played
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_download_played_all_content
+    {
+    buf = qtn_musicshop_note_played_all_content;
+    }
+    
+
+// End of File

@@ -1,0 +1,7 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZTI17CEdwinTestControl @ 2 NONAME ; #<TI>#
+	_ZTI19CListBoxTestControl @ 3 NONAME ; #<TI>#
+	_ZTV17CEdwinTestControl @ 4 NONAME ; #<VT>#
+	_ZTV19CListBoxTestControl @ 5 NONAME ; #<VT>#
+

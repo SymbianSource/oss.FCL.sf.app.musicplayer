@@ -1,0 +1,3 @@
+EXPORTS
+	?NewL@CMPXEqualizerView@@SAPAV1@XZ @ 1 NONAME ; class CMPXEqualizerView * CMPXEqualizerView::NewL(void)
+

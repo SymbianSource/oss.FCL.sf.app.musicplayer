@@ -1,0 +1,113 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxcommonconatiner.
+*
+*/
+
+
+
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxcommoncontainer.dll
+TARGETTYPE      dll
+UID             0x1000006C 0x101FFC69
+EPOCALLOWDLLDATA
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+VERSION 15.0
+
+MACRO __ENABLE_MSK
+MACRO __ENABLE_PODCAST_IN_MUSIC_MENU
+MACRO __HG_COLLECTIONVIEW
+#define __HG_COLLECTIONVIEW
+MACRO HG_MP_LOC_AVAILABLE
+
+SOURCEPATH      ../src
+SOURCE          mpxcommoncontainer.cpp
+//SOURCE          mpxcommoncontainerhitchcockimp.cpp
+//SOURCE          mpxcommoncontainertexturemanager.cpp
+SOURCE          mpxcommoncontainermediahelper.cpp
+#ifdef __HG_COLLECTIONVIEW
+SOURCE          mpxcommoncontainerhgimp.cpp
+SOURCE          mpxcommoncontainertexturemanager2.cpp
+#else //__HG_COLLECTIONVIEW
+SOURCE          mpxcommoncontaineravkonimp.cpp
+#endif //__HG_COLLECTIONVIEW
+SOURCE          mpxcommonlistboxarraybase.cpp
+
+START RESOURCE  ../data/mpxcommoncontainer.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS 
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+OS_LAYER_LIBC_SYSTEMINCLUDE
+OS_LAYER_GLIB_SYSTEMINCLUDE 
+OS_LAYER_STDCPP_SYSTEMINCLUDE 
+SYSTEMINCLUDE 	/epoc32/include/stdapis/sys
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         avkon.lib
+LIBRARY         eikctl.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         efsrv.lib
+LIBRARY         bafl.lib
+LIBRARY         featmgr.lib
+LIBRARY         cdlengine.lib
+LIBRARY         estor.lib
+LIBRARY         fbscli.lib
+LIBRARY         aknicon.lib
+//for handling the Ustring memory leak  
+LIBRARY         libc.lib
+LIBRARY         libglib.lib
+//LIBRARY         alfwidgetmodel.lib
+LIBRARY         egul.lib 		// CGulIcon
+LIBRARY         libpthread.lib
+//LIBRARY         mulutility.lib
+LIBRARY         commonengine.lib
+LIBRARY         thumbnailmanager.lib	// Album art
+
+LIBRARY         mpxcollectionutility.lib
+LIBRARY         mpxcommonui.lib
+LIBRARY         mpxcommon.lib
+
+LIBRARY         fepbase.lib               // MCoeFepObserver
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         ws32.lib
+LIBRARY         form.lib
+#ifdef __HG_COLLECTIONVIEW
+LIBRARY        	aknskins.lib
+LIBRARY         ganes.lib
+LIBRARY        	aknskinsrv.lib
+LIBRARY         bitgdi.lib
+#endif //__HG_COLLECTIONVIEW
+
+#if defined(ARMCC)
+deffile ../eabi/ 
+#elif defined(WINSCW)
+deffile ../bwinscw/ 
+#endif
+
+// End of File

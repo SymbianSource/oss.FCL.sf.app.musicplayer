@@ -1,0 +1,6 @@
+EXPORTS
+	_ZN20CMPXUPnPBrowseDialog4NewLEi @ 1 NONAME
+	_ZN20CMPXUPnPBrowseDialog9ExecuteLDEi @ 2 NONAME
+	_ZTI20CMPXUPnPBrowseDialog @ 3 NONAME ; #<TI>#
+	_ZTV20CMPXUPnPBrowseDialog @ 4 NONAME ; #<VT>#
+

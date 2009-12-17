@@ -1,0 +1,108 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxpodcastcollectionview.
+*
+*/
+
+
+
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+#include "../../../../../inc/musicplayerbldvariant.hrh"
+
+TARGET          mpxpodcastcollectionview.dll
+TARGETTYPE      dll
+UID             0x1000006C 0x101FFC9A
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+VERSION 15.0
+
+#ifdef IAD_INCLUDE_UPNP 
+MACRO UPNP_INCLUDED
+#endif
+
+MACRO __ENABLE_MSK
+MACRO __ENABLE_PODCAST_IN_MUSIC_MENU
+MACRO __ENABLE_HITCHCOCK_UI
+MACRO __HG_COLLECTIONVIEW
+#ifdef IAD_INCLUDE_SINGLE_CLICK 
+MACRO SINGLE_CLICK_INCLUDED
+#endif
+
+SOURCEPATH      ../src
+SOURCE          mpxpodcastcollectionviewimp.cpp
+SOURCE          mpxpodcastcollectionview.cpp
+SOURCE          mpxpodcastcollectionviewcontainer.cpp
+SOURCE          mpxpodcastcollectionviewlistboxarray.cpp
+
+START RESOURCE  ../data/mpxpodcastcollectionview.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS 
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         avkon.lib
+LIBRARY         hlplch.lib
+LIBRARY         egul.lib
+LIBRARY         estor.lib
+LIBRARY         eikctl.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         efsrv.lib
+LIBRARY         bafl.lib
+LIBRARY         aknskins.lib
+LIBRARY         aknicon.lib
+LIBRARY         commonengine.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         sendui.lib
+LIBRARY         centralrepository.lib
+LIBRARY         platformenv.lib // pathinfo
+LIBRARY         commondialogs.lib
+LIBRARY         mpxcollectionutility.lib
+LIBRARY         mpxviewutility.lib
+LIBRARY         mpxcommon.lib
+LIBRARY         mpxcommoncontainer.lib
+LIBRARY         mpxplaybackutility.lib
+LIBRARY         mpxcommonui.lib
+LIBRARY         apgrfx.lib  // TApaTask
+LIBRARY         mpxcollectionhelper.lib
+LIBRARY         fbscli.lib  // CFbsBitmap
+
+LIBRARY         servicehandler.lib  // AIW
+#ifdef IAD_INCLUDE_UPNP
+LIBRARY         upnpcommand.lib
+#endif
+
+LIBRARY         eikdlg.lib
+
+#if defined(ARMCC)
+deffile ../eabi/ 
+#elif defined(WINSCW)
+deffile ../bwinscw/ 
+#endif
+
+// End of File

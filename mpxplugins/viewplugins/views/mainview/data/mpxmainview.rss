@@ -1,0 +1,200 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxmainview
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MXMV // 4 letter ID
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <bldvariant.hrh>
+#include <mpxmainview.mbg>
+
+#include <mpxappui.hrh>
+#include <mpxmainview.loc>
+#include "mpxmainview.hrh"
+
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// ---------------------------------------------------------------------------
+// r_mpx_main_view
+// main view information resource.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_mpx_main_view
+    {
+    menubar = r_mpx_main_view_menubar;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_cui_softkeys_options_phone
+// CBA with "Options" and "Phone" Softkey.
+// ---------------------------------------------------------------------------
+//
+RESOURCE CBA r_mpx_cui_softkeys_options_phone
+    {
+    buttons=
+        {
+        CBA_BUTTON
+            {
+            id = EAknSoftkeyOptions;
+            txt = text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id = EMPXCmdHideApp;
+            txt = qtn_softkey_hide;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_main_view_menubar
+// main view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_main_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            {
+            menu_pane = r_mpx_main_view_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_main_view_menu_2
+// main view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_main_view_menu
+    {
+    items=
+        {
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToNowPlaying;
+            txt = qtn_nmp_options_go_to_nowplaying;
+            },
+        MENU_ITEM
+            {
+            command = EMPXMainViewRefresh;
+            txt = qtn_mus_options_update_collection;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//    
+//    r_musicplayer_cui_library_view_lbx
+//    Library view's listbox resource.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE LISTBOX r_mpx_main_view_lbx
+    {
+    flags = EAknListBoxSelectionList;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mainview_title
+// Title for main view.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_main_view_title
+    {
+    buf = qtn_mus_application_name;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_mpx_refresh_after_sync
+// Text for querying refresh after a usb transfer
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_refresh_after_sync
+    {
+    buf = qtn_nmp_note_library_refresh_sync;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_mpx_track_position
+// Text for track position in playlist
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_track_position
+    {
+    buf = qtn_nmp_track_position;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_query_yes_no
+//    Ask the user for a yes/no question
+//
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_query_yes_no
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// End of File

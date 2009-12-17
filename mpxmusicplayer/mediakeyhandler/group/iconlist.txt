@@ -1,0 +1,6 @@
+/c8,8 qgn_graf_mup_status_pop_pause
+/c8,8 qgn_graf_mup_status_pop_play
+/c8,8 qgn_indi_mup_forw
+/c8,8 qgn_indi_mup_rew
+/c8,8 qgn_indi_mup_pause
+/c8,8 qgn_indi_mup_play

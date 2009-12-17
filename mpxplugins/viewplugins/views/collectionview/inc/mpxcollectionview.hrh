@@ -1,0 +1,146 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource headers for project mpxcollectionview
+*
+*/
+
+
+
+#ifndef MPXCOLLECTIONVIEW_HRH
+#define MPXCOLLECTIONVIEW_HRH
+
+// ENUMS
+
+// Collection view ID
+enum TMPXCollectionViewIds
+    {
+    KMPXCollectionViewId = 20001
+    };
+    
+// command ID's
+enum TMPXCollectionCommandIds
+    {
+    EMPXCmdSongDetails = 0x0010,
+    EMPXCmdAlbumArt,
+    EMPXCmdSend,
+    EMPXCmdDelete,
+    EMPXCmdSetAsRingtone,
+    EMPXCmdCreatePlaylist,
+    EMPXCmdAddToPlaylist,
+    EMPXCmdAddToNewPlaylist,
+    EMPXCmdAddToSavedPlaylist,
+    EMPXCmdFindInMusicShop,
+    EMPXCmdRename,
+    EMPXCmdPlaylistDetails,
+    EMPXCmdReorder,
+    EMPXCmdAddSongs,
+    EMPXCmdRemove,
+    EMPXCmdGoToMusicShop,
+    EMPXCmdGoToMultipleMusicShop,
+    EMPXCmdGoToNokiaMusicShop,
+    EMPXCmdGoToOperatorMusicShop,
+    EMPXCmdMusicLibraryDetails,
+    EMPXCmdSavePlaylist,
+    EMPXCmdReorderGrab,
+    EMPXCmdReorderDrop,
+    EMPXCmdReorderDone,
+    EMPXCmdReorderCancel,
+    EMPXCmdUpArrow,
+    EMPXCmdDownArrow,
+    EMPXCmdUpArrowAfterListboxHandled,
+    EMPXCmdDownArrowAfterListboxHandled,
+    EMPXCmdFind,
+    EMPXCmdFindCancel,
+    EMPXCmdUPnPAiwCmdCopyToExternalCriteria,    
+    EMPXCmdUpnpPlayVia,
+    EMPXCmdUpnpPlayViaLocal,
+    EMPXCmdUpnpPlayViaRemotePlayer,  // 0x101D
+    // Should always be the last one in the list.  Sets the end of the Upnpplayer commands.
+    // Allows for dynamic upnp player commands.  Currently set to allow up to 28 more
+    // dynamic players.  If more are needed then this number needs to be adjusted.
+    EMPXCmdUpnpLastCommandId = 0x0055,
+    EMPXCmdAiwCmdAssign,
+    EMPXCmdUseAsCascade
+#ifdef __ENABLE_PODCAST_IN_MUSIC_MENU                
+    ,EMPXCmdRefreshLibrary
+#endif
+    };
+
+// current MediaL operation
+enum TMPXCollectionViewCurrentMediaLOp
+    {
+    EMPXOpMediaLIdle,
+    EMPXOpMediaLCopyToRemote,
+    EMPXOpMediaLGetContainerInfo,
+    EMPXOpMediaLSend,
+    EMPXOpMediaLCollectionDetails,
+    EMPXOpMediaLPlaylistDetails,
+    EMPXOpMediaLRenamePlaylist,
+    EMPXOpMediaLSongDetailsFileCheck,
+    EMPXOpMediaLAlbumArtFileCheck,
+    EMPXOpMediaLNewPlaylistCollectionSongCount,
+    EMPXOpMediaLFindInMusicShopSongDetails,
+    EMPXOpMediaLFindInMusicShopMediaLCompleted
+    };
+
+// current FindAllL operation    
+enum TMPXCollectionViewCurrentFindAllLOp
+    {
+    EMPXOpFindAllLIdle,
+    EMPXOpFindAllLUpnp,
+    EMPXOpFindAllLGetPlaylists,
+    EMPXOpFindAllLRenameArtist,
+    EMPXOpFindAllLRenameAlbum,
+    EMPXOpFindAllLRenameGenre,
+    EMPXOpFindAllLRenameComposer,
+    EMPXOpFindAllLAlbumArtistAddToNewPlaylist,
+    EMPXOpFindAllLAlbumArtistAddToSavedPlaylist,
+    EMPXOpFindAllLPlaylistTracksCount,
+    EMPXOpFindAllLUpnpPlayback
+    };    
+
+// current playlist related operation    
+enum TMPXCollectionViewCurrentPlaylistOp
+    {
+    EMPXOpPLIdle,
+    EMPXOpPLCreating,
+    EMPXOpPlOpening
+    };
+
+// headings in file detail dialog
+enum TMPXCollectionDetailsHeading
+    {
+    EMPXCollectionDetailsSongs,
+    EMPXCollectionDetailsDuration,
+    EMPXCollectionDetailsPhoneMemory,
+    EMPXCollectionDetailsMemoryCard,
+    EMPXCollectionDetailsRefreshed,
+    EMPXCollectionDetailsCount
+    };
+
+// headings in playlist detail dialog    
+enum TMPXPlaylistDetailsHeading
+    {
+    EMPXPlaylistDetailsName,
+    EMPXPlaylistDetailsSongs,
+    EMPXPlaylistDetailsDuration,
+    EMPXPlaylistDetailsUri,
+    EMPXPlaylistDetailsDate,
+    EMPXPlaylistDetailsTime,
+    EMPXPlaylistDetailsCount
+    };
+
+#endif  // MPXCOLLECTIONVIEW_HRH
+
+// End of File

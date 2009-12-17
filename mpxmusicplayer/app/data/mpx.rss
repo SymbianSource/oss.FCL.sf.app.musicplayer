@@ -1,0 +1,268 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxmusicplayer
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MPXA // 4 letter ID
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <bldvariant.hrh>
+#include <appinfo.rh>
+#include <mpx.mbg>    
+#include <mpxpathconfiguration.hrh>
+
+#include <mpx.loc>
+
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// CONSTANTS  
+// Bitmap file path
+#define KMPXAifMifFile "\\resource\\apps\\mpx_aif.mif"
+#define KMPXAifMbmFile "\\resource\\apps\\mpx_aif.mbm"
+
+
+// RESOURCE DEFINITIONS 
+
+RESOURCE EIK_APP_INFO
+    {
+    status_pane = r_mpx_status_pane;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_localisable_app_info
+// Application info.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE LOCALISABLE_APP_INFO r_mpx_localisable_app_info
+    {
+    short_caption = qtn_apps_mplayer_grid;
+    caption_and_icon = 
+        CAPTION_AND_ICON_INFO
+            {
+            caption = qtn_apps_mplayer_grid;
+
+#ifdef __SCALABLE_ICONS
+            number_of_icons = 1;
+            icon_file = KMPXAifMifFile;
+#else // __SCALABLE_ICONS
+            number_of_icons = 2;
+            icon_file = KMPXAifMbmFile;
+#endif // __SCALABLE_ICONS
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_status_pane
+// Music Player's status pane.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE STATUS_PANE_APP_MODEL r_mpx_status_pane
+    {
+    layout = R_AVKON_STATUS_PANE_LAYOUT_USUAL;
+    panes = 
+        {   
+        SPANE_PANE
+            {
+            id = EEikStatusPaneUidTitle;
+            type = EAknCtTitlePane;
+            resource = r_mpx_overriden_app_name;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_save_song_confirmation_query
+// Confirmation query dialog for saving a song
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_save_song_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_video_call_ongoing
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_video_call_ongoing
+    {
+    buf = qtn_mus_info_video_call_ongoing;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_overriden_app_name
+// Overriden application name.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TITLE_PANE r_mpx_overriden_app_name
+    {
+    txt = " "; // Has to contain at least 1 character
+    }
+
+// -----------------------------------------------------------------------------
+//    r_mpx_targetfolder_attachment
+//    Folder used for saving attachments.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_targetfolder_attachment
+    {
+    buf = text_targetfolder_attachment;
+    }
+
+// -----------------------------------------------------------------------------
+//    r_mpx_targetfolder_downloads
+//    Folder used for saving downloads.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_targetfolder_downloads
+    {
+    buf = text_targetfolder_downloads;
+    }
+
+// -----------------------------------------------------------------------------
+//    r_mpx_targetfolder_ringtones
+//    Folder used for saving ringtones.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_targetfolder_ringtones
+    {
+    buf = text_targetfolder_ringtones;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_save_one_item_wait_note
+// Text for saving one item wait note
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_save_one_item_wait_note
+    {
+    buf = qtn_nmp_wait_save_one_item;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_saved_to_collection_note
+// Text for saved to collection
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_saved_to_collection_note
+    {
+    buf = qtn_nmp_note_saved_to_collection;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_saved_note
+// Text for saved to gallery
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_saved_note
+    {
+    buf = qtn_nmp_note_saved_to_gallery;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_query_conf_save_downloaded
+// Text for asking user to save
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_query_conf_save_downloaded
+    {
+    buf = qtn_iv_query_conf_save_downloaded;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_mpx_refresh_after_sync
+// Text for querying refresh after a usb transfer
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_refresh_after_sync
+    {
+    buf = qtn_nmp_note_library_refresh_sync;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_no_memory_info
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_no_memory_info
+    {
+    buf = qtn_memlo_ram_out_of_mem;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_query_yes_no
+//    Ask the user for a yes/no question
+//
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_query_yes_no
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_cannot_proceed_with_operation
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cannot_proceed_with_operation
+    {
+    buf = qtn_nmp_note_cannot_proceed_with_operation;
+    }
+
+// End of File

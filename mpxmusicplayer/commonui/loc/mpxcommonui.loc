@@ -1,0 +1,355 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project mpxcommonui
+*
+*/
+
+
+
+/*
+  The syntax of a logical name entry in this file is the following:
+
+  // d:context description (line 1)
+  // d:context description (line N)
+  // l:layout id
+  // w:
+  // r:release information
+  //
+  #define qtn_<?feature_or_application>_?freetext "?text"
+
+  where
+      "qtn_" starts a logical name.  Note: "text_" has been used in
+           old logical names, but is deprecated.
+      "?feature/application" is 2-5 lower-case characters and/or numbers
+           identifying the larger context of the display text.
+      "?freetext" is the free text portion of the logical name.
+           It may contain only lower-case letters ('a' to 'z'), numbers
+           ('0' to '9'), and the underscore ('_').  The total length of
+           the logical name does must not exceed 50 characters.
+      "d:" Starts a description line clarifying the entry's context with
+           information like:
+           - Is a word a verb in imperative or is it a noun?  (For instance,
+             what does "Set" mean?)
+           - What will replace %U (unicode text parameter) or %N (number
+             parameter) included in texts?  (For instance, is it a phone
+             number or an e-mail address?)
+      "l:" Starts a layout id information (one line).
+           "P" and "No" are symbols in LAF's information table
+                - "P" is parent pane or current pane
+                - "No" is reference number in table
+      "r:" Starts a release information: one line indicating in which
+           S60 release the text was used for the first time.
+
+  Refer to the S60 localization instructions for more information.
+*/
+
+
+// LOCALISATION STRINGS
+
+// *** Set as ringing tone ***
+
+// d:Information note text.
+// d:Shown after track is set as the ringing tone of the active profile.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_ringtone_set "%U set as ringtone for active profile"
+
+// *** Error strings ***
+
+// d:Notification that a file cannot be found.
+// d:Thus, the intended operation will not be performed.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mp_note_broken_file "File cannot be found. Operation cancelled."
+
+// d:Text for an information note shown when user attempts to play a playlist
+// d:or a category of songs, and all of the tracks are missing or unplayable.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_invalid_list "Unable to play selection. Operation cancelled."
+
+// d:Notification that a file is corrupted.
+// d:Thus, the intended operation will not be performed.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mp_note_corrupt_file "File is corrupt. Operation cancelled."
+
+
+// *** Unit conversion ***
+
+// d:Item for Music Library Details dialog.
+// d:%N is free memory in bytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_b "%N B"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in gigabytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_gb "%U GB"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in megabytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_nmp_memory_mb "%U MB"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in kilobytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_nmp_memory_kb "%U kB"
+
+// d:Item for Music Library Details dialog.
+// d:%N is free memory in bytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_b_free "%N B free"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in gigabytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_gb1_free "%U GB free"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in megabytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_mb1_free "%U MB free"
+
+// d:Item for Music Library Details dialog.
+// d:%U is free memory in kilobytes
+// l:list_single_heading_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_memory_kb1_free "%U kB free"
+
+
+// *** Speed Scrolling ***
+
+// d:When speed scrolling fast,
+// d:show speed in Navi pane.
+// l:navi_text_pane_t1
+// r:3.1
+//
+#define qtn_nmp_navi_speed_fast "fast"
+
+
+// *** Playlist ***
+
+// d:Options menu item for adding to a playlist.
+// l:list_single_pane_t1_cp2/opt3
+// r:3.1
+//
+#define qtn_mus_options_add_to_pl "Add to a playlist"
+
+// d:Options menu item for adding to a new playlist.
+// l:list_single_popup_submenu_pane_t1
+// r:3.1
+//
+#define qtn_nmp_sub_add_to_playlist_new "New playlist"
+
+// d:Options menu item for adding to a saved playlist.
+// l:list_single_popup_submenu_pane_t1
+// r:3.1
+//
+#define qtn_nmp_sub_add_to_playlist_saved "Saved playlist"
+
+// d:Text for an information shown when a single track has been added to
+// d:a playlist. %U is the name of the playlist.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mus_note_track_added_to_pl "Song added to %U"
+
+// d:Text for an information shown when multiple tracks has been added to
+// d:a playlist.
+// d:%N is the number of tracks.
+// d:%U is the name of the playlist.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mus_multiple_tracks_added_to_pl "%N songs added to %U"
+
+// d:Title for the playlist selection query when adding new tracks to a 
+// d:playlist.
+// l:heading_pane_t1
+// r:3.1
+//
+#define qtn_mus_title_select_pl "Select a playlist:"
+
+// d:prompt text for new playlist name
+// l:popup_query_data_window
+// r:3.1
+//
+#define qtn_mus_enter_pl_name "Playlist name:"
+
+// d:Playlist default filename without extension.
+// d:Shown in data query editing field.
+// d:Reserve space for ordinal numbers also,
+// d:in case a playlist with same name already exists.
+// l:query_popup_data_pane_t1/opt4
+// r:3.1
+//
+#define qtn_mg_def_name_playlist "Playlist"
+
+// d:Text for wait note for adding multiple songs to playlist
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_mus_note_adding_tracks "Adding songs"
+
+// d:Text for wait note for adding one song to playlist
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_nmp_note_adding_one_song "Adding song"
+
+
+// *** DRM ***
+
+// d:Popup note to tell the user that they cannot play a file, 
+// d:the song rights have expired.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_drm_expired_playback "Rights are expired. Unable to play %U"
+
+// d:Popup note to tell the user that they cannot set a file as ringtone
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_drm_prev_rights_set "Unable to select object"
+
+// d:Text in navi pane label.
+// d:Shows total duration of one second.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_second "1 second"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in seconds.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_second "%N seconds"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 minute and 1 second.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_min_single_sec "1 minute, 1 second"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 minutes and seconds.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_min_plural_sec "1 minute, %N seconds"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in minutes and one second.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_min_single_sec "%N minutes, 1 second"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in minutes and seconds.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_min_plural_sec "%0N min, %1N sec"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 hour and 1 minute.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_hr_single_min "1 hour, 1 minute"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 hour and minutes.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_hr_plural_min "1 hour, %N minutes"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in hours and 1 minute.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_hr_single_min "%N hours, 1 minute"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in hours and minutes.
+// l:navi_text_pane_t1
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_hr_plural_min "%0N hours, %1N minutes"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 day and 1 hour.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_day_single_hr "1 day, 1 hour"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in 1 day and hours.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_single_day_plural_hr "1 day, %N hours"
+
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in days and hours.
+// l:list_single_heading_pane_t1_cp2
+// r:5.0
+//
+#define qtn_mus_time_frmt_plural_day_plural_hr "%0N days, %1N hours"
+
+// d: When playing DRM file over a bluetooth headset, 
+// d: the audio should not be played.
+// l: popup_note_window/opt2
+// r: 3.1
+//
+#define qtn_nmp_note_protected_over_bluetooth "Song is protected. Unable to play over Bluetooth headset"
+
+// *** UPNP ***
+
+// d:Media keypress not supported error note.
+// d:Display when media key event isn't supported by player.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_no_media_key "Media key event not supported by player"
+
+// End of File

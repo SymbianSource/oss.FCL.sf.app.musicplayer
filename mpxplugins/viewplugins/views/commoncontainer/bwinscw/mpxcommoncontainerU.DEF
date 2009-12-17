@@ -1,0 +1,15 @@
+EXPORTS
+	??0CMPXCommonListBoxArrayBase@@QAE@XZ @ 1 NONAME ; CMPXCommonListBoxArrayBase::CMPXCommonListBoxArrayBase(void)
+	??1CMPXCommonListBoxArrayBase@@UAE@XZ @ 2 NONAME ; CMPXCommonListBoxArrayBase::~CMPXCommonListBoxArrayBase(void)
+	?AppendMediaL@CMPXCommonListBoxArrayBase@@UAEXABVCMPXMedia@@@Z @ 3 NONAME ; void CMPXCommonListBoxArrayBase::AppendMediaL(class CMPXMedia const &)
+	?ConstructListBoxArrayL@CMPXCommonListBoxArrayBase@@QAEXXZ @ 4 NONAME ; void CMPXCommonListBoxArrayBase::ConstructListBoxArrayL(void)
+	?ContainerMedia@CMPXCommonListBoxArrayBase@@QAEABVCMPXMedia@@XZ @ 5 NONAME ; class CMPXMedia const & CMPXCommonListBoxArrayBase::ContainerMedia(void)
+	?CreateIconArrayL@CMPXCommonListBoxArrayBase@@UAEPAVCAknIconArray@@XZ @ 6 NONAME ; class CAknIconArray * CMPXCommonListBoxArrayBase::CreateIconArrayL(void)
+	?MdcaCount@CMPXCommonListBoxArrayBase@@MBEHXZ @ 7 NONAME ; int CMPXCommonListBoxArrayBase::MdcaCount(void) const
+	?MediaArray@CMPXCommonListBoxArrayBase@@QAEABVCMPXMediaArray@@XZ @ 8 NONAME ; class CMPXMediaArray const & CMPXCommonListBoxArrayBase::MediaArray(void)
+	?MediaL@CMPXCommonListBoxArrayBase@@QAEABVCMPXMedia@@H@Z @ 9 NONAME ; class CMPXMedia const & CMPXCommonListBoxArrayBase::MediaL(int)
+	?NewL@CMPXCommonContainerFactory@@SAPAVMMPXCommonContainer@@XZ @ 10 NONAME ; class MMPXCommonContainer * CMPXCommonContainerFactory::NewL(void)
+	?RemoveObserver@CMPXCommonListBoxArrayBase@@QAEXXZ @ 11 NONAME ; void CMPXCommonListBoxArrayBase::RemoveObserver(void)
+	?ResetMediaArrayL@CMPXCommonListBoxArrayBase@@QAEXXZ @ 12 NONAME ; void CMPXCommonListBoxArrayBase::ResetMediaArrayL(void)
+	?SetObserver@CMPXCommonListBoxArrayBase@@QAEXPAVMMPXCommonListBoxArrayObserver@@@Z @ 13 NONAME ; void CMPXCommonListBoxArrayBase::SetObserver(class MMPXCommonListBoxArrayObserver *)
+

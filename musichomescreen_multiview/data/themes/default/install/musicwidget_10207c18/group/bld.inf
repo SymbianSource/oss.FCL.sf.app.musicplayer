@@ -1,0 +1,78 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  The information required for building
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/hsps/widgetconfiguration.xml
+../hsps/00/musicwidgetconfiguration.dtd /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/hsps/musicwidgetconfiguration.dtd
+../icons/musicwidgeticon.mif /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/hsps/musicwidgeticon.mif
+
+../xuikon/00/MusicWidget.dat /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/MusicWidget_10207c18.dat
+../xuikon/00/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/MusicWidget.css
+../xuikon/00/MusicWidget.xml /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/MusicWidget.xml
+
+// Arabic languages
+//*****************
+../xuikon/37/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/37/MusicWidget.css
+../xuikon/50/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/50/MusicWidget.css
+../xuikon/57/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/57/MusicWidget.css
+../xuikon/94/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget_10207c18/xuikon/94/MusicWidget.css
+
+
+// Support for S60 localization
+//*****************************
+#ifndef __MUSICWIDGETCONFIGURATION_LOC__
+#define __MUSICWIDGETCONFIGURATION_LOC__
+../loc/musicwidgetconfiguration.loc         APP_LAYER_LOC_EXPORT_PATH(musicwidgetconfiguration.loc)
+#endif //__MUSICWIDGETCONFIGURATION_LOC__
+
+// Support for S60 builds
+//***********************
+../rom/musicwidget_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(musicwidget_10207c18_resources.iby)
+../rom/musicwidget_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(musicwidget_10207c18_customer.iby)
+../rom/musicwidget_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(musicwidget_10207c18_variant.iby)
+../rom/musicwidget.iby CORE_APP_LAYER_IBY_EXPORT_PATH(musicwidget_10207c18.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME musicwidget_10207c18
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  
+
+
+
+

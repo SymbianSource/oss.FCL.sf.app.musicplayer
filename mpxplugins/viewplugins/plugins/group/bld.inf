@@ -1,0 +1,73 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for View plugins.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+#include "../../../../inc/musicplayerbldvariant.hrh"
+
+#include "../mainviewplugin/group/bld.inf"
+#include "../playbackviewplugin/group/bld.inf"
+#include "../embeddedplaybackviewplugin/group/bld.inf"
+#include "../pdplaybackviewplugin/group/bld.inf"
+#ifdef RD_BROWSER_PROGRESSIVE_DOWNLOAD
+#include "../pdsbplaybackviewplugin/group/bld.inf"
+#endif
+
+#include "../collectionviewplugin/group/bld.inf"
+#include "../collectionviewhgplugin/group/bld.inf"
+#include "../equalizerviewplugin/group/bld.inf"
+#include "../audioeffectsviewplugin/group/bld.inf"
+#include "../metadataeditordialogplugin/group/bld.inf"
+#include "../albumarteditordialogplugin/group/bld.inf"
+#include "../addtracksdialogplugin/group/bld.inf"
+#include "../waitnotedialogplugin/group/bld.inf"
+
+
+
+#ifdef IAD_INCLUDE_UPNP
+#include "../upnpplaybackviewplugin/group/bld.inf"
+#include "../upnpbrowsedialogplugin/group/bld.inf"
+#include "../upnpplaybackdialogplugin/group/bld.inf"
+#endif
+
+
+#include "../podcastviewplugin/group/bld.inf"
+#include "../podcastplaybackviewplugin/group/bld.inf"
+
+PRJ_EXPORTS
+../rom/mpxmainviewplugin.iby                CORE_APP_LAYER_IBY_EXPORT_PATH(mpxmainviewplugin.iby)
+../rom/mpxplaybackviewplugin.iby            CORE_APP_LAYER_IBY_EXPORT_PATH(mpxplaybackviewplugin.iby)
+../rom/mpxembeddedplaybackviewplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(mpxembeddedplaybackviewplugin.iby)
+../rom/mpxpdplaybackviewplugin.iby          CORE_APP_LAYER_IBY_EXPORT_PATH(mpxpdplaybackviewplugin.iby)
+../rom/mpxpdsbplaybackviewplugin.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(mpxpdsbplaybackviewplugin.iby)
+../rom/mpxcollectionviewplugin.iby          CORE_APP_LAYER_IBY_EXPORT_PATH(mpxcollectionviewplugin.iby)
+../rom/mpxcollectionviewhgplugin.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(mpxcollectionviewhgplugin.iby)
+../rom/mpxequalizerviewplugin.iby           CORE_APP_LAYER_IBY_EXPORT_PATH(mpxequalizerviewplugin.iby)
+../rom/mpxaudioeffectsviewplugin.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(mpxaudioeffectsviewplugin.iby)
+../rom/mpxwaitnotedialogplugin.iby          CORE_APP_LAYER_IBY_EXPORT_PATH(mpxwaitnotedialogplugin.iby)
+../rom/mpxmetadataeditordialogplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(mpxmetadataeditordialogplugin.iby)
+../rom/mpxalbumarteditordialogplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(mpxalbumarteditordialogplugin.iby)
+../rom/mpxaddtracksdialogplugin.iby         CORE_APP_LAYER_IBY_EXPORT_PATH(mpxaddtracksdialogplugin.iby)
+../rom/mpxpodcastviewplugin.iby             CORE_APP_LAYER_IBY_EXPORT_PATH(mpxpodcastviewplugin.iby)
+../rom/mpxpodcastplaybackviewplugin.iby     CORE_APP_LAYER_IBY_EXPORT_PATH(mpxpodcastplaybackviewplugin.iby)
+#ifdef IAD_INCLUDE_UPNP
+../rom/mpxupnpplaybackviewplugin.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(mpxupnpplaybackviewplugin.iby)
+../rom/mpxupnpbrowsedialogplugin.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(mpxupnpbrowsedialogplugin.iby)
+../rom/mpxupnpplaybackdialogplugin.iby      CORE_APP_LAYER_IBY_EXPORT_PATH(mpxupnpplaybackdialogplugin.iby)
+#endif	// IAD_INCLUDE_UPNP
+

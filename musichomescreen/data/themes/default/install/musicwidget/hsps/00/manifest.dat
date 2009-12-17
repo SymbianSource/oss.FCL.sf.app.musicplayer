@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package version="0.3">
+
+    <type>widget</type>
+
+    <!-- interface uid -->
+	<interfaceuid>2001f48a</interfaceuid>
+
+	<!-- vendor uid  -->
+	<provideruid>101fb657</provideruid>
+
+	<!-- uid -->
+	<configurationuid>10207c18</configurationuid>
+
+	<!-- description -->
+	<fullname>&amp;qtn_musicwidget_configuration_name;</fullname>
+	<shortname>mw</shortname>
+	<version>1.0</version>
+	
+
+	<!-- configuration -->
+	<filexml>widgetconfiguration.xml</filexml>
+
+	<!-- Name of the localization files -->
+   <filedtd>musicwidgetconfiguration.dtd</filedtd>
+	<!-- Locale independent/common resources -->
+	
+
+  <!-- Locale specific resources -->
+	<localization>
+<fileresource>musicwidget.o0000</fileresource>
+	</localization>
+</package>

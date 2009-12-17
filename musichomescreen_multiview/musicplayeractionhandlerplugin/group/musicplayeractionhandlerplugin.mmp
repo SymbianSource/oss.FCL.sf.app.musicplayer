@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for Music Player ActionHandlerPlugin
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include "../inc/musicplayeractionhandleruids.hrh"
+
+TARGET                  musicplayeractionhandlerplugin.dll
+TARGETTYPE              PLUGIN
+UID                     0x10009D8D KMusicPlayerActionHandlerDLL 
+
+CAPABILITY              CAP_ECOM_PLUGIN
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+SOURCE                  proxy.cpp
+SOURCE                  musicplayeractionhandler.cpp
+
+USERINCLUDE             ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE           /epoc32/include/ecom
+
+SOURCEPATH              ../data
+START RESOURCE          musicplayeractionhandlerplugin.rss
+HEADER
+TARGET                  musicplayeractionhandlerplugin.rsc
+TARGETPATH              resource/plugins 
+END
+
+LIBRARY                 euser.lib
+LIBRARY                 liwservicehandler.lib   // TLiwVariant
+LIBRARY                 ws32.lib                // RWsSession
+LIBRARY                 apgrfx.lib              // TApaTask, TApaTaskList, RApaLsSession
+LIBRARY                 apparc.lib              // CApaCommandLine, TApaAppInfo
+LIBRARY                 estor.lib               // RBufWriteStream, RWriteStream
+LIBRARY                 mpxcommon.lib           // CMPXparameter
+LIBRARY                 mpxplaybackutility.lib  // MMPXPlaybackUtility
+LIBRARY                 mpxcommonui.lib         // Common UI helpers
+LIBRARY                 mpxcollectionhelper.lib // Collection helpers
+LIBRARY                 avkon.lib               // CAknTaskList
+
+//  End of File

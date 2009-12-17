@@ -1,0 +1,87 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxmediakeyhandler.
+*
+*/
+
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxmediakeyhandler.dll
+TARGETTYPE      dll
+UID             0x1000006C 0x101FFC65
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+VERSION 10.0
+
+#ifdef IAD_INCLUDE_UPNP 
+MACRO UPNP_INCLUDED
+#endif
+
+MACRO __S60_NOTIFIER_EXTRA_ICONS
+MACRO __S60_AVKON_LAYOUTS
+SOURCEPATH      ../src
+SOURCE          mpxmediakeyhandler.cpp
+SOURCE          mpxmediakeyhandlerimp.cpp
+SOURCE          mpxremconkeyresponse.cpp
+SOURCE          mpxnotifierdialog.cpp
+
+START RESOURCE  ../data/mpxmediakeyhandler.rss
+TARGETPATH      APP_RESOURCE_DIR
+HEADER
+LANGUAGE_IDS 
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+SYSTEMINCLUDE	/epoc32/include/mmf/server
+LIBRARY			mmfdevsound.lib 
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         avkon.lib
+LIBRARY         efsrv.lib
+LIBRARY         bafl.lib
+LIBRARY         apgrfx.lib
+LIBRARY         ws32.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         aknskins.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         commonengine.lib
+LIBRARY         remconcoreapi.lib
+LIBRARY         remconinterfacebase.lib
+LIBRARY         mpxplaybackutility.lib
+LIBRARY         mpxcommon.lib
+#ifdef IAD_INCLUDE_UPNP
+LIBRARY         upnpcommand.lib
+#endif
+LIBRARY         mpxmetadatahandler.lib
+
+#if defined(ARMCC)
+deffile ../eabi/ 
+#elif defined(WINSCW)
+deffile ../bwinscw/ 
+#endif
+
+// End of File

@@ -1,0 +1,94 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: Package file for Huriganes music player
+;
+;Language - standard language definitions
+&EN
+
+; standard SIS file header
+#{"HgMPXCollectionView"},(0x101FFC62),13,2,0906,TYPE=SA, RU
+
+%{"Nokia"}
+:"Nokia"
+
+; VIEWS
+;common container
+"\epoc32\release\armv5\udeb\mpxcommoncontainer.dll"     -"c:\sys\bin\mpxcommoncontainer.dll"
+"\epoc32\data\Z\resource\apps\mpxcommoncontainer.rsc"   -"c:\resource\apps\mpxcommoncontainer.rsc"
+;collection
+"\epoc32\release\armv5\udeb\mpxcollectionview.dll"      -"c:\sys\bin\mpxcollectionview.dll"
+"\epoc32\data\Z\resource\apps\mpxcollectionview.mif"    -"c:\resource\apps\mpxcollectionview.mif"
+"\epoc32\data\Z\resource\apps\mpxcollectionview.rsc"    -"c:\resource\apps\mpxcollectionview.rsc"
+;podcast
+"\epoc32\release\armv5\udeb\mpxpodcastcollectionview.dll"      -"c:\sys\bin\mpxpodcastcollectionview.dll"
+"\epoc32\data\Z\resource\apps\mpxpodcastcollectionview.mif"    -"c:\resource\apps\mpxpodcastcollectionview.mif"
+"\epoc32\data\Z\resource\apps\mpxpodcastcollectionview.rsc"    -"c:\resource\apps\mpxpodcastcollectionview.rsc"
+;albumeditdialog  TNM integration
+"\epoc32\release\armv5\UDEB\mpxalbumarteditordialog.dll"    -"c:\sys\bin\mpxalbumarteditordialog.dll"
+"\epoc32\data\Z\resource\apps\mpxalbumarteditordialog.rsc"  -"c:\resource\apps\mpxalbumarteditordialog.rsc"
+
+"\epoc32\release\armv5\UDEB\mpxcollectionviewplugin.dll"        -"c:\sys\bin\mpxcollectionviewplugin.dll"
+"\epoc32\data\Z\resource\plugins\mpxcollectionviewplugin.rsc"   -"c:\resource\plugins\mpxcollectionviewplugin.rsc"
+
+
+;Service Plugins: DB changes
+;mpxsqlitedbcommon
+"\epoc32\release\armv5\udeb\mpxsqlitedbcommon.dll"           -"c:\sys\bin\mpxsqlitedbcommon.dll"
+;mpxsqlitedbplugin
+"\epoc32\release\armv5\udeb\mpxsqlitedbplugin.dll"          -"c:\sys\bin\mpxsqlitedbplugin.dll"
+"\epoc32\data\Z\resource\plugins\mpxsqlitedbplugin.rsc"     -"c:\resource\plugins\mpxsqlitedbplugin.rsc"
+"\epoc32\data\Z\resource\apps\mpxcollectiondbres.rsc"       -"c:\resource\apps\mpxcollectiondbres.rsc"
+"\epoc32\data\Z\resource\apps\pcres.rsc"                        -"c:\resource\apps\pcres.rsc"
+;podcast db plugin
+"\epoc32\release\armv5\udeb\mpxsqlitepodcastdbplugin.dll"    -"c:\sys\bin\mpxsqlitepodcastdbplugin.dll"
+"\epoc32\data\Z\resource\plugins\mpxsqlitepodcastdbplugin.rsc"  -"c:\resource\plugins\mpxsqlitepodcastdbplugin.rsc"
+
+;mpx frameworks: 
+; From Common Framework
+"\epoc32\release\armv5\UREL\mpxcommon.dll"                      -"c:\sys\bin\mpxcommon.dll"
+
+; From Collection Framework
+"\epoc32\release\armv5\UREL\mpxcollectionutility.dll"           -"c:\sys\bin\mpxcollectionutility.dll"
+"\epoc32\release\armv5\UREL\mpxcollectionserver.exe"            -"c:\sys\bin\mpxcollectionserver.exe"
+"\epoc32\release\armv5\UREL\mpxcollectionengine.dll"            -"c:\sys\bin\mpxcollectionengine.dll"
+
+; From Playback Framework
+"\epoc32\release\armv5\UREL\mpxplaybackengine.dll"              -"c:\sys\bin\mpxplaybackengine.dll"
+"\epoc32\release\armv5\UREL\mpxplaybackserver.exe"              -"c:\sys\bin\mpxplaybackserver.exe"
+"\epoc32\release\armv5\UREL\mpxplaybackutility.dll"             -"c:\sys\bin\mpxplaybackutility.dll"
+
+; From Harvester
+"\epoc32\release\armv5\UREL\mpxharvesterserver.exe"             -"c:\sys\bin\mpxharvesterserver.exe"
+"\epoc32\release\armv5\UREL\mpxfilehandler.dll"                 -"c:\sys\bin\mpxfilehandler.dll"
+"\epoc32\release\armv5\UREL\mpxharvesterutility.dll"            -"c:\sys\bin\mpxharvesterutility.dll"
+"\epoc32\release\armv5\UREL\mpxcollectionmediator.dll"          -"c:\sys\bin\mpxcollectionmediator.dll"
+"\epoc32\release\armv5\UREL\mpxmetadataextractor.dll"           -"c:\sys\bin\mpxmetadataextractor.dll"
+"\epoc32\data\Z\resource\apps\mpxmediator.rsc"                  -"c:\resource\apps\mpxmediator.rsc"
+
+; From Playlist Engine
+"\epoc32\release\armv5\UREL\mpxplaylistengine.dll"              -"c:\sys\bin\mpxplaylistengine.dll"
+"\epoc32\release\armv5\UREL\mpxplaylistrecognizer.dll"          -"c:\sys\bin\mpxplaylistrecognizer.dll"
+"\epoc32\data\Z\resource\plugins\mpxplaylistrecognizer.rsc"     -"c:\resource\plugins\mpxplaylistrecognizer.rsc"
+"\epoc32\data\Z\resource\mpxplaylisttopcharacterset.rsc"        -"c:\resource\mpxplaylisttopcharacterset.rsc"
+
+; From View Framework
+"\epoc32\release\armv5\UREL\mpxviewutility.dll"                 -"c:\sys\bin\mpxviewutility.dll"
+"\epoc32\release\armv5\UREL\mpxviewplugin.dll"                  -"c:\sys\bin\mpxviewplugin.dll"
+
+; Other pieces
+"\epoc32\release\armv5\UREL\mpxalbumartutility.dll"             -"c:\sys\bin\mpxalbumartutility.dll"
+"\epoc32\release\armv5\UREL\mpxcollectionhelper.dll"            -"c:\sys\bin\mpxcollectionhelper.dll"
+
+; Add missing dll files
+"\epoc32\release\armv5\UREL\MPSettEngine.dll"             -"!:\sys\bin\MPSettEngine.dll"

@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project mpxmusicplayer.
+*
+*/
+
+
+#include <bldvariant.hrh>
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../rom/mpxmusicplayerapp.iby            CORE_APP_LAYER_IBY_EXPORT_PATH(mpxmusicplayerapp.iby)
+../rom/mpxmusicplayerapprsc.iby         LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(mpxmusicplayerapprsc.iby)
+../loc/mpx.loc	    			APP_LAYER_LOC_EXPORT_PATH(mpx.loc)
+
+
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE mpx_aif.mif
+OPTION HEADERFILE mpx.mbg
+OPTION SOURCES  -c8,8 qgn_menu_mp
+END
+
+PRJ_MMPFILES
+mpx.mmp
+
+PRJ_TESTMMPFILES

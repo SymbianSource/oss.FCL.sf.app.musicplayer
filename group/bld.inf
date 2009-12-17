@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for music domain
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "../inc/musicplayerbldvariant.hrh"
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+
+PRJ_MMPFILES
+#include "../musicplayer_plat/group/bld.inf"
+//#include "../cameseui/group/bld.inf"
+#include "../mpxmusicplayer/group/bld.inf"
+#ifdef IAD_INCLUDE_ENHANCED_HOMESCREEN
+#include "../musichomescreen_multiview/group/bld.inf"
+#endif
+#include "../mpxplugins/group/bld.inf"
+
+
+//  End of File  
+

@@ -1,0 +1,9 @@
+EXPORTS
+	_ZN23CMPXWaitNoteConstructor18ConstructWaitNoteLERK7TDesC16P20MMPXWaitNoteObserver @ 1 NONAME
+	_ZTI18CMPXWaitNoteDialog @ 2 NONAME ; #<TI>#
+	_ZTI22CMPXScanningWaitDialog @ 3 NONAME ; #<TI>#
+	_ZTV18CMPXWaitNoteDialog @ 4 NONAME ; #<VT>#
+	_ZTV22CMPXScanningWaitDialog @ 5 NONAME ; #<VT>#
+	_ZTI21CMPXOpeningWaitDialog @ 6 NONAME ; #<TI>#
+	_ZTV21CMPXOpeningWaitDialog @ 7 NONAME ; #<VT>#
+

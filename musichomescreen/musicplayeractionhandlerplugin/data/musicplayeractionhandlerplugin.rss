@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  ECOM registration for Music Player Action Handler Plugin
+*
+*/
+
+
+#include <registryinfo.rh>
+#include <ahpluginuids.hrh>
+#include "musicplayeractionhandleruids.hrh"
+
+// ---------------------------------------------------------------------------
+// MusicPlayerActionHandlerPluginInfo
+// Declares info for implementation of the plugin
+// ---------------------------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO MusicPlayerActionHandlerPluginInfo
+    {
+    // UID for the DLL
+    dll_uid = KMusicPlayerActionHandlerDLL;
+    // Declare array of interface info
+    interfaces =
+        {
+        INTERFACE_INFO
+            {
+            // UID of interface that is implemented
+            interface_uid = KAHPluginInterfaceUid;
+            implementations =
+                {
+                IMPLEMENTATION_INFO
+                    {
+                    implementation_uid = KMusicPlayerActionHandlerUID;
+                    version_no = 1;
+                    display_name = "";
+                    default_data = "";
+                    opaque_data = "";
+                    }
+                };
+            }
+        };
+    }
+
+// End of File

@@ -52,6 +52,7 @@ class MMPXCollectionUtility;
 class MMPXPlaybackUtility;
 class MMpxCbaHandler;
 class TAknsItemID;
+class CAsyncOneShot;
 
 // CLASS DECLARATION
 
@@ -70,6 +71,7 @@ NONSHARABLE_CLASS( CMPXCollectionViewHgContainer )
     , public MMPXCollectionFindObserver
     , public MHgVgMediaWallObserver
     , public MMpxTNLoaderObserver
+    , public MCoeForegroundObserver
 	{
 public:
 
@@ -448,6 +450,9 @@ public:
 
     TTypeUid::Ptr MopSupplyObject(TTypeUid aId);
 
+    void HandleGainingForeground();
+    
+    void HandleLosingForeground();
 
 // from base class MCoeControlObserver
 
@@ -537,6 +542,13 @@ public:
 	void HandleItemCommandL( TInt aCommand );
 	
 	CMPXMedia* SelectedItemMediaL();
+	
+	/**
+     * Determines if current view is TBoneview
+     *
+     * @return ETrue if current view is TBoneview, EFalse otherwise
+     */
+	TBool IsTBoneView();
 	
 private:
 
@@ -686,6 +698,8 @@ private:
     void PlayPlaylistL(TInt aIndex);
     void PlayGenreL(TInt aIndex);
 
+    static TInt AsyncCallback( TAny* aPtr );
+    
 private: // data member
 
     /**
@@ -803,7 +817,9 @@ private: // data member
     TViewType iCurrentViewType;
     TViewType iPrevViewType;
     TFindOp iFindOp;
-
+    TBool iIsForeground;
+    TBool iDelayedControlCreation;
+    CAsyncCallBack* iAsyncCallBack;
     };
 
 #endif  // CMPXCOLLECTIONVIEWHGCONTAINER_H

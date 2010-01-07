@@ -3218,25 +3218,54 @@ void CMPXPodcastCollectionViewImp::HandleCommandL(TInt aCommand)
 
                 if (currentDepth == 2)
                     {
+
+					TInt val(0);
+					CRepository* repository = CRepository::NewL( KCRUidMPXMPFeatures );
+					repository->Get( KMPXMPLocalVariation, val );
+					TBool startInAlbumMenu = val&KMPXStartMusicPlayerinArtistsandAlbums ? ETrue : EFalse;
+					delete repository;
+
+					if ( startInAlbumMenu )
+						{
+						CMPXCollectionPath* path = CMPXCollectionPath::NewL();
+						CleanupStack::PushL( path );
+						path->AppendL(KMusicCollectionUid);
+						path->AppendL(3); // Artist & Albums
+						iCollectionUtility->Collection().OpenL( *path );
+						CleanupStack::PopAndDestroy( path );
+
+						// activate the collection view
+						RArray<TUid> uids;
+						CleanupClosePushL( uids );
+						uids.AppendL( TUid::Uid( KMPXPluginTypeCollectionUid ) );
+						uids.AppendL( TUid::Uid( KMusicCollectionUid ));
+						iViewUtility->ActivateViewL(uids);
+
+						CleanupStack::PopAndDestroy( &uids );
+						}
+					else
+						{
+
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
-                    // open the podcast collection db plugin
-                    CMPXCollectionPath* mainPodcastMenu = CMPXCollectionPath::NewL();
-                    CleanupStack::PushL( mainPodcastMenu );
-                    mainPodcastMenu->AppendL(KMusicCollectionUid);
-                    iCollectionUtility->Collection().OpenL( *mainPodcastMenu );
-                    CleanupStack::PopAndDestroy( mainPodcastMenu );
+						// open the podcast collection db plugin
+						CMPXCollectionPath* mainPodcastMenu = CMPXCollectionPath::NewL();
+						CleanupStack::PushL( mainPodcastMenu );
+						mainPodcastMenu->AppendL(KMusicCollectionUid);
+						iCollectionUtility->Collection().OpenL( *mainPodcastMenu );
+						CleanupStack::PopAndDestroy( mainPodcastMenu );
 
-                    // activate the podcast collection view
-                    RArray<TUid> uids;
-                    CleanupClosePushL( uids );
-                    uids.AppendL( TUid::Uid( KMPXPluginTypeCollectionUid ) );
-                    uids.AppendL( TUid::Uid( KMusicCollectionUid ));
-                    iViewUtility->ActivateViewL(uids);
+						// activate the podcast collection view
+						RArray<TUid> uids;
+						CleanupClosePushL( uids );
+						uids.AppendL( TUid::Uid( KMPXPluginTypeCollectionUid ) );
+						uids.AppendL( TUid::Uid( KMusicCollectionUid ));
+						iViewUtility->ActivateViewL(uids);
 
-                    CleanupStack::PopAndDestroy( &uids );
+						CleanupStack::PopAndDestroy( &uids );
 #else
-                    AppUi()->HandleCommandL(aCommand);
+						AppUi()->HandleCommandL(aCommand);
 #endif
+						}
                     }
                 else if (currentDepth == 3) // jumping back to the main podcast menu
                     {

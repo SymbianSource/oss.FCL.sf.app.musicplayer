@@ -2062,10 +2062,12 @@ void CMPXMetadataEditorDialog::HandleControlStateChangeL( TInt aControlId )
                 else
                     {
                     // Text query cancelled.  Display popup list again.
-                    iTextValues->SetCurrentValueIndex( 0 );
                     iPopup->ActivateSelectionListL();
-                    // genre is fetched so that "Custom..." isn't passed as the new genre
-                    FetchGenreL();
+                    
+                    // reset to original index
+                    TInt genreIndex;
+                    iGenreArr->Find( iMedia->ValueText( KMPXMediaMusicGenre ), genreIndex );
+                    iTextValues->SetCurrentValueIndex( genreIndex );
                     }
                 CleanupStack::PopAndDestroy( genreName );
                 }

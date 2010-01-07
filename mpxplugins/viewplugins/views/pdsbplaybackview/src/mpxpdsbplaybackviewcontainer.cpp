@@ -110,21 +110,22 @@ void CMPXPdSbPlaybackViewContainer::HandleDownloadPositionChanged(
 // ---------------------------------------------------------------------------
 //
 void CMPXPdSbPlaybackViewContainer::RedrawRect(
-    const TRect& aRect,
-    CBitmapContext& aGc) const
+    const TRect& aRect) const
     {
     MPX_DEBUG1("CMPXPdSbPlaybackViewContainer::RedrawRect() entering");
 
-    CMPXCommonPlaybackViewContainer::RedrawRect( aRect, aGc );
+
+    CMPXCommonPlaybackViewContainer::RedrawRect( aRect );
 
     // Always show progress bars in progressive download
-    DrawIndicator( aGc, aRect, iSliderBackgroundRect, iSliderBackground );
-    DrawIndicator( aGc,
+    CWindowGc& gc = SystemGc();
+    DrawIndicator( gc, aRect, iSliderBackgroundRect, iSliderBackground );
+    DrawIndicator( gc,
                    aRect,
                    TRect(iDownloadSliderRect.iTl,
                          iDownloadSlider->Bitmap()->SizeInPixels()),
                    iDownloadSlider );
-    DrawIndicator( aGc,
+    DrawIndicator( gc,
                    aRect,
                    TRect(iPlaybackSliderRect.iTl,
                          iPlaybackSlider->Bitmap()->SizeInPixels()),

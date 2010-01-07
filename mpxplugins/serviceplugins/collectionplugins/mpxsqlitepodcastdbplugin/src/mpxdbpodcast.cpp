@@ -134,15 +134,25 @@ TUint32 CMPXDbPodcast::AddEpisodeL(
 
     TUint32 episodeId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), EMPXCollection,
         aMedia.ValueText(KMPXMediaGeneralUri), EFalse));
-    if (EpisodeExistsL(episodeId))
+    if ( EpisodeExistsL( episodeId ))
         {
-        DoUpdateEpisodeL(episodeId, aMedia, NULL);
+        // Return deleted file paths to caller
+        CDesCArray* fp = new( ELeave ) CDesCArrayFlat( 1 );
+        CleanupStack::PushL( fp );
+
+        // a list of change event messages a result of the item being removed
+        CMPXMessageArray* itemChangedMessages = CMPXMediaArray::NewL();
+        CleanupStack::PushL( itemChangedMessages );
+        
+        DeleteEpisodeL( episodeId, *fp, *itemChangedMessages, ETrue );
+        
+        CleanupStack::PopAndDestroy( itemChangedMessages );
+        CleanupStack::PopAndDestroy( fp );
         }
-    else
-        {
-        // add the song
-        DoAddEpisodeL(episodeId, aMedia, aDrive, NULL);
-        }
+    // add the song
+    DoAddEpisodeL(episodeId, aMedia, aDrive, NULL);
+
+    
 
     return episodeId;
     }

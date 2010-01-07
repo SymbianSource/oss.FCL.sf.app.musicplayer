@@ -115,11 +115,12 @@ private:    // new methods
      * Redraw part of the screen to the bitmap context.
      *
      * @param aRect Area to be redrawn.
-     * @param aGc Graphics context to draw to.
+     * 
      */
-    void RedrawRect(
-        const TRect& aRect,
-        CBitmapContext& aGc) const;
+     void RedrawRect(
+        const TRect& aRect) const;
+   
+
 
 private:
 

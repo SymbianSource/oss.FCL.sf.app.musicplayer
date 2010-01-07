@@ -33,6 +33,8 @@ public:
 
     virtual void ChangeCbaVisibility( TBool aVisible ) = 0;
 
+    virtual void UpdateCba() = 0;
+    
     };
 
 

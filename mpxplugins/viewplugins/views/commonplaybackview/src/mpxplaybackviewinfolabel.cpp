@@ -69,7 +69,7 @@ void CMPXPlaybackViewInfoLabel::ConstructL(TBool aEnableMarqueeSupport)
         iMarquee->SetContainerWindowL( *this );
         }
     }
-    
+
 // ---------------------------------------------------------------------------
 // Destructor
 // ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ CMPXPlaybackViewInfoLabel::~CMPXPlaybackViewInfoLabel()
     delete iMarquee;
     iBackground = NULL;
     }
-    
+
 // ---------------------------------------------------------------------------
 // Set background bitmap
 // ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void CMPXPlaybackViewInfoLabel::RedrawRect( const TRect& aRect ) const
         TInt baselineOffset = 0;
         if ( iMarquee )
             {
-            const CAknLayoutFont* layoutFont = 
+            const CAknLayoutFont* layoutFont =
                 CAknLayoutFont::AsCAknLayoutFontOrNull( Font() );
             if ( layoutFont )
                 {
@@ -222,6 +222,14 @@ TBool CMPXPlaybackViewInfoLabel::NeedToScroll() const
     __ASSERT_DEBUG( iFont, User::Panic( KPanicCat, EFontNotSet ) );
 
     TBool need( EFalse );
+    // We don't scroll text more than 250 chars in length.
+    if ( iFullText )
+    	{
+    	if ( iFullText->Length() > 250 )
+			{
+			return need;
+			}
+		}
     if ( iFullText && iFont->TextWidthInPixels( *iFullText ) > Size().iWidth )
         {
         need = ETrue;
@@ -235,7 +243,7 @@ TBool CMPXPlaybackViewInfoLabel::NeedToScroll() const
 //
 TInt CMPXPlaybackViewInfoLabel::RedrawCallback( TAny* aPtr )
     {
-    CMPXPlaybackViewInfoLabel* self = 
+    CMPXPlaybackViewInfoLabel* self =
         static_cast<CMPXPlaybackViewInfoLabel*>( aPtr );
     CWindowGc& gc = self->SystemGc();
     gc.Activate( *self->DrawableWindow() );

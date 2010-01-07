@@ -218,10 +218,10 @@ public:
 
 protected:
 
-    /**
-     * Create background images
-     */
-    IMPORT_C virtual void CreateBackgroundImagesL();
+
+
+
+
 
     /**
      * Creates labels.
@@ -251,7 +251,7 @@ protected:
      * @param aInvertMask    Invert mask (see CBitmapContext::BitBltMasked)
      */
     IMPORT_C virtual void DrawIndicator(
-        CBitmapContext& aGc,
+        CWindowGc& aGc ,
         const TRect& aDirtyRect,
         const TRect& aIndicatorRect,
         const CGulIcon* aIcon,
@@ -261,11 +261,10 @@ protected:
      * Redraw part of the screen to the bitmap context.
      *
      * @param aRect Area to be redrawn.
-     * @param aGc Graphics context to draw to.
+     * 
      */
-    IMPORT_C virtual void RedrawRect(
-        const TRect& aRect,
-        CBitmapContext& aGc) const;
+  IMPORT_C virtual void RedrawRect(
+         const TRect& aRect) const;
 
     /**
      * Update progress bar graphics based on current playback
@@ -395,9 +394,9 @@ private:
     MMPXLayoutSwitchObserver*    iLayoutObserver;   // not owned
     RPointerArray<CMPXPlaybackViewInfoLabel> iLabels;   // owned
 
-    CFbsBitmap* iOffScreenBitmap;       // owned
-    CFbsBitGc* iOSBitmapContext;        // owned
-    CFbsBitmapDevice* iOSBitmapDevice;  // owned
+
+ 
+
 
     HBufC* iMinSecFormatString;         // owned
     HBufC* iShortFormatString;          // owned
@@ -472,8 +471,8 @@ private:
     TBool iTouchDown;        // Flag indicating touch progress bar is in use
     TBool iActiveView;
 
-    // mutable is used so that conts Draw method can change the state
-    mutable TBool iRefreshBackBuffer; 
+
+
     TBool iDragProgressBar; //Flag drag progress bar
     };
 

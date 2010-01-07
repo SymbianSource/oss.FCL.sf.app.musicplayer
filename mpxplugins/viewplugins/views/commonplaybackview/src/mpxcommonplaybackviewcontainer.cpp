@@ -101,8 +101,8 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ConstructL( const TRect& /*aRect*
     TAknWindowLineLayout screenLayout =
         AknLayout::screen();
     TRect screenRect = screenLayout.Rect();
-    iBackground = CAknsBasicBackgroundControlContext::NewL(
-        KAknsIIDQsnBgAreaMainMp, screenRect, EFalse );
+	iBackground = CAknsBasicBackgroundControlContext::NewL(
+			KAknsIIDQsnBgAreaMain, screenRect, EFalse );
 
 	iSeekTimer = CPeriodic::NewL( EPriorityLow );
 
@@ -116,7 +116,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ConstructL( const TRect& /*aRect*
 
     iEnableButtons = static_cast<TBool>( flags & KMPXRockerMappingSupport );
 
-    CreateBackgroundImagesL();
 
     // Create labels
     CreateLabelsL();
@@ -205,9 +204,9 @@ EXPORT_C CMPXCommonPlaybackViewContainer::~CMPXCommonPlaybackViewContainer()
     delete iShortFormatString;
     delete iCommonUiHelper;
 
-    delete iOffScreenBitmap;
-    delete iOSBitmapContext;
-    delete iOSBitmapDevice;
+
+
+
 
     delete iButtonManager;
 
@@ -778,7 +777,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandleResourceChange( TInt aType 
 
     if ( aType == KAknsMessageSkinChange )
         {
-		iRefreshBackBuffer = ETrue;
         // Reload icons
         TRAP_IGNORE(
             {
@@ -794,8 +792,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandleResourceChange( TInt aType 
         iLayoutObserver->HandleLayoutChange();
         UpdateBackgroundSkinControlContext( Rect() );
 
-        // recreate background image
-        TRAP_IGNORE( CreateBackgroundImagesL() );
         }
     else
         {
@@ -843,53 +839,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::StartMarquee(
             label->DrawDeferred();
             }
         }
-    }
-
-// ---------------------------------------------------------------------------
-// Creates background images
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CMPXCommonPlaybackViewContainer::CreateBackgroundImagesL()
-    {
-
-    CWindowGc& gc( SystemGc() );
-    CGraphicsDevice* device( gc.Device() );
-    TSize size( device->SizeInPixels() );
-    TDisplayMode mode( device->DisplayMode() );
-
-    if( iOffScreenBitmap && 
-		size == iOffScreenBitmap->SizeInPixels() &&
-		mode == iOffScreenBitmap->DisplayMode() )
-    	{
-		// No need to update backbuffer
-    	return;
-    	}
-
-    delete iOffScreenBitmap;
-    iOffScreenBitmap = NULL;
-    delete iOSBitmapContext;
-    iOSBitmapContext = NULL;
-    delete iOSBitmapDevice;
-    iOSBitmapDevice = NULL;
-
-    iOffScreenBitmap = new (ELeave) CFbsBitmap();
-    TInt err( iOffScreenBitmap->Create( size, mode ));
-    if ( KErrNone != err )
-        {
-        delete iOffScreenBitmap;
-        iOffScreenBitmap = NULL;
-        User::Leave( err );
-        }
-
-    iOSBitmapDevice = CFbsBitmapDevice::NewL( iOffScreenBitmap );
-    err = iOSBitmapDevice->CreateContext( iOSBitmapContext );
-    if ( KErrNone != err )
-        {
-        delete iOSBitmapDevice;
-        iOSBitmapDevice = NULL;
-        User::Leave( err );
-        }
-    iRefreshBackBuffer = ETrue;
     }
 
 // ---------------------------------------------------------------------------
@@ -989,7 +938,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::FreeIcons()
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CMPXCommonPlaybackViewContainer::DrawIndicator(
-    CBitmapContext& aGc,
+    CWindowGc& aGc ,
     const TRect& aDirtyRect,
     const TRect& aIndicatorRect,
     const CGulIcon* aIcon,
@@ -1011,19 +960,13 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::DrawIndicator(
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CMPXCommonPlaybackViewContainer::RedrawRect(
-    const TRect& aRect,
-    CBitmapContext& aGc) const
+    const TRect& aRect) const
     {
+	CWindowGc& gc = SystemGc();
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    AknsDrawUtils::DrawBackground(
-        skin,
-        iBackground,
-        this,
-        aGc,
-        aRect.iTl,
-        aRect,
-        KAknsDrawParamDefault );
 
+	AknsDrawUtils::Background( skin, iBackground,
+			this, gc, aRect );
 
     TBool embedded = iEikonEnv->StartedAsServerApp();
 
@@ -1031,34 +974,34 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::RedrawRect(
         {
         if ( iRepeatAllMode && !embedded )
             {
-            DrawIndicator( aGc, aRect, iRepeatIconRect, iRepeatAllIcon );
+            DrawIndicator( gc, aRect, iRepeatIconRect, iRepeatAllIcon );
             }
 
         if ( iRepeatOneMode && !embedded )
             {
-            DrawIndicator(aGc, aRect, iRepeatIconRect, iRepeatOneIcon);
+            DrawIndicator(gc, aRect, iRepeatIconRect, iRepeatOneIcon);
             }
 
         if ( iRandomMode && !embedded )
             {
-            DrawIndicator(aGc, aRect, iRandomIconRect, iRandomIcon);
+            DrawIndicator(gc, aRect, iRandomIconRect, iRandomIcon);
             }
 
 #ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
         if ( iRealAudioMode )
             {
-            DrawIndicator( aGc, aRect, iRealIconRect, iRealIcon );
+            DrawIndicator( gc, aRect, iRealIconRect, iRealIcon );
             }
 #endif
 
-        DrawIndicator( aGc, aRect, iSliderBackgroundRect, iSliderBackground );
+        DrawIndicator( gc, aRect, iSliderBackgroundRect, iSliderBackground );
         if ( iMode == EPlayMode || iMode == EPauseMode )
             {
 
-            DrawIndicator( aGc, aRect, TRect(iDownloadSliderRect.iTl,
+            DrawIndicator( gc, aRect, TRect(iDownloadSliderRect.iTl,
                     iDownloadSlider->Bitmap()->SizeInPixels()),
                     iDownloadSlider );
-            DrawIndicator(aGc, aRect, TRect(iPlaybackSliderRect.iTl,
+            DrawIndicator(gc, aRect, TRect(iPlaybackSliderRect.iTl,
                     iPlaybackSlider->Bitmap()->SizeInPixels() ),
                     iPlaybackSlider );
             }
@@ -1079,19 +1022,19 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::RedrawRect(
                 Centerpos += iAlbumArtRect.iTl;
 
                 // Draw album art and frame
-                aGc.BitBlt( Centerpos, iTrackAlbumArt);
+                gc.BitBlt( Centerpos, iTrackAlbumArt);
                 TRgb color = KRgbBlack;
                 AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                         EAknsCIQsnTextColorsCG50 );
                 TRect imageRect( Centerpos, iTrackAlbumArt->SizeInPixels() );
-                aGc.SetPenStyle( CGraphicsContext::ESolidPen );
-                aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-                aGc.SetPenColor( color );
-                aGc.DrawRect( imageRect );
+                gc.SetPenStyle( CGraphicsContext::ESolidPen );
+                gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+                gc.SetPenColor( color );
+                gc.DrawRect( imageRect );
                 }
             else
                 {
-                DrawIndicator( aGc, aRect, iAlbumArtRect, iDefaultAlbumArt );
+                DrawIndicator( gc, aRect, iAlbumArtRect, iDefaultAlbumArt );
                 }
             }
         }
@@ -1163,21 +1106,21 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateBackgroundSkinControlContex
     {
     CAknsBasicBackgroundControlContext* background =
         static_cast<CAknsBasicBackgroundControlContext*>( iBackground );
-
     if ( Layout_Meta_Data::IsLandscapeOrientation() )
         {
         TAknWindowLineLayout screenLayout =
             AknLayout::screen();
         TRect screenRect = screenLayout.Rect();
-        background->SetBitmap( KAknsIIDQsnBgAreaMainMp );
+        background->SetBitmap( KAknsIIDQsnBgAreaMain );
         background->SetRect( screenRect );
+
         }
     else
         {
-        background->SetBitmap( KAknsIIDQsnBgAreaMainMp );
-        background->SetRect( aRect );
+        background->SetBitmap( KAknsIIDQsnBgAreaMain );
+        background->SetRect( aRect );        
         }
-    iRefreshBackBuffer = ETrue;
+
     }
 
 // ---------------------------------------------------------------------------
@@ -1254,21 +1197,7 @@ EXPORT_C CCoeControl* CMPXCommonPlaybackViewContainer::ComponentControl( TInt aI
 //
 EXPORT_C void CMPXCommonPlaybackViewContainer::Draw( const TRect& aRect ) const
     {
-    if( iActiveView || iRefreshBackBuffer )
-        {
-        if ( iOSBitmapContext )
-            {
-            RedrawRect( aRect, *iOSBitmapContext );
-            iRefreshBackBuffer = EFalse;
-            }
-        }
-
-    // Draw off-screen bitmap to display
-    if ( iOffScreenBitmap )
-        {
-        CWindowGc& gc = SystemGc();
-		gc.BitBlt( TPoint(),iOffScreenBitmap );
-        }
+    RedrawRect(aRect);
     }
 
 // -----------------------------------------------------------------------------
@@ -1496,7 +1425,6 @@ void CMPXCommonPlaybackViewContainer::DoUpdateLayoutL()
         return;
         }
 
-    CreateBackgroundImagesL();
 
     MPX_DEBUG5( "CMPXCommonPlaybackViewContainer::DoUpdateLayoutL() -- new layout: top-left (%d, %d) size (%d, %d)",
         myRect.iTl.iX, myRect.iTl.iY, myRect.Size().iWidth, myRect.Size().iHeight );

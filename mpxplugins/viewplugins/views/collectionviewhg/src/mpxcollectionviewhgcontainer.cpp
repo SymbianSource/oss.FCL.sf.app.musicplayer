@@ -199,6 +199,14 @@ CMPXCollectionViewHgContainer::~CMPXCollectionViewHgContainer()
 
     delete iPlaylist;
     delete iPlaylistHelper;
+
+    if( iAsyncCallBack )
+        {
+        iAsyncCallBack->Cancel();
+        }
+    delete iAsyncCallBack;
+
+    iCoeEnv->RemoveForegroundObserver( *this );
     }
 
 // ---------------------------------------------------------------------------
@@ -253,11 +261,15 @@ void CMPXCollectionViewHgContainer::ConstructL()
 
     CreateIconArrayL();
 
+    iIsForeground = ETrue;
+    iCoeEnv->AddForegroundObserverL( *this );
+
+    TCallBack callback(CMPXCollectionViewHgContainer::AsyncCallback, this);
+    iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityStandard );
+    iAsyncCallBack->Set(callback);
+
     CreateWindowL();
     ActivateL();
-    DrawableWindow()->SetPointerCapture( RWindowBase::TCaptureDisabled );
-    SetPointerCapture( EFalse );
-    CapturesPointer();
     }
 
 // -----------------------------------------------------------------------------
@@ -714,13 +726,27 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             }
         else if ( aType == KEikDynamicLayoutVariantSwitch )
             {
+            if( iCurrentViewType == EMPXViewTBone )
+                {
+				iCollectionUtility->Collection().BackL();
+                }
+            else
+                {
+                // Coe env is in middle if notifying observers (controls).
+                // Just to be save, lets just create a small async callback and then
+                // call HandleLbxItemAdditionL
+                if( !iAsyncCallBack->IsActive() )
+                    {
+                    iAsyncCallBack->CallBack();
+                    }
+                }
+
+            if( iCbaHandler )
+                iCbaHandler->UpdateCba();
+
             TRect clientRect = ((CAknView*)iView)->ClientRect();
-
+            SetRect( clientRect );
             iBgContext->SetRect(((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect());
-
-            // In current design we switch to different type of control in
-            // all orientation switches.
-            HandleLbxItemAdditionL();
             }
         );
     }
@@ -1085,7 +1111,7 @@ void CMPXCollectionViewHgContainer::DrawLbxItemL( TInt aIndex )
 
     CHgScroller* list = CurrentListWidget();
 
-    if( list )
+    if( list && aIndex < list->ItemCount() )
         {
         CHgItem* item = &list->ItemL(aIndex);
         SetDetailIndicatorL(item, aIndex);
@@ -1361,9 +1387,9 @@ void CMPXCollectionViewHgContainer::HandleMarkableListDynInitMenuPane(
 //
 void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArray, TInt aCount)
     {
-    TRect clientRect = ((CAknView*)iView)->ClientRect();
     if( iListWidget )
         {
+        TRect clientRect = ((CAknView*)iView)->ClientRect();
         TInt index = iListWidget->SelectedIndex();
         iListWidget->InitScreenL( clientRect );
         iListWidget->Reset();
@@ -1380,14 +1406,18 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
         }
     else if( iMediaWall )
         {
-        TInt index = iMediaWall->SelectedIndex();
-        iMediaWall->InitScreenL( clientRect );
+        // In case of mediawall components we switch to different view type if orientation changes
+        // so there is no need to set new client rect for mediawall.
+
         iMediaWall->Reset();
         if ( aCount )
             {
             iMediaWall->ResizeL( aCount );
             ProvideDataWithoutThumbnailsMwL(aMediaArray);
-            iMediaWall->SetSelectedIndex( CurrentLbxItemIndex() );
+            TInt index = CurrentLbxItemIndex();
+            index = index >= 0 ? index : 0;
+            iMediaWall->SetSelectedIndex( index );
+            OpenAlbumL( index );
             }
         else
             {
@@ -1468,6 +1498,14 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
     TRect mediaWallRect = TRect(clientRect.iTl, TPoint(clientRect.iBr.iX, 250));
     TRect mwListRect = TRect(TPoint(clientRect.iTl.iX, 250), clientRect.iBr);
 
+    if( iMediaWall )
+        {
+        delete iMediaWall;
+        iMediaWall = 0;
+        delete iMwListWidget;
+        iMwListWidget = 0;
+        }
+
     if ( !iMediaWall )
 		{
 		iMediaWall = CHgVgMediaWall::NewL (
@@ -1477,6 +1515,9 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 				EFalse,
 				this,
 				DefaultIconL() );
+
+		if( !iIsForeground )
+		    iMediaWall->HandleLosingForeground();
 
 		iMediaWall->SetMopParent(this);
 		iMediaWall->EnableScrollBufferL(*this, KMPXListBufferSizeWithMediaWall, KMPXListBufferSizeWithMediaWall/4);
@@ -1541,6 +1582,14 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
 	((CAknAppUi*)iCoeEnv->AppUi())->StatusPane()->MakeVisible(EFalse);
 	iThumbnailManager->SetSizeL( EAudioFullScreenThumbnailSize );
 
+    if( iMediaWall )
+        {
+        delete iMediaWall;
+        iMediaWall = 0;
+        delete iMwListWidget;
+        iMwListWidget = 0;
+        }
+
 	if (!iMediaWall)
 	    {
         iMediaWall = CHgVgMediaWall::NewL(
@@ -1550,6 +1599,10 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
                 ETrue,
                 this,
                 DefaultIconL() );
+
+        if( !iIsForeground )
+            iMediaWall->HandleLosingForeground();
+
         iMediaWall->SetMopParent(this);
         iMediaWall->SetSelectionObserver(*this);
         iMediaWall->SetObserver( this ); // softkey visibility event observer
@@ -1586,7 +1639,6 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
             iMediaWall->SetSelectedIndex( iAlbumIndex );
 
         iMediaWall->DrawDeferred();
-	    iMediaWall->RefreshScreen(0);
 	    }
 
 	iDefaultIconSet = ETrue;
@@ -1642,6 +1694,19 @@ CHgScroller* CMPXCollectionViewHgContainer::CurrentListWidget()
     }
 
 // ----------------------------------------------------------------------------
+// Check if the current view is TBoneView.
+// ----------------------------------------------------------------------------
+TBool CMPXCollectionViewHgContainer::IsTBoneView()
+    {
+    TBool tBoneView = EFalse;
+    
+    if( EMPXViewTBone == iCurrentViewType )
+        tBoneView = ETrue;
+    
+    return tBoneView;
+    }
+	
+// ----------------------------------------------------------------------------
 // Resolve the current view type based on the browsing context
 // ----------------------------------------------------------------------------
 void CMPXCollectionViewHgContainer::ResolveCurrentViewType()
@@ -1686,25 +1751,28 @@ void CMPXCollectionViewHgContainer::CleanPrevView()
         {
         case EMPXViewCoverFlow:
             {
-            iMediaWall->MakeVisible( EFalse );
-            iMediaWall->SetFocus( EFalse );
-            iMediaWall->DisableScrollBuffer();
+            if( iCurrentViewType != EMPXViewTBone )
+                {
+                delete iMediaWall;
+                iMediaWall = 0;
+                }
             break;
             }
         case EMPXViewTBone:
             {
-            iMediaWall->MakeVisible( EFalse );
-            iMediaWall->DisableScrollBuffer();
-            iMwListWidget->MakeVisible( EFalse );
-            iMwListWidget->Reset();
+            if( iCurrentViewType != EMPXViewCoverFlow )
+                {
+                delete iMediaWall;
+                iMediaWall = 0;
+                }
+            delete iMwListWidget;
+            iMwListWidget = 0;
             break;
             }
         case EMPXViewList:
             {
-            iListWidget->MakeVisible( EFalse );
-            iListWidget->SetFocus( EFalse );
-            iListWidget->DisableScrollBuffer();
-            iListWidget->Reset();
+            delete iListWidget;
+            iListWidget = 0;
             break;
             }
         default:
@@ -1721,7 +1789,7 @@ TBool CMPXCollectionViewHgContainer::IsSelectedItemASong()
     MPX_FUNC( "CMPXCollectionViewHgContainer::IsSelectedItemASong" );
 
 	TBool res(EFalse);
-    if ( iContext == EContextItemAlbum  )
+    if ( iContext == EContextItemAlbum || iContext == EContextGroupSong )
         {
     	CHgScroller* listWidget = CurrentListWidget();
 		if ( listWidget->SelectedIndex() == 0 &&
@@ -1752,7 +1820,14 @@ CMPXMedia* CMPXCollectionViewHgContainer::SelectedItemMediaL()
     CHgScroller* listWidget = CurrentListWidget();
     if (listWidget && songs)
         {
-        song = songs->AtL(listWidget->SelectedIndex());
+        if (listWidget->ItemCount() > 1)
+            {
+            song = songs->AtL(listWidget->SelectedIndex()-1);
+            }
+        else
+            {
+            song = songs->AtL(listWidget->SelectedIndex());
+            }
         }
     return song;
     }
@@ -1766,25 +1841,43 @@ void CMPXCollectionViewHgContainer::HandleItemCommandL( TInt aCommand )
     {
     MPX_FUNC( "CMPXCollectionViewHgContainer::HandleItemCommanddL" );
 
-    if ( iContext == EContextGroupAlbum && aCommand == EMPXCmdPlay )
+    if( aCommand == EMPXCmdPlay )
         {
-    	CHgScroller* listWidget = CurrentListWidget();
-		iSelectedAlbumIndex = listWidget->SelectedIndex();
-        SaveSelectedAlbumItemL(iSelectedAlbumIndex);
-		// Open first song of album & playlist for entire album is created.
-		PlayAlbumL(iSelectedAlbumIndex);
-        }
-    else if ( iContext == EContextGroupPlaylist && aCommand == EMPXCmdPlay )
-        {
-    	CHgScroller* listWidget = CurrentListWidget();
-		TInt index = listWidget->SelectedIndex();
-		PlayPlaylistL(index);
-        }
-    else if ( iContext == EContextGroupGenre && aCommand == EMPXCmdPlay )
-        {
-        CHgScroller* listWidget = CurrentListWidget();
-        TInt index = listWidget->SelectedIndex();
-        PlayGenreL(index);
+        switch( iCurrentViewType )
+            {
+            case EMPXViewCoverFlow:
+            case EMPXViewTBone:
+                {
+                iSelectedAlbumIndex = iMediaWall->SelectedIndex();
+                SaveSelectedAlbumItemL(iSelectedAlbumIndex);
+                // Open first song of album & playlist for entire album is created.
+                UpdatePathAndOpenL(0, ETrue);
+                break;
+                }
+            case EMPXViewList:
+                {
+                if ( iContext == EContextGroupAlbum  )
+                    {
+                    iSelectedAlbumIndex = iListWidget->SelectedIndex();
+                    SaveSelectedAlbumItemL(iSelectedAlbumIndex);
+                    // Open first song of album & playlist for entire album is created.
+                    PlayAlbumL(iSelectedAlbumIndex);
+                    }
+                else if ( iContext == EContextGroupPlaylist  )
+                    {
+                    TInt index = iListWidget->SelectedIndex();
+                    PlayPlaylistL(index);
+                    }
+                else if ( iContext == EContextGroupGenre  )
+                    {
+                    TInt index = iListWidget->SelectedIndex();
+                    PlayGenreL(index);
+                    }
+                break;
+                }
+            default:
+                break;
+            }
         }
     }
 
@@ -2225,6 +2318,11 @@ void CMPXCollectionViewHgContainer::RefreshNoThumbnailL(TInt aIndex)
 //
 void CMPXCollectionViewHgContainer::RefreshL(TInt aIndex)
     {
+    if( !iIsForeground )
+        {
+        return;
+        }
+
     MPX_FUNC( "CMPXCollectionViewHgContainer::Refresh" );
 
 	TInt mediaCount = iListBoxArray->MediaArray().Count();
@@ -2435,6 +2533,10 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL()
 		{
 		iListWidget->SetDefaultIconL(iconCopy);
 		}
+	else
+		{
+		delete iconCopy;
+		}
 	iCurrentDefaultIcon = defaultIcon;
 	}
 
@@ -2501,6 +2603,10 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL(TInt aIndex)
 	else if ( iListWidget && defaultIcon != EMPXDefaultIconNotSet )
 		{
         iListWidget->ItemL(aIndex).SetIcon(iconCopy);
+		}
+	else
+		{
+		delete iconCopy;
 		}
 	}
 
@@ -4045,8 +4151,11 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
     CAknPopupList* dialog = CAknPopupList::NewL(listBox, R_MPX_COLLECTION_ALBUMSONGS_LIST_CBA,
             AknPopupLayouts::EDynMenuWindow );
 
+	CleanupStack::PushL( dialog );
+
     listBox->ConstructL( dialog,
             EAknListBoxSelectionList | EAknListBoxScrollBarSizeExcluded  );
+	CleanupStack::Pop( dialog );
 
     listBox->CreateScrollBarFrameL( ETrue );
     listBox->ScrollBarFrame()->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
@@ -4071,6 +4180,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
 
     if ( songCount > 1 )
         {
+		// Todo: Use localized string.
         songList->AppendL( _L("Shuffle All") );
         }
 
@@ -4251,7 +4361,8 @@ void CMPXCollectionViewHgContainer::RestoreSelectedAlbumItemL(
         {
         CMPXMedia* currentMedia( aMediaArray.AtL( i ) );
 
-        if ( currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == id )
+        if ( (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == id) || 
+             (id == KMPXInvalidItemId && currentMedia->ValueText(KMPXMediaGeneralTitle).Compare( restoredAlbum->ValueText(KMPXMediaGeneralTitle) ) == 0 )  )
             {
             iRestoredAlbumIndex = i;
             iSelectedAlbumIndex = i;
@@ -4329,7 +4440,32 @@ void CMPXCollectionViewHgContainer::ReadFromStreamFileL( CMPXMedia* aMedia )
         CleanupStack::PopAndDestroy( store );
         }
 
+    // for corrupted Media
+    TMPXItemId id=aMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);    
+    if ( id.iId1 == 0 )
+        {
+        aMedia->SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, KMPXInvalidItemId );
+        }
     }
 
+void CMPXCollectionViewHgContainer::HandleGainingForeground()
+    {
+    iIsForeground = ETrue;
+    }
+
+void CMPXCollectionViewHgContainer::HandleLosingForeground()
+    {
+    iIsForeground = EFalse;
+    }
+
+TInt CMPXCollectionViewHgContainer::AsyncCallback( TAny* aPtr )
+    {
+    CMPXCollectionViewHgContainer* self = static_cast<CMPXCollectionViewHgContainer*>(aPtr);
+    if( self )
+        {
+        self->HandleLbxItemAdditionL();
+        }
+    return KErrNone;
+    }
 
 //  End of File

@@ -86,11 +86,11 @@ public:
      * Redraw part of the screen to the bitmap context.
      *
      * @param aRect Area to be redrawn.
-     * @param aGc Graphics context to draw to.
+     * 
      */
     void RedrawRect(
-        const TRect& aRect,
-        CBitmapContext& aGc) const;
+        const TRect& aRect) const;
+
 
     /**
      * Sets main pane mode.

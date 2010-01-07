@@ -160,14 +160,15 @@ void CMPXUPnPPlaybackViewContainer::CreateIconsL()
 // ---------------------------------------------------------------------------
 //
 void CMPXUPnPPlaybackViewContainer::RedrawRect(
-    const TRect& aRect,
-    CBitmapContext& aGc) const
+ const TRect& aRect) const
     {
-    CMPXCommonPlaybackViewContainer::RedrawRect( aRect, aGc );
+
+    CMPXCommonPlaybackViewContainer::RedrawRect( aRect );
 
     if ( iRemotePlayerUsed )
         {
-        DrawIndicator( aGc, aRect, iRemotePlayerIconRect, iRemotePlayerIcon );
+        CWindowGc& gc = SystemGc();
+        DrawIndicator( gc, aRect, iRemotePlayerIconRect, iRemotePlayerIcon );
         }
     }
 

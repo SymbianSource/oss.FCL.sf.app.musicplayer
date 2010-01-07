@@ -130,6 +130,13 @@ private:
      *
      */
     void DeleteSelectedItemsL(TInt aCommand);
+    
+	/**
+     * Delete the selected items in TBone view
+     * @param aCommand the command that triggered the deletion
+     *
+     */
+    void DeleteSelectedTBoneItemsL( TInt aCommand );
 
     /**
      * Updates list box
@@ -368,6 +375,11 @@ private:
      * Handle send command
      */
     void DoSendL();
+   
+   /**
+     * Handle send command in TBone view
+     */
+    void DoSendTBoneListItemL( TMPXItemId aContainerId );
 
     /**
      * Handle send playlist command
@@ -825,6 +837,8 @@ private:
 
  	void ChangeCbaVisibility( TBool aVisible );
 
+ 	void UpdateCba();
+ 	
     void HandleInitMusicMenuPaneL(CEikMenuPane* aMenuPane );
 
     void OpenAllSongsL();

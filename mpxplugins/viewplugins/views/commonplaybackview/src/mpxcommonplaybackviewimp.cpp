@@ -42,7 +42,7 @@
 
 #include <e32const.h>
 #ifdef UPNP_INCLUDED
-#include <upnpcopycommand.h> 
+#include <upnpcopycommand.h>
 #endif
 
 #include <apgcli.h> // For FF_FMTX
@@ -339,7 +339,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
 #ifdef UPNP_INCLUDED
     if (!iUpnpCopyCommand )
         {
-   	    MPX_TRAPD ( error, iUpnpCopyCommand = CUpnpCopyCommand::NewL() );   
+   	    MPX_TRAPD ( error, iUpnpCopyCommand = CUpnpCopyCommand::NewL() );
 		    if ( error == KErrNone )
             {
             iUpnpFrameworkSupport = ETrue;
@@ -464,7 +464,7 @@ EXPORT_C CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp()
     	iDelayedErrorTimer->Cancel();
     	delete iDelayedErrorTimer;
     	}
-    
+
     delete iOldUri;
     MPX_DEBUG1( "CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp exiting" );
     }
@@ -732,7 +732,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateAlbumArtL(
             {
             const TDesC& album = aMedia->ValueText( KMPXMediaGeneralUri );
             if(!iOldUri || iOldUri->Compare(album)!= 0)
-                {  
+                {
 
                 TRect albumArtRect(
                         iLayout->IndicatorLayout(
@@ -746,7 +746,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateAlbumArtL(
                 delete iOldUri;
                 iOldUri = NULL;
                 iOldUri=album.AllocL();
-                } 
+                }
             }
 
         if (KErrNone != err )
@@ -1221,7 +1221,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoHandleMediaL(
         UpdateTrackPosInPlaylistL();
         UpdateTrackInfoL( iMedia );
         UpdateAlbumArtL( iMedia );
-        
+
 
         // Update duration if previously not available
         if ( iMedia->IsSupported( KMPXMediaGeneralDuration ) )
@@ -1285,8 +1285,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoHandleMediaL(
         }
     else
         {
-        
-#ifndef CAMESE_IN_DRM_UTILITY		
+
+#ifndef CAMESE_IN_DRM_UTILITY
         // Check if Camese Support is enabled and
         // if the error is caused by PV being unable
         // to retrieve media properties before handling
@@ -1432,13 +1432,13 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleErrorL( TInt aError )
             iIgnoredByUsbEvent = EFalse;
             return;
             }
-        
+
         // else iIgnoredByUsbEvent==EFalse, then furtherly check USB status in central repository.
         else if ( !iIgnoredByUsbEvent )
         	{
             TInt usbStatus;
             RProperty::Get( KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, usbStatus );
-        
+
             if ( KUsbPersonalityIdMS == usbStatus && KErrDisMounted == aError  )
             	{
             	// Igore this error when USB is avtive in MassStrorage mode.
@@ -1537,7 +1537,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleErrorL( TInt aError )
             case KErrNotFound:
             case KErrPathNotFound:
             case KErrDivideByZero:
-            case KErrGeneral: 
+            case KErrGeneral:
                 {
                 // USB dismounts the disk, it cannot find any records
                 if( !iDatabaseNotReady )
@@ -1888,6 +1888,12 @@ void CMPXCommonPlaybackViewImp::PrepareStatusPaneForPlaybackViewL()
     iPreviousStatusPaneLayout = StatusPane()->CurrentLayoutResId();
     TInt resId( KErrNone );
 
+	// We need to restore the status pane if not visible.
+	if (!StatusPane()->IsVisible())
+		{
+		StatusPane()->MakeVisible(ETrue);
+		}
+
     if ( !Layout_Meta_Data::IsLandscapeOrientation() )
         {
         if ( iPreviousStatusPaneLayout != R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT )
@@ -2079,7 +2085,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                                     {
                                     isEqual = EFalse;
                                     }
-      
+
                                 if ( isEqual ) // if they're the same path
 									{
 									pbPath->Back();
@@ -2138,7 +2144,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
             repository->Get( KMPXMPLocalVariation, val );
             TBool startInAlbumMenu = val&KMPXStartMusicPlayerinArtistsandAlbums ? ETrue : EFalse;
             delete repository;
-            
+
             if ( startInAlbumMenu )
                 {
                 CMPXCollectionPath* cpath = iCollectionUiHelper->MusicMenuPathL();
@@ -2146,7 +2152,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                 cpath->AppendL(3); // Albums
                 MPX_DEBUG_PATH(*cpath);
                 iCollectionUtility->Collection().OpenL( *cpath );
-                CleanupStack::PopAndDestroy( cpath );                
+                CleanupStack::PopAndDestroy( cpath );
                 }
             else
                 {
@@ -2468,7 +2474,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleStatusPaneSizeChange()
             {
             iContainer->AdjustOrdinalPosition( KMPXPlaybackViewWindowBackground );
             }
-        else 
+        else
             {
             iContainer->SetRect( ClientRect() );
             iContainer->DrawDeferred();
@@ -2496,12 +2502,13 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
     CAknToolbar* toolbar = Toolbar();
     if ( toolbar )
         {
-        AppUi()->AddToStackL(toolbar, 
+        AppUi()->AddToStackL(toolbar,
         		ECoeStackPriorityCba,
-                ECoeStackFlagRefusesFocus 
+                ECoeStackFlagRefusesFocus
                 | ECoeStackFlagRefusesAllKeys );
         toolbar->MakeVisible( ETrue );
         toolbar->HideItemsAndDrawOnlyBackground(EFalse);
+        toolbar->SetSkinBackgroundId(KAknsIIDQsnBgScreenMp);
         toolbar->SetToolbarVisibility(ETrue);
         }
     PrepareStatusPaneForPlaybackViewL();
@@ -2525,7 +2532,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
     iIdle = CIdle::NewL( CActive::EPriorityIdle );
     iIdle->Start( TCallBack( CMPXCommonPlaybackViewImp::DeferredAlbumArtExtractCallback, this ) );
 
-    // Retrieve current repeat & random modes, fix for EJZU-7NZ9CD 
+    // Retrieve current repeat & random modes, fix for EJZU-7NZ9CD
     iPlaybackUtility->PropertyL( *this, EPbPropertyRandomMode );
     iPlaybackUtility->PropertyL( *this, EPbPropertyRepeatMode );
 
@@ -2547,9 +2554,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
     CEikButtonGroupContainer* cba = Cba();
     if ( cba )
         {
-        CCoeControl* control = cba->ButtonGroup()->AsControl();
-        static_cast<CEikCba*>( control )->
-            SetSkinBackgroundId( KAknsIIDQsnBgAreaControlMp );
 
 #ifdef __ENABLE_MSK
         iCommonUiHelper->SetMiddleSoftKeyLabelL(
@@ -2732,7 +2736,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
     {
     TInt usbUnblockingStatus;
     RProperty::Get( KMPXViewPSUid,
-                    KMPXUSBUnblockingPSStatus, 
+                    KMPXUSBUnblockingPSStatus,
                     usbUnblockingStatus);
 
     switch ( aResourceId )
@@ -2943,7 +2947,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                     iUserPlaylists->Value<CMPXMediaArray>(
                     KMPXMediaArrayContents );
                 User::LeaveIfNull(const_cast<CMPXMediaArray*>(mediaArray));
-               
+
                 TInt entriesCount( mediaArray->Count() );
                 MPX_DEBUG2( "CMPXCommonPlaybackViewImp::DynInitMenuPaneL Entry count = %d", entriesCount );
                 if ( entriesCount > 0 )
@@ -2986,7 +2990,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
         if ( !Layout_Meta_Data::IsLandscapeOrientation() )
             {
             TUid activeView = iViewUtility->ActiveViewImplementationUid();
-            
+
             // only switch to flat if current view is not equalizer
             // since it'll mess up equilizer's screen
             if ( StatusPane()->CurrentLayoutResId() !=
@@ -3009,7 +3013,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
 
         iContainer->SetRect( ClientRect() );
         delete iOldUri;
-        iOldUri = NULL;         
+        iOldUri = NULL;
         // Update album art
         TRAP_IGNORE( UpdateAlbumArtL( iMedia ));
         TRAP_IGNORE( UpdateTrackInfoL( iMedia ));
@@ -3116,14 +3120,14 @@ EXPORT_C TBool CMPXCommonPlaybackViewImp::IsUpnpVisible()
     {
     MPX_FUNC( "CMPXCommonPlaybackViewImp::IsUpnpVisible" );
     TBool returnValue = EFalse;
-    
+
 #ifdef UPNP_INCLUDED
-   	if ( iUpnpCopyCommand && iUpnpFrameworkSupport ) 	  
+   	if ( iUpnpCopyCommand && iUpnpFrameworkSupport )
         {
-        returnValue = iUpnpCopyCommand->IsAvailableL();   
+        returnValue = iUpnpCopyCommand->IsAvailableL();
         }
 #endif
-    return returnValue; 
+    return returnValue;
 
     }
 
@@ -3557,7 +3561,7 @@ EXPORT_C TBool CMPXCommonPlaybackViewImp::IsCommandSupportedL()
                         break;
                         }
                     }
-                
+
                 if( setText )
                     {
                 CAknErrorNote* errNote = new(ELeave) CAknErrorNote(ETrue);
@@ -3900,7 +3904,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbar()
             CAknButton* pausePlayControl;
             pausePlayControl = (CAknButton*)(toolbar->ComponentControl( 1 ));
             CAknButton* fwControl;
-            fwControl = (CAknButton*)(toolbar->ComponentControl( 2 ));                                   
+            fwControl = (CAknButton*)(toolbar->ComponentControl( 2 ));
             MMPXSource* s = iPlaybackUtility->Source();
             if ( s )
                 {
@@ -3965,7 +3969,7 @@ TInt CMPXCommonPlaybackViewImp::HandleDelayedError( TAny* aPtr )
     {
     CMPXCommonPlaybackViewImp* pv = reinterpret_cast<CMPXCommonPlaybackViewImp*>( aPtr );
     pv->iDelayedErrorTimer->Cancel();
-    
+
     // compare index
     if ( pv->iPlaybackUtility )
     	{

@@ -3863,7 +3863,7 @@ void CMPXCollectionViewImp::DoHandleCollectionMessageL( const CMPXMessage& aMess
                                 EMPXUSBUnblockingPSStatusActive );
 				}
             
-            if ( iIsEmbedded && type == EMcMsgUSBMassStorageEnd )
+            if ( iContainer && iIsEmbedded && type == EMcMsgUSBMassStorageEnd )
             	{
             	DoIncrementalOpenL();
             	}

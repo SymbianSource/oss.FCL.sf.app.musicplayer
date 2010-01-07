@@ -619,6 +619,123 @@ void CMPXCollectionViewHgImp::ConstructL()
     }
 
 // ---------------------------------------------------------------------------
+// Delete the selected items in TBone View
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL" );
+     // if reorder mode is on, or something is currently deleting, disable delete
+    TBool isIgnore( iContainer->IsInReorderMode() || iIsDeleting );
+
+    if ( !isIgnore  && iCollectionReady )
+        {
+        CMPXCommonListBoxArrayBase* listboxArray( iContainer->ListBoxArray() );
+        const CMPXMedia& containerMedia( listboxArray->ContainerMedia() );
+
+        TMPXGeneralType containerType(
+            containerMedia.ValueTObjectL<TMPXGeneralType>(
+                KMPXMediaGeneralType ) );
+        TMPXGeneralCategory containerCategory(
+            containerMedia.ValueTObjectL<TMPXGeneralCategory>(
+                KMPXMediaGeneralCategory ) );
+
+        const TMPXItemId containerId = containerMedia.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+
+        HBufC* promptTxt( NULL );
+        HBufC* waitNoteText( NULL );
+        TInt waitNoteCBA( R_AVKON_SOFTKEYS_EMPTY );
+        
+        // Create a copy of collection path
+        CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
+        CleanupStack::PushL( path );
+
+        if ( containerType == EMPXItem && containerCategory == EMPXAlbum )    
+            {             
+             //get the media object of the selected track in TBone View
+            CMPXMedia* albumTrack = iContainer->SelectedItemMediaL();
+            
+            TMPXGeneralType mediaType(
+                    albumTrack->ValueTObjectL<TMPXGeneralType>(
+                            KMPXMediaGeneralType ) );
+            TMPXGeneralCategory mediaCategory(
+                    albumTrack->ValueTObjectL<TMPXGeneralCategory>(
+                    KMPXMediaGeneralCategory ) );
+
+            if ( mediaType == EMPXItem && mediaCategory == EMPXSong )
+                {
+                // tracks level in Tbone View
+                TMPXItemId trackId = albumTrack->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+                const TDesC& trackTitle( albumTrack->ValueText( KMPXMediaGeneralTitle ) );
+                // create the item path to delete
+                 path->Back();
+                 path->Back();
+                 path->AppendL(containerId);
+                 path->AppendL(trackId);
+
+                waitNoteText = StringLoader::LoadLC(
+                    R_MPX_QTN_ALBUM_WAITING_DELETING, trackTitle );
+                promptTxt = StringLoader::LoadLC(
+                    R_MPX_QTN_QUERY_COMMON_CONF_DELETE,
+                    trackTitle );
+
+                iConfirmationDlg = CAknQueryDialog::NewL(
+                CAknQueryDialog::EConfirmationTone );
+
+                waitNoteCBA = R_MPX_COLLECTION_WAITNOTE_SOFTKEYS_EMPTY_STOP;
+                
+                iConfirmationDlg->SetPromptL( *promptTxt );
+                CleanupStack::PopAndDestroy( promptTxt );
+                TBool performDelete(EFalse);
+                if(iCachedCommand == aCommand)
+                   {
+                   performDelete = ETrue;
+                   }
+                if (!performDelete)
+                    {
+                    if ( iConfirmationDlg->ExecuteLD( R_MPX_CUI_DELETE_CONFIRMATION_QUERY ) )
+                        {
+                        performDelete = ETrue;
+                        }
+                    }
+                if (performDelete)
+                    {
+                    HandleCommandL( EMPXCmdIgnoreExternalCommand );
+                    MPX_PERF_START_EX( MPX_PERF_SHOW_WAITNOTE );
+                    if(iCachedCommand != aCommand)
+                        {
+                        iIsWaitNoteCanceled = EFalse;
+                        StartProgressNoteL();
+                        TPtr buf = waitNoteText->Des();
+                        UpdateProcessL(0, buf);
+                        }
+                    if ( !iIsWaitNoteCanceled )
+                        {
+                        iIsDeleting = ETrue;
+                        iCollectionUiHelper->DeleteL( *path, this );
+                        }
+                    else if( iContainer )
+                        {
+                        // delete was canceled before it even began, clear marked items
+                        iContainer->ClearLbxSelection();
+                        }
+                    iIsWaitNoteCanceled = EFalse;
+        
+                    if(iContainer->FindBoxVisibility())
+                        {
+                        iContainer->EnableFindBox(EFalse);
+                        }
+                    }
+                iConfirmationDlg = NULL;
+                CleanupStack::PopAndDestroy( waitNoteText );
+                }
+            }
+        CleanupStack::PopAndDestroy( path );
+        }
+    }
+
+
+// ---------------------------------------------------------------------------
 // Delete the selected items
 // ---------------------------------------------------------------------------
 //
@@ -2783,6 +2900,45 @@ TBool CMPXCollectionViewHgImp::FileDetailsOptionVisibilityL()
     return isHidden;
     }
 
+
+
+// -----------------------------------------------------------------------------
+// Handle send command in TBone view.
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DoSendTBoneListItemL(TMPXItemId aContainerId)
+    {
+
+    MPX_FUNC( "CMPXCollectionViewHgImp::DoSendTBoneListItemL" );
+    
+    CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
+    CleanupStack::PushL( path );
+    
+    CMPXMedia* albumTrack = iContainer->SelectedItemMediaL();
+    TMPXItemId trackId = albumTrack->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+
+    path->Back();
+    path->Back();
+    path->AppendL(aContainerId);
+    path->AppendL(trackId); 
+
+    RArray<TMPXAttribute> attrs;
+    CleanupClosePushL(attrs);
+    attrs.Append(
+        TMPXAttribute( KMPXMediaIdGeneral,
+            EMPXMediaGeneralUri | EMPXMediaGeneralSize |
+            EMPXMediaGeneralCollectionId |
+            EMPXMediaGeneralFlags | EMPXMediaGeneralId |
+            EMPXMediaGeneralType | EMPXMediaGeneralCategory ) );
+    iCurrentMediaLOp = EMPXOpMediaLSend;
+    iCollectionUtility->Collection().MediaL( *path, attrs.Array() );
+    CleanupStack::PopAndDestroy( &attrs );
+    CleanupStack::PopAndDestroy( path );
+}
+
+
+
+
 // -----------------------------------------------------------------------------
 // Handle send command.
 // -----------------------------------------------------------------------------
@@ -3838,7 +3994,7 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
                                 EMPXUSBUnblockingPSStatusActive );
 				}
 
-            if ( iIsEmbedded && type == EMcMsgUSBMassStorageEnd )
+            if ( iContainer && iIsEmbedded && type == EMcMsgUSBMassStorageEnd )
             	{
             	DoIncrementalOpenL();
             	}
@@ -5182,7 +5338,14 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
         case EMPXCmdRemove:
             {
             StoreListboxItemIndexL();
-            DeleteSelectedItemsL(aCommand);
+            if ( iContainer->IsTBoneView() )
+                {
+                DeleteSelectedTBoneItemsL(aCommand);
+                }
+            else
+                {
+                DeleteSelectedItemsL(aCommand);    
+                }
             break;
             }
         case EMPXCmdSend:
@@ -5196,7 +5359,13 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             TMPXGeneralCategory category(
                 media.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory ) );
 
-            if ( iContainer->CurrentSelectionIndicesL()->Count() == 0 &&
+            if( type == EMPXItem && category == EMPXAlbum && 
+                    iContainer->IsTBoneView() )
+                {
+                const TMPXItemId containerId = media.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+                DoSendTBoneListItemL(containerId);
+                }
+            else if ( iContainer->CurrentSelectionIndicesL()->Count() == 0 &&
                 type == EMPXItem &&
                 category == EMPXPlaylist )
                 {
@@ -5524,11 +5693,20 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                             StopDisplayingMenuBar();
                             }
                         iPlayIndex = KErrNotFound;
-                        if(iCollectionCacheReady)
-                            {
-                            iCollectionUtility->Collection().OpenL( currentItem, EMPXOpenPlaylistOnly );
-                            iFirstIncrementalBatch = ETrue;
-                            }
+
+                        if (iContainer->IsSelectedItemASong())
+							{
+							if(iCollectionCacheReady)
+								{
+								iCollectionUtility->Collection().OpenL( currentItem, EMPXOpenPlaylistOnly );
+								iFirstIncrementalBatch = ETrue;
+								}
+							}
+						else
+							{
+							iContainer->HandleItemCommandL(EMPXCmdPlay);
+							}
+
                         }
                     }
                 else
@@ -6437,8 +6615,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                                 // and album art
                                 aMenuPane->SetItemDimmed( EMPXCmdSongDetails,
                                     fileDetailVisibility );
-                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt,
-                                    fileDetailVisibility );
+                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
 #ifdef SINGLE_CLICK_INCLUDED
                                 aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );  
 #else
@@ -7713,6 +7890,47 @@ void CMPXCollectionViewHgImp::ChangeCbaVisibility( TBool aVisible )
 		}
     }
 
+void CMPXCollectionViewHgImp::UpdateCba()
+    {
+    TRAP_IGNORE( 
+        {
+        CMPXCollectionPath* cpath( iCollectionUtility->Collection().PathL() );
+        CleanupStack::PushL( cpath );
+    
+        CMPXCommonListBoxArrayBase* listboxArray(
+            iContainer->ListBoxArray() );
+        const CMPXMedia& media( listboxArray->ContainerMedia() );
+    
+        TMPXGeneralType containerType( EMPXNoType );
+        if ( media.IsSupported( KMPXMediaGeneralType ) )
+            {
+            containerType = media.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType );
+            }
+    
+        TMPXGeneralCategory containerCategory( EMPXNoCategory );
+        if ( media.IsSupported( KMPXMediaGeneralCategory ) )
+            {
+            containerCategory = media.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory );
+            }
+        TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+        CEikButtonGroupContainer* cba = Cba();
+        if ( cba && containerType == EMPXGroup && containerCategory == EMPXAlbum && landscapeOrientation )
+            {
+            cba->SetCommandSetL( R_MPX_COLLECTION_TRANSPARENT_CBA );
+            cba->MakeVisible( EFalse );
+            cba->DrawDeferred();
+            }
+        else if ( cba )
+            {
+            cba->SetCommandSetL(
+                ( cpath->Levels() == 3 && !iIsEmbedded ) ?
+                R_MPX_OPTIONS_HIDE_CBA : R_AVKON_SOFTKEYS_OPTIONS_BACK );
+            cba->MakeVisible( ETrue );
+            cba->DrawDeferred();
+            }
+        CleanupStack::PopAndDestroy(cpath);
+        });
+    }
 
 // -----------------------------------------------------------------------------
 // CMPXCollectionViewHgImp::OpenAllSongsL

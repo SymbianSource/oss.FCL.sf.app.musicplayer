@@ -2001,14 +2001,20 @@ void CMPXAppUi::HandleBroadcastMessageL( const CMPXMessage& aMessage )
         {
         if ( !IsEmbedded() )
             {
-            CMPXCollectionPath* cPath = iCollectionUtility->Collection().PathL ( );
-            CleanupStack::PushL ( cPath );
             TBool usbDiskRemovalEvent(EFalse);
             if ( (op == EMcMsgDiskRemoved) && iIsUsbOnGoing )
                 {
                 usbDiskRemovalEvent = ETrue;
                 }
+            else
+                {
+                MPX_DEBUG1( "CMPXAppUi::HandleBroadcastMessageL. MMC ejected and the application needs to close." );
+                RunAppShutter();
+				return;
+                }
 
+            CMPXCollectionPath* cPath = iCollectionUtility->Collection().PathL ( );
+            CleanupStack::PushL ( cPath );
             if ( cPath->Levels ( )> 1 && !iFormattingOnGoing && !usbDiskRemovalEvent &&
                  iCurrentViewType.iUid != KMPXPluginTypePlaybackUid )
                 {
@@ -3631,14 +3637,9 @@ void CMPXAppUi::HandleCommandL(
 					{
 					TRAP( err, iCoeEnv->SimulateKeyEventL(key,EEventKey); )
 					}
+                }
 
-				// Options/Exit selected, close also the MM suite
-                if( aCommand == EAknCmdExit )
-                    {
-                    LaunchMmViewL( KMmMessage );
-                    }
-				}
-
+            TBool needToExit( EFalse );
             if ( iSaveMode != EMPXSaveModeIdle )
                 {
                 iCancelFileMan = ETrue;
@@ -3656,7 +3657,16 @@ void CMPXAppUi::HandleCommandL(
                     TRAP_IGNORE( manager.ClearSelectPlayersL() );
                     iPlaybackUtility->CommandL( EPbCmdClose );
                     }
+                needToExit = ETrue;
+                }
 
+            if( aCommand == EAknCmdExit )
+                {
+                // Options/Exit selected, close also the MM suite
+                LaunchMmViewL( KMmMessage );
+                }
+            if( needToExit )
+                {
                 Exit();
                 }
             break;

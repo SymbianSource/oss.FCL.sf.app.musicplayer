@@ -655,6 +655,7 @@ void CMCPMusicPlayer::DoUpdatePlayerStateL(TMPlayerState aState)
             case EMPlayerStatePlaying:
                 {
                 MPX_DEBUG1("CMCPMusicPlayer::DoUpdatePlayerStateL EMPlayerStatePlaying");
+                iMusicPlayerOpeningTimer->Cancel();
                 UpdateToolBarL(TBK::KSkeep_L|TBK::KPause|TBK::KSkeep_R);
                 break;
                 }
@@ -1275,31 +1276,12 @@ void CMCPMusicPlayer::OpeningMusicPlayer()
 //
 TInt CMCPMusicPlayer::MusicPlayerOpeningTimerCallback( TAny* aPtr )
     {
-    MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback <---");
-    RWsSession wsSession;
-    TInt error = wsSession.Connect();
-    if ( error != KErrNone )
+    MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback <---");     
+    if ( EMPlayerStatePlaying != static_cast<CMCPMusicPlayer*>(aPtr)->iEngine->PlayerState() )
         {
-        return error;
-        }
-    
-    TBool taskExists( EFalse );
-    CAknTaskList* taskList( NULL );
-    TRAPD( err, taskList = CAknTaskList::NewL( wsSession ) );
-    if ( err == KErrNone )
-        {
-        MPX_DEBUG2("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback "
-                "error = %d occur when creating CAknTaskList", err);
-        TApaTask task = taskList->FindRootApp( TUid::Uid( KMusicPlayerAppUidAsTInt ) );
-        delete taskList;
-        taskExists = task.Exists();
-        }
-    wsSession.Close();
-    
-    if ( !taskExists )
-        {
-        MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback Music Player not opened");
-        //Reset the widget and menu, music player is not running
+        MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback Music Player not Playing");
+        //Reset the widget and menu, music player is not running and playing.
+        static_cast<CMCPMusicPlayer*>(aPtr)->iActive = EFalse;
         TRAP_IGNORE( static_cast<CMCPMusicPlayer*>(aPtr)->ResetL() );
         }
     static_cast<CMCPMusicPlayer*>(aPtr)->iMusicPlayerOpeningTimer->Cancel();

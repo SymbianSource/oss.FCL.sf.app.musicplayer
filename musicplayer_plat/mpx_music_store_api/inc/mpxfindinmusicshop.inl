@@ -48,20 +48,23 @@ CMPXFindInMShop* CMPXFindInMShop::NewL()
     CMPXFindInMShop* imp = NULL;
     RImplInfoPtrArray plugins;
     REComSession::ListImplementationsL( KSchemeHandlerDefinitionUid, plugins );
-    TInt err = KErrNotFound;
+    
+    TInt latestVersion(KErrNotFound);
+    TInt current_version(0);
+    // Find largest version number from the plugins
     for( TInt i=0; i<plugins.Count(); ++i )
         {
         CImplementationInformation* info = plugins[i];
-        if( info->RomBased() )
+        current_version = info->Version();
+        if ( current_version > latestVersion )
             {
-            err = KErrNone;
-            TUid uid = info->ImplementationUid();    
+            latestVersion = current_version;
+            TUid uid = info->ImplementationUid();
             imp = reinterpret_cast<CMPXFindInMShop*>
-                ( REComSession::CreateImplementationL( uid, _FOFF( CMPXFindInMShop, iDtorKey ) ) );
-            break;
+                ( REComSession::CreateImplementationL( uid, _FOFF( CMPXFindInMShop, iDtorKey ) ) );        
             }
         }
-    User::LeaveIfError( err );
+
     plugins.ResetAndDestroy();
     plugins.Close();
     return imp;

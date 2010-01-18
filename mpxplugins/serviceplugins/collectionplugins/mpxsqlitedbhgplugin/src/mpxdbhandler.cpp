@@ -2789,6 +2789,15 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
         MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemInserted,
             aCategory, KDBPluginUid);
         }
+    // when the added item's category is Genre or Composer,
+    // and it is NOT a new record,
+    // we should send the item number changed message
+    else if ( ( aCategory == EMPXGenre || aCategory == EMPXComposer ) &&
+    		!newRecord && aItemChangedMessages )
+        {
+        MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemModified,
+            aCategory, KDBPluginUid);
+        }
     aItemExist = !newRecord;
     MPX_PERF_END(CMPXDbHandler_AddCategoryItemL);
 
@@ -2823,6 +2832,14 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
     if (newRecord && aItemChangedMessages)
         {
         MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemInserted,
+            aCategory, KDBPluginUid);
+        }
+    // when the added item's category is Artist, and it is NOT a new record,
+    // we should send the item number changed message
+    else if (  aCategory == EMPXArtist &&
+    		!newRecord && aItemChangedMessages )
+        {
+        MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemModified,
             aCategory, KDBPluginUid);
         }
     aItemExist = !newRecord;

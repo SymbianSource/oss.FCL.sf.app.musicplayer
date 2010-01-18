@@ -176,6 +176,7 @@ CMPXCollectionViewHgContainer::~CMPXCollectionViewHgContainer()
     delete iMediaWall;
     delete iMwListWidget;
     delete iListWidget;
+    delete iOrigIcon;
     delete iCommonUiHelper;
     CancelTNRequest();
     iThumbnailReqMap.Close();
@@ -458,6 +459,10 @@ void CMPXCollectionViewHgContainer::UpdateReorderTitleIconL()
     newIcon->SetPictureOwnedExternally( EFalse );
     iContextPane = static_cast<CAknContextPane*>
         ( sp->ControlL( TUid::Uid( EEikStatusPaneUidContext ) ) );
+    if ( iOrigIcon )
+        {
+        delete iOrigIcon;
+        }
     iOrigIcon = iContextPane->SwapPicture( newIcon );
     CleanupStack::Pop( 3 ); // bitmap, mask, newIcon
     }
@@ -473,6 +478,7 @@ void CMPXCollectionViewHgContainer::RestoreOriginalTitleIconL()
         {
         CEikImage* newIcon = iContextPane->SwapPicture( iOrigIcon );
         delete newIcon;
+        iOrigIcon = NULL; 
         }
     }
 
@@ -1099,6 +1105,10 @@ void CMPXCollectionViewHgContainer::SetLbxEmptyTextL( const TDesC& aText )
         {
         iListWidget->SetEmptyTextL( aText );
         }
+    else if ( iMediaWall && aText != KNullDesC )
+        {
+        iMediaWall->SetEmptyTextL( aText );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -1673,7 +1683,7 @@ void CMPXCollectionViewHgContainer::SetShuffleItemToListL(CHgScroller* aScroller
 // ----------------------------------------------------------------------------
 CHgScroller* CMPXCollectionViewHgContainer::CurrentListWidget()
     {
-    CHgScroller* current = 0;
+    CHgScroller* current = NULL;
     switch (iCurrentViewType)
         {
         case EMPXViewTBone:
@@ -1941,7 +1951,7 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
             iView->ProcessCommandL( EMPXCmdCommonEnterKey );
             }
         }
-    else if ( iContext == EContextGroupSong )
+    else if ( iContext == EContextGroupSong || iContext == EContextItemPlaylist )
         {
         // Check if shuffle play all was selected.
         if (!ShufflePlayAllL(aIndex))
@@ -2524,7 +2534,7 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL()
 
 	CGulIcon* iconCopy = CGulIcon::NewL(bitmap, mask);
 	iconCopy->SetBitmapsOwnedExternally(ETrue);
-
+	CleanupStack::PushL( iconCopy );
 	if ( iMediaWall )
 		{
 		iMediaWall->SetDefaultIconL(iconCopy);
@@ -2537,6 +2547,7 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL()
 		{
 		delete iconCopy;
 		}
+	CleanupStack::Pop( iconCopy );
 	iCurrentDefaultIcon = defaultIcon;
 	}
 
@@ -2593,7 +2604,7 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL(TInt aIndex)
 
 	CGulIcon* iconCopy = CGulIcon::NewL(bitmap, mask);
 	iconCopy->SetBitmapsOwnedExternally(ETrue);
-
+	CleanupStack::PushL( iconCopy );
 
 	// TODO, fix this to use currentviewtype
 	if ( iMediaWall && defaultIcon != EMPXDefaultIconNotSet )
@@ -2608,6 +2619,7 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL(TInt aIndex)
 		{
 		delete iconCopy;
 		}
+	CleanupStack::Pop( iconCopy );
 	}
 
 
@@ -3918,7 +3930,18 @@ TBool CMPXCollectionViewHgContainer::ShufflePlayAllL(TInt aIndex)
     if ( type == EMPXItem && category == EMPXCommand )
         {
 		shuffle = ETrue;
-		iPlaylistHelper->InitPlaylistL(shuffle);
+		if ( iContext == EContextItemPlaylist )
+			{
+			CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
+			CleanupStack::PushL( cpath );
+			cpath->Remove(0); // we want to remove index 0 which is shuffle item
+			iPlaylistHelper->InitPlaylistL(*cpath, shuffle);
+			CleanupStack::PopAndDestroy( cpath );
+			}
+		else
+			{
+			iPlaylistHelper->InitPlaylistL(shuffle);
+			}
         }
 
     return shuffle;
@@ -4354,21 +4377,26 @@ void CMPXCollectionViewHgContainer::RestoreSelectedAlbumItemL(
     MPX_FUNC( "CMPXCollectionViewHgContainer::RestoreSelectedAlbumItemL" );
 
     CMPXMedia* restoredAlbum = CMPXMedia::NewL();
+    CleanupStack::PushL( restoredAlbum );
     ReadFromStreamFileL(restoredAlbum);
     TMPXItemId id=restoredAlbum->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
-
+    iRestoredAlbumIndex = 0; 
+    iSelectedAlbumIndex = 0;
+	
     for ( TInt i = 0; i < aMediaArray.Count() ; i++ )
         {
         CMPXMedia* currentMedia( aMediaArray.AtL( i ) );
 
         if ( (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == id) || 
-             (id == KMPXInvalidItemId && currentMedia->ValueText(KMPXMediaGeneralTitle).Compare( restoredAlbum->ValueText(KMPXMediaGeneralTitle) ) == 0 )  )
+             (id.iId1 == 0 && currentMedia->ValueText(KMPXMediaGeneralTitle).Compare( restoredAlbum->ValueText(KMPXMediaGeneralTitle) ) == 0 )  )
             {
             iRestoredAlbumIndex = i;
             iSelectedAlbumIndex = i;
             break;
             }
         }
+		
+    CleanupStack::PopAndDestroy( restoredAlbum );
     }
 
 // ----------------------------------------------------------------------------
@@ -4440,12 +4468,6 @@ void CMPXCollectionViewHgContainer::ReadFromStreamFileL( CMPXMedia* aMedia )
         CleanupStack::PopAndDestroy( store );
         }
 
-    // for corrupted Media
-    TMPXItemId id=aMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);    
-    if ( id.iId1 == 0 )
-        {
-        aMedia->SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, KMPXInvalidItemId );
-        }
     }
 
 void CMPXCollectionViewHgContainer::HandleGainingForeground()

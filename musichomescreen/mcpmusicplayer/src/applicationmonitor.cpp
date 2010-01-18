@@ -87,6 +87,7 @@ void CApplicationMonitor::StartL( TUid aAppUid , TBool aRootAppIndication )
     TUint64 threadId(0);
     TBool taskExists(EFalse);
     TInt status = KErrNone;
+    iAppUid = aAppUid;
     if(aRootAppIndication)
         {
         CAknTaskList* taskList = CAknTaskList::NewL( wsSession );
@@ -131,22 +132,22 @@ void CApplicationMonitor::RunL()
     MPX_DEBUG1("CApplicationMonitor::RunL <---");
     switch (iStatus.Int())
         {
-        case EExitKill: 
-        case EExitTerminate:
-        case EExitPanic:
-            MPX_DEBUG1("CApplicationMonitor::RunL kill\terminate\panic");
-            iObserver.HandleApplicationClosedL((TExitType) iStatus.Int());
+        case EExitPending: 
+            MPX_DEBUG1("CApplicationMonitor::RunL reason = EExitPending");
+            iThread.Close();
+            TRAPD(err, StartL( iAppUid ) );
+            if (KErrNone != err)
+                {
+                MPX_DEBUG1("CApplicationMonitor::RunL reason = EExitPending but thread is really gone");
+                iObserver.HandleApplicationClosedL((TExitType) iStatus.Int());
+                }
             break;
         case KErrCancel:
-        case KErrNoMemory:
-            MPX_DEBUG1("CApplicationMonitor::RunL cancel\memory");
+            MPX_DEBUG1("CApplicationMonitor::RunL cancel");
             break;
-        case EExitPending: 
         default:
-            MPX_DEBUG1("CApplicationMonitor::RunL exitpendin\default");
-            // Listen again
-            iThread.Logon(iStatus);
-            SetActive();
+        	  MPX_DEBUG2("CApplicationMonitor::RunL reason = %d", iStatus.Int());
+        	  iObserver.HandleApplicationClosedL((TExitType) iStatus.Int());
             break;
         }
     MPX_DEBUG1("CApplicationMonitor::RunL --->");
@@ -171,9 +172,6 @@ void CApplicationMonitor::DoCancel()
 TInt CApplicationMonitor::RunError(TInt /*aError*/)
     {
     MPX_DEBUG1("CApplicationMonitor::RunError <---");
-    // Listen again
-    iThread.Logon(iStatus);
-    SetActive();
     MPX_DEBUG1("CApplicationMonitor::RunError --->");
     return KErrNone;
     }

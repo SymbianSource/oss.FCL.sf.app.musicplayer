@@ -297,20 +297,32 @@ void CMPXMediaKeyHandlerImp::DoFilterAndSendCommandL(
         if ( forwardCommand )
             {
             iVolumeEventCount++;
+        	
+            TInt volume(0);
+            TFileName subPlayerName;
+            TMPXPlaybackPlayerType currentPlayerType = EPbLocal;
+            GetSubPlayerInfoL(subPlayerName, currentPlayerType);
             
-            TInt volume = iUpnpVolume % ( KPbPlaybackVolumeLevelMax / iVolumeSteps )
-                    + iCurrentVol * KPbPlaybackVolumeLevelMax / iVolumeSteps;
-
-			if ( volume < KMPXMinVolume )
-				{
-				volume = KMPXMinVolume;
-				}
-			if ( volume > KMPXMaxVolume )
-				{
-				volume = KMPXMaxVolume;
-				}
-			
-			iObserver->HandleMediaKeyCommand( aCommandId, volume );
+        	if ( currentPlayerType == EPbRemote )
+                {
+        	    volume = iUpnpVolume % ( KPbPlaybackVolumeLevelMax / iVolumeSteps )
+            	                    + iCurrentVol * KPbPlaybackVolumeLevelMax / iVolumeSteps;
+        	    }
+        	else
+        	    {
+        	    volume = iCurrentVol * KPbPlaybackVolumeLevelMax/iVolumeSteps;
+        	    }
+            
+            if ( volume < KMPXMinVolume )
+                {
+                volume = KMPXMinVolume;
+                }
+            if ( volume > KMPXMaxVolume )
+                {
+                volume = KMPXMaxVolume;
+                }
+            
+            iObserver->HandleMediaKeyCommand( aCommandId, volume );
             }
         }
     }

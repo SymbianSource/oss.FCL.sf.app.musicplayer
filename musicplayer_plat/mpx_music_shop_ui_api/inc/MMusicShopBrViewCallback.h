@@ -33,13 +33,7 @@
 */
 class MMusicShopBrViewCallback
     {
-    public:
-        enum TMusDownloadControlCommandId
-            {
-            EPauseDownload = 0x01, // pause
-            EResumeDownload, // resume
-            ECancelDownload // cancel
-            };
+
         /**
         * Activate the MusicShop application view based on view id
         *
@@ -50,13 +44,6 @@ class MMusicShopBrViewCallback
         */
         virtual void ActivateMusicShopViewL (TUid aViewId) = 0;
 
-        /**
-        * Handle pause/resume/cancel download related commands from Music Player playback view.
-        *
-        * @since S60 3.2.3
-        * @param aControlDownloadCommandId pause/resume/cancel download command id.
-        */
-        virtual void HandleDownloadCommandL ( TMusDownloadControlCommandId aControlDownloadCommandId ) = 0;
     };
 
 #endif //M_MUSICSHOP_BR_VIEW_CALLBACK_H

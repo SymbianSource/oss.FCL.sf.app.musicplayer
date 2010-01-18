@@ -5962,7 +5962,14 @@ void CMPXCollectionViewImp::DynInitMenuPaneL(
                                 aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
                                 aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
                                 aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+                                if ( iCollectionReady )
+                                	{
+                                	aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+                                	}
+                                else
+                                	{
+                                	aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+                                	}
                                 aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
                                 }
                             break;

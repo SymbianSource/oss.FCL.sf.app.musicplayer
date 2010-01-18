@@ -1442,7 +1442,9 @@ void CMPXProgressDownloadSB::SetMute( TBool aMute )
 //
 void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL()
     {
-    if ( iFileSaved || ( (*iPdPath).Length() == 0 ) )
+    if ( iFileSaved ||
+         ( (*iPdPath).Length() == 0 ) ||
+         iMAudioProgDLSource->GetDownloadStatus() == MProgDLSource::EDeleted )
         {
         return;
         }

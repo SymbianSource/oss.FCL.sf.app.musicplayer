@@ -78,12 +78,9 @@ _LIT( KResourceFile, "z:musichomescreen.rsc");
 // Constructor
 // ---------------------------------------------------------------------------
 //
-CMusicContentPublisher::CMusicContentPublisher( MLiwInterface* aCPSInterface )
+CMusicContentPublisher::CMusicContentPublisher( MLiwInterface* aCPSInterface ):
+        iCPSInterface (aCPSInterface)
     {
-    iCPSInterface = aCPSInterface;
-    iActivePlugin=NULL;
-    iIsPublisherActive = EFalse;
-
     }
 
 // ---------------------------------------------------------------------------
@@ -307,14 +304,14 @@ void CMusicContentPublisher::MapEnumToDestinationInfoL(TInt aEnum,
         TPtrC8 dataKey ( reinterpret_cast<const TUint8*>(
                 tmpdstitemp->dataKey ) );
         TPtrC content ( reinterpret_cast<const TUint16*>(
-                    tmpdstitemp->content) );
+                tmpdstitemp->content) );
 
         aType.Set(type);
         aDataKey.Set(dataKey);
 
         if ( !content.Compare( KWildCard ) )
             {
-            aContent.Set( iInstanceId->Des() );
+            aContent.Set(iInstanceId ? iInstanceId->Des(): KNullDesC() );
             }
         else
             {
@@ -680,7 +677,7 @@ void CMusicContentPublisher::PublishImageL( CMCPPlugin* aPlugin,
             }
         else
             {
-            if ( iIsPublisherActive )
+            if ( iWidgetForeground )
                 {
                 iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
                 }
@@ -780,7 +777,7 @@ void CMusicContentPublisher::PublishImageL( CMCPPlugin* aPlugin,
             }
         else
             {
-            if ( iIsPublisherActive )
+            if ( iWidgetForeground )
                 {
                 iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );  	
                 }
@@ -921,7 +918,7 @@ void CMusicContentPublisher::PublishTextL( CMCPPlugin* aPlugin,
             }
         else
             {
-            if ( iIsPublisherActive )
+            if ( iWidgetForeground )
                 {
                 iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );        	
                 }
@@ -990,7 +987,7 @@ void CMusicContentPublisher::PublishActionL( CMCPPlugin* aPlugin,
             }
         else
             {
-            if ( iIsPublisherActive )
+            if ( iWidgetForeground )
                 {
             	  iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
                 }
@@ -1076,17 +1073,18 @@ void CMusicContentPublisher::SkinContentChanged()
 void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContentId, const TDesC8& aTrigger )
     {
     MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL <---");
-    if ( aTrigger == KMyActive )
+    if ( aTrigger == KMyActive && !iWidgetActivated)
         {
+        iWidgetActivated = ETrue;
         MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL activate");
         if ( !iInstanceId )
             {
             iInstanceId = aContentId.AllocL();
-        	  //Reset The Widget
-        	  MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL activate --> Reset Widget");
-        	  RDebug::Print(aContentId);
+            //Reset The Widget
+            MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL activate --> Reset Widget");
+            RDebug::Print(aContentId);
             PublishImageL(NULL,EMusicWidgetImage1,KEmpty);
-        	InstallGoToAlbumL( EMusicWidgetTrigger1 );
+            InstallGoToAlbumL( EMusicWidgetTrigger1 );
             PublishTextL( NULL,EMusicWidgetText1, KEmpty );
             PublishImageL(NULL,EMusicWidgetToolbarB1,KEmpty);
             PublishImageL(NULL,EMusicWidgetToolbarB2,KEmpty);
@@ -1095,7 +1093,7 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
             InstallEmptyActionL(EMusicWidgetTB2Trigger);
             InstallEmptyActionL(EMusicWidgetTB3Trigger);
             PublishTextL( NULL,EMusicWidgetDefaultText, iGoToMusicBuffer->Des() );
-			InstallGoToAlbumL( EMusicWidgetTrigger2 );
+            InstallGoToAlbumL( EMusicWidgetTrigger2 );
             }
         else
             {
@@ -1104,8 +1102,9 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
             iInstanceId = aContentId.AllocL();
             }
         }
-    else if ( aTrigger ==  KMyDeActive)
+    else if ( aTrigger ==  KMyDeActive && iWidgetActivated)
         {
+        iWidgetActivated = EFalse;
         MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL deactivate");
         //Removing al the CPS entrys to prevent flicker of old text and unwanted images (old/expired handles).
         RemoveL( EMusicWidgetImage1 );
@@ -1115,15 +1114,15 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
         RemoveL( EMusicWidgetToolbarB3 );
         RemoveL( EMusicWidgetDefaultText );
         }
-    else if ( aTrigger ==  KMySuspend)
+    else if ( aTrigger ==  KMySuspend && iWidgetActivated && iWidgetForeground)
         {
         MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL suspend");
-        iIsPublisherActive = EFalse;
+        iWidgetForeground = EFalse;
         }
-    else if ( aTrigger ==  KMyResume)
+    else if ( aTrigger ==  KMyResume && iWidgetActivated && !iWidgetForeground)
         {
         MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL resume");
-        iIsPublisherActive = ETrue;
+        iWidgetForeground = ETrue;
         DoPublishL();
         }
     MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL --->");

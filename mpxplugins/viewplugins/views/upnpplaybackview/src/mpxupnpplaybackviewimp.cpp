@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Implementation of Upnp Playback view
-*  Version     : %version: da1mmcf#35.1.3.1.4 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: e003sa33#35.1.3.1.5 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -245,7 +245,8 @@ void CMPXUPnPPlaybackViewImp::DoHandlePlaybackMessageL(
                                      EPbAccessoryWirelessHeadset == mode ||
                                      EPbAccessoryMusicStand == mode ||
                                      EPbAccessoryTVOut == mode ||
-                                     EPbAccessoryHeadphones == mode );
+                                     EPbAccessoryHeadphones == mode ||
+                                     EPbAccessoryHDMI == mode );
 #else
                     resetToLocal = ( EPbAccessoryHeadset == mode ||
                                      EPbAccessoryLoopset == mode );

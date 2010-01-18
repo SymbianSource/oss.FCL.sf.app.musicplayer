@@ -27,6 +27,7 @@
 #include <mpxmusicplayerviewplugin.hrh> // KMPXPluginTypePlaybackUid
 #include <AknTaskList.h>                // CAknTaskList
 
+#include <mpxcommandgeneraldefs.h>
 #include <mpxcommonuihelper.h>
 #include <mpxcollectionhelperfactory.h>
 #include "musicplayeractionhandler.h"
@@ -36,6 +37,8 @@
 const TInt KPlayerMusicPlayerParameterGranularity = 50;
 const TUid  KMusicPlayerAppUid = { 0x102072C3 };
 
+const TInt KMPXStandAloneProcessIDTop32( 1 );
+const TInt KMPXStandAloneProcessIDBottom32( 2 );
 // RProperty key to identify the case when Music Player launching
 // in the background
 const TInt KMPXLaunchingOnBackground( 100 );
@@ -121,7 +124,7 @@ TInt CMusicPlayerActionHandler::ExecutePlaybackCommandL(const CLiwMap* aMap)
         {
         TMPXPlaybackCommand Command;
         Command = static_cast<TMPXPlaybackCommand>( variant.AsTInt32() );
-        iPlaybackUtility->CommandL( Command );
+        SetPlaybackCommandL( Command );
         }
     CleanupStack::PopAndDestroy( &variant);
     MPX_DEBUG1("<--CMusicPlayerActionHandler::ExecutePlaybackCommandL()");
@@ -429,5 +432,45 @@ TInt CMusicPlayerActionHandler::ExecuteActionL( const CLiwMap* aMap )
     return errCode;
     }
 
+// ---------------------------------------------------------------------------
+// Set the command to playbackUtility
+// ---------------------------------------------------------------------------
+//
+void CMusicPlayerActionHandler::SetPlaybackCommandL( TMPXPlaybackCommand aCommand )
+    {
+    MPX_DEBUG1("-->CMusicPlayerActionHandler::SetPlaybackCommandL()");
+    //Try to get musicplay StandAloneMode process id
+    TInt procId( 0 );
+    TUint64 mpProcId( 0 );
+    TInt err( RProperty::Get( KMusicPlayerAppUid, KMPXStandAloneProcessIDTop32, procId ) );
+    if ( err == KErrNone )
+        {
+        mpProcId = TUint64( procId ) << 32;
+        err = RProperty::Get( KMusicPlayerAppUid, KMPXStandAloneProcessIDBottom32, procId );
+        if ( err == KErrNone )
+            {
+            mpProcId += procId;
+            }
+        else
+            {
+            mpProcId = 0;
+            }
+        }
+    
+    CMPXCommand* cmd( CMPXCommand::NewL() );
+    CleanupStack::PushL( cmd );
+    cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXCommandIdPlaybackGeneral );
+    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, aCommand );
+    cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralData, 0 );
+    if ( mpProcId )
+        {
+        //This attribute will be used by playbckEngine->iLastActiveProcess 
+        cmd->SetTObjectValueL<TProcessId> ( KMPXCommandPlaybackGeneralClientPid, mpProcId );
+        }
+    iPlaybackUtility->CommandL( *cmd );
+    CleanupStack::PopAndDestroy( cmd );
+    MPX_DEBUG1("<--CMusicPlayerActionHandler::SetPlaybackCommandL()");
+    }
 //  End of File
 

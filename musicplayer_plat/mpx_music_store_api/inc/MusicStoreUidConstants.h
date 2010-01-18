@@ -22,8 +22,8 @@
 #define MUSICSTOREAPPUIDCONST_H
 
 // Music Shop Wrapper (or Music Store)
-// use by Music Player for the "Find in Music Shop"
-const TUid KUidMusicStore = { 0x10207BF5 }; // UID used in MusicStoreApp.cpp
+// use by Music Player for the "Find in Music Shop" 
+const TUid KUidMusicStore = { 0x101FFB51 }; // UID used in MusicStoreApp.cpp
 
 
 #endif // MUSICSTOREAPPUIDCONST_H

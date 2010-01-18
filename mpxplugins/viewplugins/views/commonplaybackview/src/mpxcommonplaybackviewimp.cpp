@@ -353,6 +353,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
 #endif
     iIsffButtonPressed = EFalse;
     iDelayedErrorTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iFmTxActivity = EFmTxStateUnknown;
     }
 
 
@@ -899,6 +900,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateFMTransmitterInfoL(
                         }
                     }
                 }
+            iFmTxActivity = value;
 
             MPX_DEBUG4( "CMPXCommonPlaybackViewImp::UpdateFMTransmitterInfoL iFMTxFreqKHz %d freqKHz %d aForceUpdate %d", iFMTxFreqKHz, freqKHz, aForceUpdate);
             if ( iFMTxFreqKHz != freqKHz || aForceUpdate )
@@ -2414,7 +2416,11 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
         case EMPXCmdVolumeUnMute:
         case EMPXCmdVolumeChanged:
             {
-            AppUi()->HandleCommandL( aCommand );
+            //Do not try to update volume if FMTx (transmission) is on.
+            if (iFmTxActivity != EFmTxStateActive)
+                {           
+                AppUi()->HandleCommandL( aCommand );
+                }
             break;
             }
         default:
@@ -2508,7 +2514,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
                 | ECoeStackFlagRefusesAllKeys );
         toolbar->MakeVisible( ETrue );
         toolbar->HideItemsAndDrawOnlyBackground(EFalse);
-        toolbar->SetSkinBackgroundId(KAknsIIDQsnBgScreenMp);
         toolbar->SetToolbarVisibility(ETrue);
         }
     PrepareStatusPaneForPlaybackViewL();

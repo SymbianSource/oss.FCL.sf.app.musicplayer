@@ -590,12 +590,11 @@ void CMPXAddTracksDialog::HandleItemArrayChangeL()
 
     CAknFilteredTextListBoxModel* lbxModel =
         static_cast<CAknFilteredTextListBoxModel*>( iListBox->Model() );
-    CAknSearchField* tempSearchField =
-        static_cast<CAknSearchField*>( lbxModel->Filter()->FindBox() );
+    CAknSearchField* findBox = FindBox();
     lbxModel->Filter()->SetSearchField( NULL );//for find the items
     // Update item array
     iLbxFilterItems->HandleItemArrayChangeL();
-    lbxModel->Filter()->SetSearchField( tempSearchField );// for laylout of list
+    lbxModel->Filter()->SetSearchField( findBox );// for laylout of list
 
     TInt itemCount = CurrentListItemCount();
     if ( itemCount )
@@ -1508,9 +1507,13 @@ TBool CMPXAddTracksDialog::OkToExitL( TInt aButtonId )
             TRAP_IGNORE( findBox->ResetL() );
             iListBox->SetFocus( ETrue );
             
+            CAknFilteredTextListBoxModel* lbxModel =
+                static_cast<CAknFilteredTextListBoxModel*>( iListBox->Model() );
+            lbxModel->Filter()->SetSearchField( findBox );// for laylout of list
             TRect mainPane;
             AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
             SetSizeAndPosition( mainPane.Size() );
+            DrawDeferred();
             break;
             }
         default:
@@ -1537,6 +1540,10 @@ TKeyResponse CMPXAddTracksDialog::OfferKeyEventL(
     TKeyResponse res = EKeyWasNotConsumed;
     TBool updateCBA = EFalse;
     CAknSearchField* findbox = FindBox();
+    
+    CAknFilteredTextListBoxModel* lbxModel =
+        static_cast<CAknFilteredTextListBoxModel*>( iListBox->Model() );
+    lbxModel->Filter()->SetSearchField( NULL );//for find the items
 
     if ( aType == EEventKey )
         {
@@ -1647,9 +1654,12 @@ TKeyResponse CMPXAddTracksDialog::OfferKeyEventL(
                     TRAP_IGNORE( findBox->ResetL() );
                     iListBox->SetFocus( ETrue );
                     
+                    lbxModel->Filter()->SetSearchField( findBox );// for laylout of list
+                    
                     TRect mainPane;
                     AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
                     SetSizeAndPosition( mainPane.Size() );
+                    iListBox->DrawDeferred();
                     res = EKeyWasConsumed;
                     }
                 else
@@ -1687,9 +1697,14 @@ void CMPXAddTracksDialog::HandleResourceChange( TInt aType )
 
     if ( aType == KEikDynamicLayoutVariantSwitch )
         {
-        TRect rect;
-        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
-        SetRect( rect );
+        CAknSearchField* findBox = FindBox();    
+        CAknFilteredTextListBoxModel* lbxModel =
+            static_cast<CAknFilteredTextListBoxModel*>( iListBox->Model() );
+        lbxModel->Filter()->SetSearchField( findBox );// for laylout of list
+
+        TRect mainPane;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
+        SetSizeAndPosition( mainPane.Size() );
         }
 
     if ( aType == KAknsMessageSkinChange )

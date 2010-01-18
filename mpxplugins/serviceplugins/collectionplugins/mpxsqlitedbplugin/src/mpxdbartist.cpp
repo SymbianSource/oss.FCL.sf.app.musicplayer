@@ -244,7 +244,9 @@ void CMPXDbArtist::UpdateMediaL(
 //              aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount,albumCount);
 //              MPX_DEBUG1("	EMPXMediaGeneralCount");
 //				MPX_DEBUG2("	AlbumCount[%d]", albumCount);
-				TInt songCount = aRecord.ColumnInt64(EArtistSongCount);
+                // get songs count from all drives
+                TInt songCount = GetSongsCountL( KDbManagerAllDrives,
+                                    aRecord.ColumnInt64( EArtistUniqueId ) );
 				aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount, songCount); // mod by anjokela
 				
                 MPX_DEBUG1("	EMPXMediaGeneralCount");

@@ -67,7 +67,7 @@ void CMusicPlayerActionHandler::ConstructL()
     MPX_DEBUG1("-->CMusicPlayerActionHandler::ConstructL()");
     
     //iPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
-    iPlaybackUtility = MMPXPlaybackUtility::NewL( KMusicPlayerAppUid);
+    //iPlaybackUtility = MMPXPlaybackUtility::NewL( KMusicPlayerAppUid);
 
     MPX_DEBUG1("<--CMusicPlayerActionHandler::ConstructL()");
     }
@@ -122,6 +122,10 @@ TInt CMusicPlayerActionHandler::ExecutePlaybackCommandL(const CLiwMap* aMap)
     errCode = ExtractVariantL( aMap, variant, KCommand );
     if ( errCode == KErrNone )
         {
+        if ( !iPlaybackUtility ) // Ensure that the utility exists
+            {
+            iPlaybackUtility = MMPXPlaybackUtility::NewL( KMusicPlayerAppUid);
+            }	
         TMPXPlaybackCommand Command;
         Command = static_cast<TMPXPlaybackCommand>( variant.AsTInt32() );
         iPlaybackUtility->CommandL( Command );

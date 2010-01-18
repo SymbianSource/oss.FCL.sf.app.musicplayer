@@ -35,7 +35,7 @@
 #include <avkon.rsg>
 #include <avkon.mbg>
 #include <sendui.h>
-#include <cmessagedata.h>
+#include <CMessageData.h>
 #include <centralrepository.h>
 #include <mprofileengine.h>
 #include <akndlgshut.h>
@@ -3341,27 +3341,77 @@ void CMPXCollectionViewHgImp::DoHandleRenameL()
 // Prepares media object for selected items
 // -----------------------------------------------------------------------------
 //
-void CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL( CMPXMedia& aMedia )
+void CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL( CMPXMedia& aMedia, TMPXGeneralCategory aContainerCategory, TMPXGeneralType aContainerType  )
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL" );
     CMPXMediaArray* mediaArray( CMPXMediaArray::NewL() );
     CleanupStack::PushL( mediaArray );
-    CMPXCommonListBoxArrayBase* listBoxArray =
-        iContainer->ListBoxArray();
-    TInt count( iSelectionIndexCache->Count() );
 
     CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
     CleanupStack::PushL( path );
     TMPXItemId id( path->Id( 0 ) );
     MPX_DEBUG2( "CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL collection ID = 0x%x", id.iId1 );
     CleanupStack::PopAndDestroy( path );
+    
+    //support for TBone view add to playlist
+    if ( aContainerCategory == EMPXAlbum && aContainerType == EMPXItem)
+        { 	 
+        CMPXMedia* media = iContainer->SelectedItemMediaL();
+        if ( media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
+           {
+           // leave with special error code, this error
+           // should not trigger any error message, the operation should
+           // be terminated silently
+           User::Leave( KMPXErrDataNotReady );
+           }
+        else
+           {
+           CMPXMedia* entry( PopulateMediaLC( *media, id ) );
+           mediaArray->AppendL( entry );
+           CleanupStack::Pop( entry );
+           }      	
+       }
 
-    if ( count > 0 )
+    else
         {
-        if ( count == 1 )
+        TInt count( iSelectionIndexCache->Count() );   
+        CMPXCommonListBoxArrayBase* listBoxArray =   
+            iContainer->ListBoxArray(); 
+        if ( count > 0 )
             {
-            // marked one item, if it's not valid, ignore the command
-            const CMPXMedia& listBoxMedia = listBoxArray->MediaL( iSelectionIndexCache->At(0) );
+                            
+            if ( count == 1 )
+                {
+                // marked one item, if it's not valid, ignore the command
+                const CMPXMedia& listBoxMedia = listBoxArray->MediaL( iSelectionIndexCache->At(0) );
+                if ( listBoxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
+                    {
+                    // leave with special error code, this error
+                    // should not trigger any error message, the operation should
+                    // be terminated silently
+                    User::Leave( KMPXErrDataNotReady );
+                    }
+                
+                }
+                for ( TInt i = 0; i < count; i++ )
+                    {
+                    const CMPXMedia& listBoxMedia = listBoxArray->MediaL( iSelectionIndexCache->At(i) );
+                    if ( listBoxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
+                        {
+                        // item not ready, cache this command and execute
+                        // it when the data becomes valid
+                        User::Leave( KMPXErrDataNotReadyCacheCommand );
+                        }
+                    CMPXMedia* entry( PopulateMediaLC( listBoxMedia, id ) );
+                    mediaArray->AppendL( entry );
+                    CleanupStack::Pop( entry );
+                    }
+            }
+       
+        else
+            {
+            const CMPXMedia& listBoxMedia = listBoxArray->MediaL(
+                iContainer->CurrentLbxItemIndex() );
             if ( listBoxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
                 {
                 // leave with special error code, this error
@@ -3369,44 +3419,20 @@ void CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL( CMPXMedia& aMedia )
                 // be terminated silently
                 User::Leave( KMPXErrDataNotReady );
                 }
-            }
-        for ( TInt i = 0; i < count; i++ )
-            {
-            const CMPXMedia& listBoxMedia = listBoxArray->MediaL( iSelectionIndexCache->At(i) );
-            if ( listBoxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
+            else
                 {
-                // item not ready, cache this command and execute
-                // it when the data becomes valid
-                User::Leave( KMPXErrDataNotReadyCacheCommand );
+                CMPXMedia* entry( PopulateMediaLC( listBoxMedia, id ) );
+                mediaArray->AppendL( entry );
+                CleanupStack::Pop( entry );
                 }
-            CMPXMedia* entry( PopulateMediaLC( listBoxMedia, id ) );
-            mediaArray->AppendL( entry );
-            CleanupStack::Pop( entry );
             }
-        }
-    else
-        {
-        const CMPXMedia& listBoxMedia = listBoxArray->MediaL(
-            iContainer->CurrentLbxItemIndex() );
-        if ( listBoxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
-            {
-            // leave with special error code, this error
-            // should not trigger any error message, the operation should
-            // be terminated silently
-            User::Leave( KMPXErrDataNotReady );
-            }
-        else
-            {
-            CMPXMedia* entry( PopulateMediaLC( listBoxMedia, id ) );
-            mediaArray->AppendL( entry );
-            CleanupStack::Pop( entry );
-            }
-        }
-    aMedia.SetTObjectValueL( KMPXMediaGeneralCollectionId, id );
-    aMedia.SetCObjectValueL( KMPXMediaArrayContents, mediaArray );
-    aMedia.SetTObjectValueL( KMPXMediaArrayCount, mediaArray->Count() );
-    iNumSongAddedToPlaylist = mediaArray->Count();
-    CleanupStack::PopAndDestroy( mediaArray );
+       }
+ 
+       aMedia.SetTObjectValueL( KMPXMediaGeneralCollectionId, id );
+       aMedia.SetCObjectValueL( KMPXMediaArrayContents, mediaArray );
+       aMedia.SetTObjectValueL( KMPXMediaArrayCount, mediaArray->Count() );
+       iNumSongAddedToPlaylist = mediaArray->Count();
+       CleanupStack::PopAndDestroy( mediaArray );
     }
 
 // -----------------------------------------------------------------------------
@@ -3583,11 +3609,7 @@ void CMPXCollectionViewHgImp::DoHandleFileCheckResultL(
     const TDesC& location = aMedia.ValueText( KMPXMediaGeneralUri );
     if ( location.Length() == 0 || ConeUtils::FileExists( location ) )
         {
-#ifdef SINGLE_CLICK_INCLUDED
-        HandleListBoxEventL( NULL, EEventItemSingleClicked );
-#else
         HandleListBoxEventL( NULL, EEventItemClicked );   
-#endif
         HBufC* buf = HBufC::NewLC( 5 ); // magic number, array granularity
         buf->Des().AppendNum( iContainer->CurrentLbxItemIndex() );
         // Activate view via View Framework
@@ -3976,23 +3998,39 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
                 }
             // USB flags
             //
+	       CEikMenuBar* menuBar( MenuBar() );
+#ifdef SINGLE_CLICK_INCLUDED
+            iContainer->EnableMarking( EFalse );
+            menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
+#else
+            iContainer->EnableMarking( ETrue );
+            menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR );
+#endif
+	        TBool IsUSBEvent( EFalse );
             if( type == EMcMsgUSBMassStorageStart || type == EMcMsgUSBMTPStart )
                 {
                 iUSBOnGoing = ETrue;
+		        IsUSBEvent = ETrue;
                 }
             else if( type == EMcMsgUSBMassStorageEnd || type == EMcMsgUSBMTPEnd )
                 {
                 iUSBOnGoing = EFalse;
+		        IsUSBEvent = ETrue;
                 RProperty::Set( KMPXViewPSUid,
                                 KMPXUSBUnblockingPSStatus,
                                 EMPXUSBUnblockingPSStatusUninitialized );
                 }
             else if( type == EMcMsgUSBMTPNotActive )
                 {
+		        IsUSBEvent = ETrue;
                 RProperty::Set( KMPXViewPSUid,
                                 KMPXUSBUnblockingPSStatus,
                                 EMPXUSBUnblockingPSStatusActive );
-				}
+		        }
+            if( IsUSBEvent && menuBar && menuBar->IsDisplayed() )
+            	{
+            	menuBar->StopDisplayingMenuBar();
+            	}
 
             if ( iContainer && iIsEmbedded && type == EMcMsgUSBMassStorageEnd )
             	{
@@ -5200,19 +5238,35 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             // flag used only in the case when songs are added incrementally
             iIsAddingToPlaylist = ETrue;
             iNumSongAddedToPlaylist = -1;
-            TMPXGeneralCategory category( EMPXNoCategory );
-            CMPXCommonListBoxArrayBase* array(
-                iContainer->ListBoxArray() );
-            const CMPXMedia& media = array->MediaL(
+      
+            CMPXCommonListBoxArrayBase* listboxArray(
+                   iContainer->ListBoxArray() );
+                
+            const CMPXMedia& currentMedia = listboxArray->MediaL(
                 iContainer->CurrentLbxItemIndex() );
-            category = media.ValueTObjectL<TMPXGeneralCategory>(
-                KMPXMediaGeneralCategory );
-            if ( category == EMPXSong )
+            
+            TMPXGeneralCategory mediaCategory( currentMedia.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory ));
+                 
+            const CMPXMedia& containerMedia = listboxArray->ContainerMedia();
+       
+            TMPXGeneralType containerType( EMPXNoType );
+            if ( containerMedia.IsSupported( KMPXMediaGeneralType ) )
+                 {
+                 containerType = containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType );
+                 }
+
+            TMPXGeneralCategory containerCategory( EMPXNoCategory );
+            if ( containerMedia.IsSupported( KMPXMediaGeneralCategory ) )
+                 {
+                 containerCategory = containerMedia.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory );
+                 } 
+                            
+            if ( mediaCategory == EMPXSong || (containerCategory == EMPXAlbum && containerType== EMPXItem) )
                 {
                 CMPXMedia* tracks = CMPXMedia::NewL();
                 CleanupStack::PushL( tracks );
 
-                MPX_TRAPD( err, PrepareMediaForSelectedItemsL( *tracks ) );
+                MPX_TRAPD( err, PrepareMediaForSelectedItemsL( *tracks, containerCategory, containerType ) );
                 if ( err == KErrNone )
                     {
                     TBool ret = EFalse;
@@ -5291,13 +5345,6 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     EMPXMediaGeneralType | EMPXMediaGeneralCategory ) );
                 CMPXMedia* criteria = CMPXMedia::NewL();
                 CleanupStack::PushL( criteria );
-                CMPXCommonListBoxArrayBase* listboxArray =
-                    iContainer->ListBoxArray();
-                const CMPXMedia& containerMedia =
-                    listboxArray->ContainerMedia();
-                TMPXGeneralCategory containerCategory(
-                    containerMedia.ValueTObjectL<TMPXGeneralCategory>(
-                    KMPXMediaGeneralCategory ) );
                 if ( containerCategory == EMPXArtist )
                     {
                     // artist/album level, need to specify artist ID in container ID
@@ -5306,8 +5353,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     criteria->SetTObjectValueL<TMPXItemId>(
                         KMPXMediaGeneralContainerId, containerId );
                     }
-                const CMPXMedia& currentMedia = listboxArray->MediaL(
-                    iContainer->CurrentLbxItemIndex() );
+            
                 TMPXItemId id(
                     currentMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
                 criteria->SetTObjectValueL<TMPXGeneralType>(
@@ -6000,7 +6046,7 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 		case EMPXAlbum:
 		case EMPXArtist:
 			{
-			// Album & Artist view
+			// Artists & Albums view
 			aMenuPane->SetItemDimmed( EMPXCmdGoToArtistAlbums, ETrue );
 			aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
 			break;
@@ -6040,6 +6086,8 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
     TInt currentItem( iContainer->CurrentLbxItemIndex() );
     TBool isListEmpty( currentItem < 0 );
     TInt selectionCount( 0 );
+	
+    iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
     if ( iSelectionIndexCache)
         {
         selectionCount = iSelectionIndexCache->Count();
@@ -6067,18 +6115,24 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
 
             // Always dim the find in hg implementation
             aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-            MMPXPlaybackUtility* pdPlaybackUtility;
-            pdPlaybackUtility = MMPXPlaybackUtility::UtilityL( TUid::Uid( KProgressDownloadUid ) );
-            MMPXSource* pdsource( pdPlaybackUtility->Source() );
-            MMPXSource* source( iPlaybackUtility->Source() );
-            TBool hideNowPlaying;
-            hideNowPlaying = ( (pdsource == 0)
-                           &&  (source == 0));
-            pdPlaybackUtility->Close();
-            if ( hideNowPlaying )
+
+			// Determine if we should hide "Goto now playing" option.
+            TBool hideNowPlaying(EFalse);
+			MMPXSource* source( iPlaybackUtility->Source() );
+            if ( source == 0 )
+				{
+				MMPXPlaybackUtility* pdPlaybackUtility;
+				pdPlaybackUtility = MMPXPlaybackUtility::UtilityL( TUid::Uid( KProgressDownloadUid ) );
+				hideNowPlaying = pdPlaybackUtility->Source() ? EFalse : ETrue;
+				pdPlaybackUtility->Close();
+				}
+            if (usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive)
                 {
-                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
                 }
+
+			aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, hideNowPlaying );
+
             if ( !isListEmpty )
                 {
                 const CMPXMedia& media = array->MediaL( currentItem );
@@ -6091,12 +6145,13 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
 #ifdef SINGLE_CLICK_INCLUDED
                 if ( containerType == EMPXGroup && containerCategory == EMPXAlbum )
                     {
-                    // album view
+                    // Artists & Albums view
                     switch ( category )
                         {
                         case EMPXAlbum:
                             {
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+                            TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+                            if ( landscapeOrientation )
                                 {
                                 aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
                                 aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
@@ -6105,18 +6160,32 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                                 aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
                                 aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
                                 aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
+                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );                            
                                 }
                             else
                                 {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
+                                if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+                                    {
+                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
+                                    }
+                                else
+                                    {
+                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
+                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
+                                    }
                                 }
                             break;
                             }
@@ -6229,12 +6298,21 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                                     }
                                 }
                             aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                            TInt trackCount (0);                   
+                            if(media.IsSupported(KMPXMediaGeneralCount))
+                                {
+                                trackCount = media.ValueTObjectL<TInt>( KMPXMediaGeneralCount );
+                                } 
+                            if( trackCount < 1 )
+                                {
+                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+                                }   
                             break;
                             }
 #ifdef SINGLE_CLICK_INCLUDED
                         case EMPXAlbum:
                             {
-                            // album contents view
+                            // Album > Tracks view
                             if ( iContainer->IsSelectedItemASong() )
                                 {                            
                                 if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )

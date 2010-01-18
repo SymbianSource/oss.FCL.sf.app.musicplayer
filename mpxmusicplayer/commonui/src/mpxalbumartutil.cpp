@@ -64,6 +64,7 @@ EXPORT_C CMPXAlbumArtUtil::~CMPXAlbumArtUtil()
     {
     if (iArtUtil)
         {
+		iArtUtil->CancelRequest();
         delete iArtUtil;
         }
     if(iFilename)
@@ -121,8 +122,16 @@ EXPORT_C void CMPXAlbumArtUtil::ExtractAlbumArtL(const CMPXMedia& aMedia,
     {
     MPX_DEBUG1("CMPXAlbumArtUtil::ExtractAlbumArtL(): Entering");
     MPX_DEBUG_THREAD("CMPXAlbumArtUtil::ExtractAlbumArtL()");
-    delete iArtUtil;
-    iArtUtil = NULL;
+    if(iFilename)
+        {  
+        delete iFilename;
+        iFilename = NULL;
+        } 
+    if ( iArtUtil )
+        {
+        delete iArtUtil;
+        iArtUtil = NULL;
+        }
     iArtUtil = CMPXImageUtil::NewL(aObs);
     iDisplayMode = aDisplayMode;
     iImageSize = aSize;
@@ -132,6 +141,7 @@ EXPORT_C void CMPXAlbumArtUtil::ExtractAlbumArtL(const CMPXMedia& aMedia,
         {
         if ( aMedia.ValueText( KMPXMediaMusicAlbumArtFileName ).Length() == 0)
             {
+            iReqId = 0;  
             User::Leave( KErrNotFound );
             }
         }
@@ -139,8 +149,6 @@ EXPORT_C void CMPXAlbumArtUtil::ExtractAlbumArtL(const CMPXMedia& aMedia,
     if ( aMedia.IsSupported( KMPXMediaGeneralUri ) &&
          aMedia.IsSupported( KMPXMediaMusicAlbumArtFileName ))
         {
-        delete iFilename;
-        iFilename = NULL;
         iFilename = aMedia.ValueText( KMPXMediaMusicAlbumArtFileName ).AllocL();
         if(aSize == iFullScreenImageSize)
             {
@@ -173,6 +181,12 @@ EXPORT_C void CMPXAlbumArtUtil::CancelRequest()
     if ( iArtUtil )
         {
         iArtUtil->CancelRequest();
+        delete iArtUtil;
+        iArtUtil = 0;
+        }
+	if ( iThumbnailManager && iReqId > 0 )
+        {
+         iThumbnailManager->CancelRequest(iReqId);
         }
     iReqId = 0;
     MPX_DEBUG1("CMPXAlbumArtUtil::CancelRequest(): Exiting");
@@ -203,7 +217,7 @@ HBufC8* CMPXAlbumArtUtil::ExtractBinaryMetaDataLC(const TDesC& aFilename,
         TPtrC data = metaCont.Field( aFieldId );
         if(data.Length()==0)
             {
-            iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );            
+            User::Leave( KErrNotFound );          
             }
         ret = MPXUser::Alloc8L(data);
 
@@ -258,12 +272,12 @@ void CMPXAlbumArtUtil::ThumbnailReady(
                 delete tempBitmap;
                 } 
             }
-        else
+        else if(iReqId == aId)
             {
             iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );
             }
         } 	
-    else
+    else if (iArtUtil && iFilename)
         {
         TRAPD( err,
             HBufC8* art( ExtractBinaryMetaDataLC(iFilename->Des(),EMetaDataJpeg ));
@@ -276,6 +290,7 @@ void CMPXAlbumArtUtil::ThumbnailReady(
             }  
         } 
 
+    iReqId = 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -302,6 +317,10 @@ void CMPXAlbumArtUtil::ExtractThumbnailL(
             {
             CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KMPXAlbumMimeType );
             TInt ret = NULL;
+            if(iThumbnailManager && iReqId >0)
+                {
+                iThumbnailManager->CancelRequest( iReqId );
+                }   
             TRAPD(err, iReqId = TInt (iThumbnailManager->GetThumbnailL( *source, (TAny*)ret)));
             if( err != KErrNone)
                 {

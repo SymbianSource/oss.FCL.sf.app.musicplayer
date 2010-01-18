@@ -1408,6 +1408,25 @@ TBool CMPXDbPlugin::DoOpenBrowsePlaylistL(
                 iDbHandler->GetSongsMatchingPlaylistL(aPath.Id (idIndex).iId2, aAttrs, aArray);
                 }
 
+
+             // Add "Shuffle" item
+            if (aArray->Count() > 2)
+                {
+                MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
+                        EMPXItem, EMPXCommand, 0, 0, 0, 1);
+                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems, aArray->Count()-2);
+
+				TInt pPath(0);
+                CMPXMedia* pMedia = aArray->AtL(0);
+				if (pMedia->IsSupported(KMPXMediaGeneralValue))
+					{
+					pPath = pMedia->ValueTObjectL<TInt>(KMPXMediaGeneralValue);
+					MPX_ASSERT(pPath);
+					}
+				//Update path to include the additional id.
+				((CMPXCollectionPath*)pPath)->InsertL(0,0);
+                }
+
             SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXPlaylist, aPath.Id(idIndex).iId2);
 
             // populate EMPXMediaGeneralNonPermissibleActions

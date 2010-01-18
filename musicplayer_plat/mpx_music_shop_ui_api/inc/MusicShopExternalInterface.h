@@ -36,7 +36,14 @@ class TMushopBrViewDnl
     {
     public: // member variable
         TBuf<KMaxUrlLength> iUrl;
+#if 1 // __ALR_MUSICSHOP_SUPPORT
+        TUint iConnectionMode;
+        TUint iConnection;
+        TUint iConfirmCellUsage;
+        TUint iConfirmRoaming;                        
+#else
         TUint iDefaultAccessPoint;
+#endif // __ALR_MUSICSHOP_SUPPORT
         TInt  iRskId;
     };
 

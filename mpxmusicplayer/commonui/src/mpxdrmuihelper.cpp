@@ -502,6 +502,7 @@ void CMPXDrmUiHelper::SilentRightsAvailable(
             TInt /*aOperationId*/,
             TInt /*aError*/ )
 	{
+    iRightsValid = ETrue;
     }
 
 // ----------------------------------------------------------------------------
@@ -512,6 +513,7 @@ void CMPXDrmUiHelper::RightsAvailable(
             TInt /*aOperationId*/,
             TInt /*aError*/ )
 	{
+    iRightsValid = ETrue;
 	}
 
 // ----------------------------------------------------------------------------

@@ -882,7 +882,7 @@ void CMPXMetadataEditorDialog::DynInitMenuPaneL(
         if ( ( IdOfFocusControl() == EMPXMetadataEditorDlgCtrlIdGenre ) ||
             ( IdOfFocusControl() == EMPXMetadataEditorDlgCtrlIdLibrary ) )
             {
-            aMenuPane->SetItemDimmed( EMPXCmdSongDetailsChange, EFalse );
+            aMenuPane->SetItemDimmed( EMPXCmdSongDetailsChange, ETrue );
             }
         else
             {
@@ -2498,7 +2498,7 @@ void CMPXMetadataEditorDialog::PostLayoutDynInitL()
     {
     MPX_FUNC( "CMPXMetadataEditorDialog::PostLayoutDynInitL" );
     CAknForm::PostLayoutDynInitL();
-    SetEditableL( ETrue );
+    SetEditableL( EFalse );
     }
 
 // -----------------------------------------------------------------------------

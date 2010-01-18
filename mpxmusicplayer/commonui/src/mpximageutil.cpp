@@ -240,6 +240,11 @@ void CMPXImageUtil::RunL()
         default: // some error
             {
             iState = EIdle;
+            if ( iBitmap )
+                {
+                delete iBitmap;
+                iBitmap = NULL;                        
+                }
             iObserver.ExtractAlbumArtCompleted(iBitmap,iStatus.Int());
             break;
             }

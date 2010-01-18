@@ -407,7 +407,7 @@ private:
      *        containing info for currently selected items used by playlist
      *        does not own this object
      */
-    void PrepareMediaForSelectedItemsL( CMPXMedia& aMedia );
+    void PrepareMediaForSelectedItemsL( CMPXMedia& aMedia, TMPXGeneralCategory aContainerCategory, TMPXGeneralType aContainerType );
 
     /**
      * Populates media object with information needed for save to

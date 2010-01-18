@@ -403,7 +403,8 @@ private: // data
     HBufC* iGoToMusicBuffer;
 
     CMCPHarvesterPublisherObserver* iHPObserver;
-    TBool iIsPublisherActive;
+    TBool iWidgetForeground;
+    TBool iWidgetActivated;
 
     HBufC* iInstanceId;
    

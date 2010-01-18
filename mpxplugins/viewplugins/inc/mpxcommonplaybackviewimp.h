@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  MPX common playback view implementation
-*  Version     : %version: da1mmcf#41.1.6.1.1.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: da1mmcf#41.1.6.1.1.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -656,7 +656,8 @@ protected:    // Data
     CMPXPSKeyWatcher*   iPSKeyWatcher;      // own
     CMPXCenRepWatcher*  iCRWatcher;         // own
     TInt                iFMTxFreqKHz;
-
+    TInt                iFmTxActivity;
+	
     // View utility.
     MMPXViewUtility* iViewUtility;
 

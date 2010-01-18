@@ -83,6 +83,7 @@ private:
 private: // data
     MApplicationMonitorObserver&  iObserver;
     RThread iThread; 
+    TUid iAppUid;
     };
 
 #endif // C_APPLICATIONMONITOR_H

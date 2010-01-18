@@ -656,7 +656,7 @@ void CMCPMusicPlayer::ActivateL()
         MPX_DEBUG1("CMCPMusicPlayer::ActivateL we are active now");
         
         iMHObserver->PublishTextL( this, EMusicWidgetDefaultText, KEmpty );
-        InstallGoToAlbumL(EMusicWidgetTrigger1);
+        InstallGoToNowPlayingL(EMusicWidgetTrigger1);
         InstallGoToLastPlayedL(EMusicMenuMusicInfoTrigger, EFalse);
         iMHObserver->PublishTextL(this, EMusicMenuMusicInfoLine1, 
                  KNowPlaying);

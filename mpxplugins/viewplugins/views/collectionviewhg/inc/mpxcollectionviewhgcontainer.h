@@ -767,6 +767,8 @@ private: // data member
     TBool                           iReady;
     TBool                           iIsEmbedded;
 
+    CAknPopupList* iDialog; // Album tracks dielog. owned.
+    
     THgScrollDirection iDirection;
     RArray<TBool> iThumbnailReqMap;
 

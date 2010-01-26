@@ -3503,7 +3503,10 @@ void CMPXCollectionViewHgImp::UpdateDatabaseFlagL(
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::UpdateDatabaseFlagL" );
     MPX_DEBUG3( "CMPXCollectionViewHgImp::UpdateDatabaseFlagL aFlag = 0x%x, aSet = %d", aFlag, aSet );
-    CMPXCommonListBoxArrayBase* array( iContainer->ListBoxArray() );
+    CMPXCommonListBoxArrayBase* array(0);
+    if (iContainer)
+    	array = iContainer->ListBoxArray();
+    	
     ASSERT( array );
 
     // set the item as invalid
@@ -4067,9 +4070,12 @@ void CMPXCollectionViewHgImp::DoIncrementalOpenL( TBool aShowWaitDlg )
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
     CleanupStack::PopAndDestroy( &attrs );
 
-    // Default empty text
-    iContainer->SetLbxEmptyTextL( KNullDesC );
-    iContainer->DrawDeferred();
+    if (iContainer)
+     {	 
+     // Default empty text
+     iContainer->SetLbxEmptyTextL( KNullDesC );
+     iContainer->DrawDeferred();
+     }
     iFirstIncrementalBatch = ETrue;
     }
 
@@ -5710,8 +5716,8 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     {
                     aCommand = EMPXCmdPlay;
                     }
-                if ( EPbStateNotInitialised == state ||
-                     EPbStateStopped == state )
+                if (iContainer && (EPbStateNotInitialised == state ||
+                     EPbStateStopped == state ))
                     {
                     // Needed to reset the status of iPreservedState
                     if ( EPbStateStopped == state )
@@ -6715,9 +6721,10 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                                 if ( array->IsItemBrokenLinkL( currentItem ) ||
                                     array->IsItemCorruptedL( currentItem ) )
                                     {
-                                aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
                                     aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
                                     aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue ); 
                                     }
                                 else // Show this option even when song is DRM protected
                                     {

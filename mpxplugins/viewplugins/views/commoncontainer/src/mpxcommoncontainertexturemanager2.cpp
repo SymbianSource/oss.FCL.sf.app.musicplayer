@@ -48,7 +48,10 @@ void CMPXCommonContainerTextureManager2::CreateTextureL(
     if ( iTextureMap.Find(aItemIndex) )
         {
         CFbsBitmap* const* item  = iTextureMap.Find(aItemIndex);
-        delete *item;
+        if(item)
+         {
+          delete *item;
+         }
         }
     iTextureMap.InsertL( aItemIndex, aBitmap );
     iTextureIndexMap.InsertL( (TInt32)aItemId, aItemIndex );

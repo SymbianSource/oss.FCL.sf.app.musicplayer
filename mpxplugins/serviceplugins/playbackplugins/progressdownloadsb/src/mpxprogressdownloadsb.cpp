@@ -972,137 +972,144 @@ void CMPXProgressDownloadSB::Event(
         case MStreamControlObserver::KStateChangedEvent:
             {
             MStreamControl* control1 = (MStreamControl*)(aControl);
-            MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[%d]",control1->GetState());
-
-            MStateChangedEvent* event = (MStateChangedEvent*)aEventObject;
-            switch( event->GetState())
+            if(aEventObject && control1)
                 {
-                case MStreamControl::INITIALIZED:
-                    MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[INITIALIZED]");
-                    if( event->GetErrorCode() == KErrNone && iState == EStateInitialising )
-                        {
-                        delete iDrmCustomCommand;
-                        iDrmCustomCommand = NULL;
-                        iDrmCustomCommand = (RMMFDRMCustomCommands*)iMStreamControl->CustomInterface(KUidInterfaceMMFDRMControl);
-
-                        if ( iDrmCustomCommand )
-                            {
-                            TInt drmCCErr = iDrmCustomCommand->DisableAutomaticIntent(ETrue);
-                            // TODO:
-                            // for wmdrm pdl, we need to let helix consume rights.
-                            // by calling ExecuteIntent() when playback completes.
-                            }
-                        iState = EStateInitialised;
-                        // Restore volume level
-                        TInt currentVol( 0 );
-                        MPX_TRAPD( volError, currentVol = iVolumeWatcher->CurrentValueL() );
-                        if ( volError == KErrNone )
-                            {
-                            SetVolume( currentVol );
-                            TBool mute( EFalse);
-                            MPX_TRAPD( muteError, mute = iMuteWatcher->CurrentValueL() );
-                            if ( muteError == KErrNone && mute )
-                                {
-                                SetMute(mute);
-                                }
-                            }
-                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPActive, ETrue, event->GetErrorCode());
-                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
-                        }
-                    else if ( event->GetErrorCode() == KErrEof ) // Playback Complete
-                        {
-                        MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[PlaybackComplete] errorcode=%d",event->GetErrorCode());
-                        if ( iDownloadState == EPbDlStateDownloadCompleted && !iFileSaved )
-                            {
-                            if ( event->GetErrorCode() == KErrEof )
-                                {
-                                ConsumeRights( ContentAccess::EStop );
-                                }
-                            else
-                                {
-                                ConsumeRights( ContentAccess::EPause );
-                                }
-                            MoveDownloadedFileToMusicFolderL();
-                            }
-                        }
-                    else if ( event->GetErrorCode() == KErrDied || event->GetErrorCode() == KErrInUse ||
-                            event->GetErrorCode() == KErrAccessDenied )
-                        {
-                        iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
-                                                 0, event->GetErrorCode() );
-                        }
-                    else
-                        {
-                        //Todo: Error cases such as no rights to play.
-                        iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlayComplete, 0, event->GetErrorCode());
-                        }
-                    break;
-                case MStreamControl::CLOSED:
-                    MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Closed]");
-           //         if ( iDownloadState == EPbDlStateDownloadCompleted )
-           //             {
-           //             MoveDownloadedFileToMusicFolderL();	//The file should be moved somewhere else.
-           //             }
-                    iErrorOfStreamClosedEvent = event->GetErrorCode();
-                    iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPClosed, 0, event->GetErrorCode() );
-                    break;
-                case MStreamControl::PRIMED:
-                    MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Primed]");
-                    TInt64 duration;
-                    if (iMStreamControl->GetDuration(duration) != KErrUnknown )
-                        {
-                        MPX_DEBUG2("CMPXProgressDownloadSB::Event:KDurationChangedEvent Duration = %d", I64INT(duration));
-                        iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDurationChanged, duration / KPbMilliMultiplier, KErrNone);
-                        }
-                    break;
-                case MStreamControl::EXECUTING://Playing
+                MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[%d]",control1->GetState());
+                MStateChangedEvent* event = (MStateChangedEvent*)aEventObject;
+                switch(event->GetState())
                     {
-                    MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Playing]");
-                    iStreamBuffering = EFalse;
-                    iPlaying = ETrue;
-                 // Send the Started-message here since View may not have been initialized earlier.
-                	TUint expectedFileSize = 0;
-                	iMAudioProgDLSource->GetExpectedFileSize(expectedFileSize);
-                	iDownloadSize = expectedFileSize;
-                	iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDownloadStarted,
-                	                         iDownloadSize,
-                	                         KErrNone );
+                    case MStreamControl::INITIALIZED:
+                        MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[INITIALIZED]");
+                        if( event->GetErrorCode() == KErrNone && iState == EStateInitialising )
+                            {
+                            delete iDrmCustomCommand;
+                            iDrmCustomCommand = NULL;
+                            iDrmCustomCommand = (RMMFDRMCustomCommands*)iMStreamControl->CustomInterface(KUidInterfaceMMFDRMControl);
 
-                    if ( iDownloadState == EPbDlStateBuffering )
+                            if ( iDrmCustomCommand )
+                                {
+                                TInt drmCCErr = iDrmCustomCommand->DisableAutomaticIntent(ETrue);
+                                // TODO:
+                                // for wmdrm pdl, we need to let helix consume rights.
+                                // by calling ExecuteIntent() when playback completes.
+                                }
+                            iState = EStateInitialised;
+                            // Restore volume level
+                            TInt currentVol( 0 );
+                            MPX_TRAPD( volError, currentVol = iVolumeWatcher->CurrentValueL() );
+                            if ( volError == KErrNone )
+                                {
+                                SetVolume( currentVol );
+                                TBool mute( EFalse);
+                                MPX_TRAPD( muteError, mute = iMuteWatcher->CurrentValueL() );
+                                if ( muteError == KErrNone && mute )
+                                    {
+                                    SetMute(mute);
+                                    }
+                                }
+                            iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPActive, ETrue, event->GetErrorCode());
+                            iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
+                            }
+                        else if ( event->GetErrorCode() == KErrEof ) // Playback Complete
+                            {
+                            MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[PlaybackComplete] errorcode=%d",event->GetErrorCode());
+                            if ( iDownloadState == EPbDlStateDownloadCompleted && !iFileSaved )
+                                {
+                                if ( event->GetErrorCode() == KErrEof )
+                                    {
+                                    ConsumeRights( ContentAccess::EStop );
+                                    }
+                                else
+                                    {
+                                    ConsumeRights( ContentAccess::EPause );
+                                    }
+                                MoveDownloadedFileToMusicFolderL();
+                                }
+                            }
+                        else if ( event->GetErrorCode() == KErrDied || event->GetErrorCode() == KErrInUse ||
+                                event->GetErrorCode() == KErrAccessDenied )
+                            {
+                            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
+                                    0, event->GetErrorCode() );
+                            }
+                        else
+                            {
+                            //Todo: Error cases such as no rights to play.
+                            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlayComplete, 0, event->GetErrorCode());
+                            }
+                        break;
+                    case MStreamControl::CLOSED:
+                        MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Closed]");
+                        //         if ( iDownloadState == EPbDlStateDownloadCompleted )
+                        //             {
+                        //             MoveDownloadedFileToMusicFolderL();	//The file should be moved somewhere else.
+                        //             }
+                        iErrorOfStreamClosedEvent = event->GetErrorCode();
+                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPClosed, 0, event->GetErrorCode() );
+                        break;
+                    case MStreamControl::PRIMED:
+                        MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Primed]");
+                        TInt64 duration;
+                        if (iMStreamControl->GetDuration(duration) != KErrUnknown )
+                            {
+                            MPX_DEBUG2("CMPXProgressDownloadSB::Event:KDurationChangedEvent Duration = %d", I64INT(duration));
+                            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDurationChanged, duration / KPbMilliMultiplier, KErrNone);
+                            }
+                        break;
+                    case MStreamControl::EXECUTING://Playing
                         {
-                        iDownloadState = EPbDlStateDownloading;
+                        MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Playing]");
+                        iStreamBuffering = EFalse;
+                        iPlaying = ETrue;
+                        // Send the Started-message here since View may not have been initialized earlier.
+                        TUint expectedFileSize = 0;
+                        iMAudioProgDLSource->GetExpectedFileSize(expectedFileSize);
+                        iDownloadSize = expectedFileSize;
+                        iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDownloadStarted,
+                                iDownloadSize,
+                                KErrNone );
+
+                        if ( iDownloadState == EPbDlStateBuffering )
+                            {
+                            iDownloadState = EPbDlStateDownloading;
+                            iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPDownloadStateChanged, iDownloadState, KErrNone);
+                            }
+                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPlaying, 0, event->GetErrorCode());
+                        TInt64 duration;
+                        if (iMStreamControl->GetDuration(duration) != KErrUnknown )
+                            {
+                            MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged Duration = %d", I64INT(duration));
+                            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDurationChanged, duration / KPbMilliMultiplier, KErrNone);
+                            }
+                        }
+                        break;
+                    case MStreamControl::BUFFERING:
+                        MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[Buffering] errorcode= %d",event->GetErrorCode());
+                        iStreamBuffering = ETrue;
+                        if ( iDownloadState != EPbDlStateDownloadPaused ||
+                                iDownloadState != EPbDlStateDownloadCanceled ||
+                                iDownloadState != EPbDlStateDownloadError ||
+                                iDownloadState != EPbDlStateNotDownloading
+                        )
+                            {
+                            iDownloadState = EPbDlStateBuffering;
+                            }
+                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
                         iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPDownloadStateChanged, iDownloadState, KErrNone);
-                        }
-                    iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPlaying, 0, event->GetErrorCode());
-                    TInt64 duration;
-                    if (iMStreamControl->GetDuration(duration) != KErrUnknown )
-                        {
-                        MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged Duration = %d", I64INT(duration));
-                        iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDurationChanged, duration / KPbMilliMultiplier, KErrNone);
-                        }
+                        break;
+                    case MStreamControl::PAUSED:
+                        MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Paused]");
+                        iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
+                        break;
+                    default:
+                        break;
                     }
-                    break;
-                case MStreamControl::BUFFERING:
-                    MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[Buffering] errorcode= %d",event->GetErrorCode());
-                    iStreamBuffering = ETrue;
-                    if ( iDownloadState != EPbDlStateDownloadPaused ||
-                         iDownloadState != EPbDlStateDownloadCanceled ||
-                         iDownloadState != EPbDlStateDownloadError ||
-                         iDownloadState != EPbDlStateNotDownloading
-                         )
-                        {
-                        iDownloadState = EPbDlStateBuffering;
-                        }
-                    iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
-                    iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPDownloadStateChanged, iDownloadState, KErrNone);
-                    break;
-                case MStreamControl::PAUSED:
-                    MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged[Paused]");
-                    iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, event->GetErrorCode());
-                    break;
-                default:
-                    break;
                 }
+            else
+                {
+                MPX_DEBUG1("CMPXProgressDownloadSB::Event:EStateChanged aEventObject is KNullDesC");
+                MPX_DEBUG1(" Code should not reach here as aEventObject is NULL");
+                }      
             }
             break;
 
@@ -1119,6 +1126,8 @@ void CMPXProgressDownloadSB::Event(
         case MSourceControlObserver::KDownloadStatusChangedEvent:
             {
             MProgDLSource* control1 = (MProgDLSource*)(aControl);
+            if( control1) 
+             {
             MPX_DEBUG2("CMPXProgressDownloadSB::Event:DownloadStatus[%d]",control1->GetDownloadStatus());
             switch ( control1->GetDownloadStatus() )
                 {
@@ -1210,13 +1219,20 @@ void CMPXProgressDownloadSB::Event(
                 default:
                   break;
                 }
+             }
+             else
+                {
+                MPX_DEBUG1("CMPXProgressDownloadSB::Event:DownloadStatus control1 is KNullDesC");
+				MPX_DEBUG1("Code should not reach here, as control1 is NULL"); 
+                }
             }
             break;
 
         case MSourceControlObserver::KFileMoveCompleteEvent:
             {
             MPX_DEBUG1("CMPXProgressDownloadSB::Event:KFileMoveCompleteEvent");
-
+            if( aEventObject)
+             {            
             MErrorCode* errorObj = (MErrorCode*)aEventObject;
             TInt fileMoveError = errorObj->GetErrorCode();
 
@@ -1248,6 +1264,12 @@ void CMPXProgressDownloadSB::Event(
                 {
                 iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPDownloadFileMoved, (TInt)iPdPath, KErrNone);
                 }
+              }
+            else
+             {
+             	 MPX_DEBUG1("CMPXProgressDownloadSB::Event:KFileMoveCompleteEvent aEventObject is KNullDesC");
+               MPX_DEBUG1(" Code should not reach here as aEventObject is NULL");
+             }    
             break;
             }
         case MSourceControlObserver::KPercentageDownloadedChangedEvent:

@@ -3762,7 +3762,7 @@ void CMPXAppUi::HandleCommandL(
                 MPXTlsHelper::SetFilePath( savedFile );
                 }
 
-            if ( !abort && !aiwExecuted )
+            if ( !abort && !aiwExecuted && iView )
                 {
                 if ( aCommand == EMPXCmdSaveForUseAsRingtone )
                     {

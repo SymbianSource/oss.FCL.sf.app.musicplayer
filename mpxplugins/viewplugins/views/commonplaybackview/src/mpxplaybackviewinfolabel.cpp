@@ -148,6 +148,7 @@ void CMPXPlaybackViewInfoLabel::StartMarquee()
     if ( iMarquee )
         {
         TBool need = NeedToScroll();
+        iMarquee->Stop();
         if ( need && !iMarquee->IsMarqueeOn() )
             {
             iMarquee->Reset();

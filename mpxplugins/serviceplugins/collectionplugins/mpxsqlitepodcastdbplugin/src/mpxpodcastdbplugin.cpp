@@ -2722,8 +2722,11 @@ TBool CMPXPodcastDbPlugin::DoSetAsyncL()
         }
     else // Single item
         {
-        visibleChange = iDbHandler->UpdateEpisodeL(*task, msgArray);
-        done = ETrue;
+        if(iDbHandler)
+            {		
+            visibleChange = iDbHandler->UpdateEpisodeL(*task, msgArray);
+            done = ETrue;
+            }
         }
     iActiveTask->SetVisibleChange(visibleChange);
     return done;
@@ -2790,7 +2793,7 @@ void CMPXPodcastDbPlugin::DoHandleChangeL(
     MPX_FUNC("CMPXPodcastDbPlugin::DoHandleChangeL");
 
     TMPXCommandId cmdId = iActiveTask->GetTask();
-    if((iActiveTask->GetVisibleChange() | CMPXDbActiveTask::EAllVisible)
+    if((iActiveTask->GetVisibleChange() & CMPXDbActiveTask::EAllVisible)
         && (cmdId == KMPXCommandIdCollectionSet ||
             cmdId == KMPXCommandIdCollectionAdd ||
             cmdId == KMPXCommandIdCollectionRemove ||

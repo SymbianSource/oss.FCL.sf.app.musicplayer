@@ -2720,7 +2720,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleForegroundEventL( TBool aForegrou
             }
 
     // to stop seek when music player goes to background.
-    if ( !aForeground && iIsffButtonPressed )
+    if ( iContainer && !aForeground && iIsffButtonPressed )
         {
         iIsffButtonPressed = EFalse;
         iContainer->RestoreButtons( iPlaybackState );

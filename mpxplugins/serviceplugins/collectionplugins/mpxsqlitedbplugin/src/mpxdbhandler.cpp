@@ -788,7 +788,7 @@ void CMPXDbHandler::GetAlbumsMatchingArtistL(
             {
             MPX_DEBUG1("    EMPXMediaGeneralCount");
             
-            attributes.Append(TMPXAttribute(KMPXMediaIdGeneral, attributeId & !EMPXMediaGeneralCount));
+            attributes.Append(TMPXAttribute(KMPXMediaIdGeneral, attributeId & ~EMPXMediaGeneralCount));
                        
             tryGetSongCount = ETrue;
             break;

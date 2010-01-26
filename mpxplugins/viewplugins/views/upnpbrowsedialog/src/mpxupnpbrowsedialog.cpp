@@ -207,60 +207,68 @@ EXPORT_C TInt CMPXUPnPBrowseDialog::ExecuteLD(TInt aPlayerUid)
                         MPX_DEBUG2( "CMPXUPnPBrowseDialog::ExecuteLD() selecDifferentSubPlayer %d", selecDifferentSubPlayer);
                         }
 
-                    MMPXSource* source = iPlaybackUtility->Source();
-                    CMPXCollectionPlaylist* playlist = NULL;
-                    if ( source )
+                    if(iPlaybackUtility)
                         {
-                        playlist = source->PlaylistL();
+                        MMPXSource* source = iPlaybackUtility->Source();
+                        CMPXCollectionPlaylist* playlist = NULL;
+                        if ( source )
+                            {
+                            playlist = source->PlaylistL();
+                            if ( playlist )
+                                {
+                                CleanupStack::PushL( playlist );
+                                }
+                            }
+
+                        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
+                        // user selects a different remote player
+                        if ( iCurrentlySelectedSubPlayerName &&
+                                selecDifferentSubPlayer )
+                            {
+                            // need to clean up the current plugin
+                            TRAP_IGNORE( manager.ClearSelectPlayersL() );
+                            }
+
+                        MPX_DEBUG3( "CMPXUPnPBrowseDialog::ExecuteLD() before call to manager.SelectSubPlayerL(%d, %d)", iPlayerUid, currentItemIndex );
+                        MPX_TRAP( errorSelectSubPlayer,
+                                manager.SelectSubPlayerL( TUid::Uid(iPlayerUid),
+                                        currentItemIndex ) );
+
+                        MPX_DEBUG2( "CMPXUPnPBrowseDialog::ExecuteLD() after manager.SelectSubPlayerL()", errorSelectSubPlayer );
+                        if ( errorSelectSubPlayer == KErrNone )
+                            {
+                            okToExit = ETrue;
+
+                            if ( selecDifferentSubPlayer )
+                                {
+                                selectedSubplayerIndex = currentItemIndex;
+                                }
+                            else // subplayer selected is the same as the current one
+                                {
+                                selectedSubplayerIndex = KErrInUse;
+                                }
+                            }
+                        else
+                            {
+                            TRAP_IGNORE( manager.ClearSelectPlayersL() );
+                            if ( playlist )
+                                {
+                                iPlaybackUtility->InitL( *playlist, EFalse );
+                                }
+
+                            DisplayErrorNoteL( R_UPNP_ERROR_PLAYER_UNAVAILABLE );
+                            }
+
                         if ( playlist )
                             {
-                            CleanupStack::PushL( playlist );
-                            }
-                        }
-
-                    MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
-                    // user selects a different remote player
-                    if ( iCurrentlySelectedSubPlayerName &&
-                         selecDifferentSubPlayer )
-                        {
-                        // need to clean up the current plugin
-                        TRAP_IGNORE( manager.ClearSelectPlayersL() );
-                        }
-
-                    MPX_DEBUG3( "CMPXUPnPBrowseDialog::ExecuteLD() before call to manager.SelectSubPlayerL(%d, %d)", iPlayerUid, currentItemIndex );
-                    MPX_TRAP( errorSelectSubPlayer,
-                          manager.SelectSubPlayerL( TUid::Uid(iPlayerUid),
-                                                    currentItemIndex ) );
-
-                    MPX_DEBUG2( "CMPXUPnPBrowseDialog::ExecuteLD() after manager.SelectSubPlayerL()", errorSelectSubPlayer );
-                    if ( errorSelectSubPlayer == KErrNone )
-                        {
-                        okToExit = ETrue;
-
-                        if ( selecDifferentSubPlayer )
-                            {
-                            selectedSubplayerIndex = currentItemIndex;
-                            }
-                        else // subplayer selected is the same as the current one
-                            {
-                            selectedSubplayerIndex = KErrInUse;
+                            CleanupStack::PopAndDestroy( playlist );
                             }
                         }
                     else
                         {
-                        TRAP_IGNORE( manager.ClearSelectPlayersL() );
-                        if ( playlist )
-                            {
-                            iPlaybackUtility->InitL( *playlist, EFalse );
-                            }
-
-                        DisplayErrorNoteL( R_UPNP_ERROR_PLAYER_UNAVAILABLE );
-                        }
-
-                    if ( playlist )
-                        {
-                        CleanupStack::PopAndDestroy( playlist );
-                        }
+                        // Should not reach here  
+                        MPX_DEBUG1( "CMPXUPnPBrowseDialog::ExecuteLD()playbackutility is NULL" );
+                        }     
                     } // if ( isSelectedItemASubplayerName )
                 } // check for boundaries
             else
@@ -285,7 +293,10 @@ EXPORT_C TInt CMPXUPnPBrowseDialog::ExecuteLD(TInt aPlayerUid)
                 cmd->SetTObjectValueL<TBool>(KMPXCommandGeneralDoSync, ETrue);
                 cmd->SetTObjectValueL<TInt>(KMPXCommandPlaybackGeneralType, EPbCmdUnloadNonActivePlugin);
                 cmd->SetTObjectValueL<TInt>(KMPXCommandPlaybackGeneralData, aPlayerUid);
-                iPlaybackUtility->CommandL(*cmd, NULL);
+                if(iPlaybackUtility)
+                 {
+                  iPlaybackUtility->CommandL(*cmd, NULL);
+                 } 
                 CleanupStack::PopAndDestroy(cmd);
 
                 okToExit = ETrue;
@@ -635,31 +646,38 @@ void CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerNameL()
         delete iCurrentlySelectedSubPlayerName;
         iCurrentlySelectedSubPlayerName = NULL;
         }
-
-    MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
-    TMPXPlaybackPlayerType playerType;
-    TInt currentlyUsedSubPlayer;
-    MPX_DEBUG1( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() before call to manager.GetSelectionL()" );
-    MPX_TRAPD( errorSelectSubPlayer, manager.GetSelectionL( playerType,
-                                                        iCurrentlyUsedPlayer,
-                                                        currentlyUsedSubPlayer,
-                                                        iCurrentlySelectedSubPlayerName));
-    MPX_DEBUG4( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL(%d, %d, %d)",
-                                                        playerType,
-                                                        iCurrentlyUsedPlayer.iUid,
-                                                        currentlyUsedSubPlayer );
-    if (iCurrentlySelectedSubPlayerName)
+    if(  iPlaybackUtility)
         {
-        MPX_DEBUG2( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL(%S)",
-                                                        iCurrentlySelectedSubPlayerName );
+        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
+        TMPXPlaybackPlayerType playerType;
+        TInt currentlyUsedSubPlayer;
+        MPX_DEBUG1( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() before call to manager.GetSelectionL()" );
+        MPX_TRAPD( errorSelectSubPlayer, manager.GetSelectionL( playerType,
+                iCurrentlyUsedPlayer,
+                currentlyUsedSubPlayer,
+                iCurrentlySelectedSubPlayerName));
+        MPX_DEBUG4( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL(%d, %d, %d)",
+                playerType,
+                iCurrentlyUsedPlayer.iUid,
+                currentlyUsedSubPlayer );
+        if (iCurrentlySelectedSubPlayerName)
+            {
+            MPX_DEBUG2( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL(%S)",
+                    iCurrentlySelectedSubPlayerName );
+            }
+        if ( errorSelectSubPlayer != KErrNone  && iCurrentlySelectedSubPlayerName )
+            {
+            MPX_DEBUG2( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL() error %d",
+                    errorSelectSubPlayer );
+            delete iCurrentlySelectedSubPlayerName;
+            iCurrentlySelectedSubPlayerName = NULL;
+            }
         }
-    if ( errorSelectSubPlayer != KErrNone  && iCurrentlySelectedSubPlayerName )
+    else
         {
-        MPX_DEBUG2( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() after call to manager.GetSelectionL() error %d",
-                                                        errorSelectSubPlayer );
-        delete iCurrentlySelectedSubPlayerName;
-        iCurrentlySelectedSubPlayerName = NULL;
-        }
+        //Should not reach here
+        MPX_DEBUG1( "CMPXUPnPBrowseDialog::RetrieveCurrentlySelectSubplayerName() iPlaybackUtility is NULL" );	
+        } 
     }
 
 // ---------------------------------------------------------------------------

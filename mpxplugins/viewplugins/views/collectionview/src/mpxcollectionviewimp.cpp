@@ -959,7 +959,7 @@ void CMPXCollectionViewImp::DeleteSelectedItemsL(TInt aCommand)
                 iIsWaitNoteCanceled = EFalse;
               
             
-            if(iContainer->Common()->FindBoxVisibility())
+            if( iContainer && iContainer->Common()->FindBoxVisibility())
                 {
                 iContainer->Common()->EnableFindBox(EFalse);
                 }
@@ -3355,7 +3355,9 @@ void CMPXCollectionViewImp::UpdateDatabaseFlagL(
     {
     MPX_FUNC( "CMPXCollectionViewImp::UpdateDatabaseFlagL" );
     MPX_DEBUG3( "CMPXCollectionViewImp::UpdateDatabaseFlagL aFlag = 0x%x, aSet = %d", aFlag, aSet );
-    CMPXCommonListBoxArrayBase* array( iContainer->Common()->ListBoxArray() );
+    CMPXCommonListBoxArrayBase* array(0);
+    if (iContainer)
+    	array = iContainer->Common()->ListBoxArray();
     ASSERT( array );
 
     // set the item as invalid
@@ -3898,9 +3900,12 @@ void CMPXCollectionViewImp::DoIncrementalOpenL( TBool aShowWaitDlg )
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
     CleanupStack::PopAndDestroy( &attrs );
 
+    if (iContainer)
+     {	 
     // Default empty text
     iContainer->Common()->SetLbxEmptyTextL( KNullDesC );
     iContainer->Common()->CoeControl()->DrawDeferred();
+      }
     iFirstIncrementalBatch = ETrue;
     }
 
@@ -5465,8 +5470,8 @@ void CMPXCollectionViewImp::HandleCommandL( TInt aCommand )
                     {
                     aCommand = EMPXCmdPlay;
                     }
-                if ( EPbStateNotInitialised == state ||
-                     EPbStateStopped == state )
+                if (iContainer && (EPbStateNotInitialised == state ||
+                     EPbStateStopped == state ))
                     {
                     // Needed to reset the status of iPreservedState
                     if ( EPbStateStopped == state )

@@ -732,6 +732,14 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             }
         else if ( aType == KEikDynamicLayoutVariantSwitch )
             {
+            if ( iCurrentViewType == EMPXViewCoverFlow )
+                {
+                if ( iDialog ) 
+                    {
+                    iDialog->CancelPopup();
+                    iDialog = NULL;
+                    }                
+                }
             if( iCurrentViewType == EMPXViewTBone )
                 {
 				iCollectionUtility->Collection().BackL();
@@ -1479,6 +1487,7 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
     if( iContext == EContextGroupAlbum ||
         iContext == EContextGroupArtist ||
         iContext == EContextGroupSong ||
+        iContext == EContextItemPlaylist ||
         iContext == EContextGroupGenre )
         {
         iListWidget->EnableScrollBufferL(*this, KMPXListBufferSize, KMPXListBufferSize/4);
@@ -4171,14 +4180,14 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
     CAknSinglePopupMenuStyleListBox* listBox = new ( ELeave ) CAknSinglePopupMenuStyleListBox;
     CleanupStack::PushL( listBox );
 
-    CAknPopupList* dialog = CAknPopupList::NewL(listBox, R_MPX_COLLECTION_ALBUMSONGS_LIST_CBA,
+    iDialog = CAknPopupList::NewL(listBox, R_MPX_COLLECTION_ALBUMSONGS_LIST_CBA,
             AknPopupLayouts::EDynMenuWindow );
 
-	CleanupStack::PushL( dialog );
+	CleanupStack::PushL( iDialog );
 
-    listBox->ConstructL( dialog,
+    listBox->ConstructL( iDialog,
             EAknListBoxSelectionList | EAknListBoxScrollBarSizeExcluded  );
-	CleanupStack::Pop( dialog );
+	
 
     listBox->CreateScrollBarFrameL( ETrue );
     listBox->ScrollBarFrame()->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
@@ -4190,7 +4199,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
         const TDesC& album = iSelectedMediaInAlbumView->ValueText( KMPXMediaMusicAlbum );
             if ( album.Compare( KNullDesC ) != 0 )
             {
-            dialog->SetTitleL( album );
+            iDialog->SetTitleL( album );
             }
         }
 
@@ -4227,10 +4236,11 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
     CTextListBoxModel* model = listBox->Model();
     model->SetItemTextArray( songList );
     model->SetOwnershipType( ELbmOwnsItemArray );
-    TBool play = dialog->ExecuteLD();
-    TInt index = listBox->CurrentItemIndex();
+    TBool play = iDialog->ExecuteLD();
+    CleanupStack::Pop( iDialog );
     if( play )
         {
+        TInt index = listBox->CurrentItemIndex();
         // If item in list was opened, we only play the selected one.
         SaveSelectedAlbumItemL(iSelectedAlbumIndex);
         // Open the selected song of album

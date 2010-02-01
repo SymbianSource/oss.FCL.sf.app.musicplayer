@@ -576,7 +576,7 @@ void CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata(
     TMediaAttributeIter& aAttributeIter )
     {
     MPX_FUNC( "CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata" );
-    const TInt KMaxMediaAttrLen = 50;   // Replace with suitable value
+    const TInt KMaxMediaAttrLen = 300;  // >110 is required for AVRCP fragmentation
     TBuf8<KMaxMediaAttrLen> attrBuf;
     TMediaAttributeId attrId;
     aAttributeIter.Start();
@@ -650,9 +650,15 @@ void CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata(
             }
         if( detail )
             {
-            if( CnvUtfConverter::ConvertFromUnicodeToUtf8( attrBuf, *detail ) )
+            const TInt returnValue = CnvUtfConverter::ConvertFromUnicodeToUtf8( attrBuf, *detail );
+            if ( returnValue == CnvUtfConverter::EErrorIllFormedInput)
                 {
-                attrBuf.Zero();     // Check if this generates the right response
+                MPX_DEBUG1( "CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata - Illformed string, sending zero length response" );
+                attrBuf.Zero();
+                }
+            else if ( returnValue > 0 )
+                {
+                MPX_DEBUG1( "CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata - Could not convert whole string, sending converted fragment" );    
                 }
             }
         if( val )

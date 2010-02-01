@@ -6515,6 +6515,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                 aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
                 }
             break;
             }

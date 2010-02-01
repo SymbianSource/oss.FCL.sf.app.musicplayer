@@ -523,6 +523,7 @@ void CMPXPodcastPlaybackViewImp::UpdateToolbar()
                 CMPXCollectionPlaylist* playlist = s->PlaylistL();
                 if ( playlist )
                     {
+                    CleanupStack::PushL( playlist );
                     if ( playlist->Count() > 0 && pausePlayControl )
                         {
                         TMPXPlaybackState state = iPlaybackUtility->StateL();
@@ -535,8 +536,8 @@ void CMPXPodcastPlaybackViewImp::UpdateToolbar()
                            pausePlayControl->SetCurrentState(1, ETrue);
                            }
                         }
+                    CleanupStack::PopAndDestroy( playlist );
                     }
-                delete playlist;
                 }
             }
         }

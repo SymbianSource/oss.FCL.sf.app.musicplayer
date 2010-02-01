@@ -682,6 +682,12 @@ void CMPXController::DoHandleBroadcastMsgL( TInt aEvent )
             }
         case EMcMsgUSBMassStorageStart:
             {
+            //Sometimes, this message will be received more than 1 time with usb plugin once.
+            //Just handle the first one. And only this message has such abnormal behaviour.
+            if ( iCurSystemEvent == EMcMsgUSBMassStorageStart )
+                {                
+                break;
+                }
             MPX_DEBUG1("CMPXController::DoHandleBroadcastMsg - EMcMsgUSBMassStorageStart");
             
             // Close playback framework and start wait note

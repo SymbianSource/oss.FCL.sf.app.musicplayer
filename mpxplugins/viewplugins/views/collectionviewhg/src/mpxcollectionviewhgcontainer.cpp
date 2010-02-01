@@ -1415,7 +1415,7 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
             {
             iListWidget->ResizeL( aCount );
             ProvideDataWithoutThumbnailsL(aMediaArray);
-            iListWidget->SetSelectedIndex( CurrentLbxItemIndex() );
+            iListWidget->SetSelectedIndex( index );
             }
         else
             {
@@ -1426,13 +1426,12 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
         {
         // In case of mediawall components we switch to different view type if orientation changes
         // so there is no need to set new client rect for mediawall.
-
+        TInt index = iMediaWall->SelectedIndex();
         iMediaWall->Reset();
         if ( aCount )
             {
             iMediaWall->ResizeL( aCount );
             ProvideDataWithoutThumbnailsMwL(aMediaArray);
-            TInt index = CurrentLbxItemIndex();
             index = index >= 0 ? index : 0;
             iMediaWall->SetSelectedIndex( index );
             OpenAlbumL( index );
@@ -1470,6 +1469,7 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
         iListWidget->ClearFlags( CHgScroller::EHgScrollerKeyMarkingDisabled );
         iListWidget->SetFocus(ETrue);
         iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerLetterStripLite );
+        iListWidget->DrawableWindow()->SetOrdinalPosition( -1 );
         ProvideDataWithoutThumbnailsL(aMediaArray);
         }
     else
@@ -1987,6 +1987,7 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex, CCoeControl* aCont
     if( iContext == EContextGroupAlbum )
         {
         iAlbumIndex = aIndex;
+        iSelectedAlbumIndex = aIndex;
         SaveSelectedAlbumItemL(aIndex);
         }
 
@@ -3598,7 +3599,7 @@ void CMPXCollectionViewHgContainer::TNReadyL(TInt aError, CFbsBitmap* aBitmap, C
     else
         {
         //no albumart supported
-        SetDefaultIconL(aIndex);
+        iThumbnailReqMap[aIndex] = ETrue;
         RefreshL(aIndex);
         }
     }

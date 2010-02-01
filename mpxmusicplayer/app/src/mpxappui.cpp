@@ -2640,20 +2640,22 @@ void CMPXAppUi::DoHandleCollectionMessageL( const CMPXMessage& aMessage )
                             {
                             CMPXCollectionPlaylist* pl = s->PlaylistL();
                             TInt browsePathCount = cPath->Count();
-
-                            if (pl &&
-                                browsePathCount > 0) // don't set index since this playlist
-                                                     // no longer contains any items, this can
-                                                     // happen in the case of autoplaylists and cause
-                                                     // a hang
+                            													
+                            if( pl )
                                 {
                                 CleanupStack::PushL( pl );
-                                TInt playlistIndex = pl->Path().Index();
-                                if(playlistIndex < browsePathCount)
+                                if( browsePathCount > 0 ) // don't set index since this playlist
+                                                          // no longer contains any items, this can
+                                                          // happen in the case of autoplaylists and cause
+                                                          // a hang
                                     {
-                                    iCollectionUtility->Collection().CommandL(EMcCmdSelect,
-                                                                              playlistIndex);
-                                    }
+                                    TInt playlistIndex = pl->Path().Index();
+                                    if(playlistIndex < browsePathCount)
+                                        {
+                                        iCollectionUtility->Collection().CommandL(EMcCmdSelect,
+                                                                                  playlistIndex);
+                                        }
+                                    }                                
                                 CleanupStack::PopAndDestroy( pl );
                                 }
                             }
@@ -2760,18 +2762,20 @@ void CMPXAppUi::DoHandleCollectionMessageL( const CMPXMessage& aMessage )
                     //
                     // Make sure we are the same level and the same container before making index call
                     //
-                    if (pl &&
-                        browsePathCount > 0 &&
-                        levels == pl->Path().Levels() &&
-                        cPath->Id(levels-2) == pl->Path().Id(levels-2) )
-                        {
+                    if( pl )
+                        {                    	
                         CleanupStack::PushL( pl );
-                        TInt playlistIndex = pl->Path().Index();
-
-                        if(playlistIndex < browsePathCount)
+                        if ( browsePathCount > 0 &&
+                            levels == pl->Path().Levels() &&
+                            cPath->Id(levels-2) == pl->Path().Id(levels-2) )
                             {
-                            iCollectionUtility->Collection().CommandL(EMcCmdSelect,
-                                                                     playlistIndex);
+                            TInt playlistIndex = pl->Path().Index();
+
+                            if(playlistIndex < browsePathCount)
+                                {
+                                iCollectionUtility->Collection().CommandL(EMcCmdSelect,
+                                                                         playlistIndex);
+                                }
                             }
                         CleanupStack::PopAndDestroy( pl );
                         }
@@ -3660,11 +3664,7 @@ void CMPXAppUi::HandleCommandL(
                 needToExit = ETrue;
                 }
 
-            if( aCommand == EAknCmdExit )
-                {
-                // Options/Exit selected, close also the MM suite
-                LaunchMmViewL( KMmMessage );
-                }
+
             if( needToExit )
                 {
                 Exit();

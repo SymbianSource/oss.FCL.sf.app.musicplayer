@@ -3375,8 +3375,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::SelectNewPlayerL(
             playlist = source->PlaylistL();
             if ( playlist )
                 {
-                iPlaybackUtility->CommandL(EPbCmdPreserveState);
                 CleanupStack::PushL( playlist );
+                iPlaybackUtility->CommandL(EPbCmdPreserveState);                
                 }
             }
 
@@ -3867,6 +3867,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL()
                 CMPXCollectionPlaylist* playlist = s->PlaylistL();
                 if ( playlist )
                     {
+                    CleanupStack::PushL( playlist );
                     if ( playlist->Count() > 0 )
                         {
                         TMPXPlaybackState state = iPlaybackUtility->StateL();
@@ -3880,7 +3881,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL()
                             iCommonUiHelper->SetMiddleSoftKeyLabelL( *cba, R_QTN_MSK_PLAY, EAknSoftkeyForwardKeyEvent);
                             }
                         }
-                    delete playlist;
+                    CleanupStack::PopAndDestroy( playlist );
                     }
                 }
             MPX_DEBUG1("CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL - new label displayed");
@@ -3916,6 +3917,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbar()
                 CMPXCollectionPlaylist* playlist = s->PlaylistL();
                 if ( playlist )
                     {
+                    CleanupStack::PushL( playlist );
                     if ( playlist->Count() > 0 )
                         {
                         if( pausePlayControl )
@@ -3940,7 +3942,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbar()
                     		}
                         }
 
-                    delete playlist;
+                    CleanupStack::PopAndDestroy( playlist );
                     }
                 else
                     {

@@ -126,6 +126,7 @@ EXPORT_C CMPXAddTracksDialog::~CMPXAddTracksDialog()
         }
     if ( iCollectionUiHelper )
         {
+        iCollectionUiHelper->Cancel();
         iCollectionUiHelper->Close();
         }
     if ( iOrigIcon )
@@ -1104,7 +1105,12 @@ void CMPXAddTracksDialog::StopAnimL()
         iAnimIconIndex = 0;
         iPeriodic->Cancel();
         iListModel->SetAnimationIconNum( iSelectIndex, 0 );
-        HighlightListItem( iSelectIndex );
+        TInt bottomIdx = iListBox->BottomItemIndex();
+        TInt topIdx = iListBox->TopItemIndex();
+        if ( topIdx <= iSelectIndex && iSelectIndex <= bottomIdx )
+            {
+            HighlightListItem( iSelectIndex );
+            }
         // restore origional navi pane text
         iNaviPane->Pop( iNaviLabelPane );
         iNaviPane->PushDefaultL();

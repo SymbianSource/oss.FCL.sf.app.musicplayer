@@ -2478,6 +2478,7 @@ void CMPXUPnPPlaybackDialog::UpdateToolbar()
                 CMPXCollectionPlaylist* playlist = s->PlaylistL();
                 if ( playlist )
                     {
+                    CleanupStack::PushL( playlist );
                     if ( playlist->Count() > 0 )
                         {
                         if( pausePlayControl )
@@ -2493,8 +2494,7 @@ void CMPXUPnPPlaybackDialog::UpdateToolbar()
                                }
                             }
                         }
-
-                    delete playlist;
+                    CleanupStack::PopAndDestroy( playlist );
                     }
                 else
                     {

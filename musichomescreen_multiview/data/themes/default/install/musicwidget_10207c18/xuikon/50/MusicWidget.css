@@ -95,15 +95,6 @@ box#player_active
     display: none;
 }
 
-
-box:focus 
-    {
-    touchfeedbackdown: basic; 
-    touchfeedbackdrag: sensitive;
-    focus-background:"SKIN(268458534 9896)";
-    }
-
-
 image
     {
     margin-left: auto;

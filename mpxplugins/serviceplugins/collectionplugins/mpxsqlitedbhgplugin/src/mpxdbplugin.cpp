@@ -1291,8 +1291,7 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
                 {
                 MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
                         EMPXItem, EMPXCommand, 0, 0, 0, 1);
-                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems,
-                    iDbHandler->NumberOfItemsL(EMPXSong));
+                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems, 0);
 
 				TInt pPath(0);
                 CMPXMedia* pMedia = aArray->AtL(0);

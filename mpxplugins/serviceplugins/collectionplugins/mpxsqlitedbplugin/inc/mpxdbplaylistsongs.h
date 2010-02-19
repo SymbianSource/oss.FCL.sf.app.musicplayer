@@ -216,9 +216,10 @@ class CMPXDbPlaylistSongs :
         /**
         * Get the number of songs for a playlist
         * @param aPlaylistId identifies the playlist
+        * @param aDriveId identifies the database to be query
         * @return number of songs
         */
-        TInt CountL(TUint32 aPlaylistId);
+        TInt CountL(TUint32 aPlaylistId, TInt aDriveId);     
 
     private:
 

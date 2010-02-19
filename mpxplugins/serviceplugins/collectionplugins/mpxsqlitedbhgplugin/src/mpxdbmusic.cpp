@@ -1570,6 +1570,13 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
                         }
                     }
 
+                if (attributeId & EMPXMediaGeneralMimeType)
+                    {
+                    const TDesC& mimeTypeText( aMedia.ValueText(KMPXMediaGeneralMimeType) );
+                    MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicMimeType, mimeTypeText);
+                    MPX_DEBUG2("    MimeType[%S]", &mimeTypeText);
+                    }
+                    
                 if (attributeId & EMPXMediaGeneralUri)
                     {
                     const TDesC& uri = aMedia.ValueText(KMPXMediaGeneralUri);
@@ -1586,12 +1593,14 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
                         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicLocation,
                             uri.Mid(KMCPathStartPos));
                         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicDRM, DRMTypeL(uri));
-
-                        const TDesC& mimeTypeText(MPXDbCommonUtil::GetMimeTypeForUriL(uri).Des());
-                        MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicMimeType, mimeTypeText);
-
                         MPX_DEBUG3("    VolumeId[%u] Location[%S]", volId, &uri);
-                        MPX_DEBUG2("    MimeType[%S]", &mimeTypeText);
+
+                        if (!aMedia.IsSupported(KMPXMediaGeneralMimeType))
+                            {
+                            TBuf< KMaxDataTypeLength > mimeTypeText(MPXDbCommonUtil::GetMimeTypeForUriL(uri).Des());
+                            MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicMimeType, mimeTypeText);
+                            MPX_DEBUG2("    MimeType[%S]", &mimeTypeText);
+                            }
 
                         if (!aMusicTable && !aMedia.IsSupported(KMPXMediaGeneralTitle))
                             {

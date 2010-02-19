@@ -44,6 +44,7 @@ class MMPXDbPlaylistObserver
 	{
 	public:
 		virtual TInt HandlePlaylistDurationL(TUint32 aPlaylistId) = 0;
+        virtual void HandlePlaylistInfoL(TUint32 aPlaylistId, TInt& aCount, TInt& aDuration) = 0;
 	};
 class CMPXDbPlaylist : public CMPXDbTable
     {

@@ -204,19 +204,14 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
     iViewUtility->AddObserverL( this );
 
     TInt flags( 0 );
-    CRepository* repository( CRepository::NewL( KCRUidMPXMPFeatures ));
+    CRepository* repository( CRepository::NewLC( KCRUidMPXMPFeatures ));
     User::LeaveIfError( repository->Get( KMPXMPLocalVariation, flags ));
-    delete repository;
+    CleanupStack::PopAndDestroy( repository );
     repository = NULL;
+
 
     iChangeRTForAllProfiles =
         static_cast<TBool>( flags & KMPXChangeRTForAll );
-
-    // Pre-load Equalizer & Audio Effects views
-    iViewUtility->PreLoadViewL(
-        TUid::Uid( KMPXPluginTypeEqualizerUid ) );
-    iViewUtility->PreLoadViewL(
-        TUid::Uid( KMPXPluginTypeAudioEffectsUid ) );
 
     iLayout = new (ELeave) CMPXCommonPlaybackViewLayout();
 
@@ -2026,7 +2021,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
             }
         case EAknSoftkeyBack:
             {
-            AppUi()->HandleCommandL( EMPXCmdGotoCollection );
+             
             #ifdef BACKSTEPPING_INCLUDED
             // let Back Stepping Service handle the event
             TInt statusInfo( KMPXBackSteppingNotConsumed );

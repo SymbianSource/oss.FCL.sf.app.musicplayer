@@ -755,4 +755,30 @@ RESOURCE TBUF r_mpx_playlist_name_exist
     {
     buf = qtn_fldr_rename_query;
     }
+
+//----------------------------------------------------
+//   
+//    r_attendee_query
+//    
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_rename_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
 // End of File

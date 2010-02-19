@@ -107,7 +107,6 @@
 #include <e32property.h>
 #include <mpxfindinmusicshop.h>
 #include <mpxfindinmusicshopcommon.h>  // KFindInMShopKeyInValid
-#include <MusicWapCenRepKeys.h>
 #include <mpxcollectionopenutility.h>
 
 // cenrep key need to be checked whether USB cable is connected in MTP/Combined Mode
@@ -625,29 +624,24 @@ void CMPXCollectionViewImp::ConstructL()
     TInt usbStatus;
     RProperty::Get(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, usbStatus);
     
-    
-    // if object doesn't exist or the usb doesn't connect
-    if(( retval2 != KErrAlreadyExists )
-            || ( usbStatus != KUsbPersonalityIdPCSuite
-                    || usbStatus != KUsbPersonalityIdMS
-                    || usbStatus != KUsbPersonalityIdPTP
-                    || usbStatus != KUsbPersonalityIdMTP
-                    || usbStatus != KUsbPersonalityIdPCSuiteMTP ))
-        {  
+    // Whenever usb  is connected
+    if ( usbStatus == KUsbPersonalityIdMTP 
+            || usbStatus == KUsbPersonalityIdMS
+            || usbStatus == KUsbPersonalityIdPTP
+            || usbStatus == KUsbPersonalityIdPCSuiteMTP 
+            || usbStatus == KUsbPersonalityIdPCSuite )
+        {
         RProperty::Set( KMPXViewPSUid,
-                        KMPXUSBUnblockingPSStatus, 
-                        EMPXUSBUnblockingPSStatusUninitialized );
+        		        KMPXUSBUnblockingPSStatus,
+                        EMPXUSBUnblockingPSStatusActive);
         }
-    // if usb mode is in MTP mode or pc suite mode
-    else if ( usbStatus == KUsbPersonalityIdMTP
-    		|| usbStatus == KUsbPersonalityIdPCSuiteMTP
-    		|| usbStatus == KUsbPersonalityIdPCSuite )
-    	{
-    	RProperty::Set( KMPXViewPSUid,
-    			KMPXUSBUnblockingPSStatus,
-    			EMPXUSBUnblockingPSStatusActive );
-    	}    
-    }
+    else
+        {
+        RProperty::Set( KMPXViewPSUid, 
+        		        KMPXUSBUnblockingPSStatus,
+                        EMPXUSBUnblockingPSStatusUninitialized );
+		}
+	} 
 
 // ---------------------------------------------------------------------------
 // Delete the selected items
@@ -6031,6 +6025,7 @@ void CMPXCollectionViewImp::DynInitMenuPaneL(
                 aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
                 }
             break;
             }

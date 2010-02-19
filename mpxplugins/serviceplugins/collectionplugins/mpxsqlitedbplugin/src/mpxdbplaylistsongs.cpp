@@ -120,7 +120,12 @@ TUint32 CMPXDbPlaylistSongs::AddSongL(
     TInt aDriveId)
     {
     MPX_FUNC("CMPXDbPlaylistSongs::AddSongL");
-    return AddSongL(aPlaylistId, CountL(aPlaylistId), aMedia, aDriveId);
+    TInt count(0);
+    if (aDriveId >= 0)
+    	{
+    	count = CountL(aPlaylistId, aDriveId);
+    	}
+    return AddSongL(aPlaylistId, count, aMedia, aDriveId);
     }
 
 // ----------------------------------------------------------------------------
@@ -631,10 +636,11 @@ TBool CMPXDbPlaylistSongs::GetSongL(
 // ----------------------------------------------------------------------------
 //
 TInt CMPXDbPlaylistSongs::CountL(
-    TUint32 aPlaylistId)
+    TUint32 aPlaylistId,
+    TInt aDriveId)
     {
     MPX_FUNC("CMPXDbPlaylist::CountL");
-    return ExecuteSumQueryL(KQueryPlaylistSongsCount, aPlaylistId);
+    return ExecuteSumExQueryL(KQueryPlaylistSongsCount, aPlaylistId, aDriveId);
     }
 
 // ----------------------------------------------------------------------------

@@ -1200,8 +1200,8 @@ EXPORT_C TInt CMPXCommonUiHelper::LaunchRenameDialogL(
             if ( iCollectionUiHelper->TitleExistsL( EMPXPlaylist, aNewName, EMPXOtherType ) )
                 {
                 HBufC* info = StringLoader::LoadLC( R_MPX_PLAYLIST_NAME_EXIST, aNewName );
-
-                if( CEikonEnv::Static()->QueryWinL( KNullDesC, *info ) )
+                CAknQueryDialog* query = new(ELeave)CAknQueryDialog( *info );
+                if( query->ExecuteLD( R_RENAME_QUERY ) )
                     {
                     if ( !LaunchRenameDialogL( aOldName, aNewName, aPath ) )
                         {
@@ -1923,8 +1923,8 @@ TBool CMPXCommonUiHelper::PlaylistCreateNameExistL( TDes& aName, const TParseBas
         if ( iCollectionUiHelper->TitleExistsL( EMPXPlaylist, aName, EMPXOtherType ) )
             {
             HBufC* info = StringLoader::LoadLC( R_MPX_PLAYLIST_NAME_EXIST, aName );
-
-            if( CEikonEnv::Static()->QueryWinL( KNullDesC, *info ) )
+            CAknQueryDialog* query = new(ELeave)CAknQueryDialog( *info );
+            if( query->ExecuteLD( R_RENAME_QUERY ) )
                 {
                 if ( !PlaylistCreateNameExistL( aName, aParse ) )
                     {

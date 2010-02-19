@@ -373,6 +373,13 @@ class CMPXDbTable :
         IMPORT_C void ExecuteMediaQueryOnDriveL(TInt aDrive,const TArray<TMPXAttribute>& aAttrs,
         	    CMPXMediaArray& aMediaArray, const TDesC& aQuery);
             
+        /**
+        * Executes a sum query with a string and two int parameters.
+        * @param aQuery query to be executed
+        * @param aPlaylistId string parameter
+        * @param aDrive integer parameter
+        */
+        IMPORT_C TInt ExecuteSumExQueryL(const TDesC& aQuery, TUint32 aPlaylistId, TInt aDrive);        
     protected:    // Data
 
         CMPXDbManager& iDbManager;

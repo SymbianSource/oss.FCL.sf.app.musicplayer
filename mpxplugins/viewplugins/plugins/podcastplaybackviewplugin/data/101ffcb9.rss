@@ -70,7 +70,6 @@ RESOURCE REGISTRY_INFO theInfo
                     opaque_data = "<p>0x101FFC06;0x101FFC3C</p>"
                                   "<t>0x101FFCA0;</t>"
                                   "<a>0x102072C3;</a>"
-                                  "<f>0x0003</f>"
                                   "<i>"EMPXViewPluginPriorityLowest"</i>";
                     }
                 };

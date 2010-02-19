@@ -24,4 +24,4 @@ DEFAULT
 
 PRJ_EXPORTS
 
-../inc/MusicWapCenRepKeys.h             APP_LAYER_PLATFORM_EXPORT_PATH(MusicWapCenRepKeys.h)
+//../inc/MusicWapCenRepKeys.h             APP_LAYER_PLATFORM_EXPORT_PATH(MusicWapCenRepKeys.h)

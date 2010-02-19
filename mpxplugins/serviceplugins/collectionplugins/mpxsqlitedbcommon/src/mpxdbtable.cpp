@@ -764,6 +764,41 @@ EXPORT_C TInt CMPXDbTable::ExecuteSumQueryL(
     }
 
 // ----------------------------------------------------------------------------
+// CMPXDbTable::ExecuteSumExQueryL
+// ----------------------------------------------------------------------------
+//
+EXPORT_C TInt CMPXDbTable::ExecuteSumExQueryL(
+    const TDesC& aQuery, 
+    TUint32 aPlaylistId, 
+    TInt aDrive)
+    {
+    MPX_FUNC("CMPXDbTable::ExecuteSumExQueryL");
+
+    HBufC* query = HBufC::NewLC(aQuery.Length() + KMCIntegerLen);
+    query->Des().Format(aQuery, aPlaylistId);  
+
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryOnAllDrivesL(aDrive, *query));
+    CleanupClosePushL(recordset);
+
+    TInt sum(0);
+    TInt err(KErrNone);
+    while ((err = recordset.Next()) == KSqlAtRow)
+        {
+        sum += recordset.ColumnInt64(KMPXTableDefaultIndex);
+        }
+    
+    CleanupStack::PopAndDestroy(&recordset);
+    CleanupStack::PopAndDestroy(query);
+
+    if (err != KSqlAtEnd)
+        {
+        User::Leave(KErrCorrupt);
+        }
+
+    return sum;
+    }
+
+// ----------------------------------------------------------------------------
 // CMPXDbTable::ExecuteMediaQueryL
 // ----------------------------------------------------------------------------
 //

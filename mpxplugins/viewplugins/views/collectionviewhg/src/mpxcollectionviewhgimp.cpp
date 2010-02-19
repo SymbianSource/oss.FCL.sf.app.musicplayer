@@ -80,12 +80,13 @@
 #include <mpxcollectioncommanddefs.h>
 #include <mpxviewpluginmanager.h>
 #include <mpxviewplugin.h>
+#ifdef BACKSTEPPING_INCLUDED
 #include <mpxbacksteppingutility.h>
+#endif // BACKSTEPPING_INCLUDED
 #include <mpxcollectionopenutility.h>
 
 #include <mpxfindinmusicshop.h>
 #include <mpxfindinmusicshopcommon.h>  // KFindInMShopKeyInValid
-#include <MusicWapCenRepKeys.h>
 
 // cenrep key need to be checked whether USB cable is connected in MTP/Combined Mode
 #include <UsbWatcherInternalPSKeys.h>
@@ -162,6 +163,7 @@ const TInt KMPXMaxHistoryLength( 255 );
 const TInt KMPXCollectionArtistAlbum( 3 );
 const TInt KMPXCollectionGenre( 5 );
 
+const TInt KMPXTimeoutTimer = 1000000; // 1 second
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -269,10 +271,20 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
         delete iMediaRecognizer;
         }
 
+    if ( iTimer )
+        {
+        if ( iTimer->IsActive() )
+	        iTimer->Cancel();
+
+	    delete iTimer;
+	    iTimer = NULL;
+        }
+#ifdef BACKSTEPPING_INCLUDED
     if( iBackSteppingUtility )
         {
         iBackSteppingUtility->Close();
         }
+#endif // BACKSTEPPING_INCLUDED
 
     if ( iResourceOffset )
         {
@@ -388,6 +400,8 @@ void CMPXCollectionViewHgImp::ConstructL()
     iViewUtility = MMPXViewUtility::UtilityL();
     iViewUtility->AddObserverL( this );
     iBottomIndex = new (ELeave) CArrayFixFlat<TInt>( 1 );
+
+    iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
 
     iCommonUiHelper = CMPXCommonUiHelper::NewL( iCollectionUtility );
     iCollectionUiHelper = CMPXCollectionHelperFactory::NewCollectionUiHelperL();
@@ -509,11 +523,13 @@ void CMPXCollectionViewHgImp::ConstructL()
     iCachedSelectionIndex = new ( ELeave )CArrayFixFlat<TInt>( KMPXArrayGranularity );
     iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this );
 
+#ifdef BACKSTEPPING_INCLUDED
     // Initialize the Back Stepping Service Utility with the MPX Music Player
     iBackSteppingUtility = MMPXBackSteppingUtility::UtilityL();
     iBackSteppingUtility->InitializeL(
         TUid::Uid( KMusicPlayerAppUidConstant ) );
     iActivateBackStepping = EFalse;
+#endif //BACKSTEPPING_INCLUDED
 
     iIsAddingToPlaylist = EFalse;
 
@@ -595,28 +611,24 @@ void CMPXCollectionViewHgImp::ConstructL()
     RProperty::Get(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, usbStatus);
 
 
-    // if object doesn't exist or the usb doesn't connect
-    if(( retval2 != KErrAlreadyExists )
-            || ( usbStatus != KUsbPersonalityIdPCSuite
-                    || usbStatus != KUsbPersonalityIdMS
-                    || usbStatus != KUsbPersonalityIdPTP
-                    || usbStatus != KUsbPersonalityIdMTP
-                    || usbStatus != KUsbPersonalityIdPCSuiteMTP ))
+    // Whenever usb  is connected
+    if ( usbStatus == KUsbPersonalityIdMTP 
+            || usbStatus == KUsbPersonalityIdMS
+            || usbStatus == KUsbPersonalityIdPTP
+            || usbStatus == KUsbPersonalityIdPCSuiteMTP 
+            || usbStatus == KUsbPersonalityIdPCSuite )
         {
         RProperty::Set( KMPXViewPSUid,
-                        KMPXUSBUnblockingPSStatus,
+        		        KMPXUSBUnblockingPSStatus,
+                        EMPXUSBUnblockingPSStatusActive);
+        }
+    else
+        {
+        RProperty::Set( KMPXViewPSUid, 
+        		        KMPXUSBUnblockingPSStatus,
                         EMPXUSBUnblockingPSStatusUninitialized );
         }
-    // if usb mode is in MTP mode or pc suite mode
-    else if ( usbStatus == KUsbPersonalityIdMTP
-    		|| usbStatus == KUsbPersonalityIdPCSuiteMTP
-    		|| usbStatus == KUsbPersonalityIdPCSuite )
-    	{
-    	RProperty::Set( KMPXViewPSUid,
-    			KMPXUSBUnblockingPSStatus,
-    			EMPXUSBUnblockingPSStatusActive );
-    	}
-    }
+    } 
 
 // ---------------------------------------------------------------------------
 // Delete the selected items in TBone View
@@ -4003,11 +4015,23 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
             //
 	       CEikMenuBar* menuBar( MenuBar() );
 #ifdef SINGLE_CLICK_INCLUDED
-            iContainer->EnableMarking( EFalse );
-            menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
+            if(iContainer)
+                {
+                iContainer->EnableMarking( EFalse );
+                }
+            if(menuBar)
+                {
+                menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
+                }
 #else
-            iContainer->EnableMarking( ETrue );
+            if(iContainer)
+                {
+            	iContainer->EnableMarking( ETrue );
+                }
+            if(menuBar)
+                {
             menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR );
+                }
 #endif
 	        TBool IsUSBEvent( EFalse );
             if( type == EMcMsgUSBMassStorageStart || type == EMcMsgUSBMTPStart )
@@ -4189,11 +4213,13 @@ void CMPXCollectionViewHgImp::HandleOpenL(
             // View is not active. Ignore.
             return;
             }
+    #ifdef BACKSTEPPING_INCLUDED
         // handle deferred notification when view is in focus but not for view transitions
         if ( iActivateBackStepping )
             {
 	        HandleBacksteppingActivation();
 		    }
+	#endif // BACKSTEPPING_INCLUDED
 
         iCollectionReady = aComplete;
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
@@ -4581,6 +4607,13 @@ void CMPXCollectionViewHgImp::HandleOpenL(
             CloseWaitNoteL();
             }
         }
+
+	MPX_DEBUG1( "HandleOpenL CheckingTimer" );
+    if ( iTimer && !iTimer->IsActive() )
+		{
+		MPX_DEBUG1( "HandleOpenL Starting" );
+		iTimer->Start( KMPXTimeoutTimer, KMPXTimeoutTimer, TCallBack( IADCheckTimerCallBack, this));
+		}
 
     MPX_PERF_CHECKPT("Collection View opened");
     }
@@ -5564,6 +5597,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     TInt currentDepth( cpath->Levels() );
                     if ( currentDepth == 2 ) // 2 is the level of music main view
                         {
+#ifdef BACKSTEPPING_INCLUDED
                         // let Back Stepping Service handle the event
                         TInt statusInfo( KMPXBackSteppingNotConsumed );
                         if( iViewUtility &&
@@ -5580,6 +5614,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                         if ( statusInfo == KMPXBackSteppingNotConsumed )
                             // event not consumed by Back Stepping utility, handle here
                             //
+#endif // BACKSTEPPING_INCLUDED
                             {
                             AppUi()->HandleCommandL( aCommand );
                             }
@@ -5989,6 +6024,7 @@ void CMPXCollectionViewHgImp::HandleForegroundEventL( TBool aForeground )
         CloseWaitNoteL();
         iOpeningNote = EFalse;
     	}
+#ifdef BACKSTEPPING_INCLUDED
     iActivateBackStepping = EFalse;
     MPX_DEBUG3("CMPXCollectionViewHgImp::HandleForegroundEventL - is in foreground=%d, this view=0x%x",
         aForeground, Id().iUid );
@@ -5998,6 +6034,7 @@ void CMPXCollectionViewHgImp::HandleForegroundEventL( TBool aForeground )
         {
         iActivateBackStepping = ETrue;
         }
+#endif // BACKSTEPPING_INCLUDED
         {
         CAknView::HandleForegroundEventL( aForeground );
         }
@@ -6010,6 +6047,7 @@ void CMPXCollectionViewHgImp::HandleForegroundEventL( TBool aForeground )
 //
 void CMPXCollectionViewHgImp::HandleBacksteppingActivation()
     {
+#ifdef BACKSTEPPING_INCLUDED
     TInt viewId( iViewUtility->ActiveViewType().iUid );
     TBuf8<KMVPrefixLen + KMaxIntLen> buf;
     buf.Copy( KMVPrefix );
@@ -6021,6 +6059,7 @@ void CMPXCollectionViewHgImp::HandleBacksteppingActivation()
          );
     MPX_DEBUG3("CMPXCollectionViewHgImp::HandleBacksteppingActivation - viewId=0x%x, statusInfo=%d", viewId, statusInfo );
     iActivateBackStepping = EFalse;
+#endif // BACKSTEPPING_INCLUDED
    }
 
 // ---------------------------------------------------------------------------
@@ -6516,6 +6555,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                 aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
                 }
             break;
             }
@@ -8085,5 +8125,41 @@ void CMPXCollectionViewHgImp::OpenPodcastsL()
 	iCollectionUtility->Collection().OpenL( *path );
 	CleanupStack::PopAndDestroy( path );
 	}
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::IADCheckTimerCallBack
+// -----------------------------------------------------------------------------
+//
+TInt CMPXCollectionViewHgImp::IADCheckTimerCallBack(TAny* aHgViewObject)
+	{
+	MPX_FUNC( "CMPXCollectionViewHgImp::IADCheckTimerCallBack" );
+
+	if (aHgViewObject)
+	   {
+	   CMPXCollectionViewHgImp* hgViewObject = static_cast<CMPXCollectionViewHgImp*>(aHgViewObject);
+	   hgViewObject->StartCheckingforIADUpdates();
+	   }
+
+	return KErrNone;
+	}
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::StartCheckingforIADUpdates
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::StartCheckingforIADUpdates()
+	{
+	MPX_FUNC( "CMPXCollectionViewHgImp::StartCheckingforIADUpdates" );
+
+	if ( iTimer )
+    	{
+     	iTimer->Cancel();
+	    delete iTimer;
+	    iTimer = NULL;
+       	}
+
+	AppUi()->HandleCommandL(EMPXCmdCheckIADUpdates);
+	}
+	
 
 //  End of File

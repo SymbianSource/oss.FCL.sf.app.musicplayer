@@ -320,6 +320,7 @@ void CMPXProgressDownloadSB::CommandL(
                 break;
                 }
             case EPbCmdPause:
+				{
                 if ( EPbDlStateDownloadCompleted == iDownloadState && iConsumeStarted )
                     {
                     ConsumeRights( ContentAccess::EPause );
@@ -327,7 +328,9 @@ void CMPXProgressDownloadSB::CommandL(
                 TInt ret = iMStreamControl->Pause();
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, ret);
                 break;
+				}
             case EPbCmdStop:
+				{
                 iMStreamControl->Stop();
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPStopped,
                                          0, KErrNone);
@@ -343,7 +346,9 @@ void CMPXProgressDownloadSB::CommandL(
                     }
                 iDrmMediaUtility->Close();
                 break;
+				}
             case EPbCmdClose:
+				{
                 if ( EPbDlStateDownloadCompleted == iDownloadState && iConsumeStarted  )
                     {
                     ConsumeRights( ContentAccess::EStop );
@@ -360,6 +365,7 @@ void CMPXProgressDownloadSB::CommandL(
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPClosed,
                                          0, KErrNone);
                 break;
+				}
             }
         }
 

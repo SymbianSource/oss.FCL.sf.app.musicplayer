@@ -1402,18 +1402,21 @@ void CMPXDbHandler::RefreshEndL()
 void CMPXDbHandler::MtpStartL()
     {
     MPX_DEBUG1("-->CMPXDbHandler::MtpStartL");
-    iMtpInUse = ETrue;
-    iOpOnDbCount = 0;
-
-#ifdef __RAMDISK_PERF_ENABLE
-	TRAPD(err, iDbManager->CopyDBsToRamL(iMtpInUse));
-	if ( err != KErrNone )
-	    {
-        MPX_DEBUG2("CMPXDbHandler::MtpStartL error=%d", err);
-	    }
-#endif //__RAMDISK_PERF_ENABLE
-
-    iDbManager->BeginL();
+    if(!iMtpInUse)
+        {
+        iMtpInUse = ETrue;
+        iOpOnDbCount = 0;
+    
+    #ifdef __RAMDISK_PERF_ENABLE
+        TRAPD(err, iDbManager->CopyDBsToRamL(iMtpInUse));
+        if ( err != KErrNone )
+            {
+            MPX_DEBUG2("CMPXDbHandler::MtpStartL error=%d", err);
+            }
+    #endif //__RAMDISK_PERF_ENABLE
+    
+        iDbManager->BeginL();
+        }
     MPX_DEBUG1("<--CMPXDbHandler::MtpStartL");
     }
 
@@ -1814,6 +1817,11 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbHandler::DoUpdateSongL(
     if (visible)
         {
         visibleChange = CMPXDbActiveTask::EAllVisible;
+        }
+    if ( aMedia.ValueTObjectL<TInt>( KMPXMediaMusicAlbumArtChanged )== 1 )
+        {
+        ( const_cast<CMPXMedia*>( &aMedia ) 
+        		)->SetTObjectValueL<TInt>( KMPXMediaMusicAlbumArtChanged, 0 );
         }
 
     return visibleChange;

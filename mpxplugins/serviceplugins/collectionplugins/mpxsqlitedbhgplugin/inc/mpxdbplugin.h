@@ -780,7 +780,6 @@ private:
     RArray<TInt>         iMusicLibraryMenuIds;         // music library item menu IDs
     HBufC*               iAllSongsForArtistTitle;
     HBufC*               iMusicMenuTitle;
-    HBufC*               iShuffleAllText;
     TBool                iDisablePodcasting;
     TBool                iMtpInUse;
     TBool                iRefreshing;

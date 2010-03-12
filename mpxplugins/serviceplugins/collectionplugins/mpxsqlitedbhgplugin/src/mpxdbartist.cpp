@@ -335,9 +335,8 @@ void CMPXDbArtist::UpdateItemL(
         {
         // execute the query
         iDbManager.ExecuteQueryL(aDriveId, KQueryArtistUpdate, setStr, aId);
-        TInt oldSongId = (aMedia.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId)).iId2;
-        MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
-            EMPXArtist, KDBPluginUid, oldSongId );
+        MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
+        		EMPXArtist, KDBPluginUid, ETrue, 0 );          
         }
 
     CleanupStack::PopAndDestroy(setStr);

@@ -76,9 +76,7 @@ enum TMPXCollectionCommandIds
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU                
     ,EMPXCmdRefreshLibrary
 #endif
-#ifdef SINGLE_CLICK_INCLUDED
     ,EMPXCmdPlayItem
-#endif
 
     };
 

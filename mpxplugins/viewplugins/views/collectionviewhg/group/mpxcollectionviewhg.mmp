@@ -37,9 +37,7 @@ MACRO __ENABLE_MSK
 MACRO __ENABLE_PODCAST_IN_MUSIC_MENU
 #define __ENABLE_PODCAST_IN_MUSIC_MENU
 MACRO __HG_COLLECTIONVIEW
-#ifdef IAD_INCLUDE_SINGLE_CLICK 
-MACRO SINGLE_CLICK_INCLUDED
-#endif
+
 
 SOURCEPATH      ../src
 SOURCE          mpxcollectionviewhg.cpp
@@ -48,6 +46,7 @@ SOURCE          mpxcollectionviewhgcontainer.cpp
 SOURCE          mpxcollectionviewhglistboxarray.cpp
 SOURCE          mpxcollectionviewhgplaylisthelper.cpp
 SOURCE          mpxcollectionviewhgtnloader.cpp
+SOURCE          mpxpopuplist.cpp
 
 START RESOURCE  ../data/mpxcollectionviewhg.rss
 HEADER
@@ -114,6 +113,12 @@ LIBRARY         thumbnailmanager.lib    // Album art
 LIBRARY         ganes.lib
 LIBRARY         aknskinsrv.lib
 LIBRARY         bitgdi.lib
+
+// Transition libs
+LIBRARY         gfxtrans.lib
+
+ALWAYS_BUILD_AS_ARM
+OPTION ARMCC -O3 -Otime
 
 #if defined(ARMCC)
 deffile ../eabi/ 

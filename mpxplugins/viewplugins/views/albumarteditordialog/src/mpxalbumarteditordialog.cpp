@@ -761,6 +761,8 @@ CMPXMedia* CMPXAlbumArtEditorDialog::SaveMediaLC(
 
         media->SetTextValueL(
             KMPXMediaMusicAlbumArtFileName, aFileName );
+        media->SetTObjectValueL<TInt>(
+                        KMPXMediaMusicAlbumArtChanged, 1 );
 
         }
     else // Broken link, cannot ben saved

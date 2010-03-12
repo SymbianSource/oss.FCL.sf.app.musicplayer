@@ -373,7 +373,7 @@ private: // data
     /**
      * Flag of Mass Storage mode or MTP mode
      */
-    TBool iUSBOnGoing;
+    TBool iBlockingOperationOngoing;
    
     /**
      * collection utility

@@ -211,6 +211,10 @@ void CMPXAppUi::ConstructL()
 // initialize FeatureManager
     FeatureManager::InitializeLibL();
 
+    // Check updates from IAD, continue UI launching even if something fails there
+	// Uncomment when to add IAD update checking functionality to music player
+    // TRAP_IGNORE( CheckUpdatesL() );
+
     if ( FeatureManager::FeatureSupported( KFeatureIdCoverDisplay ) )
         {
         iCoverDisplay = ETrue;
@@ -780,11 +784,17 @@ void CMPXAppUi::HandleMediaKeyCommand(
             if ( !MPXUser::IsCallOngoing( KMPXCallTypeGenericVoice ) ||
                 ( playerState == EPbStatePlaying ) ||
                 ( playerState == EPbStateSeekingForward ) ||
-                ( playerState == EPbStateSeekingBackward ) )
+                ( playerState == EPbStateSeekingBackward ) ||
+                iPdParameterHandler )
                 {
+                TMPXPlaybackState pdPlayerState( EPbStateNotInitialised );
+                if ( iPdParameterHandler )
+                    {
+                    pdPlayerState = iPdParameterHandler->PdStateL();
+                    }
                 // only process command if there no call ongoing
                 // or if we're actively playing during call
-                if ( IsForeground() || EPbStatePlaying == playerState )
+                if ( IsForeground() || EPbStatePlaying == playerState || EPbStatePlaying == pdPlayerState )
                     {
                     MuteVolume();
                     HandlePopupL( EPbCmdMuteVolume );
@@ -799,11 +809,17 @@ void CMPXAppUi::HandleMediaKeyCommand(
             if ( !MPXUser::IsCallOngoing( KMPXCallTypeGenericVoice ) ||
                 ( playerState == EPbStatePlaying ) ||
                 ( playerState == EPbStateSeekingForward ) ||
-                ( playerState == EPbStateSeekingBackward ) )
+                ( playerState == EPbStateSeekingBackward ) ||
+                iPdParameterHandler )
                 {
                 // only process command if there no call ongoing
                 // or if we're actively playing during call
-                if ( IsForeground() || EPbStatePlaying == playerState )
+                TMPXPlaybackState pdPlayerState( EPbStateNotInitialised );
+                if ( iPdParameterHandler )
+                    {
+                    pdPlayerState = iPdParameterHandler->PdStateL();
+                    }
+                if ( IsForeground() || EPbStatePlaying == playerState || EPbStatePlaying == pdPlayerState )
                     {
                     UnMuteVolume();
                     HandlePopupL( EPbCmdUnMuteVolume );
@@ -2096,8 +2112,9 @@ void CMPXAppUi::HandleCommandParametersL( const TDesC8& aCommand )
         CleanupClosePushL( procArray );
         TProcessId npProcId( 0 );
         MMPXPlaybackUtility* activePbU = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
+        CleanupClosePushL( *activePbU );
         activePbU->GetClientsL( procArray );
-        activePbU->Close();
+        CleanupStack::PopAndDestroy( activePbU );
         npProcId = procArray[ 0 ];
         CleanupStack::PopAndDestroy( &procArray );
 
@@ -3333,11 +3350,6 @@ void CMPXAppUi::HandleCommandL(
     TMPXPlaybackCommand cmd = EPbCmdEnd;
     switch ( aCommand )
         {
-	    case EMPXCmdCheckIADUpdates:
-	        {
-	        TRAP_IGNORE( CheckUpdatesL() );
-	        break;
-	        }
         case EMPXCmdPlay:
         case EMPXCmdPause:
         case EMPXCmdPlayPause:
@@ -4352,7 +4364,12 @@ void CMPXAppUi::SetVolume( const TInt aVolume )
     cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, EPbCmdSetVolume );
     cmd->SetTObjectValueL<TUint>( KMPXCommandPlaybackGeneralData, aVolume );
-    iPlaybackUtility->CommandL( *cmd );
+    
+    MMPXPlaybackUtility* activePbu = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
+    CleanupClosePushL( *activePbu );
+    activePbu->CommandL( *cmd );
+    CleanupStack::PopAndDestroy( activePbu );
+    
     CleanupStack::PopAndDestroy( cmd );
     }
 
@@ -4368,7 +4385,12 @@ void CMPXAppUi::MuteVolume()
     cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
     cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, EPbCmdMuteVolume );
-    iPlaybackUtility->CommandL( *cmd );
+    
+    MMPXPlaybackUtility* activePbu = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
+    CleanupClosePushL( *activePbu );
+    activePbu->CommandL( *cmd );
+    CleanupStack::PopAndDestroy( activePbu );
+    
     CleanupStack::PopAndDestroy( cmd );
     }
 
@@ -4384,7 +4406,12 @@ void CMPXAppUi::UnMuteVolume()
     cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
     cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, EPbCmdUnMuteVolume );
-    iPlaybackUtility->CommandL( *cmd );
+    
+    MMPXPlaybackUtility* activePbu = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
+    CleanupClosePushL( *activePbu );
+    activePbu->CommandL( *cmd );
+    CleanupStack::PopAndDestroy( activePbu );
+    
     CleanupStack::PopAndDestroy( cmd );
     }
 

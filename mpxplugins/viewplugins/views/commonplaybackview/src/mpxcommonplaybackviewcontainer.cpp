@@ -53,6 +53,10 @@
 #include <mpxconstants.h>
 #include <mpxfmtx.rsg> // For FF_FMTX
 #include <mpxappui.hrh>
+#include <mpxinternalcrkeys.h>
+#include <touchfeedback.h>
+#include <akntranseffect.h>                 // For transition effects
+#include <gfxtranseffect\gfxtranseffect.h>  // For transition effects
 
 #include "mpxcommonplaybackviewcontainer.h"
 #include "mpxcommonplaybackviewlayout.h"
@@ -62,11 +66,8 @@
 #include "mpxplaybackviewlayoutinterface.h"
 #include "mpxlayoutswitchobserver.h"
 #include "mpxcommonuihelper.h"
-#include <mpxinternalcrkeys.h>
 #include "mpxbuttonmanager.h"
 #include "mpxlog.h"
-
-#include <touchfeedback.h>
 
 // CONSTANTS
 const TInt KLabelCount = ETextCount;
@@ -179,6 +180,10 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ConstructL( const TRect& /*aRect*
     iActiveView = ETrue;
     iPrerollCompleted = EFalse;
 
+    iLightStatus = CHWRMLight::ELightStatusUnknown;
+    iIsForeground = EFalse ;
+    iLight = CHWRMLight::NewL(this); 
+
 	DrawableWindow()->SetPointerGrab( ETrue );
     EnableDragEvents();
 
@@ -204,9 +209,11 @@ EXPORT_C CMPXCommonPlaybackViewContainer::~CMPXCommonPlaybackViewContainer()
     delete iShortFormatString;
     delete iCommonUiHelper;
 
-
-
-
+    if ( iLight )
+        {        
+        delete iLight;
+        iLight = NULL;
+        }
 
     delete iButtonManager;
 
@@ -636,6 +643,9 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandleForegroundEventL(
     TBool aForeground )
     {
     MPX_FUNC( "CMPXCommonPlaybackViewContainer::HandleForegroundEventL" );
+
+    iIsForeground = aForeground;
+
     if ( !aForeground && iEnableButtons )
         {
         // if losing foreground and buttons are enabled
@@ -1047,6 +1057,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::RedrawRect(
 //
 EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateProgressBarGraphics()
     {
+    MPX_FUNC("CMPXCommonPlaybackViewContainer::UpdateProgressBarGraphics()");
     TSize downloadBarSize = iDownloadSliderRect.Size();
     TSize playbackBarSize = iPlaybackSliderRect.Size();
 
@@ -1065,12 +1076,24 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateProgressBarGraphics()
 
 // ---------------------------------------------------------------------------
 // Update progress bar graphics and redraw.
+// Refresh happens only when backlight is ON and
+// the UI is in foreground. 
+// Note: Some display types may not need backlight. In that case
+// code may need to be adjusted accordingly.
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CMPXCommonPlaybackViewContainer::RefreshProgressBar()
     {
-    UpdateProgressBarGraphics();
-    Window().Invalidate( iSliderPaneRect );
+    MPX_FUNC( "CMPXCommonPlaybackViewContainer::RefreshProgressBar" );
+
+    MPX_DEBUG2(" iIsForeground : (%d)", iIsForeground);
+    MPX_DEBUG2(" iLightStatus : (%d)", iLightStatus);
+
+    if ( iIsForeground && (iLightStatus == CHWRMLight::ELightOn) )
+		{
+		UpdateProgressBarGraphics();
+		Window().Invalidate( iSliderPaneRect );
+		}
     }
 
 // ---------------------------------------------------------------------------
@@ -1086,7 +1109,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateLabelColorsL()
         skin,
         color,
         KAknsIIDQsnTextColors,
-        EAknsCIQsnTextColorsCG50 );
+        EAknsCIQsnTextColorsCG6 );
 
     for ( TInt i = 0; i < iLabels.Count(); i++ )
         {
@@ -1403,6 +1426,23 @@ EXPORT_C TInt CMPXCommonPlaybackViewContainer::GetNewSongPosition()
     return iNewSongPosition;
     }
 
+// -----------------------------------------------------------------------------
+// CMPXCommonPlaybackViewContainer::LightStatusChanged
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CMPXCommonPlaybackViewContainer::LightStatusChanged( TInt aTarget, CHWRMLight::TLightStatus aStatus )
+    {
+    MPX_FUNC( "CMPXCommonPlaybackViewContainer::LightStatusChanged" );
+    if ( aTarget == CHWRMLight::EPrimaryDisplay )
+        {
+		MPX_DEBUG2(" LightStatusChanged: (%d)", aStatus);
+		if ( ( aStatus == CHWRMLight::ELightOn || aStatus == CHWRMLight::ELightOff ) && aStatus != iLightStatus )
+	    	{	
+			iLightStatus = aStatus;
+			}
+        }
+    }
+
 // ---------------------------------------------------------------------------
 // CMPXCommonPlaybackViewContainer::SetNewSongPosition
 // ---------------------------------------------------------------------------
@@ -1609,4 +1649,35 @@ void CMPXCommonPlaybackViewContainer::AdjustOrdinalPosition( TInt aNewOrdinalPos
     {
     return Window().SetOrdinalPosition( aNewOrdinalPosition );
     }
+
+// -----------------------------------------------------------------------------
+// CMPXCommonPlaybackViewContainer::BeginTransition
+// -----------------------------------------------------------------------------
+//
+void CMPXCommonPlaybackViewContainer::BeginTransition()
+    {
+    iTransitionType = EMPXTranstionToRight;
+    const TInt flags = AknTransEffect::TParameter::EActivateExplicitCancel;
+    TRect appRect = ((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect();
+    GfxTransEffect::BeginFullScreen( iTransitionType, appRect,
+            AknTransEffect::EParameterType, AknTransEffect::GfxTransParam(KAppUidMusicPlayerX, flags));
+
+    // start transition immediately. Other option would be to start it when the album thumb has
+    // been received.
+    EndTransition();
+    }
+
+// -----------------------------------------------------------------------------
+// CMPXCommonPlaybackViewContainer::EndTransition
+// -----------------------------------------------------------------------------
+//
+void CMPXCommonPlaybackViewContainer::EndTransition()
+    {
+    if( iTransitionType != EMPXTranstionNotDefined )
+        {
+        GfxTransEffect::EndFullScreen();
+        iTransitionType = EMPXTranstionNotDefined;
+        }
+    }
+
 //  End of File

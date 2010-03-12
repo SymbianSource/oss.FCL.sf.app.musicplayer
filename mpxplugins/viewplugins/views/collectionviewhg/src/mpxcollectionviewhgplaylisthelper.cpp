@@ -399,7 +399,6 @@ void CMPXCollectionViewHgPlaylistHelper::InitPlaybackEngineL( CMPXCollectionPath
 
     if( !iInitCanceled )
         {
-        aPath.Remove(0); // we want to remove index 0 which is shuffle item
         TTime time;
         time.UniversalTime();
         TInt64 seed = time.Int64();

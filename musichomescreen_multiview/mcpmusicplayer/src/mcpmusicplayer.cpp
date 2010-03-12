@@ -677,6 +677,7 @@ void CMCPMusicPlayer::DoUpdatePlayerStateL(TMPlayerState aState)
             case EMPlayerStatePlaying:
                 {
                 MPX_DEBUG1("CMCPMusicPlayer::DoUpdatePlayerStateL EMPlayerStatePlaying");
+                iMusicPlayerOpeningTimer->Cancel();
                 UpdateToolBarL(TBK::KSkeep_L|TBK::KPause|TBK::KSkeep_R);
                 break;
                 }
@@ -697,7 +698,7 @@ void CMCPMusicPlayer::DoUpdatePlayerStateL(TMPlayerState aState)
             case EMPlayerStateStopped:
                 {
                 MPX_DEBUG1("CMCPMusicPlayer::DoUpdatePlayerStateL EMPlayerStateStopped");
-                if ( iUSBOnGoing )
+                if ( iBlockingOperationOngoing )
                     {
                     UpdateToolBarL( TBK::KSkeep_L_dimmed |
                             TBK::KPlay_dimmed |
@@ -1209,11 +1210,15 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
     TInt type = aMsg.ValueTObjectL<TInt> ( KMPXMessageGeneralType );
     MPX_DEBUG3("--->CMCPMusicPlayer::DoHandleGeneralMessageL(), event = %d, type = %d", event, type);
 
+    
     if ( event == TMPXCollectionMessage::EBroadcastEvent
-        && ( type == EMcMsgUSBMassStorageStart || type == EMcMsgUSBMTPStart ))
+        && ( type == EMcMsgUSBMassStorageStart || 
+             type == EMcMsgUSBMTPStart ||
+             type == EMcMsgRefreshStart ))
         {
-        iUSBOnGoing = ETrue;
-        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iUSBOnGoing changed to: %d", iUSBOnGoing );
+        iBlockingOperationOngoing = ETrue;
+        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iBlockingOperationOngoing changed to: %d", 
+                  iBlockingOperationOngoing );
         UpdateToolBarL( TBK::KSkeep_L_dimmed |
                 TBK::KPlay_dimmed |
                 TBK::KSkeep_R_dimmed );
@@ -1223,10 +1228,13 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
             }
         }
     else if ( event == TMPXCollectionMessage::EBroadcastEvent
-            && ( type == EMcMsgUSBMassStorageEnd || type == EMcMsgUSBMTPEnd ))
+            && ( type == EMcMsgUSBMassStorageEnd || 
+                 type == EMcMsgUSBMTPEnd ||
+                 type == EMcMsgRefreshEnd ))
         {
-        iUSBOnGoing = EFalse;
-        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iUSBOnGoing changed to: %d", iUSBOnGoing );
+        iBlockingOperationOngoing = EFalse;
+        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iBlockingOperationOngoing changed to: %d", 
+                   iBlockingOperationOngoing );
         DoUpdatePlayerStateL( iEngine->PlayerState() );
         if ( IsOKToPublishData() )
             {
@@ -1297,31 +1305,12 @@ void CMCPMusicPlayer::OpeningMusicPlayer()
 //
 TInt CMCPMusicPlayer::MusicPlayerOpeningTimerCallback( TAny* aPtr )
     {
-    MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback <---");
-    RWsSession wsSession;
-    TInt error = wsSession.Connect();
-    if ( error != KErrNone )
+    MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback <---");     
+    if ( EMPlayerStatePlaying != static_cast<CMCPMusicPlayer*>(aPtr)->iEngine->PlayerState() )
         {
-        return error;
-        }
-    
-    TBool taskExists( EFalse );
-    CAknTaskList* taskList( NULL );
-    TRAPD( err, taskList = CAknTaskList::NewL( wsSession ) );
-    if ( err == KErrNone )
-        {
-        MPX_DEBUG2("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback "
-                "error = %d occur when creating CAknTaskList", err);
-        TApaTask task = taskList->FindRootApp( TUid::Uid( KMusicPlayerAppUidAsTInt ) );
-        delete taskList;
-        taskExists = task.Exists();
-        }
-    wsSession.Close();
-    
-    if ( !taskExists )
-        {
-        MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback Music Player not opened");
-        //Reset the widget and menu, music player is not running
+        MPX_DEBUG1("CMCPMusicPlayer::MusicPlayerOpeningTimerCallback Music Player not Playing");
+        //Reset the widget and menu, music player is not running and playing.
+        static_cast<CMCPMusicPlayer*>(aPtr)->iActive = EFalse;
         TRAP_IGNORE( static_cast<CMCPMusicPlayer*>(aPtr)->ResetL() );
         }
     static_cast<CMCPMusicPlayer*>(aPtr)->iMusicPlayerOpeningTimer->Cancel();

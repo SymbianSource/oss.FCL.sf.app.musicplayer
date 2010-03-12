@@ -1321,7 +1321,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoHandleStateChangedL(
         case EPbStateStopped:
         case EPbStateNotInitialised:
             {
-            UpdateTrackPlaybackPositionL( 0, iDuration );
+            iPosition = 0;
+            UpdateTrackPlaybackPositionL( iPosition, iDuration );
             break;
             }
         case EPbStateInitialising:
@@ -2489,12 +2490,18 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleStatusPaneSizeChange()
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
-    const TVwsViewId& /* aPrevViewId */,
+    const TVwsViewId& aPrevViewId,
     TUid /* aCustomMessageId */,
     const TDesC8& /* aCustomMessage */ )
     {
     MPX_FUNC_EX( "CMPXCommonPlaybackViewImp::DoActivateL()" );
 
+    if( aPrevViewId.iAppUid == KAppUidMusicPlayerX && iContainer )
+        {
+        // record the begin state for the transition animation.
+        iContainer->BeginTransition();
+        }
+            
     iSwitchingView = EFalse;
     iDatabaseNotReady = EFalse;
 	iUnsupportedNoteDisabled = EFalse;

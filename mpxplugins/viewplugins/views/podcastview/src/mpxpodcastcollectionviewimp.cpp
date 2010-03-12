@@ -3641,6 +3641,7 @@ void CMPXPodcastCollectionViewImp::DynInitMenuPaneL(
         case R_MPX_PODCAST_COLLECTION_VIEW_MENU_1:
             {
             aMenuPane->SetItemDimmed(EMPXCmdFind, ETrue);
+            aMenuPane->SetItemDimmed(EMPXCmdLibraryDetails, ETrue);
             if ( !iPlaybackUtility->Source() )
                 {
                 aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );

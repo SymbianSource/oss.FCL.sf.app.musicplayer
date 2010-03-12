@@ -125,4 +125,5 @@ EXPORTS
 	?IsRemoteDrive@CMPXDbManager@@QAEHW4TDriveNumber@@@Z @ 124 NONAME ; int CMPXDbManager::IsRemoteDrive(enum TDriveNumber)
 	?ExecuteSumQueryL@CMPXDbTable@@IAEHABVTDesC16@@@Z @ 125 NONAME ; int CMPXDbTable::ExecuteSumQueryL(class TDesC16 const &)
 	?ExecuteSumQueryL@CMPXDbTable@@IAEHABVTDesC16@@KK@Z @ 126 NONAME ; int CMPXDbTable::ExecuteSumQueryL(class TDesC16 const &, unsigned long, unsigned long)
+	?AddItemAlbumChangedMessageL@MPXDbCommonUtil@@SAXAAVCMPXMediaArray@@VTMPXItemId@@W4TMPXChangeEventType@@W4TMPXGeneralCategory@@IH1@Z @ 127 NONAME ; void MPXDbCommonUtil::AddItemAlbumChangedMessageL(class CMPXMediaArray &, class TMPXItemId, enum TMPXChangeEventType, enum TMPXGeneralCategory, unsigned int, int, class TMPXItemId)
 

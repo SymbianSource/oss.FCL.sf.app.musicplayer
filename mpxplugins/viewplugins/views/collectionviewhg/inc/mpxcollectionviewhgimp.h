@@ -36,6 +36,7 @@
 #include "mpxcollectionviewhg.h"
 #include "mpxplaybackframeworkdefs.h" // TMPXPlaybackPlayerType
 #include "mpxwaitnotedefs.h"
+#include "mpxselectedalbumhandler.h"
 
 // FORWARD DECLARATIONS
 class CAiwGenericParamList;
@@ -83,7 +84,8 @@ NONSHARABLE_CLASS( CMPXCollectionViewHgImp ) : public CMPXCollectionViewHg,
                                              public MMPXViewActivationObserver,
                                              public MCoeViewDeactivationObserver,
                                              public MCoeViewActivationObserver,
-                                             public MMpxCbaHandler
+                                             public MMpxCbaHandler,
+                                             public MMPXSelectedAlbumHandler
     {
 public:
 
@@ -114,6 +116,20 @@ public:
      * @ since 3.1
      */
     void LaunchMusicShopL();
+
+    /**
+     *  Saves selected album.
+     *
+     *  @param aMedia Album to be stored
+     */
+     void SaveSelectedAlbum (CMPXMedia &aMedia);
+
+     /**
+     *  Restores selected album.
+     *
+     *  @return media of restored album
+     */
+     const CMPXMedia* RestoreSelectedAlbum ();
 
 
 private:
@@ -161,11 +177,6 @@ private:
      * @param aError Error code to be handled.
      */
     void HandleError( TInt aError );
-
-    /**
-     * Updates the navi pane
-     */
-    void UpdateNaviPaneL();
 
     /**
      * Updates the title pane
@@ -842,8 +853,14 @@ private:
  	void ChangeCbaVisibility( TBool aVisible );
 
  	void UpdateCba();
- 	
+
+	TBool NowPlayingOptionVisibilityL();
     void HandleInitMusicMenuPaneL(CEikMenuPane* aMenuPane );
+    void DynInitMenuPaneAlbumL(TInt aResourceId, CEikMenuPane* aMenuPane );
+    void DynInitMenuPanePlaylistL(TInt aResourceId, CEikMenuPane* aMenuPane );
+    void DynInitMenuPaneGenreL(TInt aResourceId, CEikMenuPane* aMenuPane );
+    void DynInitMenuPaneSongsL(TInt aResourceId, CEikMenuPane* aMenuPane );
+    void DynInitMenuPanePlaylistSongsL(TInt aResourceId, CEikMenuPane* aMenuPane );
 
     void OpenAllSongsL();
     void OpenArtistAlbumsL();
@@ -851,8 +868,6 @@ private:
     void OpenGenreL();
     void OpenPodcastsL();
 
-    static TInt IADCheckTimerCallBack(TAny* aHgViewObject); //directly called
-    void StartCheckingforIADUpdates(); //indirectly called
 
 private:    // Data
 
@@ -905,10 +920,6 @@ private:    // Data
 
     TInt                        iCachedCommand; // for incremental open
     CListBoxView::CSelectionIndexArray* iCachedSelectionIndex;
-
-    CAknNavigationDecorator*        iNaviDecorator;
-    CAknNaviLabel*                  iNaviLabel;
-    CAknNavigationControlContainer* iNaviPane;
 
     CEikButtonGroupContainer*       iCurrentCba;
 
@@ -980,8 +991,7 @@ private:    // Data
     TBool iOpeningNote; // Waitnote is opening
 	TBool iMarkedAll;
 	TBool iFirstIncrementalBatch;
-
-    CPeriodic* iTimer;
+    CMPXMedia *iStoredAlbum; // owned
     };
 
 #endif  // C_CMPXCOLLECTIONVIEWHGIMP_H

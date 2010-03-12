@@ -53,6 +53,8 @@ public: // NEW FUNCTIONS
     void CancelThumb( TInt aIndex );
     void CancelAll();
     void SetSizeL( TThumbnailSize aSize );
+    void Pause( TTimeIntervalMicroSeconds32 aDelay );
+    void Resume();
 
 private: // From MThumbnailManagerObserver
 
@@ -74,6 +76,8 @@ private: // NEW FUNCTIONS
     static TInt LoadThumbnail( TAny* aSelf );
     void LoadNextTN();
 
+    static TInt ResumeCallback(TAny* aPtr);
+    
 private: // DATA
 
     MMpxTNLoaderObserver& iObserver;
@@ -96,6 +100,8 @@ private: // DATA
     RPointerArray<TLoadingTN> iLoading; // Loading Thubmbs
     CAsyncCallBack* iAsyncCallBack;
     TThumbnailSize iSize;
+    TBool iPaused;
+    CPeriodic* iPauseTimer;
     };
 
 #endif // MPXCOLLECTIONVIEWHGTNLOADER_H_

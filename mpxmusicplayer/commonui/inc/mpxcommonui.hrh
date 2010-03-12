@@ -35,6 +35,7 @@
 #define KMPXBrowserUid    0x10008D39
 #define KMPXBrowserUid2   0x1020724D
 #define KPodcastingAppUid 0x1028190B
+#define KMPXCommonMailUid 0x2001E277
 
 #endif  // MPXCOMMONUI_HRH
 

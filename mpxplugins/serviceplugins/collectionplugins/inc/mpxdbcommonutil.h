@@ -410,6 +410,19 @@ class MPXDbCommonUtil
         */
         IMPORT_C static TPtrC GetColumnTextL(RSqlStatement& aStatement, TInt aField);
 
+        /**
+        * Constructs an item changed message and adds it to the array
+        * @param aMessageArray array to add the message to
+        * @param aId item ID
+        * @param aChangeType change type
+        * @param aCategory category of the item changed
+        * @param aUid plugin UID
+        * @param aAlbumArt is the flag for album art changed
+        * @param aDeprecatedId deprecated id of the item after it's been moved/renamed
+        */
+        IMPORT_C static void AddItemAlbumChangedMessageL(CMPXMessageArray& aMessageArray, TMPXItemId aId,
+            TMPXChangeEventType aChangeType, TMPXGeneralCategory aCategory, TUint aUid,
+            TBool aAlbumArt, TMPXItemId aDeprecatedId = 0 );
     private:
         /**
         * Create a media object with title, type, category and ID and push onto the CS.

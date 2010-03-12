@@ -232,7 +232,8 @@ EXPORT_C TBool CMPXCommonUiHelper::IsHostMessagingL()
     TInt hostUid = MPXTlsHelper::HostUid().iUid;
     if ( hostUid == KMPXMmsViewerUid || hostUid == KMPXMmsEditorUid ||
          hostUid == KMPXMailViewerUid || hostUid == KMPXMailEditorUid ||
-         hostUid == KMPXMessagingUid || hostUid == KMPXUniEditorUid )
+         hostUid == KMPXMessagingUid || hostUid == KMPXUniEditorUid ||
+         hostUid == KMPXCommonMailUid )
         {
         ret = ETrue;
         }

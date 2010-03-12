@@ -163,7 +163,6 @@ const TInt KMPXMaxHistoryLength( 255 );
 const TInt KMPXCollectionArtistAlbum( 3 );
 const TInt KMPXCollectionGenre( 5 );
 
-const TInt KMPXTimeoutTimer = 1000000; // 1 second
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -271,14 +270,6 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
         delete iMediaRecognizer;
         }
 
-    if ( iTimer )
-        {
-        if ( iTimer->IsActive() )
-	        iTimer->Cancel();
-
-	    delete iTimer;
-	    iTimer = NULL;
-        }
 #ifdef BACKSTEPPING_INCLUDED
     if( iBackSteppingUtility )
         {
@@ -297,7 +288,6 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
         delete iContainer;
         }
 
-    delete iNaviDecorator;
     delete iUserPlaylists;
     delete iCommonUiHelper;
     delete iSendUi;
@@ -316,6 +306,8 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
         {
         delete iOperatorMusicStoreURI;
         }
+    if (iStoredAlbum)
+        delete iStoredAlbum;
     }
 
 // ---------------------------------------------------------------------------
@@ -324,7 +316,8 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
 // ---------------------------------------------------------------------------
 //
 CMPXCollectionViewHgImp::CMPXCollectionViewHgImp() :
-    iLastDepth( 1 ), iPlayIndex( KErrNotFound ),
+    iLastDepth( 1 ),
+    iPlayIndex( KErrNotFound ),
     iSetMediaLCount( KErrNotFound ),
     iCurrentHighlightedIndex( KErrNotFound ),
     iCachedCommand( KErrNotFound ),
@@ -401,8 +394,6 @@ void CMPXCollectionViewHgImp::ConstructL()
     iViewUtility->AddObserverL( this );
     iBottomIndex = new (ELeave) CArrayFixFlat<TInt>( 1 );
 
-    iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
-
     iCommonUiHelper = CMPXCommonUiHelper::NewL( iCollectionUtility );
     iCollectionUiHelper = CMPXCollectionHelperFactory::NewCollectionUiHelperL();
 
@@ -441,14 +432,6 @@ void CMPXCollectionViewHgImp::ConstructL()
     MPX_TRAP( iErrorAttachAssignMenu, iServiceHandler->AttachMenuL( R_MPX_USE_AS_CASCADE,
                                                R_MPX_AIW_ASSIGN_INTEREST ) );
 
-    iNaviPane =
-        static_cast<CAknNavigationControlContainer*>
-        ( iAvkonViewAppUi->StatusPane()->ControlL(
-            TUid::Uid( EEikStatusPaneUidNavi ) ) );
-    iNaviDecorator = iNaviPane->CreateNavigationLabelL( KNullDesC );
-    //Create label to change text in Navi pane
-    iNaviLabel = static_cast<CAknNaviLabel*>
-            ( iNaviDecorator->DecoratedControl() );
 
     TInt flags( 0 );
     CRepository* repository = CRepository::NewL( KCRUidMPXMPFeatures );
@@ -644,14 +627,7 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
         {
         CMPXCommonListBoxArrayBase* listboxArray( iContainer->ListBoxArray() );
         const CMPXMedia& containerMedia( listboxArray->ContainerMedia() );
-
-        TMPXGeneralType containerType(
-            containerMedia.ValueTObjectL<TMPXGeneralType>(
-                KMPXMediaGeneralType ) );
-        TMPXGeneralCategory containerCategory(
-            containerMedia.ValueTObjectL<TMPXGeneralCategory>(
-                KMPXMediaGeneralCategory ) );
-
+        
         const TMPXItemId containerId = containerMedia.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
 
         HBufC* promptTxt( NULL );
@@ -662,8 +638,8 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
         CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
         CleanupStack::PushL( path );
 
-        if ( containerType == EMPXItem && containerCategory == EMPXAlbum )    
-            {             
+        if ( iContainer->IsTBoneView() )
+            {
              //get the media object of the selected track in TBone View
             CMPXMedia* albumTrack = iContainer->SelectedItemMediaL();
             
@@ -680,8 +656,18 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
                 TMPXItemId trackId = albumTrack->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
                 const TDesC& trackTitle( albumTrack->ValueText( KMPXMediaGeneralTitle ) );
                 // create the item path to delete
-                 path->Back();
-                 path->Back();
+
+                 if ( path->Levels() == 3 )
+					{
+					path->Back();
+					}
+				 else if (path->Levels() == 4)
+					{
+					path->Back();
+					path->Back();
+					}
+
+
                  path->AppendL(containerId);
                  path->AppendL(trackId);
 
@@ -717,9 +703,6 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
                     if(iCachedCommand != aCommand)
                         {
                         iIsWaitNoteCanceled = EFalse;
-                        StartProgressNoteL();
-                        TPtr buf = waitNoteText->Des();
-                        UpdateProcessL(0, buf);
                         }
                     if ( !iIsWaitNoteCanceled )
                         {
@@ -820,6 +803,8 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
         TInt waitNoteCBA( R_AVKON_SOFTKEYS_EMPTY );
         MPX_DEBUG2( "CMPXCollectionViewHgImp::DeleteSelectedItemsL delete array count = %d", arrayCount );
 
+        // delete single song, not show wait note
+        TBool singleSong( EFalse );
         TMPXGeneralType containerType(
             containerMedia.ValueTObjectL<TMPXGeneralType>(
                 KMPXMediaGeneralType ) );
@@ -921,6 +906,11 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
                 if ( ( type == EMPXItem && category == EMPXSong ) ||
                     ( type == EMPXItem && category == EMPXPlaylist ) )
                     {
+                    // delete single song
+                    if ( type == EMPXItem && category == EMPXSong )
+                        {
+                        singleSong = ETrue;
+                        }
                     // tracks level, or deleting a playlist
                     waitNoteText = StringLoader::LoadLC(
                         R_MPX_QTN_ALBUM_WAITING_DELETING, title );
@@ -1039,9 +1029,13 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
             if(iCachedCommand != aCommand)
                 {
                 iIsWaitNoteCanceled = EFalse;
-                StartProgressNoteL();
-				TPtr buf = waitNoteText->Des();
-				UpdateProcessL(0, buf);
+                // If delete one song, don't show progress note.
+                if ( !singleSong )
+                    {
+                    StartProgressNoteL();
+                    TPtr buf = waitNoteText->Des();
+                    UpdateProcessL(0, buf);
+                    }
                 }
 
                 if ( !iIsWaitNoteCanceled )
@@ -1261,36 +1255,6 @@ void CMPXCollectionViewHgImp::HandleError( TInt aError )
     }
 
 // ---------------------------------------------------------------------------
-// Updates the navi pane
-// ---------------------------------------------------------------------------
-//
-void CMPXCollectionViewHgImp::UpdateNaviPaneL()
-    {
-    MPX_FUNC( "CMPXCollectionViewHgImp::UpdateNaviPaneL" );
-    if ( iContainer &&
-        (iViewUtility->ActiveViewType() !=
-                       TUid::Uid( KMPXPluginTypeAddSongsEditorUid )) &&
-        (iViewUtility->ActiveViewType() !=
-                      TUid::Uid( KMPXPluginTypeAlbumArtEditorUid )) &&
-        (iViewUtility->ActiveViewType() !=
-                      TUid::Uid( KMPXPluginTypeMetadataEditorUid ))
-       )
-        {
-        MPX_DEBUG2("CMPXCollectionViewHgImp::UpdateNaviPaneL updating %d", iDuration);
-        if ( iDuration )
-            {
-            iNaviLabel->SetTextL( *iDuration );
-            iNaviPane->PushL( *iNaviDecorator );
-            }
-        else
-            {
-            iNaviPane->Pop( iNaviDecorator );
-            }
-        iNaviPane->DrawNow();
-        }
-    }
-
-// ---------------------------------------------------------------------------
 // Updates the title pane
 // ---------------------------------------------------------------------------
 //
@@ -1496,7 +1460,6 @@ void CMPXCollectionViewHgImp::UpdateReorderNaviPaneL()
     iDuration = StringLoader::LoadL(
         R_MPX_CUI_POSITION_COUNTER_TXT, *params );
     CleanupStack::PopAndDestroy( params );
-    UpdateNaviPaneL();
     }
 
 // ---------------------------------------------------------------------------
@@ -1586,10 +1549,6 @@ void CMPXCollectionViewHgImp::DeactivateReorderGrabbedModeL( TBool aExit )
             delete iOriginalDuration;
             iOriginalDuration = NULL;
             }
-        if ( iViewUtility->ActiveViewType() == TUid::Uid( KMPXPluginTypeCollectionUid ) )
-            {
-            UpdateNaviPaneL();
-            }
         iContainer->ActivateReorderMode( EFalse );
         iContainer->EnableFindBox( ETrue );
         }
@@ -1633,7 +1592,7 @@ void CMPXCollectionViewHgImp::DisplayDetailsDialogL( MDesC16Array& aDataArray,
         list, R_AVKON_SOFTKEYS_OK_EMPTY,
         AknPopupLayouts::EMenuGraphicHeadingWindow);
     CleanupStack::PushL( popupList );
-    list->ConstructL( popupList, CEikListBox::ELeftDownInViewRect );
+    list->ConstructL( popupList, EAknListBoxViewerFlags );
     list->CreateScrollBarFrameL( ETrue );
     list->ScrollBarFrame()->SetScrollBarVisibilityL(
         CEikScrollBarFrame::EOff,
@@ -2897,17 +2856,26 @@ TBool CMPXCollectionViewHgImp::FileDetailsOptionVisibilityL()
         CMPXCollectionViewListBoxArray* array =
             static_cast<CMPXCollectionViewListBoxArray*>(
             iContainer->ListBoxArray() );
-        const CMPXMedia& media = array->MediaL(
-            iContainer->CurrentLbxItemIndex() );
 
-        if ( media.IsSupported( KMPXMediaGeneralFlags ) )
+        TInt currentItem = iContainer->CurrentLbxItemIndex();
+        if ( currentItem > KErrNotFound )
             {
-            TUint flags( media.ValueTObjectL<TUint>( KMPXMediaGeneralFlags ) );
-            if ( ( flags ) & ( KMPXMediaGeneralFlagsIsMissingDetails ) )
+            const CMPXMedia& media = array->MediaL( currentItem );
+
+            if ( media.IsSupported( KMPXMediaGeneralFlags ) )
                 {
-                isHidden = ETrue;
+                TUint flags( media.ValueTObjectL<TUint>( KMPXMediaGeneralFlags ) );
+                if ( ( flags ) & ( KMPXMediaGeneralFlagsIsMissingDetails ) )
+                    {
+                    isHidden = ETrue;
+                    }
                 }
             }
+        else
+            {
+            isHidden = ETrue;
+            }
+
         }
     return isHidden;
     }
@@ -3366,8 +3334,8 @@ void CMPXCollectionViewHgImp::PrepareMediaForSelectedItemsL( CMPXMedia& aMedia, 
     CleanupStack::PopAndDestroy( path );
     
     //support for TBone view add to playlist
-    if ( aContainerCategory == EMPXAlbum && aContainerType == EMPXItem)
-        { 	 
+    if ( iContainer->IsTBoneView() )
+        {
         CMPXMedia* media = iContainer->SelectedItemMediaL();
         if ( media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) == KMPXInvalidItemId )
            {
@@ -4014,7 +3982,6 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
             // USB flags
             //
 	       CEikMenuBar* menuBar( MenuBar() );
-#ifdef SINGLE_CLICK_INCLUDED
             if(iContainer)
                 {
                 iContainer->EnableMarking( EFalse );
@@ -4023,16 +3990,6 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
                 {
                 menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
                 }
-#else
-            if(iContainer)
-                {
-            	iContainer->EnableMarking( ETrue );
-                }
-            if(menuBar)
-                {
-            menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR );
-                }
-#endif
 	        TBool IsUSBEvent( EFalse );
             if( type == EMcMsgUSBMassStorageStart || type == EMcMsgUSBMTPStart )
                 {
@@ -4273,9 +4230,16 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                     }
                 else if ( cba )
                     {
-                    cba->SetCommandSetL(
-                        ( cpath->Levels() == 3 && !iIsEmbedded ) ?
-                        R_MPX_OPTIONS_HIDE_CBA : R_AVKON_SOFTKEYS_OPTIONS_BACK );
+                    if ( iContainer->IsTBoneView() )
+                        {
+                        cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK );
+                        }
+                    else
+                        {
+                        cba->SetCommandSetL(
+                            ( cpath->Levels() == 3 && !iIsEmbedded ) ?
+                            R_MPX_OPTIONS_HIDE_CBA : R_AVKON_SOFTKEYS_OPTIONS_BACK );
+                        }
                     cba->MakeVisible( ETrue );
                     cba->DrawDeferred();
                     }
@@ -4416,13 +4380,8 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                 else
                     {
                     // tracks view
-#ifdef SINGLE_CLICK_INCLUDED
                     iContainer->EnableMarking( EFalse );
                     menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
-#else
-                    iContainer->EnableMarking( ETrue );
-                    menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR );
-#endif
                     resId = R_MPX_COLLECTION_SONG_LBX_EMPTYTEXT;
 #ifdef __ENABLE_MSK
                     mskId = R_QTN_MSK_PLAY;
@@ -4608,13 +4567,6 @@ void CMPXCollectionViewHgImp::HandleOpenL(
             }
         }
 
-	MPX_DEBUG1( "HandleOpenL CheckingTimer" );
-    if ( iTimer && !iTimer->IsActive() )
-		{
-		MPX_DEBUG1( "HandleOpenL Starting" );
-		iTimer->Start( KMPXTimeoutTimer, KMPXTimeoutTimer, TCallBack( IADCheckTimerCallBack, this));
-		}
-
     MPX_PERF_CHECKPT("Collection View opened");
     }
 
@@ -4662,7 +4614,6 @@ void CMPXCollectionViewHgImp::HandleCollectionMediaL(
                         iDuration = iCommonUiHelper->DisplayableDurationInTextL( duration/KMilliSecondsToSeconds );
                         }
                     }
-                UpdateNaviPaneL();
                 break;
                 }
             case EMPXOpMediaLSend:
@@ -5245,13 +5196,11 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             OpenPodcastsL();
             break;
             }
-#ifdef SINGLE_CLICK_INCLUDED
         case EMPXCmdPlayItem:
             {
             iContainer->HandleItemCommandL(EMPXCmdPlay);
             break;
             }
-#endif
         case EMPXCmdCreatePlaylist:
             {
             iCurrentPlaylistOp = EMPXOpPLCreating;
@@ -5298,9 +5247,9 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             if ( containerMedia.IsSupported( KMPXMediaGeneralCategory ) )
                  {
                  containerCategory = containerMedia.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory );
-                 } 
-                            
-            if ( mediaCategory == EMPXSong || (containerCategory == EMPXAlbum && containerType== EMPXItem) )
+                 }
+
+            if ( mediaCategory == EMPXSong || iContainer->IsTBoneView() )
                 {
                 CMPXMedia* tracks = CMPXMedia::NewL();
                 CleanupStack::PushL( tracks );
@@ -5576,6 +5525,18 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             }
         case EAknSoftkeyBack:
             {
+			if (iContainer->OfferCommandL(EAknSoftkeyBack))
+				{
+				CEikButtonGroupContainer* cba = Cba();
+				if (cba)
+					{
+					cba->SetCommandSetL( R_MPX_OPTIONS_HIDE_CBA );
+					cba->MakeVisible( ETrue );
+					cba->DrawDeferred();
+					}
+				break;
+				}
+
             iMarkedAll = EFalse;
             if( iIsDeleting )
             	{
@@ -5880,7 +5841,7 @@ void CMPXCollectionViewHgImp::DoActivateL(
 
     if ( !iContainer )
         {
-        iContainer = CMPXCollectionViewHgContainer::NewL( this, this, iIsEmbedded );
+        iContainer = CMPXCollectionViewHgContainer::NewL( this, this, this, iIsEmbedded );
         iContainer->SetCbaHandler( this );
         }
     iContainer->SetMopParent( this );
@@ -5913,11 +5874,13 @@ void CMPXCollectionViewHgImp::DoActivateL(
 #endif
 
 	UpdateTitlePaneL();
-    UpdateNaviPaneL();
 
 
     if ( iViewUtility->PreviousViewType().iUid == KMPXPluginTypePlaybackUid )
         {
+		// Set the previous view for animatin purposes.
+		iContainer->SetPreviousViewId(TUid::Uid(KMPXPluginTypePlaybackUid));
+
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
         // If previous view is Playback view, it can only be normal playback view
         // Podcast shouldn't be highlighted in any case.
@@ -6004,7 +5967,6 @@ void CMPXCollectionViewHgImp::DoDeactivate()
         {
         delete iDuration;
         iDuration = NULL;
-        TRAP_IGNORE(UpdateNaviPaneL());
         }
 
     // Cleanup view deactivation observer
@@ -6062,6 +6024,32 @@ void CMPXCollectionViewHgImp::HandleBacksteppingActivation()
 #endif // BACKSTEPPING_INCLUDED
    }
 
+
+
+// -----------------------------------------------------------------------------
+// checks if Now Playing option should be shown
+// -----------------------------------------------------------------------------
+//
+TBool CMPXCollectionViewHgImp::NowPlayingOptionVisibilityL()
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::SendOptionVisibilityL" );
+    TBool isHidden( iContainer->TotalListItemCount() < 1 );
+
+	// First check if there's a local playback source
+	MMPXSource* source( iPlaybackUtility->Source() );
+	if ( source == 0 )
+		{
+		// If no local playback, check if there's a progressive download playback source.
+		MMPXPlaybackUtility* pdPlaybackUtility;
+		pdPlaybackUtility = MMPXPlaybackUtility::UtilityL( TUid::Uid( KProgressDownloadUid ) );
+		isHidden = pdPlaybackUtility->Source() ? EFalse : ETrue;
+		pdPlaybackUtility->Close();
+		}
+
+    return isHidden;
+    }
+
+
 // ---------------------------------------------------------------------------
 // Handle initialing a music menu pane.
 // ---------------------------------------------------------------------------
@@ -6077,6 +6065,9 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 	TMPXGeneralCategory containerCategory(
 		containerMedia.ValueTObjectL<TMPXGeneralCategory>(
 			KMPXMediaGeneralCategory ) );
+			
+	TMPXGeneralType containerType(
+    	containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );			
 
 	switch ( containerCategory )
 		{
@@ -6084,8 +6075,18 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 			{
 			// playlist view
 			aMenuPane->SetItemDimmed( EMPXCmdGoToPlaylists, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+            aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, iGoToMusicShopOptionHidden );
+	        if (containerType != EMPXGroup ) // EMPXItem -> playlist tracks level
+			 {
+			  aMenuPane->SetItemDimmed( EMPXCmdGoToArtistAlbums, ETrue );
+			  aMenuPane->SetItemDimmed( EMPXCmdGoToAllSongs, ETrue );
+			  aMenuPane->SetItemDimmed( EMPXCmdGoToPodcasts, ETrue );
+			  aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
+			  aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+              aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue);
+			  aMenuPane->SetItemDimmed( EMPXCmdGoToMusicShop, ETrue );
+	          aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue); 
+			 }  
 			break;
 			}
 		case EMPXAlbum:
@@ -6093,20 +6094,42 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 			{
 			// Artists & Albums view
 			aMenuPane->SetItemDimmed( EMPXCmdGoToArtistAlbums, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
+            aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, iGoToMusicShopOptionHidden ); 
+			if ( iContainer->IsTBoneView() ) //TBone View
+			    {
+			    aMenuPane->SetItemDimmed( EMPXCmdGoToAllSongs, ETrue );
+			    aMenuPane->SetItemDimmed( EMPXCmdGoToPlaylists, ETrue );
+			    aMenuPane->SetItemDimmed( EMPXCmdGoToPodcasts, ETrue );
+			    aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
+			    aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue); 
+			    }    
 			break;
 			}
 		case EMPXGenre:
 			{
 			// Genre view
-			aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+        	aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
+            aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, iGoToMusicShopOptionHidden );    
+			if ( containerType != EMPXGroup ) // EMPXItem -> tracks level
+				{
+                aMenuPane->SetItemDimmed( EMPXCmdGoToAllSongs, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToArtistAlbums, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToPlaylists, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToPodcasts, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue);
+				aMenuPane->SetItemDimmed( EMPXCmdGoToMusicShop, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue); 
+				}
+			
 			break;
 			}
 		case EMPXSong:
 			{
+			// Song view and Genre Track view
 			aMenuPane->SetItemDimmed( EMPXCmdGoToAllSongs, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+            aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, iGoToMusicShopOptionHidden );
 			break;
 			}
 		default:
@@ -6115,6 +6138,678 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 			}
 		}
    	}
+// ---------------------------------------------------------------------------
+// Dynamically initialises a menu pane for the Album context
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
+    TInt aResourceId,
+    CEikMenuPane* aMenuPane )
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL" );
+    ASSERT( iContainer && aMenuPane != NULL);
+    TBool isListEmpty( iContainer->TotalListItemCount() == 0 );
+
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            HandleInitMusicMenuPaneL(aMenuPane);
+			if ( isListEmpty )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue);
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+
+				TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+				if ( landscapeOrientation )
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+					}
+				else
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+
+					TInt usbUnblockingStatus;
+					RProperty::Get( KMPXViewPSUid,
+									KMPXUSBUnblockingPSStatus,
+									usbUnblockingStatus);
+
+					if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
+					    {
+                        if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+                            {
+                            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+                            }
+                        else
+                            {
+                            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
+                            aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+                            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                            aMenuPane->SetItemDimmed( EMPXCmdPlayItem,
+                                    iContainer->IsTBoneView() ? ETrue : EFalse );
+                            }
+					    }
+					if ( iContainer->IsSelectedItemASong() && iContainer->IsTBoneView() )
+						{
+						if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+							{
+							aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+							aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+							}
+						else
+							{
+							aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
+							aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+							}
+						}
+					
+					//If Operator Music store exist, show the cascade menu with Nokia and Operator music store.
+					if ( iOperatorMusicStore )
+					    {
+					    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+					    }
+					else
+					    {
+					    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+					    }
+					}
+				}
+
+			break;
+			}
+
+		case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+			aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+ 			aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+			if( !iContainer->IsTBoneView()&& (iContainer->CurrentLbxItemIndex() > KErrNotFound))
+			    {  
+			     aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+			    } 
+		    break;
+			}
+        case R_MPX_ADD_TO_PL_SUB_MENU:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdAddToSavedPlaylist, !FindPlaylistsL() );
+            break;
+            }
+        default:
+            {
+            // Do nothing
+            break;
+            }
+		}
+	}
+
+// ---------------------------------------------------------------------------
+// Dynamically initialises a menu pane for the Playlist context
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL(
+    TInt aResourceId,
+    CEikMenuPane* aMenuPane )
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL" );
+
+    TBool isListEmpty( (iContainer->TotalListItemCount()) == 0 );
+
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            HandleInitMusicMenuPaneL(aMenuPane);
+
+			aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+			aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+
+			TInt usbUnblockingStatus;
+			RProperty::Get( KMPXViewPSUid,
+							KMPXUSBUnblockingPSStatus,
+							usbUnblockingStatus);
+			if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, EFalse );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+				}
+
+			TInt currentItem( iContainer->CurrentLbxItemIndex() );
+
+			CMPXCollectionViewListBoxArray* array =
+				static_cast<CMPXCollectionViewListBoxArray*>(
+				iContainer->ListBoxArray() );
+			const CMPXMedia& media = array->MediaL( currentItem );
+
+			if ( media.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
+				{
+				// check for auto playlist, disable delete
+				TMPXGeneralNonPermissibleActions attr(
+					media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+						KMPXMediaGeneralNonPermissibleActions ) );
+				if ( attr & EMPXWrite )
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+					}
+				}
+
+			TInt trackCount (0);
+			if( media.IsSupported(KMPXMediaGeneralCount) )
+				{
+				trackCount = media.ValueTObjectL<TInt>( KMPXMediaGeneralCount );
+				}
+			if( trackCount < 1 )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+				}
+
+			if ( iOperatorMusicStore )
+			    {
+			    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+			    }
+			else
+			    {
+			    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+			    }
+
+			break;
+			}
+
+		case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+			aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+
+			TInt currentItem( iContainer->CurrentLbxItemIndex() );
+
+			CMPXCollectionViewListBoxArray* array =
+				static_cast<CMPXCollectionViewListBoxArray*>(
+				iContainer->ListBoxArray() );
+			const CMPXMedia& media = array->MediaL( currentItem );
+
+			TInt usbUnblockingStatus;
+			RProperty::Get( KMPXViewPSUid,
+							KMPXUSBUnblockingPSStatus,
+							usbUnblockingStatus);
+			if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdRename, EFalse );
+				}
+
+			if ( media.IsSupported(
+				KMPXMediaGeneralNonPermissibleActions ) )
+				{
+				// check for auto playlist, disable delete
+				TMPXGeneralNonPermissibleActions attr(
+					media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+						KMPXMediaGeneralNonPermissibleActions ) );
+				if ( attr & EMPXWrite )
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+					// TODO: this should be an item specific command.
+					aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+					}
+				}
+			if ( array->IsItemBrokenLinkL( currentItem ) ||
+				array->IsItemCorruptedL( currentItem ) )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+                // TODO: this should be an item specific command.
+				aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+				}
+
+			break;
+			}
+        default:
+            {
+            // Do nothing
+            break;
+            }
+		}
+	}
+
+
+
+// ---------------------------------------------------------------------------
+// Dynamically initialises a menu pane for the Genre context
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DynInitMenuPaneGenreL(
+    TInt aResourceId,
+    CEikMenuPane* aMenuPane )
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL" );
+
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            HandleInitMusicMenuPaneL(aMenuPane);
+
+            aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+
+            if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
+                {
+                TInt usbUnblockingStatus;
+                RProperty::Get( KMPXViewPSUid,
+                                KMPXUSBUnblockingPSStatus,
+                                usbUnblockingStatus);
+                if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+                    {
+                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                   }
+                else
+                    {
+                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
+                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
+                    }
+                }
+            
+            if ( iOperatorMusicStore )
+                {
+                aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+                }
+            else
+                {
+                aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+                }
+			break;
+			}
+
+		case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+			aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+            
+            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+			break;
+			}
+        case R_MPX_ADD_TO_PL_SUB_MENU:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdAddToSavedPlaylist, !FindPlaylistsL() );
+            break;
+            }
+        default:
+            {
+            // Do nothing
+            break;
+            }
+		}
+	}
+
+
+// ---------------------------------------------------------------------------
+// Dynamically initialises a menu pane for the Songs context
+// Handling for any tracks view except playlist tracks.
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DynInitMenuPaneSongsL(
+    TInt aResourceId,
+    CEikMenuPane* aMenuPane )
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPaneAllSongsL" );
+
+    TBool isListEmpty( iContainer->TotalListItemCount() == 0 );
+    TInt selectionCount( 0 );
+    iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            HandleInitMusicMenuPaneL(aMenuPane);
+			if ( isListEmpty )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue);
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+
+				TInt usbUnblockingStatus;
+				RProperty::Get( KMPXViewPSUid,
+								KMPXUSBUnblockingPSStatus,
+								usbUnblockingStatus);
+
+				if ( iContainer->IsSelectedItemASong() )
+					{
+					if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
+						aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+						}
+					else
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
+						aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
+						aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+						}
+					}
+				if ( iOperatorMusicStore )
+				    {
+				    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+				    }
+				else
+				    {
+				    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+				    }
+				}
+
+			break;
+			}
+
+		case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+
+		
+			if ( iSelectionIndexCache)
+				{
+				selectionCount = iSelectionIndexCache->Count();
+				}
+			if ( selectionCount > 0 )
+				{
+				// multiple selection
+				aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdSongDetails,
+				        FileDetailsOptionVisibilityL() );
+				aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+
+				TInt currentItem( iContainer->CurrentLbxItemIndex() );
+				if ( currentItem > KErrNotFound )
+					{
+					CMPXCollectionViewListBoxArray* array =
+						static_cast<CMPXCollectionViewListBoxArray*>(
+						iContainer->ListBoxArray() );
+
+					if ( array->IsItemBrokenLinkL( currentItem ) ||
+						array->IsItemCorruptedL( currentItem ) )
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+						}
+					aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+					}
+				}
+			aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+			if (iServiceHandler->HandleSubmenuL(*aMenuPane))
+				{
+				return;
+				}
+
+			break;
+			}
+        case R_MPX_ADD_TO_PL_SUB_MENU:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdAddToSavedPlaylist, !FindPlaylistsL() );
+            break;
+            }
+        default:
+            {
+            // Do nothing
+            break;
+            }
+		}
+	}
+
+
+
+// ---------------------------------------------------------------------------
+// Dynamically initialises a menu pane for the playlist Songs context
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
+    TInt aResourceId,
+    CEikMenuPane* aMenuPane )
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL" );
+
+    TBool isListEmpty( iContainer->TotalListItemCount() == 0 );
+
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            HandleInitMusicMenuPaneL(aMenuPane);
+
+			if ( isListEmpty )
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, EFalse );
+				}
+			else
+				{
+                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+                aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+				
+				TInt usbUnblockingStatus;
+				RProperty::Get( KMPXViewPSUid,
+								KMPXUSBUnblockingPSStatus,
+								usbUnblockingStatus);
+
+				if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+					aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
+					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+					}
+				else
+					{
+					TInt selectionCount( 0 );
+					iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
+					if ( iSelectionIndexCache)
+						{
+						selectionCount = iSelectionIndexCache->Count();
+						}
+					// do not display add songs option when marking is on
+					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, selectionCount > 0 );
+
+					if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
+						aMenuPane->SetItemDimmed( EMPXCmdRemove, EFalse );
+						}
+					}
+
+				CMPXCollectionViewListBoxArray* array =
+					static_cast<CMPXCollectionViewListBoxArray*>(
+					iContainer->ListBoxArray() );
+				const CMPXMedia& containerMedia = array->ContainerMedia();
+
+				if ( containerMedia.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
+					{
+					// check for auto playlist, disable add, remove and reorder
+					TMPXGeneralNonPermissibleActions attr(
+						containerMedia.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+							KMPXMediaGeneralNonPermissibleActions ) );
+					if ( attr & EMPXWrite )
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+						aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+						}
+					}
+				}
+
+			break;
+			}
+
+		case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+
+			TInt selectionCount( 0 );
+			iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
+			if ( iSelectionIndexCache)
+				{
+				selectionCount = iSelectionIndexCache->Count();
+				}
+			if ( selectionCount > 0 )
+				{
+				// multiple selection
+				aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+				}
+			else
+				{
+				aMenuPane->SetItemDimmed( EMPXCmdSongDetails,
+					FileDetailsOptionVisibilityL() );
+
+				TInt currentItem( iContainer->CurrentLbxItemIndex() );
+
+				if ( currentItem > KErrNotFound )
+					{
+					CMPXCollectionViewListBoxArray* array =
+						static_cast<CMPXCollectionViewListBoxArray*>(
+						iContainer->ListBoxArray() );
+					if ( array->IsItemBrokenLinkL( currentItem ) ||
+						array->IsItemCorruptedL( currentItem ) )
+						{
+						aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+						}
+					aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+					}
+				}
+			if (iServiceHandler->HandleSubmenuL(*aMenuPane))
+				{
+				return;
+				}
+
+			break;
+			}
+        default:
+            {
+            // Do nothing
+            break;
+            }
+		}
+	}
+
 // ---------------------------------------------------------------------------
 // From MEikMenuObserver
 // Dynamically initialises a menu pane.
@@ -6125,701 +6820,82 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
     CEikMenuPane* aMenuPane )
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPaneL" );
+
     CMPXCollectionViewListBoxArray* array =
         static_cast<CMPXCollectionViewListBoxArray*>(
         iContainer->ListBoxArray() );
-    TInt currentItem( iContainer->CurrentLbxItemIndex() );
-    TBool isListEmpty( currentItem < 0 );
-    TInt selectionCount( 0 );
-	
-    iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
-    if ( iSelectionIndexCache)
-        {
-        selectionCount = iSelectionIndexCache->Count();
-        }
+	const CMPXMedia& containerMedia = array->ContainerMedia();
+	TMPXGeneralType containerType(
+		containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
+	TMPXGeneralCategory containerCategory(
+		containerMedia.ValueTObjectL<TMPXGeneralCategory>(
+			KMPXMediaGeneralCategory ) );
 
     TInt usbUnblockingStatus;
     RProperty::Get( KMPXViewPSUid,
                     KMPXUSBUnblockingPSStatus,
                     usbUnblockingStatus);
 
+	// We first construct options menu based on collection browsing context.
+	// For resource R_MPX_COLLECTION_VIEW_MENU_1, R_MPX_COLLECTION_VIEW_MENU_2.
+	if ( containerType == EMPXGroup )
+		{
+		switch (containerCategory)
+			{
+			case EMPXCollection:
+				break;
+			case EMPXArtist:
+				break;
+			case EMPXAlbum:
+			    // Artist & Album view
+				DynInitMenuPaneAlbumL(aResourceId, aMenuPane);
+				break;
+			case EMPXPlaylist:
+			    // Playlist view
+				DynInitMenuPanePlaylistL(aResourceId, aMenuPane);
+				break;
+			case EMPXSong:
+			    // Songs (All Songs) View
+				DynInitMenuPaneSongsL(aResourceId, aMenuPane);
+				break;
+			case EMPXGenre:
+			    // Genre View
+				DynInitMenuPaneGenreL(aResourceId, aMenuPane);
+				break;
+			case EMPXComposer:
+				break;
+			default:
+				User::Leave(KErrNotSupported);
+				break;
+			}
+		}
+	else if ( containerType == EMPXItem )
+		{
+		switch (containerCategory)
+			{
+			case EMPXSong:
+				break;
+			case EMPXArtist:
+				break;
+			case EMPXPlaylist:
+			    // Playlist tracks view
+				DynInitMenuPanePlaylistSongsL(aResourceId, aMenuPane);
+				break;
+			case EMPXAlbum:
+			case EMPXGenre:
+			case EMPXComposer:
+			    // Other tracks view
+				DynInitMenuPaneSongsL(aResourceId, aMenuPane);
+				break;
+			default:
+				User::Leave(KErrNotSupported);
+				break;
+			}
+		}
+
+	// Handle other menu resources.
     switch ( aResourceId )
         {
-        case R_MPX_COLLECTION_VIEW_MENU_1:
-            {
-            const CMPXMedia& containerMedia = array->ContainerMedia();
-            TMPXGeneralType containerType(
-                containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
-            TMPXGeneralCategory containerCategory(
-                containerMedia.ValueTObjectL<TMPXGeneralCategory>(
-                    KMPXMediaGeneralCategory ) );
-
-            HandleInitMusicMenuPaneL(aMenuPane);
-
-            MPX_DEBUG3( "CMPXCollectionViewHgImp::DynInitMenuPaneL container type = %d, category = %d", containerType, containerCategory );
-
-            // Always dim the find in hg implementation
-            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-
-			// Determine if we should hide "Goto now playing" option.
-            TBool hideNowPlaying(EFalse);
-			MMPXSource* source( iPlaybackUtility->Source() );
-            if ( source == 0 )
-				{
-				MMPXPlaybackUtility* pdPlaybackUtility;
-				pdPlaybackUtility = MMPXPlaybackUtility::UtilityL( TUid::Uid( KProgressDownloadUid ) );
-				hideNowPlaying = pdPlaybackUtility->Source() ? EFalse : ETrue;
-				pdPlaybackUtility->Close();
-				}
-            if (usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive)
-                {
-                aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
-                }
-
-			aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, hideNowPlaying );
-
-            if ( !isListEmpty )
-                {
-                const CMPXMedia& media = array->MediaL( currentItem );
-                TMPXGeneralType type(
-                    media.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
-                TMPXGeneralCategory category(
-                    media.ValueTObjectL<TMPXGeneralCategory>(
-                        KMPXMediaGeneralCategory ) );
-                MPX_DEBUG3( "CMPXCollectionViewHgImp::DynInitMenuPaneL item type = %d, category = %d", type, category );
-#ifdef SINGLE_CLICK_INCLUDED
-                if ( containerType == EMPXGroup && containerCategory == EMPXAlbum )
-                    {
-                    // Artists & Albums view
-                    switch ( category )
-                        {
-                        case EMPXAlbum:
-                            {
-                            TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
-                            if ( landscapeOrientation )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );                            
-                                }
-                            else
-                                {
-                                if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
-                                    }
-                                else
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
-                                    }
-                                }
-                            break;
-                            }
-                        case EMPXCommand:
-                            {
-                            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-                            break;
-                            }
-                        }
-                    }
-                else
-#endif
-                if ( containerType == EMPXItem && containerCategory == EMPXPlaylist )
-                    {
-                    // in playlist tracks view
-                    // enable reordering and add songs in playlist view
-                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                    if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                        {
-                        aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                        aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                        aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                        aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                        aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-#ifdef SINGLE_CLICK_INCLUDED
-                        aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-#endif
-
-                        }
-                    else
-                        {
-                        // do not display add songs option when marking is on
-                        aMenuPane->SetItemDimmed( EMPXCmdAddSongs, selectionCount > 0 );
-                        TInt totalItemCount( iContainer->TotalListItemCount() );
-                        // display reorder option only when more than 1 item is visible
-                        // do not display reorder option when marking is on
-#ifdef SINGLE_CLICK_INCLUDED
-                        aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-#else
-                        aMenuPane->SetItemDimmed( EMPXCmdReorder,
-                            ( totalItemCount > 1 && selectionCount == 0 ) ?
-                            EFalse : ETrue );
-#endif
-                        aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                        aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                        aMenuPane->SetItemDimmed( EMPXCmdRemove, EFalse );
-#ifdef SINGLE_CLICK_INCLUDED
-                        aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-#endif
-						}
-
-                    if ( containerMedia.IsSupported(
-                        KMPXMediaGeneralNonPermissibleActions ) )
-                        {
-                        // check for auto playlist, disable add, remove and reorder
-                        TMPXGeneralNonPermissibleActions attr(
-                            containerMedia.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-                                KMPXMediaGeneralNonPermissibleActions ) );
-                        if ( attr & EMPXWrite )
-                            {
-                            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                            }
-                        }
-                    }
-                else if ( type == EMPXItem )
-                    {
-                    switch ( category )
-                        {
-                        case EMPXPlaylist:
-                            {
-                            // playlist view
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                }
-                            if ( media.IsSupported(
-                                KMPXMediaGeneralNonPermissibleActions ) )
-                                {
-                                // check for auto playlist, disable delete
-                                TMPXGeneralNonPermissibleActions attr(
-                                    media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-                                        KMPXMediaGeneralNonPermissibleActions ) );
-                                if ( attr & EMPXWrite )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                    }
-                                }
-                            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                            TInt trackCount (0);                   
-                            if(media.IsSupported(KMPXMediaGeneralCount))
-                                {
-                                trackCount = media.ValueTObjectL<TInt>( KMPXMediaGeneralCount );
-                                } 
-                            if( trackCount < 1 )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-                                }   
-                            break;
-                            }
-#ifdef SINGLE_CLICK_INCLUDED
-                        case EMPXAlbum:
-                            {
-                            // Album > Tracks view
-                            if ( iContainer->IsSelectedItemASong() )
-                                {                            
-                                if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-                                    }
-                                else
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                    aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-                                    }
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );                                
-                                }
-                            break;
-                            }
-                        case EMPXGenre:
-                            {
-                            // genre view
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                }
-                            break;
-                            }
-#endif
-                            
-#ifdef SINGLE_CLICK_INCLUDED
-                        case EMPXArtist:  
-                        case EMPXComposer:
-#else
-                        case EMPXAlbum:
-                        case EMPXArtist:
-                        case EMPXGenre:
-                        case EMPXComposer:
-#endif
-                            {
-                            // artist, album, genre, composer view
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                                }
-                            break;
-                            }
-                        case EMPXSong:
-                            {
-                            // any tracks view except playlist tracks
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-#ifdef SINGLE_CLICK_INCLUDED
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-#endif
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-                                aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-#ifdef SINGLE_CLICK_INCLUDED
-                                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-#endif
-                                }
-                            break;
-                            }
-                        case EMPXCommand:
-                            {
-							aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-							aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-#ifdef SINGLE_CLICK_INCLUDED
-                            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-#endif
-							
-                            }
-                            break;
-                        default:
-                            {
-                            ASSERT( 0 );
-                            break;
-                            }
-                        }
-                    }
-
-                if ( iUpnpFrameworkSupport )
-                    {
-                    HandleDynInitUpnpL( aResourceId, *aMenuPane );
-                    }
-                else
-                    {
-                    aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-                    aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-                    }
-                }
-            else
-                {
-                // list empty
-
-                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist,
-                    ( containerType == EMPXGroup && containerCategory == EMPXPlaylist) ? // in playlist view?
-                    EFalse : ETrue );
-                if ( containerType == EMPXItem && containerCategory == EMPXPlaylist)
-                    {
-                    // in playlist tracks view
-                    if ( containerMedia.IsSupported(
-                        KMPXMediaGeneralNonPermissibleActions ) )
-                        {
-                        // check for auto playlist, disable add songs
-                        TMPXGeneralNonPermissibleActions attr(
-                            containerMedia.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-                                KMPXMediaGeneralNonPermissibleActions ) );
-                        if ( attr & EMPXWrite )
-                            {
-                            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                            }
-                        }
-                    }
-                else
-                    {
-                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                    }
-                aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
-                }
-            break;
-            }
-        case R_MPX_COLLECTION_VIEW_MENU_2:
-            {
-            if ( !isListEmpty )
-                {
-                const CMPXMedia& media = array->MediaL( currentItem );
-                TMPXGeneralType type(
-                    media.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
-                TMPXGeneralCategory category(
-                    media.ValueTObjectL<TMPXGeneralCategory>(
-                        KMPXMediaGeneralCategory ) );
-                const CMPXMedia& containerMedia = array->ContainerMedia();
-                TMPXGeneralType containerType(
-                    containerMedia.ValueTObjectL<TMPXGeneralType>(
-                        KMPXMediaGeneralType ) );
-                TMPXGeneralCategory containerCategory(
-                    containerMedia.ValueTObjectL<TMPXGeneralCategory>(
-                        KMPXMediaGeneralCategory ) );
-                MPX_DEBUG3( "CMPXCollectionViewHgImp::DynInitMenuPaneL container type = %d, category = %d", containerType, containerCategory );
-                MPX_DEBUG3( "CMPXCollectionViewHgImp::DynInitMenuPaneL item type = %d, category = %d", type, category );
-                if ( type == EMPXItem)
-                    {
-                    switch ( category )
-                        {
-                        case EMPXPlaylist:
-                            {
-                            // playlist view
-                            aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                                }
-                            else
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, EFalse );
-                                }
-                            aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, EFalse );
-                            if ( media.IsSupported(
-                                KMPXMediaGeneralNonPermissibleActions ) )
-                                {
-                                // check for auto playlist, disable delete
-                                TMPXGeneralNonPermissibleActions attr(
-                                    media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-                                        KMPXMediaGeneralNonPermissibleActions ) );
-                                if ( attr & EMPXWrite )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-                                    }
-                                }
-                            if ( array->IsItemBrokenLinkL( currentItem ) ||
-                                array->IsItemCorruptedL( currentItem ) )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-                                }
-                            break;
-                            }
-                        case EMPXAlbum:
-                        case EMPXArtist:
-                        case EMPXGenre:
-                        case EMPXComposer:
-                            {
-                            // artist, album, genre, composer view
-                            aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                            if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                                }
-                            else
-                                {
-#ifdef SINGLE_CLICK_INCLUDED
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-#else
-                                aMenuPane->SetItemDimmed( EMPXCmdRename, EFalse );                              
-#endif
-                                }
-#ifndef SINGLE_CLICK_INCLUDED
-                            if ( category == EMPXAlbum )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, EFalse );
-                                // if unknown entry exist in album level, disable album art
-                                // for last item, if unknown exist it'll be at this
-                                // location
-                                if ( array->IsCategoryUnknownExist() &&
-                                    category == EMPXAlbum &&
-                                    currentItem == iContainer->TotalListItemCount() - 1 )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                                    }
-                                if ( containerCategory == EMPXArtist )
-                                    {
-                                    // in artist/album view, do not display album art/rename
-                                    // option on All ( first item in list )
-                                    if ( currentItem == 0 )
-                                        {
-                                        aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                                        aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                                        }
-                                    }
-                                }
-                            else
-#endif
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                                }
-#ifdef SINGLE_CLICK_INCLUDED
-                            if ( category == EMPXComposer )
-#else
-                            if ( ( category == EMPXGenre ) || ( category == EMPXComposer ) )
-#endif
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                                }
-#ifdef SINGLE_CLICK_INCLUDED
-                            else if ( category == EMPXGenre )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, EFalse );
-                                }
-#endif
-                            else
-                                {
-                                if ( array->IsCategoryUnknownExist() &&
-                                    ( category == EMPXAlbum || category == EMPXArtist ) &&
-                                    currentItem == iContainer->TotalListItemCount() - 1 )
-                                    {
-                                    // if unknown entry exist in artist or album level
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                                    }
-                                else
-                                    {
-#ifdef SINGLE_CLICK_INCLUDED
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-#else
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, EFalse );
-#endif
-                                    }
-                                }
-                            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-
-                            if ( !iUsingNokiaService )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                                }
-                            break;
-                            }
-                        case EMPXSong:
-                            {
-                            // any tracks view
-#ifdef __ENABLE_MSK
-                            // show context menu if MSK selected and there are
-                            // multiple selections; otherwise, show options menu
-                            if ( ( selectionCount > 0 ) && iShowContextMenu )
-                                {
-                                MenuBar()->SetMenuType(CEikMenuBar::EMenuContext);
-                                iShowContextMenu = EFalse;
-                                }
-                            else
-                                {
-                                MenuBar()->SetMenuType(CEikMenuBar::EMenuOptions);
-                                }
-#endif //__ENABLE_MSK
-
-                            if ( selectionCount > 0 )
-                                {
-                                // multiple selection
-                                aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                                }
-                            else
-                                {
-                                TBool fileDetailVisibility( FileDetailsOptionVisibilityL() );
-                                // use the same criteria for showing/hiding song details
-                                // and album art
-                                aMenuPane->SetItemDimmed( EMPXCmdSongDetails,
-                                    fileDetailVisibility );
-                                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-#ifdef SINGLE_CLICK_INCLUDED
-                                aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );  
-#else
-                                TBool vis = ETrue;
-                                TRAPD( err, vis = SetAsRingToneOptionVisibilityL() );
-
-                                if ( err )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade,
-                                        ETrue); // dim the option if any sql error.
-                                    }
-                                else
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade,
-                                        vis);
-                                    }
-#endif
-                                
-                                if ( array->IsItemBrokenLinkL( currentItem ) ||
-                                    array->IsItemCorruptedL( currentItem ) )
-                                    {
-                                    aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue ); 
-                                    }
-                                else // Show this option even when song is DRM protected
-                                    {
-#ifdef SINGLE_CLICK_INCLUDED
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-#else                                    
-                                    aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, EFalse );
-#endif
-                                    }
-                                }
-                            aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-                            if ( !iUsingNokiaService )
-                                {
-                                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                                }
-                            if (iServiceHandler->HandleSubmenuL(*aMenuPane))
-                                {
-                                return;
-                                }
-                            break;
-                            }
-                        case EMPXCommand:
-                            {
-                            aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-
-                            }
-                            break;
-                        default:
-                            {
-                            // other types, not handled
-                            break;
-                            }
-                        }
-                    }
-                }
-            else
-                {
-                // list empty
-                aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-                }
-            aMenuPane->SetItemDimmed( EAknCmdExit, iExitOptionHidden );
-            break;
-            }
         case R_MPX_ADD_TO_PL_SUB_MENU:
             {
             aMenuPane->SetItemDimmed( EMPXCmdAddToSavedPlaylist, !FindPlaylistsL() );
@@ -6833,43 +6909,13 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
                 }
             break;
             }
-        case R_MPX_COLLECTION_VIEW_MUSIC_MENU:
-            {
-            MMPXPlaybackUtility* pdPlaybackUtility;
-            pdPlaybackUtility = MMPXPlaybackUtility::UtilityL( TUid::Uid( KProgressDownloadUid ) );
-            MMPXSource* pdsource( pdPlaybackUtility->Source() );
-            MMPXSource* source( iPlaybackUtility->Source() );
-            TBool hideNowPlaying;
-            hideNowPlaying = ( (pdsource == 0)
-                           &&  (source == 0));
-            pdPlaybackUtility->Close();
-            if ( hideNowPlaying )
-                {
-                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
-                }
-            if (usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive)
-                {
-                aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
-                }
-            aMenuPane->SetItemDimmed( EAknCmdExit, iExitOptionHidden );
-            aMenuPane->SetItemDimmed(
-                EMPXCmdGoToMusicShop, iGoToMusicShopOptionHidden );
-            if (iOperatorMusicStore)
-            	{
-            	aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-            	}
-            else
-            	{
-            	aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-          		}
-            break;
-            }
         case R_MPX_COLLECTION_VIEW_EMBEDDED_PLAYLIST_VIEW:
             {
             // if it's from browser/messaging, display save option if
             // it has not been saved
             aMenuPane->SetItemDimmed( EMPXCmdSavePlaylist,
                 ( !iCommonUiHelper->IsHostMessagingBrowserL() || !MPXTlsHelper::NeedSave() ) );
+            TBool isListEmpty( iContainer->TotalListItemCount() == 0 );
             aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, isListEmpty );
 
             break;
@@ -6896,20 +6942,6 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
             }
         }
 
-#ifndef SINGLE_CLICK_INCLUDED
-		if ( iServiceHandler->IsAiwMenu(aResourceId) && aResourceId == R_MPX_USE_AS_CASCADE )
-            {
-            MPX_DEBUG1( "CMPXCollectionViewHgImp::DynInitMenuPaneL(): Aiw menu for assign" );
-            CAiwGenericParamList& paramList = iServiceHandler->InParamListL();
-            FillAiwParametersL(paramList);
-            iServiceHandler->InitializeMenuPaneL(*aMenuPane,
-                                                aResourceId,
-                                                EMPXCmdAiwCmdAssign,
-                                                paramList);
-            MPX_DEBUG1( "CMPXCollectionViewHgImp::DynInitMenuPaneL(): Aiw menu for assign end" );
-            }
-#endif
-
     if (!(aResourceId == R_AVKON_MENUPANE_MARKABLE_LIST && usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive))
         {
         // Custom handling of menu pane for markable lists
@@ -6934,11 +6966,7 @@ void CMPXCollectionViewHgImp::HandleListBoxEventL(
     if ( iContainer )
         {
         //to keep/change focus on right song in rename/remove
-#ifdef SINGLE_CLICK_INCLUDED
         if ( aEventType == EEventItemSingleClicked )         
-#else
-        if ( aEventType == EEventItemClicked )
-#endif
             {
             if ( !iHandlingKeyEvent && iCollectionCacheReady )
                 {
@@ -6957,9 +6985,7 @@ void CMPXCollectionViewHgImp::HandleListBoxEventL(
             }
 
         if ( aEventType == EEventEnterKeyPressed || aEventType == EEventItemDoubleClicked
-#ifdef SINGLE_CLICK_INCLUDED
             || aEventType == EEventItemSingleClicked
-#endif
            )
             {
             if ( iContainer->IsInReorderMode() )
@@ -7746,7 +7772,6 @@ void CMPXCollectionViewHgImp::HandleViewActivation(
             {
             iAddingSong = EFalse;
             TRAP_IGNORE( GetDurationL() );
-            TRAP_IGNORE( UpdateNaviPaneL() );
             }
         if( iInAlbumArtDialog )
             {
@@ -7780,11 +7805,6 @@ void CMPXCollectionViewHgImp::HandleViewUpdate(
 void CMPXCollectionViewHgImp::HandleViewActivation(const TVwsViewId& aNewlyActivatedViewId,
                                                  const TVwsViewId& /*aViewIdToBeDeactivated */)
     {
-    if( aNewlyActivatedViewId.iAppUid == TUid::Uid(KMusicPlayerAppUidConstant) &&
-        aNewlyActivatedViewId.iViewUid == Id() )
-        {
-        TRAP_IGNORE( UpdateNaviPaneL() );
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -7794,18 +7814,6 @@ void CMPXCollectionViewHgImp::HandleViewActivation(const TVwsViewId& aNewlyActiv
 void CMPXCollectionViewHgImp::HandleViewDeactivation(const TVwsViewId& aViewIdToBeDeactivated,
                                                    const TVwsViewId& /*aNewlyActivatedViewId*/)
     {
-    if( aViewIdToBeDeactivated.iAppUid == TUid::Uid(KMusicPlayerAppUidConstant) &&
-        aViewIdToBeDeactivated.iViewUid == Id() )
-        {
-        if( iContainer )
-            {
-            if ( iNaviPane && iNaviDecorator )
-                {
-                if (iNaviPane->Top() == iNaviDecorator) // Only pop if it's the top, don't pop when it's behind a dialog
-                    iNaviPane->Pop( iNaviDecorator );
-                }
-            }
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -8048,9 +8056,16 @@ void CMPXCollectionViewHgImp::UpdateCba()
             }
         else if ( cba )
             {
-            cba->SetCommandSetL(
-                ( cpath->Levels() == 3 && !iIsEmbedded ) ?
-                R_MPX_OPTIONS_HIDE_CBA : R_AVKON_SOFTKEYS_OPTIONS_BACK );
+			if ( iContainer->IsTBoneView() )
+				{
+            	cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK );
+				}
+			else
+				{
+				cba->SetCommandSetL(
+					( cpath->Levels() == 3 && !iIsEmbedded ) ?
+					R_MPX_OPTIONS_HIDE_CBA : R_AVKON_SOFTKEYS_OPTIONS_BACK );
+				}
             cba->MakeVisible( ETrue );
             cba->DrawDeferred();
             }
@@ -8126,40 +8141,32 @@ void CMPXCollectionViewHgImp::OpenPodcastsL()
 	CleanupStack::PopAndDestroy( path );
 	}
 
-// -----------------------------------------------------------------------------
-// CMPXCollectionViewHgImp::IADCheckTimerCallBack
-// -----------------------------------------------------------------------------
-//
-TInt CMPXCollectionViewHgImp::IADCheckTimerCallBack(TAny* aHgViewObject)
-	{
-	MPX_FUNC( "CMPXCollectionViewHgImp::IADCheckTimerCallBack" );
 
-	if (aHgViewObject)
-	   {
-	   CMPXCollectionViewHgImp* hgViewObject = static_cast<CMPXCollectionViewHgImp*>(aHgViewObject);
-	   hgViewObject->StartCheckingforIADUpdates();
-	   }
-
-	return KErrNone;
-	}
 
 // -----------------------------------------------------------------------------
-// CMPXCollectionViewHgImp::StartCheckingforIADUpdates
+// CMPXCollectionViewHgImp::SaveSelectedAlbum
 // -----------------------------------------------------------------------------
 //
-void CMPXCollectionViewHgImp::StartCheckingforIADUpdates()
-	{
-	MPX_FUNC( "CMPXCollectionViewHgImp::StartCheckingforIADUpdates" );
+void CMPXCollectionViewHgImp::SaveSelectedAlbum (CMPXMedia &aMedia)
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::SaveSelectedAlbum" );
+    if (iStoredAlbum)
+		{
+		delete iStoredAlbum;
+		}
+    iStoredAlbum = CMPXMedia::NewL(aMedia);
+    }
 
-	if ( iTimer )
-    	{
-     	iTimer->Cancel();
-	    delete iTimer;
-	    iTimer = NULL;
-       	}
 
-	AppUi()->HandleCommandL(EMPXCmdCheckIADUpdates);
-	}
-	
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::RestoreSelectedAlbum
+// -----------------------------------------------------------------------------
+//
+const CMPXMedia* CMPXCollectionViewHgImp::RestoreSelectedAlbum ()
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::RestoreSelectedAlbum" );
+
+	return iStoredAlbum;
+    }
 
 //  End of File

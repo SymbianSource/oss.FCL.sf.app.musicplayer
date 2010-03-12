@@ -108,4 +108,5 @@ EXPORTS
 	?GetIndicatorVariant@CMPXCommonPlaybackViewLayout@@IAE?AW4TMPXPbvLayoutVariants@@W4TMPXPbvIndicator@@@Z @ 107 NONAME ; enum TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetIndicatorVariant(enum TMPXPbvIndicator)
 	?HandleCollectionMediaL@CMPXCommonPlaybackViewImp@@MAEXABVCMPXMedia@@H@Z @ 108 NONAME ; void CMPXCommonPlaybackViewImp::HandleCollectionMediaL(class CMPXMedia const &, int)
 	?GetHelpContext@CMPXCommonPlaybackViewContainer@@UBEXAAVTCoeHelpContext@@@Z @ 109 NONAME ; void CMPXCommonPlaybackViewContainer::GetHelpContext(class TCoeHelpContext &) const
+	?LightStatusChanged@CMPXCommonPlaybackViewContainer@@UAEXHW4TLightStatus@CHWRMLight@@@Z @ 110 NONAME ; void CMPXCommonPlaybackViewContainer::LightStatusChanged(int, enum CHWRMLight::TLightStatus)
 

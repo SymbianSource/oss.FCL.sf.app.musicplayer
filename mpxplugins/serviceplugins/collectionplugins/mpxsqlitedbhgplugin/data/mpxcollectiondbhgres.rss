@@ -236,12 +236,6 @@ RESOURCE LBUF r_mc_recently_added_playlist
     {
     txt = qtn_mus_pl_recently_downloaded;
     }
-
-// ** Shuffle All
-RESOURCE LBUF r_mc_shuffle_all
-    {
-    txt = "Shuffle All";
-    }
     
 // ---------------------------------------------------------------------------
 // r_mpx_qtn_mus_music_num_songs

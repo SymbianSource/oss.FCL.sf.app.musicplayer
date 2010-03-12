@@ -64,6 +64,9 @@ LIBRARY         ecom.lib // DestroyedImplementation
 LIBRARY         mpxcommon.lib
 LIBRARY         centralrepository.lib
 
+ALWAYS_BUILD_AS_ARM
+OPTION ARMCC -O3 -Otime
+
 #if defined(ARMCC)
 deffile ../eabi/ 
 #elif defined(WINSCW)

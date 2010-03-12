@@ -23,11 +23,13 @@
 
 // INCLUDES
 #include <coecntrl.h>
+#include <hwrmlight.h>
 
 #include "mpxcommonplaybackviewdefs.h"
 #include "mpxalbumartutilobserver.h"
 #include "mpxbutton.h"
 #include "mpxplaybackframeworkdefs.h"
+#include "mpxconstants.h"
 
 
 // FORWARD DECLARATIONS
@@ -50,7 +52,8 @@ class MMPXPlaybackViewLayout;
  */
 class CMPXCommonPlaybackViewContainer : public CCoeControl,
                                                  public MMPXAlbumArtUtilObserver,
-                                                 public MMPXButtonCmdObserver
+                                                 public MMPXButtonCmdObserver,
+ 						                        public MHWRMLightObserver
     {
 public:
 
@@ -274,6 +277,10 @@ protected:
 
     /**
      * Update progress bar graphics and redraw.
+     * Refresh happens only when backlight is ON and
+     * UI is in foreground.
+     * Note: Some display types may not need backlight. In that case
+     * code may need to be adjusted accordingly.
      */
     IMPORT_C virtual void RefreshProgressBar();
 
@@ -362,6 +369,15 @@ public:
     void SetNewSongPosition( const TInt64& aPositon );
 
     /**
+     * From MBacklightControlObserver.
+     * Callback for change in backlight status
+     *
+	 * @param aTarget The target of light change event; keypad, screen or both
+	 * @param aStatus New status of the target
+     */
+    IMPORT_C virtual void LightStatusChanged( TInt aTarget, CHWRMLight::TLightStatus aStatus );
+
+    /**
      * Restore Buttons' state in some special case
      *
      * @since S60 3.0
@@ -381,6 +397,12 @@ public:
      */
     void AdjustOrdinalPosition( TInt aNewOrdinalPosition );
 
+    /**
+     * Records the transition animation begin state. 
+     * Animation is started when albumart is fetched.
+     */
+    void BeginTransition();
+    
 private:
 
     /**
@@ -388,6 +410,11 @@ private:
      */
     void DoUpdateLayoutL();
 
+    /**
+     * Trickers the transtition.
+     */
+    void EndTransition();
+    
  protected:   // data
 
     MEikCommandObserver* iCommandObserver;  // not owned
@@ -471,9 +498,12 @@ private:
     TBool iTouchDown;        // Flag indicating touch progress bar is in use
     TBool iActiveView;
 
-
+    TBool iIsForeground;
+    CHWRMLight::TLightStatus iLightStatus;
+    CHWRMLight *iLight;
 
     TBool iDragProgressBar; //Flag drag progress bar
+    TTransitionType iTransitionType; // Transition direction
     };
 
 #endif  // CMPXCOMMONPLAYBACKVIEWCONTAINER_H

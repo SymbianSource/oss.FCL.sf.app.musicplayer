@@ -398,7 +398,20 @@ private:  // Functions from base class
     void MakeRestrictedDrmItemsL(
         HBufC* aRights, TInt& aCurrentIndex,
         CDesCArrayFlat* aHeadingsArray, CDesCArrayFlat* aDataArray );
+    
+	
+	/**
+     * Populates file details window for songs
+     */
+    void PopulateFileDetailsL();
 
+
+    /**
+     * Populates file details window for podcasts
+     */
+    void PopulatePodcastFileDetailsL();
+
+	
     /**
      * Add parts Of time.
      * @param aIntYrs year information

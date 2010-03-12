@@ -177,10 +177,13 @@ void CAiPlayerPluginEngine::HandleMediaL( const CMPXMedia& aMedia,
             }
 		delete iArtist;
 		iArtist = NULL;
-		iArtist = ( aMedia.ValueText( KMPXMediaMusicArtist ) ).AllocL();
-		
-		iObserver->TrackInfoChanged( *iTitle, *iArtist );
-        
+		if ( aMedia.IsSupported( KMPXMediaMusicArtist ) )
+		    {
+		    iArtist = ( aMedia.ValueText( KMPXMediaMusicArtist ) ).AllocL();
+		    }
+
+		iObserver->TrackInfoChanged(iTitle ? *iTitle : KNullDesC(), iArtist ? *iArtist : KNullDesC());
+
 		if (!iSkipping)
             {
             if (iExtractingAlbumArt)

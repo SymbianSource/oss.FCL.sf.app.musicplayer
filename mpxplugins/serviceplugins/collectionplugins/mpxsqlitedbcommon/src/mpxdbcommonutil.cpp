@@ -483,14 +483,7 @@ EXPORT_C void MPXDbCommonUtil::FillItemChangedMessageL(
 
     if ((aDeprecatedId != 0) && (aId != aDeprecatedId))
         {
-        if ( aCategory == EMPXAlbum && aChangeType == EMPXItemModified )
-            {
-            aMessage.SetTObjectValueL<TMPXItemId>(KMPXMessageMediaDeprecatedId, aId);
-            }
-        else
-            {
-            aMessage.SetTObjectValueL<TMPXItemId>(KMPXMessageMediaDeprecatedId, aDeprecatedId);
-            }
+        aMessage.SetTObjectValueL<TMPXItemId>(KMPXMessageMediaDeprecatedId, aDeprecatedId);
         }
     }
 
@@ -1285,5 +1278,33 @@ EXPORT_C TPtrC MPXDbCommonUtil::GetColumnTextL(
     return text;
 	}
 
+// ----------------------------------------------------------------------------
+// Add an album item changed message to the message array
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void MPXDbCommonUtil::AddItemAlbumChangedMessageL(
+    CMPXMessageArray& aMessageArray,
+    TMPXItemId aId,
+    TMPXChangeEventType aChangeType,
+    TMPXGeneralCategory aCategory,
+    TUint aUid,
+    TBool aAlbumArt,
+    TMPXItemId aDeprecatedId)
+    {
+    MPX_FUNC("MPXDbCommonUtil::AddItemChangedMessageL");
+    CMPXMessage* message = CMPXMedia::NewL();
+    CleanupStack::PushL(message);
 
+    FillItemChangedMessageL(*message, aId, aChangeType, aCategory, aUid,
+    		aDeprecatedId );
+    if ( aAlbumArt )
+        {
+        message->SetTObjectValueL<TMPXItemId>(KMPXMessageMediaDeprecatedId, aId);
+        }
+    if (FindItemChangedMessageL(aMessageArray, *message) == KErrNotFound)
+        {
+        aMessageArray.AppendL(*message); // ownership xfer
+        }
+    CleanupStack::PopAndDestroy(message);
+    }
 // End of File

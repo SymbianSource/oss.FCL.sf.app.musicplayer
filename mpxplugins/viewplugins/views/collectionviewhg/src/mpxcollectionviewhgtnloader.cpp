@@ -57,6 +57,11 @@ CMpxTNLoader::~CMpxTNLoader ( )
         iAsyncCallBack->Cancel();
 
     delete iAsyncCallBack;
+    
+    if( iPauseTimer )
+        iPauseTimer->Cancel();
+    
+    delete iPauseTimer;
     }
 
 TInt CMpxTNLoader::LoadThumbnail( TAny* aSelf )
@@ -68,6 +73,9 @@ TInt CMpxTNLoader::LoadThumbnail( TAny* aSelf )
 
 void CMpxTNLoader::LoadNextTN()
     {
+    if( iPaused )
+        return;
+    
     if( iLoading.Count() > 0 )
         {
         TInt index = iLoading[0]->iIndex;
@@ -138,6 +146,7 @@ void CMpxTNLoader::ConstructL ()
     TCallBack callback(CMpxTNLoader::LoadThumbnail, this);
     iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityStandard );
     iAsyncCallBack->Set(callback);
+    iPauseTimer = CPeriodic::NewL( CActive::EPriorityStandard  );
     }
 
 // -----------------------------------------------------------------------------
@@ -209,14 +218,11 @@ void CMpxTNLoader::CancelThumb( TInt aIndex )
     TInt loadingIndex = FindLoadingByIndex( aIndex );
     if(loadingIndex != KErrNotFound)
         {
-        // Current thumbnail manager has bugs in thumbnail request cancelation.
-        // There is a fix coming in near future but until that we cannot cancel requests
-        // since after that we dont get any thumbnails from server.
-//        if( iLoading[loadingIndex]->iId != 0 )
-//            {
-//            RDebug::Print(_L("!!CANCEL REQUEST!!"));
-//            iTnEngine->CancelRequest( iLoading[loadingIndex]->iId );
-//            }
+        if( iLoading[loadingIndex]->iId != 0 )
+            {
+			MPX_DEBUG2( "Cancel Thumb Request: %d", aIndex );
+            iTnEngine->CancelRequest( iLoading[loadingIndex]->iId );
+            }
         delete iLoading[loadingIndex];
         iLoading.Remove(loadingIndex);
         }
@@ -224,11 +230,6 @@ void CMpxTNLoader::CancelThumb( TInt aIndex )
 
 void CMpxTNLoader::CancelAll()
     {
-    iLoading.ResetAndDestroy();
-    return;
-    // Current thumbnail manager has bugs in thumbnail request cancelation.
-    // There is a fix coming in near future but until that we cannot cancel requests
-    // since after that we dont get any thumbnails from server.
     while ( iLoading.Count() > 0 )
         {
         if( iLoading[0]->iId != 0 )
@@ -241,4 +242,32 @@ void CMpxTNLoader::CancelAll()
 void CMpxTNLoader::SetSizeL( TThumbnailSize aSize )
     {
     iTnEngine->SetThumbnailSizeL( aSize );
+    }
+
+void CMpxTNLoader::Pause(TTimeIntervalMicroSeconds32 aDelay)
+    {
+    iAsyncCallBack->Cancel();
+    iPaused = ETrue;
+    iPauseTimer->Cancel();
+    iPauseTimer->Start(
+            aDelay, aDelay, 
+            TCallBack(ResumeCallback, this));
+    }
+
+void CMpxTNLoader::Resume()
+    {
+    iPaused = EFalse;
+    if( !iAsyncCallBack->IsActive() )
+        iAsyncCallBack->CallBack();    
+    iPauseTimer->Cancel();
+    }
+
+TInt CMpxTNLoader::ResumeCallback(TAny* aPtr)
+    {
+    CMpxTNLoader* self = (CMpxTNLoader*)aPtr;
+    if( self )
+        {
+        self->Resume();
+        }
+    return KErrNone;
     }

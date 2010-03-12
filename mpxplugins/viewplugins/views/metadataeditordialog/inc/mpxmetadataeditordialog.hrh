@@ -47,6 +47,17 @@ enum TMPXMetadataEditorDlgCtrlIds
     EMPXMetadataEditorDlgCtrlIdComposer,
     EMPXMetadataEditorDlgCtrlIdComment,
     EMPXMetadataEditorDlgCtrlIdLibrary,
+    EMPXMetadataEditorDlgCtrlIdFileName,
+    EMPXMetadataEditorDlgCtrlIdFileFormat,
+    EMPXMetadataEditorDlgCtrlIdFileDuration,
+    EMPXMetadataEditorDlgCtrlIdFileBitrate,
+    EMPXMetadataEditorDlgCtrlIdSamplingrate,
+    EMPXMetadataEditorDlgCtrlIdSize,
+    EMPXMetadataEditorDlgCtrlIdLastModified,
+    EMPXMetadataEditorDlgCtrlIdCopyright,
+    EMPXMetadataEditorDlgCtrlIdWebaddress,
+    EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+    EMPXMetadataEditorDlgCtrlIdLastPublished,
     EMPXMetadataEditorDlgCtrlIdGenre      // Genre has to be the last item in this enum (for popup field items)
     };
 

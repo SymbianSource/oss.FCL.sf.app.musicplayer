@@ -109,7 +109,6 @@ CMPXDbPlugin::~CMPXDbPlugin()
     delete iMusicLibraryTitles;
     delete iAllSongsForArtistTitle;
     delete iMusicMenuTitle;
-    delete iShuffleAllText;
 
     if (iActiveTask)
         {
@@ -156,7 +155,6 @@ void CMPXDbPlugin::ConstructL()
     iMusicMenuTitle = iResource->ReadHBufCL(R_MPX_QTN_MUS_TITLE_MUSIC_MENU);
 #endif // __ENABLE_MUSIC_TEXT_ALIGNMENT
 
-    iShuffleAllText = iResource->ReadHBufCL(R_MC_SHUFFLE_ALL);
 
     iActiveTask = CMPXDbActiveTask::NewL(*this);
 
@@ -990,16 +988,7 @@ TBool CMPXDbPlugin::DoOpenIncrementalL( const CMPXCollectionPath& aPath,  const 
         CleanupClosePushL( ids );
 
         iDbHandler->GetAllSongsLimitedL( aAttrs, *aArray, KFirstFetchCount );
-        if ( aArray->Count() > 1 )
-            {
-            // Add "Shuffle" item
-            MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
-                    EMPXItem, EMPXCommand, 0, 0, 0, 0);            
-            //MPXDbCommonUtil::AppendMediaL(*aArray, *iShuffleAllText, EMPXItem, EMPXCommand,
-            //    0, 0, 0);
-            aArray->AtL(0)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems,
-                iDbHandler->NumberOfItemsL(EMPXSong));           
-            }
+
         TInt c( aArray->Count() );
         for( TInt i=0; i<c; ++i )
             {
@@ -1072,15 +1061,6 @@ TBool CMPXDbPlugin::DoOpenBrowseAllL(
             SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXSong,
                 iMusicLibraryTitles->MdcaPoint(EBrowseAll));
 
-            // Add "Shuffle" item
-            if (aArray->Count() > 2)
-                {
-                MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
-                        EMPXItem, EMPXCommand, 0, 0, 0, 1);
-                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems,
-                    iDbHandler->NumberOfItemsL(EMPXSong));
-
-                }
             MPX_PERF_END(CMPXDbPlugin_DoOpenBrowseAllL_All);
             break;
             }
@@ -1286,24 +1266,6 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
             SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXAlbum,
                 iMusicLibraryTitles->MdcaPoint(EBrowseAlbum));
 
-             // Add "Shuffle" item
-            if (aArray->Count() > 2)
-                {
-                MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
-                        EMPXItem, EMPXCommand, 0, 0, 0, 1);
-                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems, 0);
-
-				TInt pPath(0);
-                CMPXMedia* pMedia = aArray->AtL(0);
-				if (pMedia->IsSupported(KMPXMediaGeneralValue))
-					{
-					pPath = pMedia->ValueTObjectL<TInt>(KMPXMediaGeneralValue);
-					MPX_ASSERT(pPath);
-					}
-				//Update path to include the additional id.
-				((CMPXCollectionPath*)pPath)->InsertL(0,0);
-                }
-
             MPX_PERF_END(CMPXDbPlugin_DoOpenBrowseAlbumL_All);
             break;
             }
@@ -1311,21 +1273,26 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
         // All songs in one or multiple albums
         case 3:
             {
-            iDbHandler->GetAllAlbumsL(aAttrs, aArray);
-			CMPXMedia* album = aArray->AtL(aPath.Index());
-			TMPXItemId albumId = aPath.Id(); // id of selected album
+            MPX_PERF_START(CMPXDbPlugin_DoOpenBrowseAlbumL_AllSongs);
+            if (selections.Count())
+                {
+                // Multiple albums
+                const TInt count(aPath.Selection().Count());
+                for (TInt i = 0; i < count; ++i)
+                    {
+                    iDbHandler->GetSongsMatchingAlbumL(selections[i].iId2, aAttrs, aArray);
+                    }
+                }
+            else
+                {
+                // One album
+                iDbHandler->GetSongsMatchingAlbumL(aPath.Id(idIndex).iId2, aAttrs, aArray);
+                }
 
-			CMPXMediaArray* songs = CMPXMediaArray::NewL();
-			CleanupStack::PushL(songs);
-			// get all the songs for the selected album
-			iDbHandler->GetSongsMatchingAlbumL(albumId, aAttrs, songs);
-			album->SetCObjectValueL(KMPXMediaArrayContents, songs);
-			album->SetTObjectValueL<TInt>(KMPXMediaArrayCount, songs->Count());
-			CleanupStack::PopAndDestroy(songs);
+				// added for ganes
+                SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXAlbum, iMusicLibraryTitles->MdcaPoint(EBrowseAlbumSong));
 
-            //iDbHandler->GetAllAlbumsL(aAttrs, aArray);
-            SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXAlbum,
-                    iMusicLibraryTitles->MdcaPoint(EBrowseAlbumSong));
+            MPX_PERF_END(CMPXDbPlugin_DoOpenBrowseAlbumL_AllSongs);
             break;
             }
 
@@ -1407,24 +1374,6 @@ TBool CMPXDbPlugin::DoOpenBrowsePlaylistL(
                 iDbHandler->GetSongsMatchingPlaylistL(aPath.Id (idIndex).iId2, aAttrs, aArray);
                 }
 
-
-             // Add "Shuffle" item
-            if (aArray->Count() > 2)
-                {
-                MPXDbCommonUtil::PrependMediaL(*aArray, *iShuffleAllText,
-                        EMPXItem, EMPXCommand, 0, 0, 0, 1);
-                aArray->AtL(1)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems, aArray->Count()-2);
-
-				TInt pPath(0);
-                CMPXMedia* pMedia = aArray->AtL(0);
-				if (pMedia->IsSupported(KMPXMediaGeneralValue))
-					{
-					pPath = pMedia->ValueTObjectL<TInt>(KMPXMediaGeneralValue);
-					MPX_ASSERT(pPath);
-					}
-				//Update path to include the additional id.
-				((CMPXCollectionPath*)pPath)->InsertL(0,0);
-                }
 
             SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXPlaylist, aPath.Id(idIndex).iId2);
 
@@ -4086,17 +4035,6 @@ void CMPXDbPlugin::DoIncrementalOpenL( const CMPXCommand& aCmd )
                                                       direction );
                         }
 
-                    // Add "Shuffle" item
-                    if (offset == 0 && array->Count() > 1)
-                        {
-                        //MPXDbCommonUtil::AppendMediaL(*array, *iShuffleAllText, EMPXItem, EMPXCommand,
-                        //0, 0, 0);
-                        MPXDbCommonUtil::PrependMediaL(*array, *iShuffleAllText,
-                                EMPXItem, EMPXCommand, 0, 0, 0, 0);                             
-                        array->AtL(0)->SetTObjectValueL(KMPXMediaColDetailNumberOfItems,
-                            iDbHandler->NumberOfItemsL(EMPXSong));
-                        }
-                    
                     TInt max( path->Count() );
                     TInt count(0);
                     TInt aryCount( array->Count() );

@@ -109,7 +109,22 @@ RESOURCE CBA r_mpx_cui_song_details_softkeys_options_empty_done
         CBA_BUTTON {id=EAknSoftkeyForwardKeyEvent; txt=text_softkey_empty; }
         };
     }
-    
+
+// ---------------------------------------------------------------------------
+// r_mpx_cui_song_details_softkeys_options_empty_back
+// CBA for Song Details view.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_cui_song_details_softkeys_options_empty_back
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt=text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back; },
+        CBA_BUTTON {id=EAknSoftkeyForwardKeyEvent; txt=text_softkey_empty; }
+        };
+    }
+        
 // ---------------------------------------------------------------------------
 // r_mpx_cui_song_details_softkeys_options_change_done
 // CBA for Song Details view.
@@ -149,7 +164,7 @@ RESOURCE TBUF r_mpx_cui_song_details_title
 RESOURCE DIALOG r_mpx_cui_song_details_dialog
     {
     flags = EAknDialogGenericFullScreen;
-    buttons = r_mpx_cui_song_details_softkeys_options_empty_done;
+    buttons = r_mpx_cui_song_details_softkeys_options_empty_back;
     form = r_mpx_cui_song_details_form;
     }
     
@@ -357,6 +372,186 @@ RESOURCE FORM r_mpx_cui_song_details_form
                 // other = qtn_aknexpopfield_list_other;
                 };
             tooltip = qtn_aknexpopfield_hint_text;
+            },
+	    DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_fd_filename;
+            id = EMPXMetadataEditorDlgCtrlIdFileName;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_format;
+            id = EMPXMetadataEditorDlgCtrlIdFileFormat;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_duration;
+            id = EMPXMetadataEditorDlgCtrlIdFileDuration;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_bitrate;
+            id = EMPXMetadataEditorDlgCtrlIdFileBitrate;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_samplerate;
+            id = EMPXMetadataEditorDlgCtrlIdSamplingrate;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_size;
+            id = EMPXMetadataEditorDlgCtrlIdSize;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_modified;
+            id = EMPXMetadataEditorDlgCtrlIdLastModified;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_copyright;
+            id = EMPXMetadataEditorDlgCtrlIdCopyright;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_url;
+            id = EMPXMetadataEditorDlgCtrlIdWebaddress;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
             }
         };
     } 
@@ -535,7 +730,7 @@ RESOURCE TBUF r_mpx_cui_song_details_episode
 RESOURCE DIALOG r_mpx_cui_podcast_details_dialog
     {
     flags = EAknDialogGenericFullScreen;
-    buttons = r_mpx_cui_song_details_softkeys_options_empty_done;
+    buttons = r_mpx_cui_song_details_softkeys_options_empty_back;
     form = r_mpx_cui_podcast_details_form;
     }
 #else
@@ -694,7 +889,187 @@ RESOURCE FORM r_mpx_cui_podcast_details_form
                 // other = qtn_aknexpopfield_list_other;
                 };
             tooltip = qtn_aknexpopfield_hint_text;
-            }
+            },
+	    DLG_LINE
+                {
+                type = EEikCtEdwin;
+                prompt = qtn_mp_fd_filename;
+                id = EMPXMetadataEditorDlgCtrlIdFileName;
+                itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+                control = EDWIN
+                    {
+                    flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                    width = KMPXSongDetailsTextWidth;
+                    lines = KMPXSongDetailsTextLines;
+                    maxlength = KMPXSongDetailsTextMaxLen;
+                    // added to limit expanding in forms.
+                    // If you want full screen use 6 here
+                    max_view_height_in_lines = 6;
+                    // if you have the line above, you must have this. 
+                    // It is calculable from LAF
+                    base_line_delta = 21;
+                    };
+                },
+		DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_format;
+            id = EMPXMetadataEditorDlgCtrlIdFileFormat;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+	    DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_duration;
+            id = EMPXMetadataEditorDlgCtrlIdFileDuration;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+	    DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_bitrate;
+            id = EMPXMetadataEditorDlgCtrlIdFileBitrate;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_samplerate;
+            id = EMPXMetadataEditorDlgCtrlIdSamplingrate;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_size;
+            id = EMPXMetadataEditorDlgCtrlIdSize;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_modified;
+            id = EMPXMetadataEditorDlgCtrlIdLastModified;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_copyright;
+            id = EMPXMetadataEditorDlgCtrlIdCopyright;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_mp_details_url;
+            id = EMPXMetadataEditorDlgCtrlIdWebaddress;
+            itemflags=EEikDlgItemTakesEnterKey| EEikDlgItemOfferAllHotKeys;
+            control = EDWIN
+                {
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable| EEikEdwinReadOnly;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
+                };
+            } 
         };
     } 
 
@@ -1127,5 +1502,47 @@ RESOURCE TBUF r_mpx_cui_metadataeditor_playback_complete
     
     buf = qtn_mp_details_playback_complete;
     }
-        
+
+RESOURCE DLG_LINE r_mpx_cui_last_playback_position
+     {
+     type=EEikCtEdwin;
+     prompt = qtn_mp_details_last_playback_position ;
+     id= EMPXMetadataEditorDlgCtrlIdLastPlayedPosition ;
+     //control=EDWIN { flags= KMultiLineExpandingEditorFlags; maxlength=168; width=3; lines=1;};
+     control = EDWIN
+                         {
+                         flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                         width = KMPXSongDetailsTextWidth;
+                         lines = KMPXSongDetailsTextLines;
+                         maxlength = KMPXSongDetailsTextMaxLen;
+                         // added to limit expanding in forms.
+                         // If you want full screen use 6 here
+                         max_view_height_in_lines = 6;
+                         // if you have the line above, you must have this. 
+                         // It is calculable from LAF
+                         base_line_delta = 21;
+                         };
+     }
+
+RESOURCE DLG_LINE r_mpx_cui_details_published
+     {
+     type=EEikCtEdwin;
+     prompt = qtn_mp_details_published ;
+     id= EMPXMetadataEditorDlgCtrlIdLastPublished ;
+     //control=EDWIN { flags= KMultiLineExpandingEditorFlags; maxlength=168; width=3; lines=1;};
+     control = EDWIN
+                         {
+                         flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                         width = KMPXSongDetailsTextWidth;
+                         lines = KMPXSongDetailsTextLines;
+                         maxlength = KMPXSongDetailsTextMaxLen;
+                         // added to limit expanding in forms.
+                         // If you want full screen use 6 here
+                         max_view_height_in_lines = 6;
+                         // if you have the line above, you must have this. 
+                         // It is calculable from LAF
+                         base_line_delta = 21;
+                         };
+     }
+
 // End of File

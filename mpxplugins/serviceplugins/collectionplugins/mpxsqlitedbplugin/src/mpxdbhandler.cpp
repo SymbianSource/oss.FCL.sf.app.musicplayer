@@ -1815,6 +1815,11 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbHandler::DoUpdateSongL(
         {
         visibleChange = CMPXDbActiveTask::EAllVisible;
         }
+    if ( aMedia.ValueTObjectL<TInt>( KMPXMediaMusicAlbumArtChanged )== 1 )
+        {
+        ( const_cast<CMPXMedia*>( &aMedia ) 
+        		)->SetTObjectValueL<TInt>( KMPXMediaMusicAlbumArtChanged, 0 );
+        }
 
     return visibleChange;
     }

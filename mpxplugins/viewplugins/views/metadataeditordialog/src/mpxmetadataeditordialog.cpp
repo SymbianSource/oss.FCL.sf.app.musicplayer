@@ -268,6 +268,7 @@ TBool CMPXMetadataEditorDialog::OkToExitL(TInt aButtonId)
             res = ETrue;
             break;
             }
+        case EAknSoftkeyBack:
         case EAknSoftkeyExit:
             {
             RestoreNaviLabelL();
@@ -633,6 +634,8 @@ void CMPXMetadataEditorDialog::DoHandleMediaL(
                 SetControlTextL( EMPXMetadataEditorDlgCtrlIdComposer,
                     iMedia->ValueText( KMPXMediaMusicComposer ), KNullDesC );
                 }
+
+            PopulateFileDetailsL();            
             DrawNow();
             }
         else
@@ -841,12 +844,15 @@ void CMPXMetadataEditorDialog::SetNaviLabelL()
 
     // store the latest navi pane
     iNaviDecorator = iNaviPane->Top();
-
-    // set the new navi label
-    iEmptyNaviDecorator =
+    
+    if(iNaviDecorator)
+        {   
+        // set the new navi label
+        iEmptyNaviDecorator =
         iNaviPane->CreateNavigationLabelL(KNullDesC);
 
-    iNaviPane->PushL( *iEmptyNaviDecorator );
+        iNaviPane->PushL( *iEmptyNaviDecorator );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -888,6 +894,8 @@ void CMPXMetadataEditorDialog::DynInitMenuPaneL(
             {
             aMenuPane->SetItemDimmed( EMPXCmdSongDetailsChange, ETrue );
             }
+        aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+        
         // Dim out the Avkon menu items
         aMenuPane->SetItemDimmed( EAknFormCmdEdit, ETrue );
         aMenuPane->SetItemDimmed( EAknFormCmdAdd, ETrue );
@@ -2379,7 +2387,7 @@ void CMPXMetadataEditorDialog::UpdateSoftkeyL()
         }
     else
         {
-        resId = R_MPX_CUI_SONG_DETAILS_SOFTKEYS_OPTIONS_EMPTY_DONE;
+        resId = R_MPX_CUI_SONG_DETAILS_SOFTKEYS_OPTIONS_EMPTY_BACK;
         }
 
     ButtonGroupContainer().SetCommandSetL( resId );
@@ -2819,5 +2827,293 @@ TBool CMPXMetadataEditorDialog::UpdateMediaObjectWithControlL(
         }
     return ret;
     }
+
+
+
+// -----------------------------------------------------------------------------
+// CMPXMetadataEditorDialog::PopulateFileDetailsL
+// -----------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::PopulateFileDetailsL()
+    {
+    MPX_FUNC( "CMPXMetadataEditorDialog::PopulateFileDetailsL" );
+    
+    ASSERT(iMedia);
+    TBool drmProtected(iMedia->ValueTObjectL<TBool> (KMPXMediaDrmProtected));
+    MPX_DEBUG2( "CMPXMetadataEditorDialog::PopulateFileDetailsL drm protected: %d", drmProtected );
+
+    if (drmProtected)
+        {
+          //TODO: Pending for UI Spec and localisation
+        }
+   
+    // Get filename
+    const TDesC& uri = iMedia->ValueText(KMPXMediaGeneralUri);
+    TParsePtrC parse(uri);
+
+    SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileName, parse.Name(),
+            KNullDesC);
+
+    // Get mime type
+    SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileFormat, iMedia->ValueText(
+            KMPXMediaGeneralMimeType), KNullDesC);
+
+    // Get duration
+    TInt duration(iMedia->ValueTObjectL<TInt> (KMPXMediaGeneralDuration));
+    if (duration > 0)
+        {
+        // convert milliseconds to seconds
+        duration = duration / KSecondInMilliseconds;
+        CMPXCommonUiHelper::TMPXDuratDisplayMode durationMode =
+        CMPXCommonUiHelper::EMPXDuratAuto;
+        if (duration > KOneHourInSeconds)
+            {
+            durationMode = CMPXCommonUiHelper::EMPXDuratHMS;
+            }
+        HBufC* stringBuf = iCommonUiHelper->DisplayableDurationL(duration,
+                durationMode);
+        CleanupStack::PushL(stringBuf);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileDuration, *stringBuf,
+                KNullDesC);
+        CleanupStack::PopAndDestroy(stringBuf);
+        }
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileDuration, KNullDesC,
+                KNullDesC);
+        }
+
+    // Get bitrate
+    TInt bitrate(iMedia->ValueTObjectL<TInt> (KMPXMediaAudioBitrate));
+    if (bitrate > 0)
+        {
+        // convert bitrate to kpbs
+        bitrate = bitrate / KMPXBitrateFactor;
+        HBufC* bitrateText = StringLoader::LoadLC(
+                R_MPX_CUI_METADATAEDITOR_BITRATE_TXT, bitrate);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileBitrate,
+                bitrateText->Des(), KNullDesC);
+        CleanupStack::PopAndDestroy(bitrateText);
+        }
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdFileBitrate, KNullDesC,
+                KNullDesC);
+        }
+
+    // Get sampling rate
+    TInt samplingRateNum((TInt) iMedia->ValueTObjectL<TInt> (
+            KMPXMediaAudioSamplerate));
+    if (samplingRateNum > 0)
+        {
+        HBufC* stringBuf = HBufC::NewLC(KMPXFileDetailsMaxBufferLen);
+        TPtr stringBufPtr = stringBuf->Des();
+        stringBufPtr.AppendNum(samplingRateNum);
+        HBufC* samplingrate = StringLoader::LoadLC(
+                R_MPX_CUI_METADATAEDITOR_SAMPLINGRATE_TXT, stringBufPtr);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSamplingrate,
+                samplingrate->Des(), KNullDesC);
+        CleanupStack::PopAndDestroy(samplingrate);
+        CleanupStack::PopAndDestroy(stringBuf);
+        }
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSamplingrate, KNullDesC,
+                KNullDesC);
+        }
+
+    // Get size, not stored in collection, have to use RFile
+    //
+    RFs& fs = CEikonEnv::Static()->FsSession();
+    RFile file;
+    TInt sizeNum(0);
+    TInt err(file.Open(fs, uri, EFileRead | EFileShareReadersOrWriters));
+    if (err == KErrNone)
+        {
+        file.Size(sizeNum);
+        file.Close();
+        }
+
+    if (sizeNum > 0)
+        {
+        HBufC* stringBuf = iCommonUiHelper->UnitConversionL(sizeNum);
+        CleanupStack::PushL(stringBuf);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSize, *stringBuf,
+                KNullDesC);
+        CleanupStack::PopAndDestroy(stringBuf);
+        }
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSize, KNullDesC, KNullDesC);
+        }
+
+    if (iCurrentLibrary == EMPXMetadataEditorDlgPodcast)
+        {
+          PopulatePodcastFileDetailsL();
+        }
+// Get modified
+if ( iMedia->IsSupported( KMPXMediaGeneralDate ) )
+    {
+    TInt64 timeInt( ( TInt64 )iMedia->ValueTObjectL<TInt64>(
+            KMPXMediaGeneralDate ) );
+    TTime time( timeInt );
+    ConvertToLocalTimeL(time);
+    HBufC* modDateTime = HBufC::NewLC(
+            KMPXMaxTimeLength + KMPXDurationDisplayResvLen );
+    HBufC* format = StringLoader::LoadLC(
+            R_QTN_DATE_USUAL_WITH_ZERO );
+    TPtr modDatePtr = modDateTime->Des();
+    MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
+    CleanupStack::PopAndDestroy( format );
+    if (err != KErrNone)
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
+                KNullDesC, KNullDesC);
+
+        }
+    else
+        {
+        format = StringLoader::LoadLC(
+                R_QTN_TIME_USUAL_WITH_ZERO );
+        HBufC* modTime = HBufC::NewLC(
+                format->Length() + KMPXDurationDisplayResvLen );
+        TPtr modTimePtr = modTime->Des();
+        MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
+        if ( err != KErrNone )
+            {
+            SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
+                    KNullDesC, KNullDesC);
+
+            }
+        else
+            {
+            modDatePtr.Append( KMPXSpace );
+            modDatePtr.Append( modTimePtr );
+            SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
+                    modDatePtr,
+                    KNullDesC);
+            }
+        CleanupStack::PopAndDestroy( modTime );
+        CleanupStack::PopAndDestroy( format );
+        }
+    CleanupStack::PopAndDestroy( modDateTime );
+    }
+else
+    {
+    SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
+            KNullDesC, KNullDesC);
+
+    }
+
+// Get filename
+SetControlTextL(EMPXMetadataEditorDlgCtrlIdCopyright,
+        iMedia->ValueText(
+                KMPXMediaGeneralCopyright ), KNullDesC);
+
+// Get URL
+SetControlTextL(EMPXMetadataEditorDlgCtrlIdWebaddress,
+        iMedia->ValueText(
+                KMPXMediaMusicURL ), KNullDesC);
+
+CAknForm::SetInitialCurrentLine();
+}
+
+// -----------------------------------------------------------------------------
+// CMPXMetadataEditorDialog::PopulatePodcastFileDetailsL
+// -----------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::PopulatePodcastFileDetailsL()
+    {
+      InsertLineL(13,R_MPX_CUI_LAST_PLAYBACK_POSITION,ActivePageId() );
+                    
+            TInt lastPbPosition((TInt) iMedia->ValueTObjectL<TInt> (
+                    KMPXMediaGeneralLastPlaybackPosition));
+
+            if (lastPbPosition > 0)
+                {
+                // convert milliseconds to seconds
+                lastPbPosition = lastPbPosition / KSecondInMilliseconds;
+                CMPXCommonUiHelper::TMPXDuratDisplayMode lastPbPositionMode =
+                CMPXCommonUiHelper::EMPXDuratAuto;
+                if (lastPbPosition > KOneHourInSeconds)
+                    {
+                    lastPbPositionMode = CMPXCommonUiHelper::EMPXDuratHMS;
+                    }
+                HBufC* stringBuf = iCommonUiHelper->DisplayableDurationL(
+                        lastPbPosition, lastPbPositionMode);
+                CleanupStack::PushL(stringBuf);
+                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                        *stringBuf, KNullDesC);
+                CleanupStack::PopAndDestroy(stringBuf);
+                }
+            else if (lastPbPosition == 0 && iMedia->IsSupported(
+                    KMPXMediaGeneralPlayCount) && iMedia->ValueTObjectL<TInt> (
+                            KMPXMediaGeneralPlayCount) > 0)
+                {
+                HBufC* stringBuf = StringLoader::LoadLC(
+                        R_MPX_CUI_METADATAEDITOR_PLAYBACK_COMPLETE);
+                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                        *stringBuf, KNullDesC);
+                CleanupStack::PopAndDestroy(stringBuf);
+
+                }
+            else
+                {
+                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                        KNullDesC, KNullDesC);
+                }
+           
+            InsertLineL(14,R_MPX_CUI_DETAILS_PUBLISHED,ActivePageId() );
+            
+            // Get published
+            if (iMedia->IsSupported(TMPXAttribute(KMPXMediaIdPodcast,
+                    EMPXMediaPodcastPubDate)))
+                {
+                TInt64 timeInt(
+                        (TInt64) iMedia->ValueTObjectL<TInt64> (TMPXAttribute(
+                                KMPXMediaIdPodcast, EMPXMediaPodcastPubDate)));
+                TTime time(timeInt);
+                ConvertToLocalTimeL(time);
+                HBufC* modDateTime = HBufC::NewLC(KMPXMaxTimeLength
+                        + KMPXDurationDisplayResvLen);
+                HBufC* format = StringLoader::LoadLC(R_QTN_DATE_USUAL_WITH_ZERO);
+                TPtr modDatePtr = modDateTime->Des();
+                MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
+                CleanupStack::PopAndDestroy(format);
+                if (err != KErrNone || time == 0)
+                    {
+                    SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                            KNullDesC, KNullDesC);
+                    }
+                else
+                    {
+                    format = StringLoader::LoadLC(R_QTN_TIME_USUAL_WITH_ZERO);
+                    HBufC* modTime = HBufC::NewLC(format->Length()
+                            + KMPXDurationDisplayResvLen);
+                    TPtr modTimePtr = modTime->Des();
+                    MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
+                    if (err != KErrNone)
+                        {
+                        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                                KNullDesC, KNullDesC);
+                        }
+                    else
+                        {
+                        modDatePtr.Append(KMPXSpace);
+                        modDatePtr.Append(modTimePtr);
+                        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                                modTimePtr, KNullDesC);
+                        }
+                    CleanupStack::PopAndDestroy(modTime);
+                    CleanupStack::PopAndDestroy(format);
+                    }
+                CleanupStack::PopAndDestroy(modDateTime);
+                }
+            else
+                {
+                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                        KNullDesC, KNullDesC);
+                }
+      }
 
 // End of File

@@ -155,13 +155,18 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             },
         MENU_ITEM
             {
-            command = EMPXCmdGoToAllSongs;
-            txt = "Songs";
-            },            
+            command = EMPXCmdCreatePlaylist;
+            txt = qtn_mg_options_create_new_pl;
+            },    
         MENU_ITEM
             {
             command = EMPXCmdGoToArtistAlbums;
             txt = "Artists & Albums";
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToAllSongs;
+            txt = "Songs";
             },
         MENU_ITEM
             {
@@ -170,27 +175,41 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             },            
         MENU_ITEM
             {
+            command = EMPXCmdGoToGenre;
+            txt = "Sort by genre";
+            },
+        MENU_ITEM
+            {
             command = EMPXCmdGoToPodcasts;
             txt = "Podcasts";
             },                        
         MENU_ITEM
             {
-            command = EMPXCmdGoToGenre;
-            txt = "Sort by genre";
-            },                             
+            command = EMPXCmdGoToMusicShop;
+            txt = qtn_nmp_options_go_to_shop;
+            },
+        MENU_ITEM
+            {
+            command = EMPXCmdGoToMultipleMusicShop;
+            txt = qtn_nmp_options_go_to_shop;
+            cascade = r_mpx_playback_collection_musicshop_sub_menu;
+            },                    
+        MENU_ITEM
+            {
+            command = EMPXCmdMusicLibraryDetails;
+            txt = qtn_mus_options_details_library;
+            },
         MENU_ITEM
             {
             command = EMPXCmdRefreshLibrary;
             txt = qtn_mus_options_update_collection1;
             },
-#ifdef SINGLE_CLICK_INCLUDED
         MENU_ITEM
             {
             command = EMPXCmdPlayItem;
             txt = "Play";
             flags = EEikMenuItemSpecific;
             },
-#endif
         MENU_ITEM
             {
             command = EMPXCmdFind;
@@ -198,17 +217,10 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             },
         MENU_ITEM
             {
-            command = EMPXCmdCreatePlaylist;
-            txt = qtn_mg_options_create_new_pl;
-            },
-        MENU_ITEM
-            {
             command = EMPXCmdAddToPlaylist;
             txt = qtn_mus_options_add_to_pl;
             cascade = r_mpx_add_to_pl_sub_menu;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecificListQuery;
-#endif
             },
         MENU_ITEM
             { 
@@ -230,9 +242,7 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             {
             command = EMPXCmdSend;
             txt = qtn_options_send_via;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;
-#endif
             },
         MENU_ITEM
             {
@@ -243,17 +253,13 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             {
             command = EMPXCmdDelete;
             txt = qtn_mus_options_delete;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;
-#endif
             },
         MENU_ITEM
             {
             command = EMPXCmdRemove;
             txt = qtn_mp_options_remove;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;
-#endif
             }
         };
     }
@@ -272,25 +278,19 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_2
             command = EMPXCmdUseAsCascade;
             txt = qtn_mus_options_use_tone_as;
             cascade = r_mpx_use_as_cascade;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecificListQuery;
-#endif
             },
         MENU_ITEM
             {
             command = EMPXCmdSongDetails;
             txt = qtn_mus_options_details_track;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;
-#endif            
             },
         MENU_ITEM
             {
             command = EMPXCmdRename;
             txt = qtn_nmp_options_rename;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;
-#endif
             },
         MENU_ITEM
             {
@@ -301,14 +301,13 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_2
             {
             command = EMPXCmdFindInMusicShop;
             txt = qtn_nmp_find_in_musicshop;
-#ifdef SINGLE_CLICK_INCLUDED
             flags = EEikMenuItemSpecific;            
-#endif
             },
         MENU_ITEM
             {
             command = EMPXCmdPlaylistDetails;
             txt = qtn_mus_options_details_pl;
+            flags = EEikMenuItemSpecific;            
             },
         MENU_ITEM
             {

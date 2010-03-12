@@ -676,7 +676,7 @@ void CMCPMusicPlayer::DoUpdatePlayerStateL(TMPlayerState aState)
             case EMPlayerStateStopped:
                 {
                 MPX_DEBUG1("CMCPMusicPlayer::DoUpdatePlayerStateL EMPlayerStateStopped");
-                if ( iUSBOnGoing )
+                if ( iBlockingOperationOngoing )
                     {
                     UpdateToolBarL( TBK::KSkeep_L_dimmed |
                             TBK::KPlay_dimmed |
@@ -1189,10 +1189,13 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
     MPX_DEBUG3("--->CMCPMusicPlayer::DoHandleGeneralMessageL(), event = %d, type = %d", event, type);
 
     if ( event == TMPXCollectionMessage::EBroadcastEvent
-        && ( type == EMcMsgUSBMassStorageStart || type == EMcMsgUSBMTPStart ))
+        && ( type == EMcMsgUSBMassStorageStart || 
+             type == EMcMsgUSBMTPStart ||
+             type == EMcMsgRefreshStart ))
         {
-        iUSBOnGoing = ETrue;
-        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iUSBOnGoing changed to: %d", iUSBOnGoing );
+        iBlockingOperationOngoing = ETrue;
+        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iBlockingOperationOngoing changed to: %d", 
+                   iBlockingOperationOngoing );
         UpdateToolBarL( TBK::KSkeep_L_dimmed |
                 TBK::KPlay_dimmed |
                 TBK::KSkeep_R_dimmed );
@@ -1202,10 +1205,13 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
             }
         }
     else if ( event == TMPXCollectionMessage::EBroadcastEvent
-            && ( type == EMcMsgUSBMassStorageEnd || type == EMcMsgUSBMTPEnd ))
+            && ( type == EMcMsgUSBMassStorageEnd || 
+                 type == EMcMsgUSBMTPEnd ||
+                 type == EMcMsgRefreshEnd ))
         {
-        iUSBOnGoing = EFalse;
-        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iUSBOnGoing changed to: %d", iUSBOnGoing );
+        iBlockingOperationOngoing = EFalse;
+        MPX_DEBUG2("CMCPMusicPlayer::DoHandleGeneralMessageL(), iBlockingOperationOngoing changed to: %d", 
+                   iBlockingOperationOngoing );
         DoUpdatePlayerStateL( iEngine->PlayerState() );
         if ( IsOKToPublishData() )
             {

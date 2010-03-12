@@ -72,6 +72,14 @@ enum TMPXLaunchMode
     EMPXLaunchModeTempPlaylist
     };
 
+// Trigger codes for MPX music player view transitions
+enum TTransitionType
+    {
+    EMPXTranstionNotDefined = 0,
+    EMPXTranstionToRight = 1001,
+    EMPXTranstionToLeft = 1002       
+    };
+
 // ERROR CODES
 
 // Error code to note that the rights on a DRM file are about to expire

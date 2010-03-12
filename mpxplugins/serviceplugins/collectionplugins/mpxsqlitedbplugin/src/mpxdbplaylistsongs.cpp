@@ -23,6 +23,7 @@
 #include <mpxmedia.h>
 #include <mpxmediaarray.h>
 #include <mpxmediageneraldefs.h>
+#include <mpxmediamusicdefs.h>
 #include "mpxdbcommonutil.h"
 
 #include "mpxcollectiondbdef.h"
@@ -300,6 +301,13 @@ TBool CMPXDbPlaylistSongs::UpdateSongL(
                     } // end case
                 } // end switch
             } // end for
+        if ( aMedia.IsSupported( KMPXMediaMusicAlbumArtChanged ) )
+            {
+            if ( aMedia.ValueTObjectL<TInt>( KMPXMediaMusicAlbumArtChanged )== 1 )
+                {
+                aUpdated = ETrue;                        
+                }
+            }
         }
 
     CleanupStack::PopAndDestroy(&recordset);

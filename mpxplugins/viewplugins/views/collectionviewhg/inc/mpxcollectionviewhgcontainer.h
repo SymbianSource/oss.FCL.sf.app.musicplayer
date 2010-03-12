@@ -53,6 +53,7 @@ class MMPXPlaybackUtility;
 class MMpxCbaHandler;
 class TAknsItemID;
 class CAsyncOneShot;
+class MMPXSelectedAlbumHandler;
 
 // CLASS DECLARATION
 
@@ -87,6 +88,7 @@ public:
     static CMPXCollectionViewHgContainer* NewL(
         MEikCommandObserver* aView,
         MEikListBoxObserver* aObserver,
+        MMPXSelectedAlbumHandler* aSelectedAlbumHandler,
         TBool aIsEmbedded );
 
     /**
@@ -549,7 +551,25 @@ public:
      * @return ETrue if current view is TBoneview, EFalse otherwise
      */
 	TBool IsTBoneView();
-	
+
+	TBool OfferCommandL(TInt aCommand);
+
+	/**
+	 * Records begin state for the transition animation.
+	 *
+	 * @param aPrevViewWasPlayback ETrue if previous view was playback.
+	 *     This information used to decide animation direction.
+	 */
+	void BeginFullScreenAnimation( TBool aPrevViewWasPlayback = EFalse );
+
+	/**
+	 * Set the previous view Uid
+	 *
+	 * @param aViewUid UId of the previous view.
+	 */
+	void SetPreviousViewId(TUid aViewUid);
+
+
 private:
 
     /**
@@ -558,6 +578,7 @@ private:
     CMPXCollectionViewHgContainer(
         MEikCommandObserver* aView,
         MEikListBoxObserver* aObserver,
+        MMPXSelectedAlbumHandler* aSelectedAlbumHandler,
         TBool aIsEmbedded);
 
     /**
@@ -659,47 +680,201 @@ private:
     void CleanAlbumArtReqQueue();
 
     /**
-     * Handle requests in visible area
+     * Handle data providing in requests in visible area
      * @param aBufferStart  the starting buffer index
      * @param aBufferEnd  the ending buffer index
      */
     void ProvideDataIntersectL(TInt aBufferStart, TInt aBufferEnd);
 
     /**
-     * Refresh list as needed
+     * Handle data providing in requests in non visible area
      * @param aBufferStart  the starting buffer index
      * @param aBufferEnd  the ending buffer index
      */
     void ProvideDataDifferenceL(TInt aBufferStart, TInt aBufferEnd);
+
+    /**
+     * Provide data without providing thumbnails to list
+     * @param aMediaArray  the media array to pull data from
+     * @param aStartIndex  the starting index index
+     */
     void ProvideDataWithoutThumbnailsL(const CMPXMediaArray& aMediaArray, TInt aStartIndex = 0);
+
+    /**
+     * Provide data without providing thumbnails to media wall
+     * @param aMediaArray  the media array to pull data from
+     * @param aStartIndex  the starting index index
+     */
     void ProvideDataWithoutThumbnailsMwL(const CMPXMediaArray& aMediaArray, TInt aStartIndex = 0);
+
+    /**
+     * Handle data providing in specified range.
+     * @param aBufferStart  the starting buffer index
+     * @param aBufferEnd  the ending buffer index
+     */
     void ProvideDataForRangeL( TInt aBufferStart, TInt aBufferEnd );
 
+    /**
+     * Prepare media wall to be shown
+     * @param aMediaArray  the media array to pull data from
+     * @param aCount  Number of items in media wall
+     */
 	void PrepareMediaWallL(const CMPXMediaArray& aMediaArray, TInt aCount);
+
+    /**
+     * Prepare TBone view to be shown
+     * @param aMediaArray  the media array to pull data from
+     * @param aCount  Number of items in media wall portion of tbone.
+     */
 	void PrepareMediaWallWithListL(const CMPXMediaArray& aMediaArray, TInt aCount);
+
+    /**
+     * Prepare list to be shown
+     * @param aMediaArray  the media array to pull data from
+     * @param aCount  Number of items in list
+     */
 	void PrepareListL(const CMPXMediaArray& aMediaArray, TInt aCount);
+
+    /**
+     * Handle list resizing
+     * @param aMediaArray  the media array to pull data from
+     * @param aCount  Number of items in list
+     */
 	void ResizeListL(const CMPXMediaArray& aMediaArray, TInt aCount);
 
+    /**
+     * Get the current list instance
+     * @param aIndex Index from list control
+     * @return Instance of scroller object
+     */
 	CHgScroller* CurrentListWidget();
+
+    /**
+     * Resolve the type of view based on current browsing context
+     */
 	void ResolveCurrentViewType();
+
+    /**
+     * Clean up the previous view's resources.
+     */
 	void CleanPrevView();
 
+    /**
+     * Initiate shuffle play all operation
+     * @return ETrue if shuffle operation is started.
+     */
 	TBool ShufflePlayAllL(TInt aIndex);
+
+    /**
+     * Update the collection path and open it to start playback.
+     * @param aIndex The selected media array index to start playing.
+     * @param aSelectAll Indicate if all items should be selected.
+     */
 	void UpdatePathAndOpenL(TInt aIndex, TBool aSelectAll = EFalse);
+
+    /**
+     * Construct a collection path with the current selection and
+     * construct a playlist from path to start playback.
+     * @param aResults The media results from find operation.
+     */
 	void UpdatePathAndOpenPlaylistL( const CMPXMedia& aResults );
+
+    /**
+     * Find songs belonging to album.
+     * @param aIndex Index in media array of albums
+     */
 	void FindAlbumSongsL(TInt aIndex);
+
+    /**
+     * Find songs belonging to playlist.
+     * @param aIndex Index in media array of playlists
+     */
 	void FindPlaylistSongsL(TInt aIndex);
+
+    /**
+     * Find songs belonging to genre.
+     * @param aIndex Index in media array of genres
+     */
 	void FindGenreSongsL(TInt aIndex);
+
+    /**
+     * Check if the currently playing track is in path
+     * @param aPath Collection path of playlist
+     * @return ETrue if current track is playing
+     */
 	TBool IsPlayingCurrentIndexL(CMPXCollectionPath* aPath);
-	void ShowAlbumSongsDialogL( const CMPXMedia& aResults );
+
+    /**
+     * Show list of songs in an album in a dialog popup.
+     * @param aAlbum Album container with list of songs
+     */
+	void ShowAlbumSongsDialogL( const CMPXMedia& aAlbum );
+
+    /**
+     * Show list of songs in an album
+     * @param aAlbum Album container with list of songs
+     */
     void ShowAlbumSongsL( const CMPXMedia& aAlbum );
+
+    /**
+     * Open the album to show its contents
+     * @param aIndex Index of the album in media array
+     */
     void OpenAlbumL(TInt aIndex);
+
+    /**
+     * Play the album
+     * @param aIndex Index of the album in media array
+     */
     void PlayAlbumL(TInt aIndex);
+
+    /**
+     * Play the playlist
+     * @param aIndex Index of the album in media array
+     */
     void PlayPlaylistL(TInt aIndex);
+
+    /**
+     * Play the genre
+     * @param aIndex Index of the album in media array
+     */
     void PlayGenreL(TInt aIndex);
 
     static TInt AsyncCallback( TAny* aPtr );
-    
+
+    /**
+     * Prepare to show the TBone view.
+     */
+	void PrepareTboneViewL();
+
+    /**
+     * Check if shuffle item is present in the view.
+     * @return ETrue if shuffle item is present.
+     */
+	TBool ShuffleItemPresent();
+
+    /**
+     * Mapping function to convert from list index to media index.
+     * @param aIndex Index from list control
+     * @return media array index
+     */
+	TInt MediaIndex(TInt aIndex) const;
+
+	/**
+     * Load and set empty text.
+     */
+	void LoadAndSetEmptyTextL();
+
+    /**
+     * End fullscreen animation effects.
+     */
+    void EndFullScreenAnimation();
+
+    /**
+     * Resolve popup list rectangle size.
+     */
+    void ResolvePopupListSizeL();
+
 private: // data member
 
     /**
@@ -743,7 +918,7 @@ private: // data member
     enum TViewType
         {
         EMPXViewUnknown,
-        EMPXViewCoverFlow,
+        EMPXViewMediawall,
         EMPXViewList,
         EMPXViewTBone
         };
@@ -814,6 +989,7 @@ private: // data member
     TInt iAlbumIndex; // opened album index in mediawall
     TInt iSelectedAlbumIndex; // selected album index in mediawall
     TInt iRestoredAlbumIndex; // restored selected album index
+    MMPXSelectedAlbumHandler* iSelectedAlbumHandler;
     TBool iDefaultIconSet;
     MMpxCbaHandler* iCbaHandler;
     TViewType iCurrentViewType;
@@ -822,6 +998,13 @@ private: // data member
     TBool iIsForeground;
     TBool iDelayedControlCreation;
     CAsyncCallBack* iAsyncCallBack;
+    TBool iOpenAlbumTracks;
+    TInt iShuffleItem;
+    TBool iSetEmptyTextNeeded;
+    TTransitionType iTranstionType;
+    TBool iLayoutSwitch;
+    TRect iPopupListRect;
+    TUid iPreviousViewId;
     };
 
 #endif  // CMPXCOLLECTIONVIEWHGCONTAINER_H

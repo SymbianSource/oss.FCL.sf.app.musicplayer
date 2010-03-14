@@ -27,6 +27,11 @@
 //#include <sqlrowsetutil.h>
 //#endif
 #include <sysutil.h>
+#ifdef __RAMDISK_PERF_ENABLE
+#include <centralrepository.h>
+#include <BAUTILS.H>  
+#include <mpxinternalcrkeys.h>
+#endif //__RAMDISK_PERF_ENABLE
 
 #include <mpxlog.h>
 
@@ -68,6 +73,19 @@ _LIT(KNameColumn, "name");
 const TInt KMaxLogQuery = 248;
 const TInt KBufIncrement = 10;
 
+#ifdef __RAMDISK_PERF_ENABLE
+_LIT(KSecurePath,   "[%x]%S");
+_LIT(KRAMAliasName, "%S");
+_LIT( KDummyDbFile, "%c:\\private\\10281e17\\dummydb.dat" );
+const TInt64 KMPMegaByte = 1048576;
+const TInt64 KMPEstimatedSongInBytes = KMPMegaByte * 2; 
+const TInt KMPEstimatedSizePerDBEntry = 3000; // worst scenario, can be lower if needed
+const TInt KMPMinimumRAMSizeToRun = 6 * KMPMegaByte; 
+// if RAM is lower than 5MB, doesn't seem enough for SQL as well.
+// so we set this number to move back DBs before being kicked out
+
+#endif //__RAMDISK_PERF_ENABLE
+
 // Used to suppress overflow when appending formatted text to a buffer.
 class TOverflowHandle :
     public TDesOverflow
@@ -102,7 +120,10 @@ class TOverflowHandle :
 //
 EXPORT_C CMPXDbManager::CMPXDbManager(
     RFs& aFs) :
-    iFs(aFs)
+    iFs(aFs), 
+    iRAMDiskPerfEnabled(EFalse),
+    iMaximumAllowedRAMDiskSpaceToCopy(0),
+    iRAMInUse(EFalse)
     {
     MPX_FUNC("CMPXDbManager::CMPXDbManager");
     }
@@ -116,6 +137,35 @@ EXPORT_C void CMPXDbManager::ConstructL(
     {
     MPX_FUNC("CMPXDbManager::ConstructL");
     iDbFile = aDatabaseFile.AllocL();
+    
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt flags( 0 );
+    CRepository* repository = CRepository::NewLC( KCRUidMPXMPFeatures );
+    User::LeaveIfError( repository->Get( KMPXMPLocalVariation, flags ));
+    MPX_DEBUG2("CMPXDbManager::ConstructL KMPXMPLocalVariation %d", flags);        
+    iRAMDiskPerfEnabled = static_cast<TBool>( flags & KMPXEnableRAMDisk );
+    
+    TInt temp;
+    User::LeaveIfError( repository->Get( KMAXAllowedDiskSpaceToCopy, temp) );
+    iMaximumAllowedRAMDiskSpaceToCopy = temp * KMPMegaByte;
+    CleanupStack::PopAndDestroy(repository);
+            
+    if ( iRAMDiskPerfEnabled )
+        {
+        MPX_DEBUG1("CMPXDbManager::ConstructL RAMDisk performance is enabled.");
+        MPX_DEBUG2("CMPXDbManager::ConstructL RAMDisk iMaximumAllowedRAMDiskSpaceToCopy=%Lu", iMaximumAllowedRAMDiskSpaceToCopy);
+        if ( GetRAMDiskPath() != KErrNone )
+            {
+            // Error finding ram drive, disable ram disk
+            iRAMDiskPerfEnabled = EFalse;
+            }
+        }
+    else
+        {
+        MPX_DEBUG2("CMPXDbManager::ConstructL RAMDisk performance is NOT enabled flag=%d", flags);
+        MPX_DEBUG2("CMPXDbManager::ConstructL RAMDisk iMaximumAllowedRAMDiskSpaceToCopy=%Lu", iMaximumAllowedRAMDiskSpaceToCopy);
+        }
+#endif //__RAMDISK_PERF_ENABLE
     }
 
 // ----------------------------------------------------------------------------
@@ -141,6 +191,14 @@ EXPORT_C CMPXDbManager::~CMPXDbManager()
     CloseAllDatabases();
 
     delete iDbFile;
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt count(iDatabaseHandles.Count());
+    for (TInt i = 0; i < count; ++i)
+        {
+        RemoveDummyFile(i);
+        }    
+#endif //__RAMDISK_PERF_ENABLE
+    iDatabaseHandles.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -165,19 +223,343 @@ EXPORT_C void CMPXDbManager::BeginL()
 
     if (++iTransactionCount == 1)
         {
-        TInt err = iDatabase.Exec(KBeginTransaction);
-        
-        // transforms SQL error to KErrNotReady
-        if( (err <= KSqlErrGeneral && err >= KSqlErrNotDb) || err == KSqlErrStmtExpired )
-            {
-            User::Leave(KErrNotReady);
-            }
-        else
-            {
-            User::LeaveIfError(err);
-            }
+        DoBeginL();
         }
     }
+
+void CMPXDbManager::DoBeginL()
+    {
+    MPX_FUNC("CMPXDbManager::DoBeginL");
+
+    TInt err = iDatabase.Exec(KBeginTransaction);
+        
+    // transforms SQL error to KErrNotReady
+    if( (err <= KSqlErrGeneral && err >= KSqlErrNotDb) || err == KSqlErrStmtExpired )
+        {
+        User::Leave(KErrNotReady);
+        }
+    else
+        {
+        User::LeaveIfError(err);
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// Copy all DBs to RAM disk
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CMPXDbManager::CopyDBsToRamL( TBool aIsMTPInUse )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::CopyDBsToRamL");
+    if( iRAMDiskPerfEnabled )
+        {
+        if ( !IsRamDiskSpaceAvailable() )
+            {
+            return;
+            }
+        
+        // Check if we are over the allowed ram space.
+        TInt dbSize=0;
+        TInt err = GetTotalDatabasesSize(dbSize);
+        if ( err || (dbSize > iMaximumAllowedRAMDiskSpaceToCopy) )
+            {
+            MPX_DEBUG2("<--CMPXDbManager::CopyDBsToRamL Over the allowed Ram disk limit %Lu", iMaximumAllowedRAMDiskSpaceToCopy );
+            return;
+            }
+        
+        TInt transactionCount = iTransactionCount;
+        if (iTransactionCount > 0) 
+            {
+            iTransactionCount = 0;
+            DoCommitL();
+            }
+
+        TInt count(iDatabaseHandles.Count());
+        TBool ret = EFalse;
+        for ( TInt i = 0; i < count ; ++i )
+            {
+            if ( iDatabaseHandles[i].iUseRAMdb )
+                {
+                // already used
+                MPX_DEBUG1("CMPXDbManager::CopyDBsToRamL iUseRAMdb already ETrue");
+                continue;
+                }
+            iDatabaseHandles[i].iUseRAMdb = ETrue;
+            TRAPD(err, ret = DoCopyDBToRamL( iDatabaseHandles[i].iDrive, aIsMTPInUse ))
+            if ( err != KErrNone )
+                {
+                MPX_DEBUG2("CMPXDbManager::CopyDBsToRamL error=%d", err);
+                // remove dymmy file
+                RemoveDummyFile(i);
+                // try to close database that is opened from RAM disk
+                TRAP_IGNORE(CloseDatabaseL( iDatabaseHandles[i].iDrive ));
+                iDatabaseHandles[i].iUseRAMdb = EFalse;
+                // reopen database from drive not from RAM
+                OpenDatabaseL( iDatabaseHandles[i].iDrive );
+                continue; // continue to copy for next drive
+                }
+            if ( !ret )
+                {
+                iDatabaseHandles[i].iUseRAMdb = EFalse;
+                }
+            }
+            
+        if (transactionCount > 0) 
+            {
+            DoBeginL();
+            iTransactionCount = transactionCount;
+            }
+        }
+    iRAMInUse = ETrue;
+	
+    MPX_DEBUG1("<--CMPXDbManager::CopyDBsToRamL");
+#endif //__RAMDISK_PERF_ENABLE
+
+    }
+
+
+// ----------------------------------------------------------------------------
+// CMPXDbManager::DoCopyDBsToRamL
+// ----------------------------------------------------------------------------
+//
+TBool CMPXDbManager::DoCopyDBToRamL( TDriveUnit aDrive, TBool aIsMTPInUse )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG2("-->CMPXDbManager::DoCopyDBsToRamL drive=%d", (TInt)aDrive);
+    TFileName dst;
+    TFileName src;
+    dst.Append(iRAMFolder);
+    src.Append(aDrive.Name());
+    src.Append(KDBFilePath);
+    TRAPD( err, BaflUtils::EnsurePathExistsL( iFs, dst ));
+    if ( err != KErrNone )
+        {
+        return EFalse;
+        }
+    TFileName filename;            
+    filename.Format(KSecurePath, User::Identity().iUid, iDbFile); //x:\private\10281e17\[sldfdsf]mpxv2_5.db
+    src.Append(filename);
+    MPX_DEBUG2("RAMDisk src path=%S", &src);
+    TEntry entry;
+    iFs.Entry( src, entry );
+    if (!BlockDiskSpace( aDrive, entry.iSize, aIsMTPInUse ) )
+        {
+        MPX_DEBUG1("CMPXDbManager::DoCopyDBsToRamL() BlockDiskSpace failed");
+        return EFalse; // continue for next drive
+        }
+    TBuf<2> d;
+    d.Append(aDrive.Name());
+    HBufC* temp = HBufC::NewLC(KMaxFileName);
+    temp->Des().Append(d.Left(1));
+    temp->Des().Append(iDbFile->Des());
+    filename.Format(KSecurePath, User::Identity().iUid, temp);
+    CleanupStack::PopAndDestroy(temp);
+    dst.Append(filename);
+    MPX_DEBUG2("RAMDisk dst path=%S", &dst);
+    TInt index( GetDatabaseIndex((TInt)aDrive) );
+    delete iDatabaseHandles[index].iOrigFullFilePath;
+    iDatabaseHandles[index].iOrigFullFilePath = 0;
+    delete iDatabaseHandles[index].iTargetFullFilePath;
+    iDatabaseHandles[index].iTargetFullFilePath = 0;
+    
+    // Save these path so it is convenient to copy back
+    iDatabaseHandles[index].iOrigFullFilePath = HBufC::NewL(src.Length());
+    iDatabaseHandles[index].iTargetFullFilePath = HBufC::NewL(dst.Length());
+        
+    iDatabaseHandles[index].iOrigFullFilePath->Des().Append(src);
+    iDatabaseHandles[index].iTargetFullFilePath->Des().Append(dst);
+
+    TRAP(err, CloseDatabaseL(aDrive));
+    if ( err != KErrNone )
+        {
+        MPX_DEBUG2("<--CMPXDbManager::DoCopyDBsToRamL error=%d", err);
+        TInt index(GetDatabaseIndex((TInt)aDrive));
+        if ( index >= 0 )
+            {
+            RemoveDummyFile( index );
+            }
+        return EFalse;
+        }
+    User::LeaveIfError( BaflUtils::CopyFile(iFs, src, dst ));
+    OpenDatabaseL((TInt)aDrive);
+
+    MPX_DEBUG2("RAMDisk Database opened=%d", (TInt)aDrive);
+    MPX_DEBUG1("<--CMPXDbManager::DoCopyDBsToRamL");
+    return ETrue;    
+#endif //__RAMDISK_PERF_ENABLE
+    }
+
+// ----------------------------------------------------------------------------
+// Copy all DBs from RAM disk back to normal drives
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CMPXDbManager::CopyDBsFromRamL()
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::CopyDBsFromRamL");
+    if( iRAMDiskPerfEnabled )
+       {
+        TInt transactionCount = iTransactionCount;
+        if (iTransactionCount > 0) 
+            {
+            iTransactionCount = 0;
+            DoCommitL();
+            }
+
+        TInt count(iDatabaseHandles.Count());
+        for (TInt i = 0; i < count && iDatabaseHandles[i].iUseRAMdb; ++i)
+            {
+            TRAPD(err, DoCopyDBFromRamL(i));
+            if ( err != KErrNone )
+                {
+                MPX_DEBUG2("<--CMPXDbManager::CopyDBsFromRamL error=%d", err);                
+                //anyting wrong, delete the temp file and open database from drive
+                RemoveDummyFile(i);
+                // delete Db on RAM
+                User::LeaveIfError( BaflUtils::DeleteFile(iFs, 
+                    *iDatabaseHandles[i].iTargetFullFilePath));
+                }
+            iDatabaseHandles[i].iUseRAMdb = EFalse;
+            // open db from drive
+            OpenDatabaseL( iDatabaseHandles[i].iDrive );      
+            }
+
+        if (transactionCount > 0) 
+            {
+            DoBeginL();
+            iTransactionCount = transactionCount;
+            }
+        }
+    iRAMInUse = EFalse;
+        
+    MPX_DEBUG1("<--CMPXDbManager::CopyDBsFromRamL");
+#endif //__RAMDISK_PERF_ENABLE
+    }
+
+
+// ----------------------------------------------------------------------------
+// CMPXDbManager::DoCopyDBsToRamL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbManager::DoCopyDBFromRamL( TInt aIndex )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::DoCopyDBsFromRamL");    
+    MPX_DEBUG2("-->CMPXDbManager::DoCopyDBsFromRamL Drive %d will be closed before copying db from RAM.",
+         iDatabaseHandles[aIndex].iDrive);
+
+    CloseDatabaseL(iDatabaseHandles[aIndex].iDrive);            
+
+    // Delete existing DB on drive
+    User::LeaveIfError( BaflUtils::DeleteFile(iFs, 
+        *iDatabaseHandles[aIndex].iOrigFullFilePath));
+    MPX_DEBUG1("CMPXDbManager::DoCopyDBsFromRamL old DB on drive deleted");
+
+    // Rename dummy file to be orignal file name
+    User::LeaveIfError( BaflUtils::RenameFile(iFs, 
+        iDatabaseHandles[aIndex].iDummyFilePath, 
+        *iDatabaseHandles[aIndex].iOrigFullFilePath) );
+    MPX_DEBUG1("CMPXDbManager::CopyDBsFromRamL RAMDisk renamed.");
+
+    //Copy Db from RAM to replace dummy file
+    ReplaceFileL( *iDatabaseHandles[aIndex].iTargetFullFilePath, *iDatabaseHandles[aIndex].iOrigFullFilePath);
+    
+    MPX_DEBUG1("CMPXDbManager::CopyDBsFromRamL RAMDisk copied back.");
+
+    // Delete existing DB on RAM
+    User::LeaveIfError( BaflUtils::DeleteFile(iFs, *iDatabaseHandles[aIndex].iTargetFullFilePath));
+    MPX_DEBUG1("CMPXDbManager::DoCopyDBsFromRamL RAMDisk deleted");
+
+    MPX_DEBUG1("<--CMPXDbManager::DoCopyDBsFromRamL");
+#endif //__RAMDISK_PERF_ENABLE
+    } 
+
+// ----------------------------------------------------------------------------
+// CMPXDbManager::ReplaceFileL
+//
+// Replaces a file with another writing over the destination file.
+// Leaves on error.
+// Implementation follows CFileMan::Copy except that 
+//  - we don't resize target file to zero
+//  - we can assume that files already exist
+//  - we don't copy file attributes & timestamp
+// ----------------------------------------------------------------------------
+//
+void CMPXDbManager::ReplaceFileL( const TDesC& aSrcName, const TDesC& aDstName )
+    {
+    // open files
+    RFile srcFile;
+    User::LeaveIfError( srcFile.Open(iFs, aSrcName, EFileRead|EFileShareReadersOnly) );
+    CleanupClosePushL( srcFile );
+    
+    RFile dstFile;
+    User::LeaveIfError( dstFile.Open(iFs, aDstName, EFileWrite|EFileWriteDirectIO|EFileShareExclusive) );
+    CleanupClosePushL( dstFile );
+    
+    // resize destination file
+    TInt remainingBytes;
+    User::LeaveIfError( srcFile.Size(remainingBytes) );
+    User::LeaveIfError( dstFile.SetSize(remainingBytes) );
+
+    // allocate buffer
+   	const TInt KBigBufSize = 512 * 1024;
+    const TInt KMediumBufSize = 32 * 1024;
+    const TInt KSmallBufSize = 4 * 1024;
+    HBufC8* bufPtr=HBufC8::New( Min(KBigBufSize, remainingBytes) );
+    if (bufPtr==NULL)
+        bufPtr=HBufC8::New(KMediumBufSize);
+    if (bufPtr==NULL)
+        bufPtr=HBufC8::New(KSmallBufSize);
+    if (bufPtr == NULL)
+        User::Leave(KErrNoMemory);
+    CleanupStack::PushL(bufPtr);
+
+    // copy
+    TPtr8 copyBuf=bufPtr->Des();
+    TInt pos=0;
+    while( remainingBytes > 0 )
+        {
+        TInt s = Min( remainingBytes, copyBuf.MaxSize() );
+        TInt ret = srcFile.Read(pos, copyBuf, s);
+        if (ret == KErrNone && copyBuf.Length()!= s )
+            {
+            ret = KErrCorrupt;
+            }
+        if (ret == KErrNone)
+            {
+            ret = dstFile.Write(pos, copyBuf, s);
+            }
+        User::LeaveIfError (ret);
+        pos += s;
+        remainingBytes -= s;
+        }
+    User::LeaveIfError( dstFile.Flush() );
+    CleanupStack::PopAndDestroy(3); // bufPtr, dstFile, srcFile
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbManager::RemoveDummyFile
+// ----------------------------------------------------------------------------
+//
+void CMPXDbManager::RemoveDummyFile( TInt index )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::RemoveDummyFile");
+       
+    if ( iDatabaseHandles[index].iDummyFilePath.Length() )
+        {
+        TInt err = BaflUtils::DeleteFile(iFs, iDatabaseHandles[index].iDummyFilePath);
+        if ( !err )
+            {
+            iDatabaseHandles[index].iDummyFilePath.Zero();
+            }
+        }
+    MPX_DEBUG1("<--CMPXDbManager::RemoveDummyFile");
+#endif //__RAMDISK_PERF_ENABLE
+
+    }
+
 
 // ----------------------------------------------------------------------------
 // Commits a transaction on all databases.
@@ -191,18 +573,29 @@ EXPORT_C void CMPXDbManager::CommitL()
         {
         if (--iTransactionCount == 0)
             {
-            TInt err = iDatabase.Exec(KCommitTransaction);
-            
-            // transforms SQL error to KErrNotReady
-            if( (err <= KSqlErrGeneral && err >= KSqlErrNotDb) || err == KSqlErrStmtExpired )
-                {
-                User::Leave(KErrNotReady);
-                }
-            else
-                {
-                User::LeaveIfError(err);
-                }
+            DoCommitL();
             }
+        }
+    }
+    
+// ----------------------------------------------------------------------------
+// Commits a transaction on all databases.
+// ----------------------------------------------------------------------------
+//
+void CMPXDbManager::DoCommitL()
+    {
+    MPX_FUNC("CMPXDbManager::DoCommitL");
+    TInt err = iDatabase.Exec(KCommitTransaction);
+    
+    // transforms SQL error to KErrNotReady
+    if( (err <= KSqlErrGeneral && err >= KSqlErrNotDb) || err == KSqlErrStmtExpired )
+        {
+        MPX_DEBUG2("CMPXDbManager::CommitL failed err=%d", err);
+        User::Leave(KErrNotReady);
+        }
+    else
+        {
+        User::LeaveIfError(err);
         }
     }
 
@@ -273,6 +666,12 @@ EXPORT_C void CMPXDbManager::InitDatabasesL(
             handle.iAliasname = HBufC::NewL(KAliasName().Length());
             handle.iAliasname->Des().Format(KAliasName, &driveName);
             handle.iOpen = EFalse;
+#ifdef __RAMDISK_PERF_ENABLE
+            handle.iOrigFullFilePath = HBufC::NewL(0);
+            handle.iTargetFullFilePath = HBufC::NewL(0);
+            handle.iDummyFilePath.Zero();
+            handle.iUseRAMdb = EFalse;
+#endif //__RAMDISK_PERF_ENABLE
 
             iDatabaseHandles.AppendL(handle);
 
@@ -313,8 +712,10 @@ EXPORT_C void CMPXDbManager::OpenDatabaseL(
             {
             if (iDatabaseHandles[i].iDrive == aDrive)
                 {
+                MPX_DEBUG2("CMPXDbManager::OpenDatabaseL found %d", aDrive);
                 if (!iDatabaseHandles[i].iOpen)
                     {
+                    MPX_DEBUG1("CMPXDbManager::OpenDatabaseL not open found");
                     // make sure the database is created
 					CreateDatabaseL(drive);
 
@@ -329,6 +730,7 @@ EXPORT_C void CMPXDbManager::OpenDatabaseL(
         }
     if (!found)
         {
+        MPX_DEBUG1("CMPXDbManager::OpenDatabaseL not found");
         User::Leave(KErrArgument);
         }
 
@@ -366,8 +768,10 @@ EXPORT_C void CMPXDbManager::CloseDatabaseL(
             {
             if (iDatabaseHandles[i].iDrive == aDrive)
                 {
+                MPX_DEBUG2("CMPXDbManager::CloseDatabaseL found %d", aDrive);
                 if (iDatabaseHandles[i].iOpen)
                     {
+                    MPX_DEBUG1("CMPXDbManager::CloseDatabaseL found open");
                     DetachDatabaseL(drive);
                     }
 
@@ -378,6 +782,7 @@ EXPORT_C void CMPXDbManager::CloseDatabaseL(
         }
     if (!found)
         {
+        MPX_DEBUG1("CMPXDbManager::CloseDatabaseL not found");
         User::Leave(KErrArgument);
         }
 
@@ -401,6 +806,11 @@ EXPORT_C void CMPXDbManager::CloseAllDatabases()
         for (TInt i = 0; i < count; ++i)
             {
             delete iDatabaseHandles[i].iAliasname;
+#ifdef __RAMDISK_PERF_ENABLE 
+            delete iDatabaseHandles[i].iOrigFullFilePath;
+            delete iDatabaseHandles[i].iTargetFullFilePath;
+            iDatabaseHandles[i].iDummyFilePath.Zero();
+#endif //__RAMDISK_PERF_ENABLE 
             }
 
         iDatabaseHandles.Reset();
@@ -1295,7 +1705,7 @@ void CMPXDbManager::CreateDatabaseL(
 
     if (database.Open(filename->Des()) != KErrNone)
         {
-        MPX_DEBUG2("CMPXDbManager::CreateDatabaseL - cannot open the database on drive %d", TInt(aDrive));
+        MPX_DEBUG3("CMPXDbManager::CreateDatabaseL - cannot open db on drive %d %S", TInt(aDrive), filename);
 
         // close the database first
         database.Close();
@@ -1350,19 +1760,50 @@ void CMPXDbManager::AttachDatabaseL(
                 {
                 HBufC* filename = CreateFilenameL(aDrive);
                 CleanupStack::PushL(filename);
+                
+#ifdef __RAMDISK_PERF_ENABLE
+                if( iDatabaseHandles[i].iUseRAMdb )
+                    {
+                    delete iDatabaseHandles[i].iAliasname;
+                    iDatabaseHandles[i].iAliasname = HBufC::NewL(KAliasName().Length());
+                    HBufC* temp = HBufC::NewLC(2); // form of DE, DF, DX,...
+                    temp->Des().Append(iRAMDrive); // length == 2
+                    TDriveUnit pdrive(aDrive);
+                    temp->Des().Append(pdrive.Name().Left(1)); //length == 2+ 1
+                    iDatabaseHandles[i].iAliasname->Des().Format(KRAMAliasName, temp);
+                    MPX_DEBUG2("CMPXDbManager::AttachDatabaseL - RAM change aliasname of %S", iDatabaseHandles[i].iAliasname );
+                    CleanupStack::PopAndDestroy(temp);
+                    }
+                else
+#endif //__RAMDISK_PERF_ENABLE
+                   {
+                   delete iDatabaseHandles[i].iAliasname;
+                   TDriveUnit drive(aDrive);
+                   const TDesC& driveName = drive.Name();
+                   iDatabaseHandles[i].iAliasname = HBufC::NewL(KAliasName().Length());
+                   iDatabaseHandles[i].iAliasname->Des().Format(KAliasName, &driveName);
+                   MPX_DEBUG2("CMPXDbManager::AttachDatabaseL - normal change aliasname of %S", iDatabaseHandles[i].iAliasname);
+                   }
 
-                User::LeaveIfError(iDatabase.Attach(filename->Des(),
-                    *(iDatabaseHandles[i].iAliasname)));
+                TInt err = iDatabase.Attach(filename->Des(), *(iDatabaseHandles[i].iAliasname));
+                MPX_DEBUG2("CMPXDbManager::AttachDatabaseL - Attach Error =%d", err);
+                User::LeaveIfError(err);
                 iDatabaseHandles[i].iOpen = ETrue;
 
                 CleanupStack::PopAndDestroy(filename);
                 }
+            else
+                {
+                MPX_DEBUG1("CMPXDbManager::AttachDatabaseL - found already open");    
+                }
+            
             found = ETrue;
             break;
             }
         }
     if (!found)
         {
+        MPX_DEBUG1("CMPXDbManager::AttachDatabaseL - not found");
         User::Leave(KErrNotFound);
         }
     }
@@ -1384,9 +1825,24 @@ void CMPXDbManager::DetachDatabaseL(
         {
         if (iDatabaseHandles[i].iDrive == aDrive)
             {
-            if (iDatabaseHandles[i].iOpen)
+#ifdef __RAMDISK_PERF_ENABLE
+            if ( iDatabaseHandles[i].iOpen || iDatabaseHandles[i].iUseRAMdb )
+#else //__RAMDISK_PERF_ENABLE
+            if ( iDatabaseHandles[i].iOpen )
+#endif //__RAMDISK_PERF_ENABLE
+
                 {
-                User::LeaveIfError(iDatabase.Detach(*(iDatabaseHandles[i].iAliasname)));
+                MPX_DEBUG1("CMPXDbManager::DetachDatabaseL found drive that is opening");
+                TInt err = iDatabase.Detach(*(iDatabaseHandles[i].iAliasname));
+                if ( err )
+                    {
+                    MPX_DEBUG2("CMPXDbManager::DetachDatabaseL detach failed Error=%d", err);
+                    }
+                else
+                    {
+                    MPX_DEBUG2("CMPXDbManager::DetachDatabaseL iAliasname=%S", iDatabaseHandles[i].iAliasname);
+                    }
+                User::LeaveIfError(err);
                 iDatabaseHandles[i].iOpen = EFalse;
                 }
 
@@ -1396,6 +1852,7 @@ void CMPXDbManager::DetachDatabaseL(
         }
     if (!found)
         {
+        MPX_DEBUG1("CMPXDbManager::DetachDatabaseL drive not found in iDatabaseHandlers");
         User::Leave(KErrNotFound);
         }
     }
@@ -1414,8 +1871,33 @@ HBufC* CMPXDbManager::CreateFilenameL(
     const TDesC& securefilePath = KSecureFilePath;
     TDriveUnit cdrive(KRootDrive());
 
-    const TDesC& driveName = aDrive.Name();
-    filename->Des().Format(securefilePath, &driveName, User::Identity().iUid, iDbFile);
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt index(GetDatabaseIndex((TInt)aDrive));    
+    if ( index >=0 && iDatabaseHandles[index].iUseRAMdb && aDrive != cdrive )
+        {
+        MPX_DEBUG1("CMPXDbManager::CreateFilenameL - use RAMDisk");
+        TFileName path;
+        path.Append(iRAMDrive);
+        path.Append(_L(":"));
+        TBuf<2> d;
+        d.Append(aDrive.Name());
+        HBufC* temp = HBufC::NewLC(KMaxFileName);
+        temp->Des().Append(d.Left(1)); // attach original drive name
+        temp->Des().Append(iDbFile->Des()); 
+        filename->Des().Format(securefilePath, &path, User::Identity().iUid, temp);
+        MPX_DEBUG3("CMPXDbManager::CreateFilenameL - path=%S filename=%S", &path, filename);
+        CleanupStack::PopAndDestroy(temp);
+        }
+    else
+#endif //__RAMDISK_PERF_ENABLE
+        {
+        MPX_DEBUG1("CMPXDbManager::CreateFilenameL - use normal drive");
+        const TDesC& driveName = aDrive.Name();
+        filename->Des().Format(securefilePath, &driveName, User::Identity().iUid, iDbFile);
+
+        }
+    
+    MPX_DEBUG2("CMPXDbManager::CreateFilenameL filename = %S", filename); 
     return filename;
     }
 
@@ -1512,43 +1994,13 @@ EXPORT_C void CMPXDbManager::CheckDiskSpaceL(
         MPX_DEBUG1("invalid driveId, leave with KErrNotReady");
         User::Leave(KErrNotReady);
         }
+    
+#ifndef __RAMDISK_PERF_ENABLE 
+    
+    EnsureDiskSpaceL(aDrive);
+    
+#endif //__RAMDISK_PERF_ENABLE
 
-    // handle the case of C drive
-    TDriveUnit drive(aDrive);
-    TDriveUnit cdrive(KRootDrive());
-
-    if(drive == cdrive)
-        {
-        if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0, aDrive))
-            {
-            User::Leave(KErrDiskFull);
-            }
-
-        return;
-        }
-
-    // handle other drives (eg. removable EDriveE)
-    TInt count(iDatabaseHandles.Count());
-    for (TInt i = 0; i < count; ++i)
-        {
-
-        if (((KDbManagerAllDrives == aDrive) ||
-            (aDrive == iDatabaseHandles[i].iDrive)) &&
-            iDatabaseHandles[i].iOpen)
-            {
-            if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0,
-                iDatabaseHandles[i].iDrive))
-                {
-                User::Leave(KErrDiskFull);
-                }
-            }
-
-        if (aDrive == iDatabaseHandles[i].iDrive)
-            {
-            // exit if just one drive to check
-            break;
-            }
-        }
     }
     
 // ----------------------------------------------------------------------------
@@ -1984,7 +2436,24 @@ void CMPXDbManager::DoCreateDatabaseL( TDriveUnit aDrive )
     // remove old databases before creating/replacing new database
     TInt driveNameLen = aDrive.Name().Length();
     
-    TFileName dbFileName(aDrive.Name()); //initialise with drive name        
+    TFileName dbFileName;
+
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt index(GetDatabaseIndex((TInt)aDrive));
+    if( index >= 0 && iDatabaseHandles[index].iUseRAMdb )
+        {
+        dbFileName.Append(iRAMDrive); // RAM
+        dbFileName.Append(_L(":")); // RAM
+        }
+    else 
+#endif //__RAMDISK_PERF_ENABLE
+        {
+        MPX_DEBUG1("CMPXDbManager::CreateDatabaseL - E:");
+        dbFileName.Append(aDrive.Name()); //initialise with drive name
+        }
+        
+
+    MPX_DEBUG2("CMPXDbManager::CreateDatabaseL - dbFileName=%S", &dbFileName);
     dbFileName.Append(KDBFilePath);  // append private path
     
     //append file name
@@ -2048,5 +2517,491 @@ void CMPXDbManager::DoCreateDatabaseL( TDriveUnit aDrive )
     CleanupStack::PopAndDestroy(filename);
     CleanupStack::PopAndDestroy(&database);
     }
+	
+// ---------------------------------------------------------------------------
+// CMPXDbManager::GetRAMDiskPath
+// ---------------------------------------------------------------------------
+//
+TInt CMPXDbManager::GetRAMDiskPath()
+    {
+    TInt error = KErrNotSupported;
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::GetRAMDiskPath");
+    TDriveList driveList;
+    TBool ramDriveFound = EFalse;
+    TInt driveOffset = 'A';
+    iRAMFolder.Zero();
+    
+    error = iFs.DriveList( driveList );
+    if ( error == KErrNone )
+        {
+        for ( TInt i = 0; i < driveList.Length(); i++ )
+            {
+            if ( driveList[i] != 0 )
+                {
+                TDriveInfo info;
+                TInt err = iFs.Drive( info, i );
+                if ( !err && info.iType == EMediaRam )
+                    {
+                    iRAMDrive = driveOffset + i;
+                    iRAMFolder.Append(iRAMDrive);
+                    iRAMFolder.Append(_L(":"));
+                    iRAMFolder.Append(KDBFilePath);
+                    ramDriveFound = ETrue;
+                    MPX_DEBUG2("RAMDisk path=%S", &iRAMFolder);
+                    break;
+                    }
+                }
+            }
+        
+        // Check if ram drive is found.
+        if ( !ramDriveFound )
+            {
+            error = KErrNotFound;
+            }
+        }
+    MPX_DEBUG2("CMPXDbManager::GetRAMDiskPath Get DriveList error=%d", error);
+    MPX_DEBUG1("<--CMPXDbManager::GetRAMDiskPath");
+#endif //__RAMDISK_PERF_ENABLE
+    return error;
+    }
 
+// ---------------------------------------------------------------------------
+// CMPXDbManager::IsRamDiskSpaceAvailable
+// ---------------------------------------------------------------------------
+//
+TBool CMPXDbManager::IsRamDiskSpaceAvailable()
+    {
+
+#ifdef __RAMDISK_PERF_ENABLE
+
+    MPX_DEBUG1("-->CMPXDbManager::IsDiskSpaceAvailable" );
+    TInt driveIndex;
+    RFs::CharToDrive(iRAMDrive, driveIndex);
+    TVolumeInfo vol;
+    TInt err = iFs.Volume( vol, driveIndex );
+    if ( err == KErrNone )
+        {
+        MPX_DEBUG2("CMPXDbManager::IsRamDiskSpaceAvailable Free in bytes =%Lu", vol.iFree);
+        if ( vol.iFree > KMPMinimumRAMSizeToRun )
+            {
+            MPX_DEBUG1("CMPXDbManager::IsRamDiskSpaceAvailable Ok to copy");
+            return ETrue;
+            }
+        MPX_DEBUG1("CMPXDbManager::IsRamDiskSpaceAvailable NOT Ok to copy");
+        return EFalse;
+        }
+    
+    MPX_DEBUG2("CMPXDbManager::IsRamDiskSpaceAvailable Disk Not available to use. %d", err);
+    MPX_DEBUG1("<--CMPXDbManager::IsDiskSpaceAvailable");
+
+#endif //__RAMDISK_PERF_ENABLE
+
+    return EFalse;
+    }
+
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::BlockDiskSpaceL
+// ---------------------------------------------------------------------------
+//
+TBool CMPXDbManager::BlockDiskSpace( TDriveUnit aDrive, TInt aOrigDbSize, TBool aIsMTPInUse )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+
+    MPX_DEBUG2("-->CMPXDbManager::BlockDiskSpaceL %d", (TInt)aDrive );
+    
+    // if current DB size can not fit in RAM, abort now
+    TInt ramDrive;
+    RFs::CharToDrive(iRAMDrive, ramDrive);
+    TVolumeInfo vol;
+    TInt err = iFs.Volume( vol, ramDrive );
+    if ( vol.iFree <= aOrigDbSize + KMPMinimumRAMSizeToRun )
+        {
+        MPX_DEBUG1("-->CMPXDbManager::BlockDiskSpaceL Not enough even for copy original DB file, leave" );
+        return EFalse;
+        }
+
+    // ensure you have the disk volume and database
+    err = iFs.Volume( vol, (TInt)aDrive );
+    if (err != KErrNone) 
+        {
+        MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Volume not available on drive %d", (TInt)aDrive);
+        return EFalse;
+        }
+
+    TInt index( GetDatabaseIndex((TInt)aDrive) );
+    if (index < 0) 
+        {
+        MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Database not available for drive %d", (TInt)aDrive);
+        return EFalse;
+        }
+
+    // Check if the drive has enough space to block
+    MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Disk total free space in bytes =%Lu", vol.iFree);
+    TInt64 blockingSize( CalculateInitalDummyDBSize( vol, aOrigDbSize, aIsMTPInUse ));
+    MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Disk blocking size =%Lu", blockingSize);
+    if ( vol.iFree <= blockingSize + 1*KMPMegaByte )
+        {
+        MPX_DEBUG1("CMPXDbManager::BlockDiskSpaceL NOk to block");
+        return EFalse;
+        }
+
+    // Create and resize the dummy file
+    TFileName dummyDbFileName; 
+    TChar ch;
+    RFs::DriveToChar((TInt)aDrive, ch );
+    dummyDbFileName.Format( KDummyDbFile, (TUint)ch);
+    RFile dummyDb;
+    err = dummyDb.Replace( iFs, dummyDbFileName, EFileWrite );
+    if (err != KErrNone) 
+        {
+        MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Can't open dummy file %d", err);
+        return EFalse;
+        }
+    err = dummyDb.SetSize( blockingSize );
+    if ( err )
+        {
+        MPX_DEBUG2("CMPXDbManager::BlockDiskSpaceL Can't resize dummy file %d", err);
+        dummyDb.Close();
+        return EFalse;
+        }
+
+    dummyDb.Close();
+    MPX_DEBUG1("CMPXDbManager::BlockDiskSpaceL Ok to block");
+
+    iDatabaseHandles[index].iDummyFilePath.Copy(dummyDbFileName);
+    MPX_DEBUG1("<--CMPXDbManager::BlockDiskSpace");
+
+    return ETrue;
+#else
+    return EFalse;
+#endif //__RAMDISK_PERF_ENABLE
+    }
+
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::CalculateInitalDummyDBSizeL
+//
+//a) MTP case
+//-------------
+//        totalNumOfSongsCanFit = <disk free space> / 2 MB;
+//        metadataSize = totalNumOfSongsCanFit * 3000B 
+//        estimatedDBSize = metadataSize + <orig DB size>;
+//        dummyDBSize = MIN (iMaximumAllowedRAMDiskSpaceToCopy , estimatedDBSize )
+
+//b) Harvesting case
+//-------------------
+//        totalNumOfSongsCanFit = <disk total size>/ 2 MB
+//        metadataSize = totalNumOfSongsCanFit * 3000B 
+//        estimatedSize = metadataSize+ <orig DB size>
+//        freeDiskSpace = <disk free space> - 1 MB
+//        dummyDBSize = MIN (freeDiskSpace, iMaximumAllowedRAMDiskSpaceToCopy , estimatedSize);
+//
+// ---------------------------------------------------------------------------
+//
+TInt64 CMPXDbManager::CalculateInitalDummyDBSize( const TVolumeInfo& aVol, TInt aOrigDbSize, TBool aIsMTPInUse )
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::CalculateInitalDummyDBSize");
+
+    if ( aIsMTPInUse )
+        {
+        TInt64 totalNumOfSongsCanFit = aVol.iFree / KMPEstimatedSongInBytes;
+        MPX_DEBUG2("-->CMPXDbManager::CalculateInitalDummyDBSize aVol.iFree=%Lu", aVol.iFree );
+        MPX_DEBUG2("-->CMPXDbManager::CalculateInitalDummyDBSize totalNumOfSongsCanFit=%Lu", totalNumOfSongsCanFit );
+        TInt64 estimatedSize = totalNumOfSongsCanFit * (TInt64) KMPEstimatedSizePerDBEntry + aOrigDbSize;
+        MPX_DEBUG2("-->CMPXDbManager::CalculateInitalDummyDBSize (MTP case) estimated DB size from calculation=%Lu", estimatedSize );
+        if ( estimatedSize > iMaximumAllowedRAMDiskSpaceToCopy )
+            {
+            MPX_DEBUG2("<--CMPXDbManager::CalculateInitalDummyDBSize returned iMaximumAllowedRAMDiskSpaceToCopy %d", iMaximumAllowedRAMDiskSpaceToCopy);
+            return iMaximumAllowedRAMDiskSpaceToCopy;
+            }
+        else
+            {
+            MPX_DEBUG2("<--CMPXDbManager::CalculateInitalDummyDBSize returned %Lu", estimatedSize );
+            return estimatedSize;
+            }
+        }
+    else
+        {
+        TInt64 totalNumOfSongsCanFit = aVol.iSize / KMPEstimatedSongInBytes;
+        TInt64 estimatedSize = totalNumOfSongsCanFit * (TInt64) KMPEstimatedSizePerDBEntry + aOrigDbSize;
+        MPX_DEBUG2("-->CMPXDbManager::CalculateInitalDummyDBSize estimated DB size from calculation=%Lu", estimatedSize );
+        if ( estimatedSize > iMaximumAllowedRAMDiskSpaceToCopy )
+            {
+            MPX_DEBUG1("<--CMPXDbManager::CalculateInitalDummyDBSize");
+            // If estimated size is larger than expected free RAM size, 
+            // and if the RAM size is larger than free disk space,
+            // then use free disk space. 1*KMPMegaByte prevent MP to use up all diskspace
+            //return iMaximumAllowedRAMDiskSpaceToCopy > aVol.iFree - 1*KMPMegaByte  
+            //    ? aVol.iFree - 1*KMPMegaByte : iMaximumAllowedRAMDiskSpaceToCopy;
+            return iMaximumAllowedRAMDiskSpaceToCopy;
+            }
+        else
+            {
+            MPX_DEBUG1("<--CMPXDbManager::CalculateInitalDummyDBSize");
+            // If estimated size is larger than disk free size, use free diskspace size,            
+            //return estimatedSize > aVol.iFree - 1*KMPMegaByte
+            //    ? aVol.iFree - 1*KMPMegaByte : estimatedSize;
+            return estimatedSize;
+            }
+        }
+    
+#endif //__RAMDISK_PERF_ENABLE    
+    }
+    
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::GetDatabaseIndex
+// ---------------------------------------------------------------------------
+//
+TInt CMPXDbManager::GetDatabaseIndex(TInt aDrive) 
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG2("-->CMPXDbManager::GetDatabaseIndex %d", aDrive );
+    TInt count(iDatabaseHandles.Count());
+    for (TInt i = 0; i < count; ++i)
+        {
+        if ( iDatabaseHandles[i].iDrive == aDrive )
+            {
+            return i;
+            }
+        }    
+#endif //__RAMDISK_PERF_ENABLE    
+    MPX_DEBUG1("<--CMPXDbManager::GetDatabaseIndex returned -1");
+    return -1;
+    }
+
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::EnsureRamSpaceL
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CMPXDbManager::EnsureRamSpaceL() 
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::EnsureRamSpaceL");
+
+    if ( iRAMInUse )
+        {
+        TVolumeInfo vol;
+        TInt driveIndex;
+        RFs::CharToDrive( iRAMDrive, driveIndex );
+
+        TInt errRAM = iFs.Volume( vol, driveIndex );
+        if ( errRAM == KErrNone && vol.iFree < KMPMinimumRAMSizeToRun )
+            {
+            // RAM not enough, copy back to normal drive and continue to harvest.
+            MPX_DEBUG1("CMPXDbManager::EnsureRamSpaceL RAM diskspace is full, copy dbs back");
+            CopyDBsFromRamL();
+            }
+        else
+            {
+            TInt size=0;
+            TInt err = GetTotalRamDatabasesSize(size);
+            if ( err || (size > iMaximumAllowedRAMDiskSpaceToCopy) )
+                {
+                // Databases using too much RAM space, copy back to normal drive and continue to harvest.
+                if ( err )
+                    {
+                    MPX_DEBUG2("CMPXDbManager::EnsureRamSpaceL Get DBs Size Err = %d, copy dbs back", err);
+                    }
+                else
+                    {
+                    MPX_DEBUG2("CMPXDbManager::EnsureRamSpaceL DBs using too much RAM space size = %d, copy dbs back", size);
+                    }
+                CopyDBsFromRamL();
+                }
+            }
+        }
+    MPX_DEBUG1("<--CMPXDbManager::EnsureRamSpaceL");
+#endif //__RAMDISK_PERF_ENABLE    
+    }
+
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::EnsureDiskSpaceL
+// ---------------------------------------------------------------------------
+//
+void CMPXDbManager::EnsureDiskSpaceL(TInt aDrive) 
+    {
+    MPX_DEBUG2("-->CMPXDbManager::EnsureDiskSpaceL for drive %d", aDrive);
+    // handle the case of C drive
+    TDriveUnit drive(aDrive);
+    TDriveUnit cdrive(KRootDrive());
+
+    if(drive == cdrive)
+        {
+        if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0, aDrive))
+            {
+            MPX_DEBUG1("CMPXDbManager::EnsureDiskSpaceL Error diskspace full");
+            User::Leave(KErrDiskFull);
+            }
+
+        return;
+        }
+
+    // handle other drives (eg. removable EDriveE)
+    TInt count(iDatabaseHandles.Count());
+    for (TInt i = 0; i < count; ++i)
+        {
+        if (((KDbManagerAllDrives == aDrive) ||
+            (aDrive == iDatabaseHandles[i].iDrive)) &&
+            iDatabaseHandles[i].iOpen)
+            {
+            if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0,
+                iDatabaseHandles[i].iDrive))
+                {
+                MPX_DEBUG1("CMPXDbManager::EnsureDiskSpaceL Error diskspace full");
+                User::Leave(KErrDiskFull);
+                }
+            }
+
+        if (aDrive == iDatabaseHandles[i].iDrive)
+            {
+            // exit if just one drive to check
+            break;
+            }
+        }
+    MPX_DEBUG1("<--CMPXDbManager::EnsureDiskSpaceL");
+    }
+
+
+// ---------------------------------------------------------------------------
+// CMPXDbManager::DoBackupDBs
+// ---------------------------------------------------------------------------
+//
+/*EXPORT_C void CMPXDbManager::BackupDBsL()
+    {
+#ifdef __RAMDISK_PERF_ENABLE
+    MPX_DEBUG1("-->CMPXDbManager::BackupDBsL");
+
+    TInt transactionCount = iTransactionCount;
+    if (iTransactionCount > 0) 
+        {
+        iTransactionCount = 0;
+        DoCommitL();
+        }
+    
+    TInt count(iDatabaseHandles.Count());
+    for (TInt i = 0; i < count && iDatabaseHandles[i].iUseRAMdb ; ++i)
+        {
+        CloseDatabaseL( iDatabaseHandles[i].iDrive );            
+
+        TInt err= BaflUtils::CopyFile(iFs, 
+            iDatabaseHandles[i].iTargetFullFilePath->Des(), 
+            iDatabaseHandles[i].iOrigFullFilePath->Des());
+
+        MPX_DEBUG2("CMPXDbManager::BackupDBsL err = %d", err);     
+
+        OpenDatabaseL( iDatabaseHandles[i].iDrive );      
+        }
+        
+    if (transactionCount > 0) 
+        {
+        DoBeginL();
+        iTransactionCount = transactionCount;
+        }
+    MPX_DEBUG1("<--CMPXDbManager::BackupDBsL");
+#endif //__RAMDISK_PERF_ENABLE    
+    }*/
+    
+// ---------------------------------------------------------------------------
+// CMPXDbManager::GetTotalDatabasesSize
+// ---------------------------------------------------------------------------
+//
+TInt CMPXDbManager::GetTotalDatabasesSize(TInt& aSize)
+    {
+    MPX_FUNC("CMPXDbManager::GetTotalDatabasesSize");
+    TInt err = KErrNotSupported;
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt size=0;
+    TInt count(iDatabaseHandles.Count());
+    err = KErrNone;
+    for ( TInt i = 0; i < count ; ++i )
+        {
+        // Generate database name.
+        TFileName dbFilename;
+        TDriveUnit drive(iDatabaseHandles[i].iDrive);
+        dbFilename.Append(drive.Name());
+        dbFilename.Append(KDBFilePath);
+        TFileName filename;            
+        filename.Format(KSecurePath, User::Identity().iUid, iDbFile); //x:\private\10281e17\[sldfdsf]mpxv2_5.db
+        dbFilename.Append(filename);
+        MPX_DEBUG2("CMPXDbManager::GetTotalDatabasesSize - Database name = %S", &dbFilename);
+        TEntry entry;
+        err = iFs.Entry( dbFilename, entry );
+        if (err == KErrNotFound || err == KErrNotReady )
+            {
+            MPX_DEBUG3("CMPXDbManager::GetTotalDatabasesSize - Ignored %S, error = %d", &dbFilename, err);
+            err = KErrNone;
+            continue;
+            }
+        if ( err != KErrNone )
+            {
+            break;
+            }
+        MPX_DEBUG3("CMPXDbManager::GetTotalDatabasesSize - Size of Db %S = %d", &dbFilename, entry.iSize);
+        // sum up size
+        size += entry.iSize;
+        }
+    aSize = size;
+    MPX_DEBUG2("CMPXDbManager::GetTotalDatabasesSize - Total Size of Dbs = %d", size);
+    
+#endif //__RAMDISK_PERF_ENABLE    
+    MPX_DEBUG2("CMPXDbManager::GetTotalDatabasesSize - Return err = %d", err);
+    return err;
+    }
+    
+// ---------------------------------------------------------------------------
+// CMPXDbManager::GetTotalRamDatabasesSize
+// ---------------------------------------------------------------------------
+//
+TInt CMPXDbManager::GetTotalRamDatabasesSize(TInt& aSize)
+    {
+    MPX_FUNC("CMPXDbManager::GetTotalRamDatabasesSize");
+    TInt err = KErrNotSupported;
+#ifdef __RAMDISK_PERF_ENABLE
+    TInt size=0;
+    TInt count(iDatabaseHandles.Count());
+    err = KErrNone;
+    for ( TInt i = 0; i < count ; ++i )
+        {
+        // make sure this db is in ram drive.
+        if ( !iDatabaseHandles[i].iUseRAMdb )
+            {
+            continue;
+            }
+        // Generate database name.
+        TFileName dbFilename;
+        dbFilename.Append(iRAMFolder);
+        TBuf<2> d;
+        TDriveUnit drive(iDatabaseHandles[i].iDrive);
+        d.Append(drive.Name());
+        HBufC* temp = HBufC::NewLC(KMaxFileName);
+        temp->Des().Append(d.Left(1));
+        temp->Des().Append(iDbFile->Des());
+        TFileName filename;            
+        filename.Format(KSecurePath, User::Identity().iUid, temp);
+        CleanupStack::PopAndDestroy(temp);
+        dbFilename.Append(filename);
+        MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Database name = %S", &dbFilename);
+        TEntry entry;
+        err = iFs.Entry( dbFilename, entry );
+        if ( (err != KErrNone) && (err != KErrNotFound) )
+            {
+            break;
+            }
+        MPX_DEBUG3("CMPXDbManager::GetTotalRamDatabasesSize - Size of Db %S = %d", &dbFilename, entry.iSize);
+        // sum up size
+        size += entry.iSize;
+        }
+    aSize = size;
+    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Total Size of Dbs = %d", size);
+#endif //__RAMDISK_PERF_ENABLE    
+    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Return err = %d", err);
+    return err;
+    }
+    
 // End of File

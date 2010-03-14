@@ -27,6 +27,9 @@ VENDORID        VID_DEFAULT
 
 CAPABILITY      CAP_GENERAL_DLL
 
+MACRO __RAMDISK_PERF_ENABLE
+#define __RAMDISK_PERF_ENABLE
+
 VERSION 15.0
 
 SOURCEPATH      ../src
@@ -59,6 +62,7 @@ LIBRARY         mmfstandardcustomcommands.lib
 LIBRARY         bafl.lib
 LIBRARY         ecom.lib // DestroyedImplementation
 LIBRARY         mpxcommon.lib
+LIBRARY         centralrepository.lib
 
 #if defined(ARMCC)
 deffile ../eabi/ 

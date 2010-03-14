@@ -49,6 +49,10 @@ const TUint32 KMPXMPLocalVariation   = 0x00000001;
 // +128 to disable podcasting
 #define KMPXDisablePodcastingOption 0x0008
 
+// Feature to enable RAM disk database copying
+#define KMPXEnableRAMDisk 0x00f0
+
+#define KMAXAllowedDiskSpaceToCopy 0x9
 // Feature to enable Go To MusicShop option in option menus.
 #define KMPXEnableGoToMusicShopOption 0x0010
 

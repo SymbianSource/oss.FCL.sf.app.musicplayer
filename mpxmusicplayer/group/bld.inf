@@ -19,7 +19,6 @@
 #include <platform_paths.hrh>
 #include "../help/group/bld.inf"
 #include "../commonui/group/bld.inf"
-#include "../activeidle/group/bld.inf"
 #include "../metadatahandler/group/bld.inf"
 #include "../mediakeyhandler/group/bld.inf"
 #include "../app/group/bld.inf"

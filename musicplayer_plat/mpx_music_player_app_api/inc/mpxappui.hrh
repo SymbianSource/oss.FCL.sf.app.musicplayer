@@ -54,7 +54,8 @@ enum TMPXAppUiCommandIds
     EMPXCmdGotoCollection,
     EMPXCmdVolumeMute,
     EMPXCmdVolumeUnMute,
-    EMPXCmdCancelReorder
+    EMPXCmdCancelReorder,
+    EMPXCmdCheckIADUpdates
 
     };
 #endif  // MPXAPPUI_HRH

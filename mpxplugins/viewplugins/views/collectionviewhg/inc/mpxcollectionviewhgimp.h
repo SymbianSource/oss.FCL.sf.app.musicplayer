@@ -53,7 +53,11 @@ class CMediaRecognizer;
 class CMediatorCommandInitiator;
 class CSendUi;
 class CUpnpCopyCommand;
+
+#ifdef BACKSTEPPING_INCLUDED
 class MMPXBackSteppingUtility;
+#endif // BACKSTEPPING_INCLUDED
+
 class MMPXCollectionUtility;
 class MMPXPlaybackUtility;
 class MMPXPlayerManager;
@@ -847,6 +851,8 @@ private:
     void OpenGenreL();
     void OpenPodcastsL();
 
+    static TInt IADCheckTimerCallBack(TAny* aHgViewObject); //directly called
+    void StartCheckingforIADUpdates(); //indirectly called
 
 private:    // Data
 
@@ -939,7 +945,10 @@ private:    // Data
     TBool iPodcast;
 #endif // __ENABLE_PODCAST_IN_MUSIC_MENU
 
+#ifdef BACKSTEPPING_INCLUDED
     MMPXBackSteppingUtility* iBackSteppingUtility;
+    TBool iActivateBackStepping;
+#endif // BACKSTEPPING_INCLUDED
 
     TBool iUSBOnGoing;
     TBool iInAlbumArtDialog;
@@ -967,10 +976,12 @@ private:    // Data
     CEikProgressInfo*	iProgressInfo;
     TBool iIsAddingToPlaylist;  // flag used to handle the return by adding songs incrementally
     CUpnpCopyCommand* iUpnpCopyCommand;
-    TBool iActivateBackStepping;
+
     TBool iOpeningNote; // Waitnote is opening
 	TBool iMarkedAll;
 	TBool iFirstIncrementalBatch;
+
+    CPeriodic* iTimer;
     };
 
 #endif  // C_CMPXCOLLECTIONVIEWHGIMP_H

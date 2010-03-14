@@ -1009,6 +1009,7 @@ class CMPXDbHandler :
 	* @see MMPXDbPlaylistObserver
 	*/
 		virtual TInt HandlePlaylistDurationL(TUint32 aPlaylistId);
+        virtual void HandlePlaylistInfoL(TUint32 aPlaylistId, TInt& aCount, TInt& aDuration);
 
     private:
 

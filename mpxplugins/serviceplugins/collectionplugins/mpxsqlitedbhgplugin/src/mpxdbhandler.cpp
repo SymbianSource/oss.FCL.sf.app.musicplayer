@@ -1356,6 +1356,9 @@ void CMPXDbHandler::RefreshStartL()
             }
     }
     
+#ifdef __RAMDISK_PERF_ENABLE
+	iDbManager->CopyDBsToRamL();
+#endif //__RAMDISK_PERF_ENABLE
     iDbMusic->RefreshStartL();
 
     BeginTransactionL();
@@ -1386,6 +1389,10 @@ void CMPXDbHandler::RefreshEndL()
         {
         iSynchronizeBasicTable = EFalse;
         }
+
+#ifdef __RAMDISK_PERF_ENABLE
+    iDbManager->CopyDBsFromRamL();
+#endif //__RAMDISK_PERF_ENABLE
     }
 
 // ----------------------------------------------------------------------------
@@ -1394,9 +1401,20 @@ void CMPXDbHandler::RefreshEndL()
 //
 void CMPXDbHandler::MtpStartL()
     {
+    MPX_DEBUG1("-->CMPXDbHandler::MtpStartL");
     iMtpInUse = ETrue;
     iOpOnDbCount = 0;
+
+#ifdef __RAMDISK_PERF_ENABLE
+	TRAPD(err, iDbManager->CopyDBsToRamL(iMtpInUse));
+	if ( err != KErrNone )
+	    {
+        MPX_DEBUG2("CMPXDbHandler::MtpStartL error=%d", err);
+	    }
+#endif //__RAMDISK_PERF_ENABLE
+
     iDbManager->BeginL();
+    MPX_DEBUG1("<--CMPXDbHandler::MtpStartL");
     }
 
 // ----------------------------------------------------------------------------
@@ -1405,9 +1423,20 @@ void CMPXDbHandler::MtpStartL()
 //
 void CMPXDbHandler::MtpEndL()
     {
+    MPX_DEBUG1("-->CMPXDbHandler::MtpEndL");
     iMtpInUse = EFalse;
     iOpOnDbCount = 0;
     iDbManager->CommitL();
+
+#ifdef __RAMDISK_PERF_ENABLE
+    TRAPD(err, iDbManager->CopyDBsFromRamL());
+	if ( err != KErrNone )
+	    {
+        MPX_DEBUG2("CMPXDbHandler::MtpEndL error=%d", err);
+	    }
+#endif //__RAMDISK_PERF_ENABLE
+    
+    MPX_DEBUG1("<--CMPXDbHandler::MtpEndL");
     }
 
 // ----------------------------------------------------------------------------
@@ -1488,6 +1517,16 @@ void CMPXDbHandler::GetPlaylistUriArrayL(TInt aDrive, TInt aFromID, TInt aRecord
 void CMPXDbHandler::BeginTransactionL()
     {
     MPX_FUNC("CMPXDbHandler::BeginTransactionL");
+
+#ifdef __RAMDISK_PERF_ENABLE
+    // EnsureRamSpaceL will copy dbs from ram if ram space is low or dbs exceeded
+    // max space.
+	TRAPD(err, iDbManager->EnsureRamSpaceL());
+	if (err)
+		{
+		//error but continue
+		}
+#endif //__RAMDISK_PERF_ENABLE
 
     if(!iMtpInUse)
         {
@@ -2938,6 +2977,37 @@ TInt CMPXDbHandler::HandlePlaylistDurationL(TUint32 aPlaylistId)
 	{
 	return GetPlaylistDurationL(aPlaylistId);
 	}
+void CMPXDbHandler::HandlePlaylistInfoL(
+    TUint32 aPlaylistId, 
+    TInt& aCount, 
+    TInt& aDuration)
+    {
+    MPX_FUNC("CMPXDbHandler::HandlePlaylistInfoL");
+    MPX_DEBUG2("CMPXDbHandler::HandlePlaylistInfoL(0x%x)", aPlaylistId);
+
+    RArray<TMPXAttribute> attributes;
+    CleanupClosePushL(attributes);
+    attributes.AppendL(KMPXMediaGeneralId);    
+    attributes.AppendL(TMPXAttribute(KMPXMediaIdGeneral, EMPXMediaGeneralDuration));
+
+    CMPXMediaArray* mediaArray = CMPXMediaArray::NewL();
+    CleanupStack::PushL(mediaArray);    
+    
+    GetPlaylistSongsL(aPlaylistId, attributes.Array(), *mediaArray);
+    
+    aCount = mediaArray->Count();
+    for (TInt index = 0; index < aCount; ++index)
+        {
+        CMPXMedia* media((*mediaArray)[index]);
+        if (media->IsSupported(KMPXMediaGeneralDuration))
+            {
+            aDuration += media->ValueTObjectL<TInt>(KMPXMediaGeneralDuration);
+            }
+        }
+
+    CleanupStack::PopAndDestroy(mediaArray);
+    CleanupStack::PopAndDestroy(&attributes);        
+    }
 
 TInt CMPXDbHandler::HandleGetAlbumsCountForArtistL(TUint32 aArtistId)
 	{

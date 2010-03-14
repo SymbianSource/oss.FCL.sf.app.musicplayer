@@ -293,6 +293,130 @@ class CMPXDbManager :
         IMPORT_C RSqlStatement ExecuteSelectQueryOnAllDrivesL(TInt aDrive, TRefByValue<const TDesC> aFmt,
             ...);
 
+        /**
+        * Copy all databases from RAM disk back to normal drive, E, F,...
+        * 
+        * @return none
+        */
+        IMPORT_C void CopyDBsFromRamL(); 
+
+        /**
+        * Copy all databases to RAM disk back from normal drive, E, F,...
+        * 
+        * @return none
+        */
+        IMPORT_C void CopyDBsToRamL( TBool aIsMTPInUse = EFalse);
+        
+
+        /**
+        * Check if RAM disk is enough to operatte. If not, DBs will be copied back to drives.
+        *
+        * @return TInt index to the database handler
+        */
+        IMPORT_C void EnsureRamSpaceL() ;
+
+        /**
+        *  Move DBs from RAMDisk to disks
+        */
+        //IMPORT_C void BackupDBsL();
+
+    private:
+
+        /**
+        * Find available RAMDISK
+        * @return error code
+        */
+        TInt GetRAMDiskPath();
+
+        /**
+        * Check if RAM disk is available to copy.
+        *
+        * @return ETrue if there is enough space, EFalse otherwise
+        */
+        TBool IsRamDiskSpaceAvailable();
+        
+        /**
+        * To block a diskspace so that it can gurantee for a write back from RAM disk
+        *
+        * @return ETrue if the dummy file is created successfully, EFalse otherwise
+        */
+        TBool BlockDiskSpace( TDriveUnit aDrive, TInt aOrigDbSize, TBool aIsMTPInUse = EFalse );
+        
+        /**
+        * To copy db from regular drive to RAM
+        *
+        * @return ETrue if succeed 
+        * @leave KErrDiskFull if there is any difficulty copying files
+        */
+        TBool DoCopyDBToRamL( TDriveUnit aDrive, TBool aIsMTPInUse );
+
+        /**
+        * To copy db back regular drive from RAM
+        *
+        */
+        void DoCopyDBFromRamL( TInt aIndex );
+    
+        /**
+        * To replace dummy file with new content
+        * Writes over previous dummy file without freeing disk space
+        */
+        void ReplaceFileL( const TDesC& aSrcName, const TDesC& aDstName );
+        	
+        /**
+        * To calculate necessary file size of the dummy file
+        *
+        * @return TInt64 estimated file size
+        */
+        TInt64 CalculateInitalDummyDBSize( const TVolumeInfo& aVol, TInt aOrigDbSize, TBool aIsMTPInUse = EFalse);
+        
+        /**
+        * Get database index by giving drive index
+        *
+        * @return TInt index to the database handler
+        */
+        TInt GetDatabaseIndex(TInt aDrive);
+
+        /**
+         * Sum up the total size in bytes of the databases.
+         * 
+         * @param aSize - On return, the total size of the databases.
+         * @return TInt System error.
+         */
+        TInt GetTotalDatabasesSize(TInt& aSize);
+
+        /**
+         * Sum up the total size in bytes of the databases on the RAM drive.
+         * 
+         * @param aSize - On return, the total size of the databases on the RAM drive.
+         * @return TInt System error.
+         */
+        TInt GetTotalRamDatabasesSize(TInt& aSize);
+
+        /**
+        * Remove dummy file
+        *
+        * @return TInt index to the database handler
+        */
+        void RemoveDummyFile( TInt index );
+
+        
+
+/**
+        * Check if disksapce is enough to operatte. If not, it leaves with KErrDiskFull
+        *
+        */
+        void EnsureDiskSpaceL(TInt aDrive) ;
+        
+        /** 
+         * Begin transaction, leaves on error
+         */
+        void DoBeginL();
+        
+        /** 
+         * Commit transaction, leaves on error
+         */
+        void DoCommitL();
+
     protected:  // Types
 
         typedef struct
@@ -300,6 +424,12 @@ class CMPXDbManager :
             TInt iDrive;
             TBool iOpen;
             HBufC* iAliasname;
+#ifdef __RAMDISK_PERF_ENABLE 
+            TBool iUseRAMdb;
+            HBufC* iOrigFullFilePath;
+            HBufC* iTargetFullFilePath;
+            TFileName iDummyFilePath;
+#endif //__RAMDISK_PERF_ENABLE 
             } DatabaseHandle;
 
     protected:  // Data
@@ -492,6 +622,14 @@ class CMPXDbManager :
 
         RArray<TSqlStatementState> iPreparedStatements;
         RPointerArray<RSqlStatement> iStatements;
+
+        // Defined for RAM disk performance
+        TBool                   iRAMDiskPerfEnabled;  // flag to indicate RAM disk feature is enabled from cenrep.
+        TUint64                 iMaximumAllowedRAMDiskSpaceToCopy; // maximum number of megabytes allow to do RAM disk operation.
+        TFileName               iRAMFolder;
+        TChar                   iRAMDrive;
+        TBool                   iRAMInUse;
+        TInt64                  iEstimatedDBSizes;
     };
 
 #endif  // MPXDBMANAGER_H

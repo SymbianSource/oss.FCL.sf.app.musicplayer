@@ -211,9 +211,6 @@ void CMPXAppUi::ConstructL()
 // initialize FeatureManager
     FeatureManager::InitializeLibL();
 
-    // Check updates from IAD, continue UI launching even if something fails there
-    TRAP_IGNORE( CheckUpdatesL() );
-
     if ( FeatureManager::FeatureSupported( KFeatureIdCoverDisplay ) )
         {
         iCoverDisplay = ETrue;
@@ -3336,6 +3333,11 @@ void CMPXAppUi::HandleCommandL(
     TMPXPlaybackCommand cmd = EPbCmdEnd;
     switch ( aCommand )
         {
+	    case EMPXCmdCheckIADUpdates:
+	        {
+	        TRAP_IGNORE( CheckUpdatesL() );
+	        break;
+	        }
         case EMPXCmdPlay:
         case EMPXCmdPause:
         case EMPXCmdPlayPause:

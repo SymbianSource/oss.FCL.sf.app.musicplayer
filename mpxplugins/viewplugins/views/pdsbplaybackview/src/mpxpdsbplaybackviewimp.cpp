@@ -887,13 +887,16 @@ void CMPXPdSbPlaybackViewImp::UpdateToolbar()
             TMPXPlaybackState state = iPlaybackUtility->StateL();
             CAknButton* pausePlayControl;
             pausePlayControl = (CAknButton*)(toolbar->ComponentControl( 1 ));
-            if ((state == EPbStateInitialising) || (state == EPbStatePlaying))
+            if (pausePlayControl)
                 {
-                pausePlayControl->SetCurrentState(0, ETrue);
-                }
-            else
-                {
-                pausePlayControl->SetCurrentState(1, ETrue);
+                if( (state == EPbStateInitialising) || (state == EPbStatePlaying) )
+                    {
+                    pausePlayControl->SetCurrentState(0, ETrue);
+                    }
+               else
+                   {
+                   pausePlayControl->SetCurrentState(1, ETrue);
+                   }
                 }
             if ( state == EPbStatePlaying ||
                     state == EPbStatePaused ||

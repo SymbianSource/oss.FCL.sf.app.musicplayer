@@ -41,6 +41,120 @@
 // CONSTANTS
 _LIT(KPathStart, ":\\");
 
+// ============================ FILE EXTENSION TO MIME MAP ==============================
+
+// ----------------------------------------------------------------------------------------------------------
+// Statically allocated Mime Map
+// ----------------------------------------------------------------------------------------------------------
+//
+
+_LIT( KExtensionAac,    "aac" );
+_LIT( KExtensionAif,    "aif"); 
+_LIT( KExtensionAifc,   "aifc"); 
+_LIT( KExtensionAiff,   "aiff");
+_LIT( KExtensionAmr,    "amr" );
+_LIT( KExtensionAu,     "au" );
+_LIT( KExtensionAwb,    "awb" );
+_LIT( KExtensionMid,    "mid" );
+_LIT( KExtensionMidi,   "midi" );
+_LIT( KExtensionMka,    "mka" );
+_LIT( KExtensionMp3,    "mp3" );
+_LIT( KExtensionOgg,    "ogg");
+_LIT( KExtensionRa,     "ra"); 
+_LIT( KExtensionRam,    "ram"); 
+_LIT( KExtensionRmi,    "rmi"); 
+_LIT( KExtensionSnd,    "snd" );
+_LIT( KExtensionSpMid,  "spmid" );
+_LIT( KExtensionWav,    "wav" );
+_LIT( KExtensionWma,    "wma" );
+
+_LIT8( KMimeTypeAac,      "audio/aac" );
+_LIT8( KMimeTypeAiff,     "audio/x-aiff");
+_LIT8( KMimeTypeAmr,      "audio/amr" );
+_LIT8( KMimeTypeAu,       "audio/au" );
+_LIT8( KMimeTypeAwb,      "audio/amr-wb" );
+_LIT8( KMimeTypeBasic,    "audio/basic");
+_LIT8( KMimeTypeMatroska, "audio/x-matroska");
+_LIT8( KMimeTypeMid,      "audio/mid");
+_LIT8( KMimeTypeMidi,     "audio/midi" );
+_LIT8( KMimeTypeMpeg,     "audio/mpeg" );
+_LIT8( KMimeTypeOgg,      "audio/ogg");
+_LIT8( KMimeTypeReal,     "audio/x-pn-realaudio");
+_LIT8( KMimeTypeSpMidi,   "audio/sp-midi" );
+_LIT8( KMimeTypeWav,      "audio/wav" ); 
+_LIT8( KMimeTypeWma,      "audio/x-ms-wma");
+
+struct TMimeMapItem {
+	const TDesC  * iExt;
+	const TDesC8 * iType;
+};
+
+// We need to explicitly cast here as LitC::operator& requires writable DLL data (even though it is just a cast)
+#define MIME_MAP_ITEM(ext,type) { &REINTERPRET_CAST(const TDesC&, ext), &REINTERPRET_CAST(const TDesC8&, type) }
+
+// THIS ARRAY MUST BE SORTED BY EXTENSION
+static const TMimeMapItem KMimeMap [] = {
+    MIME_MAP_ITEM( KExtensionAac,   KMimeTypeAac),
+    MIME_MAP_ITEM( KExtensionAif,   KMimeTypeAiff ),
+    MIME_MAP_ITEM( KExtensionAifc,  KMimeTypeAiff ),
+    MIME_MAP_ITEM( KExtensionAiff,  KMimeTypeAiff ),
+    MIME_MAP_ITEM( KExtensionAmr,   KMimeTypeAmr ),
+    MIME_MAP_ITEM( KExtensionAu,    KMimeTypeAu ), // KMimeTypeAudioBasic?  "audio/x-au"?
+    MIME_MAP_ITEM( KExtensionAwb,   KMimeTypeAwb ),
+    MIME_MAP_ITEM( KExtensionMid,   KMimeTypeMidi ),
+    MIME_MAP_ITEM( KExtensionMidi,  KMimeTypeMidi ),
+    MIME_MAP_ITEM( KExtensionMka,   KMimeTypeMatroska ),
+    MIME_MAP_ITEM( KExtensionMp3,   KMimeTypeMpeg ),
+    MIME_MAP_ITEM( KExtensionOgg,   KMimeTypeOgg ),
+    MIME_MAP_ITEM( KExtensionRa,    KMimeTypeReal ),
+    MIME_MAP_ITEM( KExtensionRam,   KMimeTypeReal ),
+    MIME_MAP_ITEM( KExtensionRmi,   KMimeTypeMid ),
+    MIME_MAP_ITEM( KExtensionSnd,   KMimeTypeBasic ),
+    MIME_MAP_ITEM( KExtensionSpMid, KMimeTypeSpMidi ),
+    MIME_MAP_ITEM( KExtensionWav,   KMimeTypeWav ), // "audio/x-wav"?
+    MIME_MAP_ITEM( KExtensionWma,   KMimeTypeWma )
+};
+
+// ----------------------------------------------------------------------------------------------------------
+// Look for Mime Type from map by file extension
+// Returns NULL if file extension is not known
+// ----------------------------------------------------------------------------------------------------------
+//
+static const TDesC8 * FindMimeTypeFromMap ( const TDesC& aFilename )
+    {
+    // extract extension
+   	TPtrC extension;
+    TInt pos = aFilename.LocateReverseF( '.' );
+    if ( pos < 0  || ++pos >= aFilename.Length() )
+        {
+        return NULL;
+        }
+    extension.Set( aFilename.Mid( pos ) );
+
+    // binary search from Mime Map
+    TUint begin = 0;
+    TUint end = sizeof KMimeMap / sizeof (TMimeMapItem);
+    while (begin < end)
+        {
+        TUint at = (begin + end) / 2;
+        const TMimeMapItem & item = KMimeMap[at];
+        TUint r = item.iExt->CompareF(extension);
+        if (r == 0)
+            {
+            return item.iType;
+            }
+        else if (r > 0)
+            {
+            end = at;
+            }
+        else
+            {
+            begin = at + 1;
+            }
+        }
+    return NULL;
+}
+
 // ============================ MEMBER FUNCTIONS ==============================
 
 // ----------------------------------------------------------------------------------------------------------
@@ -809,7 +923,11 @@ EXPORT_C TDataType MPXDbCommonUtil::GetMimeTypeForUriL(
     {
     MPX_FUNC("MPXDbUtil::GetMimeTypeForUriL");
 
-    TParsePtrC parse(aUri);
+    if ( const TDesC8 * type = FindMimeTypeFromMap (aUri) )
+        {
+        return TDataType(*type);
+        }
+    
     RApaLsSession appArc;
     User::LeaveIfError(appArc.Connect());
     CleanupClosePushL(appArc);

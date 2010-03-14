@@ -101,7 +101,9 @@ LIBRARY         mediatorclient.lib
 LIBRARY         featmgr.lib
 // Cover UI end
 
+#ifdef IAD_INCLUDE_BACKSTEPPING
 LIBRARY         mpxbacksteppingutility.lib 
+#endif // IAD_INCLUDE_BACKSTEPPING
 
 // Added by Harri for Hurriganes MediaWall mod
 LIBRARY         ws32.lib

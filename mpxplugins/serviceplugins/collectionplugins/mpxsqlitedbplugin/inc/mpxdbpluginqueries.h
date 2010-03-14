@@ -283,7 +283,7 @@ _LIT(KQueryPlaylistSongsDeleteSongOrdinal, "DELETE FROM :dbname.PlaylistSongs WH
 _LIT(KQueryPlaylistSongsDeleteForCategory, "DELETE FROM :dbname.PlaylistSongs WHERE PlaylistSongs.SongId=Music.UniqueId AND Music.%S=%u");
 _LIT(KQueryPlaylistSongsDeleteForArtistAlbum, "DELETE FROM :dbname.PlaylistSongs WHERE PlaylistSongs.SongId=Music.UniqueId AND Music.Artist=%u AND Music.Album=%u");
 
-_LIT(KQueryPlaylistSongsCount, "SELECT count(*) FROM :dbname.PlaylistSongs WHERE PlaylistId=%u");
+_LIT(KQueryPlaylistSongsCount, "SELECT count(*) FROM :dbname.music as m,:pldbname.Playlistsongs as pl WHERE pl.PlaylistId=%u AND m.UniqueId=pl.SongId AND m.Deleted=0");
 _LIT(KQueryPlaylistSongsPlaylistSongCount, "SELECT count(*) FROM :dbname.PlaylistSongs WHERE PlaylistId=%u AND SongId=%u");
 _LIT(KQueryPlaylistSongsSongCount, "SELECT count(*) FROM :dbname.PlaylistSongs WHERE SongId=%u");
 _LIT(KQueryPlaylistSongsGetSongs, "SELECT UniqueId,SongId,Ordinal FROM :dbname.PlaylistSongs WHERE PlaylistId=%u ORDER BY Ordinal");

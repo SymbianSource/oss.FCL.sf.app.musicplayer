@@ -332,7 +332,11 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
             if( op == EMcMsgRefreshEnd )                                    
             {
             MPX_DEBUG1("CMPXScanningWaitDialog::HandleCollectionMessageL refresh end");
-            iNumItemsAdded = mmcCount;
+            // Do not reset iNumItemsAdded while KErrLocked or KErrDiskFull.
+            if( data != KErrLocked && data != KErrDiskFull ) 
+            	{
+            	iNumItemsAdded = mmcCount;
+            	}
             switch ( iWaitNoteType )
                 {
                 case EMPXScanningNote:

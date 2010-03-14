@@ -563,12 +563,18 @@ void CMPXDbPlaylist::FindAllL(
         {
         // Setup basic info - with first record of a group
         TUint32 playlistId(recordset.ColumnInt64(EPlaylistUniqueId));
+        TUint32 volId(recordset.ColumnInt64(EPlaylistVolumeId));
+        TInt driveId = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(), volId);
 
         TBool valid(ETrue);
         TInt songCount(-1);
         if (criteriaCounterSet)
             {
-            songCount = iPlaylistSongs->CountL(playlistId);
+            if (driveId >= 0)
+                {
+                //valid disk
+                songCount = iPlaylistSongs->CountL(playlistId, driveId);
+                }
             valid = (criteriaCounter == songCount);
             }
 
@@ -703,6 +709,8 @@ void CMPXDbPlaylist::UpdateMediaL(
     TUint32 playlistId(aRecord.ColumnInt64(EPlaylistUniqueId));
 
     TInt count(aAttrs.Count());
+    TUint32 volId(aRecord.ColumnInt64(EPlaylistVolumeId));
+    TInt driveId = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(), volId);
     for (TInt i = 0; i < count; ++i)
         {
         TInt contentId(aAttrs[i].ContentId());
@@ -730,8 +738,6 @@ void CMPXDbPlaylist::UpdateMediaL(
                 (attributeId & EMPXMediaGeneralDrive) ||
                 (attributeId & EMPXMediaGeneralFlags))
                 {
-                TUint32 volId(aRecord.ColumnInt64(EPlaylistVolumeId));
-                TInt driveId = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(), volId);
 
                 // LTAN-7GH6BZ, crash if eject memory card when adding song to existing playlist
                 // due to special timing issue, it is possible drive number is -1 and create a
@@ -798,22 +804,27 @@ void CMPXDbPlaylist::UpdateMediaL(
             } // end if contentId == KMPXMediaIdGeneral
         } // end for
 
+    TInt plSongCount(0);
+    TInt plSongDuration(0);
     if (countRequested)
         {
-		TInt count = iPlaylistSongs->CountL(playlistId);
+        if (driveId >= 0)
+            {
+            //valid disk
+            iObserver.HandlePlaylistInfoL(playlistId, plSongCount, plSongDuration);
+            }
         aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount,
-            count );
+        		plSongCount );
         
         MPX_DEBUG1("    EMPXMediaGeneralCount");
-		MPX_DEBUG2("	Count[%d]", count);				
+		MPX_DEBUG2("	Count[%d]", plSongCount);				
         }
 	if (durationRequested)
 		{
-		TInt duration = iObserver.HandlePlaylistDurationL(playlistId);		
-		aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralDuration, duration);
+        aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralDuration, plSongDuration);
 		
 		MPX_DEBUG1("    EMPXMediaGeneralDuration");
-		MPX_DEBUG2("	Duration[%d]", duration);				
+        MPX_DEBUG2("	Duration[%d]", plSongDuration);				
 		}
 
     aMedia.SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);

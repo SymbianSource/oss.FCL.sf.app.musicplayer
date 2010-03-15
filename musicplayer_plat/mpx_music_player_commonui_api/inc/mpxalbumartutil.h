@@ -20,7 +20,7 @@
 #define CMPXALBUMARTUTIL_H
 
 #include <gdi.h>
-#include <metadatafield.hrh>
+#include <MetaDataField.hrh>
 #include <thumbnailmanager.h>
 #include <thumbnailmanagerobserver.h>
 

@@ -72,6 +72,7 @@ LIBRARY     hlplch.lib
 LIBRARY     commonengine.lib
 LIBRARY     mpxplaybackutility.lib
 LIBRARY	    mpxcommon.lib
+LIBRARY     mpxviewutility.lib
 
 #if defined(ARMCC)
 deffile ../eabi/ 

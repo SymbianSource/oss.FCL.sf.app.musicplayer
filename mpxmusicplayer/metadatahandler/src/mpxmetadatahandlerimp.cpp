@@ -145,6 +145,10 @@ void CMPXMetaDataHandlerImp::ConstructL(CRemConInterfaceSelector &aInterfaceSele
     iEqPresetListener->StartL();
     iTrackNumber = 0;
     iColId.iUid = -1;
+    
+    //Notify accessories that currently no track is playing.
+    iPlayerEventsObserver->TrackChanged(MPlayerEventsObserver::KNoTrackSelected, 
+        MPlayerEventsObserver::KPlaybackPositionUnknown);
     }
 
 // ---------------------------------------------------------------------------

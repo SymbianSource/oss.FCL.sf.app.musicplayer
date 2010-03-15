@@ -20,6 +20,7 @@
 #define C_MUSICPLAYERACTIONHANDLER_H
 
 #include <ahplugin.h>
+#include <mpxplaybackcommanddefs.h>
 
 // FORWARD DECLARATION
 class CLiwMap;
@@ -126,6 +127,11 @@ private:
     TInt ExtractVariantL( const CLiwMap* aMap, TLiwVariant& aVariant,
             const TDesC8& aMapName );
 
+    /**
+     *  Sets the playback command.
+     *  @param aCommand commandType.
+     */
+    void SetPlaybackCommandL( TMPXPlaybackCommand aCommand );
 private: // data
 
     /**

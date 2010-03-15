@@ -255,8 +255,8 @@ void CMPXDbAlbum::DecrementSongsForCategoryL(
             if (aItemChangedMessages)
                 {
                 // add the item changed message
-                MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
-                    iCategory, KDBPluginUid);
+                MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
+                    EMPXAlbum, KDBPluginUid, ETrue, 0 );  
                 }
             }
 

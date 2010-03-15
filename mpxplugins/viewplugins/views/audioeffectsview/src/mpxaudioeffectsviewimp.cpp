@@ -28,6 +28,7 @@
 
 #include <mpxplaybackutility.h>
 #include <mpxaudioeffectsview.rsg>
+#include <mpxviewutility.h>
 #include "mpxaudioeffectengine.h"
 
 #include "mpxaudioeffectsmodel.h"
@@ -71,6 +72,8 @@ void CMPXAudioEffectsViewImp::ConstructL()
     iPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
 
     iModel = CMPXAudioEffectsModel::NewL( *iPlaybackUtility );
+        
+    iViewUtility = MMPXViewUtility::UtilityL();
     }
 
 // ---------------------------------------------------------------------------
@@ -113,6 +116,12 @@ CMPXAudioEffectsViewImp::~CMPXAudioEffectsViewImp()
         {
         CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );
         }
+
+    if ( iViewUtility )
+        {
+        iViewUtility->Close();
+        }
+
     }
 
 // -----------------------------------------------------------------------------
@@ -157,6 +166,11 @@ void CMPXAudioEffectsViewImp::HandleCommandL( TInt aCommand )
             {
             HlpLauncher::LaunchHelpApplicationL(iEikonEnv->WsSession(),
             AppUi()->AppHelpContextL());
+            break;
+            }
+        case EAknSoftkeyBack:
+            {
+            iViewUtility->ActivatePreviousViewL();
             break;
             }
         default:

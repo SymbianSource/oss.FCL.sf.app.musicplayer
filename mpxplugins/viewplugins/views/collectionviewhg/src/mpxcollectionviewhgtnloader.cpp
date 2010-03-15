@@ -82,7 +82,7 @@ void CMpxTNLoader::LoadNextTN()
         if( index >= 0 && iLoading[0]->iId == 0)
             {
             CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(iLoading[0]->iFileName, KMPXAlbumMimeType);
-            TRAPD(err, iLoading[0]->iId = iTnEngine->GetThumbnailL( *source, NULL, 0 ); )
+            TRAPD(err, iLoading[0]->iId = iTnEngine->GetThumbnailL( *source, NULL, 1 ); )
         	MPX_DEBUG4( "GetThumbnailL: %d [%d,%d]", err, index, iLoading[0]->iId);
 			CleanupStack::PopAndDestroy(source);
             }
@@ -144,7 +144,7 @@ void CMpxTNLoader::ConstructL ()
     iTnEngine->SetQualityPreferenceL( CThumbnailManager::EOptimizeForQuality );
     iTnEngine->SetThumbnailSizeL( iSize );
     TCallBack callback(CMpxTNLoader::LoadThumbnail, this);
-    iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityStandard );
+    iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityHigh );
     iAsyncCallBack->Set(callback);
     iPauseTimer = CPeriodic::NewL( CActive::EPriorityStandard  );
     }

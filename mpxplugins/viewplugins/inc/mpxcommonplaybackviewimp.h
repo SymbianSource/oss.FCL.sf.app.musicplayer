@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  MPX common playback view implementation
-*  Version     : %version: da1mmcf#41.1.6.1.1.1.9 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: da1mmcf#41.1.6.1.1.1.10 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -642,6 +642,12 @@ private:
      * @param aPtr pointer to self
      */
     static TInt HandleDelayedError( TAny* aPtr );
+    
+    /**
+     * Callback function of timer to handle TN request for custom size
+     * @param aPtr pointer to self
+     */
+    static TInt HandleTNRequestForCustomSizeL( TAny* aPtr );
 
 protected:    // Data
 
@@ -754,6 +760,9 @@ private:    // Data
 	TInt iOldPosition; // in seconds
 	TBool iIsTapped;
     TCommandSender iCommandSender;
+    
+    TSize iFullScreenImageSize;
+    CPeriodic* iTNRequestTimer;
     };
 
 #endif  // CMPXCOMMONPLAYBACKVIEWIMP_H

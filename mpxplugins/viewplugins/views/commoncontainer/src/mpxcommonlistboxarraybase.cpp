@@ -80,8 +80,11 @@ EXPORT_C void CMPXCommonListBoxArrayBase::ConstructListBoxArrayL()
 EXPORT_C void CMPXCommonListBoxArrayBase::AppendMediaL( const CMPXMedia& aMedia )
     {
     MPX_FUNC( "CMPXCommonListBoxArrayBase::AppendMediaL" );
-    delete iContainerMedia;
-    iContainerMedia=NULL;
+    if ( NULL != iContainerMedia )
+        {
+        delete iContainerMedia;
+        iContainerMedia=NULL;
+        }
     iContainerMedia=CMPXMedia::NewL(aMedia);
     iMedia=const_cast<CMPXMediaArray*>(iContainerMedia->Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
     MPX_DEBUG2( "CMPXCommonListBoxArrayBase::AppendMediaL media count %d", iMedia->Count() );
@@ -95,8 +98,11 @@ EXPORT_C void CMPXCommonListBoxArrayBase::AppendMediaL( const CMPXMedia& aMedia 
 EXPORT_C void CMPXCommonListBoxArrayBase::ResetMediaArrayL()
     {
     MPX_FUNC( "CMPXCommonListBoxArrayBase::ResetMediaArray" );
-    delete iContainerMedia;
-    iContainerMedia = NULL;
+    if ( NULL != iContainerMedia )
+        {
+        delete iContainerMedia;
+        iContainerMedia = NULL;
+        }
     iMedia = NULL;
     iIndex = KErrNotFound;
     iPbState = EPbStateNotInitialised;

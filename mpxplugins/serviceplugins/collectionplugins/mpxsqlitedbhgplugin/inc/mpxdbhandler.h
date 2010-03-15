@@ -940,6 +940,7 @@ class CMPXDbHandler :
         /**
         * Verify the volume id for the databases
         */
+        void VerifyVolumeIdL( TInt aDrive );
         void VerifyVolumeIdL();
 
 

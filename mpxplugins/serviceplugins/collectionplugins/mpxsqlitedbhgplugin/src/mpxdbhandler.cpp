@@ -1294,7 +1294,7 @@ void CMPXDbHandler::OpenDatabaseL(
     iDbManager->OpenDatabaseL(aDrive);
 
     // Verify the volume ID after a remount event
-    VerifyVolumeIdL();
+    VerifyVolumeIdL( aDrive );
     }
 
 // ----------------------------------------------------------------------------
@@ -2671,36 +2671,32 @@ CMPXDbCategory* CMPXDbHandler::DbCategoryL(
 // Verifies that the volume ID of the database matches the drive
 // ----------------------------------------------------------------------------
 //
-void CMPXDbHandler::VerifyVolumeIdL()
+void CMPXDbHandler::VerifyVolumeIdL( TInt aDrive )
     {
     MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL <--");
-
-    TInt count( iDbDrives.Count() );
-    for( TInt i=0; i<count; ++i )
-        {
-        if( iDbManager->IsOpen( iDbDrives[i] ) )
+        if( iDbManager->IsOpen( aDrive ) )
             {
             TVolumeInfo volInfo;
-            iFs.Volume(volInfo, iDbDrives[i] );
+            iFs.Volume(volInfo, aDrive );
             TUint curId(volInfo.iUniqueID);
 
-            TInt volId = iDbAuxiliary->IdL( iDbDrives[i] );
+            TInt volId = iDbAuxiliary->IdL( aDrive );
 
             // New database, no volume id set, mask out top bit because this is an uint
             //
             MPX_DEBUG3("CMPXDBHandler::VerifyVolumeIdL drive:%i db:%i", curId, volId);
-            if( volId == 0 )
+            if( volId == 0 && (curId&0x7FFFFFFF) )
                 {
                 MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL -- New ID");
                 BeginTransactionL();
-                TRAPD( err, iDbAuxiliary->SetIdL( iDbDrives[i], curId&0x7FFFFFFF ) );
+                TRAPD( err, iDbAuxiliary->SetIdL( aDrive, curId&0x7FFFFFFF ) );
                 EndTransactionL( err );
 
                 // KSqlDbCorrupted indicates DB corrupted, need to recreate.
                 if ( err == KSqlDbCorrupted )
                     {
                     MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- Corrupted DB");
-                    iDbManager->RecreateDatabaseL(iDbDrives[i]);
+                    iDbManager->RecreateDatabaseL(aDrive);
                     BeginTransactionL();
                     TRAPD(err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
                     EndTransactionL( err );
@@ -2711,12 +2707,27 @@ void CMPXDbHandler::VerifyVolumeIdL()
             else if ( (curId&0x7FFFFFFF) != (volId&0x7FFFFFFFF) )
                 {
                 MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL -- ID match FAILED");
-                iDbManager->RecreateDatabaseL(iDbDrives[i]);
+                iDbManager->RecreateDatabaseL(aDrive);
                 BeginTransactionL();
                 TRAPD(err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
                 EndTransactionL( err );
                 }
             }
+
+    MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL -->");
+    }
+
+// ----------------------------------------------------------------------------
+// Verifies that the volume ID of the database matches the drive
+// ----------------------------------------------------------------------------
+//
+void CMPXDbHandler::VerifyVolumeIdL()
+    {
+    MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL <--");
+    TInt count( iDbDrives.Count() );
+    for( TInt i=0; i<count; ++i )
+        {
+        VerifyVolumeIdL(iDbDrives[i]);
         }
     MPX_DEBUG1("CMPXDbHandler::VerifyVolumeIdL -->");
     }

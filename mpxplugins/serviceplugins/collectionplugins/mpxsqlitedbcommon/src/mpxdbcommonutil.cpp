@@ -138,7 +138,7 @@ static const TDesC8 * FindMimeTypeFromMap ( const TDesC& aFilename )
         {
         TUint at = (begin + end) / 2;
         const TMimeMapItem & item = KMimeMap[at];
-        TUint r = item.iExt->CompareF(extension);
+        TInt r = item.iExt->CompareF(extension);
         if (r == 0)
             {
             return item.iType;

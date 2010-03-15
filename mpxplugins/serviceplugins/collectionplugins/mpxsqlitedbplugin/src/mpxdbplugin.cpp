@@ -64,7 +64,7 @@ const TInt KFirstFetchCount = 400;
 
 const TUid KCRUIDMusicPlayerFeatures = { 0x101FFCD0 };
 const TInt KMusicPlayerFeatures = 1;
-const TInt KDisablePodcasting = 0x80;
+const TInt KDisablePodcasting = 0x08;
 
 const TInt KIncrementalDeleteCount = 400;
 

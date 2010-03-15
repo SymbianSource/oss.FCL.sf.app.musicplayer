@@ -317,20 +317,18 @@ void CMPXAlbumArtUtil::ExtractThumbnailL(
             {
             CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KMPXAlbumMimeType );
             TInt ret = NULL;
-            TInt err = KErrNone;
-            if(iThumbnailManager )
+            if(iThumbnailManager && iReqId >0)
                 {
-                if(iReqId >0)
-                    {	
-                    iThumbnailManager->CancelRequest( iReqId );
-                    }
-                TRAP(err, iReqId = TInt (iThumbnailManager->GetThumbnailL( *source, (TAny*)ret)));
-                }   
-
-            if( err != KErrNone)
-                {
-                User::Leave( KErrNotFound );
-                }  
+                iThumbnailManager->CancelRequest( iReqId );
+                }
+			if(iThumbnailManager)
+				{   
+            	TRAPD(err, iReqId = TInt (iThumbnailManager->GetThumbnailL( *source, (TAny*)ret)));	
+    	        if( err != KErrNone)
+                	{
+                	User::Leave( KErrNotFound );
+                	}
+				}  
             CleanupStack::PopAndDestroy( source );
             }
         }

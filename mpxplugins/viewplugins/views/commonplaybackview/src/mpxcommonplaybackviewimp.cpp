@@ -113,6 +113,7 @@ const TInt KMPXOneSecInMilliSecs( 1000 );
 const TUid KMPXEqualizerViewImplementationId = { 0x101FFC77 };
 const TInt KMPXPostponeForHandleDelayedError( 1000000 ); // 1S
 const TInt KMPXPlaybackViewWindowBackground = -1;
+const TInt KMPXDelayForTNRequest( 3000000 ); // 3S
 
 // for freqency display in the format of "XXX.XX"
 const TInt KMPXFMFreqWidth        = 6;
@@ -159,6 +160,9 @@ _LIT(KMPXRealAudioMimeType, "audio/x-realaudio");
 _LIT(KMPXRnRealAudioMimeType, "audio/vnd.rn-realaudio");
 #endif
 
+#define THUMBNAIL_CENREP_UID 0x102830B0 // from thumbnailmanageruids.hrh
+const TUint32 KSizeAudioFullscreenWidth = 0x16;
+const TUint32 KSizeAudioFullscreenHeight = 0x17;
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -209,6 +213,15 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
     CleanupStack::PopAndDestroy( repository );
     repository = NULL;
 
+    repository = CRepository::NewLC( TUid::Uid(THUMBNAIL_CENREP_UID));
+
+    TInt xSize( 0 );
+    TInt ySize( 0 );
+    User::LeaveIfError( repository->Get( KSizeAudioFullscreenWidth, xSize ));
+    User::LeaveIfError( repository->Get( KSizeAudioFullscreenHeight, ySize ));
+    iFullScreenImageSize.SetSize(xSize,ySize);
+    CleanupStack::PopAndDestroy( repository );
+    repository = NULL;
 
     iChangeRTForAllProfiles =
         static_cast<TBool>( flags & KMPXChangeRTForAll );
@@ -349,6 +362,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
     iIsffButtonPressed = EFalse;
     iDelayedErrorTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     iFmTxActivity = EFmTxStateUnknown;
+
+    iTNRequestTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     }
 
 
@@ -462,6 +477,13 @@ EXPORT_C CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp()
     	}
 
     delete iOldUri;
+    
+    if ( iTNRequestTimer )
+        {
+        iTNRequestTimer->Cancel();
+        delete iTNRequestTimer;
+        }
+    
     MPX_DEBUG1( "CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp exiting" );
     }
 
@@ -729,20 +751,32 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateAlbumArtL(
             const TDesC& album = aMedia->ValueText( KMPXMediaGeneralUri );
             if(!iOldUri || iOldUri->Compare(album)!= 0)
                 {
-
-                TRect albumArtRect(
-                        iLayout->IndicatorLayout(
-                                ClientRect(), EAlbumArtArea ) );
-
-            MPX_TRAP( err,
-                iMPXUtility->ExtractAlbumArtL(
+                // Request for pre-generated TN size
+                MPX_TRAP( err,
+                    iMPXUtility->ExtractAlbumArtL(
                     *aMedia,
                     *iContainer,
-                    albumArtRect.Size() ); );
-                delete iOldUri;
-                iOldUri = NULL;
-                iOldUri=album.AllocL();
+                    iFullScreenImageSize ); );
+
+                // cancel timer
+                if ( iTNRequestTimer->IsActive())
+                    {
+                    iTNRequestTimer->Cancel();
+                    }
+
+                if ( err == KErrNone )
+                    {
+                    // startup timer for updating album art with custom size
+                    TCallBack cb( HandleTNRequestForCustomSizeL, this );
+                    iTNRequestTimer->Start( KMPXDelayForTNRequest,
+                        KMPXDelayForTNRequest,
+                        cb );
+                    }  
                 }
+            
+            delete iOldUri;
+            iOldUri = NULL;
+            iOldUri = album.AllocL();
             }
 
         if (KErrNone != err )
@@ -2043,8 +2077,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                 if ( !iBacking )
                     {
                     // event not consumed by Back Stepping utility, handle here
-                    //
-                    // Status pane has to be modified before view gets deactivated
 
                     MMPXSource* source = iPlaybackUtility->Source();
                     if ( source )
@@ -2053,48 +2085,15 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                         if ( playlist )
                             {
                             CleanupStack::PushL( playlist );
-    						CMPXCollectionPath* browsePath( iCollectionUtility->Collection().PathL() );
-							CleanupStack::PushL( browsePath );
-					        MPX_DEBUG_PATH(*browsePath);
-
+    						
                             if ( playlist->Count() )
                                 {
-                                CMPXCollectionPath* pbPath =
-                                    CMPXCollectionPath::NewL( playlist->Path() );
+                                CMPXCollectionPath* pbPath = CMPXCollectionPath::NewL( playlist->Path() );
                                 CleanupStack::PushL( pbPath );
+                                pbPath->Back();
+                                iViewUtility->PushDefaultHistoryL();
                                 MPX_DEBUG_PATH(*pbPath);
-
-                                TInt playbackPathCount( pbPath->Levels() );
-                                // if both path are at the same level, we need to check further
-                                TBool isEqual( ETrue );
-                                if ( browsePath->Levels() == playbackPathCount )
-                                    {
-                                    // Check id at each level
-                                    for ( TInt i = 0; i < playbackPathCount - 1; i++ )
-                                        {
-                                        if ( browsePath->Id( i ) != pbPath->Id( i ) )
-                                            {
-                                            isEqual = EFalse;
-                                            break;
-                                            }
-                                        }
-                                    }
-                                else
-                                    {
-                                    isEqual = EFalse;
-                                    }
-
-                                if ( isEqual ) // if they're the same path
-									{
-									pbPath->Back();
-									iViewUtility->PushDefaultHistoryL();
-									iCollectionUtility->Collection().OpenL( *pbPath );
-									}
-								else // we want to reopen the browse path
-									{
-									browsePath->Back();
-									iCollectionUtility->Collection().OpenL( *browsePath );
-									}
+                                iCollectionUtility->Collection().OpenL( *pbPath );
                                 CleanupStack::PopAndDestroy( pbPath );
                                 }
                             else
@@ -2103,7 +2102,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                                 // music main menu? or change ui spec
                                 AppUi()->HandleCommandL( EAknSoftkeyBack );
                                 }
-                            CleanupStack::PopAndDestroy( browsePath );
                             CleanupStack::PopAndDestroy( playlist );
                             }
                         else
@@ -2115,7 +2113,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
                         {
                         CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
                         CleanupStack::PushL( cpath );
-                        while ( cpath->Levels() > 1 )
+                        while ( cpath->Levels() > 2 )
                             {
                             cpath->Back();
                             }
@@ -2649,6 +2647,11 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoDeactivate()
         toolbar->MakeVisible(EFalse);
         AppUi()->RemoveFromStack( toolbar );
         }
+    
+    if ( iTNRequestTimer->IsActive())
+        {
+        iTNRequestTimer->Cancel();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -2991,7 +2994,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
 //
 EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
     {
-    iContainer->ExtractAlbumArtCompleted( NULL, KErrNone );
     if (iContainer && !iSwitchingView)
         {
         if ( !Layout_Meta_Data::IsLandscapeOrientation() )
@@ -4000,4 +4002,56 @@ TInt CMPXCommonPlaybackViewImp::HandleDelayedError( TAny* aPtr )
 
     return KErrNone;
     }
+
+// ---------------------------------------------------------------------------
+// Updates track's album art.
+// ---------------------------------------------------------------------------
+//
+TInt CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL( TAny* aPtr )
+    {
+    MPX_DEBUG1("CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL()");
+    
+    ASSERT( aPtr );
+    CMPXCommonPlaybackViewImp* pv = reinterpret_cast<CMPXCommonPlaybackViewImp*>( aPtr );
+    
+    ASSERT( pv->iOldUri );   
+    if ( pv->iContainer && !pv->iSwitchingView )
+        {
+        TInt err( KErrNone );      
+        if ( pv->iMedia && pv->iMedia->IsSupported(KMPXMediaGeneralUri) )
+            {
+            const TDesC& album = pv->iMedia->ValueText( KMPXMediaGeneralUri );
+
+            if ( pv->iOldUri->Compare( album ) == 0 )
+                { 
+                TRect albumArtRect(
+                        pv->iLayout->IndicatorLayout(
+                        pv->ClientRect(), EAlbumArtArea ) );
+                
+                // Request for custom TN size               
+                MPX_TRAP( err,
+                    pv->iMPXUtility->ExtractAlbumArtL(
+                    *pv->iMedia,
+                    *pv->iContainer,
+                    albumArtRect.Size() ); );                
+                }
+            }
+
+        if ( KErrNone != err )
+            {
+            // If error, show default album art
+            MPX_DEBUG2("CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL(): err = %d", err);
+            pv->iContainer->ExtractAlbumArtCompleted( NULL, KErrNone );
+            }
+        }
+    
+    // cancel timer
+    if ( pv->iTNRequestTimer->IsActive())
+        {
+        pv->iTNRequestTimer->Cancel();
+        }
+        
+    return KErrNone;
+    }
+    
 //  End of File

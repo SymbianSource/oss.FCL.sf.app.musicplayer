@@ -56,7 +56,7 @@
 #include <mpxinternalcrkeys.h>
 #include <touchfeedback.h>
 #include <akntranseffect.h>                 // For transition effects
-#include <gfxtranseffect\gfxtranseffect.h>  // For transition effects
+#include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
 
 #include "mpxcommonplaybackviewcontainer.h"
 #include "mpxcommonplaybackviewlayout.h"
@@ -182,7 +182,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ConstructL( const TRect& /*aRect*
 
     iLightStatus = CHWRMLight::ELightStatusUnknown;
     iIsForeground = EFalse ;
-    iLight = CHWRMLight::NewL(this); 
+    iLight = CHWRMLight::NewL(this);
 
 	DrawableWindow()->SetPointerGrab( ETrue );
     EnableDragEvents();
@@ -210,7 +210,7 @@ EXPORT_C CMPXCommonPlaybackViewContainer::~CMPXCommonPlaybackViewContainer()
     delete iCommonUiHelper;
 
     if ( iLight )
-        {        
+        {
         delete iLight;
         iLight = NULL;
         }
@@ -719,7 +719,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ExtractAlbumArtCompleted(
         iTrackAlbumArt = aBitmap;
         }
 
-    DrawDeferred(); 
+    DrawDeferred();
     //Window().Invalidate( iAlbumArtRect );
     //Window().Invalidate( iSliderPaneRect );
     }
@@ -1020,27 +1020,16 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::RedrawRect(
             {
             if ( iTrackAlbumArt )
                 {
-                // Calculating the CenterPoint for Drawing the albumart image 
-                TSize bmpSizeInPixels = iTrackAlbumArt->SizeInPixels();
-                TInt xPos = ( iAlbumArtRect.Width() - bmpSizeInPixels.iWidth )
-                        / 2;
-                TInt yPos =
-                        ( iAlbumArtRect.Height() - bmpSizeInPixels.iHeight )
-                                / 2;
-                TPoint Centerpos = TPoint(xPos, yPos );
-                // bitmap top left corner position
-                Centerpos += iAlbumArtRect.iTl;
-
                 // Draw album art and frame
-                gc.BitBlt( Centerpos, iTrackAlbumArt);
+                gc.DrawBitmap( iAlbumArtRect, iTrackAlbumArt, iTrackAlbumArt->SizeInPixels() );
+                
                 TRgb color = KRgbBlack;
                 AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                         EAknsCIQsnTextColorsCG50 );
-                TRect imageRect( Centerpos, iTrackAlbumArt->SizeInPixels() );
                 gc.SetPenStyle( CGraphicsContext::ESolidPen );
                 gc.SetBrushStyle( CGraphicsContext::ENullBrush );
                 gc.SetPenColor( color );
-                gc.DrawRect( imageRect );
+                gc.DrawRect( iAlbumArtRect );                    
                 }
             else
                 {
@@ -1077,7 +1066,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateProgressBarGraphics()
 // ---------------------------------------------------------------------------
 // Update progress bar graphics and redraw.
 // Refresh happens only when backlight is ON and
-// the UI is in foreground. 
+// the UI is in foreground.
 // Note: Some display types may not need backlight. In that case
 // code may need to be adjusted accordingly.
 // ---------------------------------------------------------------------------
@@ -1141,7 +1130,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateBackgroundSkinControlContex
     else
         {
         background->SetBitmap( KAknsIIDQsnBgAreaMain );
-        background->SetRect( aRect );        
+        background->SetRect( aRect );
         }
 
     }
@@ -1189,7 +1178,7 @@ EXPORT_C TInt CMPXCommonPlaybackViewContainer::CountComponentControls() const
         {
         return 0;
         }
-   } 
+   }
 // ---------------------------------------------------------------------------
 // From CCoeControl
 // Gets an indexed component of a compound control.
@@ -1252,7 +1241,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandlePointerEventL(const TPointe
             {
             case TPointerEvent::EButton1Down:
                 {
-                if ( iSliderPaneRect.Contains(aPointerEvent.iPosition) && 
+                if ( iSliderPaneRect.Contains(aPointerEvent.iPosition) &&
                         ( iMode == EPlayMode || iMode == EPauseMode ))
                     {
                     // Pointer events
@@ -1269,13 +1258,13 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandlePointerEventL(const TPointe
                         EAspectRatioNotPreserved );
                     }
                 if ( iAlbumArtRect.Contains(aPointerEvent.iPosition ) )
-                    {                    
+                    {
                     MTouchFeedback* feedback = MTouchFeedback::Instance();
                     if (feedback)
                         {
                         feedback->InstantFeedback(ETouchFeedbackBasic);
-                        }                
-                 
+                        }
+
                     if ( iCommandObserver )
         								{
                         iCommandObserver->ProcessCommandL( EMPXCmdVolumeChanged );
@@ -1437,7 +1426,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::LightStatusChanged( TInt aTarget,
         {
 		MPX_DEBUG2(" LightStatusChanged: (%d)", aStatus);
 		if ( ( aStatus == CHWRMLight::ELightOn || aStatus == CHWRMLight::ELightOff ) && aStatus != iLightStatus )
-	    	{	
+	    	{
 			iLightStatus = aStatus;
 			}
         }
@@ -1619,7 +1608,7 @@ void CMPXCommonPlaybackViewContainer::DoUpdateLayoutL()
 // CMPXCommonPlaybackViewContainer::ReStoreButtons
 // -----------------------------------------------------------------------------
 //
-void CMPXCommonPlaybackViewContainer::RestoreButtons( 
+void CMPXCommonPlaybackViewContainer::RestoreButtons(
     TMPXPlaybackState aState )
     {
     if ( iEnableButtons )

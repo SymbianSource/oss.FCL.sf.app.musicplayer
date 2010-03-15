@@ -21,7 +21,7 @@
 
 // INCLUDES
 #include <eikclb.h>
-#include <AknProgressDialog.h>  // MProgressDialogCallback
+#include <aknwaitdialog.h>
 #include <eikprogi.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxcollectionobserver.h>
@@ -203,18 +203,17 @@ private:
     void StartWaitNoteL( TWaitNoteType aNoteType );
 
     /**
-     * Start either the delete progress note
+     * Start either the delete wait note
      *
      */
-    void StartProgressNoteL();
+    void StartDeleteWaitNoteL();
 
     /**
      * Updates the progress note text and progress bar
      *
-     * @param aProgress Indicates the portion of the process completed
      * @param aProgressText Text to be displayed on the progress note
      */
-    void UpdateProcessL( TInt aProgress, const TDesC& aProgressText );
+    void UpdateProcessL( const TDesC& aProgressText );
 
     /**
     * Close a wait note
@@ -843,7 +842,8 @@ private:
  	 * Stores the current list box item index.
  	 */
  	void StoreListboxItemIndexL();
-
+ 	
+ 	void ShowAddedItemsDialogL();
 
  	/*
  	 * Internal function for registering to BackStepping service.
@@ -904,7 +904,7 @@ private:    // Data
     TBool                       iIgnoreNextFocusChangedMessage;
     TBool                       iCollectionReady;  // for incremental open
     TBool                       iCollectionCacheReady; //cache ready
-
+    
     TInt                        iCurrentPlaylistOp;
     TInt                        iNumSongAddedToPlaylist;
     TMPXItemId                  iPlaylistId;
@@ -982,9 +982,8 @@ private:    // Data
     TInt iMusicStoreWebPage;
     HBufC16* iOperatorMusicStoreURI;
 
-    // Progress note for delete
-    CAknProgressDialog*	iProgressDialog;
-    CEikProgressInfo*	iProgressInfo;
+    // Wait note for delete
+    CAknWaitDialog*	iWaitDialog;
     TBool iIsAddingToPlaylist;  // flag used to handle the return by adding songs incrementally
     CUpnpCopyCommand* iUpnpCopyCommand;
 
@@ -992,6 +991,9 @@ private:    // Data
 	TBool iMarkedAll;
 	TBool iFirstIncrementalBatch;
     CMPXMedia *iStoredAlbum; // owned
+    
+    TBool                       iDialogDismissed;
+    HBufC*                      iTitleWait; // Owned
     };
 
 #endif  // C_CMPXCOLLECTIONVIEWHGIMP_H

@@ -33,7 +33,7 @@ class CMPXAudioEffectsViewContainer;
 class MMPXPlaybackUtility;
 class CMPXAudioEffectEngine;
 class CCustomCommandUtility;
-
+class MMPXViewUtility;
 
 /**
 *  CMPXAudioEffectsViewImp, View class for audio settings 
@@ -125,6 +125,7 @@ private: // data
     
     TVwsViewId iPreviousView;
     TInt iResourceOffset;
+    MMPXViewUtility* iViewUtility;
     };
 
 #endif    // C_CMPXAUDIOEFFECTSVIEWIMP_H

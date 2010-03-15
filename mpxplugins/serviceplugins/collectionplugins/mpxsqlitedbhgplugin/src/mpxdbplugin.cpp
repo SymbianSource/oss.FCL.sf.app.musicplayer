@@ -64,7 +64,7 @@ const TInt KFirstFetchCount = 400;
 
 const TUid KCRUIDMusicPlayerFeatures = { 0x101FFCD0 };
 const TInt KMusicPlayerFeatures = 1;
-const TInt KDisablePodcasting = 0x80;
+const TInt KDisablePodcasting = 0x08;
 
 const TInt KIncrementalDeleteCount = 400;
 
@@ -792,65 +792,66 @@ TBool CMPXDbPlugin::DoOpenL(
     TInt levels(aPath.Levels());
     TBool isASong(EFalse);
 
-    aEntries.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, aPath.Id(levels - 1));
 
-    if (1 == levels)
-        {
-        // return the "main menu"
-        count = iMusicLibraryMenuTitles->Count();
-        RArray<TMPXItemId> ids;
-        CleanupClosePushL(ids);
+	if ( 1 == levels )
+	    {
 
-        // due to ui changes, the order of main menu is changed
-        // since multiple clients hardcode indexes to each entry,
-        // the enum cannot be changed, instead we will have to
-        // manually change the display order to minimize the impact to
-        // external clients
+	    // Redirecting all open requests at level 1 to open albums 
+	    // due to UI changes that removed the library menu collection level.
+        TInt acount = array->Count();
+        MPX_DEBUG2(" array count11 [%d]", acount);
+        
+ 		CMPXCollectionPath* path = CMPXCollectionPath::NewL(aPath);
+		CleanupStack::PushL( path );
+		
+		path->AppendL(3); // Albums
+		TInt whatLevel = path->Levels();
 
-        // change from:
-        // all songs, playlist, artist, album, (podcast), genre, composer
-        // to:
-        // artist, album, playlist, all songs, (podcast), genre, composer
-        for (TInt i = EBrowseArtist; i <= EBrowseAlbum; ++i)
+		MPX_DEBUG_PATH(*path);
+		
+		aEntries.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, path->Id(whatLevel - 1) );
+		
+      // Create a media which hold the pointer to the returned path
+        if (aEntries.IsSupported(KMPXMediaGeneralValue))
             {
-            MPXDbCommonUtil::AppendMediaL(*array, iMusicLibraryMenuTitles->MdcaPoint(i), EMPXGroup,
-                CategoryForBrowseType(static_cast<TMCBrowseType>(i)), iMusicLibraryMenuIds[i]);
-            ids.AppendL(TMPXItemId(iMusicLibraryMenuIds[i]));
+            MPX_DEBUG1(" pointer to the returned path ");
+            CMPXMedia* pMedia = CMPXMedia::NewL();
+            CleanupStack::PushL(pMedia);
+            pMedia->SetTObjectValueL<TInt>(KMPXMediaGeneralValue,
+                                          aEntries.ValueTObjectL<TInt>(KMPXMediaGeneralValue));
+            array->AppendL(*pMedia);
+            CleanupStack::PopAndDestroy(pMedia);
             }
-        MPXDbCommonUtil::AppendMediaL(*array, iMusicLibraryMenuTitles->MdcaPoint(1), EMPXGroup,
-            CategoryForBrowseType(static_cast<TMCBrowseType>(1)), iMusicLibraryMenuIds[1]);
-        ids.AppendL(TMPXItemId(iMusicLibraryMenuIds[1]));
-        MPXDbCommonUtil::AppendMediaL(*array, iMusicLibraryMenuTitles->MdcaPoint(0), EMPXGroup,
-            CategoryForBrowseType(static_cast<TMCBrowseType>(0)), iMusicLibraryMenuIds[0]);
-        ids.AppendL(TMPXItemId(iMusicLibraryMenuIds[0]));
+		
+	
+        RArray<TMPXAttribute> openAttrs;
+        CleanupClosePushL(openAttrs);
 
-#ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
-        if( !iDisablePodcasting )
+        RArray<TInt> supportedIds;
+        CleanupClosePushL(supportedIds);
+
+        SetAttributesL(*path, openAttrs, supportedIds);
+        openAttrs.AppendL(KMPXMediaArrayContents);
+        
+        CleanupStack::PopAndDestroy(&supportedIds);
+		
+		if( iAllSongsValid )
+		    {
+		    isASong = DoOpenBrowseAlbumL( *path, openAttrs.Array(), aEntries, array );
+		    }
+		CleanupStack::PopAndDestroy(&openAttrs);
+		CleanupStack::PopAndDestroy( path );
+
+        //Remove the first media
+        if ( array->Count() &&
+            (*array)[0]->IsSupported(KMPXMediaGeneralValue))
             {
-            MPXDbCommonUtil::AppendMediaL(*array, iMusicLibraryMenuTitles->MdcaPoint(EBrowsePodcasts), EMPXGroup,
-                CategoryForBrowseType(static_cast<TMCBrowseType>(EBrowsePodcasts)), iMusicLibraryMenuIds[EBrowsePodcasts]);
-            ids.AppendL(TMPXItemId(iMusicLibraryMenuIds[EBrowsePodcasts]));
+            array->Remove(0);
             }
-#endif // __ENABLE_PODCAST_IN_MUSIC_MENU
-
-        // Genre and composer
-        for (TInt i = ( EBrowseGenre ); i < count; ++i)
-            {
-            MPXDbCommonUtil::AppendMediaL(*array, iMusicLibraryMenuTitles->MdcaPoint(i), EMPXGroup,
-                CategoryForBrowseType(static_cast<TMCBrowseType>(i)), iMusicLibraryMenuIds[i]);
-            ids.AppendL(TMPXItemId(iMusicLibraryMenuIds[i]));
-            }
-
-        TInt pPath = aEntries.ValueTObjectL<TInt>(KMPXMediaGeneralValue);
-        MPX_ASSERT(pPath);
-        ((CMPXCollectionPath*)pPath)->AppendL(ids.Array());
-        CleanupStack::PopAndDestroy(&ids);
-        SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXCollection, *iMusicMenuTitle);
-        aEntries.SetTObjectValueL<TMPXGeneralNonPermissibleActions>(
-            KMPXMediaGeneralNonPermissibleActions, EMPXWrite);
-        }
+	    }
     else if (levels >= 2)
         {
+	    aEntries.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, aPath.Id(levels - 1));
         // Create a media which hold the pointer to the returned path
         if (aEntries.IsSupported(KMPXMediaGeneralValue))
             {
@@ -3820,7 +3821,14 @@ void CMPXDbPlugin::DoHandleOperationCompletedL(
     // Cancel is called, no need to callback to observer
     if (aErr != KErrCancel)
         {
-        iObs->HandleCommandComplete(NULL, aErr);
+        if( iActiveTask->GetTask() == KMPXCommandIdCollectionAdd )
+            {
+            iObs->HandleCommandComplete( &iActiveTask->GetCommand(), aErr );
+            }
+        else
+            {
+            iObs->HandleCommandComplete(NULL, aErr);
+            }
         }
 
     if( iDbHandler->InTransaction() )

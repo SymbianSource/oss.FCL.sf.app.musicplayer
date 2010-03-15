@@ -37,8 +37,8 @@
 #include <sendui.h>
 #include <CMessageData.h>
 #include <centralrepository.h>
-#include <mprofileengine.h>
-#include <akndlgshut.h>
+#include <MProfileEngine.h>
+#include <AknDlgShut.h>
 #ifdef RD_MULTIPLE_DRIVE
 #include <driveinfo.h>
 #endif //RD_MULTIPLE_DRIVE
@@ -48,9 +48,9 @@
 
 #include <mediarecognizer.h>
 #include <featmgr.h>
-#include <aknmediatorfacade.h>
+#include <AknMediatorFacade.h>
 #include <MediatorCommandInitiator.h>
-#include <mediatordomainuids.h>
+#include <MediatorDomainUIDs.h>
 
 #include <mplayersecondarydisplayapi.h>
 #include <data_caging_path_literals.hrh>
@@ -130,7 +130,6 @@ const TInt KIncrementalDelayNone = 0;
 const TInt KIncrementalDelayHalfSecond = 1000000;
 const TInt KIncrementalFetchBlockSize = 400;
 const TInt KIncrementalDirectionCount = 8;
-const TInt KProgressBarMaxValue = 100;  // Max Value for the Progress Info bar
 const TInt KWaitNoteImpUid = 0x101FFC6C; // refresh wait note UID
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
 const TInt KMusicMenuPodcastMenuItemIndex = 4; // podcast menu item index
@@ -287,7 +286,10 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
         AppUi()->RemoveFromStack( iContainer );
         delete iContainer;
         }
-
+    if( iTitleWait )
+	    {
+	    delete iTitleWait;
+		}
     delete iUserPlaylists;
     delete iCommonUiHelper;
     delete iSendUi;
@@ -322,7 +324,9 @@ CMPXCollectionViewHgImp::CMPXCollectionViewHgImp() :
     iCurrentHighlightedIndex( KErrNotFound ),
     iCachedCommand( KErrNotFound ),
     iNoteType( EMPXNoteNotDefined ),
-	iFirstIncrementalBatch( ETrue )
+	iFirstIncrementalBatch( ETrue ),
+	iDialogDismissed( EFalse ),
+	iTitleWait( NULL )
 	{
     MPX_FUNC( "CMPXCollectionViewHgImp::CMPXCollectionViewHgImp" );
     iUsingNokiaService = EFalse;
@@ -626,9 +630,6 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
     if ( !isIgnore  && iCollectionReady )
         {
         CMPXCommonListBoxArrayBase* listboxArray( iContainer->ListBoxArray() );
-        const CMPXMedia& containerMedia( listboxArray->ContainerMedia() );
-        
-        const TMPXItemId containerId = containerMedia.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
 
         HBufC* promptTxt( NULL );
         HBufC* waitNoteText( NULL );
@@ -657,7 +658,12 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
                 const TDesC& trackTitle( albumTrack->ValueText( KMPXMediaGeneralTitle ) );
                 // create the item path to delete
 
-                 if ( path->Levels() == 3 )
+                if ( 2 == path->Levels() )
+                    {
+                    path->Back();
+                    path->AppendL(3);
+                    }
+                 else if ( path->Levels() == 3 )
 					{
 					path->Back();
 					}
@@ -667,9 +673,15 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
 					path->Back();
 					}
 
+                TInt currentIndex( iContainer->CurrentLbxItemIndex() );
+                const CMPXMediaArray& albums = listboxArray->MediaArray();
+                CMPXMedia* album( albums.AtL( currentIndex ) );
+                const TMPXItemId albumId = album->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
 
-                 path->AppendL(containerId);
-                 path->AppendL(trackId);
+                path->AppendL(albumId);
+                path->AppendL(trackId);
+                 
+                MPX_DEBUG_PATH(*path);
 
                 waitNoteText = StringLoader::LoadLC(
                     R_MPX_QTN_ALBUM_WAITING_DELETING, trackTitle );
@@ -703,6 +715,9 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
                     if(iCachedCommand != aCommand)
                         {
                         iIsWaitNoteCanceled = EFalse;
+                        StartDeleteWaitNoteL();
+                        TPtr buf = waitNoteText->Des();
+                        UpdateProcessL( buf );
                         }
                     if ( !iIsWaitNoteCanceled )
                         {
@@ -798,13 +813,36 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
         // Create a copy of collection path
         CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
         CleanupStack::PushL( path );
+        
+        if ( 2 == path->Levels() )
+             {
+             path->Back();
+             path->AppendL(3);
+             
+             const CMPXMediaArray& albums = listboxArray->MediaArray();
+             
+             RArray<TMPXItemId> ids;
+             CleanupClosePushL(ids);
+
+             TInt albumCount = albums.Count();
+              for (TInt i=0; i<albumCount; ++i)
+                  {
+                  CMPXMedia* album = albums.AtL(i);
+                  const TMPXItemId id = album->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+                  ids.AppendL(id);
+                  }
+              path->AppendL(ids.Array()); // top level items
+              ids.Reset();
+              path->Set(currentIndex);
+              CleanupStack::PopAndDestroy(&ids);             
+             }
+        MPX_DEBUG_PATH(*path);
+        
         HBufC* promptTxt( NULL );
         HBufC* waitNoteText( NULL );
         TInt waitNoteCBA( R_AVKON_SOFTKEYS_EMPTY );
         MPX_DEBUG2( "CMPXCollectionViewHgImp::DeleteSelectedItemsL delete array count = %d", arrayCount );
 
-        // delete single song, not show wait note
-        TBool singleSong( EFalse );
         TMPXGeneralType containerType(
             containerMedia.ValueTObjectL<TMPXGeneralType>(
                 KMPXMediaGeneralType ) );
@@ -906,11 +944,6 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
                 if ( ( type == EMPXItem && category == EMPXSong ) ||
                     ( type == EMPXItem && category == EMPXPlaylist ) )
                     {
-                    // delete single song
-                    if ( type == EMPXItem && category == EMPXSong )
-                        {
-                        singleSong = ETrue;
-                        }
                     // tracks level, or deleting a playlist
                     waitNoteText = StringLoader::LoadLC(
                         R_MPX_QTN_ALBUM_WAITING_DELETING, title );
@@ -1029,13 +1062,9 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
             if(iCachedCommand != aCommand)
                 {
                 iIsWaitNoteCanceled = EFalse;
-                // If delete one song, don't show progress note.
-                if ( !singleSong )
-                    {
-                    StartProgressNoteL();
-                    TPtr buf = waitNoteText->Des();
-                    UpdateProcessL(0, buf);
-                    }
+                StartDeleteWaitNoteL();
+				TPtr buf = waitNoteText->Des();
+				UpdateProcessL( buf );
                 }
 
                 if ( !iIsWaitNoteCanceled )
@@ -1390,31 +1419,29 @@ void CMPXCollectionViewHgImp::StartWaitNoteL( TWaitNoteType aNoteType )
     }
 
 // ---------------------------------------------------------------------------
-// Start a Progress note
+// Start a Wait note
 // ---------------------------------------------------------------------------
 //
-void CMPXCollectionViewHgImp::StartProgressNoteL()
+void CMPXCollectionViewHgImp::StartDeleteWaitNoteL()
     {
-    iProgressDialog = new (ELeave) CAknProgressDialog(
-        (REINTERPRET_CAST(CEikDialog**, &iProgressDialog)),
+    iWaitDialog = new (ELeave) CAknWaitDialog(
+        (REINTERPRET_CAST(CEikDialog**, &iWaitDialog)),
         ETrue);
-    iProgressDialog->PrepareLC(R_MPX_PROGRESS_NOTE);
-    iProgressInfo = iProgressDialog->GetProgressInfoL();
-    iProgressDialog->SetCallback(this);
-    iProgressDialog->RunLD();
-    iProgressInfo->SetFinalValue(KProgressBarMaxValue);
+    iWaitDialog->PrepareLC(R_MPX_WAIT_NOTE);
+
+    iWaitDialog->SetCallback(this);
+    iWaitDialog->RunLD();
     }
 
 // ---------------------------------------------------------------------------
 // Update the Progress note
 // ---------------------------------------------------------------------------
 //
-void CMPXCollectionViewHgImp::UpdateProcessL( TInt aProgress, const TDesC& aProgressText )
+void CMPXCollectionViewHgImp::UpdateProcessL( const TDesC& aProgressText )
     {
-    if ( iProgressDialog )
+    if ( iWaitDialog )
         {
-        iProgressDialog->SetTextL(aProgressText);
-        iProgressInfo->SetAndDraw(aProgress);
+        iWaitDialog->SetTextL(aProgressText);
         }
     }
 
@@ -2743,11 +2770,16 @@ TBool CMPXCollectionViewHgImp::SendOptionVisibilityL()
         else
             {
             //single selection
-            isHidden = array->IsItemBrokenLinkL(
-                iContainer->CurrentLbxItemIndex() );
-            isHidden = isHidden ||
-                array->IsItemCorruptedL(
-                iContainer->CurrentLbxItemIndex() );
+            TInt currentIndex( iContainer->CurrentLbxItemIndex() );
+            if( currentIndex > KErrNotFound )
+                {   
+                isHidden = array->IsItemBrokenLinkL( currentIndex );
+                isHidden = isHidden || array->IsItemCorruptedL( currentIndex );
+                }
+			else
+                {
+                isHidden = ETrue;
+                }	
             }
         }
 
@@ -2896,9 +2928,17 @@ void CMPXCollectionViewHgImp::DoSendTBoneListItemL(TMPXItemId aContainerId)
     
     CMPXMedia* albumTrack = iContainer->SelectedItemMediaL();
     TMPXItemId trackId = albumTrack->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+    // create the item path to send
 
-    path->Back();
-    path->Back();
+    if ( path->Levels() == 3 ) //TBone album level
+        {
+        path->Back();  
+        }
+    else if (path->Levels() == 4) //TBone Song Node level
+        {
+        path->Back();
+        path->Back();
+        }
     path->AppendL(aContainerId);
     path->AppendL(trackId); 
 
@@ -3674,6 +3714,7 @@ void CMPXCollectionViewHgImp::HandleAddCompletedL(
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::HandleAddCompletedL" );
     iAddingToNewPlaylist = EFalse;
+    iDialogDismissed = EFalse;
     iCommonUiHelper->DismissWaitNoteL();
     HandleCommandL( EMPXCmdHandleExternalCommand );
     if ( aError == KErrNone )
@@ -3686,45 +3727,16 @@ void CMPXCollectionViewHgImp::HandleAddCompletedL(
         MPX_DEBUG2( "CMPXCollectionViewHgImp::HandleAddCompletedL iPlaylistId = 0x%x", iPlaylistId.iId1 );
         if ( iCurrentPlaylistOp != EMPXOpPLCreating )
             {
-            HBufC* confirmTxt( NULL );
-            const TDesC& title( aPlaylist->ValueText( KMPXMediaGeneralTitle ) );
-            TMPlayerSecondaryDisplayNote noteId( EMPlayerNoteNone );
-            if ( iNumSongAddedToPlaylist > 1 )
+            if( !iTitleWait )
                 {
-                confirmTxt = StringLoader::LoadLC(
-                    R_MPX_QTN_MUS_MULTIPLE_TRACKS_ADDED_TO_PL,
-                    title, iNumSongAddedToPlaylist );
-                noteId = EMPlayerNoteAddManySongToPlaylist;
+                delete iTitleWait;
+                iTitleWait = NULL;
                 }
-            else
+            iTitleWait = aPlaylist->ValueText( KMPXMediaGeneralTitle ).AllocL();
+            if( iDialogDismissed )
                 {
-                confirmTxt = StringLoader::LoadLC(
-                    R_MPX_QTN_MUS_NOTE_TRACK_ADDED_TO_PL, title );
-                noteId = EMPlayerNoteAddSongToPlaylist;
+                ShowAddedItemsDialogL();
                 }
-
-            CAknConfirmationNote* note = new ( ELeave ) CAknConfirmationNote();
-
-            note->PublishDialogL(
-                noteId,
-                KMPlayerNoteCategory );
-
-            if ( iCoverDisplay )
-                {
-                CAknMediatorFacade* covercl = AknMediatorFacade( note );
-                if ( covercl )
-                    {
-                    covercl->BufStream() << title;
-                    if ( iNumSongAddedToPlaylist > 1 )
-                        {
-                        covercl->BufStream().WriteInt32L( iNumSongAddedToPlaylist );
-                        }
-                    }
-                }
-
-            note->ExecuteLD( *confirmTxt );
-            CleanupStack::PopAndDestroy( confirmTxt );
-
             }
         else // iCurrentPlaylistOp == EMPXOpPLCreating
             {
@@ -3745,6 +3757,57 @@ void CMPXCollectionViewHgImp::HandleAddCompletedL(
         {
         iContainer->ClearLbxSelection();
         }
+    }
+
+// ---------------------------------------------------------------------------
+// Shows the added items dialog
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::ShowAddedItemsDialogL()
+    {
+    HBufC* confirmTxt( NULL );
+    
+    TMPlayerSecondaryDisplayNote noteId( EMPlayerNoteNone );
+    if ( iNumSongAddedToPlaylist > 1 )
+        {
+        
+        confirmTxt = StringLoader::LoadLC(
+            R_MPX_QTN_MUS_MULTIPLE_TRACKS_ADDED_TO_PL,
+            iTitleWait->Des(), iNumSongAddedToPlaylist );
+        noteId = EMPlayerNoteAddManySongToPlaylist;
+        }
+    else
+        {
+        confirmTxt = StringLoader::LoadLC(
+            R_MPX_QTN_MUS_NOTE_TRACK_ADDED_TO_PL, iTitleWait->Des() );
+        noteId = EMPlayerNoteAddSongToPlaylist;
+        }
+    
+    CAknConfirmationNote* note = new ( ELeave ) CAknConfirmationNote();
+
+    note->PublishDialogL(
+        noteId,
+        KMPlayerNoteCategory );
+
+    if ( iCoverDisplay )
+        {
+        CAknMediatorFacade* covercl = AknMediatorFacade( note );
+        if ( covercl )
+            {
+            covercl->BufStream() << iTitleWait;
+            if ( iNumSongAddedToPlaylist > 1 )
+                {
+                covercl->BufStream().WriteInt32L( iNumSongAddedToPlaylist );
+                }
+            }
+        }
+    note->ExecuteLD( *confirmTxt );
+    CleanupStack::PopAndDestroy( confirmTxt );
+	if( iTitleWait )
+	    {
+	    delete iTitleWait;
+	    iTitleWait = NULL;
+		}
     }
 
 // -----------------------------------------------------------------------------
@@ -4092,6 +4155,7 @@ void CMPXCollectionViewHgImp::StartDelayedActionL(
 //
 void CMPXCollectionViewHgImp::DialogDismissedL( TInt aButtonId )
     {
+    iDialogDismissed = ETrue;
     MPX_FUNC( "CMPXCollectionViewHgImp::DialogDismissedL" );
     if ( iCommandInitiator )
         {
@@ -4124,6 +4188,15 @@ void CMPXCollectionViewHgImp::DialogDismissedL( TInt aButtonId )
                 // cancel incremental adding of songs
                 iCommonUiHelper->CancelCollectionOperation();
                 iIsAddingToPlaylist = EFalse;
+                }
+            break;
+            }
+        case EAknSoftkeyDone:
+            {
+            // Double check that we should be showing the dialog
+            if( iTitleWait )
+                {
+                ShowAddedItemsDialogL();
                 }
             break;
             }
@@ -4515,9 +4588,9 @@ void CMPXCollectionViewHgImp::HandleOpenL(
         {
         // nothing else to delete
         iIsDeleting = EFalse;
-        if ( iProgressDialog )
+        if ( iWaitDialog )
             {
-            iProgressDialog->ProcessFinishedL();
+            iWaitDialog->ProcessFinishedL();
             }
         HandleCommandL( EMPXCmdHandleExternalCommand );
         }
@@ -4891,9 +4964,9 @@ void CMPXCollectionViewHgImp::HandleOperationCompleteL( TCHelperOperation aOpera
                     {
                     // only dismiss wait note if the wait note is not
                     // canceled
-                    if ( iProgressDialog )
+                    if ( iWaitDialog )
                         {
-                        iProgressDialog->ProcessFinishedL();
+                        iWaitDialog->ProcessFinishedL();
                         }
                     HandleCommandL( EMPXCmdHandleExternalCommand );
                     iIsWaitNoteCanceled = EFalse;
@@ -4916,9 +4989,9 @@ void CMPXCollectionViewHgImp::HandleOperationCompleteL( TCHelperOperation aOpera
                 iIsDeleting = EFalse;
                 if ( !iIsWaitNoteCanceled )
                     {
-                    if ( iProgressDialog )
+                    if ( iWaitDialog )
                     	{
-						iProgressDialog->ProcessFinishedL();
+						iWaitDialog->ProcessFinishedL();
 						}
                     HandleCommandL( EMPXCmdHandleExternalCommand );
                     iIsWaitNoteCanceled = EFalse;
@@ -5025,27 +5098,6 @@ void CMPXCollectionViewHgImp::HandleOperationCompleteL( TCHelperOperation aOpera
             if ( aErr != KErrNone )
                 {
                 iCommonUiHelper->HandleErrorL( aErr );
-                }
-            break;
-            }
-        case EDeleteStatusOp:
-            {
-            if ( aArgument )
-                {
-                CMPXMedia* media = (CMPXMedia*)aArgument;
-                CleanupStack::PushL( media );
-                if ( media->IsSupported( KMPXMediaGeneralCount ) )
-                    {
-                    TInt deletePercent = media->ValueTObjectL<TInt>( KMPXMediaGeneralCount );
-                    MPX_DEBUG2( "CMPXCollectionViewHgImp::HandleOperationCompleteL % Files Deleted: %d", deletePercent );
-                    // update WaitNote dialog.
-                    HBufC* string = StringLoader::LoadLC(R_MPX_QTN_NMP_DEL_BATCH_SONGS_WAIT_NOTE, deletePercent);
-                    TPtr buf = string->Des();
-                    UpdateProcessL(deletePercent, buf);
-                    CleanupStack::PopAndDestroy( string );
-                    }
-                CleanupStack::PopAndDestroy( media );
-                aArgument = NULL;
                 }
             break;
             }
@@ -5447,6 +5499,28 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     }
                 CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
                 CleanupStack::PushL( path );
+                
+                if ( 2 == path->Levels() )
+                     {
+                     path->Back();
+                     path->AppendL(3);
+                     
+                     const CMPXMediaArray& albums = listboxArray->MediaArray();
+                     
+                     RArray<TMPXItemId> ids;
+                     CleanupClosePushL(ids);
+
+                     TInt albumCount = albums.Count();
+                      for (TInt i=0; i<albumCount; ++i)
+                          {
+                          CMPXMedia* album = albums.AtL(i);
+                          const TMPXItemId id = album->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+                          ids.AppendL(id);
+                          }
+                      path->AppendL(ids.Array()); // top level items
+                      ids.Reset();
+                      CleanupStack::PopAndDestroy(&ids);             
+                     }
                 path->Set( iContainer->CurrentLbxItemIndex() );
                 RArray<TMPXAttribute> attrs;
                 CleanupClosePushL( attrs );
@@ -6068,7 +6142,17 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 			
 	TMPXGeneralType containerType(
     	containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );			
-
+    
+	TInt usbUnblockingStatus;
+    RProperty::Get( KMPXViewPSUid,
+                    KMPXUSBUnblockingPSStatus,
+                    usbUnblockingStatus);
+   
+   if(usbUnblockingStatus)
+       {
+       aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+       }
+   
 	switch ( containerCategory )
 		{
 		case EMPXPlaylist:
@@ -6177,36 +6261,24 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
 
 				TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
-				if ( landscapeOrientation )
+				if ( !landscapeOrientation )
 					{
-					aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-					}
-				else
-					{
-					aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                    aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                    aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-
 					TInt usbUnblockingStatus;
 					RProperty::Get( KMPXViewPSUid,
 									KMPXUSBUnblockingPSStatus,
 									usbUnblockingStatus);
 
-					if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
+					if ( iContainer->CurrentLbxItemIndex() > KErrNotFound && !iContainer->IsTBoneView())
 					    {
                         if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
                             {
@@ -6217,9 +6289,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
                             {
                             aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
                             aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
-                            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                            aMenuPane->SetItemDimmed( EMPXCmdPlayItem,
-                                    iContainer->IsTBoneView() ? ETrue : EFalse );
+                            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, EFalse );
                             }
 					    }
 					if ( iContainer->IsSelectedItemASong() && iContainer->IsTBoneView() )
@@ -6233,19 +6303,20 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
 							{
 							aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, EFalse );
 							aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
+							aMenuPane->SetItemDimmed( EMPXCmdSend, EFalse );
 							}
 						}
-					
-					//If Operator Music store exist, show the cascade menu with Nokia and Operator music store.
-					if ( iOperatorMusicStore )
-					    {
-					    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-					    }
-					else
-					    {
-					    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-					    }
 					}
+					
+				//If Operator Music store exist, show the cascade menu with Nokia and Operator music store.
+				if ( iOperatorMusicStore )
+				    {
+				    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+				    }
+				else
+				    {
+				    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+				    }
 				}
 
 			break;
@@ -6323,34 +6394,35 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL(
 				}
 
 			TInt currentItem( iContainer->CurrentLbxItemIndex() );
+			if(currentItem > KErrNotFound )
+			    {  
+			    CMPXCollectionViewListBoxArray* array =
+			    static_cast<CMPXCollectionViewListBoxArray*>(
+			            iContainer->ListBoxArray() );
+			    const CMPXMedia& media = array->MediaL( currentItem );
 
-			CMPXCollectionViewListBoxArray* array =
-				static_cast<CMPXCollectionViewListBoxArray*>(
-				iContainer->ListBoxArray() );
-			const CMPXMedia& media = array->MediaL( currentItem );
+			    if ( media.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
+			        {
+			        // check for auto playlist, disable delete
+			        TMPXGeneralNonPermissibleActions attr(
+			                media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+			                        KMPXMediaGeneralNonPermissibleActions ) );
+			        if ( attr & EMPXWrite )
+			            {
+			            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+			            }
+			        }
 
-			if ( media.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
-				{
-				// check for auto playlist, disable delete
-				TMPXGeneralNonPermissibleActions attr(
-					media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-						KMPXMediaGeneralNonPermissibleActions ) );
-				if ( attr & EMPXWrite )
-					{
-					aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-					}
-				}
-
-			TInt trackCount (0);
-			if( media.IsSupported(KMPXMediaGeneralCount) )
-				{
-				trackCount = media.ValueTObjectL<TInt>( KMPXMediaGeneralCount );
-				}
-			if( trackCount < 1 )
-				{
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-				}
-
+			    TInt trackCount (0);
+			    if( media.IsSupported(KMPXMediaGeneralCount) )
+			        {
+			        trackCount = media.ValueTObjectL<TInt>( KMPXMediaGeneralCount );
+			        }
+			    if( trackCount < 1 )
+			        {
+			        aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+			        }
+			    } 
 			if ( iOperatorMusicStore )
 			    {
 			    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
@@ -6372,47 +6444,49 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL(
 			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
 
 			TInt currentItem( iContainer->CurrentLbxItemIndex() );
+            
+			if(currentItem > KErrNotFound )
+			    {  
+			    CMPXCollectionViewListBoxArray* array =
+			    static_cast<CMPXCollectionViewListBoxArray*>(
+			            iContainer->ListBoxArray() );
+			    const CMPXMedia& media = array->MediaL( currentItem );
 
-			CMPXCollectionViewListBoxArray* array =
-				static_cast<CMPXCollectionViewListBoxArray*>(
-				iContainer->ListBoxArray() );
-			const CMPXMedia& media = array->MediaL( currentItem );
+			    TInt usbUnblockingStatus;
+			    RProperty::Get( KMPXViewPSUid,
+			            KMPXUSBUnblockingPSStatus,
+			            usbUnblockingStatus);
+			    if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
+			        {
+			        aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			        }
+			    else
+			        {
+			        aMenuPane->SetItemDimmed( EMPXCmdRename, EFalse );
+			        }
 
-			TInt usbUnblockingStatus;
-			RProperty::Get( KMPXViewPSUid,
-							KMPXUSBUnblockingPSStatus,
-							usbUnblockingStatus);
-			if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-				{
-				aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-				}
-			else
-				{
-				aMenuPane->SetItemDimmed( EMPXCmdRename, EFalse );
-				}
-
-			if ( media.IsSupported(
-				KMPXMediaGeneralNonPermissibleActions ) )
-				{
-				// check for auto playlist, disable delete
-				TMPXGeneralNonPermissibleActions attr(
-					media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-						KMPXMediaGeneralNonPermissibleActions ) );
-				if ( attr & EMPXWrite )
-					{
-					aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-					// TODO: this should be an item specific command.
-					aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-					}
-				}
-			if ( array->IsItemBrokenLinkL( currentItem ) ||
-				array->IsItemCorruptedL( currentItem ) )
-				{
-				aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
-                // TODO: this should be an item specific command.
-				aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-				}
-
+			    if ( media.IsSupported(
+			            KMPXMediaGeneralNonPermissibleActions ) )
+			        {
+			        // check for auto playlist, disable delete
+			        TMPXGeneralNonPermissibleActions attr(
+			                media.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+			                        KMPXMediaGeneralNonPermissibleActions ) );
+			        if ( attr & EMPXWrite )
+			            {
+			            aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			            // TODO: this should be an item specific command.
+			            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+			            }
+			        }
+			    if ( array->IsItemBrokenLinkL( currentItem ) ||
+			            array->IsItemCorruptedL( currentItem ) )
+			        {
+			        aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+			        // TODO: this should be an item specific command.
+			        aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+			        }
+			    } 
 			break;
 			}
         default:
@@ -6731,27 +6805,26 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
 						aMenuPane->SetItemDimmed( EMPXCmdRemove, EFalse );
 						}
 					}
+				} 
 
-				CMPXCollectionViewListBoxArray* array =
-					static_cast<CMPXCollectionViewListBoxArray*>(
-					iContainer->ListBoxArray() );
-				const CMPXMedia& containerMedia = array->ContainerMedia();
+            CMPXCollectionViewListBoxArray* array =
+            static_cast<CMPXCollectionViewListBoxArray*>(
+                    iContainer->ListBoxArray() );
+            const CMPXMedia& containerMedia = array->ContainerMedia();
 
-				if ( containerMedia.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
-					{
-					// check for auto playlist, disable add, remove and reorder
-					TMPXGeneralNonPermissibleActions attr(
-						containerMedia.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
-							KMPXMediaGeneralNonPermissibleActions ) );
-					if ( attr & EMPXWrite )
-						{
-						aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-						aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-						aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-						}
-					}
-				}
-
+            if ( containerMedia.IsSupported( KMPXMediaGeneralNonPermissibleActions ) )
+                {
+                // check for auto playlist, disable add, remove and reorder
+                TMPXGeneralNonPermissibleActions attr(
+                        containerMedia.ValueTObjectL<TMPXGeneralNonPermissibleActions>(
+                                KMPXMediaGeneralNonPermissibleActions ) );
+                if ( attr & EMPXWrite )
+                    {
+                    aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+                    aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+                    aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+                    }
+                }
 			break;
 			}
 

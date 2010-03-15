@@ -67,7 +67,7 @@
 
 #include <layoutmetadata.cdl.h>
 #include <akntranseffect.h>                 // For transition effects
-#include <gfxtranseffect\gfxtranseffect.h>  // For transition effects
+#include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
 
 #include "mpxcommoncontainer.hrh"
 #include "mpxcollectionviewhg.hrh"
@@ -486,7 +486,7 @@ void CMPXCollectionViewHgContainer::RestoreOriginalTitleIconL()
         {
         CEikImage* newIcon = iContextPane->SwapPicture( iOrigIcon );
         delete newIcon;
-        iOrigIcon = NULL; 
+        iOrigIcon = NULL;
         }
     }
 
@@ -742,10 +742,10 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             {
             if ( iCurrentViewType == EMPXViewMediawall )
                 {
-                if ( iDialog ) 
+                if ( iDialog )
                     {
                     iDialog->CancelPopup();
-                    }                
+                    }
                 }
             iSetEmptyTextNeeded = ETrue;
 
@@ -759,8 +759,6 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
 
             iLayoutSwitch = ETrue;
 
-            if( iCbaHandler )
-                iCbaHandler->UpdateCba();
 
             TRect clientRect = ((CAknView*)iView)->ClientRect();
             SetRect( clientRect );
@@ -1188,7 +1186,19 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
 
     HandleLbxItemRemovalL();
     TViewType prevViewType = iCurrentViewType;
-    ResolveCurrentViewType();
+    //no songs and no allbums, then its list view
+    if ( count > 0 )
+        {
+        ResolveCurrentViewType();
+        }
+    else
+        {
+        TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+        if( landscapeOrientation )
+            iCurrentViewType = EMPXViewMediawall;
+        else
+            iCurrentViewType = EMPXViewList;
+        }
 
     iThumbnailReqMap.Reset();
     if (ShuffleItemPresent())
@@ -1267,7 +1277,7 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
         {
         LoadAndSetEmptyTextL();
         iSetEmptyTextNeeded = EFalse;
-        }    
+        }
     if( !iDefaultIconSet )
         {
         SetDefaultIconL();
@@ -1793,13 +1803,13 @@ CHgScroller* CMPXCollectionViewHgContainer::CurrentListWidget()
 TBool CMPXCollectionViewHgContainer::IsTBoneView()
     {
     TBool tBoneView = EFalse;
-    
+
     if( EMPXViewTBone == iCurrentViewType )
         tBoneView = ETrue;
-    
+
     return tBoneView;
     }
-	
+
 // ----------------------------------------------------------------------------
 // Resolve the current view type based on the browsing context
 // ----------------------------------------------------------------------------
@@ -1821,7 +1831,6 @@ void CMPXCollectionViewHgContainer::ResolveCurrentViewType()
 					{
                 	iCurrentViewType = EMPXViewTBone;
                 	iContext = EContextItemAlbum;
-                	iOpenAlbumTracks = EFalse;
 					}
 				else
 					{
@@ -1895,7 +1904,7 @@ TBool CMPXCollectionViewHgContainer::IsSelectedItemASong()
     MPX_FUNC( "CMPXCollectionViewHgContainer::IsSelectedItemASong" );
 
 	TBool res(EFalse);
-    if ( iContext == EContextItemAlbum || 
+    if ( iContext == EContextItemAlbum ||
          iContext == EContextGroupSong ||
          iContext == EContextItemGenre )
         {
@@ -1925,9 +1934,9 @@ TBool CMPXCollectionViewHgContainer::IsSelectedItemASong()
 CMPXMedia* CMPXCollectionViewHgContainer::SelectedItemMediaL()
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::SelectedItemMediaL" );
-    CMPXMedia* song = NULL;    
+    CMPXMedia* song = NULL;
     const CMPXMediaArray& albums = iListBoxArray->MediaArray();
-    CMPXMedia* album( albums.AtL( iSelectedAlbumIndex ) );    
+    CMPXMedia* album( albums.AtL( iSelectedAlbumIndex ) );
     const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
     CHgScroller* listWidget = CurrentListWidget();
     if (listWidget && songs)
@@ -2270,30 +2279,61 @@ void CMPXCollectionViewHgContainer::ProvideDataForRangeL( TInt aBufferStart, TIn
     {
     const CMPXMediaArray& mediaArray = iListBoxArray->MediaArray();
     TInt index(0);
-    for( TInt i = aBufferStart; i <= aBufferEnd; i++ )
-        {
-        // Just get the exiting item and update the fields + icon.
-        CHgItem* item = NULL;
-        if( iMediaWall )
-            item = &iMediaWall->ItemL(i);
-        else
-            item = &iListWidget->ItemL(i);
 
-        index = MediaIndex(i);
-        if ( index >= 0 )
-            {
-            CMPXMedia* currentMedia( mediaArray.AtL( index ) );
-            AddThumbnailToDisplayedItemL( item, currentMedia, index );
-            }
-        else
-        	{
-			if ( iCurrentViewType == EMPXViewMediawall ||
-				 iCurrentViewType == EMPXViewList && (i-iShuffleItem) == -1 )
-				SetDetailIconShuffleL(); 
-			iThumbnailReqMap[i] = ETrue;
-			RefreshNoThumbnailL(i);
+    if(iDirection == MHgScrollBufferObserver::EHgBufferScrollUp )
+        {
+        for( TInt i = aBufferEnd; i >= aBufferStart; i-- )
+			{
+			// Just get the exiting item and update the fields + icon.
+			CHgItem* item = NULL;
+			if( iMediaWall )
+				item = &iMediaWall->ItemL(i);
+			else
+				item = &iListWidget->ItemL(i);
+
+			index = MediaIndex(i);
+			if ( index >= 0 )
+				{
+				CMPXMedia* currentMedia( mediaArray.AtL( index ) );
+				AddThumbnailToDisplayedItemL( item, currentMedia, index );
+				}
+			else
+				{
+				if ( iCurrentViewType == EMPXViewMediawall ||
+					 iCurrentViewType == EMPXViewList && (i-iShuffleItem) == -1 )
+					SetDetailIconShuffleL();
+				iThumbnailReqMap[i] = ETrue;
+				RefreshNoThumbnailL(i);
+				}
 			}
-        }
+		}
+	else
+		{
+		for( TInt i = aBufferStart; i <= aBufferEnd; i++ )
+			{
+			// Just get the exiting item and update the fields + icon.
+			CHgItem* item = NULL;
+			if( iMediaWall )
+				item = &iMediaWall->ItemL(i);
+			else
+				item = &iListWidget->ItemL(i);
+
+			index = MediaIndex(i);
+			if ( index >= 0 )
+				{
+				CMPXMedia* currentMedia( mediaArray.AtL( index ) );
+				AddThumbnailToDisplayedItemL( item, currentMedia, index );
+				}
+			else
+				{
+				if ( iCurrentViewType == EMPXViewMediawall ||
+					 iCurrentViewType == EMPXViewList && (i-iShuffleItem) == -1 )
+					SetDetailIconShuffleL();
+				iThumbnailReqMap[i] = ETrue;
+				RefreshNoThumbnailL(i);
+				}
+			}
+		}
     }
 
 // -----------------------------------------------------------------------------
@@ -3714,7 +3754,12 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 
         MPX_DEBUG_PATH(*cpath);
 
-        if (cpath->Levels() == 3)
+		if ( 2 == cpath->Levels())
+            {
+            cpath->Back();
+            cpath->AppendL(3);
+            }
+        else if (cpath->Levels() == 3)
 			{
 			// go back one level before amending path with new levels
 			cpath->Back();
@@ -3846,7 +3891,13 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenPlaylistL(
 	CleanupStack::PushL( cpath );
 
 	MPX_DEBUG_PATH(*cpath);
-	if (cpath->Levels() == 3)
+
+    if ( 2 == cpath->Levels())
+        {
+        cpath->Back();
+        cpath->AppendL(3);
+        }
+	else if (cpath->Levels() == 3)
 		{
 		// go back one level before amending path with new levels
 		cpath->Back();
@@ -4249,7 +4300,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
 
     listBox->ConstructL( dialog,
             EAknListBoxSelectionList | EAknListBoxScrollBarSizeExcluded  );
-	
+
 
     listBox->CreateScrollBarFrameL( ETrue );
     listBox->ScrollBarFrame()->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
@@ -4567,7 +4618,20 @@ TInt CMPXCollectionViewHgContainer::AsyncCallback( TAny* aPtr )
     CMPXCollectionViewHgContainer* self = static_cast<CMPXCollectionViewHgContainer*>(aPtr);
     if( self )
         {
+        //check if the pointer to ContainerMedia exists
+        const CMPXMedia& media = self->iListBoxArray->ContainerMedia();    
+        if ( NULL == &media )
+    	    {
+            return KErrNone;
+    	    }  
+
+
         self->HandleLbxItemAdditionL();
+
+        if( self->iCbaHandler )
+            { 
+            self->iCbaHandler->UpdateCba();
+            }
         }
     return KErrNone;
     }
@@ -4708,7 +4772,7 @@ void CMPXCollectionViewHgContainer::LoadAndSetEmptyTextL()
         TInt resId = R_MPX_COLLECTION_ALBUM_LBX_EMPTYTEXT;
         HBufC* emptyText = StringLoader::LoadLC( resId );
         SetLbxEmptyTextL( *emptyText );
-        CleanupStack::PopAndDestroy( emptyText );        
+        CleanupStack::PopAndDestroy( emptyText );
         }
     }
 
@@ -4746,7 +4810,9 @@ void CMPXCollectionViewHgContainer::BeginFullScreenAnimation(TBool aPrevViewWasP
         iTranstionType = EMPXTranstionNotDefined;
         return;
         }
-    else if( iCurrentViewType == EMPXViewTBone )
+    else if( iContext == EContextItemAlbum ||
+             iContext == EContextItemGenre ||
+             iContext == EContextItemPlaylist )
         {
         iTranstionType = EMPXTranstionToRight;
         }
@@ -4755,6 +4821,9 @@ void CMPXCollectionViewHgContainer::BeginFullScreenAnimation(TBool aPrevViewWasP
         {
         iMediaWall->SetFlags( CHgVgMediaWall::EHgVgMediaWallDrawToWindowGC );
         iMediaWall->DrawNow();
+		// workaround for NGA animations: includes Media Wall into transition animation.
+		iCoeEnv->WsSession().Finish();
+		User::After(1000);
         }
 
     const TInt flags = AknTransEffect::TParameter::EActivateExplicitCancel;

@@ -107,7 +107,7 @@ const TReal KMPXOneGB ( 1073741824 );
 
 const TText KRightToLeftMark = 0x200F;
 
-const TInt KMPXChunkSize = 100;  // number of songs added in each chunk, IncAddL
+const TInt KMPXChunkSize = 50;  // number of songs added in each chunk, IncAddL
 const TInt KSQLErrGeneral = -311; // SQL General error. Don't want to include sql header here
 
 _LIT( KMPXCommonUiRscPath, "mpxcommonui.rsc" );

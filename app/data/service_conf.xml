@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<service>
+  <name>Music Fetcher</name>
+  <filepath>No path</filepath>
+  <description>Music Fetcher</description>
+  <interface>
+     <name>com.nokia.services.media.Music</name>
+     <version>1.0</version>
+     <description>Interface for fetching music URIs</description>
+   </interface>
+</service>

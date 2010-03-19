@@ -1,0 +1,17 @@
+EXPORTS
+	_ZN12MusicFetcher10titleReadyERK7QString @ 1 NONAME
+	_ZN12MusicFetcher11qt_metacallEN11QMetaObject4CallEiPPv @ 2 NONAME
+	_ZN12MusicFetcher11qt_metacastEPKc @ 3 NONAME
+	_ZN12MusicFetcher12itemSelectedE7QString @ 4 NONAME
+	_ZN12MusicFetcher16staticMetaObjectE @ 5 NONAME DATA 16
+	_ZN12MusicFetcher19getStaticMetaObjectEv @ 6 NONAME
+	_ZN12MusicFetcherC1Ev @ 7 NONAME
+	_ZN12MusicFetcherC2Ev @ 8 NONAME
+	_ZN12MusicFetcherD0Ev @ 9 NONAME
+	_ZN12MusicFetcherD1Ev @ 10 NONAME
+	_ZN12MusicFetcherD2Ev @ 11 NONAME
+	_ZNK12MusicFetcher10metaObjectEv @ 12 NONAME
+	_ZNK12MusicFetcher12contextTitleEv @ 13 NONAME
+	_ZTI12MusicFetcher @ 14 NONAME
+	_ZTV12MusicFetcher @ 15 NONAME
+

@@ -1,4 +1,0 @@
-EXPORTS
-	?NewL@CMPXCollectionViewHg@@SAPAV1@XZ @ 1 NONAME ; class CMPXCollectionViewHg * CMPXCollectionViewHg::NewL(void)
-	?NewLC@CMPXCollectionViewHg@@SAPAV1@XZ @ 2 NONAME ; class CMPXCollectionViewHg * CMPXCollectionViewHg::NewLC(void)
-

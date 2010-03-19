@@ -1,0 +1,19 @@
+<RCC>
+
+    <qresource prefix="/playbackviewicons" >
+        <file alias="defaultalbumart.png">defaultalbumart.png</file>
+        <file alias="info.svg">info.svg</file>
+        <file alias="next.svg">next.svg</file>
+        <file alias="pause.svg">pause.svg</file>
+        <file alias="play.svg">play.svg</file>
+        <file alias="prev.svg">prev.svg</file>
+        <file alias="shuffle_on.svg">shuffle_on.svg</file>        
+        <file alias="shuffle_off.svg">shuffle_off.svg</file>  
+        <file alias="select.png" >select.png</file>
+    </qresource>
+    
+    <qresource prefix="/playbackviewdocml" >
+        <file alias="playbackwidget.docml">playbackwidget.docml</file>
+    </qresource>
+
+</RCC>

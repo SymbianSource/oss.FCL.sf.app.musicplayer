@@ -1,0 +1,20 @@
+EXPORTS
+	?qt_metacall@MpNowPlayingWidget@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 1 NONAME ; int MpNowPlayingWidget::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?trUtf8@MpNowPlayingWidget@@SA?AVQString@@PBD0H@Z @ 2 NONAME ; class QString MpNowPlayingWidget::trUtf8(char const *, char const *, int)
+	??0MpNowPlayingWidget@@QAE@JPAVQGraphicsItem@@@Z @ 3 NONAME ; MpNowPlayingWidget::MpNowPlayingWidget(long, class QGraphicsItem *)
+	?qt_metacast@MpNowPlayingWidget@@UAEPAXPBD@Z @ 4 NONAME ; void * MpNowPlayingWidget::qt_metacast(char const *)
+	?clicked@MpNowPlayingWidget@@IAEXXZ @ 5 NONAME ; void MpNowPlayingWidget::clicked(void)
+	?mousePressEvent@MpNowPlayingWidget@@EAEXPAVQGraphicsSceneMouseEvent@@@Z @ 6 NONAME ; void MpNowPlayingWidget::mousePressEvent(class QGraphicsSceneMouseEvent *)
+	?metaObject@MpNowPlayingWidget@@UBEPBUQMetaObject@@XZ @ 7 NONAME ; struct QMetaObject const * MpNowPlayingWidget::metaObject(void) const
+	?getStaticMetaObject@MpNowPlayingWidget@@SAABUQMetaObject@@XZ @ 8 NONAME ; struct QMetaObject const & MpNowPlayingWidget::getStaticMetaObject(void)
+	?tr@MpNowPlayingWidget@@SA?AVQString@@PBD0@Z @ 9 NONAME ; class QString MpNowPlayingWidget::tr(char const *, char const *)
+	?tr@MpNowPlayingWidget@@SA?AVQString@@PBD0H@Z @ 10 NONAME ; class QString MpNowPlayingWidget::tr(char const *, char const *, int)
+	??1MpNowPlayingWidget@@UAE@XZ @ 11 NONAME ; MpNowPlayingWidget::~MpNowPlayingWidget(void)
+	?mouseReleaseEvent@MpNowPlayingWidget@@EAEXPAVQGraphicsSceneMouseEvent@@@Z @ 12 NONAME ; void MpNowPlayingWidget::mouseReleaseEvent(class QGraphicsSceneMouseEvent *)
+	?trUtf8@MpNowPlayingWidget@@SA?AVQString@@PBD0@Z @ 13 NONAME ; class QString MpNowPlayingWidget::trUtf8(char const *, char const *)
+	?playbackAttachmentChanged@MpNowPlayingWidget@@IAEX_N@Z @ 14 NONAME ; void MpNowPlayingWidget::playbackAttachmentChanged(bool)
+	??_EMpNowPlayingWidget@@UAE@I@Z @ 15 NONAME ; MpNowPlayingWidget::~MpNowPlayingWidget(unsigned int)
+	?staticMetaObject@MpNowPlayingWidget@@2UQMetaObject@@B @ 16 NONAME ; struct QMetaObject const MpNowPlayingWidget::staticMetaObject
+	?paint@MpNowPlayingWidget@@UAEXPAVQPainter@@PBVQStyleOptionGraphicsItem@@PAVQWidget@@@Z @ 17 NONAME ; void MpNowPlayingWidget::paint(class QPainter *, class QStyleOptionGraphicsItem const *, class QWidget *)
+	?setEnabled@MpNowPlayingWidget@@QAEX_N@Z @ 18 NONAME ; void MpNowPlayingWidget::setEnabled(bool)
+

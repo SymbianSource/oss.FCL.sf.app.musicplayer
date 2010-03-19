@@ -1,5 +1,0 @@
-EXPORTS
-	??1CMPXUPnPPlaybackDialog@@UAE@XZ @ 1 NONAME ; CMPXUPnPPlaybackDialog::~CMPXUPnPPlaybackDialog(void)
-	?NewL@CMPXUPnPPlaybackDialog@@SAPAV1@XZ @ 2 NONAME ; class CMPXUPnPPlaybackDialog * CMPXUPnPPlaybackDialog::NewL(void)
-	?SetParamL@CMPXUPnPPlaybackDialog@@QAEXPBVTDesC16@@@Z @ 3 NONAME ; void CMPXUPnPPlaybackDialog::SetParamL(class TDesC16 const *)
-

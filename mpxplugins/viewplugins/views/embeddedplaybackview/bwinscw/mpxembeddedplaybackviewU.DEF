@@ -1,4 +1,0 @@
-EXPORTS
-	?NewL@CMPXEmbeddedPlaybackView@@SAPAV1@XZ @ 1 NONAME ; class CMPXEmbeddedPlaybackView * CMPXEmbeddedPlaybackView::NewL(void)
-	?NewLC@CMPXEmbeddedPlaybackView@@SAPAV1@XZ @ 2 NONAME ; class CMPXEmbeddedPlaybackView * CMPXEmbeddedPlaybackView::NewLC(void)
-

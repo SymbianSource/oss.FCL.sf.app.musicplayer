@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/appeffects" >
+        <file alias="slide_out_to_top.fxml">slide_out_to_top.fxml</file>
+        <file alias="slide_out_to_right.fxml">slide_out_to_right.fxml</file>
+        <file alias="slide_out_to_left.fxml">slide_out_to_left.fxml</file>
+        <file alias="slide_in_to_top_and_fade_in.fxml">slide_in_to_top_and_fade_in.fxml</file>
+        <file alias="slide_in_to_right_and_fade_in.fxml">slide_in_to_right_and_fade_in.fxml</file>
+        <file alias="slide_in_to_left_and_fade_in.fxml">slide_in_to_left_and_fade_in.fxml</file>
+    </qresource>   
+</RCC>

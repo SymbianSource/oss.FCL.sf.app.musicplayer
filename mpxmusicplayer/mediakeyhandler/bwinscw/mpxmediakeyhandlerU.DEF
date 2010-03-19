@@ -1,3 +1,0 @@
-EXPORTS
-	?NewL@MMPXMediaKeyHandler@@SAPAV1@HPAVMMPXMediaKeyHandlerObserver@@@Z @ 1 NONAME ; class MMPXMediaKeyHandler * MMPXMediaKeyHandler::NewL(int, class MMPXMediaKeyHandlerObserver *)
-

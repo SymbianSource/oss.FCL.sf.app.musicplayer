@@ -1,32 +1,20 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
   <!ENTITY layer_real_source_path "sf/app/musicplayer" >
 ]> 
 
-<SystemDefinition name="avdomain" schema="1.4.0">
+<SystemDefinition name="avdomain" schema="1.5.1">
 	<systemModel>
   <!-- Common file for prebuild layers-->
   	<layer name="app_layer">
 			<module name="musicplayer">
-				<unit unitID="musicplayer" mrp="" bldFile="&layer_real_source_path;/group" name="musicplayer" />
+				<unit unitID="musicplayer" mrp="" bldFile="&layer_real_source_path;" name="musicplayer" proFile="qtmusicplayer.pro" qmakeArgs="-r -config rom"/>
 			</module>
-    </layer>    
-
-    <layer name="api_test_layer">
-			<module name="musicplayer_tsrc">
-				<unit unitID="musicplayer_tsrc" name="musicplayer_tsrc" bldFile="&layer_real_source_path;/tsrc/group" mrp="" />
-			</module>
-    </layer>
-
-    <layer name="pref_test_layer">
-			<module name="musicplayer_tsrc_group">
-				<unit unitID="musicplayer_tsrc_group" name="musicplayer_tsrc_group" bldFile="&layer_real_source_path;/tsrc/group" mrp="" filter="TA_MUSICPLAYER" />
-			</module>
-    </layer>
-
+    </layer>   
+    
   	<layer name="app_musicplayer_layer">
 			<module name="musicplayer_group">
-				<unit unitID="musicplayer_group" mrp="" bldFile="&layer_real_source_path;/group" name="musicplayer_group" />
+				<unit unitID="musicplayer_group" mrp="" bldFile="&layer_real_source_path;" name="musicplayer_group" proFile="qtmusicplayer.pro" qmakeArgs="-r -config rom"/>
 			</module>
     </layer>
 

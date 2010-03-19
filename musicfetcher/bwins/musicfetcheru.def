@@ -1,0 +1,17 @@
+EXPORTS
+	?qt_metacast@MusicFetcher@@UAEPAXPBD@Z @ 1 NONAME ; void * MusicFetcher::qt_metacast(char const *)
+	?qt_metacall@MusicFetcher@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 2 NONAME ; int MusicFetcher::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?tr@MusicFetcher@@SA?AVQString@@PBD0@Z @ 3 NONAME ; class QString MusicFetcher::tr(char const *, char const *)
+	?contextTitle@MusicFetcher@@QBE?AVQString@@XZ @ 4 NONAME ; class QString MusicFetcher::contextTitle(void) const
+	?getStaticMetaObject@MusicFetcher@@SAABUQMetaObject@@XZ @ 5 NONAME ; struct QMetaObject const & MusicFetcher::getStaticMetaObject(void)
+	?staticMetaObject@MusicFetcher@@2UQMetaObject@@B @ 6 NONAME ; struct QMetaObject const MusicFetcher::staticMetaObject
+	??_EMusicFetcher@@UAE@I@Z @ 7 NONAME ; MusicFetcher::~MusicFetcher(unsigned int)
+	?itemSelected@MusicFetcher@@QAEXVQString@@@Z @ 8 NONAME ; void MusicFetcher::itemSelected(class QString)
+	?titleReady@MusicFetcher@@IAEXABVQString@@@Z @ 9 NONAME ; void MusicFetcher::titleReady(class QString const &)
+	??1MusicFetcher@@UAE@XZ @ 10 NONAME ; MusicFetcher::~MusicFetcher(void)
+	?trUtf8@MusicFetcher@@SA?AVQString@@PBD0H@Z @ 11 NONAME ; class QString MusicFetcher::trUtf8(char const *, char const *, int)
+	?trUtf8@MusicFetcher@@SA?AVQString@@PBD0@Z @ 12 NONAME ; class QString MusicFetcher::trUtf8(char const *, char const *)
+	?metaObject@MusicFetcher@@UBEPBUQMetaObject@@XZ @ 13 NONAME ; struct QMetaObject const * MusicFetcher::metaObject(void) const
+	?tr@MusicFetcher@@SA?AVQString@@PBD0H@Z @ 14 NONAME ; class QString MusicFetcher::tr(char const *, char const *, int)
+	??0MusicFetcher@@QAE@XZ @ 15 NONAME ; MusicFetcher::MusicFetcher(void)
+

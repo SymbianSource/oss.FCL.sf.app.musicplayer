@@ -1,0 +1,39 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: 
+;
+;Header
+#{"MPXMusicPlayer"}, (0x101FFC62), 18, 0, 0, TYPE=SA, RU
+; dlls version uses 13.2
+
+
+; Localised vendor names
+%{"Nokia"}
+
+; Unique, global vendor name  
+:"Nokia"
+
+;Files to install
+"\epoc32\release\armv5\urel\mpxlocalaudioplayback.dll"      	-"!:\sys\bin\mpxlocalaudioplayback.dll"
+"\epoc32\release\armv5\urel\mpxsqlitedbcommon.dll"           	-"!:\sys\bin\mpxsqlitedbcommon.dll"
+"\epoc32\release\armv5\urel\mpxsqlitedbplugin.dll"          	-"!:\sys\bin\mpxsqlitedbplugin.dll"
+"\epoc32\release\armv5\urel\mpxsqlitepodcastdbplugin.dll"   	-"!:\sys\bin\mpxsqlitepodcastdbplugin.dll"
+"\epoc32\release\armv5\urel\mpxm3uplaylistparsers.dll"      	-"!:\sys\bin\mpxm3uplaylistparsers.dll"
+"\epoc32\release\armv5\urel\mpxm3uplaylistplugin.dll"       	-"!:\sys\bin\mpxm3uplaylistplugin.dll"
+
+"\epoc32\data\Z\resource\plugins\mpxlocalaudioplayback.rsc"	-"!:\resource\plugins\mpxlocalaudioplayback.rsc"
+"\epoc32\data\Z\resource\plugins\mpxsqlitedbplugin.rsc"		-"!:\resource\plugins\mpxsqlitedbplugin.rsc"
+"\epoc32\data\Z\resource\apps\mpxcollectiondbres.rsc" 		-"!:\resource\apps\mpxcollectiondbres.rsc"
+"\epoc32\data\Z\resource\plugins\mpxsqlitepodcastdbplugin.rsc"	-"!:\resource\plugins\mpxsqlitepodcastdbplugin.rsc"
+"\epoc32\data\Z\resource\plugins\mpxm3uplaylistplugin.rsc"	-"!:\resource\plugins\mpxm3uplaylistplugin.rsc"

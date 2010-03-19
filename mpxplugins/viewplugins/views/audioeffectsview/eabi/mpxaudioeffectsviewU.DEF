@@ -1,6 +1,0 @@
-EXPORTS
-	_ZN20CMPXAudioEffectsView4NewLEv @ 1 NONAME
-	_ZN20CMPXAudioEffectsView5NewLCEv @ 2 NONAME
-	_ZTI29CMPXAudioEffectsViewContainer @ 3 NONAME ; #<TI>#
-	_ZTV29CMPXAudioEffectsViewContainer @ 4 NONAME ; #<VT>#
-

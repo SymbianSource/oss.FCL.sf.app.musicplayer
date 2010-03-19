@@ -1,0 +1,21 @@
+<layers>
+    <visual>
+
+        <param name="translation_x" type="anim">
+            <duration>.6</duration>
+            <!--style>inoutcubic</style-->
+            <keyframe at="0.0">0.0</keyframe>
+            <keyframe at="1.0">1.0</keyframe>
+            <start ref="screen.left">1</start>
+            <end ref="screen.right">-0.3</end>
+        </param>
+
+        <param name="opacity" type="anim">
+            <duration>.6</duration>
+            <!--style>inoutcubic</style-->
+	          <keyframe at="0.0">1.0</keyframe>
+	          <keyframe at="1.0">0.0</keyframe>
+	      </param>
+	      
+    </visual>
+</layers>

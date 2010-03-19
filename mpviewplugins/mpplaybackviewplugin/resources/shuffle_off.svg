@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 14.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 43363)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="35px"
+	 height="35px" viewBox="0 0 35 35" enable-background="new 0 0 35 35" xml:space="preserve">
+<g id="Layer_1">
+</g>
+<g id="Layer_2">
+	<g>
+		<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="3.0361328" y1="30.09375" x2="28.5427303" y2="4.5871511">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="0.533742" style="stop-color:#C4C4C4"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path fill="url(#SVGID_1_)" d="M0.0478516,27.1054688h8.4970703c0,0,2.6523438,0.5097656,5.3583984-3.3339844
+			c2.7060547-3.8417969,7.2431641-9.2602539,7.2431641-9.2602539s0.875-1.4541016,2.8134766-1.5078125
+			c1.4736328-0.0419922,4.2304688-0.0556641,4.2304688-0.0556641v3.3007812l5.953125-6.0605469l-5.953125-5.7636719
+			l-0.0546875,3.5986328h-4.8154297c0,0-2.9775391-0.4863281-8.3349609,6.6035156L10.0068359,20.6875
+			c0,0-0.7041016,1.0839844-2.4902344,1.0839844h-7.46875V27.1054688z"/>
+		<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="2.3720703" y1="15.2382812" x2="10.4428988" y2="7.1674523">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="0.533742" style="stop-color:#C4C4C4"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path fill="url(#SVGID_2_)" d="M14.9267578,12.3374023c-0.3769531-0.5146484-0.7382812-1.0185547-1.0732422-1.4970703
+			c-2.7060547-3.8847656-5.3574219-3.3671875-5.3574219-3.3671875H0v5.3925781h7.4677734
+			c1.7871094,0,2.4892578,1.09375,2.4892578,1.09375l1.7167969,2.1132812
+			C12.7724609,14.8237305,13.6679688,13.4477539,14.9267578,12.3374023z"/>
+		<linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="21.5712891" y1="27.2451172" x2="29.2561741" y2="19.5602322">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="0.533742" style="stop-color:#C4C4C4"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path fill="url(#SVGID_3_)" d="M28.1416016,18.4458008v3.3393555c0,0-2.7587891-0.0136719-4.2294922-0.0566406
+			c-1.9394531-0.0546875-2.8144531-1.5234375-2.8144531-1.5234375s-0.4082031-0.4941406-1.0517578-1.2890625
+			c-0.9921875,1.2421875-1.90625,2.609375-3.0625,3.6855469c4.0644531,4.5292969,6.2880859,4.1621094,6.2880859,4.1621094h4.8154297
+			l0.0546875,3.6386719l5.9550781-5.8261719L28.1416016,18.4458008z"/>
+	</g>
+</g>
+</svg>

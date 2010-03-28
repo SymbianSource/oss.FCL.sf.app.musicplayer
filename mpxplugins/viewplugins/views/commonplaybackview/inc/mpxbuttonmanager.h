@@ -136,7 +136,7 @@ NONSHARABLE_CLASS( CMPXButtonManager ) :public CCoeControl,
 	     */
 	    void HandleResourceChange( TInt aType );
 
-	    void CMPXButtonManager::SizeChanged();
+	    void SizeChanged();
 
 	    /**
 	     * From MCoeControlBackground

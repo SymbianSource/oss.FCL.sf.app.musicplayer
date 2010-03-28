@@ -330,7 +330,7 @@ private:
         const TDesC& aContentId,
         const TDesC& aContentType );
     
-    TUint CMusicContentPublisher::ExtractItemId( const CLiwGenericParamList& aInParamList );
+    TUint ExtractItemId( const CLiwGenericParamList& aInParamList );
     
     void RemoveL( TInt aDestination );
     

@@ -475,7 +475,7 @@ class CMPXDbMusic :
          * Get the ID of Artist which belongs to the specified Album
 		 * @param aId, the ID of Album
          */
-        TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
+        TUint32 ArtistForAlbumL(const TUint32 aId);
 
         /**
         * Signals the start of a refresh operation

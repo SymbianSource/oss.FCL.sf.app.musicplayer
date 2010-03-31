@@ -14,13 +14,13 @@
             <actions>
                 <action>
                     <trigger name="activate"/>
-                    <event name="MWPublisher/area1_image1(MWTrigger1)"/>
+                    <event name="MWPublisher/music(MWTrigger1)"/>
                 </action>
             </actions>
 
           <image class="area1_images" id="DefaultImage" path="SKIN(270501603 8633)"/>
             <image class="area1_images" id="area1_image1">
-            		<configuration name="content_type" value="area1_image1"/>
+            		<configuration name="content_type" value="music"/>
                 <property class="MWPublisher/area1_image1_data"/>
                 <property class="policy/emptyContent" name="DefaultImage" value="display: block;"/>
                 <property class="policy/Content" name="DefaultImage" value="display: none;"/>
@@ -34,7 +34,7 @@
                 <actions>
                     <action>
                         <trigger name="activate"/>
-                        <event name="MWPublisher/default_text(MWTrigger2)"/>
+                        <event name="MWPublisher/music(MWTrigger2)"/>
                     </action>
                     <action>                    
                         <trigger name="losevisualisation" />
@@ -45,7 +45,7 @@
                 </actions>
     
                 <text id="area2_default_text">
-                		<configuration name="content_type" value="default_text"/>
+                		<configuration name="content_type" value="music"/>
                     <property class="MWPublisher/default_text_data"/>                
                     <property class="policy/emptyContent" name="player_inactive" value="display: none;"/>
                     <property class="policy/emptyContent" name="player_active" value="display: block;"/>
@@ -61,7 +61,7 @@
             <box id="player_active" visualisationaware="true">
                 <box id="textbox">
                     <text id="area2_text1">
-                    		<configuration name="content_type" value="area2_text1"/>
+                    		<configuration name="content_type" value="music"/>
                         <property class="MWPublisher/area2_text1_data"/>
                     </text>
     
@@ -72,7 +72,7 @@
                         <actions>
                             <action>
                                 <trigger name="activate"/>
-                                <event name="MWPublisher/toolbar_b1(TB1Trigger)"/>
+                                <event name="MWPublisher/music(TB1Trigger)"/>
                             </action>
                             <action>
                                 <trigger name="losevisualisation" />
@@ -82,7 +82,7 @@
                             </action>
                         </actions>
                         <image class="toolbarimage" id="toolbarimage1" >
-                        		<configuration name="content_type" value="toolbar_b1"/>
+                        		<configuration name="content_type" value="music"/>
                             <property class="MWPublisher/toolbar_b1_data"/>
                         </image>
                     </box><!--.toolbarbuttonbox-->
@@ -91,7 +91,7 @@
                         <actions>
                             <action>
                                 <trigger name="activate"/>
-                                <event name="MWPublisher/toolbar_b2(TB2Trigger)"/>
+                                <event name="MWPublisher/music(TB2Trigger)"/>
                             </action>
                             <action>
                                 <trigger name="losevisualisation" />
@@ -101,7 +101,7 @@
                             </action>
                         </actions>
                         <image class="toolbarimage" id="toolbarimage2">
-                        		<configuration name="content_type" value="toolbar_b2"/>
+                        		<configuration name="content_type" value="music"/>
                             <property class="MWPublisher/toolbar_b2_data"/>                            
                             <property class="policy/emptyContent"      name="player_active" value="display: none;"/>
 			    									<property class="policy/emptyContent"      name="player_inactive" value="display: block;"/>                                                        
@@ -113,7 +113,7 @@
                         <actions>
                             <action>
                                 <trigger name="activate"/>
-                                <event name="MWPublisher/toolbar_b3(TB3Trigger)"/>
+                                <event name="MWPublisher/music(TB3Trigger)"/>
                             </action>
                             <action>
                                 <trigger name="losevisualisation" />
@@ -123,7 +123,7 @@
                             </action>
                         </actions>
                         <image class="toolbarimage" id="toolbarimage3">
-                        		<configuration name="content_type" value="toolbar_b3"/>
+                        		<configuration name="content_type" value="music"/>
                             <property class="MWPublisher/toolbar_b3_data"/>
                         </image>
                     </box><!--.toolbarbuttonbox-->    

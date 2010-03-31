@@ -66,8 +66,7 @@ RESOURCE CBA r_audioeffects_softkeys_options_change_back
 //
 RESOURCE AVKON_VIEW r_audioeffects_settingslist_view
     {
-    menubar = r_audioeffects_settingslist_menu_bar;  
-    cba = r_audioeffects_softkeys_options_change_back;  
+    cba = R_AVKON_SOFTKEYS_BACK;
     }
 #else
 // ---------------------------------------------------------------------------
@@ -77,8 +76,7 @@ RESOURCE AVKON_VIEW r_audioeffects_settingslist_view
 //
 RESOURCE AVKON_VIEW r_audioeffects_settingslist_view
     {
-    menubar = r_audioeffects_settingslist_menu_bar;  
-    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;  
+    cba = R_AVKON_SOFTKEYS_BACK;
     }
 #endif // __ENABLE_MSK
 
@@ -160,7 +158,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_audioeffects_setting_item_list
             {
             identifier = ELoudnessItem;
             setting_page_resource = r_loudness_setting_page;
-            associated_resource = r_settingslist_hints_popup_setting_texts;
+            associated_resource = r_loudness_settingslist_hints_popup_setting_texts;
             name = qtn_nmp_loudness;
             },
         //stereo widening
@@ -168,7 +166,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_audioeffects_setting_item_list
             {
             identifier = EStereoWideningSettingItem;
             setting_page_resource = r_stereowidening_setting_page;
-            associated_resource = r_settingslist_hints_popup_setting_texts;
+            associated_resource = r_stereowidening_settingslist_hints_popup_setting_texts;
             name = qtn_nmp_stereowidening;
             }        
         };
@@ -219,6 +217,58 @@ RESOURCE AVKON_SETTING_PAGE r_loudness_setting_page
     editor_resource_id = r_settingslist_common_use_popup_setting_list;
     }
 
+// ---------------------------------------------------------------------------
+// r_loudness_settingslist_hints_popup_setting_texts
+// Audio Effects view hints popup setting texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_loudness_settingslist_hints_popup_setting_texts
+    {
+    setting_texts_resource = r_loudness_settingslist_hints_texts;
+    popped_up_texts_resource = r_loudness_settingslist_hints_popup_texts;
+    }
+
+// ---------------------------------------------------------------------------
+// r_loudness_settingslist_hints_texts
+// Audio Effects view hints texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_loudness_settingslist_hints_texts
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 1; 
+            text = qtn_nmp_loudness_on; 
+            },
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 0; 
+            text = qtn_nmp_loudness_off; 
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_loudness_settingslist_hints_popup_texts
+// Audio Effects view hints popup texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_loudness_settingslist_hints_popup_texts
+    {
+    items =
+        {
+        LBUF 
+            { 
+            txt = qtn_nmp_loudness_on;
+            },
+        LBUF 
+            { 
+            txt = qtn_nmp_loudness_off;
+            }
+        };
+    }
   
 // STEREO WIDENING
 
@@ -235,6 +285,59 @@ RESOURCE AVKON_SETTING_PAGE r_stereowidening_setting_page
     }
 
 // ---------------------------------------------------------------------------
+// r_stereowidening_settingslist_hints_popup_setting_texts
+// Audio Effects view hints popup setting texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_stereowidening_settingslist_hints_popup_setting_texts
+    {
+    setting_texts_resource = r_stereowidening_settingslist_hints_texts;
+    popped_up_texts_resource = r_stereowidening_settingslist_hints_popup_texts;
+    }
+
+// ---------------------------------------------------------------------------
+// r_stereowidening_settingslist_hints_texts
+// Audio Effects view hints texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_stereowidening_settingslist_hints_texts
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 1; 
+            text = qtn_nmp_stereowidening_on; 
+            },
+        AVKON_ENUMERATED_TEXT 
+            { 
+            value = 0; 
+            text = qtn_nmp_stereowidening_off; 
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_stereowidening_settingslist_hints_popup_texts
+// Audio Effects view hints popup texts.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_stereowidening_settingslist_hints_popup_texts
+    {
+    items =
+        {
+        LBUF 
+            { 
+            txt = qtn_nmp_stereowidening_on;
+            },
+        LBUF 
+            { 
+            txt = qtn_nmp_stereowidening_off;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
 // r_settingslist_common_use_popup_setting_list
 // Audio Effects view common use popup setting list.
 // ---------------------------------------------------------------------------
@@ -242,60 +345,6 @@ RESOURCE AVKON_SETTING_PAGE r_stereowidening_setting_page
 RESOURCE POPUP_SETTING_LIST r_settingslist_common_use_popup_setting_list
     {
     }
-
-// ---------------------------------------------------------------------------
-// r_settingslist_hints_popup_setting_texts
-// Audio Effects view hints popup setting texts.
-// ---------------------------------------------------------------------------
-//
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_settingslist_hints_popup_setting_texts
-    {
-    setting_texts_resource = r_settingslist_hints_texts;
-    popped_up_texts_resource = r_settingslist_hints_popup_texts;
-    }
-
-// ---------------------------------------------------------------------------
-// r_settingslist_hints_texts
-// Audio Effects view hints texts.
-// ---------------------------------------------------------------------------
-//
-RESOURCE ARRAY r_settingslist_hints_texts
-    {
-    items =
-        {
-        AVKON_ENUMERATED_TEXT 
-            { 
-            value = 1; 
-            text = qtn_nmp_on; 
-            },
-        AVKON_ENUMERATED_TEXT 
-            { 
-            value = 0; 
-            text = qtn_nmp_off; 
-            }
-        };
-    }
-
-// ---------------------------------------------------------------------------
-// r_settingslist_hints_popup_texts
-// Audio Effects view hints popup texts.
-// ---------------------------------------------------------------------------
-//
-RESOURCE ARRAY r_settingslist_hints_popup_texts
-    {
-    items =
-        {
-        LBUF 
-            { 
-            txt = qtn_nmp_on;
-            },
-        LBUF 
-            { 
-            txt = qtn_nmp_off;
-            }
-        };
-    }
-
 
 // BALANCE
 
@@ -390,3 +439,6 @@ RESOURCE TBUF r_audioeffect_balance_right100
     { 
     buf = qtn_nmp_balance_right100; 
     }
+
+// End of file
+

@@ -211,6 +211,23 @@ void CMPXDbCategory::FindAllL(
                 }
 #endif //RD_MPX_COLLECTION_CACHE
             }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+          else if (criterion == KMPXMediaGeneralUri)
+                 {  
+                 TUint32 itemId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
+                       aCriteria.ValueText(KMPXMediaGeneralUri), (iCategory != EMPXGenre)));   
+                   HBufC* critStr = PreProcessStringLC(KCriterionCategoryUniqueId);
+                   MPXDbCommonUtil::AddSqlCriterionL(*criteriaArray, *critStr, itemId);
+             CleanupStack::PopAndDestroy(critStr);
+             }
+        else if (criterion == KMPXMediaGeneralDrive)
+            {
+            const TDesC& drive(aCriteria.ValueText(KMPXMediaGeneralDrive));
+            TDriveUnit driveUnit(drive);
+            MPXDbCommonUtil::AddSqlCriterionL(*criteriaArray, KCriterionAbstractAlbumVolumeId,
+                MPXDbCommonUtil::GetVolIdMatchDriveIdL(iDbManager.Fs(), driveUnit));
+            }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         else
             {
             // ignore attribute
@@ -240,7 +257,8 @@ void CMPXDbCategory::DecrementSongsForCategoryL(
     const TUint32 aId,
     TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages,
-    TBool& aItemExist)
+    TBool& aItemExist,
+    TBool /*aMTPInUse*/)
     {
     MPX_FUNC("CMPXDbCategory::DecrementSongsForCategoryL");
 

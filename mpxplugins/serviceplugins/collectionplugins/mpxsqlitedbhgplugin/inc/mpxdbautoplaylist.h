@@ -139,6 +139,11 @@ class CMPXDbAutoPlaylist :
         HBufC*              iRecentlyPlayedPlaylist;   // recently played playlist name
         HBufC*              iMostPlayedPlaylist;       // most played playlist name
         HBufC*              iRecentlyAddedPlaylist;    // recently added playlist name
+
+        HBufC*              iTitleRecentlyPlayed;   // title of recently played playlist name
+        HBufC*              iTitleMostPlayed;       // title of most played playlist name
+        HBufC*              iTitleRecentlyAdded;    // title of recently added playlist name
+
         CMPXDbManager&      iDbManager;
     };
 

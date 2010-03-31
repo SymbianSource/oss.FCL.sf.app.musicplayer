@@ -78,10 +78,10 @@ RESOURCE MENU_ITEM_ARRAY r_mc_title_items_array
     {
     array_of_menu_items =
         {
-        MENU_ITEM {id = EBrowseAll;      name = LBUF {txt = qtn_mus_title_all_tracks;};},
+        MENU_ITEM {id = EBrowseAll;      name = LBUF {txt = qtn_mus_title_tracks;};},
         MENU_ITEM {id = EBrowsePlaylist; name = LBUF {txt = qtn_mus_title_pls;};},
         MENU_ITEM {id = EBrowseArtist;   name = LBUF {txt = qtn_mus_title_artists;};},
-        MENU_ITEM {id = EBrowseAlbum;    name = LBUF {txt = qtn_mus_title_albums;};},
+        MENU_ITEM {id = EBrowseAlbum;    name = LBUF {txt = qtn_mus_title_artists_and_albums;};},
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU                
         MENU_ITEM {id = EBrowsePodcasts; name = LBUF {txt = qtn_mus_podcasts;};},
 #endif        
@@ -288,5 +288,35 @@ RESOURCE LBUF r_mpx_qtn_mp_title_my_music_menu_nseries
     txt = qtn_mp_title_my_music_menu_nseries;
     }
 #endif //__ENABLE_MUSIC_TEXT_ALIGNMENT
+
+// ---------------------------------------------------------------------------
+// r_mc_title_most_played
+// Title for Most Played item in the playlists menu
+// ---------------------------------------------------------------------------
+//
+RESOURCE LBUF r_mc_title_most_played
+    {
+    txt = qtn_mus_title_most_played;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_title_music_menu
+// Title for Recently Played item in the playlists menu
+// ---------------------------------------------------------------------------
+//
+RESOURCE LBUF r_mc_title_recently_played
+    {
+    txt = qtn_mus_title_recently_played;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_title_music_menu
+// Title for Recently Added item in the playlists menu
+// ---------------------------------------------------------------------------
+//
+RESOURCE LBUF r_mc_title_recently_downloaded
+    {
+    txt = qtn_mus_title_recently_downloaded;
+    }
 
 // End of File

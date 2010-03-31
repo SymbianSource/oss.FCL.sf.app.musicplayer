@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  MPX common playback view implementation
-*  Version     : %version: da1mmcf#41.1.6.1.1.1.10 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: da1mmcf#41.1.6.1.1.1.12 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -38,6 +38,7 @@
 #include "mpxplaybackframeworkdefs.h" // TMPXPlaybackPlayerType
 
 #include "../../../inc/musicplayerbldvariant.hrh"
+#include <tvoutconfig.h>
 
 // FORWARD DECLARATIONS
 class CMPXCommonPlaybackViewContainer;
@@ -612,6 +613,12 @@ protected:
      * Updates the middle (play/pause) toolbar control key icon based on playback state
      */
     IMPORT_C void UpdateToolbar();
+  
+  	/** 
+	 * Launch Metadata Dialog to show the file details
+	 */
+    IMPORT_C virtual void LaunchFileDetailsDialogL();
+  
 protected:
     static TInt DeferredAlbumArtExtractCallback( TAny* aPtr );
 
@@ -760,7 +767,7 @@ private:    // Data
 	TInt iOldPosition; // in seconds
 	TBool iIsTapped;
     TCommandSender iCommandSender;
-    
+    CTvOutConfig* iTvOutConfig;
     TSize iFullScreenImageSize;
     CPeriodic* iTNRequestTimer;
     };

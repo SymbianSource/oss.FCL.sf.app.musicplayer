@@ -1263,7 +1263,33 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
             {
             MPX_PERF_START(CMPXDbPlugin_DoOpenBrowseAlbumL_All);
 
-            iDbHandler->GetAllAlbumsL(aAttrs, aArray);
+            TRAPD(err, iDbHandler->GetAllAlbumsL(aAttrs, aArray) );
+            // in error case, return empty list and append empty id to path 
+            // in order to increase one level 
+            if ( err != KErrNone )
+                {
+                TInt pPath(0);
+                if (aArray->Count())
+                    {
+                    CMPXMedia* pMedia = (*aArray)[0];
+                    if (pMedia->IsSupported(KMPXMediaGeneralValue))
+                        {
+                        pPath = pMedia->ValueTObjectL<TInt>(KMPXMediaGeneralValue);
+                        MPX_ASSERT(pPath);
+                        }                   
+                    }
+
+                RArray<TMPXItemId> ids;
+                CleanupClosePushL(ids);
+            
+                // Append ids to the returned path
+                if (pPath)
+                    {
+                    ((CMPXCollectionPath*)pPath)->AppendL(ids.Array());
+                    }
+                CleanupStack::PopAndDestroy(&ids);
+                }
+            
             SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXAlbum,
                 iMusicLibraryTitles->MdcaPoint(EBrowseAlbum));
 
@@ -2565,6 +2591,13 @@ void CMPXDbPlugin::DoRemoveL(
             mediaId = iDbHandler->GetPlaylistIdMatchingUriL(uri);
             iDbHandler->RemovePlaylistL(mediaId, *fp, *itemChangedMessages);
             }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED            
+        else if (category == EMPXAbstractAlbum )
+            {
+            mediaId = iDbHandler->GetAbstractAlbumIdMatchingUriL(uri);
+            iDbHandler->RemoveAbstractAlbumL(mediaId, *fp, *itemChangedMessages);            
+            }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         else
             {
             // otherwise unable to process this item
@@ -3414,11 +3447,11 @@ TUint32 CMPXDbPlugin::DoAddL(
     CMPXMessageArray* changeMsgAry = CMPXMessageArray::NewL();
     CleanupStack::PushL(changeMsgAry);
 
-	// start a transaction here
-	if (!iDbHandler->InTransaction())
-		{
-		iDbHandler->BeginTransactionL();
-		}
+    // start a transaction here
+    if (!iDbHandler->InTransaction())
+        {
+        iDbHandler->BeginTransactionL();
+        }
 
     // Group of items
     if (aMedia.ValueTObjectL<TMPXGeneralType>(KMPXMediaGeneralType) == EMPXGroup)
@@ -3440,8 +3473,8 @@ TUint32 CMPXDbPlugin::DoAddL(
         itemId = DoAddItemL(aMedia, *changeMsgAry);
         }
 
-	// end transaction here.
-	iDbHandler->EndTransactionL(KErrNone);
+    // end transaction here.
+    iDbHandler->EndTransactionL(KErrNone);
 
     iActiveTask->SetVisibleChange(CMPXDbActiveTask::EAllVisible);
     DoHandleChangeL(changeMsgAry);
@@ -3494,7 +3527,31 @@ TUint32 CMPXDbPlugin::DoAddItemL(
                 }
             }
             break;
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+       case EMPXAbstractAlbum:
+            {
+            if (aMedia.IsSupported(KMPXMediaGeneralUri))
+                { 
+                   
+                itemId = iDbHandler->AddAbstractAlbumL(aMedia, &aMessageArray);
+            
+                if ( aMedia.IsSupported(KMPXMediaArrayContents))
+                    {
+                    //need to update songs information to music table           
+                    CMPXMediaArray* array = aMedia.Value<CMPXMediaArray>(KMPXMediaArrayContents);                        
+                    if (array->Count())            
+                        {                  
+                        iDbHandler->UpdateAbstractAlbumSongsL(aMedia, aMessageArray);
+                        }
+                    }
+                }
+            else
+                {
+                User::Leave(KErrArgument);
+                }
+            }
+            break;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         case EMPXSong:
             {
             // For the use case of adding thousands of songs at once,
@@ -3660,7 +3717,13 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbPlugin::DoSetItemL(
             visibleChange = CMPXDbActiveTask::ESingleVisible;
             }
             break;
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        case EMPXAbstractAlbum:
+            {
+            visibleChange = iDbHandler->UpdateAbstractAlbumSongsL(aMedia, aMessageArray);
+            }
+            break;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         case EMPXSong:
             {
             // a list of changed messages as a result of the song being updated
@@ -4309,13 +4372,13 @@ void CMPXDbPlugin::SetAttributesL(
                 break;
                 }
             case EBrowseAlbum:
-            	{
+                {
 
                 aAttrs.AppendL( TMPXAttribute(KMPXMediaIdMusic,
                     EMPXMediaMusicArtist | EMPXMediaMusicAlbum | EMPXMediaMusicAlbumArtFileName ) );
                 aSupportedIds.AppendL( KMPXMediaIdMusic );
                 break;
-				}
+                }
             case EBrowsePlaylist:
             case EBrowseGenre:
             case EBrowseComposer:

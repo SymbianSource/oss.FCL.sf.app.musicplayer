@@ -65,8 +65,6 @@ namespace TBK
     }
 
 _LIT( KEmpty, "" );
-_LIT( KNowPlaying, "LOC:NOW PLAYING" );
-_LIT( KLastPlayed, "LOC:LAST PLAYED" );
 
 
 _LIT( KMIF, "z:\\resource\\apps\\musichomescreenicons.mif");
@@ -80,7 +78,6 @@ _LIT8( KPBCommand, "command" );
 //for music player action handler - message to music player
 _LIT( KactionMessageToMusicPlayer, "MessageToMusicPlayer" );
 _LIT( KGoToNowPlaying, "GoToNowPlaying" );
-_LIT( KGoToLastPlayed, "GoToLastPlayed" );
 _LIT( KGoToLastPlayedMinimized, "GoToLastPlayedMinimized" );
 _LIT( KGoToAlbumView, "GoToAlbumView" );
 
@@ -307,7 +304,7 @@ void CMCPMusicPlayer::InstallGoToNowPlayingL(
 // ---------------------------------------------------------------------------
 //
 void CMCPMusicPlayer::InstallGoToLastPlayedL(
-        TMCPTriggerDestination aDestination, TBool aMinimized )
+        TMCPTriggerDestination aDestination )
     {
     MPX_DEBUG1("CMCPMusicPlayer::InstallGoToLastPlayedL <---");
     CLiwDefaultMap* mapTrigger = CLiwDefaultMap::NewLC();
@@ -315,14 +312,7 @@ void CMCPMusicPlayer::InstallGoToLastPlayedL(
     
     mapTrigger->InsertL( KPluginUid, TLiwVariant( TUid::Uid( 0x10207C16 ) ) );
     mapData->InsertL( KType, TLiwVariant( KactionMessageToMusicPlayer ) );
-    if (aMinimized)
-        {
-        mapData->InsertL( KMessage, TLiwVariant( KGoToLastPlayedMinimized ) );
-        }
-    else
-        {
-        mapData->InsertL( KMessage, TLiwVariant( KGoToLastPlayed ) );
-        }
+    mapData->InsertL( KMessage, TLiwVariant( KGoToLastPlayedMinimized ) );
     mapTrigger->InsertL( KData , TLiwVariant( mapData ) );
 
     iMHObserver->PublishActionL( this, aDestination, mapTrigger );
@@ -475,7 +465,7 @@ void CMCPMusicPlayer::UpdateToolBarL(TUint aToolBarState)
             iMHObserver->PublishImageL( this, EMusicWidgetToolbarB2, iconId,
                     KMIF, EMbmMusichomescreeniconsQgn_prop_image_tb_play2, 
                     EMbmMusichomescreeniconsQgn_prop_image_tb_play2_mask);
-            InstallGoToLastPlayedL(EMusicWidgetTB2Trigger, ETrue); 
+            InstallGoToLastPlayedL(EMusicWidgetTB2Trigger); 
             iToolBarState |= TBK::KPlay_last_played;
             MPX_DEBUG1("CMCPMusicPlayer::UpdateToolBarL KPlay_last_played");
             }
@@ -570,19 +560,7 @@ void CMCPMusicPlayer::ResetL()
     InstallEmptyActionL(EMusicWidgetTB2Trigger);
     InstallEmptyActionL(EMusicWidgetTB3Trigger);
     InstallGoToAlbumL(EMusicWidgetTrigger2);
-
     
-    //Reset the music menu info
-    InstallEmptyActionL(EMusicMenuMusicInfoTrigger);
-    iMHObserver->PublishTextL( this, EMusicMenuMusicInfoLine1, 
-            KLastPlayed );
-    iMHObserver->PublishTextL( this, EMusicMenuMusicInfoLine2, 
-            KEmpty );
-    iMHObserver->PublishImageL( this, EMusicMenuMusicInfoImage1,
-        KAknsIIDQgnIndiMupDefaultAlbum, 
-        KMIF,
-        EMbmMusichomescreeniconsQgn_indi_mup_default_album,
-        EMbmMusichomescreeniconsQgn_indi_mup_default_album_mask); 
     MPX_DEBUG1("CMCPMusicPlayer::ResetL --->");
     }
 
@@ -612,7 +590,7 @@ void CMCPMusicPlayer::ActivateL()
     if ( iPNSMonitor )
         {
         delete iPNSMonitor;
-        iFileMonitor = NULL;
+        iPNSMonitor = NULL;
         MPX_DEBUG1("CMCPMusicPlayer::ActivateL pns monitor deleted");
         }
     iPNSMonitor = CPNSMonitor::NewL(*this);
@@ -657,9 +635,6 @@ void CMCPMusicPlayer::ActivateL()
         
         iMHObserver->PublishTextL( this, EMusicWidgetDefaultText, KEmpty );
         InstallGoToNowPlayingL(EMusicWidgetTrigger1);
-        InstallGoToLastPlayedL(EMusicMenuMusicInfoTrigger, EFalse);
-        iMHObserver->PublishTextL(this, EMusicMenuMusicInfoLine1, 
-                 KNowPlaying);
         DoUpdateTrackInfoL(iEngine->TitleL(), iEngine->Artist());
         iToolBarState = 0;
         DoUpdatePlayerStateL( iEngine->PlayerState() );
@@ -735,8 +710,6 @@ void CMCPMusicPlayer::DoUpdateTrackInfoL(const TDesC& aTitle, const TDesC& aArti
                 nowPlayingForMMPtr.Append(aArtist);
                 }            
             iMHObserver->PublishTextL( this,EMusicWidgetText1, *nowPlayingForMM );
-            iMHObserver->PublishTextL(this, EMusicMenuMusicInfoLine2,
-                    *nowPlayingForMM);
             CleanupStack::PopAndDestroy( nowPlayingForMM );
             MPX_DEBUG1("CMCPMusicPlayer::DoUpdatePlayerStateL deliting file monitor");
             if (iFileMonitor)
@@ -875,15 +848,9 @@ void CMCPMusicPlayer::DoUpdateAlbumArtL( CFbsBitmap* aBitmap )
             {
             iMHObserver->PublishImageL(this,EMusicWidgetImage1,handle);
             }
-        iMHObserver->PublishImageL( this, EMusicMenuMusicInfoImage1, 
-                handle );
         }
     else
         {
-        iMHObserver->PublishImageL( this, EMusicMenuMusicInfoImage1,
-                    KAknsIIDQgnIndiMupDefaultAlbum, 
-                    KMIF, EMbmMusichomescreeniconsQgn_indi_mup_default_album, 
-                    EMbmMusichomescreeniconsQgn_indi_mup_default_album_mask); 
         iMHObserver->PublishImageL( this, EMusicWidgetImage1,
                     KAknsIIDQgnIndiMupDefaultAlbum, 
                     KMIF, EMbmMusichomescreeniconsQgn_indi_mup_default_album, 
@@ -958,10 +925,6 @@ void CMCPMusicPlayer::DoHandleSkinChangedL()
         }
     else
         {
-        iMHObserver->PublishImageL( this, EMusicMenuMusicInfoImage1,
-                    KAknsIIDQgnIndiMupDefaultAlbum, 
-                    KMIF, EMbmMusichomescreeniconsQgn_indi_mup_default_album, 
-                    EMbmMusichomescreeniconsQgn_indi_mup_default_album_mask); 
         iMHObserver->PublishImageL( this, EMusicWidgetImage1,
                     KAknsIIDQgnIndiMupDefaultAlbum, 
                     KMIF, EMbmMusichomescreeniconsQgn_indi_mup_default_album, 
@@ -1083,6 +1046,11 @@ void CMCPMusicPlayer::AlbumArtChanged( CFbsBitmap* aBitmap )
     MPX_DEBUG1("CMCPMusicPlayer::AlbumArtChanged <---");
     if (!iActive)
         {
+        if (iCachedArtBitmap) 
+            {
+            MPX_DEBUG2("CMCPMusicPlayer::AlbumArtChanged dropping bitmap %x", iCachedArtBitmap);
+            delete iCachedArtBitmap;
+            } 
         iCachedArtBitmap = aBitmap;
         iArtCached = ETrue;
         }
@@ -1149,9 +1117,6 @@ void CMCPMusicPlayer::HandleApplicationClosedL(TExitType aReason)
         if (IsOKToPublishData() )
             {
             iMHObserver->PublishTextL( this, EMusicWidgetDefaultText, KEmpty );
-            InstallGoToLastPlayedL(EMusicMenuMusicInfoTrigger, EFalse);       
-            iMHObserver->PublishTextL(this, EMusicMenuMusicInfoLine1,
-                                KLastPlayed);     
             DoUpdateTrackInfoL(iEngine->TitleL(), iEngine->Artist());
             DoUpdateAlbumArtL(iArtCached ? iCachedArtBitmap : iArtBitmap);
             }
@@ -1222,10 +1187,6 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
         UpdateToolBarL( TBK::KSkeep_L_dimmed |
                 TBK::KPlay_dimmed |
                 TBK::KSkeep_R_dimmed );
-        if ( IsOKToPublishData() )
-            {
-            InstallGoToAlbumL(EMusicMenuMusicInfoTrigger);
-            }
         }
     else if ( event == TMPXCollectionMessage::EBroadcastEvent
             && ( type == EMcMsgUSBMassStorageEnd || 
@@ -1240,9 +1201,6 @@ void CMCPMusicPlayer::DoHandleGeneralMessageL(const CMPXMessage& aMsg)
             {
             iMHObserver->PublishTextL( this, EMusicWidgetDefaultText,
                     KEmpty );
-            InstallGoToLastPlayedL( EMusicMenuMusicInfoTrigger, ETrue );
-            iMHObserver->PublishTextL( this, EMusicMenuMusicInfoLine1,
-                    KLastPlayed );
             DoUpdateTrackInfoL( iEngine->TitleL(), iEngine->Artist() );
             DoUpdateAlbumArtL( iArtCached ? iCachedArtBitmap : iArtBitmap );
             }

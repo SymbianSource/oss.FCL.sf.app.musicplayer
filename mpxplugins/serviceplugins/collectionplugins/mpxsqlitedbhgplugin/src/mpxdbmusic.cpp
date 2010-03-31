@@ -52,6 +52,10 @@ const TInt KUnknownAlbumID = 1770790356;
 const TInt KColUniqueID = 0;
 // URI column in Uris requests
 const TInt KColUri = 1;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT( KAbstractAlbumExt, ".alb" );
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
 
 // ============================ MEMBER FUNCTIONS ==============================
 
@@ -175,6 +179,14 @@ TBool CMPXDbMusic::DoAddSongL(
     MPXDbCommonUtil::AppendValueL(*fields, *values, KMCMusicTimeAdded, *timeAdded);
     CleanupStack::PopAndDestroy(timeAdded);
 
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    //update ContainEmbeddedArt
+    const TDesC& albumArtFilename = aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen);
+    if (albumArtFilename.Length() > 0)
+        {
+        MPXDbCommonUtil::AppendValueL(*fields, *values, KMCMusicContainEmbeddedArt, 1);
+        }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     // process the media parameter and construct the fields and values array
     TBool visible(GenerateMusicFieldsValuesL(aSongId, aMedia, aItemChangedMessages,
         NULL, *fields, *values, aDrive));
@@ -242,11 +254,11 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::DoUpdateSongL(
           recordset);
 
         // Update Album table
-		if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
-			{
-			TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
-			iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
-			}
+        if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
+            {
+            TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
+            iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
+            }
 
         // Update Artist table
         if ( aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) )
@@ -423,6 +435,9 @@ HBufC* CMPXDbMusic::GetSongInfoL(
     TUint32& aAlbumId,
     TUint32& aGenreId,
     TUint32& aComposerId,
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    TUint32& aAbstractAlbumId,
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     TInt& aDriveId)
     {
     MPX_FUNC("CMPXDbMusic::GetSongInfoL");
@@ -441,6 +456,9 @@ HBufC* CMPXDbMusic::GetSongInfoL(
     aAlbumId = recordset.ColumnInt64(EMusicAlbum);
     aGenreId = recordset.ColumnInt64(EMusicGenre);
     aComposerId = recordset.ColumnInt64(EMusicComposer);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    aAbstractAlbumId = recordset.ColumnInt64(EMusicAbstractAlbum);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     HBufC* uri = ConstructUriL(recordset);
 
     CleanupStack::PopAndDestroy(&recordset);
@@ -788,6 +806,22 @@ void CMPXDbMusic::GetSongsForComposerL(
         aComposerId);
     }
 
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+// ----------------------------------------------------------------------------
+// CMPXDbMusic::GetAllSongsForAbstractAlbumL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbMusic::GetAllSongsForAbstractAlbumL(
+    TInt aDrive,
+    TInt aAbstractAlbumId,
+    const TArray<TMPXAttribute>& aAttrs,
+    CMPXMediaArray& aMediaArray)
+    {
+    MPX_FUNC("CMPXDbMusic::GetAllSongsL");
+    ExecuteMediaQueryL(aDrive, aAttrs, aMediaArray, KQueryMusicGetSongsForAbstractAlbum(), aAbstractAlbumId);
+    }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
 // ----------------------------------------------------------------------------
 // CMPXDbMusic::AllSongsDurationL
 // ----------------------------------------------------------------------------
@@ -1131,11 +1165,11 @@ void CMPXDbMusic::UpdateMediaGeneralL(
             {
             TUint32 pListUId(aMusicTable.ColumnInt64(35));
             aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, TMPXItemId(pListUId, songId));
-        	}
+            }
         else
-        	{
-        	aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, songId);
-        	}
+            {
+            aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, songId);
+            }
         MPX_DEBUG2("    SongId[%d]", songId);
         }
     // FIX ME temporary always fetch URI
@@ -1190,18 +1224,18 @@ void CMPXDbMusic::UpdateMediaGeneralL(
         MPX_DEBUG2("    Title[%S]", &title);
         }
     if ( aAttrId & EMPXMediaGeneralDate)
-		{
-		MPX_DEBUG1("    EMPXMediaGeneralDate");
-		const TDesC& dateStr(MPXDbCommonUtil::GetColumnTextL (aMusicTable,
-				EMusicTimeAdded));
-		if ( dateStr.Compare (KNullDesC)!= 0)
-			{
-			TTime dateTime(MPXDbCommonUtil::DesToTTimeL (dateStr));
-			aMedia.SetTObjectValueL<TInt64> (KMPXMediaGeneralDate,
-					dateTime.Int64 ());
-			}
-		MPX_DEBUG2("    Date[%S]", &dateStr);
-		}
+        {
+        MPX_DEBUG1("    EMPXMediaGeneralDate");
+        const TDesC& dateStr(MPXDbCommonUtil::GetColumnTextL (aMusicTable,
+                EMusicTimeAdded));
+        if ( dateStr.Compare (KNullDesC)!= 0)
+            {
+            TTime dateTime(MPXDbCommonUtil::DesToTTimeL (dateStr));
+            aMedia.SetTObjectValueL<TInt64> (KMPXMediaGeneralDate,
+                    dateTime.Int64 ());
+            }
+        MPX_DEBUG2("    Date[%S]", &dateStr);
+        }
     if (aAttrId & EMPXMediaGeneralComment)
         {
         MPX_DEBUG1("    EMPXMediaGeneralComment");
@@ -1331,18 +1365,18 @@ void CMPXDbMusic::UpdateMediaMusicL(
         MPX_DEBUG2("    Album[%S]", &album);
         }
     if ( aAttrId & EMPXMediaMusicYear)
-		{
-		const TDesC& dateStr(MPXDbCommonUtil::GetColumnTextL (aMusicTable,
-				EMusicReleaseDate));
-		if ( dateStr.Compare (KNullDesC)!= 0)
-			{
-			TTime dateTime(MPXDbCommonUtil::DesToTTimeL (dateStr));
-			aMedia.SetTObjectValueL<TInt64> (KMPXMediaMusicYear,
-					dateTime.Int64 ());
-			MPX_DEBUG2("    Year[%d]", dateTime.Int64());
-			}
-		MPX_DEBUG2("    ReleaseDate[%S]", &dateStr);
-		}
+        {
+        const TDesC& dateStr(MPXDbCommonUtil::GetColumnTextL (aMusicTable,
+                EMusicReleaseDate));
+        if ( dateStr.Compare (KNullDesC)!= 0)
+            {
+            TTime dateTime(MPXDbCommonUtil::DesToTTimeL (dateStr));
+            aMedia.SetTObjectValueL<TInt64> (KMPXMediaMusicYear,
+                    dateTime.Int64 ());
+            MPX_DEBUG2("    Year[%d]", dateTime.Int64());
+            }
+        MPX_DEBUG2("    ReleaseDate[%S]", &dateStr);
+        }
     if (aAttrId & EMPXMediaMusicAlbumTrack)
         {
         TInt32 track(aMusicTable.ColumnInt(EMusicAlbumTrack));
@@ -1384,20 +1418,51 @@ void CMPXDbMusic::UpdateMediaMusicL(
         // Always set original album art to be file path
         // Maybe add a new column to db for future if services like rhapsody pushes jpgs to us
         if (aMedia.IsSupported(KMPXMediaGeneralUri))
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+            {    
+            TUint32 abstractAlbumId(aMusicTable.ColumnInt64(EMusicAbstractAlbum));
+            TInt containEmbeddedArt = aMusicTable.ColumnInt( EMusicContainEmbeddedArt);
+            //embedded with art, no art
+            if (containEmbeddedArt || (!containEmbeddedArt && !abstractAlbumId)) //embedded with art case, no art
+                {
+                const TDesC& art(aMedia.ValueText(KMPXMediaGeneralUri));
+                aMedia.SetTextValueL(KMPXMediaMusicOriginalAlbumArtFileName, art);
+                MPX_DEBUG2("    Music Original Album Art FullPath[%S]", &art);
+                }
+            //for abstractalbum case, originalAlbumArt from AbstractAlbum table
+            else if ( abstractAlbumId )
+                {
+                HBufC* art = iObserver.HandleGetAlbumNameFromIdL(abstractAlbumId);
+                CleanupStack::PushL(art);
+                aMedia.SetTextValueL(KMPXMediaMusicOriginalAlbumArtFileName, *art);
+                MPX_DEBUG2("    Music Original Album Art FullPath[%S]", art);
+                CleanupStack::PopAndDestroy(art);
+                }
+            }
+#else
             {
             const TDesC& uri(aMedia.ValueText(KMPXMediaGeneralUri));
             aMedia.SetTextValueL(KMPXMediaMusicOriginalAlbumArtFileName, uri);
             MPX_DEBUG2("    Music Original Album Art FullPath[%S]", &uri);
             }
-        else
-            {
-            HBufC* fullPath = ConstructUriL(aMusicTable);
-            CleanupStack::PushL(fullPath);
-            aMedia.SetTextValueL(KMPXMediaMusicOriginalAlbumArtFileName, *fullPath);
-            MPX_DEBUG2("    Music Original Album Art FullPath[%S]", fullPath);
-            CleanupStack::PopAndDestroy(fullPath);
-            }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+       else
+           {
+           HBufC* fullPath = ConstructUriL(aMusicTable);
+           CleanupStack::PushL(fullPath);
+           aMedia.SetTextValueL(KMPXMediaMusicOriginalAlbumArtFileName, *fullPath);
+           MPX_DEBUG2("    Music Original Album Art FullPath[%S]", fullPath);
+           CleanupStack::PopAndDestroy(fullPath);
+           }
+      }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED    
+     if (aAttrId & EMPXMediaMusicAlbumArtist)
+        {
+        TPtrC albumartist(MPXDbCommonUtil::GetColumnTextL(aMusicTable, EMusicAlbumArtist));
+        aMedia.SetTextValueL(KMPXMediaMusicAlbumArtist, albumartist);
+        MPX_DEBUG2("    Music AlbumArtist[%S]", &albumartist);
         }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     }
 
 // ----------------------------------------------------------------------------
@@ -1800,14 +1865,30 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 
                 if (attributeId & EMPXMediaMusicAlbumArtFileName)
                     {
-                    const TDesC& albumArtFilename = aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen);
-                    if (!aMusicTable || (albumArtFilename != MPXDbCommonUtil::GetColumnTextL(*aMusicTable, EMusicArt)))
-                        {
-                        MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicArt, albumArtFilename);
-                        visibleChange = CMPXDbActiveTask::EAllVisible;
-                        metaDataModified = ETrue;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED     
+                    TInt containEmbeddedArt(0);                   
+                    if (aMusicTable )
+                        {                        
+                        containEmbeddedArt = aMusicTable->ColumnInt(EMusicContainEmbeddedArt);                    
                         }
-
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+                    const TDesC& albumArtFilename = aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED 
+                    TParsePtrC parse(albumArtFilename);
+                    TPtrC ext(parse.Ext());
+                          
+                    if ( ((ext.CompareF(KAbstractAlbumExt)== 0) && !containEmbeddedArt) || (ext.CompareF(KAbstractAlbumExt)!= 0))                    
+                        {
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+                        if (!aMusicTable || (albumArtFilename != MPXDbCommonUtil::GetColumnTextL(*aMusicTable, EMusicArt)))
+                            {
+                            MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicArt, albumArtFilename);
+                            visibleChange = CMPXDbActiveTask::EAllVisible;
+                            metaDataModified = ETrue;              
+                            }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED                                       
+                        }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED                                         
                     MPX_DEBUG2("    Album Art Filename[%S]", &albumArtFilename);
                     }
 
@@ -1822,6 +1903,20 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 
                     MPX_DEBUG2("    Music URL[%S]", &url);
                     }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED                    
+               if (attributeId & EMPXMediaMusicAlbumArtist)
+                    {
+                    const TDesC& albumartist = aMedia.ValueText(KMPXMediaMusicAlbumArtist);
+                    TPtrC truncatedAlbumartist(albumartist.Left(KMCMaxTextLen));
+                    
+                    if (!aMusicTable || (truncatedAlbumartist.Compare(MPXDbCommonUtil::GetColumnTextL(*aMusicTable, EMusicAlbumArtist)) != 0))
+                        {
+                        MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAlbumArtist, truncatedAlbumartist);
+                        visibleChange = CMPXDbActiveTask::EAllVisible;
+                        metaDataModified = ETrue;
+                        }                
+                   }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED              
                 }
                 break;
 
@@ -1935,12 +2030,18 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
     TUint32 albumId(0);
     TUint32 genreId(0);
     TUint32 composerId(0);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    TUint32 abstractAlbumId(0);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     if (aMusicTable)
         {
         artistId = aMusicTable->ColumnInt64(EMusicArtist);
         albumId = aMusicTable->ColumnInt64(EMusicAlbum);
         genreId = aMusicTable->ColumnInt64(EMusicGenre);
         composerId = aMusicTable->ColumnInt64(EMusicComposer);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        abstractAlbumId = aMusicTable->ColumnInt64(EMusicAbstractAlbum);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED        
         }
 
     // update the artist field
@@ -1956,8 +2057,8 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
         }
 
     // update the album field
-	if (UpdateCategoryFieldL(EMPXAlbum, aMedia, KMPXMediaMusicAlbum, albumId,
-		aDrive, aItemChangedMessages, id, artistIdForAlbum))
+    if (UpdateCategoryFieldL(EMPXAlbum, aMedia, KMPXMediaMusicAlbum, albumId,
+        aDrive, aItemChangedMessages, id, artistIdForAlbum))
         {
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAlbum, id);
         metaDataModified = (aMusicTable != NULL);
@@ -1997,7 +2098,24 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
         metaDataModified = (aMusicTable != NULL);
         visibleChange = CMPXDbActiveTask::EAllVisible;
         }
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    if ( aMedia.IsSupported (KMPXMediaMusicAlbumArtFileName))
+        {
+        const TDesC& albumArtFilename = aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen);            
+        TParsePtrC parse( albumArtFilename );
+        TPtrC ext( parse.Ext() );
+        if (ext.CompareF(KAbstractAlbumExt)== 0)   
+            {
+            if (UpdateCategoryFieldL(EMPXAbstractAlbum, aMedia, KMPXMediaMusicAlbumArtFileName, abstractAlbumId,
+                aDrive, aItemChangedMessages, id))
+                {
+                MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAbstractAlbum, id);
+                metaDataModified = (aMusicTable != NULL);
+                visibleChange = CMPXDbActiveTask::EAllVisible;
+                }
+            }                       
+        }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 #if defined (__MTP_PROTOCOL_SUPPORT)
     // Set Mod bit to ETrue if metadata has been updated and caller hasn't explicitly
     // set/reset it
@@ -2282,10 +2400,34 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                 {
                 // only add if the ID changed,
                 // otherwise the song was updated but the artist name was not
-
-                // ignore the return value
-                iObserver.AddCategoryItemL(aCategory, name, aDriveId,
-                    aItemChangedMessages, itemAdded);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+                if(aCategory == EMPXAbstractAlbum)
+                    {
+                    if (aMedia.ValueTObjectL<TMPXGeneralCategory>(KMPXMediaGeneralCategory) == EMPXSong )
+                        {
+                        iObserver.AddCategoryItemL(aCategory, name, aDriveId,
+                            aItemChangedMessages, itemAdded, KNullDesC, KNullDesC);                                 
+                        }
+                    else
+                        {         
+                        TPtrC albumartist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
+                        //get AlbumArt, Genre for AbstractAlbum
+                        MPX_DEBUG2("    Music albumartist[%S]", &albumartist);            
+                        TPtrC genre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));                               
+                        MPX_DEBUG2("    Music Genre[%S]", &genre);    
+                           
+                        // ignore the return value
+                        iObserver.AddCategoryItemL(aCategory, name, aDriveId,
+                          aItemChangedMessages, itemAdded, albumartist, genre);    
+                        }
+                    }
+                else
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+                    {
+                    // ignore the return value
+                    iObserver.AddCategoryItemL(aCategory, name, aDriveId,
+                        aItemChangedMessages, itemAdded);
+                    }
                 updated = ETrue;
                 }
             }
@@ -2296,14 +2438,35 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                 (aCategory != EMPXGenre));
             if (!aOldId || (aOldId != aItemId))
                 {
-                // ignore the return value
-                iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
-                    aItemChangedMessages, itemAdded);
-                updated = ETrue;
-                }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED                                        
+                if(aCategory == EMPXAbstractAlbum)
+                    {              
+                    //get AlbumArt, Genre for AbstractAlbum
+                    TPtrC albumartist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
+                    MPX_DEBUG2("    Music albumartist[%S]", &albumartist);
+                    TPtrC genre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));
+                    MPX_DEBUG2("    Music Genre[%S]", &genre);    
+                                           
+                    // ignore the return value
+                    iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
+                    aItemChangedMessages, itemAdded, albumartist, genre);      
+                    }
+               else
+#endif // ABSTRACTAUDIOALBUM_INCLUDED        
+                      {              
+                      // ignore the return value
+                      iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
+                            aItemChangedMessages, itemAdded);
+                      }
+                 updated = ETrue;
+                 }
             }
-
-        if (aOldId && (aOldId != aItemId))
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+            //no need to delete old item for abstractalbum
+            if (aOldId && (aOldId != aItemId) && (aCategory != EMPXAbstractAlbum))
+#else
+            if (aOldId && (aOldId != aItemId))
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
             {
             iObserver.DeleteSongForCategoryL(aCategory, aOldId, aDriveId,
                 aItemChangedMessages, itemNotRemoved);
@@ -2401,13 +2564,13 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                 {
                 // only add if the ID changed,
                 // otherwise the song was updated but the artist name was not
-				TPtrC art(KNullDesC);
-				if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
-					{
-					art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
-					}
+                TPtrC art(KNullDesC);
+                if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
+                    {
+                    art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
+                    }
 
-				iObserver.AddCategoryItemL(aCategory, name, aArtistId, art, aDriveId, aItemChangedMessages, itemAdded);
+                iObserver.AddCategoryItemL(aCategory, name, aArtistId, art, aDriveId, aItemChangedMessages, itemAdded);
                 updated = ETrue;
                 }
             }
@@ -2565,7 +2728,11 @@ TBool CMPXDbMusic::IsSupported(
         aMedia.IsSupported(KMPXMediaAudioNumberOfChannels) ||
         aMedia.IsSupported(KMPXMediaDrmType) ||
         aMedia.IsSupported(KMPXMediaDrmRightsStatus) ||
-        aMedia.IsSupported(KMPXMediaMTPDrmStatus);
+        aMedia.IsSupported(KMPXMediaMTPDrmStatus)
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED        
+        ||aMedia.IsSupported(KMPXMediaMusicAlbumArtist)
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+        ;
     }
 
 // End of File

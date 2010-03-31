@@ -121,7 +121,6 @@ HR, ET, FA, CF, EL, HE, IN, LV, LT, MS, BP, RO, SR, LS, UK, UR, VI, BA, GL, 129,
 ;"\epoc32\release\armv5\urel\camesedrmhandler.dll"              -"!:\sys\bin\camesedrmhandler.dll"
 
 "\epoc32\release\armv5\urel\mcpmusicplayer.dll"                	-"!:\sys\bin\mcpmusicplayer.dll"
-"\epoc32\release\armv5\urel\mpxcollectionpublisher.dll"        	-"!:\sys\bin\mpxcollectionpublisher.dll"
 "\epoc32\release\armv5\urel\musiccontentpublisher.dll"         	-"!:\sys\bin\musiccontentpublisher.dll"
 "\epoc32\release\armv5\urel\musicplayeractionhandlerplugin.dll" -"!:\sys\bin\musicplayeractionhandlerplugin.dll"
 "\epoc32\release\armv5\urel\dummyMusic.dll"                	-"!:\sys\bin\dummyMusic.dll"
@@ -162,10 +161,8 @@ HR, ET, FA, CF, EL, HE, IN, LV, LT, MS, BP, RO, SR, LS, UK, UR, VI, BA, GL, 129,
 "\epoc32\data\Z\resource\apps\mpx_aif.mif"                  	-"!:\resource\apps\mpx_aif.mif"
 "\epoc32\data\Z\resource\apps\mpxpodcastcollectionview.mif"     -"!:\resource\apps\mpxpodcastcollectionview.mif"
 
-; Music Suite Matrix Menu
+; Music Homescreen
 "\epoc32\include\musichomescreen.rsg" -"!:\resource\apps\musichomescreen.rsg"
-"\epoc32\data\z\private\101F4CD2\import\suites\musicsuite\suite.xml" -"!:\private\101F4CD2\import\suites\musicsuite\suite.xml"
-"\epoc32\data\z\private\101F4CD2\import\suites\musicsuite\music_matrix_items.xml" -"!:\private\101F4CD2\import\suites\musicsuite\music_matrix_items.xml" 
 
 ; cenrep files
 "101ffcd0.cre"           -"!:\private\10202BE9\101ffcd0.cre"
@@ -202,7 +199,6 @@ HR, ET, FA, CF, EL, HE, IN, LV, LT, MS, BP, RO, SR, LS, UK, UR, VI, BA, GL, 129,
 "\epoc32\data\Z\resource\plugins\mpxprogressdownload.rsc"      		-"!:\resource\plugins\mpxprogressdownload.rsc"
 "\epoc32\data\Z\resource\plugins\mpxprogressdownloadsb.rsc"      	-"!:\resource\plugins\mpxprogressdownloadsb.rsc"
 "\epoc32\data\Z\resource\plugins\mcpmusicplayer.rsc"      		-"!:\resource\apps\mcpmusicplayer.rsc"
-"\epoc32\data\Z\resource\plugins\mpxcollectionpublisher.rsc"      	-"!:\resource\apps\mpxcollectionpublisher.rsc"
 "\epoc32\data\Z\resource\plugins\musiccontentpublisher.rsc"      	-"!:\resource\apps\musiccontentpublisher.rsc"
 "\epoc32\data\Z\resource\plugins\mpxscreensaverplugin.rsc"  		-"!:\resource\plugins\mpxscreensaverplugin.rsc"
 "\epoc32\data\Z\private\10003a3f\apps\mpx_reg.rsc"          		-"!:\private\10003a3f\import\apps\mpx_reg.rsc"

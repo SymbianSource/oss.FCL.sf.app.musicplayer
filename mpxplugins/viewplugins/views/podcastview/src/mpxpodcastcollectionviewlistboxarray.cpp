@@ -479,7 +479,7 @@ void CMPXPodcastCollectionViewListBoxArray::AppendMediaL( const CMPXMedia& aMedi
             if ( origMedia->ValueText(KMPXMediaGeneralTitle ).Length() == 0 )
                 {
                 HBufC* text = StringLoader::LoadLC(
-                    R_MPX_QTN_NMP_UNKNOWN_TITLE );
+                    R_MPX_PODCAST_UNKNOWN );
                 origMedia->SetTextValueL(KMPXMediaGeneralTitle,
                     *text );
                 CleanupStack::PopAndDestroy( text );
@@ -493,7 +493,7 @@ void CMPXPodcastCollectionViewListBoxArray::AppendMediaL( const CMPXMedia& aMedi
             if ( iContainerMedia->ValueText(KMPXMediaGeneralTitle).Length() == 0 )
                 {
                 HBufC* text = StringLoader::LoadLC(
-                    R_MPX_QTN_NMP_UNKNOWN_TITLE );
+                    R_MPX_TITLE_UNKNOWN_PODCAST );
                 iContainerMedia->SetTextValueL(KMPXMediaGeneralTitle,
                     *text );
                 CleanupStack::PopAndDestroy( text );

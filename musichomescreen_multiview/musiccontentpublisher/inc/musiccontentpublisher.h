@@ -25,8 +25,9 @@
 #include <e32hashtab.h>
 #include <AknsSrvClient.h>
 
+#include "musiccontentmap.h"
+
 class MLiwInterface;
-class CLiwGenericParamList;
 class CPluginManager;
 class CFbsBitmap;
 class CCoeEnv;
@@ -39,7 +40,7 @@ struct TMCPDestinationItem
     const TInt id;
     const wchar_t* type;
     const char* dataKey;
-    const wchar_t* content;
+    const char* maskKey;
     };
 
 struct TMCPImageDestinationInfoItem
@@ -56,47 +57,35 @@ struct TBmpMsk
     CFbsBitmap *mask;
     };
 
-struct TMyBufferItem
-    {
-    TAny* buf;
-    TInt size;
-    };
-
 
 const TMCPDestinationItem KMCPDestinationInfo[] =
     {
-     { EMusicWidgetImage1,      L"area1_image1", "area1_image1_data",       L"*" }
-    ,{ EMusicWidgetText1,       L"area2_text1",  "area2_text1_data",        L"*" }
-    ,{ EMusicWidgetToolbarB1,   L"toolbar_b1", "toolbar_b1_data",         L"*" }
-    ,{ EMusicWidgetToolbarB2,   L"toolbar_b2", "toolbar_b2_data",         L"*" }
-    ,{ EMusicWidgetToolbarB3,   L"toolbar_b3", "toolbar_b3_data",         L"*" }
-    ,{ EMusicWidgetDefaultText, L"default_text",  "default_text_data",       L"*" }
+     { EMusicWidgetImage1,      L"area1_image1", "area1_image1_data", "area1_image1_data_mask" }
+    ,{ EMusicWidgetText1,       L"area2_text1",  "area2_text1_data", ""}
+    ,{ EMusicWidgetToolbarB1,   L"toolbar_b1", "toolbar_b1_data", "toolbar_b1_data_mask" }
+    ,{ EMusicWidgetToolbarB2,   L"toolbar_b2", "toolbar_b2_data", "toolbar_b2_data_mask" }
+    ,{ EMusicWidgetToolbarB3,   L"toolbar_b3", "toolbar_b3_data", "toolbar_b3_data_mask" }
+    ,{ EMusicWidgetDefaultText, L"default_text",  "default_text_data", "" }
     
-    ,{ EMusicWidgetTrigger1,    L"area1_image1", "MWTrigger1",  L"*" }
-    ,{ EMusicWidgetTrigger2,    L"default_text",  "MWTrigger2", L"*" }
-    ,{ EMusicWidgetTB1Trigger,  L"toolbar_b1", "TB1Trigger",    L"*" }
-    ,{ EMusicWidgetTB2Trigger,  L"toolbar_b2", "TB2Trigger",    L"*" }
-    ,{ EMusicWidgetTB3Trigger,  L"toolbar_b3", "TB3Trigger",    L"*" }
-            
-    ,{ EMusicMenuMusicInfoImage1,   L"image",  "musicmenu_musicinfo_imagedata", L"musicmenu_musicinfo_image" }
-    ,{ EMusicMenuMusicInfoLine1,        L"text",   "musicmenu_musicinfo_text1data",  L"musicmenu_musicinfo_text1" }
-    ,{ EMusicMenuMusicInfoLine2,        L"text",   "musicmenu_musicinfo_text2data",  L"musicmenu_musicinfo_text2" }
-    ,{ EMusicMenuMusicInfoTrigger, L"text",   "MMInfoTrigger",  L"musicmenu_musicinfo_text1" }
+    ,{ EMusicWidgetTrigger1,    L"area1_image1", "MWTrigger1", "" }
+    ,{ EMusicWidgetTrigger2,    L"default_text",  "MWTrigger2", "" }
+    ,{ EMusicWidgetTB1Trigger,  L"toolbar_b1", "TB1Trigger", "" }
+    ,{ EMusicWidgetTB2Trigger,  L"toolbar_b2", "TB2Trigger", "" }
+    ,{ EMusicWidgetTB3Trigger,  L"toolbar_b3", "TB3Trigger", "" }
     };
 
 
 const TMCPImageDestinationInfoItem KMCPImageDestinationInfo[] =
 
     {
-        {EMusicWidgetImage1, 70,70}
+        {EMusicWidgetImage1, 70, 70}
     ,
         {EMusicWidgetToolbarB1, 41,41}
     ,
         {EMusicWidgetToolbarB2, 41,41}
     ,
         {EMusicWidgetToolbarB3, 41,41}
-    ,
-        {EMusicMenuMusicInfoImage1, 70,70} 
+
     };
 
 /**
@@ -274,6 +263,11 @@ private:
     void ConstructL();
     
     /**
+     * Publish default content
+     */
+    void PublishDefaultL();
+
+    /**
      * Installs an action, mainly for readability purposes.
      *
      * @since S60 5.0
@@ -296,21 +290,7 @@ private:
      * @param aDestination Destination trigger that should launch the action.
      */
     void InstallEmptyActionL(TMCPTriggerDestination aDestination);
-    
-    
-    /**
-     * Maps an enum from TMCPImageDestination, TMCPTextDestination and 
-     * TMCPTriggerDestination to it's keys on CPS.
-     * @param aEnum the enum/destination
-     * @param aType the type key is loaded here
-     * @param aDataKey the data key is loaded here
-     * @param aContent the content key is loaded here
-     *
-     * @since S60 5.0
-     */
-    void MapEnumToDestinationInfoL(TInt aEnum,TPtrC& aType, TPtrC8& aDataKey, 
-            TPtrC& aContent);
-    
+   
     /**
      * Resets the Bitmap cache.
      *
@@ -318,22 +298,13 @@ private:
      */
     void ResetBitmapCache();
     
-    /**
-     * Resets the publishing buffers.
-     *
-     * @since S60 5.0
-     */
-    void ResetPublishingBuffers();
-    
     TUint RegisterPublisherL( 
         const TDesC& aPublisherId, 
         const TDesC& aContentId,
         const TDesC& aContentType );
     
-    TUint CMusicContentPublisher::ExtractItemId( const CLiwGenericParamList& aInParamList );
-    
-    void RemoveL( TInt aDestination );
-    
+    TUint ExtractItemId( const CLiwGenericParamList& aInParamList );
+   
     /**
      * Get a heap descriptor from the resource file
      *
@@ -341,8 +312,14 @@ private:
      */
     void GetLocalizedStringL(RResourceFile& aResourceFile, HBufC*& aRetBuf,
             TInt aResourceId);
-    
-    void DoPublishL();
+
+    void PublishDeferred();
+    static TInt DoPublish(TAny * aMusicContentPublisher);
+    void DoPublishAllL();
+    void DoPublishModifiedL();
+    void DoPublishDeleteAllL();
+    void DoPublishCmdL(const TDesC8& aCmd, const TDesC8& aKey, const CLiwMap * aValue);
+
     
 
 private: // data
@@ -368,7 +345,13 @@ private: // data
     /**
      * mapping for the destination translation.
      */    
-    RHashMap<TInt, TMCPDestinationItem> iDestinationMap;
+    struct TDestinationItem {
+    	  explicit TDestinationItem(const TMCPDestinationItem& aItem);
+        TPtrC  iType;
+        TPtrC8 iDataKey;
+        TPtrC8 iMaskKey;
+    };
+    RHashMap<TInt, TDestinationItem>    iDestinationMap;
     
     /**
      * mapping for the destination  image info translation.
@@ -381,14 +364,15 @@ private: // data
     RHashMap<TInt, TBmpMsk> iBitmapCache;
     
     /**
-     * To keep the unpublished data.
+     * The published data
      */
-    RHashMap<TInt, TMyBufferItem> iPublishingDataBuffers;
+    RMusicContentMap iPublishingDataMap;
+    RMusicContentMap iPublishingActionMap;
     
     /**
-     * To keep the unpublished actions.
-     */
-    RHashMap<TInt, TMyBufferItem> iPublishingActionBuffers;
+    * Deferred callback to DoPublishL
+    */
+    CAsyncCallBack * iDeferredPublish;
     
     /**
     * Skin server session.
@@ -404,7 +388,6 @@ private: // data
 
     CMCPHarvesterPublisherObserver* iHPObserver;
     TBool iWidgetForeground;
-    TBool iWidgetActivated;
 
     HBufC* iInstanceId;
    

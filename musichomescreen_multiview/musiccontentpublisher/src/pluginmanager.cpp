@@ -103,18 +103,24 @@ CPluginManager::~CPluginManager()
     }
 
 // ---------------------------------------------------------------------------
-// Retuns a plugin by UID
+// Retuns a plugin by Implementation UID
 // ---------------------------------------------------------------------------
 //
 TAny* CPluginManager::GetImplementation( TUid aUid )
     {
-    TInt32 key = aUid.iUid;
     TAny* ret= NULL;
-    TAny** imp= NULL;
-    imp = iPluginMap.Find( key );
-    if ( imp )
+    THashMapIter<TInt32, TAny*> iter( iPluginMap );
+    const TInt32* pluginInstanceKey( NULL );
+    TAny*const* ptr = iter.NextValue();
+    while ( ptr )
         {
-        ret = *imp;
+        pluginInstanceKey = iter.CurrentKey();
+        if (REComSession::GetImplementationUidL( TUid::Uid( *pluginInstanceKey ) ) == aUid) 
+            {
+            ret = *ptr;
+            break;
+            }
+        ptr = iter.NextValue();
         }
     return ret;
     }
@@ -165,16 +171,16 @@ void CPluginManager::LoadPluginsL()
         {
         TUid current_plugin = infoArray[i]->ImplementationUid();
         TAny* plug( NULL );
-        TUid temp;
+        TUid instanceKey;
         TInt err( KErrNone );
         TRAP( err, plug = REComSession::CreateImplementationL(
                         current_plugin,
-                        temp,
+                        instanceKey,
                         iParameter ) );
         if ( err == KErrNone && plug )
             {
             CleanupStack::PushL( plug );
-            TInt32 key = current_plugin.iUid;
+            TInt32 key = instanceKey.iUid;
             iPluginMap.InsertL( key, plug );
             CleanupStack::Pop( plug );
             }
@@ -194,16 +200,16 @@ void CPluginManager::CleanPluginsTable()
     THashMapIter<TInt32, TAny*> iter( iPluginMap );
     TAny*const* ptr = iter.NextValue();
     CBase* plug( NULL );
-    const TInt32* pluginUid( NULL );
+    const TInt32* pluginInstanceKey( NULL );
     while ( ptr )
         {
         plug = static_cast<CBase*>( *ptr );
         delete plug;
         plug = NULL;
-        pluginUid = iter.CurrentKey();
-        REComSession::DestroyedImplementation( TUid::Uid( *pluginUid ) );
+        pluginInstanceKey = iter.CurrentKey();
+        REComSession::DestroyedImplementation( TUid::Uid( *pluginInstanceKey ) );
         ptr = iter.NextValue();
-        pluginUid = NULL;
+        pluginInstanceKey = NULL;
         }
     MPX_DEBUG1("CPluginManager::CleanPluginsTable --->");
     }

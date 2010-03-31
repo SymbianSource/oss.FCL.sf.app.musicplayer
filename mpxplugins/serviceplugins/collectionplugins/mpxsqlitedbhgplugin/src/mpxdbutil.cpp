@@ -72,6 +72,11 @@ TPtrC MPXDbUtil::TableNameForCategoryL(
         case EMPXComposer:
             ptr.Set(KMCComposerTable);
             break;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        case EMPXAbstractAlbum:
+            ptr.Set(KMCAbstractAlbumTable);
+            break;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         default:
             User::Leave(KErrNotSupported);
         }
@@ -103,6 +108,11 @@ TPtrC MPXDbUtil::MusicFieldNameForCategoryL(
         case EMPXComposer:
             ptr.Set(KMCMusicComposer);
             break;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        case EMPXAbstractAlbum:
+            ptr.Set(KMCMusicAbstractAlbum);
+            break;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         default:
             User::Leave(KErrNotSupported);
         }

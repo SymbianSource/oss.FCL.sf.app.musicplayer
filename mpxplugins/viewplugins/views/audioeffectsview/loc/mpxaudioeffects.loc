@@ -60,25 +60,7 @@
 // l:title_pane_t2/opt9
 // r:3.1
 //
-#define qtn_nmp_audioeffects    "Audio settings"
-
-// d:Used in Sound check view.
-// d:Name of an option to switch off bassboost and stereo
-// d:widening effect for audio.
-// d:Series_60_Music_settings_UI_Specification_v2.0.doc, Figure 4.5-3
-// l:list_set_graphic_pane_t1
-// r:3.1
-//
-#define qtn_nmp_off "Off"
-
-// d:Used in Sound check view.
-// d:Name of an option to switch on bassboost and stereo
-// d:widening effect for audio.
-// d:Series_60_Music_settings_UI_Specification_v2.0.doc, Figure 4.5-3
-// l:list_set_graphic_pane_t1
-// r:3.1
-//
-#define qtn_nmp_on  "On"
+#define qtn_nmp_audioeffects    "Settings"
 
 // d:Used in Sound check view.
 // d:Name of a component that will change stereo widening
@@ -170,5 +152,29 @@
 // r:3.1
 //
 #define qtn_nmp_balance_left100 "Balance - Left 100"
+
+// d:On as setting item in Loudness
+// l:list_set_graphic_pane_t1
+// r:5.2
+//
+#define qtn_nmp_loudness_on "On"
+
+// d:Off as setting item in Loudness
+// l:list_set_graphic_pane_t1
+// r:5.2
+//
+#define qtn_nmp_loudness_off "Off"
+
+// d:On as setting item in Stereo widening
+// l:list_set_graphic_pane_t1
+// r:5.2
+//
+#define qtn_nmp_stereowidening_on "On"
+
+// d:Off as setting item in Stereo widening
+// l:list_set_graphic_pane_t1
+// r:5.2
+//
+#define qtn_nmp_stereowidening_off "Off"
 
 // End of File

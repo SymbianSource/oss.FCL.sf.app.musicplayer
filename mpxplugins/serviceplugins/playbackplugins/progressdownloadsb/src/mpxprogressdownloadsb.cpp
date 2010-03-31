@@ -331,10 +331,13 @@ void CMPXProgressDownloadSB::CommandL(
                 iMStreamControl->Stop();
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPStopped,
                                          0, KErrNone);
-                if ( EPbDlStateDownloadCompleted == iDownloadState && iConsumeStarted )
+                if ( EPbDlStateDownloadCompleted == iDownloadState  )
                     {
-                    ConsumeRights( ContentAccess::EStop );
-                    iConsumeStarted = EFalse;
+                    if ( iConsumeStarted )
+                        {
+                        ConsumeRights( ContentAccess::EStop );
+                        iConsumeStarted = EFalse;
+                        }
                     if ( !iFileSaved )
                         {
                         iDrmMediaUtility->Close(); // release file handle so we can move file.
@@ -344,10 +347,13 @@ void CMPXProgressDownloadSB::CommandL(
                 iDrmMediaUtility->Close();
                 break;
             case EPbCmdClose:
-                if ( EPbDlStateDownloadCompleted == iDownloadState && iConsumeStarted  )
+                if ( EPbDlStateDownloadCompleted == iDownloadState )
                     {
-                    ConsumeRights( ContentAccess::EStop );
-                    iConsumeStarted = EFalse;
+                    if ( iConsumeStarted )
+                        {
+                        ConsumeRights( ContentAccess::EStop );
+                        iConsumeStarted = EFalse;
+                        }
                     if ( !iFileSaved )
                         {
                         iDrmMediaUtility->Close(); // release file handle so we can move file.

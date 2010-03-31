@@ -228,9 +228,8 @@ private:
      * Installs Go To Last Played action, the puppose of this is to improve
      * readability.
      */
-    void InstallGoToLastPlayedL( TMCPTriggerDestination aDestination, 
-             TBool aMinimized );
-    
+    void InstallGoToLastPlayedL( TMCPTriggerDestination aDestination ); 
+   
     /**
      * Installs an action, mainly for readability purposes.
      *

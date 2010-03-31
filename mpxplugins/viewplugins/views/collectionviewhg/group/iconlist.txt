@@ -24,3 +24,4 @@
 -c8,8 qgn_graf_mup_lst_drm_exp
 -c8,8 qgn_graf_mup_dlst_podcast
 -c8,8 qgn_graf_mup_npv_icon_shuffle.svg
+-c8,8 qgn_prop_albumart_large.svg

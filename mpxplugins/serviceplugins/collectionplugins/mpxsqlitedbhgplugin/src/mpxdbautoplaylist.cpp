@@ -80,6 +80,11 @@ CMPXDbAutoPlaylist::~CMPXDbAutoPlaylist()
     delete iRecentlyPlayedPlaylist;
     delete iMostPlayedPlaylist;
     delete iRecentlyAddedPlaylist;
+    
+    delete iTitleRecentlyPlayed;
+    delete iTitleMostPlayed;
+    delete iTitleRecentlyAdded;
+
     }
 
 // ----------------------------------------------------------------------------
@@ -106,6 +111,10 @@ void CMPXDbAutoPlaylist::ConstructL(
     iMostPlayedPlaylist = aResource.ReadHBufCL(R_MC_MOST_PLAYED_PLAYLIST);
     iRecentlyAddedPlaylist = aResource.ReadHBufCL(R_MC_RECENTLY_ADDED_PLAYLIST);
 
+    iTitleRecentlyPlayed = aResource.ReadHBufCL(R_MC_TITLE_RECENTLY_PLAYED );
+    iTitleMostPlayed = aResource.ReadHBufCL(R_MC_TITLE_MOST_PLAYED );
+    iTitleRecentlyAdded = aResource.ReadHBufCL(R_MC_TITLE_RECENTLY_DOWNLOADED );
+    
     iRecentlyPlayedPlaylistId = KMPXRecentlyPlayedPlaylistId;
     iMostPlayedPlaylistId = KMPXMostPlayedPlaylistId;
     iRecentlyAddedPlaylistId = KMPXRecentlyAddedPlaylistId;
@@ -160,15 +169,15 @@ TPtrC CMPXDbAutoPlaylist::AutoPlaylistNameL(
     TPtrC ptr;
     if (aPlaylistId == iRecentlyPlayedPlaylistId)
         {
-        ptr.Set(*iRecentlyPlayedPlaylist);
+        ptr.Set(*iTitleRecentlyPlayed);
         }
     else if (aPlaylistId == iMostPlayedPlaylistId)
         {
-        ptr.Set(*iMostPlayedPlaylist);
+        ptr.Set(*iTitleMostPlayed);
         }
     else if (aPlaylistId == iRecentlyAddedPlaylistId)
         {
-        ptr.Set(*iRecentlyAddedPlaylist);
+        ptr.Set(*iTitleRecentlyAdded);
         }
     else
         {

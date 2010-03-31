@@ -182,7 +182,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
     User::LeaveIfError( MPXUser::CompleteWithDllPath( resourceFile ) );
     BaflUtils::NearestLanguageFile( coeEnv->FsSession(), resourceFile );
     iResourceOffset = coeEnv->AddResourceFileL( resourceFile );
-
+    iTvOutConfig =   CTvOutConfig::NewL() ;
 	if ( FeatureManager::FeatureSupported( KFeatureIdFmtx ) )
 		{
     	parse.Set( KMPXFMTXRscPath, &KDC_APP_RESOURCE_DIR, NULL );
@@ -483,6 +483,10 @@ EXPORT_C CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp()
         iTNRequestTimer->Cancel();
         delete iTNRequestTimer;
         }
+	if(iTvOutConfig)
+        {
+        delete iTvOutConfig;
+        }	
     
     MPX_DEBUG1( "CMPXCommonPlaybackViewImp::~CMPXCommonPlaybackViewImp exiting" );
     }
@@ -2164,6 +2168,11 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
             // Status pane has to be modified before view gets deactivated
             break;
             }
+        case EMPXPbvCmdSongDetails:
+            {
+            LaunchFileDetailsDialogL();
+            break;
+            }
         case EMPXPbvCmdPlay:
             {
             if ( iEmbedded )
@@ -2759,6 +2768,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                 iContainer->RestoreButtons( iPlaybackState );
                 iPlaybackUtility->CommandL( EPbCmdStopSeeking );
                 }
+           
+		    aMenuPane->SetItemDimmed( EMPXPbvCmdAddToPlaylist, ETrue );
             if ( !iMedia )
                 {
                 aMenuPane->SetItemDimmed(
@@ -2778,9 +2789,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                     ETrue );
                 aMenuPane->SetItemDimmed(
                     EMPXPbvCmdOpenMusicSettings,
-                    ETrue );
-                aMenuPane->SetItemDimmed(
-                    EMPXPbvCmdAddToPlaylist,
                     ETrue );
                 aMenuPane->SetItemDimmed(
                     EMPXPbvCmdUseAsCascade,
@@ -2816,14 +2824,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                             }
                         CleanupStack::PopAndDestroy( playlist );
                         }
-                    }
-                if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-                    {
-                    aMenuPane->SetItemDimmed( EMPXPbvCmdAddToPlaylist, ETrue );
-                    }
-                else
-                    {
-                    aMenuPane->SetItemDimmed( EMPXPbvCmdAddToPlaylist, addToPlDimmed );
                     }
                 TBool isOfflineMode( EFalse );
                 TBool isFormatNotSupported( EFalse );
@@ -2885,6 +2885,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                     {
                     return;
                     }
+                aMenuPane->SetItemDimmed( EMPXPbvCmdOpenMusicSettings, iTvOutConfig->HdmiCableConnected());        
                 }
             break;
             }
@@ -4052,6 +4053,34 @@ TInt CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL( TAny* aPtr )
         }
         
     return KErrNone;
+    }
+
+// ---------------------------------------------------------------------------
+// Launch Metadata Dialog to show the file details
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL()
+    {
+    MMPXSource* s = iPlaybackUtility->Source();
+    TInt count (0);
+    TInt index (0);
+    if ( s )
+        {
+        CMPXCollectionPlaylist* playlist = s->PlaylistL();
+        if ( playlist )
+           {
+           count = playlist->Count();
+           index = playlist->PathIndex( playlist->Index() );
+           delete playlist;
+           playlist = NULL;
+           }
+        }
+    HBufC* buf = HBufC::NewLC( 5 ); // magic number, array granularity
+    buf->Des().AppendNum( index);
+
+    // Activate Metadata dialog via View Framework
+    iViewUtility->ActivateViewL( TUid::Uid(KMPXPluginTypeMetadataEditorUid), buf );
+    CleanupStack::PopAndDestroy(buf);
     }
     
 //  End of File

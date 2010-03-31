@@ -306,4 +306,22 @@
 //
 #define qtn_nmp_del_batch_songs_wait_note "Deleting: %N%"
 
+// d:Text shown if there is at least one episode for which podcast title information is missing
+// l:list_double_large_graphic_pane_t1
+// r:5.2
+//
+#define qtn_mus_podcast_unknown "Unknown"
+
+// d:Text shown if title is not known
+// l:title_pane_t2/opt9
+// r:5.2
+//
+#define qtn_mus_title_unknown_podcast "Unknown"
+
+// d:Options menu item for now playing.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.0
+//
+#define qtn_mus_options_nowplaying "Now Playing"
+
 // End of File

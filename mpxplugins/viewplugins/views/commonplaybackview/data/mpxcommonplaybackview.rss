@@ -107,6 +107,11 @@ RESOURCE MENU_PANE r_mpx_playback_view_menu
             },
         MENU_ITEM
             { 
+            command = EMPXPbvCmdSongDetails;
+            txt = qtn_mus_options_details_track;
+            },
+        MENU_ITEM
+            { 
             command = EMPXPbvCmdFMTransmitter;
             txt = qtn_nmp_go_to_fm_transmitter;
             },

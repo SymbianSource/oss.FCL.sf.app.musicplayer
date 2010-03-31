@@ -228,4 +228,16 @@
 //
 #define qtn_mus_options_go_to_podcast_menu  "Go to Podcast Menu"
 
+// d:Options menu item for opening Track details popup.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.0
+//
+#define qtn_mus_options_details_track "Song details"
+
+// d:Options menu item for opening Episode details popup.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.0
+//
+#define qtn_mus_options_details_episode "Episode details"
+
 // End of File

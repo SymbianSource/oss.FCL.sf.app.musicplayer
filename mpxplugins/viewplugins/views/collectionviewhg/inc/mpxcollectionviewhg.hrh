@@ -77,7 +77,7 @@ enum TMPXCollectionCommandIds
     ,EMPXCmdRefreshLibrary
 #endif
     ,EMPXCmdPlayItem
-
+    ,EMPXCmdAbout
     };
 
 // current MediaL operation

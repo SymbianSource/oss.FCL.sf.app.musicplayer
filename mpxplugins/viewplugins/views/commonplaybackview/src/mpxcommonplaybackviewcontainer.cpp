@@ -168,7 +168,8 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ConstructL( const TRect& /*aRect*
     UpdateProgressBarGraphics();
 
     iMode = EUninitialized;
-    iLabels[ETextDownloadState]->MakeVisible( ETrue );
+    // suppress download text per UI spec
+    iLabels[ETextDownloadState]->MakeVisible( EFalse );
     iLabels[ETextArtist]->MakeVisible( EFalse );
     iLabels[ETextTrack]->MakeVisible( EFalse );
     iLabels[ETextElapsedTime]->MakeVisible( EFalse );
@@ -331,6 +332,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateLabelL(
     CMPXPlaybackViewInfoLabel* label = iLabels[aLabel];
     if(aLabel == ETextDownloadState)
         {
+		/*
         iSliderPaneRect = iLayout->IndicatorLayout( Rect(), ESliderPane );
         iLayout->LayoutLabel(
         iLabels[ETextDownloadState], iSliderPaneRect, ETextDownloadState );
@@ -348,6 +350,9 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::UpdateLabelL(
             *iLabels[ETextDownloadState],
             EColorLabelText,
             color );
+        */
+        // suppress download text per UI spec.
+        return;
         }
     if ( label )
         {
@@ -381,7 +386,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
 	    case EUninitialized:
 	    	{
 	    	// Set label visibility
-	        iLabels[ETextDownloadState]->MakeVisible( ETrue );
+	        //iLabels[ETextDownloadState]->MakeVisible( EFalse );
 	        iLabels[ETextArtist]->MakeVisible( ETrue );
 	        iLabels[ETextTrack]->MakeVisible( ETrue );
 	        //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -392,7 +397,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
         case ENoTracksMode:
             {
             // Set label visibility
-            iLabels[ETextDownloadState]->MakeVisible( ETrue );
+            //iLabels[ETextDownloadState]->MakeVisible( ETrue );
             iLabels[ETextArtist]->MakeVisible( EFalse );
             iLabels[ETextTrack]->MakeVisible( EFalse );
             //iLabels[ETextEmpty]->MakeVisible( ETrue );
@@ -404,7 +409,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
         case EStopMode:
             {
             // Fixed the layout for Download label and time label are overlaped in position
-            iLabels[ETextDownloadState]->MakeVisible( EFalse );
+            //iLabels[ETextDownloadState]->MakeVisible( EFalse );
             iLabels[ETextTrack]->MakeVisible( ETrue );
             iLabels[ETextArtist]->MakeVisible( ETrue );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -414,7 +419,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
             }
         case EInitialising:
             {
-            iLabels[ETextDownloadState]->MakeVisible( ETrue );
+            //iLabels[ETextDownloadState]->MakeVisible( ETrue );
             iLabels[ETextTrack]->MakeVisible( ETrue );
             iLabels[ETextArtist]->MakeVisible( ETrue );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -424,7 +429,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
             }
         case EMediaKeySkipping:
             {
-            iLabels[ETextDownloadState]->MakeVisible( ETrue );
+            //iLabels[ETextDownloadState]->MakeVisible( ETrue );
             iLabels[ETextTrack]->MakeVisible( ETrue );
             iLabels[ETextArtist]->MakeVisible( ETrue );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -434,7 +439,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
             }
         case EInvalidMode:
             {
-            iLabels[ETextDownloadState]->MakeVisible( EFalse );
+            //iLabels[ETextDownloadState]->MakeVisible( EFalse );
             iLabels[ETextTrack]->MakeVisible( EFalse );
             iLabels[ETextArtist]->MakeVisible( EFalse );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -446,7 +451,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
         case EBufferingMode:
             {
             // Set label visibility
-            iLabels[ETextDownloadState]->MakeVisible( EFalse );
+            //iLabels[ETextDownloadState]->MakeVisible( EFalse );
             iLabels[ETextArtist]->MakeVisible( ETrue );
             iLabels[ETextTrack]->MakeVisible( ETrue );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -457,7 +462,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SetMode( TMPXPbvPlaybackMode aMod
         default:
             {
             // Set label visibility
-            iLabels[ETextDownloadState]->MakeVisible( EFalse );
+            //iLabels[ETextDownloadState]->MakeVisible( EFalse );
             iLabels[ETextArtist]->MakeVisible( ETrue );
             iLabels[ETextTrack]->MakeVisible( ETrue );
             //iLabels[ETextEmpty]->MakeVisible( EFalse );
@@ -1473,8 +1478,9 @@ void CMPXCommonPlaybackViewContainer::DoUpdateLayoutL()
         iLabels[ETextPlaylistCount], myRect, ETextPlaylistCount );
     //iLayout->LayoutLabel(
     //    iLabels[ETextEmpty], myRect, ETextEmpty );
-    iLayout->LayoutLabel(
-        iLabels[ETextDownloadState], iSliderPaneRect, ETextDownloadState );
+    // suppress download text per UI spec
+    //iLayout->LayoutLabel(
+    //    iLabels[ETextDownloadState], iSliderPaneRect, ETextDownloadState );
 
    	if ( iFMTXMode )
        	{

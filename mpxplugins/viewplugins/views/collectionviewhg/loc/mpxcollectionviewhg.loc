@@ -513,4 +513,185 @@
 //
 #define qtn_nmp_del_batch_songs_wait_note "Deleting: %N%"
 
+// d:Options menu item for Ovi music.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_ovi_music "Ovi Music"
+
+// d:Options menu item for about.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_about "About"
+
+// d:Options menu item for songs.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_songs "Songs"
+
+// d:Options menu item for artists & albums.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_artists_and_albums "Artists & Albums"
+
+// d:Options menu item for playlists.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_playlists "Playlists"
+
+// d:Options menu item for podcasts.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_podcasts "Podcasts"
+
+// d:Options menu item for Genres.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_genres "Genres"
+
+// d:Shuffle item in the list. First item in list with more than one item.
+// l:list_double_large_graphic_pane_t1
+// r:5.2
+//
+#define qtn_mus_shuffle "Shuffle"
+
+// d:Options menu item for play.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_play "Play"
+
+// d:Shuffle item in the media wall. First item in media wall. 
+// d:when there's more than one item.
+// l:main_cf0_pane_t2
+// r:5.2
+//
+#define qtn_mus_mediawall_title_shuffle_all "Shuffle"
+
+// d:Text shown if there is no content to display for Artists & Albums.
+// l:main_pane_empty_t1
+// r:5.2
+//
+#define qtn_vmp_no_albums "(no albums)"
+
+// d:Text shown if there is at least one artist for which the artist name is not available.
+// l:list_double_large_graphic_pane_t1
+// r:5.2
+//
+#define qtn_mp_unknown "Unknown"
+
+// d:Text shown if the artist name is not available in media wall
+// l:main_cf0_pane_t1
+// r:5.2
+//
+#define qtn_mus_mediawall_artist_unknown "Unknown"
+
+// d:Text shown if the album name is not available in media wall
+// l:main_cf0_pane_t2
+// r:5.2
+//
+#define qtn_mus_mediawall_album_unknown "Unknown"
+
+// d:Shuffle item in the list. First item in list with more than one item.
+// l:list_single_pane_t1
+// r:5.2
+//
+#define qtn_mus_tbone_shuffle "Shuffle"
+
+// d:Shuffle item in the popup list. First item in the popup list.
+// d:when there's more than one item.
+// l:list_single_pane_t1_cp2
+// r:5.2
+//
+#define qtn_mus_mediawall_dialog_shuffle "Shuffle"
+
+// d:Text shown if the album name is not available in media wall
+// l:heading_pane_t1/opt2
+// r:5.2
+//
+#define qtn_mus_mediawall_popup_title_unknown "Unknown"
+
+// d:Text shown if the artist name is not available in tracks level view
+// l:list_double_large_graphic_pane_t2
+// r:5.2
+//
+#define qtn_mus_songs_artist_unknown "Unknown"
+
+// d:Text shown when there is no content to display in tracks level view
+// l:main_pane_empty_t1
+// r:5.2
+//
+#define qtn_vmp_no_songs "(no songs)"
+
+// d:Information and a query note text
+// d:Display when Music Player launch first time or at manual refresh(if new song added)
+// d:%U is the educating user URI
+// l:popup_info_list_pane_t1
+// r:5.2
+//
+#define qtn_nmp_note_educating_the_user "Please note that using Media Transfer mode to transfer your music will optimize your music experience. To learn more, please go to %U. Remind me later?"
+
+// d:Heading "About" for verions info of musicplayer
+// l:heading_pane_t1
+// r:5.2
+//
+#define qtn_mus_about_note "About"
+
+// d:Information about music player version
+// d:%U is version number
+// l:popup_info_list_pane_t1
+// r:5.2
+//
+#define qtn_mus_about_version "Music Player for Symbian^3 version %U\nCopyright © 2010 Nokia. All rights reserved." 
+
+// d:Options menu item for now playing.
+// l:list_single_pane_t1_cp2/opt1
+// r:5.2
+//
+#define qtn_mus_options_nowplaying "Now Playing"
+
+// d:Text shown if there is more than one song in the playlist.
+// d:where %N is the number of songs within the playlist 
+// d:and %U is the duration time for the total playlist, 
+// d:in the format hh:mm is displayed.
+// d:if the playlist is empty, the duration is displayed as dashes (-- : --)
+// l:list_double_large_graphic_pane_t2
+// r:5.2
+//
+#define qtn_mus_music_num_songs_duration "%N songs - %U"
+
+// d:Text shown if there is only one song in the playlist
+// d:%U is the duration time for the total playlist, 
+// d:in the format hh:mm is displayed.
+// l:list_double_large_graphic_pane_t2
+// r:5.2
+//
+#define qtn_mus_music_one_song_duration "1 song - %U"
+
+// d:List box text to show the number of items in the collection
+// d:For the case there're 0 or more than 1 song in the collection
+// l:list_double_large_graphic_pane_t2
+// r:5.0
+//
+#define qtn_mus_music_num_songs "%N songs"
+
+// d:List box text to show the number of items in the collection
+// d:For the case there's only 1 song in the collection
+// l:list_double_large_graphic_pane_t2
+// r:5.0
+//
+#define qtn_mus_music_one_song  "1 song"
+
+// d:Text shown when the genre name is not available.
+// l:list_double_large_graphic_pane_t1
+// r:5.2
+//
+#define qtn_mus_genre_unknown "Unknown"
+
 // End of File

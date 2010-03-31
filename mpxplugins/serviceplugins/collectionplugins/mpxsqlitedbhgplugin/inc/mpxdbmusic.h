@@ -48,6 +48,23 @@ class CMPXMediaArray;
 class MMPXDbMusicObserver
     {
     public:
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        /**
+        * Called when a new category item has to be added to a category table.
+        * @param aCategory category type
+        * @param aName name string
+        * @param aDrive drive to add the category to
+        * @param aItemChangedMessages changed mesages array to be updated or NULL
+        * @param aItemExist Out parameter, ETrue if the item already exist before the add,
+        *        EFalse otherwise
+        * @param aAlbumArtist AlbumArtist string
+        * @param aGenre Genre string
+        * @return the ID of the category item (new or existing)
+        */
+        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TDesC& aAlbumArtist=KNullDesC,
+            const TDesC& aGenre=KNullDesC) = 0;
+#else
         /**
         * Called when a new category item has to be added to a category table.
         * @param aCategory category type
@@ -60,11 +77,11 @@ class MMPXDbMusicObserver
         */
         virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
             TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
-
-		// for Album and Artist table
-		virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-			TUint32 aArtistId, const TDesC& aArt,
-			TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+       // for Album and Artist table
+        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
+            TUint32 aArtistId, const TDesC& aArt,
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
         /**
         * Called when the ID of a category item changed for a Music record, for example when
         * the artist name changed for a song. The implementation is supposed to update the
@@ -102,9 +119,17 @@ class MMPXDbMusicObserver
          * @param aMedia media data
          * @param aItemChangedMessages changed mesages array to be updated or NULL
          */
-		virtual void UpdateCategoryItemL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
-			const CMPXMedia& aMedia, TInt aDrive, CMPXMessageArray* aItemChangedMessages) = 0;
-    };
+        virtual void UpdateCategoryItemL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
+             const CMPXMedia& aMedia, TInt aDrive, CMPXMessageArray* aItemChangedMessages) = 0;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        /**
+        * Get title from the Id
+        * @param Id to search for
+        * @return name matching the ID
+        */
+        virtual HBufC* HandleGetAlbumNameFromIdL( TUint32 aId ) = 0;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED    
+	};
 
 /**
 * Responsible for managing the Music table
@@ -210,6 +235,21 @@ class CMPXDbMusic :
         */
         TInt GetDriveL(TUint32 aSongId);
 
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        /**
+        * Get the drive and category IDs for a specified song
+        * @param aSongId song to be retrieved
+        * @param aArtistId returns the artist ID
+        * @param aAlbumId returns the artist ID
+        * @param aGenreId returns the artist ID
+        * @param aComposerId returns the artist ID
+        * @param aAbstractAlbumId returns the AbstractAlbum ID
+        * @param aDriveId returns the song drive
+        * @return song URI. The ownership is transferred.
+        */
+        HBufC* GetSongInfoL(TUint32 aSongId, TUint32& aArtistId, TUint32& aAlbumId,
+            TUint32& aGenreId, TUint32& aComposerId, TUint32& aAbstractAlbumId, TInt& aDriveId);
+#else 
         /**
         * Get the drive and category IDs for a specified song
         * @param aSongId song to be retrieved
@@ -222,7 +262,7 @@ class CMPXDbMusic :
         */
         HBufC* GetSongInfoL(TUint32 aSongId, TUint32& aArtistId, TUint32& aAlbumId,
             TUint32& aGenreId, TUint32& aComposerId, TInt& aDriveId);
-
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Get the song Id, title, URI, and general flags from the given song Id and/or URI
         * @param aCriteria search the media by song Id and/or URI
@@ -379,6 +419,18 @@ class CMPXDbMusic :
         void GetSongsForComposerL(TUint aComposerId, const TArray<TMPXAttribute>& aAttrs,
             CMPXMediaArray& aMediaArray);
 
+
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+	    /**
+        * Returns all songs for a given abstractalbum.
+        * @param aDrive drive ID AbstractAlbum stored
+        * @param aAbstractAlbumId abstractalbum to get the songs for
+        * @param aAttrs attributes to be retrieved
+        * @param aMediaArray returns the song attributes.
+        */
+        void GetAllSongsForAbstractAlbumL(TInt aDrive, TInt aAbstractAlbumId,
+            const TArray<TMPXAttribute>& aAttrs, CMPXMediaArray& aMediaArray);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Returns the duration of all songs.
         * @return the duration value
@@ -473,7 +525,7 @@ class CMPXDbMusic :
 
         /**
          * Get the ID of Artist which belongs to the specified Album
-		 * @param aId, the ID of Album
+         * @param aId, the ID of Album
          */
         TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
 
@@ -641,9 +693,9 @@ class CMPXDbMusic :
             const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TUint32& aItemId);
 
-		TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
-			const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
-			CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
+        TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
+        	const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
+         	CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:
         * EMPXMediaGeneralId, EMPXMediaGeneralType, EMPXMediaGeneralCategory,
@@ -696,45 +748,50 @@ class CMPXDbMusic :
         /**
         * Column indexes in the music table
         */
-		enum TMusicColumns
-			{
-			EMusicUniqueId = KMPXTableDefaultIndex,
-			EMusicDbFlag,
-			EMusicVolumeId,
-			EMusicTitle,
-			EMusicArtist,
-			EMusicArt,
-			EMusicDeleted,
-			EMusicLocation,
-			EMusicAlbumTrack,
-			EMusicPlayCount,
-			EMusicTimeAdded,
-			EMusicTimePlayed,
-			EMusicDuration,
-			EMusicSync,
-			EMusicModified,
-			EMusicAlbum,
-			EMusicGenre,
-			EMusicComposer,
-			EMusicReleaseDate,
-			EMusicRating,
-			EMusicComment,
-			EMusicCopyright,
-			EMusicUrl,
-			EMusicDRM,
-			EMusicLastPlayPosition,
-			EMusicSampleRate,
-			EMusicBitRate,
-			EMusicNumChannels,
-			EMusicCodec,
-			EMusicMimeType,
-			EMusicMTPDrmStatus,
-			EMusicArtistName,
-			EMusicAlbumName,
-			EMusicGenreName,
-			EMusicComposerName,
-			EMusicFieldCount
-			};
+        enum TMusicColumns
+        	{
+        	EMusicUniqueId = KMPXTableDefaultIndex,
+            EMusicDbFlag,
+            EMusicVolumeId,
+            EMusicTitle,
+            EMusicArtist,
+            EMusicArt,
+            EMusicDeleted,
+            EMusicLocation,
+            EMusicAlbumTrack,
+            EMusicPlayCount,
+            EMusicTimeAdded,
+            EMusicTimePlayed,
+            EMusicDuration,
+            EMusicSync,
+            EMusicModified,
+            EMusicAlbum,
+            EMusicGenre,
+            EMusicComposer,
+            EMusicReleaseDate,
+            EMusicRating,
+            EMusicComment,
+            EMusicCopyright,
+            EMusicUrl,
+            EMusicDRM,
+            EMusicLastPlayPosition,
+            EMusicSampleRate,
+            EMusicBitRate,
+            EMusicNumChannels,
+            EMusicCodec,
+            EMusicMimeType,
+            EMusicMTPDrmStatus,
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+            EMusicAlbumArtist,
+            EMusicContainEmbeddedArt,
+            EMusicAbstractAlbum,
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+            EMusicArtistName,
+            EMusicAlbumName,
+            EMusicGenreName,
+            EMusicComposerName,
+            EMusicFieldCount
+            };
 
          /*
          * Unique ID for Queries with a lifetime

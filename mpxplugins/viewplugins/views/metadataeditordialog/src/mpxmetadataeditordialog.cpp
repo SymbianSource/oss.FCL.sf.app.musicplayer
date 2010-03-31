@@ -74,6 +74,8 @@
 #include "mpxmetadataeditordialog.hrh"
 #include "mpxmetadataeditordialog.hlp.hrh"
 #include "mpxlog.h"
+#include <drmuihandling.h>
+
 
 // CONSTANTS
 const TInt KMPXFileDetailsMaxTitleLen = 32;
@@ -232,6 +234,10 @@ EXPORT_C CMPXMetadataEditorDialog::~CMPXMetadataEditorDialog()
     if ( iDrmResourceOffset )
         {
         iEikonEnv->DeleteResourceFile( iDrmResourceOffset );
+        }
+    if(iDrmUiHandler)
+        {
+        delete iDrmUiHandler;
         }
     }
 
@@ -513,6 +519,9 @@ void CMPXMetadataEditorDialog::ConstructL()
     repository->Get( KMPXMPLocalVariation, val );
     iDisablePodcasting = val&KMPXDisablePodcastingOption ? ETrue : EFalse;
     delete repository;
+    
+    //DRM information popup
+    iDrmUiHandler = DRM::CDrmUiHandling::NewL();
     }
 
 // -----------------------------------------------------------------------------
@@ -2409,18 +2418,16 @@ TKeyResponse CMPXMetadataEditorDialog::OfferKeyEventL(
 
     if ( aType == EEventKey )
         {
-        switch ( aKeyEvent.iScanCode )
+        if (aKeyEvent.iScanCode && (aKeyEvent.iScanCode == EStdKeyUpArrow
+                || aKeyEvent.iScanCode == EStdKeyDownArrow))
             {
-            case EStdKeyUpArrow:
-            case EStdKeyDownArrow:
-                {
-                UpdateSoftkeyL();
-                break;
-                }
-            default:
-                {
-                break;
-                }
+            UpdateSoftkeyL();
+            }
+
+        else if ((aKeyEvent.iCode == EKeyOK || aKeyEvent.iCode == EKeyEnter)
+                && (IdOfFocusControl() == EMPXMetadataEditorDlgCtrlIdDRMDetail))
+            {
+            LaunchDrmInfoL();
             }
         }
 
@@ -2844,7 +2851,11 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL()
 
     if (drmProtected)
         {
-          //TODO: Pending for UI Spec and localisation
+        HBufC* detail = StringLoader::LoadLC( R_MPX_CUI_LICENCE_DET_LINK );
+        InsertLineL(9,R_MPX_CUI_LICENCE_INFO,ActivePageId() );
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdDRMDetail, detail->Des(),
+                KNullDesC);
+        CleanupStack::PopAndDestroy( detail );	
         }
    
     // Get filename
@@ -3116,4 +3127,24 @@ void CMPXMetadataEditorDialog::PopulatePodcastFileDetailsL()
                 }
       }
 
+// -----------------------------------------------------------------------------
+// CMPXMetadataEditorDialog::LaunchDrmInfoL
+// -----------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::LaunchDrmInfoL()
+
+    {
+    MPX_FUNC( "CMPXMetadataEditorDialog::LaunchDrmInfoL" );
+    const TDesC& aFileName = iMedia->ValueText(KMPXMediaGeneralUri);
+    RFs fs;
+    User::LeaveIfError( fs.Connect() );
+    CleanupClosePushL( fs );
+    RFile64 drmFile;
+    User::LeaveIfError( drmFile.Open( 
+            fs, aFileName, EFileRead | EFileShareReadersOrWriters ) );
+    CleanupClosePushL( drmFile );
+    iDrmUiHandler->ShowDetailsViewL( drmFile );
+    CleanupStack::PopAndDestroy( &drmFile );
+    CleanupStack::PopAndDestroy( &fs );
+    }
 // End of File

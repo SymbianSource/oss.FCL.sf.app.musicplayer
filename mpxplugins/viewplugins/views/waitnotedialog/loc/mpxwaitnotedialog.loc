@@ -26,11 +26,11 @@
 #define qtn_nmp_note_scanning_db "Searching for music"
 
 // d:Search complete text shown after scanning is complete 
-// d:and some songs are found
+// d:showing number of items found.
 // l:popup_note_window/opt2
-// r:3.1
+// r:5.2
 //
-#define qtn_mus_note_search_complete1 "Search complete \nAdded: %N"
+#define qtn_mus_note_search_complete1 "Search complete \nFound: %N"
 
 // d:Search stopped text shown after scanning is complete 
 // d:and some songs are found
@@ -101,5 +101,17 @@
 // r:9.0
 //
 #define qtn_nmp_note_mp_unavailable_mmc "Music Player unable to access memory card. Memory card operation underway."
+
+// d:Search complete text shown after scanning is completed 
+// l:popup_note_window/opt2
+// r:5.2
+//
+#define qtn_mus_note_uptodate "Library is up to date."
+
+// d:Wait note shown when it takes long time to stop to refresh
+// l:popup_note_wait_window
+// r:5.2
+//
+#define qtn_mus_note_updating_library "Updating Library. \n Please wait."
 
 // End of File

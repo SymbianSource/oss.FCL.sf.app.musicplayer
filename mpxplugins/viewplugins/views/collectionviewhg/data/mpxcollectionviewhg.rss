@@ -151,7 +151,7 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
         MENU_ITEM
             {
             command = EMPXCmdGoToNowPlaying;
-            txt = qtn_nmp_options_go_to_nowplaying;
+            txt = qtn_mus_options_nowplaying;
             },
         MENU_ITEM
             {
@@ -161,27 +161,27 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
         MENU_ITEM
             {
             command = EMPXCmdGoToArtistAlbums;
-            txt = "Artists & Albums";
+            txt = qtn_mus_options_artists_and_albums;
             },
         MENU_ITEM
             {
             command = EMPXCmdGoToAllSongs;
-            txt = "Songs";
+            txt = qtn_mus_options_songs;
             },
         MENU_ITEM
             {
             command = EMPXCmdGoToPlaylists;
-            txt = "Playlists";
+            txt = qtn_mus_options_playlists;
             },            
         MENU_ITEM
             {
             command = EMPXCmdGoToGenre;
-            txt = "Sort by genre";
+            txt = qtn_mus_options_genres;
             },
         MENU_ITEM
             {
             command = EMPXCmdGoToPodcasts;
-            txt = "Podcasts";
+            txt = qtn_mus_options_podcasts;
             },                        
         MENU_ITEM
             {
@@ -207,7 +207,7 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
         MENU_ITEM
             {
             command = EMPXCmdPlayItem;
-            txt = "Play";
+            txt = qtn_mus_options_play;
             flags = EEikMenuItemSpecific;
             },
         MENU_ITEM
@@ -467,7 +467,7 @@ RESOURCE MENU_PANE r_mpx_playback_collection_musicshop_sub_menu
         MENU_ITEM
             { 
             command = EMPXCmdGoToNokiaMusicShop;
-            txt = "Nokia Music Store";
+            txt = qtn_mus_options_ovi_music;
             }
         };
     }
@@ -1568,5 +1568,122 @@ RESOURCE CBA r_mpx_collection_albumsongs_list_cba
             }
         };
     }
-    
+
+// ---------------------------------------------------------------------------
+// r_mpx_shuffle
+// Shuffle item in the list. First item in list with more than one item.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_shuffle
+    {
+    buf = qtn_mus_shuffle;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mediawall_title_shuffle_all
+// Shuffle item in the media wall. First item in media wall when there's more than one item.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mediawall_title_shuffle_all
+    {
+    buf = qtn_mus_mediawall_title_shuffle_all;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_shuffle_single
+// Shuffle item in the list. First item in list with more than one item.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_tbone_shuffle
+    {
+    buf = qtn_mus_tbone_shuffle;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_shuffle_popuplist
+// Shuffle item in the popuplist. First item in list with more than one item.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mediawall_dialog_shuffle
+    {
+    buf = qtn_mus_mediawall_dialog_shuffle;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mp_list_artist_unknown
+// Text shown if there is at least one artist for which the artist name is not available.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mp_list_artist_unknown
+    {
+    buf = qtn_mp_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mp_list_album_unknown
+// Text shown if the album name is not available
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mp_list_album_unknown
+    {
+    buf = qtn_vmp_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mediawall_artist_unknown
+// Text shown if the artist name is not available in media wall
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mediawall_artist_unknown
+    {
+    buf = qtn_mus_mediawall_artist_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mediawall_album_unknown
+// Text shown if the artist name is not available in media wall
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mediawall_album_unknown
+    {
+    buf = qtn_mus_mediawall_album_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_mediawall_popup_title_unknown
+// Text shown if the album name is not available in media wall
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_mediawall_popup_title_unknown
+    {
+    buf = qtn_mus_mediawall_popup_title_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_songs_artist_unknown
+// Text shown if the artist name is not available in tracks level view
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_songs_artist_unknown
+    {
+    buf = qtn_mus_songs_artist_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// Text shown if there is no content to display for Artists & Albums.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_vmp_no_albums
+    {
+    buf = qtn_vmp_no_albums;
+    }
+
+// ---------------------------------------------------------------------------
+// Text shown when there is no content to display in tracks level view.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_vmp_no_songs
+    {
+    buf = qtn_vmp_no_songs;
+    }
 // End of File

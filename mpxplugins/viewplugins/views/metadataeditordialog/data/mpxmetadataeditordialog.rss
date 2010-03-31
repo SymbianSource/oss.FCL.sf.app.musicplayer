@@ -1545,4 +1545,22 @@ RESOURCE DLG_LINE r_mpx_cui_details_published
                          };
      }
 
+RESOURCE DLG_LINE r_mpx_cui_licence_info
+    {
+    type=EEikCtEdwin;
+    prompt = qtn_nmp_song_details_licences ;
+    id= EMPXMetadataEditorDlgCtrlIdDRMDetail ;
+    control = EDWIN
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable ;
+        width = KMPXSongDetailsTextWidth;
+        lines = KMPXSongDetailsTextLines;
+        maxlength = KMPXSongDetailsTextMaxLen;
+        max_view_height_in_lines = 6;
+	base_line_delta = 21;
+        };
+    }
+
+RESOURCE TBUF r_mpx_cui_licence_det_link          { buf = qtn_nmp_song_details_licences_details; }
+
 // End of File

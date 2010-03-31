@@ -25,7 +25,8 @@
 /** Command ID's. */
 enum TMPXPodcastPlaybackViewCommandIds
     {
-    EMPXPbvCmdGoToPodcastMenu = 0x1A00
+    EMPXPbvCmdGoToPodcastMenu = 0x1A00,
+    EMPXPbvCmdPodcastDetails
     };
 
 #define KMPXPodcastPlaybackViewId 0x101FFCB8

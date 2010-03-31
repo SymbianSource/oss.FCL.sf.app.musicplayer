@@ -37,8 +37,15 @@
 #include "pluginmanager.h"
 #include "mcpharvesterpublisherobserver.h"
 
-_LIT( KPubData,        "publisher" );
+// These extend macros in <mpxlog.h>
 
+#ifdef _DEBUG
+#define MPX_DEBUG2_8(cstr, p) RDebug::Printf(cstr, p)
+#else
+#define MPX_DEBUG2_8(cstr, p)
+#endif
+
+_LIT( KPubData,        "publisher" );
 
 _LIT8( KMyActive, "active" );
 _LIT8( KMyDeActive, "deactive");
@@ -47,16 +54,12 @@ _LIT8( KMyResume, "resume");
 _LIT8( KMyActionMap, "action_map" );
 _LIT8( KMyItem, "item" );
 _LIT8( KMyAdd, "Add" );
+_LIT8( KMyMusic, "music");
 _LIT8( KMyItemId, "item_id" );
 _LIT( KMyActionName, "data" );
 
 _LIT( KEmpty, "" );
-_LIT( KLoc, "LOC:");
-_LIT( KWildCard, "*");
 
-_LIT( KNowPlaying, "LOC:NOW PLAYING" );
-_LIT( KLastPlayed, "LOC:LAST PLAYED" );
-_LIT( KMask, "_mask");
 _LIT( KMWPublisher, "MWPublisher");
 _LIT( KactionMessageToMusicPlayer, "MessageToMusicPlayer" );
 _LIT( KGoToAlbumView, "GoToAlbumView" );
@@ -73,6 +76,13 @@ _LIT8( KMessageForMMOpenMusicSuiteWithHide, "mm://root/musicsuite?exit=hide");
 _LIT( KResourceFile, "z:musichomescreen.rsc");
 
 // ======== MEMBER FUNCTIONS ========
+
+CMusicContentPublisher::TDestinationItem::TDestinationItem(const TMCPDestinationItem& aItem):
+    iType( reinterpret_cast<const TUint16*>(aItem.type) ),
+    iDataKey ( reinterpret_cast<const TUint8*>(aItem.dataKey ) ),
+    iMaskKey ( reinterpret_cast<const TUint8*>(aItem.maskKey ) )
+    {}
+
 
 // ---------------------------------------------------------------------------
 // Constructor
@@ -95,7 +105,7 @@ void CMusicContentPublisher::ConstructL()
     for (TInt i = 0; i < dstl; i++)
         {
         iDestinationMap.InsertL(KMCPDestinationInfo[i].id, 
-                KMCPDestinationInfo[i]);
+                                TDestinationItem(KMCPDestinationInfo[i]));
         }
     
     dstl = (sizeof(KMCPImageDestinationInfo)/sizeof(
@@ -131,8 +141,6 @@ void CMusicContentPublisher::ConstructL()
     resourceFile.OpenL(fs,fileName);
     CleanupClosePushL(resourceFile);
     resourceFile.ConfirmSignatureL();
-    GetLocalizedStringL(resourceFile, iLastPlayedBuffer, R_MUSICHOMESCREEN_LAST_PLAYED);
-    GetLocalizedStringL(resourceFile, iNowPlayingBuffer, R_MUSICHOMESCREEN_NOW_PLAYING);
     GetLocalizedStringL(resourceFile, iGoToMusicBuffer, R_MUSICHOMESCREEN_GO_TO_MUSIC);
     CleanupStack::PopAndDestroy(&resourceFile);
     CleanupStack::PopAndDestroy(&fs);
@@ -143,6 +151,9 @@ void CMusicContentPublisher::ConstructL()
     
     // enable skin.
     AknsUtils::InitSkinSupportL();
+    	
+    iDeferredPublish = new (ELeave) CAsyncCallBack(TCallBack(DoPublish, this), 
+                                                   CActive::EPriorityLow);
 
     MPX_DEBUG1("CMusicContentPublisher::ConstructL subscribing to observer");
  
@@ -153,21 +164,19 @@ void CMusicContentPublisher::ConstructL()
         
     if( id != 0 )
         {
-    CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
+        CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
 
-    filter->InsertL( KPublisherId, TLiwVariant( KMWPublisher ) );
-    filter->InsertL( KContentId, TLiwVariant( KAll) );
-    filter->InsertL( KContentType, TLiwVariant( KAll ) );
+        filter->InsertL( KPublisherId, TLiwVariant( KMWPublisher ) );
+        filter->InsertL( KContentId, TLiwVariant( KAll) );
+        filter->InsertL( KContentType, TLiwVariant( KAll ) );
 
-    iHPObserver = CMCPHarvesterPublisherObserver::NewL(this);
-    iHPObserver->RegisterL(filter);
-    CleanupStack::PopAndDestroy(filter);
+        iHPObserver = CMCPHarvesterPublisherObserver::NewL(this);
+        iHPObserver->RegisterL(filter);
+        CleanupStack::PopAndDestroy(filter);
         }
-    //Reset the music menu info
-    InstallEmptyActionL(EMusicMenuMusicInfoTrigger);
-    PublishTextL( NULL, EMusicMenuMusicInfoLine1, iLastPlayedBuffer->Des() );
-    PublishTextL( NULL, EMusicMenuMusicInfoLine2, KEmpty );
-    PublishImageL( NULL, EMusicMenuMusicInfoImage1, KEmpty );
+    
+    MPX_DEBUG1("CMusicContentPublisher::ConstructL initializing content");
+    PublishDefaultL();
     
     MPX_DEBUG1("CMusicContentPublisher::ConstructL --->");
     }
@@ -195,13 +204,12 @@ CMusicContentPublisher::~CMusicContentPublisher()
     {
     
     MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher <---");
+    delete iDeferredPublish;
     if(iHPObserver)
         {
         MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher deleting observer");
         delete iHPObserver; 
         }
-    delete iNowPlayingBuffer;
-    delete iLastPlayedBuffer;
     delete iGoToMusicBuffer;
     MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher closing destination maps");
     iImageDestinationSizeMap.Close();
@@ -212,13 +220,34 @@ CMusicContentPublisher::~CMusicContentPublisher()
     iAknsSrvSession.Close();
     MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher deleting plugin manager");
     delete iPluginManager;
-    MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher resetting publishing buffers");
-    ResetPublishingBuffers();
+    MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher resetting publishing maps");
+    iPublishingDataMap.Close();
+    iPublishingActionMap.Close();
     MPX_DEBUG1("CMusicContentPublisher::~CMusicContentPublisher --->");
     if ( iInstanceId )
     	{
     	delete iInstanceId;
     	}
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CMusicContentPublisher::PublishDefaultL()
+    {
+    MPX_FUNC("CMusicContentPublisher::PublishDefaultL");
+    PublishImageL(NULL,EMusicWidgetImage1,KEmpty);
+    InstallGoToAlbumL( EMusicWidgetTrigger1 );
+    PublishTextL( NULL,EMusicWidgetDefaultText, *iGoToMusicBuffer );
+    PublishTextL( NULL,EMusicWidgetText1, KEmpty );
+    PublishImageL(NULL,EMusicWidgetToolbarB1,KEmpty);
+    PublishImageL(NULL,EMusicWidgetToolbarB2,KEmpty);
+    PublishImageL(NULL,EMusicWidgetToolbarB3,KEmpty);
+    InstallEmptyActionL(EMusicWidgetTB1Trigger);
+    InstallEmptyActionL(EMusicWidgetTB2Trigger);
+    InstallEmptyActionL(EMusicWidgetTB3Trigger);
+    InstallGoToAlbumL( EMusicWidgetTrigger2 );
     }
 
 // ---------------------------------------------------------------------------
@@ -286,46 +315,6 @@ void CMusicContentPublisher::InstallEmptyActionL(
     CleanupStack::PopAndDestroy( mapTrigger );
     MPX_DEBUG1("CMusicContentPublisher::InstallEmptyActionL --->");
     }
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CMusicContentPublisher::MapEnumToDestinationInfoL(TInt aEnum,
-        TPtrC& aType, TPtrC8& aDataKey, TPtrC& aContent)
-    {
-    MPX_DEBUG1("CMusicContentPublisher::MapEnumToDestinationInfoL <---");
-    TMCPDestinationItem* tmpdstitemp;
-    tmpdstitemp = iDestinationMap.Find(aEnum);
-    
-    if (tmpdstitemp)
-        {
-        TPtrC type ( reinterpret_cast<const TUint16*>(
-                tmpdstitemp->type) );
-        TPtrC8 dataKey ( reinterpret_cast<const TUint8*>(
-                tmpdstitemp->dataKey ) );
-        TPtrC content ( reinterpret_cast<const TUint16*>(
-                tmpdstitemp->content) );
-
-        aType.Set(type);
-        aDataKey.Set(dataKey);
-
-        if ( !content.Compare( KWildCard ) )
-            {
-            aContent.Set(iInstanceId ? iInstanceId->Des(): KNullDesC() );
-            }
-        else
-            {
-            aContent.Set(content);
-            }
-        }
-    else
-        {
-        //API user provided an invalid destination or the destination is not
-        //defined properly.
-        __ASSERT_DEBUG(EFalse,User::Invariant());
-        }
-    MPX_DEBUG1("CMusicContentPublisher::MapEnumToDestinationInfoL --->");
-    }
 
 // ----------------------------------------------------------------------------
 // Get a heap descriptor from the resource file
@@ -344,95 +333,157 @@ void CMusicContentPublisher::GetLocalizedStringL(RResourceFile& aResourceFile,
    }
 
 // ----------------------------------------------------------------------------
-// Publishes buffered data and actions.
+// Trigger deferred publishing through an active object
 // ----------------------------------------------------------------------------
 //
-void CMusicContentPublisher::DoPublishL()
+void CMusicContentPublisher::PublishDeferred()
     {
-    MPX_DEBUG1("CMusicContentPublisher::DoPublishL <---");
-    THashMapIter<TInt, TMyBufferItem> dataIter( iPublishingDataBuffers );
-    MPX_DEBUG1("CMusicContentPublisher::DoPublishL publishing data");
-    
-    TMyBufferItem const* itemptr;
-    itemptr = dataIter.NextValue();
-    while (itemptr)
+    MPX_FUNC("CMusicContentPublisher::PublishDeferred");
+    if ( iWidgetForeground )
         {
-        CLiwGenericParamList* inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList* outParam = CLiwGenericParamList::NewLC();
-        
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL(*dataIter.CurrentKey(), type, dataKey, content);
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC( );
-        
-        
-        RMemReadStream rs( itemptr->buf, itemptr->size );
-        CLiwDefaultMap* map = CLiwDefaultMap::NewLC( rs );
-         
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        cpdatamap->InsertL( KDataMap  , TLiwVariant( map ) );
-    
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
- 
-        iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-        CleanupStack::PopAndDestroy( map );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
-        
-        itemptr = dataIter.NextValue();
+        iDeferredPublish->CallBack();
         }
-        
-    //The order in wich we publish is important, actions should be published after the data contents.
-    THashMapIter<TInt, TMyBufferItem> actionIter( iPublishingActionBuffers );
-    MPX_DEBUG1("CMusicContentPublisher::DoPublishL publishing actions");
-    
-    itemptr = NULL;
-    itemptr = actionIter.NextValue();
-    while (itemptr)
-        {
-        CLiwGenericParamList* inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList* outParam = CLiwGenericParamList::NewLC();
-        
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL( *actionIter.CurrentKey(), type, dataKey, content );
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC( );
-        
-        
-        RMemReadStream rs( itemptr->buf, itemptr->size );
-        CLiwDefaultMap* map = CLiwDefaultMap::NewLC( rs );
-         
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        cpdatamap->InsertL( KMyActionMap  , TLiwVariant( map ) );
-    
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
- 
-        iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-        CleanupStack::PopAndDestroy( map );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
-        
-        itemptr = actionIter.NextValue();
-        }
-    MPX_DEBUG1("CMusicContentPublisher::CMusicContentPublisher::DoPublishL --->");
     }
 
+// ----------------------------------------------------------------------------
+// Run deferred publishing
+// ----------------------------------------------------------------------------
+//
+ TInt CMusicContentPublisher::DoPublish(TAny * aMusicContentPublisher)
+    {
+    MPX_FUNC("CMusicContentPublisher::DoPublish");
+    CMusicContentPublisher * self = static_cast<CMusicContentPublisher*>(aMusicContentPublisher);
+    if ( self->iWidgetForeground )
+        {
+        TRAPD(err, self->DoPublishModifiedL());
+        if (err != KErrNone)
+            {
+            MPX_DEBUG2("CMusicContentPublisher::DoPublish failed, err=%d", err);
+            }
+        }    
+    return KErrNone;
+    }
+     
+// ----------------------------------------------------------------------------
+// Publish all content
+// ----------------------------------------------------------------------------
+//
+void CMusicContentPublisher::DoPublishAllL()
+    {
+    MPX_FUNC("CMusicContentPublisher::DoPublishAllL");
+    if (iCPSInterface && iInstanceId)
+        {
+        CLiwMap * datamap = iPublishingDataMap.GetAllLC();
+        CLiwMap * actionmap = iPublishingActionMap.GetAllLC();
+
+        CLiwDefaultMap * cpdata = CLiwDefaultMap::NewLC( );
+        cpdata->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
+        cpdata->InsertL( KContentType , TLiwVariant( KMyMusic ) );
+        cpdata->InsertL( KContentId  , TLiwVariant( iInstanceId ) );
+        cpdata->InsertL( KDataMap  , TLiwVariant( datamap ) );
+        cpdata->InsertL( KActionMap  , TLiwVariant( actionmap ) );
+
+        MPX_DEBUG2("CMusicContentPublisher::DoPublishAllL Add in %S", iInstanceId);
+        DoPublishCmdL( KAdd, KItem, cpdata );
+        
+        CleanupStack::PopAndDestroy( cpdata );
+        CleanupStack::PopAndDestroy( actionmap );
+        CleanupStack::PopAndDestroy( datamap );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// Publish modified content
+// ----------------------------------------------------------------------------
+//
+void CMusicContentPublisher::DoPublishModifiedL()
+    {
+    MPX_FUNC("CMusicContentPublisher::DoPublishModifiedL");
+    if (iCPSInterface && iInstanceId )
+        {
+        CLiwMap * datamap = iPublishingDataMap.GetModifiedLC();
+        // Must re-publish all actions even if only one of them has changed,
+        // otherwise non-modified actions won't work any more
+        CLiwMap * actionmap = NULL;
+        if ( iPublishingActionMap.IsModified() )
+            {
+            actionmap = iPublishingActionMap.GetAllLC();
+            }
+        if ( datamap || actionmap )
+            {
+            CLiwMap * cpdata = CLiwDefaultMap::NewLC( );
+            cpdata->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
+            cpdata->InsertL( KContentType , TLiwVariant( KMyMusic ) );
+            cpdata->InsertL( KContentId  , TLiwVariant( iInstanceId ) );
+            if ( datamap && datamap->Count() )
+                {
+                cpdata->InsertL( KDataMap  , TLiwVariant( datamap ) );
+                }
+            if ( actionmap && actionmap->Count() )
+                {
+                cpdata->InsertL( KActionMap  , TLiwVariant( actionmap ) );
+                }
+
+            MPX_DEBUG2("CMusicContentPublisher::DoPublishModifiedL Add in %S", iInstanceId);
+            DoPublishCmdL( KAdd, KItem, cpdata );
+        
+            CleanupStack::PopAndDestroy( cpdata );
+            }
+        if (actionmap)
+            {
+            CleanupStack::PopAndDestroy( actionmap );
+            }
+        if (datamap)
+            {
+            CleanupStack::PopAndDestroy( datamap );
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Remove all content
+// ---------------------------------------------------------------------------
+//
+void CMusicContentPublisher::DoPublishDeleteAllL()
+    {
+    MPX_FUNC("CMusicContentPublisher::DoPublishDeleteAllL");
+    if( iCPSInterface && iInstanceId)
+        {
+        CLiwDefaultMap * cpdata = CLiwDefaultMap::NewLC( );
+        cpdata->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
+        cpdata->InsertL( KContentType , TLiwVariant( KAll ) );
+        cpdata->InsertL( KContentId  , TLiwVariant( iInstanceId ) );
+
+        MPX_DEBUG2("CMusicContentPublisher::DoPublishDeleteAllL Delete All in %S", iInstanceId);
+        DoPublishCmdL( KDelete, KFilter, cpdata );
+
+        CleanupStack::PopAndDestroy( cpdata );
+        }  
+    }
+    
+// ---------------------------------------------------------------------------
+// Execute a CMD to iCPSInterface
+// ---------------------------------------------------------------------------
+//
+void CMusicContentPublisher::DoPublishCmdL(const TDesC8& aCmd, 
+	                                         const TDesC8& aKey, 
+	                                         const CLiwMap * aValue)
+    {
+    MPX_FUNC("CMusicContentPublisher::DoPublishCmdL");
+    CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
+    TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
+    inParam->AppendL( cptype );
+    TLiwGenericParam item( aKey, TLiwVariant( aValue ) ); 
+    inParam->AppendL( item );
+
+    CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
+
+    iCPSInterface->ExecuteCmdL( aCmd , *inParam, *outParam);
+
+    CleanupStack::PopAndDestroy( outParam );
+    CleanupStack::PopAndDestroy( inParam );
+    }
+    
 // ---------------------------------------------------------------------------
 // Resets all the graphical elements.
 // ---------------------------------------------------------------------------
@@ -443,23 +494,7 @@ void CMusicContentPublisher::ResetL()
     //Plugin deletion is handled by the pluginmanager.
     iActivePlugin = NULL;
     //Reset The Widget
-    PublishImageL(NULL,EMusicWidgetImage1,KEmpty);
-    InstallGoToAlbumL(EMusicWidgetTrigger1);
-    PublishTextL( NULL,EMusicWidgetText1, KEmpty );
-    PublishImageL(NULL,EMusicWidgetToolbarB1,KEmpty);
-    PublishImageL(NULL,EMusicWidgetToolbarB2,KEmpty);
-    PublishImageL(NULL,EMusicWidgetToolbarB3,KEmpty);
-    InstallEmptyActionL(EMusicWidgetTB1Trigger);
-    InstallEmptyActionL(EMusicWidgetTB2Trigger);
-    InstallEmptyActionL(EMusicWidgetTB3Trigger);
-    PublishTextL( NULL,EMusicWidgetDefaultText, iGoToMusicBuffer->Des() );  
-    InstallGoToAlbumL(EMusicWidgetTrigger2);
-
-    //Reset the music menu info
-    InstallEmptyActionL(EMusicMenuMusicInfoTrigger);
-    PublishTextL( NULL, EMusicMenuMusicInfoLine1, iLastPlayedBuffer->Des() );
-    PublishTextL( NULL, EMusicMenuMusicInfoLine2, KEmpty );
-    PublishImageL( NULL, EMusicMenuMusicInfoImage1, KEmpty );
+    PublishDefaultL();
     MPX_DEBUG1("CMusicContentPublisher::Reset --->");
     }
 // ---------------------------------------------------------------------------
@@ -511,34 +546,9 @@ void CMusicContentPublisher::ResetBitmapCache()
     }
     
 // ---------------------------------------------------------------------------
-// Destroys the publishing buffers.
+// 
 // ---------------------------------------------------------------------------
 //
-void CMusicContentPublisher::ResetPublishingBuffers()
-    {
-    THashMapIter<TInt, TMyBufferItem> dataIter( iPublishingDataBuffers );
-    THashMapIter<TInt, TMyBufferItem> actionIter( iPublishingActionBuffers );
-    
-    TMyBufferItem const* itemptr;
-    itemptr = dataIter.NextValue();
-    while (itemptr)
-        {
-        User::Free(itemptr->buf);
-        dataIter.RemoveCurrent();
-        itemptr = dataIter.NextValue();
-        }
-    iPublishingDataBuffers.Close();
-    itemptr = NULL;
-    itemptr = actionIter.NextValue();
-    while (itemptr)
-        {
-        User::Free(itemptr->buf);
-        actionIter.RemoveCurrent();
-        itemptr = actionIter.NextValue();
-        }
-    iPublishingActionBuffers.Close();
-    }
-
 TUint CMusicContentPublisher::RegisterPublisherL( 
     const TDesC& aPublisherId, 
     const TDesC& aContentId,
@@ -605,36 +615,6 @@ TUint CMusicContentPublisher::ExtractItemId( const CLiwGenericParamList& aInPara
     return result;
     }
  
- // ---------------------------------------------------------------------------
-// removes CPS entry for the required destination
-// ---------------------------------------------------------------------------
-//
-void CMusicContentPublisher::RemoveL( TInt aDestination )
-    {
-    MPX_DEBUG1("CMusicContentPublisher::RemoveL <---");
-    if( iCPSInterface )
-        {
-        CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL(aDestination, type, dataKey, content);
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap * cpdatamap = CLiwDefaultMap::NewLC( );
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        TLiwGenericParam item( KFilter, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
-        iCPSInterface->ExecuteCmdL( KDelete , *inParam, *outParam);
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
-        }  
-    MPX_DEBUG1("CMusicContentPublisher::RemoveL --->");
-    }
 
 // ---------------------------------------------------------------------------
 // Publishes an image from path to the required destination
@@ -644,64 +624,20 @@ void CMusicContentPublisher::PublishImageL( CMCPPlugin* aPlugin,
         TMCPImageDestination aDestination, 
         const TDesC& aImagePath )
     {
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL <---");
+    MPX_FUNC("CMusicContentPublisher::PublishImageL");
+    if ( aDestination >= EMusicMenuMusicInfoImage1 )
+        {
+        MPX_DEBUG2("CMusicContentPublisher::PublishImageL deprecated aDestination=%d", aDestination);
+        return;
+        }
+
     if( iCPSInterface && iActivePlugin == aPlugin )
         {
-        CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
-        
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL(aDestination, type, dataKey, content);
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap * cpdatamap = CLiwDefaultMap::NewLC( );
-        CLiwDefaultMap * map = CLiwDefaultMap::NewLC( );
-        
-         
-        map->InsertL(dataKey, TLiwVariant( aImagePath ) );
-        
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        cpdatamap->InsertL( KDataMap  , TLiwVariant( map ) );
-    
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
-        
-        if ( aDestination >= EMusicMenuMusicInfoImage1 )
-            {
-            iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-            }
-        else
-            {
-            if ( iWidgetForeground )
-                {
-                iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-                }
-            TMyBufferItem* ptr;
-            ptr = iPublishingDataBuffers.Find(aDestination);
-            if (ptr) //remove the old one
-                {
-                User::Free(ptr->buf);
-                iPublishingDataBuffers.Remove(aDestination);
-                }
-            TInt sz = map->Size();
-            TMyBufferItem bufferitem;
-            bufferitem.size = map->Size();
-            bufferitem.buf = User::AllocL(map->Size());
-            RMemWriteStream ws(bufferitem.buf, bufferitem.size);
-            map->ExternalizeL(ws);
-            iPublishingDataBuffers.Insert(aDestination, bufferitem);
-            }
-        CleanupStack::PopAndDestroy( map );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
-        }   
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL --->");
+        TDestinationItem & destination (iDestinationMap.FindL( aDestination ));
+        iPublishingDataMap.SetL( destination.iDataKey, aImagePath );
+        iPublishingDataMap.Reset( destination.iMaskKey );
+        PublishDeferred();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -713,95 +649,28 @@ void CMusicContentPublisher::PublishImageL( CMCPPlugin* aPlugin,
         TInt aBitmapHandle,
         TInt aMaskBitmapHandle)
     {
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL <---");
+    MPX_FUNC("CMusicContentPublisher::PublishImageL");
+    if ( aDestination >= EMusicMenuMusicInfoImage1 )
+        {
+        MPX_DEBUG2("CMusicContentPublisher::PublishImageL deprecated aDestination=%d", aDestination);
+        return;
+        }
     if( iCPSInterface && iActivePlugin == aPlugin )
         {
-        CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
+        TDestinationItem & destination (iDestinationMap.FindL( aDestination ));
         
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL(aDestination, type, dataKey, content);
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap * cpdatamap = CLiwDefaultMap::NewLC( );
-        CLiwDefaultMap * map = CLiwDefaultMap::NewLC( );
-        
-         
-        if (aDestination == EMusicMenuMusicInfoImage1)
-            {
-            //Matrix Menu expects a Tint32 (TVariantTypeId::EVariantTypeTInt32)   
-            map->InsertL(dataKey, TLiwVariant( TInt32( aBitmapHandle ) ) );
-            }
-        else 
-            {
-            //Homescreen expects a TBool/TInt 
-            //(TVariantTypeId::EVariantTypeTBool)
-            map->InsertL(dataKey, TLiwVariant( aBitmapHandle ) );
-            }
+        iPublishingDataMap.SetL( destination.iDataKey, aBitmapHandle  );
         
         if (aMaskBitmapHandle)
             {
-            HBufC8* maskResult = HBufC8::NewLC( 
-                    dataKey.Length() + KMask().Length() );
-            TPtr8 maskResultPtr = maskResult->Des();
-            maskResultPtr.Append( dataKey );
-            maskResultPtr.Append( KMask );
-            if (aDestination == EMusicMenuMusicInfoImage1)
-                {
-                //Matrix Menu expects a Tint32 (TVariantTypeId::EVariantTypeTInt32)   
-                map->InsertL(maskResultPtr, TLiwVariant( (TInt32)aMaskBitmapHandle ) );
-                }
-            else 
-                {
-                //Homescreen expects a TBool/TInt 
-                //(TVariantTypeId::EVariantTypeTBool)
-                map->InsertL(maskResultPtr, TLiwVariant( aMaskBitmapHandle ) );
-                }
-            CleanupStack::PopAndDestroy( maskResult );
-            }
-        
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        cpdatamap->InsertL( KDataMap  , TLiwVariant( map ) );
-    
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
-        
-        if ( aDestination >= EMusicMenuMusicInfoImage1 )
-            {
-            iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
+            iPublishingDataMap.SetL( destination.iMaskKey, aMaskBitmapHandle );
             }
         else
             {
-            if ( iWidgetForeground )
-                {
-                iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );  	
-                }
-            TMyBufferItem* ptr;
-            ptr = iPublishingDataBuffers.Find(aDestination);
-            if (ptr) //remove the old one
-                {
-                User::Free(ptr->buf);
-                iPublishingDataBuffers.Remove(aDestination);
-                }
-            TInt sz = map->Size();
-            TMyBufferItem bufferitem;
-            bufferitem.size = map->Size();
-            bufferitem.buf = User::AllocL(map->Size());
-            RMemWriteStream ws(bufferitem.buf, bufferitem.size);
-            map->ExternalizeL(ws);
-            iPublishingDataBuffers.Insert(aDestination, bufferitem);
+            iPublishingDataMap.Reset( destination.iMaskKey );
             }
-        CleanupStack::PopAndDestroy( map );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
+        PublishDeferred();
         }
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL --->");
     }
 
 // ---------------------------------------------------------------------------
@@ -815,7 +684,13 @@ void CMusicContentPublisher::PublishImageL(CMCPPlugin* aPlugin,
         const TInt aFileBitmapId,
         const TInt aFileMaskId )
     {
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL <---");
+    MPX_FUNC("CMusicContentPublisher::PublishImageL");
+    if ( aDestination >= EMusicMenuMusicInfoImage1 )
+        {
+        MPX_DEBUG2("CMusicContentPublisher::PublishImageL deprecated aDestination=%d", aDestination);
+        return;
+        }
+        
     TBmpMsk* bitmapandmask;
     bitmapandmask = iBitmapCache.Find(aID.iMajor+aID.iMinor);
     CFbsBitmap* bitmap = NULL;
@@ -850,7 +725,6 @@ void CMusicContentPublisher::PublishImageL(CMCPPlugin* aPlugin,
     mask = bitmapandmask->mask;
     
     PublishImageL( aPlugin, aDestination, bitmap->Handle() , mask->Handle()); 
-    MPX_DEBUG1("CMusicContentPublisher::PublishImageL --->");
     }
 
 // ---------------------------------------------------------------------------
@@ -861,88 +735,21 @@ void CMusicContentPublisher::PublishTextL( CMCPPlugin* aPlugin,
         TMCPTextDestination aDestination, 
         const TDesC& aText )
     {
-    MPX_DEBUG1("CMusicContentPublisher::PublishTextL <---");
+    MPX_FUNC("CMusicContentPublisher::PublishTextL");
+    if ( aDestination >= EMusicMenuMusicInfoLine1 )
+        {
+        MPX_DEBUG2("CMusicContentPublisher::PublishTextL deprecated aDestination=%d", aDestination);
+        return;
+        }
+
     if( iCPSInterface && iActivePlugin == aPlugin)
         {
-        CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
-        
-        TPtrC8 dataKey;
-        TPtrC type;
-        TPtrC content;
-        MapEnumToDestinationInfoL(aDestination, type, dataKey, content);
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        CLiwDefaultMap * cpdatamap = CLiwDefaultMap::NewLC( );
-        CLiwDefaultMap * map = CLiwDefaultMap::NewLC( );
-        
-        if (KErrNotFound == aText.Find(KLoc))
-            {
-            map->InsertL( dataKey , TLiwVariant( aText ) );    
-            }
-        else
-            {
-            if ( ! aText.Compare( KNowPlaying ) )
-                {
-                map->InsertL( dataKey , TLiwVariant( iNowPlayingBuffer ) );
-                }
-            else if ( ! aText.Compare( KLastPlayed ) )
-                {
-                map->InsertL( dataKey , TLiwVariant( iLastPlayedBuffer ) );
-                }
-            else
-                {
-                map->InsertL( dataKey , TLiwVariant( aText ) );
-                }
-            }
-        
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( type ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( content ) );
-        cpdatamap->InsertL( KDataMap  , TLiwVariant( map ) );
-        
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
-        
-        if ( aDestination >= EMusicMenuMusicInfoLine1 )
-            {
-            if (aText  != KEmpty)
-                {
-                iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-                }
-            else
-                {
-                iCPSInterface->ExecuteCmdL( KDelete , *inParam, *outParam);
-                }
-            }
-        else
-            {
-            if ( iWidgetForeground )
-                {
-                iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );        	
-                }
-            TMyBufferItem* ptr;
-            ptr = iPublishingDataBuffers.Find(aDestination);
-            if (ptr) //remove the old one
-                {
-                User::Free(ptr->buf);
-                iPublishingDataBuffers.Remove(aDestination);
-                }
-            TInt sz = map->Size();
-            TMyBufferItem bufferitem;
-            bufferitem.size = map->Size();
-            bufferitem.buf = User::AllocL(map->Size());
-            RMemWriteStream ws(bufferitem.buf, bufferitem.size);
-            map->ExternalizeL(ws);
-            iPublishingDataBuffers.Insert(aDestination, bufferitem);
-            }
-        CleanupStack::PopAndDestroy( map );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
+        TPtrC8 dataKey (iDestinationMap.FindL(aDestination).iDataKey);
+        TPtrC  text;
+        text.Set( aText );
+        iPublishingDataMap.SetL ( dataKey, text );
+        PublishDeferred();
         }  
-    MPX_DEBUG1("CMusicContentPublisher::PublishTextL --->");
     }
 
 // ---------------------------------------------------------------------------
@@ -953,65 +760,19 @@ void CMusicContentPublisher::PublishActionL( CMCPPlugin* aPlugin,
         TMCPTriggerDestination aDestination,
         CLiwDefaultMap* aTriggerMap )
     {
-    MPX_DEBUG1("CMusicContentPublisher::PublishActionL <---");
-     if( iCPSInterface && iActivePlugin == aPlugin)
+    MPX_FUNC("CMusicContentPublisher::PublishActionL");
+    if ( aDestination >= EMusicMenuMusicInfoTrigger )
         {
-        CLiwGenericParamList * inParam = CLiwGenericParamList::NewLC();
-        CLiwGenericParamList * outParam = CLiwGenericParamList::NewLC();
-        
-        TPtrC8 triggerKey;
-        TPtrC hostType;
-        TPtrC hostContent;
-        
-        MapEnumToDestinationInfoL(aDestination, hostType, triggerKey, 
-                hostContent);
-        
-        TLiwGenericParam cptype( KType , TLiwVariant( KCpData ) );
-        inParam->AppendL( cptype );
-        
-        CLiwDefaultMap * cpdatamap = CLiwDefaultMap::NewLC( );
-        cpdatamap->InsertL( KPublisherId , TLiwVariant( KMWPublisher ) );
-        cpdatamap->InsertL( KContentType , TLiwVariant( hostType ) );
-        cpdatamap->InsertL( KContentId  , TLiwVariant( hostContent ) );
-        
-        CLiwDefaultMap * actionmap = CLiwDefaultMap::NewLC( );
-        actionmap->InsertL( triggerKey , TLiwVariant( aTriggerMap ) );
-        cpdatamap->InsertL( KActionMap  , TLiwVariant( actionmap ) );
-        
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ) ); 
-        inParam->AppendL( item );
-        
-        if ( aDestination >= EMusicMenuMusicInfoTrigger )
-            {
-            iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-            }
-        else
-            {
-            if ( iWidgetForeground )
-                {
-            	  iCPSInterface->ExecuteCmdL( KAdd , *inParam, *outParam );
-                }
-            TMyBufferItem* ptr;
-            ptr = iPublishingActionBuffers.Find(aDestination);
-            if (ptr) //remove the old one
-                {
-                User::Free(ptr->buf);
-                iPublishingActionBuffers.Remove(aDestination);
-                }
-            TInt sz = actionmap->Size();
-            TMyBufferItem bufferitem;
-            bufferitem.size = actionmap->Size();
-            bufferitem.buf = User::AllocL(actionmap->Size());
-            RMemWriteStream ws(bufferitem.buf, bufferitem.size);
-            actionmap->ExternalizeL(ws);
-            iPublishingActionBuffers.Insert(aDestination, bufferitem);
-            }
-        CleanupStack::PopAndDestroy( actionmap );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        CleanupStack::PopAndDestroy( outParam );
-        CleanupStack::PopAndDestroy( inParam );
+        MPX_DEBUG2("CMusicContentPublisher::PublishActionL deprecated aDestination=%d", aDestination);
+        return;
         }
-    MPX_DEBUG1("CMusicContentPublisher::PublishActionL --->");
+
+    if( iCPSInterface && iActivePlugin == aPlugin)
+        {
+        TDestinationItem & destination ( iDestinationMap.FindL( aDestination ) );
+        iPublishingActionMap.SetL( destination.iDataKey , aTriggerMap );
+        PublishDeferred();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -1020,19 +781,19 @@ void CMusicContentPublisher::PublishActionL( CMCPPlugin* aPlugin,
 //
 void CMusicContentPublisher::BecameActiveL( CMCPPlugin* aPlugin )
     {
-    MPX_DEBUG1("CMusicContentPublisher::BecameActiveL <---");
+    MPX_FUNC("CMusicContentPublisher::BecameActiveL");
     if ( iActivePlugin != aPlugin )
         {
         if ( iActivePlugin )
             {
             MPX_DEBUG1("CMusicContentPublisher::BecameActiveL deactivating old plugin");
+            DoPublishDeleteAllL();
             iActivePlugin->Deactivate();
-            MPX_DEBUG1("CMusicContentPublisher::BecameActiveL plugin deactivated");
-            PublishImageL( iActivePlugin, EMusicMenuMusicInfoImage1, KEmpty );
+            iPublishingDataMap.Close();
+            iPublishingActionMap.Close();
             }
         iActivePlugin = aPlugin;
         }
-    MPX_DEBUG1("CMusicContentPublisher::BecameActiveL --->");
     }
 // ---------------------------------------------------------------------------
 // From CContentHarvesterPlugin
@@ -1041,7 +802,7 @@ void CMusicContentPublisher::BecameActiveL( CMCPPlugin* aPlugin )
 //    
 void CMusicContentPublisher::UpdateL() 
     {
-    MPX_DEBUG1("CMusicContentPublisher::UpdateL <---");
+    MPX_FUNC("CMusicContentPublisher::UpdateL");
     if ( !iPluginManager )
         {
         MPX_DEBUG1("CMusicContentPublisher::UpdateL creating the plugin manager");
@@ -1050,7 +811,6 @@ void CMusicContentPublisher::UpdateL()
                 static_cast<MMCPPluginObserver*>( this ),
                 this );
         }
-    MPX_DEBUG1("CMusicContentPublisher::UpdateL --->");
     }
 
 // ---------------------------------------------------------------------------
@@ -1070,62 +830,42 @@ void CMusicContentPublisher::SkinContentChanged()
     MPX_DEBUG1("CMusicContentPublisher::SkinContentChanged --->");
     }
 
-void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContentId, const TDesC8& aTrigger )
+void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContentId, 
+	                                                         const TDesC8& aTrigger )
     {
-    MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL <---");
-    if ( aTrigger == KMyActive && !iWidgetActivated)
+    MPX_DEBUG2_8("-->CMusicContentPublisher::HandlePublisherNotificationL %S", &aTrigger);
+    if ( aTrigger == KMyActive )
         {
-        iWidgetActivated = ETrue;
-        MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL activate");
+        delete iInstanceId;
+        iInstanceId = NULL;
+        iInstanceId = aContentId.AllocL();
+        DoPublishAllL();
+        }
+    else if ( aTrigger ==  KMyDeActive )
+        {
+        DoPublishDeleteAllL();
+        delete iInstanceId;
+        iInstanceId = NULL;
+        }
+    else if ( aTrigger ==  KMySuspend && iWidgetForeground)
+        {
+        iWidgetForeground = EFalse;
+        }
+    else if ( aTrigger ==  KMyResume && !iWidgetForeground)
+        {
+        iWidgetForeground = ETrue;
         if ( !iInstanceId )
             {
+            // CPS framework does not always send 'active' message during boot
             iInstanceId = aContentId.AllocL();
-            //Reset The Widget
-            MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL activate --> Reset Widget");
-            RDebug::Print(aContentId);
-            PublishImageL(NULL,EMusicWidgetImage1,KEmpty);
-            InstallGoToAlbumL( EMusicWidgetTrigger1 );
-            PublishTextL( NULL,EMusicWidgetText1, KEmpty );
-            PublishImageL(NULL,EMusicWidgetToolbarB1,KEmpty);
-            PublishImageL(NULL,EMusicWidgetToolbarB2,KEmpty);
-            PublishImageL(NULL,EMusicWidgetToolbarB3,KEmpty);
-            InstallEmptyActionL(EMusicWidgetTB1Trigger);
-            InstallEmptyActionL(EMusicWidgetTB2Trigger);
-            InstallEmptyActionL(EMusicWidgetTB3Trigger);
-            PublishTextL( NULL,EMusicWidgetDefaultText, iGoToMusicBuffer->Des() );
-            InstallGoToAlbumL( EMusicWidgetTrigger2 );
+            DoPublishAllL();
             }
         else
             {
-            delete iInstanceId;
-            iInstanceId = NULL;
-            iInstanceId = aContentId.AllocL();
+            DoPublishModifiedL();
             }
         }
-    else if ( aTrigger ==  KMyDeActive && iWidgetActivated)
-        {
-        iWidgetActivated = EFalse;
-        MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL deactivate");
-        //Removing al the CPS entrys to prevent flicker of old text and unwanted images (old/expired handles).
-        RemoveL( EMusicWidgetImage1 );
-        RemoveL( EMusicWidgetText1 );
-        RemoveL( EMusicWidgetToolbarB1 );
-        RemoveL( EMusicWidgetToolbarB2 );
-        RemoveL( EMusicWidgetToolbarB3 );
-        RemoveL( EMusicWidgetDefaultText );
-        }
-    else if ( aTrigger ==  KMySuspend && iWidgetActivated && iWidgetForeground)
-        {
-        MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL suspend");
-        iWidgetForeground = EFalse;
-        }
-    else if ( aTrigger ==  KMyResume && iWidgetActivated && !iWidgetForeground)
-        {
-        MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL resume");
-        iWidgetForeground = ETrue;
-        DoPublishL();
-        }
-    MPX_DEBUG1("CMusicContentPublisher::HandlePublisherNotificationL --->");
+    MPX_DEBUG1("<--CMusicContentPublisher::HandlePublisherNotificationL");
     }
 
 

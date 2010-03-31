@@ -104,10 +104,10 @@ LIBRARY         featmgr.lib
 LIBRARY         mpxbacksteppingutility.lib 
 #endif // IAD_INCLUDE_BACKSTEPPING
 
-// Added by Harri for Hurriganes MediaWall mod
 LIBRARY         ws32.lib
 LIBRARY         ecom.lib
 LIBRARY         aknlayout2scalable.lib
+LIBRARY         AknLayout2.lib       
 
 LIBRARY         thumbnailmanager.lib    // Album art
 LIBRARY         ganes.lib

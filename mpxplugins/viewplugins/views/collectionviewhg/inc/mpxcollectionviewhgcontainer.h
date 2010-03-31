@@ -751,8 +751,9 @@ private:
 
     /**
      * Resolve the type of view based on current browsing context
+     * @param aCount Count from media array
      */
-	void ResolveCurrentViewType();
+	void ResolveCurrentViewType(TInt aCount);
 
     /**
      * Clean up the previous view's resources.

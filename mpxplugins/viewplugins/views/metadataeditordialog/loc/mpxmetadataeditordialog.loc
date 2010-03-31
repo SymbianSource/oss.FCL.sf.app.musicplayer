@@ -569,4 +569,18 @@
 // r:3.1
 //
 #define qtn_mp_details_playback_complete "Playback complete" 
+
+// d:Metadata editing prompt text.
+// d:Licence name prompt.
+// l:form_field_data_wide_pane_t1
+// r:5.2
+//
+#define qtn_nmp_song_details_licences "Licences"
+
+// d:Text shown in File Details to launch DRM file detail popup
+// l:list_form_graphic_pane_t1
+// r:5.2
+//
+#define qtn_nmp_song_details_licences_details "Click for details"
+
 // End of File

@@ -61,8 +61,13 @@ class CMPXDbCategory :
         *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        virtual TUint32 AddItemL(const TDesC& aName, TInt aDriveId, TBool& aNewRecord,
+            TBool aCaseSensitive = ETrue);
+#else 
         TUint32 AddItemL(const TDesC& aName, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
         /**
         * Get the name field for a given ID.
@@ -100,9 +105,13 @@ class CMPXDbCategory :
         * @param aItemExist Out parameter, ETrue if the category is not deleted after the delete,
         *        EFalse otherwise
         */
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        virtual void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
+            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, TBool aMtpInUse = EFalse);
+#else
         void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
-
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Deletes a category.
         * @param aId identifies the category
@@ -167,15 +176,15 @@ class CMPXDbCategory :
         */
         TInt GetSongsCountL(TInt aDriveId, TUint32 aId);
 
-		/**
-	    * Update a category item.
-	    * @param aId: The ID of the category to update
-	    * @param aMedia: The media data
-	    * @param aDriveId: The Drive Id the name (category) belongs
-	    * @param aItemChangedMessages: if valid on return contains a updated message if the
+        /**
+        * Update a category item.
+        * @param aId: The ID of the category to update
+        * @param aMedia: The media data
+        * @param aDriveId: The Drive Id the name (category) belongs
+        * @param aItemChangedMessages: if valid on return contains a updated message if the
         * category was updated
         */
-		void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+        void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
 
     protected:
 

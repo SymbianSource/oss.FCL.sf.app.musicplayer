@@ -89,7 +89,7 @@ RESOURCE MENU_PANE r_mpx_podcast_collection_view_podcast_menu
         MENU_ITEM
             {
             command = EMPXCmdGoToNowPlaying;
-            txt = qtn_nmp_options_go_to_nowplaying;
+            txt = qtn_mus_options_nowplaying;
             },
         MENU_ITEM
             {
@@ -158,7 +158,7 @@ RESOURCE MENU_PANE r_mpx_podcast_collection_view_menu_1
         MENU_ITEM
             {
             command = EMPXCmdGoToNowPlaying;
-            txt = qtn_nmp_options_go_to_nowplaying;
+            txt = qtn_mus_options_nowplaying;
             },
         MENU_ITEM
             {
@@ -265,7 +265,7 @@ RESOURCE MENU_PANE r_mpx_podcast_collection_view_menu_2
         MENU_ITEM
             {
             command = EMPXCmdGoToNowPlaying;
-            txt = qtn_nmp_options_go_to_nowplaying;
+            txt = qtn_mus_options_nowplaying;
             },
         MENU_ITEM
             {
@@ -907,6 +907,26 @@ RESOURCE DIALOG r_mpx_progress_note
                 };
             }
         };
+    }
+
+//------------------------------------------------------------------------------
+// r_mpx_podcast_unknown
+// Text shown if there is at least one episode for which podcast title information is missing
+//------------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_podcast_unknown
+    {
+    buf = qtn_mus_podcast_unknown;
+    }
+
+//------------------------------------------------------------------------------
+// r_mpx_title_unknown_podcast
+// Text shown if title is not known
+//------------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_title_unknown_podcast
+    {
+    buf = qtn_mus_title_unknown_podcast;
     }
 
 // End of File

@@ -172,20 +172,20 @@ void CMPXCollectionViewHgPlaylistHelper::InitPlaylistL(CMPXCollectionPath& aPath
 
     if (!iIsInitializing)
         {
+		if (aEnableShuffle)
+			{
+			TTime time;
+			time.UniversalTime();
+			TInt64 seed = time.Int64();
+			TInt randIndex = Math::Rand(seed) % aPath.Count();
+			aPath.Set(randIndex);
+			}
+
         CMPXCollectionPlaylist* playlist = CMPXCollectionPlaylist::NewL( aPath );
         CleanupStack::PushL( playlist );
-        
-        if (aEnableShuffle)
-            {
-            TTime time;
-            time.UniversalTime();
-            TInt64 seed = time.Int64();
-            TInt randIndex = Math::Rand(seed) % aPath.Count();
-            aPath.Set(randIndex);
-            playlist->SetShuffleEnabledL( aEnableShuffle );
-            iPlaybackUtility->SetL( EPbPropertyRandomMode, aEnableShuffle );
-            }
 
+        playlist->SetShuffleEnabledL( aEnableShuffle );
+        iPlaybackUtility->SetL( EPbPropertyRandomMode, aEnableShuffle );
         iPlaybackUtility->InitL( *playlist, ETrue );
         CleanupStack::PopAndDestroy( playlist );
 

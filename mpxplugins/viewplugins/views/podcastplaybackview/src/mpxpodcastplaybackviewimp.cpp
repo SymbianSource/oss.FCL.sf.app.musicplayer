@@ -292,6 +292,9 @@ void CMPXPodcastPlaybackViewImp::DynInitMenuPaneL(
             aMenuPane->SetItemDimmed(
                     EMPXPbvCmdRandom,
                     ETrue );
+            aMenuPane->SetItemDimmed(
+                    EMPXPbvCmdSongDetails,
+                    ETrue );
 
 			// Check if FM Transmitter is supported
 			if ( !FeatureManager::FeatureSupported( KFeatureIdFmtx ) )
@@ -378,6 +381,11 @@ EXPORT_C void CMPXPodcastPlaybackViewImp::HandleCommandL( TInt aCommand )
                 }
             break;
             }
+        case EMPXPbvCmdPodcastDetails:
+            {
+            CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL();
+			break;
+            } 
         default:
             {
             CMPXCommonPlaybackViewImp::HandleCommandL( aCommand );

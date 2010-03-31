@@ -91,6 +91,11 @@ RESOURCE MENU_PANE r_mpx_podcast_playback_view_menu1
             { 
             command = EMPXPbvCmdGoToPodcastMenu;
             txt = qtn_mus_options_go_to_podcast_menu;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdPodcastDetails;
+            txt = qtn_mus_options_details_episode;
             }
         };
     }

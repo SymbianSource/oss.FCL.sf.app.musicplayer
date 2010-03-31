@@ -161,12 +161,12 @@ CDesCArrayFlat* CMPXResource::ReadMenuArrayLC(TInt aResourceId, RArray<TInt>& aI
     TInt count(resReader.ReadInt16());
     CDesCArrayFlat* descArray = new (ELeave) CDesCArrayFlat(count); ;
     for (TInt k = 0; k < count; k++)
-              {
-              aIdArray.AppendL (resReader.ReadInt32());
-              HBufC* hbuf = resReader.ReadHBufCL();
-              CleanupStack::PushL(hbuf);
-              descArray->AppendL (*hbuf);
-              CleanupStack::PopAndDestroy(hbuf);
+        {
+        aIdArray.AppendL (resReader.ReadInt32());
+        HBufC* hbuf = resReader.ReadHBufCL();
+        CleanupStack::PushL(hbuf);
+        descArray->AppendL (*hbuf);
+        CleanupStack::PopAndDestroy(hbuf);
         }
     CleanupStack::PopAndDestroy(readBuffer);
     //MPX_DEBUG1("CMPXResource::ReadDesCArrayLC End");

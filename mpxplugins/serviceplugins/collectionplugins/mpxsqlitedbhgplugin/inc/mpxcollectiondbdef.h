@@ -27,8 +27,11 @@
 // ================================== DATABASE ================================
 
 // Db filename
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT(KMCDbFile, "mpxv2_6.db");
+#else 
 _LIT(KMCDbFile, "mpxv2_5.db");
-
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 // Collection Db resource file
 _LIT(KMPXCollectionDbResourceFile,  "mpxcollectiondbhgres.rsc");
 
@@ -51,7 +54,10 @@ _LIT(KMCAlbumTable,                 "Album");
 _LIT(KMCGenreTable,                 "Genre");
 // The Composer table stores composers information
 _LIT(KMCComposerTable,              "Composer");
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+// The AbstractAlbum table stores Abstract Album Art information
+_LIT(KMCAbstractAlbumTable,              "AbstractAlbum");
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 // == Music TABLE FIELDS ======================================================
 _LIT(KMCMusicUniqueId,          "UniqueId");
 
@@ -94,6 +100,11 @@ _LIT(KMCMusicNumChannels,           "NumChannels");
 _LIT(KMCMusicCodec,                 "Codec");
 _LIT(KMCMusicMimeType,              "MimeType");
 _LIT(KMCMusicMTPDrmStatus,          "MTPDrmStatus");
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT(KMCMusicAlbumArtist,           "AlbumArtist");
+_LIT(KMCMusicContainEmbeddedArt,    "ContainEmbeddedArt");
+_LIT(KMCMusicAbstractAlbum,         "AbstractAlbum");
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
 // == Category TABLE FIELDS ===================================================
 _LIT(KMCCategoryUniqueId,           "UniqueId");

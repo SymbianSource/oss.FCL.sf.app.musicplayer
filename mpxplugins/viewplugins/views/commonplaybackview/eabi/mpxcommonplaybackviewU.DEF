@@ -148,4 +148,4 @@ EXPORTS
 	_ZThn96_N25CMPXCommonPlaybackViewImp18HandleLayoutChangeEv @ 147 NONAME
 	_ZN31CMPXCommonPlaybackViewContainer18LightStatusChangedEiN10CHWRMLight12TLightStatusE @ 148 NONAME
 	_ZThn60_N31CMPXCommonPlaybackViewContainer18LightStatusChangedEiN10CHWRMLight12TLightStatusE @ 149 NONAME
-
+        _ZN25CMPXCommonPlaybackViewImp24LaunchFileDetailsDialogLEv @ 150 NONAME 

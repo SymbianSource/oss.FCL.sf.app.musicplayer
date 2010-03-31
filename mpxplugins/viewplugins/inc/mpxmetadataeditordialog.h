@@ -43,6 +43,10 @@ class CMPXMedia;
 class MMPXCollectionUiHelper;
 class CAknPopupField;
 class CIdle;
+namespace DRM
+    {
+    class CDrmUiHandling;
+    }
 
 // CLASS DECLARATION
 /*
@@ -411,6 +415,12 @@ private:  // Functions from base class
      */
     void PopulatePodcastFileDetailsL();
 
+
+    /**
+     * Launch DRM information popup
+     */
+    void LaunchDrmInfoL();
+
 	
     /**
      * Add parts Of time.
@@ -610,6 +620,7 @@ private:
     TBool                                   iDisablePodcasting;
     CIdle*                                  iIdle;
     TBool                                   iTryingExit;
+    DRM::CDrmUiHandling* iDrmUiHandler;
     };
 
 #endif  // MPXMETADATAEDITORDIALOG_H

@@ -43,6 +43,7 @@ enum TMPXPlaybackViewCommandIds
     EMPXPbvCmdRandom,
     EMPXPbvCmdRandomOn,
     EMPXPbvCmdRandomOff,
+    EMPXPbvCmdSongDetails,
     EMPXPbvCmdPosition,
     EMPXPbvCmdSetAsRngTone,
     EMPXPbvCmdAiwCmdAssign,

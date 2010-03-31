@@ -75,4 +75,6 @@ LIBRARY         mpxcommonui.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         centralrepository.lib  
 
+LIBRARY         drmuihandling.lib
+
 // End of File

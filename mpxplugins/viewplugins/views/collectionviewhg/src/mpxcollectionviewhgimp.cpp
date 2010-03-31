@@ -586,13 +586,12 @@ void CMPXCollectionViewHgImp::ConstructL()
     //    }
     CleanupStack::PopAndDestroy(musicStoreJavaName);
 
-    TInt retval2(KErrNone);
     // P/S key for usb unblocking
-    retval2 = RProperty::Define( KMPXViewPSUid,
-                                KMPXUSBUnblockingPSStatus,
-                                RProperty::EInt,
-                                KMPlayerRemoteReadPolicy,
-                                KMPlayerRemoteWritePolicy );
+    RProperty::Define( KMPXViewPSUid,
+            KMPXUSBUnblockingPSStatus,
+            RProperty::EInt,
+            KMPlayerRemoteReadPolicy,
+            KMPlayerRemoteWritePolicy );
 
     TInt usbStatus;
     RProperty::Get(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, usbStatus);
@@ -2747,7 +2746,8 @@ TBool CMPXCollectionViewHgImp::SendOptionVisibilityL()
         CMPXCollectionViewListBoxArray* array =
             static_cast<CMPXCollectionViewListBoxArray*>( baseArray );
         TInt selectionCount( 0 );
-        if ( iSelectionIndexCache)
+        iSelectionIndexCache = iContainer->CurrentSelectionIndicesL();
+        if ( iSelectionIndexCache )
             {
             selectionCount = iSelectionIndexCache->Count();
             }
@@ -4376,7 +4376,7 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                 // embedded playlist view
                 iContainer->EnableMarking( ETrue );
                 menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_EMBEDDED_PLAYLIST_VIEW );
-                resId = R_MPX_COLLECTION_SONG_LBX_EMPTYTEXT;
+                resId = R_MPX_VMP_NO_SONGS;
 #ifdef __ENABLE_MSK
                 mskId = R_QTN_MSK_PLAY;
 #endif // __ENABLE_MSK
@@ -4422,7 +4422,7 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                         case EMPXAlbum:
                             {
                             // album view
-                            resId = R_MPX_COLLECTION_ALBUM_LBX_EMPTYTEXT;
+                            resId = R_MPX_VMP_NO_ALBUMS;
                             break;
                             }
                         case EMPXGenre:
@@ -4455,7 +4455,7 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                     // tracks view
                     iContainer->EnableMarking( EFalse );
                     menuBar->SetMenuTitleResourceId( R_MPX_COLLECTION_VIEW_MENUBAR_NO_MARKING );
-                    resId = R_MPX_COLLECTION_SONG_LBX_EMPTYTEXT;
+                    resId = R_MPX_VMP_NO_SONGS;
 #ifdef __ENABLE_MSK
                     mskId = R_QTN_MSK_PLAY;
 #endif // __ENABLE_MSK
@@ -5565,7 +5565,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
         case EMPXCmdMusicLibraryDetails:
             {
             iCurrentMediaLOp = EMPXOpMediaLCollectionDetails;
-            CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
+            CMPXCollectionPath* path = iCollectionUiHelper->MusicMenuPathL();
             CleanupStack::PushL( path );
             RArray<TMPXAttribute> attrs;
             CleanupClosePushL( attrs );
@@ -5742,35 +5742,49 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
                     iContainer->ListBoxArray();
                 if ( iContainer->CurrentListItemCount() > 0 )
                     {
-                    TInt currentItem(
-                        iContainer->CurrentLbxItemIndex() );
-                    const CMPXMedia& media = listboxArray->MediaL( currentItem );
-                    TMPXGeneralType type(
-                        media.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
-                    TMPXGeneralCategory category(
-                        media.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory ) );
-                    if ( category == EMPXPlaylist && type == EMPXItem )
+                    TInt currentItem( iContainer->CurrentLbxItemIndex() );
+                    MPX_DEBUG2( "CMPXCollectionViewHgImp::HandleCommandL currentItem %d", currentItem );
+                    if (currentItem == KErrNotFound)
                         {
-                        MPX_DEBUG1( "CMPXCollectionViewHgImp::HandleCommandL checking item count in playlist" );
+                        // no item selected
+                        // start playing previous playlist
+                        if ( iPlaybackUtility->Source() )
+                            {
+                            iPlaybackUtility->CommandL( EPbCmdPlay );
+                            HandleCommandL( EMPXCmdGoToNowPlaying );
+                            }
                         isReady = EFalse;
-                        TMPXItemId id(
-                            media.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
-                        CMPXMedia* entry = CMPXMedia::NewL();
-                        CleanupStack::PushL( entry );
-                        entry->SetTObjectValueL<TMPXGeneralType>(
-                            KMPXMediaGeneralType, EMPXGroup );
-                        entry->SetTObjectValueL<TMPXGeneralCategory>(
-                            KMPXMediaGeneralCategory, EMPXSong );
-                        entry->SetTObjectValueL<TMPXItemId>(
-                            KMPXMediaGeneralId, id );
-                        iCurrentFindAllLOp = EMPXOpFindAllLPlaylistTracksCount;
-                        RArray<TMPXAttribute> attrs;
-                        CleanupClosePushL( attrs );
-                        attrs.Append( KMPXMediaGeneralId );
-                        iCollectionUtility->Collection().FindAllL(
-                            *entry, attrs.Array(), *this );
-                        CleanupStack::PopAndDestroy( &attrs );
-                        CleanupStack::PopAndDestroy( entry );
+                        } 
+                    else 
+                        {
+                        const CMPXMedia& media = listboxArray->MediaL( currentItem );
+                        TMPXGeneralType type(
+                            media.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
+                        TMPXGeneralCategory category(
+                            media.ValueTObjectL<TMPXGeneralCategory>( KMPXMediaGeneralCategory ) );
+                        if ( category == EMPXPlaylist && type == EMPXItem )
+                            {
+                            MPX_DEBUG1( "CMPXCollectionViewHgImp::HandleCommandL checking item count in playlist" );
+                            isReady = EFalse;
+                            TMPXItemId id(
+                                media.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
+                            CMPXMedia* entry = CMPXMedia::NewL();
+                            CleanupStack::PushL( entry );
+                            entry->SetTObjectValueL<TMPXGeneralType>(
+                                KMPXMediaGeneralType, EMPXGroup );
+                            entry->SetTObjectValueL<TMPXGeneralCategory>(
+                                KMPXMediaGeneralCategory, EMPXSong );
+                            entry->SetTObjectValueL<TMPXItemId>(
+                                KMPXMediaGeneralId, id );
+                            iCurrentFindAllLOp = EMPXOpFindAllLPlaylistTracksCount;
+                            RArray<TMPXAttribute> attrs;
+                            CleanupClosePushL( attrs );
+                            attrs.Append( KMPXMediaGeneralId );
+                            iCollectionUtility->Collection().FindAllL(
+                                *entry, attrs.Array(), *this );
+                            CleanupStack::PopAndDestroy( &attrs );
+                            CleanupStack::PopAndDestroy( entry );
+                            }
                         }
                     }
                 else
@@ -6119,6 +6133,10 @@ TBool CMPXCollectionViewHgImp::NowPlayingOptionVisibilityL()
 		isHidden = pdPlaybackUtility->Source() ? EFalse : ETrue;
 		pdPlaybackUtility->Close();
 		}
+	else
+	    {
+        isHidden = EFalse;
+	    }
 
     return isHidden;
     }
@@ -6239,9 +6257,9 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
         case R_MPX_COLLECTION_VIEW_MENU_1:
             {
             HandleInitMusicMenuPaneL(aMenuPane);
+            aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
 			if ( isListEmpty )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
@@ -6257,7 +6275,6 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
 				}
 			else
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
@@ -6563,8 +6580,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneGenreL(
 			aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
 			aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
 			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-            
-            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
 			break;
 			}
         case R_MPX_ADD_TO_PL_SUB_MENU:
@@ -6600,9 +6616,9 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneSongsL(
         case R_MPX_COLLECTION_VIEW_MENU_1:
             {
             HandleInitMusicMenuPaneL(aMenuPane);
+            aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
 			if ( isListEmpty )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
@@ -6618,7 +6634,6 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneSongsL(
 				}
 			else
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
@@ -6747,10 +6762,9 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
         case R_MPX_COLLECTION_VIEW_MENU_1:
             {
             HandleInitMusicMenuPaneL(aMenuPane);
-
+            aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
 			if ( isListEmpty )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
@@ -6765,7 +6779,6 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
 				}
 			else
 				{
-                aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
                 aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );

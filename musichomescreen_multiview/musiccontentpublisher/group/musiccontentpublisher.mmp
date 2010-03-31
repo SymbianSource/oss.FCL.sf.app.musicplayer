@@ -29,6 +29,7 @@ VENDORID                VID_DEFAULT
 
 SOURCEPATH              ../src
 SOURCE                  musiccontentpublisher.cpp
+SOURCE                  musiccontentmap.cpp
 SOURCE                  proxy.cpp
 SOURCE                  pluginmanager.cpp
 SOURCE                  mcpharvesterpublisherobserver.cpp

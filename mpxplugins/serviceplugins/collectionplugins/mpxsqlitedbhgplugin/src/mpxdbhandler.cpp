@@ -118,7 +118,9 @@ CMPXDbHandler::~CMPXDbHandler()
     delete iDbComposer;
     delete iDbAuxiliary;
     delete iDbManager;
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    delete iDbAbstractAlbum;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     delete iMimeTypes;
     delete iExtensions;
     delete iExtensionsMime;
@@ -173,9 +175,12 @@ void CMPXDbHandler::ConstructL()
     iDbMusic = CMPXDbMusic::NewL(*iDbManager, iResource, *this);
     iDbPlaylist = CMPXDbPlaylist::NewL(*iDbManager, *this);
     iDbArtist = CMPXDbArtist::NewL(*iDbManager, EMPXArtist, *this);
-	iDbAlbum = CMPXDbAlbum::NewL(*iDbManager, EMPXAlbum, *this);
+    iDbAlbum = CMPXDbAlbum::NewL(*iDbManager, EMPXAlbum, *this);
     iDbGenre = CMPXDbGenre::NewL(*iDbManager, EMPXGenre);
     iDbComposer = CMPXDbComposer::NewL(*iDbManager, EMPXComposer);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED  
+    iDbAbstractAlbum = CMPXDbAbstractAlbum::NewL(*iDbManager, EMPXAbstractAlbum);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED 
     iAutoPlaylist = CMPXDbAutoPlaylist::NewL(*iDbManager, iFs, iResource);
     iDbAuxiliary = CMPXDbAuxiliary::NewL(*iDbManager);
 
@@ -299,6 +304,99 @@ TUint32 CMPXDbHandler::AddSongToPlaylistL(
     return playlistId;
     }
 
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+// ----------------------------------------------------------------------------
+// Add AbstractAlbum to collection
+// ----------------------------------------------------------------------------
+//
+TUint32 CMPXDbHandler::AddAbstractAlbumL(
+    const CMPXMedia& aMedia,
+    CMPXMessageArray* aMessageArray)
+    {
+    MPX_FUNC("CMPXDbHandler::AddAbstractAlbumL");
+
+    BeginTransactionL();
+   // TUint32 abstractAlbumId(0);
+    TBool newRecord(EFalse);
+    TInt err(KErrNone);
+
+    TDriveUnit drive(aMedia.ValueText(KMPXMediaGeneralUri));
+    TPtrC name(aMedia.ValueText(KMPXMediaGeneralUri).Left(KMCMaxTextLen));
+    TPtrC albumartist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
+    TPtrC genre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));
+    
+    //only insert to AbstractAlbum table when it is new item  
+     TUint32 abstractAlbumId(MPXDbCommonUtil::GenerateUniqueIdL(iFs, EMPXAbstractAlbum, name, (EMPXAbstractAlbum!=EMPXGenre)));      
+   
+    newRecord = !iDbAbstractAlbum->CategoryItemExistsL(drive, abstractAlbumId);
+   
+    
+    if (newRecord)   
+        {
+        MPX_TRAP(err, abstractAlbumId = iDbAbstractAlbum->AddItemL( name, albumartist, genre, drive, newRecord, (EMPXAbstractAlbum != EMPXGenre)));      
+        if (iOutOfDisk && (err == KErrNotFound))
+            {
+            err = KErrDiskFull;
+            }
+        if (aMessageArray)
+            {
+            MPXDbCommonUtil::AddItemChangedMessageL(*aMessageArray, abstractAlbumId, EMPXItemInserted,
+            EMPXAbstractAlbum, KDBPluginUid);
+            }
+        }
+    EndTransactionL(err);
+
+    return abstractAlbumId;  
+    }
+
+// ----------------------------------------------------------------------------
+// Update all songs which associate with AbstractAlbum in the collection
+// ----------------------------------------------------------------------------
+//
+CMPXDbActiveTask::TChangeVisibility CMPXDbHandler::UpdateAbstractAlbumSongsL(
+    const CMPXMedia& aMedia,
+    CMPXMessageArray& aItemChangedMessages)
+    {
+    MPX_FUNC("CMPXDbHandler::UpdateAbstractAlbumSongsL");
+
+    CMPXDbActiveTask::TChangeVisibility visibleChange(CMPXDbActiveTask::ENotVisibile);
+
+    if (aMedia.IsSupported(KMPXMediaGeneralUri))
+        {
+        const TDesC& art(aMedia.ValueText (KMPXMediaGeneralUri));
+    
+        TBool existRecord(EFalse); 
+        TDriveUnit drive(aMedia.ValueText(KMPXMediaGeneralUri));
+        TUint32 rowId(MPXDbCommonUtil::GenerateUniqueIdL(iFs, EMPXAbstractAlbum, art, (EMPXAbstractAlbum != EMPXGenre)));    
+        //check if abstractAlbum in ABSTRACTALBUM table before update songs
+        existRecord = iDbAbstractAlbum->CategoryItemExistsL(drive, rowId);
+         
+        //update songs associated with abstractalbum only when abstractalbum associated already
+        //in the AbstractAlbum table     
+        if (existRecord)
+            {         
+            if (aMedia.IsSupported(KMPXMediaArrayContents))
+                {
+
+                CMPXMediaArray* mediaArray = aMedia.Value<CMPXMediaArray>(KMPXMediaArrayContents);
+                User::LeaveIfNull(mediaArray);
+                TInt count(mediaArray->Count());
+                for (TInt i = 0; i < count; i++)
+                    {
+                    CMPXMedia* element = mediaArray->AtL(i);
+                    element->SetTextValueL(KMPXMediaMusicAlbumArtFileName, art );
+                    visibleChange = UpdateSongL(*element, aItemChangedMessages);
+                    }
+               }
+            else
+                {
+                iDbAbstractAlbum->UpdateItemL(rowId, aMedia, drive, &aItemChangedMessages);
+                }
+          }
+        }
+    return visibleChange;
+}
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 // ----------------------------------------------------------------------------
 // Update a song in the collection
 // ----------------------------------------------------------------------------
@@ -484,6 +582,50 @@ void CMPXDbHandler::RemoveSongFromPlaylistL(
         EndTransactionL( err );
         }
     }
+
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+// ----------------------------------------------------------------------------
+// Remove specified abstractalbum
+// ----------------------------------------------------------------------------
+//
+void CMPXDbHandler::RemoveAbstractAlbumL(
+    TUint32 aAbstractAlbumId,
+    CDesCArray& aUriArray,
+    CMPXMessageArray& aItemChangedMessages)
+    {
+    MPX_FUNC("CMPXDbHandler::RemoveAbstractAlbumL");
+
+    BeginTransactionL();
+    MPX_TRAPD(err, DoRemoveAbstractAlbumL(aAbstractAlbumId, aUriArray, aItemChangedMessages));
+    EndTransactionL(err);
+    }
+
+// ----------------------------------------------------------------------------
+// Remove specified abstractalbum
+// ----------------------------------------------------------------------------
+//
+void CMPXDbHandler::DoRemoveAbstractAlbumL(
+    TUint32 aAbstractAlbumId,
+    CDesCArray& aUriArray,
+    CMPXMessageArray& aItemChangedMessages)
+    {
+    MPX_FUNC("CMPXDbHandler::DoRemoveAbstractAlbumL");
+
+
+    HBufC* uri(iDbAbstractAlbum->DeleteAbstractAlbumL(aAbstractAlbumId));
+    if (uri)
+        {
+        CleanupStack::PushL(uri);
+        aUriArray.AppendL(*uri);
+        CleanupStack::PopAndDestroy(uri);
+        }
+
+    MPXDbCommonUtil::AddItemChangedMessageL(aItemChangedMessages, aAbstractAlbumId, EMPXItemDeleted,
+        EMPXAbstractAlbum, KDBPluginUid);
+
+   
+    }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
 // ----------------------------------------------------------------------------
 // Cleanup records marked as deleted. This is designated for MTP to clean up records marked as deleted
@@ -739,6 +881,19 @@ TUint32 CMPXDbHandler::GetSongIdMatchingUriL(
     return MPXDbCommonUtil::GenerateUniqueIdL(iFs, EMPXCollection, aUri, EFalse);
     }
 
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+// ----------------------------------------------------------------------------
+// Get abstractalbum Id matching the given URI
+// ----------------------------------------------------------------------------
+//
+TUint32 CMPXDbHandler::GetAbstractAlbumIdMatchingUriL(
+    const TDesC& aUri)
+    {
+    MPX_FUNC("CMPXDbHandler::GetAbstractAlbumIdMatchingUriL");
+    return MPXDbCommonUtil::GenerateUniqueIdL(iFs, EMPXAbstractAlbum, aUri, ETrue);
+    }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
 // ----------------------------------------------------------------------------
 // Get all artists
 // ----------------------------------------------------------------------------
@@ -827,10 +982,10 @@ void CMPXDbHandler::GetAlbumsMatchingArtistL(
                 CMPXMedia* media = aMediaArray[i];
                 TUint32 albumId((media->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId)));
 
-				TInt songCount = iDbAlbum->GetSongsCountInAlbumMatchingArtistL(aArtistId, albumId);
+                TInt songCount = iDbAlbum->GetSongsCountInAlbumMatchingArtistL(aArtistId, albumId);
 
                 media->SetTObjectValueL<TInt>(KMPXMediaGeneralCount, songCount );
-				MPX_DEBUG2("	SongCount[%d]", songCount );
+                MPX_DEBUG2("    SongCount[%d]", songCount );
                 }
             }
         }
@@ -1357,7 +1512,7 @@ void CMPXDbHandler::RefreshStartL()
     }
     
 #ifdef __RAMDISK_PERF_ENABLE
-	iDbManager->CopyDBsToRamL();
+    iDbManager->CopyDBsToRamL();
 #endif //__RAMDISK_PERF_ENABLE
     iDbMusic->RefreshStartL();
 
@@ -1433,10 +1588,10 @@ void CMPXDbHandler::MtpEndL()
 
 #ifdef __RAMDISK_PERF_ENABLE
     TRAPD(err, iDbManager->CopyDBsFromRamL());
-	if ( err != KErrNone )
-	    {
+    if ( err != KErrNone )
+        {
         MPX_DEBUG2("CMPXDbHandler::MtpEndL error=%d", err);
-	    }
+        }
 #endif //__RAMDISK_PERF_ENABLE
     
     MPX_DEBUG1("<--CMPXDbHandler::MtpEndL");
@@ -1946,10 +2101,17 @@ void CMPXDbHandler::DoRemoveSongL(
     TUint32 albumID(0);
     TUint32 genreID(0);
     TUint32 composerID(0);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    TUint32 abstractAlbumID(0);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     TInt drive(0);
 
-    // Get information from the Music table first
+// Get information from the Music table first
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, abstractAlbumID, drive);
+#else
     HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, drive);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
     // add the URI to the return array
     CleanupStack::PushL(uri);
@@ -1962,7 +2124,12 @@ void CMPXDbHandler::DoRemoveSongL(
     iDbAlbum->DecrementSongsForCategoryL(albumID, drive, &aItemChangedMessages, categoryExist, artistID);
     iDbGenre->DecrementSongsForCategoryL(genreID, drive, &aItemChangedMessages, categoryExist);
     iDbComposer->DecrementSongsForCategoryL(composerID, drive, &aItemChangedMessages, categoryExist);
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    if (abstractAlbumID)
+        {
+        iDbAbstractAlbum->DecrementSongsForCategoryL(abstractAlbumID, drive, &aItemChangedMessages, categoryExist, iMtpInUse);
+        }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     // Update the music table
     TBool deleteRecord(ETrue);
 
@@ -2295,7 +2462,32 @@ void CMPXDbHandler::FindSongL(
 
         GetPlaylistSongsL(playlistId, aAttrs, aMediaArray);
         }
-
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    else if (type == EMPXGroup &&
+        (cat == EMPXAbstractAlbum ||
+        MPX_ITEM_CATEGORY(containerId) == EMPXAbstractAlbum))
+        {
+        TUint32 abstractAlbumId = (cat == EMPXAbstractAlbum) ?
+            id : (containerId & KMCCategoryMask);
+        TInt attrCount(aAttrs.Count());
+        if ( attrCount > 1 || (attrCount == 1 && !(aAttrs[0] == KMPXMediaGeneralId)) )
+            {
+            TInt abstractAlbumDrive(iDbAbstractAlbum->GetDriveIdL(abstractAlbumId));
+            MPX_TRAPD(err, iDbMusic->GetAllSongsForAbstractAlbumL(abstractAlbumDrive, abstractAlbumId, aAttrs, aMediaArray));
+        if (err == KErrNotFound)
+            {
+            //
+            // Leave with KErrNotFound
+            User::Leave(KErrNotFound);
+            }
+        else
+            {
+            // Leave if error
+            User::LeaveIfError(err);
+            }
+        }
+    }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     //////////////////////////////////////////////////////////////////////
     // Find a particular song in the specified playlist. This fills the
     // song with info from Playlist table first then overwrites it with
@@ -2660,6 +2852,13 @@ CMPXDbCategory* CMPXDbHandler::DbCategoryL(
             dbCategory = (CMPXDbCategory*)iDbComposer;
             break;
             }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        case EMPXAbstractAlbum:
+            {
+            dbCategory = (CMPXDbCategory*)iDbAbstractAlbum;
+            break;
+            }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         default:
             User::Leave(KErrNotSupported);
         }
@@ -2834,14 +3033,33 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
     const TDesC& aName,
     TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages,
-    TBool& aItemExist)
+    TBool& aItemExist
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED    
+      ,const TDesC& aAlbumArtist,
+    const TDesC& aGenre
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+    )
     {
     MPX_FUNC("CMPXDbHandler::AddCategoryItemL()");
 
     MPX_PERF_START(CMPXDbHandler_AddCategoryItemL);
 
     TBool newRecord(EFalse);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED    
+    TUint32 id(0);   
+    //for AbstractAlbum, SetAbstractAlbum, associate songs with abstractalbum.
+    //only called with newRecord as EFalse
+    //increment songCount if id exist in AbstractAlbum table, otherwise do nothing.
+    if (aCategory == EMPXAbstractAlbum)
+        {     
+        id = iDbAbstractAlbum->AddItemL( aName, aAlbumArtist, aGenre, aDriveId, newRecord, (aCategory != EMPXGenre));     
+        }    
+    else
+        {
+        id = DbCategoryL(aCategory)->AddItemL(aName, aDriveId, newRecord, (aCategory != EMPXGenre));
+#else 
     TUint32 id(DbCategoryL(aCategory)->AddItemL(aName, aDriveId, newRecord, (aCategory != EMPXGenre)));
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     if (newRecord && aItemChangedMessages)
         {
         MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemInserted,
@@ -2857,6 +3075,9 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
             aCategory, KDBPluginUid);
         }
     aItemExist = !newRecord;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED      
+       }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     MPX_PERF_END(CMPXDbHandler_AddCategoryItemL);
 
     return id;
@@ -2895,7 +3116,7 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
     // when the added item's category is Artist, and it is NOT a new record,
     // we should send the item number changed message
     else if (  aCategory == EMPXArtist &&
-    		!newRecord && aItemChangedMessages )
+            !newRecord && aItemChangedMessages )
         {
         MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, id, EMPXItemModified,
             aCategory, KDBPluginUid);
@@ -2904,30 +3125,30 @@ TUint32 CMPXDbHandler::AddCategoryItemL(
     MPX_PERF_END(CMPXDbHandler_AddCategoryItemL);
 
     return id;
-	}
+    }
 
 void CMPXDbHandler::UpdateCategoryItemL(
-		TMPXGeneralCategory aCategory,
-		TUint32 aCategoryId,
-		const CMPXMedia& aMedia,
-		TInt aDrive,
-		CMPXMessageArray* aItemChangedMessages)
-	{
-	switch(aCategory)
-	    {
-	    case EMPXAlbum:
+        TMPXGeneralCategory aCategory,
+        TUint32 aCategoryId,
+        const CMPXMedia& aMedia,
+        TInt aDrive,
+        CMPXMessageArray* aItemChangedMessages)
+    {
+    switch(aCategory)
+        {
+        case EMPXAlbum:
             iDbAlbum->UpdateItemL(aCategoryId, aMedia, aDrive, aItemChangedMessages);
-	        break;
+            break;
 
-	    case EMPXArtist:
-	        iDbArtist->UpdateItemL(aCategoryId, aMedia, aDrive, aItemChangedMessages);
-	        break;
+        case EMPXArtist:
+            iDbArtist->UpdateItemL(aCategoryId, aMedia, aDrive, aItemChangedMessages);
+            break;
 
-	    default:
+        default:
             DbCategoryL(aCategory)->UpdateItemL(aCategoryId, aMedia, aDrive, aItemChangedMessages);
-	        break;
-	    }
-	}
+            break;
+        }
+    }
 // ----------------------------------------------------------------------------
 // CMPXDbHandler::DeleteSongForCategoryL
 // ----------------------------------------------------------------------------
@@ -2993,9 +3214,9 @@ TBool CMPXDbHandler::IsRemoteDrive(TDriveNumber aDrive)
     }
 
 TInt CMPXDbHandler::HandlePlaylistDurationL(TUint32 aPlaylistId)
-	{
-	return GetPlaylistDurationL(aPlaylistId);
-	}
+    {
+    return GetPlaylistDurationL(aPlaylistId);
+    }
 void CMPXDbHandler::HandlePlaylistInfoL(
     TUint32 aPlaylistId, 
     TInt& aCount, 
@@ -3029,9 +3250,9 @@ void CMPXDbHandler::HandlePlaylistInfoL(
     }
 
 TInt CMPXDbHandler::HandleGetAlbumsCountForArtistL(TUint32 aArtistId)
-	{
-	return iDbAlbum->GetAlbumsCountForArtistL(aArtistId);
-	}
+    {
+    return iDbAlbum->GetAlbumsCountForArtistL(aArtistId);
+    }
 
 TBool CMPXDbHandler::HandleIsUnknownArtistL(TUint32 aArtistId)
     {
@@ -3042,4 +3263,14 @@ TUint32 CMPXDbHandler::HandleArtistForAlbumL(const TUint32 aAlbumId)
     {
     return iDbMusic->ArtistForAlbumL(aAlbumId);
     }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED   
+// ----------------------------------------------------------------------------------------------------------
+// CMPXDbHandler::HandleGetAlbumNameForSongL
+// ----------------------------------------------------------------------------------------------------------
+// 
+HBufC* CMPXDbHandler::HandleGetAlbumNameFromIdL(TUint32 aId)
+    {
+    return iDbAbstractAlbum->GetNameL(aId);
+    }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 // End of file

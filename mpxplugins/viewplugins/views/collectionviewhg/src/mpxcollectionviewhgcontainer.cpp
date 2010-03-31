@@ -66,6 +66,8 @@
 #include <ganes/HgVgMediaWall.h>
 
 #include <layoutmetadata.cdl.h>
+#include <AknLayout2ScalableDef.h>
+#include <aknlayoutscalable_apps.cdl.h>
 #include <akntranseffect.h>                 // For transition effects
 #include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
 
@@ -934,7 +936,7 @@ TInt CMPXCollectionViewHgContainer::CurrentListItemCount() const
             break;
         }
 
-    return count;
+    return count - iShuffleItem;
     }
 
 
@@ -1077,9 +1079,11 @@ void CMPXCollectionViewHgContainer::SetLbxCurrentItemIndex( TInt aIndex )
 
     // TODO, check if we need to support this with other view types also
     // David: This needs to be supported for Mediawall and Tbone
-    if ( iListWidget )
+    if ( iListWidget && iCurrentViewType == EMPXViewList )
         {
-        iListWidget->SetSelectedIndex( aIndex );
+        // aIndex is the song index, so need take "ShuffleAll" item 
+        // into account
+        iListWidget->SetSelectedIndex( aIndex + iShuffleItem );
         }
     }
 
@@ -1186,20 +1190,9 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
 
     HandleLbxItemRemovalL();
     TViewType prevViewType = iCurrentViewType;
-    //no songs and no allbums, then its list view
-    if ( count > 0 )
-        {
-        ResolveCurrentViewType();
-        }
-    else
-        {
-        TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
-        if( landscapeOrientation )
-            iCurrentViewType = EMPXViewMediawall;
-        else
-            iCurrentViewType = EMPXViewList;
-        }
-
+ 
+    ResolveCurrentViewType( count );
+ 
     iThumbnailReqMap.Reset();
     if (ShuffleItemPresent())
         iShuffleItem = 1;
@@ -1467,17 +1460,22 @@ void CMPXCollectionViewHgContainer::HandleMarkableListDynInitMenuPane(
 //
 void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArray, TInt aCount)
     {
+    MPX_FUNC( "CMPXCollectionViewHgContainer::ResizeListL" );
+    TInt mediaCount = aMediaArray.Count();
+    
     if( iListWidget )
         {
-        TRect clientRect = ((CAknView*)iView)->ClientRect();
-        TInt index = iListWidget->SelectedIndex();
+        TRect clientRect = ((CAknView*)iView)->ClientRect();        
+        TInt mediaIndex = MediaIndex(iListWidget->SelectedIndex());
+        mediaIndex = ( mediaIndex >= 0 && (mediaIndex < (mediaCount)) ) ? mediaIndex : (mediaCount - 1);
+        	
         iListWidget->InitScreenL( clientRect );
         iListWidget->Reset();
         if ( aCount )
             {
             iListWidget->ResizeL( aCount );
             ProvideDataWithoutThumbnailsL(aMediaArray);
-            iListWidget->SetSelectedIndex( index );
+            iListWidget->SetSelectedIndex( mediaIndex + iShuffleItem );
             }
         else
             {
@@ -1488,17 +1486,28 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
         {
         // In case of mediawall components we switch to different view type if orientation changes
         // so there is no need to set new client rect for mediawall.
-        TInt index = iMediaWall->SelectedIndex();
+        TInt mediaIndex = MediaIndex(iMediaWall->SelectedIndex());
+        
+        // Correct the array index if it is out of range
+        // This case may happen when last album or album beside selected album is deleted
+        mediaIndex = ( mediaIndex >= 0 && ( mediaIndex < mediaCount ) ) ? mediaIndex : (mediaCount - 1);
+	        
+        if( iSelectedAlbumIndex != mediaIndex  )
+            {
+             iSelectedAlbumIndex = mediaIndex; 
+             SaveSelectedAlbumItemL( iSelectedAlbumIndex );
+            }
+  
         iMediaWall->Reset();
         if ( aCount )
             {
             iMediaWall->ResizeL( aCount );
             ProvideDataWithoutThumbnailsMwL(aMediaArray);
-            index = index >= 0 ? index : 0;
-            iMediaWall->SetSelectedIndex( index );
+			
+            iMediaWall->SetSelectedIndex( mediaIndex + iShuffleItem);
             if ( iCurrentViewType == EMPXViewTBone )
                 {
-                OpenAlbumL( index );
+                OpenAlbumL( mediaIndex );
                 }
             }
         else
@@ -1520,6 +1529,7 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
 
     TRect clientRect = ((CAknView*)iView)->ClientRect();
     iThumbnailManager->SetSizeL( EAudioListThumbnailSize );
+    iImageSize = CHgDoubleGraphicListFlat::PreferredImageSize();
 
     if( !iListWidget )
         {
@@ -1547,12 +1557,16 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
         iListWidget->InitScreenL(clientRect);
         }
 
-
+    if ( (iAlbumIndex > 0) && (iAlbumIndex < aCount) )
+        {
+        iListWidget->SetSelectedIndex( iAlbumIndex + iShuffleItem );
+        }
+    
     // TODO. Define here in which views we need to have buffering enabled in the list
-    if( iContext == EContextGroupAlbum ||
+    if( ( iContext == EContextGroupAlbum ||
         iContext == EContextGroupArtist ||
         iContext == EContextGroupSong ||
-        iContext == EContextItemPlaylist )
+        iContext == EContextItemPlaylist ) && ( aCount > 0) ) 
         {
         iListWidget->EnableScrollBufferL(*this, KMPXListBufferSize, KMPXListBufferSize/4);
         }
@@ -1578,9 +1592,19 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 
     TRect clientRect = ((CAknView*)iView)->ClientRect();
 
-    // Temporary until we have real layout data
-    TRect mediaWallRect = TRect(clientRect.iTl, TPoint(clientRect.iBr.iX, 250));
-    TRect mwListRect = TRect(TPoint(clientRect.iTl.iX, 250), clientRect.iBr);
+    TAknLayoutRect mediawallLayout;
+    mediawallLayout.LayoutRect( clientRect, AknLayoutScalable_Apps::cf0_flow_pane(0) );
+
+    TAknLayoutRect listLayout;
+    listLayout.LayoutRect( clientRect, AknLayoutScalable_Apps::listscroll_cf0_pane(0) );
+
+    TRect mediaWallRect = mediawallLayout.Rect();
+    TRect mwListRect = listLayout.Rect();
+
+    // get front rectange from layout
+    TAknLayoutRect frontRect;
+    frontRect.LayoutRect( mediaWallRect, AknLayoutScalable_Apps::cf0_flow_pane_g1(0) );
+	iImageSize = frontRect.Rect().Size();
 
     if( iMediaWall )
         {
@@ -1598,7 +1622,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 				CHgVgMediaWall::EHgVgMediaWallStyleCoverflowTBonePortrait,
 				EFalse,
 				this,
-				NULL );
+				DefaultIconL() );
 
 		if( !iIsForeground )
 		    iMediaWall->HandleLosingForeground();
@@ -1666,7 +1690,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
         OpenAlbumL(iAlbumIndex);
        }
     iMwListWidget->RefreshScreen(0);
-
+	iDefaultIconSet = ETrue;
     }
 
 // ----------------------------------------------------------------------------
@@ -1678,6 +1702,10 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
    	TRect appRect = ((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect();
 	((CAknAppUi*)iCoeEnv->AppUi())->StatusPane()->MakeVisible(EFalse);
 	iThumbnailManager->SetSizeL( EAudioFullScreenThumbnailSize );
+    // get front rectange from layout
+    TAknLayoutRect frontRect;
+    frontRect.LayoutRect( appRect, AknLayoutScalable_Apps::cf0_flow_pane_g1(0) );
+	iImageSize = frontRect.Rect().Size();
 
     if( iMediaWall )
         {
@@ -1754,8 +1782,10 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
 void CMPXCollectionViewHgContainer::SetShuffleItemToListL(CHgScroller* aScroller )
     {
     CHgItem* item = CHgItem::NewL();
-    // Todo: Localize
-    item->SetTitleL( _L("Shuffle All") );
+    HBufC* shuffleText = StringLoader::LoadLC(
+        R_MPX_TBONE_SHUFFLE );
+    item->SetTitleL( *shuffleText );
+    CleanupStack::PopAndDestroy( shuffleText );
 
     CGulIcon* icon = (*iIconArray)[EMPXClvIconShuffle];
     CFbsBitmap* bitmap = icon->Bitmap();
@@ -1813,7 +1843,7 @@ TBool CMPXCollectionViewHgContainer::IsTBoneView()
 // ----------------------------------------------------------------------------
 // Resolve the current view type based on the browsing context
 // ----------------------------------------------------------------------------
-void CMPXCollectionViewHgContainer::ResolveCurrentViewType()
+void CMPXCollectionViewHgContainer::ResolveCurrentViewType( TInt aCount )
     {
     iCurrentViewType = EMPXViewUnknown;
     TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
@@ -1852,6 +1882,16 @@ void CMPXCollectionViewHgContainer::ResolveCurrentViewType()
             iCurrentViewType = EMPXViewList;
             break;
         }
+    
+    // if tbone view is empty, switch back to Albums list or meidawall view 
+    if( ( iCurrentViewType == EMPXViewTBone ) && ( aCount < 1 ) )
+        {
+        if( landscapeOrientation )
+         iCurrentViewType = EMPXViewMediawall;
+        else
+         iCurrentViewType = EMPXViewList;        
+        }
+    
     }
 
 // ----------------------------------------------------------------------------
@@ -1961,26 +2001,37 @@ CMPXMedia* CMPXCollectionViewHgContainer::SelectedItemMediaL()
 //
 void CMPXCollectionViewHgContainer::HandleItemCommandL( TInt aCommand )
     {
-    MPX_FUNC( "CMPXCollectionViewHgContainer::HandleItemCommanddL" );
-
+    MPX_FUNC( "CMPXCollectionViewHgContainer::HandleItemCommandL" );
+    MPX_DEBUG3("CMPXCollectionViewHgContainer::HandleItemCommandL iCurrentViewType = %d, iContext = %d", iCurrentViewType, iContext);
     if( aCommand == EMPXCmdPlay )
         {
-        if ( iContext == EContextGroupAlbum  )
+        TInt index = CurrentLbxItemIndex();
+        if (!ShufflePlayAllL(index))
             {
-            iSelectedAlbumIndex = MediaIndex(iListWidget->SelectedIndex());
-            SaveSelectedAlbumItemL(iSelectedAlbumIndex);
-            // Open first song of album & playlist for entire album is created.
-            PlayAlbumL(iSelectedAlbumIndex);
-            }
-        else if ( iContext == EContextGroupPlaylist  )
-            {
-            TInt index = MediaIndex(iListWidget->SelectedIndex());
-            PlayPlaylistL(index);
-            }
-        else if ( iContext == EContextGroupGenre  )
-            {
-            TInt index = MediaIndex(iListWidget->SelectedIndex());
-            PlayGenreL(index);
+            switch( iContext )
+                {
+                case EContextGroupAlbum:
+                case EContextItemAlbum:                    
+                    {
+                    iSelectedAlbumIndex = index;
+                    SaveSelectedAlbumItemL(index);
+                    // Open first song of album & playlist for entire album is created.
+                    PlayAlbumL(index);                    
+                    break;
+                    }
+                case EContextGroupPlaylist:
+                    {
+                    PlayPlaylistL(index);
+					break;
+                    }
+                case EContextGroupGenre:
+                    {
+                    PlayGenreL(index);
+					break;
+                    }
+                default:
+                    break;
+                }
             }
         }
     }
@@ -2012,12 +2063,14 @@ void CMPXCollectionViewHgContainer::HandleSelectL( TInt aIndex, CCoeControl* aCo
         if ( aControl == iMediaWall )
             {
             iSelectedAlbumIndex = index;
+            iAlbumIndex = index;            
             OpenAlbumL(index);
             }
         }
     else if( iCurrentViewType == EMPXViewMediawall )
         {
         iSelectedAlbumIndex = index;
+        iAlbumIndex = index;
         }
     }
 
@@ -2573,7 +2626,7 @@ CGulIcon* CMPXCollectionViewHgContainer::DefaultIconL()
         case EContextGroupAlbum:
         case EContextItemAlbum:
             {
-            iconIndex = EMPXClvIconAlbum;
+            iconIndex = 27; // default album art in mediawall
             break;
             }
         case EContextGroupPodcast:
@@ -2931,43 +2984,60 @@ void CMPXCollectionViewHgContainer::SetTitleL(
     MPX_FUNC( "CMPXCollectionViewHgContainer::SetTitleL" );
 
 
-	if ( iContext == EContextGroupAlbum ||  iContext == EContextItemAlbum )
-		{
-
-		if ( aMedia->IsSupported( KMPXMediaMusicArtist ) )
-			{
-			const TDesC& title = aMedia->ValueText( KMPXMediaMusicArtist );
-			if ( title.Compare( KNullDesC ) != 0 )
-				{
-				aVisualItem->SetTitleL( title );
-				}
-			else
-				{
-				HBufC* unknownText =
-						StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
-				aVisualItem->SetTitleL( *unknownText );
-				CleanupStack::PopAndDestroy( unknownText );
-				}
-			}
-		}
-	else
-		{
-		if ( aMedia->IsSupported( KMPXMediaGeneralTitle ) )
-			{
-			const TDesC& title = aMedia->ValueText( KMPXMediaGeneralTitle );
-			if ( title.Compare( KNullDesC ) != 0 )
-				{
-				aVisualItem->SetTitleL( title );
-				}
-			else
-				{
-				HBufC* unknownText =
-						StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
-				aVisualItem->SetTitleL( *unknownText );
-				CleanupStack::PopAndDestroy( unknownText );
-				}
-			}
-		}
+    if ( iContext == EContextGroupAlbum ||  iContext == EContextItemAlbum )
+        {
+        if ( aMedia->IsSupported( KMPXMediaMusicArtist ) )
+            {
+            const TDesC& title = aMedia->ValueText( KMPXMediaMusicArtist );
+            if ( title.Compare( KNullDesC ) != 0 )
+                {
+                aVisualItem->SetTitleL( title );
+                }
+            else
+                {
+                HBufC* unknownText = NULL;
+                if ( iContext == EContextGroupAlbum )
+                    {
+                    TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+                    if ( landscapeOrientation )
+                        {
+                        unknownText = 
+                            StringLoader::LoadLC( R_MPX_MEDIAWALL_ARTIST_UNKNOWN );
+                        }
+                    else
+                        {
+                        unknownText = 
+                            StringLoader::LoadLC( R_MPX_MP_LIST_ARTIST_UNKNOWN );		        
+                        }
+                    }
+                else 
+                    {
+                    unknownText = 
+                        StringLoader::LoadLC( R_MPX_MEDIAWALL_ARTIST_UNKNOWN );			    
+                    }
+                aVisualItem->SetTitleL( *unknownText );
+                CleanupStack::PopAndDestroy( unknownText );
+                }
+            }
+        }
+    else
+        {
+        if ( aMedia->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            const TDesC& title = aMedia->ValueText( KMPXMediaGeneralTitle );
+            if ( title.Compare( KNullDesC ) != 0 )
+                {
+                aVisualItem->SetTitleL( title );
+                }
+            else
+                {
+                HBufC* unknownText =
+                    StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
+                aVisualItem->SetTitleL( *unknownText );
+                CleanupStack::PopAndDestroy( unknownText );
+                }
+            }
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -2980,22 +3050,21 @@ void CMPXCollectionViewHgContainer::SetSongTitleL(
     {
     MPX_FUNC( "CMPXCollectionViewHgContainer::SetSongTitleL" );
 
-
-	if ( aMedia->IsSupported( KMPXMediaGeneralTitle ) )
-		{
-		const TDesC& title = aMedia->ValueText( KMPXMediaGeneralTitle );
-		if ( title.Compare( KNullDesC ) != 0 )
-			{
-			aVisualItem->SetTitleL( title );
-			}
-		else
-			{
-			HBufC* unknownText =
-					StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
-			aVisualItem->SetTitleL( *unknownText );
-			CleanupStack::PopAndDestroy( unknownText );
-			}
-		}
+    if ( aMedia->IsSupported( KMPXMediaGeneralTitle ) )
+        {
+        const TDesC& title = aMedia->ValueText( KMPXMediaGeneralTitle );
+        if ( title.Compare( KNullDesC ) != 0 )
+            {
+            aVisualItem->SetTitleL( title );
+            }
+        else
+            {
+            HBufC* unknownText =
+                StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
+            aVisualItem->SetTitleL( *unknownText );
+            CleanupStack::PopAndDestroy( unknownText );
+            }
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -3079,24 +3148,25 @@ void CMPXCollectionViewHgContainer::SetDetailArtistL(
     CMPXMedia* aMedia )
     {
     MPX_FUNC( "CMPXCollectionViewHgContainer::SetDetailArtistL" );
-	if ( aMedia->IsSupported( KMPXMediaMusicArtist ) )
-		{
-		// AK - Needs to be localized
-		TBuf<KMPXMaxFileLength> detailText;
-		const TDesC& artist = aMedia->ValueText( KMPXMediaMusicArtist );
-		if ( artist.Compare( KNullDesC ) != 0 )
-			{
-			detailText.Copy(artist.Left(detailText.MaxLength()));
-	        aVisualItem->SetTextL( detailText );
-			}
-	    else
-	        {
+
+    if ( aMedia->IsSupported( KMPXMediaMusicArtist ) )
+        {
+        // AK - Needs to be localized
+        TBuf<KMPXMaxFileLength> detailText;
+        const TDesC& artist = aMedia->ValueText( KMPXMediaMusicArtist );
+        if ( artist.Compare( KNullDesC ) != 0 )
+            {
+            detailText.Copy(artist.Left(detailText.MaxLength()));
+            aVisualItem->SetTextL( detailText );
+            }
+        else
+            {
             HBufC* unknownText =
-                StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
-    		aVisualItem->SetTextL( *unknownText );
+                StringLoader::LoadLC( R_MPX_SONGS_ARTIST_UNKNOWN );
+            aVisualItem->SetTextL( *unknownText );
             CleanupStack::PopAndDestroy( unknownText );
             }
-		}
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -3125,9 +3195,27 @@ void CMPXCollectionViewHgContainer::SetDetailAlbumL(
             aVisualItem->SetTextL( detailText );
             }
         else
-            {
-            HBufC* unknownText =
-                StringLoader::LoadLC( R_MPX_COLLECTION_UNKNOWN );
+            {            
+            HBufC* unknownText = NULL;
+            if ( iContext == EContextGroupAlbum )
+                {
+                TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+                if ( landscapeOrientation )
+                    {
+                    unknownText = 
+                        StringLoader::LoadLC( R_MPX_MEDIAWALL_ALBUM_UNKNOWN );
+                    }
+                else
+                    {
+                    unknownText = 
+                        StringLoader::LoadLC( R_MPX_MP_LIST_ALBUM_UNKNOWN );               
+                    }
+                }
+            else 
+                {
+                unknownText = 
+                    StringLoader::LoadLC( R_MPX_MEDIAWALL_ALBUM_UNKNOWN );             
+                }
             aVisualItem->SetTextL( *unknownText );
             CleanupStack::PopAndDestroy( unknownText );
             }
@@ -3476,16 +3564,20 @@ void CMPXCollectionViewHgContainer::SetDetailIconShuffleL()
 		CFbsBitmap* bitmap = icon->Bitmap();
 		CFbsBitmap* mask = icon->Mask();
 
-		TSize size(240,240);
+		TSize size(CHgDoubleGraphicListFlat::PreferredImageSize());
 		CHgItem* item = NULL;
 		if( iCurrentViewType == EMPXViewMediawall || iCurrentViewType == EMPXViewTBone )
 			{
 			item = &iMediaWall->ItemL(0);
+			TRect appRect = ((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect();
+			// get front rectange from layout
+			TAknLayoutRect frontRect;
+			frontRect.LayoutRect( appRect, AknLayoutScalable_Apps::cf0_flow_pane_g1(0) );
+			size = frontRect.Rect().Size();
 			}
 		else if( iCurrentViewType == EMPXViewList )
 			{
 			item = &iListWidget->ItemL(0);
-			size = CHgDoubleGraphicListFlat::PreferredImageSize();
 			}
 		else
 			{
@@ -3519,21 +3611,47 @@ TBool CMPXCollectionViewHgContainer::SetShuffleItemTextL(CHgItem* aItem, CMPXMed
     const CMPXMediaArray& mediaArray = iListBoxArray->MediaArray();
     const TInt count( mediaArray.Count() );
 
-	if ( count > 1 && iContext == EContextGroupAlbum ||
-		 iContext == EContextGroupSong ||
-		 iContext == EContextGroupGenre ||
-		 iContext == EContextItemPlaylist ||
-		 iContext == EContextItemGenre ||
-		 iContext == EContextItemSong )
-		{
-		aItem->SetTitleL( _L("Shuffle All") );
+    if ( count > 1 && iContext == EContextGroupAlbum )
+        {
+        TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();        
+        if ( landscapeOrientation )
+            {
+            HBufC* shuffleText = StringLoader::LoadLC(
+                R_MPX_MEDIAWALL_TITLE_SHUFFLE_ALL );
+            aItem->SetTitleL( *shuffleText );
+            CleanupStack::PopAndDestroy( shuffleText );        
+            }
+        else
+            {
+            HBufC* shuffleText = StringLoader::LoadLC(
+                R_MPX_SHUFFLE );
+            aItem->SetTitleL( *shuffleText );
+            CleanupStack::PopAndDestroy( shuffleText );
+            }        
 
-		// We can try to set icon too.
-		SetDetailIconShuffleL();
-		res = ETrue;
-		}
+        // We can try to set icon too.
+        SetDetailIconShuffleL();
+        res = ETrue;
+        }
 
-	return res;
+    if ( count > 1 &&
+        iContext == EContextGroupSong ||
+        iContext == EContextGroupGenre ||
+        iContext == EContextItemPlaylist ||
+        iContext == EContextItemGenre ||
+        iContext == EContextItemSong )
+        {
+        HBufC* shuffleText = StringLoader::LoadLC(
+            R_MPX_SHUFFLE );
+        aItem->SetTitleL( *shuffleText );
+        CleanupStack::PopAndDestroy( shuffleText );
+        
+        // We can try to set icon too.
+        SetDetailIconShuffleL();
+        res = ETrue;
+        }
+
+    return res;
     }
 
 // -----------------------------------------------------------------------------
@@ -3796,8 +3914,6 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 
 		cpath->AppendL(ids.Array()); // top level items
 
-		TBool shuffle(EFalse);
-
 		if ( aSelectAll ) // Plays all songs without shuffle
 			{
 			cpath->Set(0);
@@ -3808,12 +3924,12 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 				{
 				if ( aIndex == 0 ) // Plays all songs shuffled
 					{
-					shuffle = ETrue;
 					TTime time;
 					time.UniversalTime();
 					TInt64 seed = time.Int64();
 					TInt randIndex = Math::Rand(seed) % count;
 					cpath->Set(randIndex);
+					iPlaybackUtility->SetL( EPbPropertyRandomMode, ETrue );
 					}
 				else
 					{
@@ -3831,24 +3947,21 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 		TMPXPlaybackState pbState( iPlaybackUtility->StateL() );
 		if ( pbState == EPbStatePlaying || pbState == EPbStatePaused )
 			{
-			if ( IsPlayingCurrentIndexL(cpath) && !shuffle )
+			if ( IsPlayingCurrentIndexL(cpath) )
 				{
 				if ( pbState == EPbStatePaused )
 					{
 					iPlaybackUtility->CommandL( EPbCmdPlay );
 					}
-                iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse );
-				iView->ProcessCommandL( EMPXCmdGoToNowPlaying );
+                iView->ProcessCommandL( EMPXCmdGoToNowPlaying );
 				}
 			else
 			    {
-            	iPlaybackUtility->SetL( EPbPropertyRandomMode, shuffle );
-                iCollectionUtility->Collection().OpenL(*cpath);
+            	iCollectionUtility->Collection().OpenL(*cpath);
 			    }
 			}
 		else
 		    {
-            iPlaybackUtility->SetL( EPbPropertyRandomMode, shuffle );
             iCollectionUtility->Collection().OpenL(*cpath);
 		    }
 
@@ -3940,7 +4053,6 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenPlaylistL(
 				{
 				iPlaybackUtility->CommandL( EPbCmdPlay );
 				}
-			iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse );
 			iView->ProcessCommandL( EMPXCmdGoToNowPlaying );
 			}
 		else
@@ -4314,6 +4426,13 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
             {
             dialog->SetTitleL( album );
             }
+        else
+            {
+            HBufC* unknownText =
+                StringLoader::LoadLC( R_MPX_MEDIAWALL_POPUP_TITLE_UNKNOWN );
+            dialog->SetTitleL( *unknownText );
+            CleanupStack::PopAndDestroy( unknownText );
+            }
         }
 
     CMPXMediaArray* songArray(const_cast<CMPXMediaArray*>( aResults.Value<CMPXMediaArray>(
@@ -4325,8 +4444,10 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
 
     if ( songCount > 1 )
         {
-		// Todo: Use localized string.
-        songList->AppendL( _L("Shuffle All") );
+        HBufC* shuffleText = StringLoader::LoadLC(
+            R_MPX_MEDIAWALL_DIALOG_SHUFFLE );
+        songList->AppendL( *shuffleText );
+        CleanupStack::PopAndDestroy( shuffleText );
         }
 
     for ( TInt i = 0; i < songCount; i++ )
@@ -4730,7 +4851,7 @@ TInt CMPXCollectionViewHgContainer::MediaIndex(TInt aIndex) const
 
 	TInt index(aIndex);
 
-	if ( iShuffleItem )
+	if ( iShuffleItem && aIndex != KErrNotFound )
 		{
 		index = aIndex - 1;
 		}
@@ -4769,8 +4890,7 @@ void CMPXCollectionViewHgContainer::LoadAndSetEmptyTextL()
 
     if ( iContext == EContextGroupAlbum )
         {
-        TInt resId = R_MPX_COLLECTION_ALBUM_LBX_EMPTYTEXT;
-        HBufC* emptyText = StringLoader::LoadLC( resId );
+        HBufC* emptyText = StringLoader::LoadLC( R_MPX_VMP_NO_ALBUMS );
         SetLbxEmptyTextL( *emptyText );
         CleanupStack::PopAndDestroy( emptyText );
         }

@@ -477,7 +477,7 @@ CAknIconArray* CMPXCollectionViewListBoxArray::CreateIconArrayL()
 
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
     // Prepare icon array for listbox
-    CAknIconArray* iconArray = new ( ELeave ) CAknIconArray( 27 ); // magic: array granularity
+    CAknIconArray* iconArray = new ( ELeave ) CAknIconArray( 28 ); // magic: array granularity
 #else
     // Prepare icon array for listbox
     CAknIconArray* iconArray = new ( ELeave ) CAknIconArray( 26 ); // magic: array granularity
@@ -675,6 +675,13 @@ CAknIconArray* CMPXCollectionViewListBoxArray::CreateIconArrayL()
         iconFile,
         EMbmMpxcollectionviewhgQgn_graf_mup_npv_icon_shuffle,
         EMbmMpxcollectionviewhgQgn_graf_mup_npv_icon_shuffle_mask );
+    AppendColorIconToArrayL( iconArray,
+        KAknsIIDNone,
+        KAknsIIDNone,
+        EAknsMinorNone,
+        iconFile,
+        EMbmMpxcollectionviewhgQgn_prop_albumart_large,
+        EMbmMpxcollectionviewhgQgn_prop_albumart_large_mask );
 
     return iconArray;
     }

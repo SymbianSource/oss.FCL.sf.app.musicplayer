@@ -178,10 +178,34 @@
 //
 #define qtn_mus_title_music_menu "Music Menu"
 
-// d:Text for music library menu.
-// l:list_logical_template_1_title
-// r:10.0
+// d:Title for Artists & Albums view in portrait mode
+// l:title_pane_t2/opt9
+// r:5.2
 //
-#define qtn_mp_title_my_music_menu_nseries "My Music"
+#define qtn_mus_title_artists_and_albums "Artists & Albums"
+
+// d:Text shown if there is more than one song in the playlist.
+// d:where %N is the number of songs within the playlist 
+// d:and %U is the duration time for the total playlist, 
+// d:in the format hh:mm:ss or mm:ss is displayed.
+// d:if the playlist is empty, the duration is displayed as dashes (-- : --)
+// l:list_double_large_graphic_pane_t2
+// r:5.2
+//
+#define qtn_mus_music_num_songs_duration "%N songs - %U"
+
+// d:Text shown if there is only one song in the playlist
+// d:%U is the duration time for the total playlist, 
+// d:in the format hh:mm:ss or mm:ss is displayed.
+// l:list_double_large_graphic_pane_t2
+// r:5.2
+//
+#define qtn_mus_music_one_song_duration "1 song - %U"
+
+// d:Title for Songs view
+// l:title_pane_t2/opt9
+// r:5.2
+//
+#define qtn_mus_title_tracks "Songs"
 
 // End of File

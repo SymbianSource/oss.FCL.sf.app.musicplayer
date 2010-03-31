@@ -51,8 +51,9 @@ CMPXScanningWaitDialog::CMPXScanningWaitDialog( MMPXWaitNoteObserver* aObs,
                                              CMPXWaitNoteDialog( aObs, aType )
     {
     iNumItemsAdded = 0;
-    iInitialMMCCount = 0;
     iTotalNewTracks = 0;
+    iInitialCount = 0;
+    isCollectionDBChanged = EFalse;
     }
 
 
@@ -162,6 +163,12 @@ void CMPXScanningWaitDialog::PostNoteHandleL( TInt aButtonId )
             iHarvesterUtil = NULL;
             iHarvesterUtil = CMPXHarvesterFactory::NewL(); 
             }
+        
+        // When stop refreshing library, prompt a process waiting dialog.
+        // Inform user to wait for the updating library.
+        HBufC* waitText = StringLoader::LoadLC( R_MPX_UPDATING_LIBRARY_TXT );  
+        DisplayProcessWaitDialogL( R_MPX_GENERIC_WAIT_NOTE, *waitText );
+        CleanupStack::PopAndDestroy( waitText );
         }
     else if( iScanningError >= KErrNone )
         {
@@ -170,15 +177,31 @@ void CMPXScanningWaitDialog::PostNoteHandleL( TInt aButtonId )
         if( iWaitNoteType == EMPXScanningNote || 
             iWaitNoteType == EMPXCorruptScanningNote )
             {
-            text = StringLoader::LoadLC( R_MPX_SCANNING_COMPLETE_TXT, 
-                                         iNumItemsAdded );
-            textRsc = R_MPX_SCANNING_COMPLETE_TXT;                                         
+            if ( isCollectionDBChanged )
+                { 
+                text = StringLoader::LoadLC( R_MPX_SCANNING_COMPLETE_TXT, 
+                                                     iNumItemsAdded );
+                textRsc = R_MPX_SCANNING_COMPLETE_TXT;                
+                }
+            else
+                {
+                text = StringLoader::LoadLC( R_MPX_UPTODATE_TXT );
+                textRsc = R_MPX_UPTODATE_TXT;
+                }                               
             }
         else // iWaitNoteType == EMPXRefreshNote
             {
-            text = StringLoader::LoadLC( R_MPX_REFRESHING_DB_COMPLETE_TXT, 
+            if ( isCollectionDBChanged )
+                {
+                text = StringLoader::LoadLC( R_MPX_REFRESHING_DB_COMPLETE_TXT, 
                                          iNumItemsAdded ); 
-            textRsc = R_MPX_REFRESHING_DB_COMPLETE_TXT;                    
+                textRsc = R_MPX_REFRESHING_DB_COMPLETE_TXT;              
+                }
+            else
+                {
+                text = StringLoader::LoadLC( R_MPX_UPTODATE_TXT );
+                textRsc = R_MPX_UPTODATE_TXT; 
+                }
             }
         }
     else if( iScanningError == KErrDiskFull )
@@ -217,6 +240,9 @@ void CMPXScanningWaitDialog::PostNoteHandleL( TInt aButtonId )
         }
     else
         {
+        // When finish updating library, cancle the process waiting 
+        // dialog and then prompt the refreshing completion dialog.
+        CancelProcessWaitDialogL();
         DisplayNoteDialogL( R_MPX_EMPTY_CLOSE_NOTE, *text, 
                             CAknNoteDialog::EConfirmationTone );
         }
@@ -267,66 +293,47 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
         if(event == TMPXCollectionMessage::EBroadcastEvent &&
                 ((op == EMcMsgRefreshStart) || (op == EMcMsgRefreshEnd)))
             {
-            TInt mmcCount = 0;
-            if ( iWaitNoteType == EMPXScanningNote)
-                { 
-                //get removable drive number
-                TInt removableDrive( EDriveF );                            
+            TInt songTotal = 0;
+            
+            if ( iWaitNoteType == EMPXScanningNote )
+                {      
+                RArray<TUid> ary;
+                CleanupClosePushL( ary );
+                ary.AppendL(TUid::Uid( EMPXCollectionPluginPodCast ) );
+                TUid podcastCollectionId = iCollection->CollectionIDL( ary.Array() );
+                ary.Reset();
+                ary.AppendL(TUid::Uid(EMPXCollectionPluginMusic));				
+                TUid musicCollectionId = iCollection->CollectionIDL( ary.Array() );
+                CleanupStack::PopAndDestroy(&ary);
+				
+				TInt removableDrive( EDriveF );                            
                 #ifdef RD_MULTIPLE_DRIVE
                     User::LeaveIfError( DriveInfo::GetDefaultDrive(
                         DriveInfo::EDefaultRemovableMassStorage,
                         removableDrive ) );
-                #endif // RD_MULTIPLE_DRIVE
- 
-                //get count from music db
-            
-                CMPXCommand* cmdCount = CMPXMedia::NewL();
-                CleanupStack::PushL( cmdCount );
-                cmdCount->SetTObjectValueL<TMPXCommandId>( 
-                        KMPXCommandGeneralId, 
-                        KMPXCommandCollectionGetCount );
-                cmdCount->SetTObjectValueL<TBool>( 
-                        KMPXCommandGeneralDoSync,
-                        ETrue );
-                cmdCount->SetTObjectValueL<TInt>( 
-                        KMPXCommandCollectionCountDrive,
-                        removableDrive);
+                #endif // RD_MULTIPLE_DRIVE 
                 
-                cmdCount->SetTObjectValueL<TInt>( 
-                        KMPXCommandCollectionCountTable,
-                        EMPXCollectionCountTotal );
-                                   
-                // Get the collection UIDs
-                RArray<TUid> ary;
-                CleanupClosePushL( ary );
-                ary.AppendL( TUid::Uid(EMPXCollectionPluginMusic) );
-                TUid musicCollectionId = 
-                iCollection->CollectionIDL( ary.Array() );
-                CleanupStack::PopAndDestroy( &ary );
-                cmdCount->SetTObjectValueL<TInt>( 
-                        KMPXCommandGeneralCollectionId,
-                        musicCollectionId.iUid );
-    
-                TRAPD(err, iCollection->Collection().CommandL( *cmdCount ) );
+                TInt massStorageDrive( EDriveE );
+                User::LeaveIfError( DriveInfo::GetDefaultDrive(
+                        DriveInfo::EDefaultMassStorage,
+                        massStorageDrive ) );
                 
-                if ( KErrNotFound != err )
-                    {
-                    User::LeaveIfError( err );
-                    }
-
-                // returned command should contain count
-                if ( cmdCount->IsSupported( KMPXCommandCollectionCountValue ) )
-                    {                        
-                    mmcCount = 
-                        cmdCount->ValueTObjectL<TInt>( 
-                                KMPXCommandCollectionCountValue );
-                    }
-                CleanupStack::PopAndDestroy( cmdCount );
+                songTotal = GetTrackCountL( removableDrive, 
+                        podcastCollectionId.iUid, EMPXCollectionCountTrack );
+                songTotal += GetTrackCountL( massStorageDrive,
+                        podcastCollectionId.iUid, EMPXCollectionCountTrack );
+                
+                songTotal += GetTrackCountL( removableDrive,
+                        musicCollectionId.iUid, EMPXCollectionCountTotal );
+                songTotal += GetTrackCountL( massStorageDrive,
+                        musicCollectionId.iUid, EMPXCollectionCountTotal );
+                
                 }
             if( op == EMcMsgRefreshStart )
                 {
+                isCollectionDBChanged = EFalse;
                 MPX_DEBUG1("refreshStart store the initial count");
-                iInitialMMCCount = mmcCount;
+                iInitialCount = songTotal;
                 }
 
             if( op == EMcMsgRefreshEnd )                                    
@@ -335,21 +342,21 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
             // Do not reset iNumItemsAdded while KErrLocked or KErrDiskFull.
             if( data != KErrLocked && data != KErrDiskFull ) 
             	{
-            	iNumItemsAdded = mmcCount;
+            	iNumItemsAdded = songTotal ;
             	}
             switch ( iWaitNoteType )
                 {
                 case EMPXScanningNote:
                     {
-                    //total new tracks on external memory 
-                    TInt totalNewOnMMC = iNumItemsAdded - iInitialMMCCount;
-
-                    //total new tracks on internal memory 
-                    TInt newOnPhone = iTotalNewTracks - totalNewOnMMC; 
-
-                    //total new tracks to dispaly 
-                    iNumItemsAdded += newOnPhone;
-
+                     if ( iTotalNewTracks || ( iNumItemsAdded != iInitialCount ) )
+                        {
+                        isCollectionDBChanged = ETrue;
+                        iNumItemsAdded = songTotal ;                        
+                        }
+                    else
+                        {
+                        isCollectionDBChanged = EFalse;
+                        }  
                     break;
                     }
 
@@ -366,10 +373,15 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
                     {
                     // Synchronize the number of items added if we had no errors
                     //
-                    if( data >= KErrNone )
+                    if( data > KErrNone || iTotalNewTracks )
                         {
-                        iNumItemsAdded = data;
+                        isCollectionDBChanged = ETrue;
+                        iNumItemsAdded = iTotalNewTracks;
                         }
+                    else
+                    	{
+                        isCollectionDBChanged = EFalse;
+                    	}
                     break;
                     }
                 };
@@ -448,6 +460,46 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
             }
         } 
     }
+// ---------------------------------------------------------------------------
+// Get track count for given table in the db
+// ---------------------------------------------------------------------------
+//
+TInt CMPXScanningWaitDialog::GetTrackCountL(TInt aDrive,TInt aColDbId, TInt aColTable)
+    {
+    MPX_DEBUG2("--->CMPXScanningWaitDialog::GetTrackCountL() aDrive = %d", aDrive );
+    TInt count(0);
+
+    //get count from db
+    CMPXCommand* cmdCountM = CMPXMedia::NewL();
+    CleanupStack::PushL(cmdCountM);
+    cmdCountM->SetTObjectValueL<TMPXCommandId>( 
+	        KMPXCommandGeneralId, 
+	        KMPXCommandCollectionGetCount );
+    cmdCountM->SetTObjectValueL<TBool>(
+            KMPXCommandGeneralDoSync, 
+            ETrue );
+    cmdCountM->SetTObjectValueL<TInt>(
+            KMPXCommandGeneralCollectionId,
+            aColDbId );
+    cmdCountM->SetTObjectValueL<TInt>(
+            KMPXCommandCollectionCountDrive,
+            aDrive );
+    cmdCountM->SetTObjectValueL<TInt>(
+            KMPXCommandCollectionCountTable,
+            aColTable );
+
+    TRAPD( err, iCollection->Collection().CommandL( *cmdCountM ) );
+
+    // returned command should contain count
+    if ( err == KErrNone && cmdCountM->IsSupported(KMPXCommandCollectionCountValue ) )
+        {
+        count = cmdCountM->ValueTObjectL<TInt>(KMPXCommandCollectionCountValue);
+        }
     
+    CleanupStack::PopAndDestroy(cmdCountM);
+    MPX_DEBUG2("--->CMPXScanningWaitDialog::GetTrackCountL() count = %d", count );
+
+    return count;
+    }
 // END OF FILE
 

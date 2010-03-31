@@ -90,6 +90,10 @@ CMPXWaitNoteDialog::~CMPXWaitNoteDialog()
         iWaitDialog->SetCallback( NULL );
         TRAP_IGNORE( iWaitDialog->ProcessFinishedL() );
         }
+    if( iProcessWaitDialog )
+        {
+        TRAP_IGNORE( iProcessWaitDialog->ProcessFinishedL() );
+        }
 
     if( iResourceOffset )
         {
@@ -473,4 +477,38 @@ void CMPXWaitNoteDialog::DisplayNoteDialogL( TInt aDlgRsc, TInt aTextRsc,
     MPX_DEBUG1("<--CMPXWaitNoteDialog::DisplayNoteDialogL for COVER DISPLAY End");
     }
 
+// ---------------------------------------------------------------------------
+// Display a generic process wait dialog
+// ---------------------------------------------------------------------------
+//
+void CMPXWaitNoteDialog::DisplayProcessWaitDialogL( TInt aDlgRsc, 
+                                             const TDesC& aLabel,
+                                             CAknWaitDialog::TTone aTone )
+    {
+    if(iProcessWaitDialog )
+        {        
+        iProcessWaitDialog->ProcessFinishedL();
+        iProcessWaitDialog = NULL;
+        }
+
+    iProcessWaitDialog = new ( ELeave ) CAknWaitDialog(
+                                    ( CEikDialog** )&iProcessWaitDialog,
+                                    iVisDelayOff );
+    
+    iProcessWaitDialog->PrepareLC( aDlgRsc );
+    iProcessWaitDialog->SetTextL( aLabel );
+    iProcessWaitDialog->RunLD();
+    }
+
+// ---------------------------------------------------------------------------
+// Cancel the process wait dialog
+// ---------------------------------------------------------------------------
+//
+void CMPXWaitNoteDialog::CancelProcessWaitDialogL()
+    {
+    if( iProcessWaitDialog )
+        {
+        iProcessWaitDialog->ProcessFinishedL();
+        }
+    }
 // End of file

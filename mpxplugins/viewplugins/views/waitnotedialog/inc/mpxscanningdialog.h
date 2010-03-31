@@ -92,14 +92,29 @@ private:
      * @param aMessage collection message
      */
     void DoHandleCollectionMessageL( const CMPXMessage& aMessage );
-
+    
+    /**
+     * Helper function used inside DoHandleCollectionMessageL
+     */
+    inline TInt GetTrackCountL(TInt aDrive,TInt aColDbId, TInt aColTable);
+    
 private: // data
     MMPXHarvesterUtility*  iHarvesterUtil;
     
     TInt                   iNumItemsAdded;
     TInt                   iScanningError;
-    TInt                   iInitialMMCCount;
     TInt                   iTotalNewTracks;
+    /**
+     * The total songs in  (Mass Storage + MMC) CollectionDB before refresh
+     */
+    TInt                   iInitialCount;
+    /**
+     * Flag of music library
+     * ETrue when total songs in CollectionDB changed 
+     *       or new songs added to CollectionDB
+     * EFalse when CollectionDB has no change
+     */
+    TBool                  isCollectionDBChanged;
     };
 
 

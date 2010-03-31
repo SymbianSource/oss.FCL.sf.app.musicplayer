@@ -263,3 +263,27 @@ RESOURCE TBUF r_mpx_formatting_txt
     {
     buf = qtn_nmp_note_mp_unavailable_mmc;
     }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_updating_library_txt
+//    Text for updating library wait note.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_updating_library_txt
+    {
+    buf = qtn_mus_note_updating_library;
+    }
+    
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_uptodate_txt
+//    Text for update music library complete.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_uptodate_txt
+    {
+    buf = qtn_mus_note_uptodate;
+    }

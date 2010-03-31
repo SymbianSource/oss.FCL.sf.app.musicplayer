@@ -189,6 +189,20 @@ protected: // From Base classes
                              CAknNoteDialog::TTone aTone = CAknNoteDialog::ENoTone );
 //#endif // __COVER_DISPLAY    
 // Cover UI end
+    
+    /**
+    * Display a process wait dialog
+    * @param aDlgRsc, dialog resource
+    * @param aLabel, text 
+    */
+    void DisplayProcessWaitDialogL( TInt aDlgRsc, const TDesC& aLabel,
+                                     CAknWaitDialog::TTone aTone = CAknWaitDialog::ENoTone );
+    
+    /**
+    * Cancel the process wait dialog
+    */
+    void CancelProcessWaitDialogL();
+
 
 protected:
 
@@ -214,6 +228,7 @@ protected: // data
     TInt                   iResourceOffset;
     CAknQueryDialog*       iQueryDialog; // Not Owned
     CAknNoteDialog* 	   iNoteDialog;  // Not Owned
+    CAknWaitDialog*        iProcessWaitDialog; // Owned
     };
 
 #endif // C_MPXWAITNOTEDIALOG_H

@@ -42,6 +42,9 @@
 #ifdef RD_MULTIPLE_DRIVE
 #include <driveinfo.h>
 #endif //RD_MULTIPLE_DRIVE
+#include <aknmessagequerydialog.h>
+#include <gfxtranseffect/gfxtranseffect.h>    
+#include <akntranseffect.h>
 
 #include <upnpcopycommand.h>
 #include <AiwServiceHandler.h>  //Copy to remote feature
@@ -150,7 +153,8 @@ const TUint32 KOperatorMusicStoreNativeUid = 0x00000007;
 const TUint32 KOperatorMusicStoreJavaName = 0x00000008;
 const TUint32 KOperatorMusicStoreWebPage = 0x00000009;
 const TUint32 KOperatorMusicStoreURI = 0x0000000A;
-
+const TUint32 KEducatingUserURI = 0x0000000D;
+const TUint32 KEducatingPopupState = 0x0000000E;
 
 const TInt KJavaMusicShopType( 1 );
 const TInt KUIDMaxLength = 8;
@@ -307,6 +311,14 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
     if ( iOperatorMusicStoreURI )
         {
         delete iOperatorMusicStoreURI;
+        }
+    if ( iEducateUserURI )
+        {
+        delete iEducateUserURI;
+        }
+    if (iRepository)
+        {
+        delete iRepository;
         }
     if (iStoredAlbum)
         delete iStoredAlbum;
@@ -519,8 +531,15 @@ void CMPXCollectionViewHgImp::ConstructL()
 #endif //BACKSTEPPING_INCLUDED
 
     iIsAddingToPlaylist = EFalse;
-
-       // Get music store information from cenrep
+   
+    //Get educating user URI and popup state from cenrep
+    iEducateUserURI = HBufC16::NewL( KMPXMaxHistoryLength );
+    TPtr16 educatingURI = iEducateUserURI->Des();
+    iRepository = CRepository::NewL( KCRUidMPXMPSettings );
+    iRepository->Get( KEducatingUserURI, educatingURI );
+    iRepository->Get( KEducatingPopupState, iEducatingPopupState);
+        
+   // Get music store information from cenrep
    //
    TBuf8< KUIDMaxLength > operatorMusicStoreUID;
 
@@ -737,6 +756,9 @@ void CMPXCollectionViewHgImp::DeleteSelectedTBoneItemsL(TInt aCommand)
                     }
                 iConfirmationDlg = NULL;
                 CleanupStack::PopAndDestroy( waitNoteText );
+                
+                // delete songs list to update T-bone view after deleting a song
+                album->Delete( KMPXMediaArrayContents );
                 }
             }
         CleanupStack::PopAndDestroy( path );
@@ -4042,6 +4064,21 @@ void CMPXCollectionViewHgImp::DoHandleCollectionMessageL( const CMPXMessage& aMe
                 {
                 iCollectionCacheReady = EFalse;
                 }
+            if(type == EMcMsgRefreshEnd)
+                {
+                TInt songAdded = aMessage.ValueTObjectL<TInt>(KMPXMessageGeneralData);
+                MPX_DEBUG2("EMcMsgRefreshEnd, songAdded = %d", songAdded);
+                if (iPopuponRefresh)
+                    {   
+                    iPopuponRefresh =(songAdded > KErrNone)? ETrue:EFalse;
+                    }
+     
+	            if( NeedToShowEducatingDialog())
+                    {  
+                    EducatingUserDialog();
+                    iPopuponRefresh = EFalse;
+                    } 
+                } 
             // USB flags
             //
 	       CEikMenuBar* menuBar( MenuBar() );
@@ -4428,13 +4465,7 @@ void CMPXCollectionViewHgImp::HandleOpenL(
                         case EMPXGenre:
                             {
                             // genre view
-                            resId = R_MPX_COLLECTION_GENRE_LBX_EMPTYTEXT;
-                            break;
-                            }
-                        case EMPXComposer:
-                            {
-                            // composer view
-                            resId = R_MPX_COLLECTION_COMPOSER_LBX_EMPTYTEXT;
+                            resId = R_MPX_VMP_NO_GENRES;
                             break;
                             }
                         case EMPXPlaylist:
@@ -5693,6 +5724,11 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             AppUi()->HandleCommandL( EMPXCmdSaveAndReopen );
             break;
             }
+        case EMPXCmdAbout:
+            {
+            DisplayAboutDlgL();
+            break;
+            }    
         case EAknCmdExit:
         case EAknSoftkeyExit:
             {
@@ -5865,6 +5901,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             //
             StartWaitNoteL( EMPXRefreshingNote );
             iPlaybackUtility->CommandL( EPbCmdStop );
+            iPopuponRefresh = ETrue;
             break;
             }
 #endif
@@ -6188,7 +6225,8 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
               aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue);
 			  aMenuPane->SetItemDimmed( EMPXCmdGoToMusicShop, ETrue );
 	          aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue); 
-			 }  
+	          aMenuPane->SetItemDimmed( EMPXCmdAbout, ETrue); 
+	          }  
 			break;
 			}
 		case EMPXAlbum:
@@ -6205,6 +6243,7 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
 			    aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
 			    aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue); 
+                aMenuPane->SetItemDimmed( EMPXCmdAbout, ETrue);
 			    }    
 			break;
 			}
@@ -6223,6 +6262,7 @@ void CMPXCollectionViewHgImp::HandleInitMusicMenuPaneL(
                 aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue);
 				aMenuPane->SetItemDimmed( EMPXCmdGoToMusicShop, ETrue );
                 aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue); 
+                aMenuPane->SetItemDimmed( EMPXCmdAbout, ETrue);
 				}
 			
 			break;
@@ -6258,35 +6298,24 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
             {
             HandleInitMusicMenuPaneL(aMenuPane);
             aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+            
 			if ( isListEmpty )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue);
 				}
 			else
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-
 				TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
 				if ( !landscapeOrientation )
 					{
@@ -6349,7 +6378,15 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
 			aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
 			if( !iContainer->IsTBoneView()&& (iContainer->CurrentLbxItemIndex() > KErrNotFound))
 			    {  
-			     aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+                CMPXCollectionViewListBoxArray* array =
+                static_cast<CMPXCollectionViewListBoxArray*>(
+                    iContainer->ListBoxArray() );
+			    const CMPXMedia& media = array->MediaL( iContainer->CurrentLbxItemIndex() );
+			    const TDesC& title( media.ValueText( KMPXMediaGeneralTitle ) );
+			    if( title.Length() > 0)
+			        {   
+			        aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, !iUsingNokiaService );
+			        }
 			    } 
 		    break;
 			}
@@ -6617,35 +6654,24 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneSongsL(
             {
             HandleInitMusicMenuPaneL(aMenuPane);
             aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
+            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+            
 			if ( isListEmpty )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
 				aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue);
 				}
 			else
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-
 				TInt usbUnblockingStatus;
 				RProperty::Get( KMPXViewPSUid,
 								KMPXUSBUnblockingPSStatus,
@@ -7409,11 +7435,17 @@ void CMPXCollectionViewHgImp::LaunchMusicShopL()
 
     if ( iMusicStoreUID != 0)
         {
-    TApaTaskList tasList( iCoeEnv->WsSession() );
-        TApaTask task = tasList.FindApp( TUid::Uid(iMusicStoreUID) );
+    TApaTaskList taskList( iCoeEnv->WsSession() );
+        TApaTask task = taskList.FindApp( TUid::Uid(iMusicStoreUID) );
 
     if ( task.Exists() )
         {
+        GfxTransEffect::BeginFullScreen( 
+        AknTransEffect::EApplicationStart,
+            TRect(), 
+            AknTransEffect::EParameterType, 
+            AknTransEffect::GfxTransParam( TUid::Uid(iMusicStoreUID),        
+            AknTransEffect::TParameter::EActivateExplicitContinue ));            
         task.BringToForeground();
         }
     else
@@ -8020,11 +8052,17 @@ void CMPXCollectionViewHgImp::LaunchOperatorNativeMusicShopL()
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::LaunchMusicShopL" );
 
-    TApaTaskList tasList( iCoeEnv->WsSession() );
-    TApaTask task = tasList.FindApp( TUid::Uid(iOperatorNativeMusicStoreUID) );
+    TApaTaskList taskList( iCoeEnv->WsSession() );
+    TApaTask task = taskList.FindApp( TUid::Uid(iOperatorNativeMusicStoreUID) );
 
     if ( task.Exists() )
         {
+        GfxTransEffect::BeginFullScreen( 
+        AknTransEffect::EApplicationStart,
+            TRect(), 
+            AknTransEffect::EParameterType, 
+            AknTransEffect::GfxTransParam( TUid::Uid(iOperatorNativeMusicStoreUID),        
+            AknTransEffect::TParameter::EActivateExplicitContinue ));                           
         task.BringToForeground();
         }
     else
@@ -8054,6 +8092,12 @@ void CMPXCollectionViewHgImp::LaunchOperatorURLMusicShopL()
 
     if ( task.Exists() )
         {
+        GfxTransEffect::BeginFullScreen( 
+        AknTransEffect::EApplicationStart,
+            TRect(), 
+            AknTransEffect::EParameterType, 
+            AknTransEffect::GfxTransParam( id,        
+            AknTransEffect::TParameter::EActivateExplicitContinue ));                            
         task.BringToForeground();
         if ( iOperatorMusicStoreURI->Length() != NULL )
             {
@@ -8255,4 +8299,127 @@ const CMPXMedia* CMPXCollectionViewHgImp::RestoreSelectedAlbum ()
 	return iStoredAlbum;
     }
 
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::DisplayAboutDlgL()
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DisplayAboutDlgL() const
+     {
+      TBuf<32> version;
+      version.Format(_L("%d.%d.%d"), MUSIC_PLAYER_VERSION_MAJOR, MUSIC_PLAYER_VERSION_MINOR, MUSIC_PLAYER_VERSION_WEEK);
+      HBufC* aboutContent  = StringLoader::LoadL(R_QTN_MUS_ABOUT_VERSION ,version);
+      HBufC* aboutTitle  = StringLoader::LoadLC(R_QTN_MUS_ABOUT_NOTE);
+      CleanupStack::PushL(aboutContent );
+      CAknMessageQueryDialog* dlg = CAknMessageQueryDialog::NewL(*aboutContent );
+      CleanupStack::PushL(dlg);
+      dlg->SetHeaderTextL(*aboutTitle );
+      dlg->ExecuteLD(R_MPX_ABOUT_DIALOG);
+      CleanupStack::Pop(dlg);
+      CleanupStack::PopAndDestroy(2,aboutTitle ); 
+     }
+	 
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::EducatingUserDialog
+// Display Educating User Dialog
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::EducatingUserDialog ()
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::EducatingUserDialog " );
+    CAknMessageQueryDialog* query = new (ELeave) CAknMessageQueryDialog(
+            CAknMessageQueryDialog::ENoTone);
+    CleanupStack::PushL(query);
+
+    HBufC* message= HBufC::NewLC(500); 
+
+    message->Des().Append(_L("<AknMessageQuery Link>")); 
+    message->Des().Append(iEducateUserURI->Des());
+    message->Des().Append(_L("</AknMessageQuery Link>"));
+    HBufC* promptTxt = StringLoader::LoadLC(
+            R_QTN_NMP_NOTE_EDUCATING_THE_USER,message->Des() );
+    query->SetMessageTextL( promptTxt->Des());
+    TCallBack cb( CMPXCollectionViewHgImp::LinkCallback, this );
+    query->SetLink( cb );
+
+    CleanupStack::PopAndDestroy( promptTxt );
+    CleanupStack::PopAndDestroy( message );
+    CleanupStack::Pop( query );
+            
+    if(query->ExecuteLD( R_MPX_CUI_EDUCATING_THE_USER_QUERY ))
+        {
+        iRepository->Set( KEducatingPopupState, EMPXShowEducatingPopup );
+        iEducatingPopupState = EMPXShowEducatingPopup;
+        }
+    else
+        {
+        iRepository->Set( KEducatingPopupState, EMPXDonotShowEducatingPopup );
+        iEducatingPopupState = EMPXDonotShowEducatingPopup; 
+        } 
+    }
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::LaunchEducatingURL
+// Launch Educating URL
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::LaunchEducatingURL()
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::LaunchEducatingURL" );
+    const TUid KOSSBrowserUidValue = {0x10008D39}; // 0x1020724D for S60 3rd Ed
+    TUid id(KOSSBrowserUidValue);
+    TApaTaskList taskList(CEikonEnv::Static()->WsSession());
+    TApaTask task = taskList.FindApp(id);
+  
+    if ( task.Exists() )
+        {
+        task.BringToForeground();
+        if ( iEducateUserURI->Length() != NULL )
+            {
+            TBuf8<KMPXMaxHistoryLength> tempUrl;
+            tempUrl.Copy(iEducateUserURI->Des());
+            task.SendMessage(TUid::Uid(0), tempUrl);
+            }
+        }
+    else
+        {
+        RApaLsSession apaLsSession;
+        if ( KErrNone == apaLsSession.Connect() )
+            {
+            CleanupClosePushL( apaLsSession );
+            TThreadId threadId;
+
+            apaLsSession.StartDocument(*iEducateUserURI, KOSSBrowserUidValue, threadId);
+            CleanupStack::PopAndDestroy(&apaLsSession);
+            }
+        }
+     }
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::LinkCallback
+// Call back for Educating User URL 
+// -----------------------------------------------------------------------------
+// 
+TInt CMPXCollectionViewHgImp::LinkCallback(TAny* aPtr)
+    {
+    CMPXCollectionViewHgImp* ptr = static_cast<CMPXCollectionViewHgImp*>( aPtr );
+    TRAPD( err, ptr->LaunchEducatingURL() );
+    MPX_DEBUG2( "CMPXCollectionViewHgImp::LinkCallback()-err:%d", err );
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::NeedToShowEducatingDialog
+// -----------------------------------------------------------------------------
+//
+TBool CMPXCollectionViewHgImp::NeedToShowEducatingDialog()
+    {
+    if(iEducateUserURI && iCollectionReady && //If educating user URI is in cenrep and Collection is Ready
+      (iEducatingPopupState == EMPXInitialEducatingPopup || //If Music Player is launched first time after phone flash 
+      (iEducatingPopupState == EMPXShowEducatingPopup && iPopuponRefresh))) //If user pressed yes on "Remind me later" and its manual refresh with some song added
+        {
+        return ETrue;
+        }
+    else
+        return EFalse;
+    }
 //  End of File

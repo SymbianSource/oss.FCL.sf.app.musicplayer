@@ -19,6 +19,11 @@
 #ifndef C_CMPXCOLLECTIONVIEWHGIMP_H
 #define C_CMPXCOLLECTIONVIEWHGIMP_H
 
+//Version Information
+#define MUSIC_PLAYER_VERSION_MAJOR 16 //Road Runner Music Player
+#define MUSIC_PLAYER_VERSION_MINOR 10 //year 2010
+#define MUSIC_PLAYER_VERSION_WEEK 11  //Week Number 
+
 // INCLUDES
 #include <eikclb.h>
 #include <aknwaitdialog.h>
@@ -64,6 +69,7 @@ class MMPXPlaybackUtility;
 class MMPXPlayerManager;
 class MMPXViewUtility;
 class MProfileEngine;
+class CRepository;
 // CLASS DECLARATION
 
 /**
@@ -868,6 +874,18 @@ private:
     void OpenGenreL();
     void OpenPodcastsL();
 
+    /*
+ 	 * Display information about MusicPlayer version.
+ 	 */
+     void  DisplayAboutDlgL() const;
+	 	 
+	/*
+ 	 * Internal functions to show the Educating user URI.
+ 	 */
+    void EducatingUserDialog();
+    TBool NeedToShowEducatingDialog(); 
+    void LaunchEducatingURL();
+    static TInt LinkCallback(TAny* aPtr);
 
 private:    // Data
 
@@ -981,6 +999,9 @@ private:    // Data
     TInt iOperatorMusicStoreType;
     TInt iMusicStoreWebPage;
     HBufC16* iOperatorMusicStoreURI;
+    HBufC16* iEducateUserURI; 
+    TInt iEducatingPopupState ;       
+    TBool iPopuponRefresh; 
 
     // Wait note for delete
     CAknWaitDialog*	iWaitDialog;
@@ -991,6 +1012,7 @@ private:    // Data
 	TBool iMarkedAll;
 	TBool iFirstIncrementalBatch;
     CMPXMedia *iStoredAlbum; // owned
+    CRepository *iRepository; //owned
     
     TBool                       iDialogDismissed;
     HBufC*                      iTitleWait; // Owned

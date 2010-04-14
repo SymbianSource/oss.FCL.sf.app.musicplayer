@@ -74,6 +74,7 @@ LIBRARY         mpxcollectionhelper.lib
 LIBRARY         mpxcommonui.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         centralrepository.lib  
+LIBRARY         mpxplaybackutility.lib
 
 LIBRARY         drmuihandling.lib
 

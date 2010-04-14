@@ -110,6 +110,9 @@ CMPXDbMusic::CMPXDbMusic(
     MMPXDbMusicObserver& aObserver) :
     CMPXDbTable(aDbManager),
     iObserver(aObserver)
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    ,iArtNeedUpdated(ETrue)
+#endif	
     {
     MPX_FUNC("CMPXDbMusic::CMPXDbMusic");
     }
@@ -253,20 +256,27 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::DoUpdateSongL(
         visible = DoUpdateSongL(aSongId, aMedia, driveUnit, aItemChangedMessages,
           recordset);
 
-        // Update Album table
-        if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        if(iArtNeedUpdated)
             {
-            TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
-            iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
-            }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+		    // Update Album table
+		    if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
+		        {
+		        TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
+		        iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
+		        }
 
-        // Update Artist table
-        if ( aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) )
-            {
-            TUint32 artistId = recordset.ColumnInt64(EMusicArtist);
-            iObserver.UpdateCategoryItemL(EMPXArtist, artistId, aMedia, driveUnit, aItemChangedMessages);
+		    // Update Artist table
+		    if ( aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) )
+		        {
+		        TUint32 artistId = recordset.ColumnInt64(EMusicArtist);
+		        iObserver.UpdateCategoryItemL(EMPXArtist, artistId, aMedia, driveUnit, aItemChangedMessages);
+		        }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
             }
-
+        iArtNeedUpdated = ETrue;  //reset flag
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         CleanupStack::PopAndDestroy(&recordset);
         }
 
@@ -1051,26 +1061,6 @@ TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId)
     CleanupStack::PopAndDestroy(&recordset);
 
     return artistId;
-    }
-
-// ----------------------------------------------------------------------------
-// CMPXDbMusic::RefreshStartL
-// ----------------------------------------------------------------------------
-//
-void CMPXDbMusic::RefreshStartL()
-    {
-    iRefresh = ETrue;
-    MPX_FUNC("CMPXDbMusic::RefreshStartL");
-    }
-
-// ----------------------------------------------------------------------------
-// CMPXDbMusic::RefreshEndL
-// ----------------------------------------------------------------------------
-//
-void CMPXDbMusic::RefreshEndL()
-    {
-    MPX_FUNC("CMPXDbMusic::RefreshEndL");
-    iRefresh = EFalse;
     }
 
 // ----------------------------------------------------------------------------
@@ -1876,6 +1866,12 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED 
                     TParsePtrC parse(albumArtFilename);
                     TPtrC ext(parse.Ext());
+					//set flag to false, so .alb will not overwrite art field in album, artist table 
+					// when song with embedded art
+	                if ((ext.CompareF(KAbstractAlbumExt)== 0) && containEmbeddedArt)
+	                    {
+	                    iArtNeedUpdated = EFalse;
+	                    }
                           
                     if ( ((ext.CompareF(KAbstractAlbumExt)== 0) && !containEmbeddedArt) || (ext.CompareF(KAbstractAlbumExt)!= 0))                    
                         {

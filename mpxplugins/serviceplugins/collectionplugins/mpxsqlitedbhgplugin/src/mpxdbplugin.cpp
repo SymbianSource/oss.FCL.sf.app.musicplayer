@@ -338,9 +338,11 @@ void CMPXDbPlugin::CommandL(
             break;
             }
         case EMcCmdClose:
+        	  // called before destructing this plug-in: no actions required
+        	  break;
         case EMcCloseCollection:
             {
-            MPX_DEBUG1("CMPXDbPlugin::CommandL - EMcCloseCollection");
+            MPX_DEBUG2("CMPXDbPlugin::CommandL - EMcCloseCollection %d", aArg);
             // Close the specified database
             TRAP_IGNORE(iDbHandler->PreCloseCollectionL());
  #ifdef RD_MULTIPLE_DRIVE
@@ -362,12 +364,11 @@ void CMPXDbPlugin::CommandL(
                 }
             else
                 {
-                iDbHandler->CloseDatabaseL(aArg);
+                TRAP_IGNORE( iDbHandler->CloseDatabaseL(aArg) ); //Closing can fail if physical media has been removed or forced disk dismount has occurred.
                 }
  #else
             iDbHandler->CloseDatabaseL(aArg);
  #endif // RD_MULTIPLE_DRIVE
-            iDbHandler->CollectionClosed();
             break;
             }
         case EMcReOpenCollection:
@@ -397,7 +398,6 @@ void CMPXDbPlugin::CommandL(
 #else
             iDbHandler->OpenDatabaseL(aArg);
 #endif // RD_MULTIPLE_DRIVE
-            TRAP_IGNORE(iDbHandler->CollectionOpenedL());
             break;
             }
         case EMcRefreshStarted:
@@ -788,7 +788,6 @@ TBool CMPXDbPlugin::DoOpenL(
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     CleanupStack::PushL(array);
 
-    TInt count(0);
     TInt levels(aPath.Levels());
     TBool isASong(EFalse);
 

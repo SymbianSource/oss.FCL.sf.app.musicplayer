@@ -1087,7 +1087,8 @@ void CMPXMediaKeyHandlerImp::MrccatoCommand(
             }
         case ERemConCoreApiBackward:
             {
-            if ( aButtonAct == ERemConCoreApiButtonClick )
+            if ( ( aButtonAct == ERemConCoreApiButtonClick ) ||
+                 ( aButtonAct == ERemConCoreApiButtonRelease ) )
                 {
                 FilterAndSendCommand( EPbCmdPrevious );
                 }
@@ -1095,7 +1096,8 @@ void CMPXMediaKeyHandlerImp::MrccatoCommand(
             }
         case ERemConCoreApiForward:
             {
-            if ( aButtonAct == ERemConCoreApiButtonClick )
+            if ( ( aButtonAct == ERemConCoreApiButtonClick ) ||
+                 ( aButtonAct == ERemConCoreApiButtonRelease ) )
                 {
                 FilterAndSendCommand( EPbCmdNext );
                 }

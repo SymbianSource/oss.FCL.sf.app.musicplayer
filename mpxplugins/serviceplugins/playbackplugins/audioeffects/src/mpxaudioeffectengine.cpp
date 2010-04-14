@@ -207,7 +207,7 @@ EXPORT_C void CMPXAudioEffectEngine::SetStereoWideningL()
         {
         if(!iStereoEffect)  // If stereo widening is ON and not constructed
             {
-            TUint stereoLevel = 100;
+            TUint stereoLevel = 30;
             // cmdUtil ownership passed into new object           
             MPX_TRAPD(error, 
                   iStereoEffect = CStereoWidening::NewL(*iMdaPlayer, 
@@ -220,7 +220,7 @@ EXPORT_C void CMPXAudioEffectEngine::SetStereoWideningL()
             }
 
         iStereoEffect->EnableL();
-        TUint8 level = 100;
+        TUint8 level = 30;
         iStereoEffect->SetStereoWideningLevelL( level );
         iStereoEffect->ApplyL();
         }

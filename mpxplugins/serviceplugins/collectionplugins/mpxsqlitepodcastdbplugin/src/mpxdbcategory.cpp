@@ -588,13 +588,17 @@ TInt CMPXDbCategory::GetEpisodeCountL(
         iDbManager.ExecuteSelectQueryL(aDriveId, *query, aId));
     CleanupClosePushL(recordset);
 
-    if (recordset.Next() != KSqlAtRow)
+    TInt err(KSqlAtEnd);
+    TInt ret(0) ;
+    while((err = recordset.Next()) == KSqlAtRow)
+        {
+        ret += recordset.ColumnInt(KMPXTableDefaultIndex);
+        }
+    if(err != KSqlAtEnd)
         {
         User::Leave(KErrNotFound);
         }
-
-    TInt ret = recordset.ColumnInt(KMPXTableDefaultIndex);
-
+    MPX_DEBUG2("CMPXDbCategory::GetEpisodeCountL Count %d" , ret);
     CleanupStack::PopAndDestroy(&recordset);
     CleanupStack::PopAndDestroy(query);
 

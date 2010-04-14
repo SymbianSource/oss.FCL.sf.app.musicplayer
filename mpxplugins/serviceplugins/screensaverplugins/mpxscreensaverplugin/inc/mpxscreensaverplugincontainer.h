@@ -89,6 +89,24 @@ public:
     * @since 3.0
     */
     void RefreshDisplayInfo();
+    
+    /**
+     * With this method the plugin may request a one-shot timeout event
+     * (EScreensaverEventTimeout) after the specified amount of seconds
+     * has passed.
+     * If the plugin only wants to be displayed for a certain time, this
+     * can be used instead of defining a timer in the plugin. Note that the
+     * maximum time is about 35 minutes (TTimeIntervalMicroSeconds32).
+     * If the screensaver is stopped before the time has passed, the
+     * timer will be canceled and callback not issued. The timer is also
+     * cancelled after the timeout has occurred. New timeout requests also
+     * cancel any pending timeouts before issuing a new one. A time value
+     * of 0 just cancels a pending timeout.
+     *
+     * @param aSecs Desired time in seconds after which a timeout callback
+     *              event should be issued. 
+     */
+     void RequestTimeout(TInt aSecs);
 
 private:
 

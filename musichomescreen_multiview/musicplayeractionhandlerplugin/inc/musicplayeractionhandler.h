@@ -132,6 +132,13 @@ private:
      *  @param aCommand commandType.
      */
     void SetPlaybackCommandL( TMPXPlaybackCommand aCommand );
+    
+    /**
+     *  Calls transition effect. 
+     *  To be called before bringing an already running application to foreground.
+     *  @param aNext TUid of the application to transition to.
+     */
+    void BeginFullScreenTransEffect( const TUid& aNext );
 private: // data
 
     /**

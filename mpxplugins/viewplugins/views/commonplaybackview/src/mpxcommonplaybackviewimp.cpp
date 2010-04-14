@@ -107,6 +107,8 @@
 #include <akntoolbar.h>
 #include <aknbutton.h>
 #include "mpxviewprivatepskeys.h"
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntranseffect.h>
 
 // CONSTANTS
 const TInt KMPXOneSecInMilliSecs( 1000 );
@@ -1859,6 +1861,12 @@ EXPORT_C void CMPXCommonPlaybackViewImp::LaunchFMTransmitterL()
         TApaTask task = tasList.FindApp( KFmTxAppUid );
         if ( task.Exists() )
             {
+            GfxTransEffect::BeginFullScreen( 
+            AknTransEffect::EApplicationStart,
+                TRect(), 
+                AknTransEffect::EParameterType, 
+                AknTransEffect::GfxTransParam( KFmTxAppUid,        
+                AknTransEffect::TParameter::EActivateExplicitContinue ));                                    
             task.BringToForeground();
             }
         else
@@ -4061,26 +4069,19 @@ TInt CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL( TAny* aPtr )
 //
 EXPORT_C void CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL()
     {
-    MMPXSource* s = iPlaybackUtility->Source();
-    TInt count (0);
-    TInt index (0);
-    if ( s )
-        {
-        CMPXCollectionPlaylist* playlist = s->PlaylistL();
-        if ( playlist )
-           {
-           count = playlist->Count();
-           index = playlist->PathIndex( playlist->Index() );
-           delete playlist;
-           playlist = NULL;
-           }
-        }
-    HBufC* buf = HBufC::NewLC( 5 ); // magic number, array granularity
-    buf->Des().AppendNum( index);
-
+    MPX_FUNC("CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL"); 
+   
     // Activate Metadata dialog via View Framework
-    iViewUtility->ActivateViewL( TUid::Uid(KMPXPluginTypeMetadataEditorUid), buf );
-    CleanupStack::PopAndDestroy(buf);
+    CAknToolbar* toolbar = Toolbar();
+    if ( toolbar )
+        {
+        toolbar->SetToolbarVisibility(EFalse);
+        }
+    iViewUtility->ActivateViewL( TUid::Uid(KMPXPluginTypeMetadataEditorUid) );
+    if ( toolbar )
+        {
+        toolbar->SetToolbarVisibility(ETrue);
+        }
     }
     
 //  End of File

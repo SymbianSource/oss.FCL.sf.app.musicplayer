@@ -347,19 +347,6 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
             switch ( iWaitNoteType )
                 {
                 case EMPXScanningNote:
-                    {
-                     if ( iTotalNewTracks || ( iNumItemsAdded != iInitialCount ) )
-                        {
-                        isCollectionDBChanged = ETrue;
-                        iNumItemsAdded = songTotal ;                        
-                        }
-                    else
-                        {
-                        isCollectionDBChanged = EFalse;
-                        }  
-                    break;
-                    }
-
                 case EMPXOpeningNote:
                 case EMPXRefreshingNote:
                 case EMPXCorruptScanningNote:
@@ -447,8 +434,8 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
                 {
                 iNumItemsAdded++;
                 iTotalNewTracks++;
-                // Update wait note text if refreshing
-                if( iWaitNoteType == EMPXRefreshingNote &&
+                // Update wait note text if refreshing or scaning
+                if( iWaitNoteType == EMPXRefreshingNote || iWaitNoteType == EMPXScanningNote || iWaitNoteType == EMPXCorruptScanningNote &&
                     iScanningError == KErrNone )
                     {
                     HBufC* text = StringLoader::LoadLC( R_MPX_REFRESHING_DB_TXT, 

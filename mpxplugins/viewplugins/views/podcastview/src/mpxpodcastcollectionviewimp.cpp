@@ -125,7 +125,6 @@ const TInt KMPXLastDirectoryLevel( 2 );
 // MACROS
 _LIT(KMPXCollDetailsItemsFormat, "%S\t%S");
 
-const TInt KProgressBarMaxValue = 100; // Max Value for the Progress Info bar
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
 #define KMusicCollectionUid 0x101FFC3A
 #endif
@@ -373,9 +372,9 @@ void CMPXPodcastCollectionViewImp::DeleteSelectedItemsL()
         if (confirmationDlg->ExecuteLD(R_MPX_CUI_DELETE_CONFIRMATION_QUERY))
             {
             HandleCommandL( EMPXCmdIgnoreExternalCommand );
-            StartProgressNoteL();
+            StartDeleteWaitNoteL();
             TPtr buf = waitNoteText->Des();
-			UpdateProcessL(0, buf);
+			UpdateProcessL(buf);
             iCollectionUiHelper->DeleteL(*path, this);
             iIsDeleting = ETrue;
 
@@ -884,31 +883,28 @@ TInt CMPXPodcastCollectionViewImp::UpdatePlaybackStatusL(TBool aStatusChangeFlag
     }
 
 // ---------------------------------------------------------------------------
-// Start a Progress note
+// Start a delete wait note
 // ---------------------------------------------------------------------------
 //
-void CMPXPodcastCollectionViewImp::StartProgressNoteL()	
+void CMPXPodcastCollectionViewImp::StartDeleteWaitNoteL()	
 	{
-	iProgressDialog = new (ELeave) CAknProgressDialog(
-		(REINTERPRET_CAST(CEikDialog**, &iProgressDialog)),
+    iWaitDialog = new (ELeave) CAknWaitDialog(
+		(REINTERPRET_CAST(CEikDialog**, &iWaitDialog)),
 		ETrue);
-	iProgressDialog->PrepareLC(R_MPX_PROGRESS_NOTE);
-	iProgressInfo = iProgressDialog->GetProgressInfoL();
-    iProgressDialog->SetCallback(this);
-    iProgressDialog->RunLD();
-	iProgressInfo->SetFinalValue(KProgressBarMaxValue);	
+    iWaitDialog->PrepareLC(R_MPX_DELETE_WAIT_NOTE);
+    iWaitDialog->SetCallback(this);
+    iWaitDialog->RunLD();
 	}
  
 // ---------------------------------------------------------------------------
-// Update the Progress note
+// Update the delete wait note
 // ---------------------------------------------------------------------------
 //
-void CMPXPodcastCollectionViewImp::UpdateProcessL(TInt aProgress,const TDesC& aProgressText)
+void CMPXPodcastCollectionViewImp::UpdateProcessL(const TDesC& aDeleteNoteText)
 	{
-	if(iProgressDialog)
+	if(iWaitDialog)
 		{
-		iProgressDialog->SetTextL(aProgressText);
-		iProgressInfo->SetAndDraw(aProgress);	
+        iWaitDialog->SetTextL(aDeleteNoteText);	
     	}
 	}
 
@@ -2411,9 +2407,9 @@ void CMPXPodcastCollectionViewImp::DoHandlePlaybackMessageL( const CMPXMessage& 
                     iCommonUiHelper->DismissWaitNoteL();
                     HandleCommandL( EMPXCmdHandleExternalCommand );
                     }
-                if (iProgressDialog)
+                if (iWaitDialog)
 					{
-					iProgressDialog->ProcessFinishedL();
+                    iWaitDialog->ProcessFinishedL();
 					}
                 if (iIsDeleting)
                     {
@@ -2801,9 +2797,9 @@ void CMPXPodcastCollectionViewImp::HandleOpenL(
         {
         // nothing else to delete
         iIsDeleting = EFalse;
-        if (iProgressDialog)
+        if (iWaitDialog)
 			{
-			iProgressDialog->ProcessFinishedL();
+            iWaitDialog->ProcessFinishedL();
 			}
         HandleCommandL( EMPXCmdHandleExternalCommand );
         }
@@ -2938,9 +2934,9 @@ void CMPXPodcastCollectionViewImp::HandleOperationCompleteL(
             if(aErr == KErrInUse)
                 {
                 iIsDeleting = EFalse;
-				if (iProgressDialog)
+				if (iWaitDialog)
 					{
-					iProgressDialog->ProcessFinishedL();
+                    iWaitDialog->ProcessFinishedL();
 					}
                 HandleCommandL( EMPXCmdHandleExternalCommand );
                 aErr = KErrNone; //handled here
@@ -2966,9 +2962,9 @@ void CMPXPodcastCollectionViewImp::HandleOperationCompleteL(
                 iIsDeleting = EFalse;
                 if(!iIsWaitNoteCanceled)
                     {
-                    if (iProgressDialog)
+                    if (iWaitDialog)
                     	{
-						iProgressDialog->ProcessFinishedL();
+                        iWaitDialog->ProcessFinishedL();
 						}
                     HandleCommandL( EMPXCmdHandleExternalCommand );
                     iIsWaitNoteCanceled = EFalse;
@@ -2982,28 +2978,6 @@ void CMPXPodcastCollectionViewImp::HandleOperationCompleteL(
 
              // reopen collection
             iCollectionUtility->Collection().OpenL();
-            break;
-            }
-        case EDeleteStatusOp:
-            {
-            if ( aArgument )
-                {
-                CMPXMedia* media = (CMPXMedia*)aArgument;
-                CleanupStack::PushL( media );
-                if ( media->IsSupported( KMPXMediaGeneralCount ) )
-                    {
-                    TInt deletePercent = media->ValueTObjectL<TInt>( KMPXMediaGeneralCount );
-                    MPX_DEBUG2( "CMPXCollectionViewImp::HandleOperationCompleteL % Files Deleted: %d", deletePercent );
-                    // update WaitNote dialog.
-                    HBufC* string = StringLoader::LoadLC(R_MPX_QTN_NMP_DEL_BATCH_SONGS_WAIT_NOTE, deletePercent);
-                    TPtr buf = string->Des();
-
-                    UpdateProcessL(deletePercent, buf);
-                    CleanupStack::PopAndDestroy( string );
-                    }
-                CleanupStack::PopAndDestroy( media );
-                aArgument = NULL;
-                }
             break;
             }
         case ERenameOp: // fall through

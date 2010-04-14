@@ -25,7 +25,7 @@
 /** Command ID's. */
 enum TMPXPlaybackViewCommandIds
     {
-    EMPXPbvCmdPlay = 0x1000,
+    EMPXPbvCmdPlay = 0x2500,
     EMPXPbvCmdPause,
     EMPXPbvCmdStop,
     EMPXPbvCmdPlayPause,

@@ -244,22 +244,24 @@ void CMPXDbAlbum::DecrementSongsForCategoryL(
         if ( artistId == aArtist )
             {
             TUint32 newArtistId = ArtistForAlbumL(aId);
-
-            _LIT( KFormatArtistId, "Artist=%d" );
-            HBufC* setStr = HBufC::NewLC(KFormatArtistId().Length() + KMCIntegerLen);
-            setStr->Des().Format(KFormatArtistId, newArtistId);
-
-            iDbManager.ExecuteQueryL(aDriveId, KQueryAlbumUpdate, setStr, aId);
-            CleanupStack::PopAndDestroy(setStr);
-
-            if (aItemChangedMessages)
+            if ( artistId != newArtistId )
                 {
-                // add the item changed message
-                MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
-                    EMPXAlbum, KDBPluginUid, ETrue, 0 );  
+                _LIT( KFormatArtistId, "Artist=%d" );
+                HBufC* setStr = HBufC::NewLC(KFormatArtistId().Length() + KMCIntegerLen);
+                setStr->Des().Format(KFormatArtistId, newArtistId);
+
+                iDbManager.ExecuteQueryL(aDriveId, KQueryAlbumUpdate, setStr, aId);
+                CleanupStack::PopAndDestroy(setStr);
+                
+                if (aItemChangedMessages)
+                    {
+                    // add the item changed message
+                    MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
+                        EMPXAlbum, KDBPluginUid, ETrue, 0 );  
+                    }
                 }
             }
-
+        
         // decrement the number of songs for the category
         query = PreProcessStringLC(KQueryCategoryDecrementSongCount);
         iDbManager.ExecuteQueryL(aDriveId, *query, aId);

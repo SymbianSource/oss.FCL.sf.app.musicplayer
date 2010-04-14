@@ -75,7 +75,7 @@
 #include "mpxmetadataeditordialog.hlp.hrh"
 #include "mpxlog.h"
 #include <drmuihandling.h>
-
+#include <mpxplaybackutility.h>
 
 // CONSTANTS
 const TInt KMPXFileDetailsMaxTitleLen = 32;
@@ -489,7 +489,7 @@ void CMPXMetadataEditorDialog::ConstructL()
 
     iCollectionUtility = MMPXCollectionUtility::NewL( this, KMcModeDefault );
     iCommonUiHelper = CMPXCommonUiHelper::NewL();
-
+    
     CAknForm::ConstructL( R_MPX_CUI_SONG_DETAILS_MENUBAR );
 
     iCurrentLibrary = EMPXMetadataEditorDlgCollection;
@@ -2455,10 +2455,11 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
     	KMPXSongDetailsYearMin, KMPXSongDetailsYearMax );
 
     // Get media property for the current song
-    CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
-    CleanupStack::PushL( cpath );
-    if ( iParam )
+    
+    if ( iParam ) // Dialog launched from CollectionView
         {
+		CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
+        CleanupStack::PushL( cpath );
         TLex yearLex( iParam->Des() );
         TInt lexToInt = NULL;
         if ( yearLex.Val( lexToInt ) == KErrNone )
@@ -2479,8 +2480,33 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
             iCollectionUtility->Collection().MediaL( *cpath, attrs.Array() );
             CleanupStack::PopAndDestroy( &attrs );
             }
+		CleanupStack::PopAndDestroy( cpath );	
         }
-    CleanupStack::PopAndDestroy( cpath );
+    else // Dialog launched from NowPlayingView
+        {
+        // Get the playback utility instance from engine.
+        MMPXPlaybackUtility* playbackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
+        MMPXSource* s = playbackUtility->Source();
+        if ( s )
+            {
+            RArray<TMPXAttribute> attrs;
+            CleanupClosePushL(attrs);
+            attrs.Append( KMPXMediaGeneralAll );
+            attrs.Append( KMPXMediaAudioAudioAll );
+            attrs.Append( KMPXMediaMusicAll );
+            attrs.Append( KMPXMediaDrmProtected );
+            if ( iCurrentLibrary == EMPXMetadataEditorDlgPodcast )
+                {
+                 attrs.Append(
+                      TMPXAttribute( KMPXMediaIdPodcast, EMPXMediaPodcastAll ) );
+                }
+                iCurrentMediaLOp = EMPXMetadataEditorGetSongInfo;
+                s->MediaL(attrs.Array(), *this);
+                CleanupStack::PopAndDestroy( &attrs );
+            }  
+        playbackUtility->Close();
+        }
+    
 
     // Podcasting is enabled
     if ( !iDisablePodcasting )
@@ -3146,5 +3172,48 @@ void CMPXMetadataEditorDialog::LaunchDrmInfoL()
     iDrmUiHandler->ShowDetailsViewL( drmFile );
     CleanupStack::PopAndDestroy( &drmFile );
     CleanupStack::PopAndDestroy( &fs );
+    }
+
+// ---------------------------------------------------------------------------
+// From MMPXPlaybackCallback
+// Handle playback property.
+// ---------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::HandlePropertyL(
+    TMPXPlaybackProperty aProperty,
+    TInt aValue,
+    TInt aError )
+    {
+    MPX_FUNC( "CMPXMetadataEditorDialog::HandleSubPlayerNamesL" );
+    }
+
+// ---------------------------------------------------------------------------
+// From MMPXPlaybackCallback
+// Method is called continously until aComplete=ETrue, signifying that
+// it is done and there will be no more callbacks
+// Only new items are passed each time
+// ---------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::HandleSubPlayerNamesL(
+    TUid /* aPlayer */,
+    const MDesCArray* /* aSubPlayers */,
+    TBool /* aComplete */,
+    TInt /* aError */ )
+    {
+    MPX_FUNC( "CMPXMetadataEditorDialog::HandleSubPlayerNamesL" );
+    }
+
+// ---------------------------------------------------------------------------
+// From MMPXPlaybackCallback
+// Handle media properties.
+// Notes: The client is responsible for delete the object of aMedia.
+// ---------------------------------------------------------------------------
+//
+void CMPXMetadataEditorDialog::HandleMediaL(
+    const CMPXMedia& aMedia,
+    TInt aError )
+    {
+    MPX_FUNC( "CMPXMetadataEditorDialog::HandleMediaL" );
+    TRAP_IGNORE( DoHandleMediaL( aMedia, aError ) );
     }
 // End of File

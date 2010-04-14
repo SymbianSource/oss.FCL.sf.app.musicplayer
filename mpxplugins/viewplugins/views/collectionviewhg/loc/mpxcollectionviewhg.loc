@@ -574,8 +574,14 @@
 //
 #define qtn_mus_mediawall_title_shuffle_all "Shuffle"
 
+// d:Text for softkey option play.
+// l:control_pane_t1/opt7
+// r:9.2
+//
+#define qtn_mus_sk1_play "Play"
+
 // d:Text shown if there is no content to display for Artists & Albums.
-// l:main_pane_empty_t1
+// l:main_pane_empty_t1/opt2
 // r:5.2
 //
 #define qtn_vmp_no_albums "(no albums)"
@@ -624,7 +630,7 @@
 #define qtn_mus_songs_artist_unknown "Unknown"
 
 // d:Text shown when there is no content to display in tracks level view
-// l:main_pane_empty_t1
+// l:main_pane_empty_t1/opt2
 // r:5.2
 //
 #define qtn_vmp_no_songs "(no songs)"
@@ -693,5 +699,17 @@
 // r:5.2
 //
 #define qtn_mus_genre_unknown "Unknown"
+
+// d:Text for softkey option Shuffle
+// l:control_pane_t1/opt7
+// r:5.2
+//
+#define qtn_mus_softkey_shuffle "Shuffle"
+
+// d:Text shown when there is no content to display in genre view
+// l:main_pane_empty_t1/opt2
+// r:5.2
+//
+#define qtn_vmp_no_genres "(no genres)"
 
 // End of File

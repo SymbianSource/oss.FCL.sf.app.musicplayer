@@ -737,16 +737,6 @@ class CMPXDbHandler :
          */
         void PreCloseCollectionL();
 
-        /**
-         * Notifies the handler that the collection was closed.
-         */
-         void CollectionClosed();
-
-         /**
-         * Notifies the handler that the collection was opened.
-         */
-         void CollectionOpenedL();
-
          /**
           * Checks if the spefified drive is a remove drive
           */
@@ -1121,8 +1111,6 @@ class CMPXDbHandler :
         RFs& iFs;
         CMPXResource& iResource;
         TBool iOutOfDisk;                   // Are we in out of disk mode?
-        TBool iSynchronizeBasicTable;       // Basic music table was not updated during last refresh
-        TBool iCollectionOpen;              // Databases opened
         TBool iRefresh;                     // Refresh operation currently performed
         TBool iMtpInUse;                    // Flag for MTP operation
         TInt  iOpOnDbCount;                 // Count to provide a min op amount in one transaction

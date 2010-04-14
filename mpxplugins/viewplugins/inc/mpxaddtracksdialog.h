@@ -28,8 +28,6 @@
 
 // FORWARD DECLARATIONS
 class CEikTextListBox;
-class CAknNavigationControlContainer;
-class CAknNavigationDecorator;
 class CAknTitlePane;
 class CAknContextPane;
 class CEikImage;
@@ -191,8 +189,9 @@ private:     // New functions
 
     /**
      * Stop the Animation execution
+     * @param aHighlightCurrent EFalse if no highlight is required to the selected item, by default highlighted.
      */
-    void StopAnimL();
+    void StopAnimL( TBool aHighlightCurrent = ETrue );
 
     /**
      * load resources.
@@ -352,14 +351,10 @@ private:    // Data
     CMPXMediaArray*                         iCategoryArray;
     CMPXMediaArray*                         iAllSongsArray;
 
-    CAknNavigationControlContainer*         iNaviPane;       // Not owned
-    CAknNavigationDecorator*                iOrigNaviPane;   // Not owned
     CAknContextPane*                        iContextPane;    // Not owned
     CAknTitlePane*                          iTitlePane;      // Not owned
     CEikTextListBox*                        iListBox;        // Not owned
     CAknListBoxFilterItems*                 iLbxFilterItems; // Not owned
-    CAknNavigationDecorator*                iNaviLabelPane;  // New navi label pane
-    CAknNavigationDecorator*                iNaviDecorator;     // Navi decorator
 
     CEikImage*                              iOrigIcon;       // Original context icon
     CEikImage*                              iNewIcon;        // New context icon

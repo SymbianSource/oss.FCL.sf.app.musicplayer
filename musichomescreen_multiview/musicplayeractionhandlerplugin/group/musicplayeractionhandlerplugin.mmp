@@ -54,5 +54,6 @@ LIBRARY                 mpxplaybackutility.lib  // MMPXPlaybackUtility
 LIBRARY                 mpxcommonui.lib         // Common UI helpers
 LIBRARY                 mpxcollectionhelper.lib // Collection helpers
 LIBRARY                 avkon.lib               // CAknTaskList
+LIBRARY                 gfxtrans.lib   	        // GfxTransEffect
 
 //  End of File

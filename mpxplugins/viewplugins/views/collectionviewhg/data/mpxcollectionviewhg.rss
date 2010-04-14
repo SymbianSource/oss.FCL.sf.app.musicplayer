@@ -204,6 +204,11 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             command = EMPXCmdRefreshLibrary;
             txt = qtn_mus_options_update_collection1;
             },
+	MENU_ITEM
+            {
+            command = EMPXCmdAbout;
+            txt = qtn_mus_options_about;
+            },
         MENU_ITEM
             {
             command = EMPXCmdPlayItem;
@@ -1543,6 +1548,100 @@ RESOURCE TBUF r_mpx_collection_unknown
     buf = qtn_vmp_unknown;
     }
     
+// -----------------------------------------------------------------------------
+// r_qtn_mus_about_note
+// About note heading  
+// -----------------------------------------------------------------------------
+// 
+ RESOURCE TBUF r_qtn_mus_about_note
+    {
+    buf = qtn_mus_about_note;
+    }
+    
+    
+// -----------------------------------------------------------------------------
+// r_qtn_mus_about_note
+// About note version content   
+// -----------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_qtn_mus_about_version 
+    {
+    buf = qtn_mus_about_version; 
+    }
+    
+      
+// -----------------------------------------------------------------------------
+// r_mpx_about_dialog
+// About Dialog
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_about_dialog
+     {
+     flags=EEikDialogFlagNoDrag |EEikDialogFlagCbaButtons |EEikDialogFlagWait;
+     buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+     items =
+         {
+         DLG_LINE
+             {
+             type = EAknCtPopupHeadingPane;
+             id = EAknMessageQueryHeaderId;
+             control = AVKON_HEADING
+                 {
+                 headinglayout = R_AVKON_LIST_HEADING_PANE_POPUPS;
+                 };
+             },
+         DLG_LINE
+             {
+             type = EAknCtMessageQuery;
+             id = EAknMessageQueryContentId;
+             control = AVKON_MESSAGE_QUERY
+                 {
+                 };
+             }
+         };
+     }
+
+// ---------------------------------------------------------------------------
+// r_qtn_nmp_note_educating_the_user
+// Text displays for educating user to optimize there music experience
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_qtn_nmp_note_educating_the_user
+    {
+    buf = qtn_nmp_note_educating_the_user;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_educating_the_user_query
+// Educating User query message  
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_cui_educating_the_user_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                headinglayout = 0;    
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };       
+    }
+    
 // ---------------------------------------------------------------------------
 // r_mpx_collection_albumsongs_list_cba
 // ---------------------------------------------------------------------------
@@ -1554,7 +1653,7 @@ RESOURCE CBA r_mpx_collection_albumsongs_list_cba
         CBA_BUTTON
             {
             id = EAknSoftkeyYes;
-            txt = "Play";
+            txt = qtn_mus_sk1_play;
             },
         CBA_BUTTON
             {
@@ -1564,7 +1663,7 @@ RESOURCE CBA r_mpx_collection_albumsongs_list_cba
         CBA_BUTTON
             {
             id = EAknSoftkeyYes;
-            txt = "";
+            txt = qtn_mus_sk1_play;
             }
         };
     }
@@ -1686,4 +1785,69 @@ RESOURCE TBUF r_mpx_vmp_no_songs
     {
     buf = qtn_vmp_no_songs;
     }
+
+// ---------------------------------------------------------------------------
+// r_mpx_music_num_songs_duration
+// Text shown if there is more than one song in the playlist.
+// where %N is the number of songs within the playlist 
+// and %U is the duration time for the total playlist, 
+// in the format hh:mm is displayed.
+// if the playlist is empty, the duration is displayed as dashes (-- : --)
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_music_num_songs_duration
+    {
+    buf = qtn_mus_music_num_songs_duration;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_music_one_song_duration
+// d:Text shown if there is only one song in the playlist
+// d:%U is the duration time for the total playlist, 
+// d:in the format hh:mm is displayed.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_music_one_song_duration
+    {
+    buf = qtn_mus_music_one_song_duration;
+    }
+
+// ---------------------------------------------------------------------------
+// List box text to show the number of items in the collection
+// For the case there're 0 or more than 1 song in the collection
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_music_num_songs
+    {
+    buf = qtn_mus_music_num_songs;
+    }
+
+// ---------------------------------------------------------------------------
+// List box text to show the number of items in the collection
+// For the case there's only 1 song in the collection
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_music_one_song
+    {
+    buf = qtn_mus_music_one_song;
+    }
+
+// ---------------------------------------------------------------------------
+// Text shown when the genre name is not available
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_genre_unknown
+    {
+    buf = qtn_mus_genre_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// Text shown when there is no content to display in genre view
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_vmp_no_genres
+    {
+    buf = qtn_vmp_no_genres;
+    }
+
 // End of File

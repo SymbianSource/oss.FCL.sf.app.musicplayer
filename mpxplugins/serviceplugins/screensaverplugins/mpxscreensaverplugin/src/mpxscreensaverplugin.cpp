@@ -268,6 +268,7 @@ TInt CMPXScreenSaverPlugin::HandleScreensaverEventL(
             {
             CreateContainerL();
             }
+        iContainer->RequestTimeout( 0 );
         MProfile* profile = iProfileEngine->ActiveProfileL();
         if( profile )
             {

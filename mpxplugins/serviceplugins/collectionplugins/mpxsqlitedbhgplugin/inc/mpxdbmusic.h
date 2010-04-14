@@ -529,21 +529,6 @@ class CMPXDbMusic :
          */
         TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
 
-        /**
-        * Signals the start of a refresh operation
-        */
-        void RefreshStartL();
-
-        /**
-        * Signals the end of a refresh operation
-        */
-        void RefreshEndL();
-
-        /*
-        * Refresh music basic table
-        */
-        void RefreshBasicTableL();
-
         /*
         * Check the integrity of the music basic table
         */
@@ -811,7 +796,9 @@ class CMPXDbMusic :
         // file extensions to check DRM type, owned
         CDesCArrayFlat* iExtensionsDrm;
         MMPXDbMusicObserver& iObserver;
-        TBool iRefresh;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED 
+        TBool iArtNeedUpdated;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     };
 
 #endif // MPXDBMUSIC_H

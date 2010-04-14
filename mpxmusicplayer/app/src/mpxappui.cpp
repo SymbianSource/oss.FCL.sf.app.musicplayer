@@ -2549,6 +2549,7 @@ void CMPXAppUi::DoHandleSaveCompleteL( TInt aErr )
                 else if ( iSaveMode == EMPXAssignContact )
                     {
                     TRAP_IGNORE(
+                        MPXTlsHelper::SetFilePath( iSavePath->Des() );
                         iView->HandleCommandL( EMPXCmdAfterSaveUseAsCascade ));
                     MPXTlsHelper::SetNeedSave( EFalse );
                     }

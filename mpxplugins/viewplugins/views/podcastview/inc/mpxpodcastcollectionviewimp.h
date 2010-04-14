@@ -24,7 +24,6 @@
 // INCLUDES
 #include <eikspmod.h>
 #include <eikclb.h>
-#include <AknProgressDialog.h>  // MProgressDialogCallback
 #include <eikprogi.h>
 #include <AknWaitDialog.h>
 #include <mpxmediageneraldefs.h>
@@ -154,17 +153,16 @@ private:
     void UpdateOptionMenuL();
 
     /**
-     * Start either the delete progress note
+     * Start either the delete wait note
      */
-    void StartProgressNoteL();
+    void StartDeleteWaitNoteL();
 
     /**
-     * Updates the progress note text and progress bar
+     * Updates the delete wait note text
      * 
-     * @param	aProgress 		Indicates the portion of the process completed
-     * @param 	aProgressText	Text to be displayed on the progress note  	
+     * @param 	aDeleteText	Text to be displayed on the delete wait note  	
      */
-    void UpdateProcessL(TInt aProgress,const TDesC& aProgressText);
+    void UpdateProcessL(const TDesC& aDeleteNoteText);
 
     /**
      * Updates the copy to remote menu attachment
@@ -678,9 +676,8 @@ private:    // Data
     TBool iUpnpFrameworkSupport;
 
     TMPXItemId iSelectedItem;
-    // Progress note for delete
-    CAknProgressDialog*	iProgressDialog;
-    CEikProgressInfo*	iProgressInfo;
+    // Wait note for delete
+    CAknWaitDialog*	iWaitDialog;
 #ifdef UPNP_INCLUDED
     CUpnpCopyCommand* iUpnpCopyCommand; 
 #endif

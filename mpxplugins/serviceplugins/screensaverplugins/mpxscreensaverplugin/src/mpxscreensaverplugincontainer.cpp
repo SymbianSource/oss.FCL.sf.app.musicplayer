@@ -293,6 +293,17 @@ void CMPXScreenSaverPluginContainer::RefreshDisplayInfo()
     }
 
 // ---------------------------------------------------------------------------
+// With this method the plugin may request a one-shot timeout event
+// (EScreensaverEventTimeout) after the specified amount of seconds
+// has passed.
+// ---------------------------------------------------------------------------
+//
+ void CMPXScreenSaverPluginContainer::RequestTimeout(TInt aSecs)
+	 {
+	 iScreenSaverHost->RequestTimeout( aSecs );
+	 }
+
+// ---------------------------------------------------------------------------
 // Create icons.
 // ---------------------------------------------------------------------------
 //

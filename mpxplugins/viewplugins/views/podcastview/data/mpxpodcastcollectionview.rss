@@ -887,14 +887,14 @@ RESOURCE TBUF r_mpx_qtn_nmp_del_batch_songs_wait_note
 
     
 //------------------------------------------------------------------------------
-// r_mpx_progress_note
-// Generic Progress note.      
+// r_mpx_delete_wait_note
+// Generic Wait note.      
 //------------------------------------------------------------------------------
 //
-RESOURCE DIALOG r_mpx_progress_note
+RESOURCE DIALOG r_mpx_delete_wait_note
     {
-    flags = EAknProgressNoteFlags;
-    buttons = R_AVKON_SOFTKEYS_CANCEL;
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
     items =
         {
         DLG_LINE
@@ -903,7 +903,8 @@ RESOURCE DIALOG r_mpx_progress_note
             id = 0x1000;
             control = AVKON_NOTE
                 {
-                layout = EProgressLayout;
+                layout = EWaitLayout;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
                 };
             }
         };

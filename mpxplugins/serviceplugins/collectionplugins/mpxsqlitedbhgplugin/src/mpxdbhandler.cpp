@@ -185,7 +185,6 @@ void CMPXDbHandler::ConstructL()
     iDbAuxiliary = CMPXDbAuxiliary::NewL(*iDbManager);
 
     MPX_TRAPD(err, iDbManager->InitDatabasesL(iDbDrives));
-    iCollectionOpen = ETrue;
 
     // If KErrCorrupt is returned, a database file was found to be corrupted
     // and was replaced with a new one.  The db plugin can ignore this error and continue
@@ -1487,14 +1486,6 @@ void CMPXDbHandler::RefreshStartL()
     // This is needed for the case where we were OOD before, but user
     // has cleared some space but now try to refresh
     MPX_TRAPD(err, iDbManager->InitDatabasesL(iDbDrives));
-    iCollectionOpen = ETrue;
-    // Update (synchronize) music basic table if it's not
-    // in sync with music table
-    if(iSynchronizeBasicTable)
-        {
-        iDbMusic->RefreshEndL();
-        }
-    iSynchronizeBasicTable = ETrue;
 
     if(err == KErrDiskFull)
         {
@@ -1512,9 +1503,8 @@ void CMPXDbHandler::RefreshStartL()
     }
     
 #ifdef __RAMDISK_PERF_ENABLE
-    iDbManager->CopyDBsToRamL();
+	iDbManager->CopyDBsToRamL();
 #endif //__RAMDISK_PERF_ENABLE
-    iDbMusic->RefreshStartL();
 
     BeginTransactionL();
     iRefresh = ETrue;
@@ -1537,14 +1527,6 @@ void CMPXDbHandler::RefreshEndL()
         curTime.HomeTime();
         SetLastRefreshedTimeL(curTime);
         }
-    iDbMusic->RefreshEndL();
-    //Update of music basic table fails when the collection is not open
-    //Next time the collection is opened the music basic table must be updated
-    if (iCollectionOpen )
-        {
-        iSynchronizeBasicTable = EFalse;
-        }
-
 #ifdef __RAMDISK_PERF_ENABLE
     iDbManager->CopyDBsFromRamL();
 #endif //__RAMDISK_PERF_ENABLE
@@ -1771,35 +1753,6 @@ void CMPXDbHandler::PreCloseCollectionL()
             curTime.HomeTime();
             SetLastRefreshedTimeL(curTime);
             }
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// Notifies the handler that the collection was closed.
-// ----------------------------------------------------------------------------
-//
-void CMPXDbHandler::CollectionClosed()
-    {
-    MPX_FUNC("CMPXDbHandler::CollectionClosed");
-
-    iCollectionOpen = EFalse;
-    }
-
-// ----------------------------------------------------------------------------
-//Notifies the handler that the collection was opened.
-// ----------------------------------------------------------------------------
-//
-void CMPXDbHandler::CollectionOpenedL()
-    {
-    MPX_FUNC("CMPXDbHandler::CollectionOpened");
-
-    iCollectionOpen = ETrue;
-    // Update (synchronize) music basic table if it's not
-    // in sync with music table
-    if(iSynchronizeBasicTable)
-        {
-        iDbMusic->RefreshEndL();
-        iSynchronizeBasicTable = EFalse;
         }
     }
 

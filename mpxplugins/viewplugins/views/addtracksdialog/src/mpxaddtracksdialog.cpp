@@ -22,8 +22,6 @@
 #include <eikimage.h>
 #include <eiktxlbx.h>
 #include <aknappui.h>
-#include <aknnavi.h>
-#include <aknnavide.h>
 #include <akntitle.h>
 #include <akncontext.h>
 #include <aknlists.h>
@@ -36,7 +34,6 @@
 #include <e32base.h>
 #include <barsread.h>
 #include <bautils.h>
-#include <aknnavilabel.h>
 #include <data_caging_path_literals.hrh>
 #include <textresolver.h>
 
@@ -144,9 +141,7 @@ EXPORT_C CMPXAddTracksDialog::~CMPXAddTracksDialog()
     iMatchedSongArray.Reset();
     iMatchedGroupArray.Reset();
 
-    delete iNaviDecorator;
     delete iOrigTitle;
-    delete iNaviLabelPane;
     delete iListModel;
     delete iNoSongText;
     delete iNoMatchText;
@@ -218,13 +213,6 @@ void CMPXAddTracksDialog::BackupPreviousStatusPaneL()
     MPX_FUNC( "CMPXAddTracksDialog::BackupPreviousStatusPaneL" );
     CEikStatusPane* sp = iAvkonAppUi->StatusPane();
 
-    // Backup navi pane
-    iNaviPane = static_cast<CAknNavigationControlContainer*>
-        ( sp->ControlL( TUid::Uid( EEikStatusPaneUidNavi ) ) );
-    iOrigNaviPane = iNaviPane->Top();
-
-    iNaviPane->PushDefaultL();
-
     // Backup title pane
     iTitlePane = static_cast<CAknTitlePane*>
         ( sp->ControlL( TUid::Uid( EEikStatusPaneUidTitle ) ) );
@@ -253,17 +241,6 @@ void CMPXAddTracksDialog::RestorePreviousStatusPaneL()
         {
         // Set original title pane
         iTitlePane->SetTextL( *iOrigTitle );
-        }
-
-    // Set original navi pane
-    iNaviPane->Pop( iNaviLabelPane );
-    if ( iOrigNaviPane )
-        {
-        iNaviPane->PushL( *iOrigNaviPane );
-        }
-    else
-        {
-        iNaviPane->PushDefaultL();
         }
 
     // Restore original context icon
@@ -1096,8 +1073,9 @@ TInt CMPXAddTracksDialog::AnimExpireL( TAny* aObject )
 // Stop animation.
 // -----------------------------------------------------------------------------
 //
-void CMPXAddTracksDialog::StopAnimL()
+void CMPXAddTracksDialog::StopAnimL( TBool aHighlightCurrent )
     {
+    MPX_FUNC( "CMPXAddTracksDialog::StopAnimL" );
     if( ( iPeriodic->IsActive() ||
         iAnimIconIndex ==
             CMPXAddTracksLbxArray::EMPXATLbxIconSongAddedAnim4 ) )
@@ -1105,15 +1083,18 @@ void CMPXAddTracksDialog::StopAnimL()
         iAnimIconIndex = 0;
         iPeriodic->Cancel();
         iListModel->SetAnimationIconNum( iSelectIndex, 0 );
-        TInt bottomIdx = iListBox->BottomItemIndex();
-        TInt topIdx = iListBox->TopItemIndex();
-        if ( topIdx <= iSelectIndex && iSelectIndex <= bottomIdx )
+        
+        // highlights the item pointed by iSelectIndex. 
+        // if Efalse, then iSelectIndex does not match to the tapped item but it is updated later when AddCurrentTractToPlaylistL is called.
+        if ( aHighlightCurrent )
             {
-            HighlightListItem( iSelectIndex );
+            TInt bottomIdx = iListBox->BottomItemIndex();
+            TInt topIdx = iListBox->TopItemIndex();
+            if ( topIdx <= iSelectIndex && iSelectIndex <= bottomIdx )
+                {
+                HighlightListItem( iSelectIndex );
+                }
             }
-        // restore origional navi pane text
-        iNaviPane->Pop( iNaviLabelPane );
-        iNaviPane->PushDefaultL();
         }
     }
 
@@ -1367,11 +1348,7 @@ void CMPXAddTracksDialog::HandleOperationCompleteL( TCHelperOperation /*aOperati
             iCommonUiHelper->HandleErrorL( aError );
             }
         }
-    else
-        {
-        // Song added text display in navi pane
-        iNaviPane->PushL( *iNaviDecorator );
-        }
+    
     CMPXMedia* media = (CMPXMedia*) aArgument;
     delete media;
     MPX_DEBUG1("<--CMPXAddTracksDialog::HandleOperationCompleteL");
@@ -1437,12 +1414,6 @@ void CMPXAddTracksDialog::PreLayoutDynInitL()
     iLbxExtFeat->EnableSpeedScrollL( ETrue );
 
     CEikStatusPane* statusPane = iAvkonAppUi->StatusPane();
-    iNaviPane = static_cast<CAknNavigationControlContainer*>
-                ( statusPane->ControlL( TUid::Uid( EEikStatusPaneUidNavi ) ) );
-    // read the navigation pane text resource
-    HBufC* text = StringLoader::LoadLC( R_MPX_CUI_ADDSONGS_SONG_ADDED );
-    iNaviDecorator = iNaviPane->CreateNavigationLabelL( *text );
-    CleanupStack::PopAndDestroy( text );
 
     // Animation icon timer
     iPeriodic = CPeriodic::NewL( CActive::EPriorityIdle );
@@ -1737,7 +1708,7 @@ void CMPXAddTracksDialog::HandleListBoxEventL(
     TListBoxEvent aEventType)
     {
     MPX_FUNC( "CMPXAddTracksDialog::HandleListBoxEventL" );
-    StopAnimL();
+    StopAnimL( EFalse );
     if ( aEventType == EEventEnterKeyPressed || aEventType == EEventItemDoubleClicked
 #ifdef SINGLE_CLICK_INCLUDED
          || aEventType == EEventItemSingleClicked
@@ -1767,7 +1738,6 @@ void CMPXAddTracksDialog::HandleListBoxEventL(
         }
     else
 	    {
-	    iNaviPane->PushDefaultL();
         UpdateSoftkeyL();
 	    }
     }

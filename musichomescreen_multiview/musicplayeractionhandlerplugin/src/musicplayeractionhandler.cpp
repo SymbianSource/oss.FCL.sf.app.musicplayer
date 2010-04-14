@@ -26,6 +26,8 @@
 #include <mpxconstants.h>               // KAppUidMusicPlayerX
 #include <mpxmusicplayerviewplugin.hrh> // KMPXPluginTypePlaybackUid
 #include <AknTaskList.h>                // CAknTaskList
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntranseffect.h>
 
 #include <mpxcommandgeneraldefs.h>
 #include <mpxcommonuihelper.h>
@@ -216,6 +218,7 @@ TInt CMusicPlayerActionHandler::GoToMusicLibraryL()
     if ( task.Exists() )
         {
 //        task.SendMessage( KAppUidMusicPlayerX, buffer->Ptr( 0 ));
+        BeginFullScreenTransEffect( KAppUidMusicPlayerX );    
         wsSession.SendMessageToWindowGroup( task.WgId(), KAppUidMusicPlayerX,
                     buffer->Ptr( 0 ) );
         }
@@ -276,6 +279,7 @@ TInt CMusicPlayerActionHandler::GoToAlbumViewL()
     if ( task.Exists() )
         {
 //        task.SendMessage( KAppUidMusicPlayerX, buffer->Ptr( 0 ));
+        BeginFullScreenTransEffect( KAppUidMusicPlayerX );
         wsSession.SendMessageToWindowGroup( task.WgId(), KAppUidMusicPlayerX,
                     buffer->Ptr( 0 ) );
         }
@@ -325,6 +329,7 @@ TInt CMusicPlayerActionHandler::GoToNowPlayingL()
     CleanupStack::PopAndDestroy( &writeStream );
     if ( task.Exists() )
         {
+        BeginFullScreenTransEffect( KAppUidMusicPlayerX );    
         wsSession.SendMessageToWindowGroup( task.WgId(), KAppUidMusicPlayerX,
                     buffer->Ptr( 0 ) );
         
@@ -380,6 +385,7 @@ TInt CMusicPlayerActionHandler::GoToLastPlayedL( TBool aMinimized )
     CleanupStack::PopAndDestroy( &writeStream );
     if ( task.Exists() )
         {
+        BeginFullScreenTransEffect( KAppUidMusicPlayerX );    
         wsSession.SendMessageToWindowGroup( task.WgId(), KAppUidMusicPlayerX,
                     buffer->Ptr( 0 ) );
         if (!aMinimized)
@@ -544,6 +550,22 @@ void CMusicPlayerActionHandler::SetPlaybackCommandL( TMPXPlaybackCommand aComman
     iPlaybackUtility->CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
     MPX_DEBUG1("<--CMusicPlayerActionHandler::SetPlaybackCommandL()");
+    }
+
+// ---------------------------------------------------------------------------
+// Sets a transition effect, to be called before bringing an application to foreground
+// ---------------------------------------------------------------------------
+//
+void CMusicPlayerActionHandler::BeginFullScreenTransEffect( const TUid& aNext )
+    {
+    MPX_DEBUG1("-->CMusicPlayerActionHandler::BeginFullScreenTransEffect()");
+    GfxTransEffect::BeginFullScreen( 
+        AknTransEffect::EApplicationStart,
+        TRect(), 
+        AknTransEffect::EParameterType, 
+        AknTransEffect::GfxTransParam( aNext,
+        AknTransEffect::TParameter::EActivateExplicitContinue ));  
+    MPX_DEBUG1("<--CMusicPlayerActionHandler::BeginFullScreenTransEffect()");
     }
 //  End of File
 

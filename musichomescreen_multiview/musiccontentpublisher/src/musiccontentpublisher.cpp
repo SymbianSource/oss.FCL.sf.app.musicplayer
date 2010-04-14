@@ -157,23 +157,24 @@ void CMusicContentPublisher::ConstructL()
 
     MPX_DEBUG1("CMusicContentPublisher::ConstructL subscribing to observer");
  
+    // Observer must be registered before the publisher
+    // When publisher is registered, HS gets the notification and starts sending the events immediately.
+    // Late registration of observer causes missing events.
+
+    // 1. Register the Observer
+    CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
+    filter->InsertL( KPublisherId, TLiwVariant( KMWPublisher ) );
+    filter->InsertL( KContentId, TLiwVariant( KAll) );
+    filter->InsertL( KContentType, TLiwVariant( KAll ) );
+    iHPObserver = CMCPHarvesterPublisherObserver::NewL(this);
+    iHPObserver->RegisterL(filter);
+    CleanupStack::PopAndDestroy(filter);
+
+    // 2. Register the Publisher 
     TUint id = RegisterPublisherL( 
             KMWPublisher,
             KAll, 
             KAll );
-        
-    if( id != 0 )
-        {
-        CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
-
-        filter->InsertL( KPublisherId, TLiwVariant( KMWPublisher ) );
-        filter->InsertL( KContentId, TLiwVariant( KAll) );
-        filter->InsertL( KContentType, TLiwVariant( KAll ) );
-
-        iHPObserver = CMCPHarvesterPublisherObserver::NewL(this);
-        iHPObserver->RegisterL(filter);
-        CleanupStack::PopAndDestroy(filter);
-        }
     
     MPX_DEBUG1("CMusicContentPublisher::ConstructL initializing content");
     PublishDefaultL();
@@ -854,16 +855,7 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
     else if ( aTrigger ==  KMyResume && !iWidgetForeground)
         {
         iWidgetForeground = ETrue;
-        if ( !iInstanceId )
-            {
-            // CPS framework does not always send 'active' message during boot
-            iInstanceId = aContentId.AllocL();
-            DoPublishAllL();
-            }
-        else
-            {
-            DoPublishModifiedL();
-            }
+        DoPublishModifiedL();
         }
     MPX_DEBUG1("<--CMusicContentPublisher::HandlePublisherNotificationL");
     }

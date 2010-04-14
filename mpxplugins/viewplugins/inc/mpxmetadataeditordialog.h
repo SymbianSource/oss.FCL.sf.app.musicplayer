@@ -27,7 +27,7 @@
 #include <mpxattribute.h>
 #include <AknQueryDialog.h>
 #include <DRMHelper.h>
-
+#include <mpxplaybackobserver.h>
 // CONSTANTS
 const TInt KMPXMetadataTextFieldMaxLen = 255;
 
@@ -43,6 +43,7 @@ class CMPXMedia;
 class MMPXCollectionUiHelper;
 class CAknPopupField;
 class CIdle;
+class MMPXPlaybackUtility;
 namespace DRM
     {
     class CDrmUiHandling;
@@ -78,6 +79,7 @@ public:
 NONSHARABLE_CLASS( CMPXMetadataEditorDialog ) : public CAknForm,
                                                 public MMPXCollectionObserver,
                                                 public MMPXCollectionFindObserver,
+                                                public MMPXPlaybackCallback,
                                                 public MMPXCHelperObserver
     {
 public:
@@ -577,6 +579,45 @@ private: // From CEikDialog
      * but before it has been activated.
      */
     void PostLayoutDynInitL();
+	
+private: // from base class MMPXPlaybackCallback
+
+    /**
+     * From MMPXPlaybackCallback
+     * Handle playback property
+     *
+     * @param aProperty the property
+     * @param aValue the value of the property
+     * @param aError error code
+     */
+    void HandlePropertyL( TMPXPlaybackProperty aProperty, TInt aValue, TInt aError );
+
+    /**
+     * From MMPXPlaybackCallback
+     * Method is called continously until aComplete=ETrue, signifying that
+     * it is done and there will be no more callbacks
+     * Only new items are passed each time
+     *
+     * @param aPlayer UID of the subplayer
+     * @param aSubPlayers a list of sub players
+     * @param aComplete ETrue no more sub players. EFalse more subplayer
+     *                  expected
+     * @param aError error code
+     */
+    void HandleSubPlayerNamesL(
+            TUid aPlayer,
+            const MDesCArray* aSubPlayers,
+            TBool aComplete,
+            TInt aError );
+
+    /**
+     * From MMPXPlaybackCallback
+     * Handle media properties
+     *
+     * @param aMedia media
+     * @param aError error code
+     */
+    void HandleMediaL( const CMPXMedia& aMedia, TInt aError );
 
 private:
     enum TMPXMetadataEditorCurrentMediaLOp

@@ -23,5 +23,6 @@
     const qint32 KMPCenRepSettingShuffleKey         = {0x00000001};
     const qint32 KMPCenRepSettingRepeatKey          = {0x00000002};
     const qint32 KMPCenRepSettingFirstStartupKey    = {0x00000003};
+    const qint32 KMPCenRepSettingPresetIdKey        = {0x00000004};
 
 #endif	// MPSETTINGSMANAGERDEFS_H

@@ -51,4 +51,13 @@
 "\epoc32\release\armv5\urel\mpplaybackviewplugin.dll"    - "!:\sys\bin\mpplaybackviewplugin.dll"
 "\epoc32\data\Z\resource\plugins\mpplaybackviewplugin.rsc" - "!:\resource\plugins\mpplaybackviewplugin.rsc"
 
+"\epoc32\release\armv5\urel\mpsettingsviewplugin.dll"    - "!:\sys\bin\mpsettingsviewplugin.dll"
+"\epoc32\data\Z\resource\plugins\mpsettingsviewplugin.rsc" - "!:\resource\plugins\mpsettingsviewplugin.rsc"
+
+"\epoc32\release\armv5\urel\mpdetailsviewplugin.dll"    - "!:\sys\bin\mpdetailsviewplugin.dll"
+"\epoc32\data\Z\resource\plugins\mpdetailsviewplugin.rsc" - "!:\resource\plugins\mpdetailsviewplugin.rsc"
+
+; data
+"\epoc32\data\Z\system\data\nullsound.mp3"          -"!:\nullsound.mp3"
+
 @"mpxservicesplugins.sis",(0x101FFC62)

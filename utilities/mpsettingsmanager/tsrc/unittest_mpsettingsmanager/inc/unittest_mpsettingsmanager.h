@@ -42,9 +42,11 @@ private slots:
     void testConstructor(); //don't change the order, this should be the first test.
     void testInstanceConstruction();
     void testShuffleGetAndSet();
-    void testRepeatGetAndSet();   
+    void testRepeatGetAndSet();
+    void testPresetGetAndSet();
     void testValueChangedShuffleCase();
     void testValueChangedRepeatCase();
+    void testValueChangedPresetCase();
 
 
 };

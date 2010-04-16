@@ -21,7 +21,7 @@
 #include "mpcollectionview.h"
 #include "mpcollectioncontainer.h"
 #include "mpcollectioncontainerallsongs.h"
-#include "mpcollectioncontainerartists.h"
+#include "mpcollectioncontaineralbums.h"
 #include "mpcollectioncontainerplaylists.h"
 #include "mpcollectioncontainergenres.h"
 #include "mptrace.h"
@@ -75,10 +75,10 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
         connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
         break;
-    case ECollectionContextArtistAlbums:
+    case ECollectionContextAlbums:
         if ( mCurrentContext != ECollectionContextAlbumSongs ) {
             deleteCurrentContainer();
-            mCurrentContainer = new MpCollectionContainerArtists(mDocumentLoader);
+            mCurrentContainer = new MpCollectionContainerAlbums(mDocumentLoader);
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
@@ -123,9 +123,9 @@ void MpCollectionContainerFactory::deleteCurrentContainer()
     case ECollectionContextAllSongs:
         delete static_cast<MpCollectionContainerAllSongs *>(mCurrentContainer);
         break;
-    case ECollectionContextArtistAlbums:
+    case ECollectionContextAlbums:
     case ECollectionContextAlbumSongs:
-        delete static_cast<MpCollectionContainerArtists *>(mCurrentContainer);
+        delete static_cast<MpCollectionContainerAlbums *>(mCurrentContainer);
         break;
     case ECollectionContextPlaylists:
     case ECollectionContextPlaylistSongs:

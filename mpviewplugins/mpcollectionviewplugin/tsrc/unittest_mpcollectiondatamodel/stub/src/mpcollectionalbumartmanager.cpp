@@ -18,7 +18,6 @@
 *
 */
 
-#include <hbicon.h>
 #include "stub/inc/mpcollectionalbumartmanager.h"
 
 int gAlbumInitCounter = 0;
@@ -43,16 +42,15 @@ void MpCollectionAlbumArtManager::resetInitCounter()
 /*!
  Stub function.
  */
-MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( QObject *parent )
+MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent )
     : QObject(parent),
       mIcon(0),
-      mAlbumArtReturn(true),
-      mCacheAlbumArtReturn(true),
       mAlbumArtCount(0),
       mCacheAlbumArtCount(0)
 {
+    Q_UNUSED(data);
     gAlbumInitCounter++;
-    mIcon = new HbIcon(QString(":/icons/artists"));
+    mIcon = new QIcon(":/icons/default_album.png");
 }
 
 /*!
@@ -67,28 +65,19 @@ MpCollectionAlbumArtManager::~MpCollectionAlbumArtManager()
 /*!
  Stub function.
  */
-HbIcon MpCollectionAlbumArtManager::albumArt( const QString& albumArtUri, int index )
+const QIcon* MpCollectionAlbumArtManager::albumArt( int index )
 {
-    Q_UNUSED(albumArtUri);
     Q_UNUSED(index);
     mAlbumArtCount++;
-    HbIcon icon;
-    if ( mAlbumArtReturn ) {
-        return *mIcon;
-    }
-    return icon;
+    return mIcon;
 }
 
 /*!
  Stub function.
  */
-bool MpCollectionAlbumArtManager::cacheAlbumArt( const QStringList albumArtList )
+void MpCollectionAlbumArtManager::cacheFirstScreen()
 {
     mCacheAlbumArtCount++;
-    if ( albumArtList.empty() ) {
-        return false;
-    }
-    return mCacheAlbumArtReturn;
 }
 
 /*!

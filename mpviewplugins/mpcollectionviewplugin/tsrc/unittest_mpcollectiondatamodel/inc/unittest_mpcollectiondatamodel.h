@@ -20,6 +20,7 @@
 
 #include <QtTest/QtTest>
 
+class QTranslator;
 class MpCollectionDataModel;
 class MpMpxCollectionData;
 class TestHelper;
@@ -48,15 +49,13 @@ public slots:
 private slots:
 
     void testMemberCleanup();
+    void testRefreshModel();
     void testRefreshModelZeroCount();
-    void testRefreshModelLargeData();
-    void testRefreshModelSmallData();
-    void testRefreshModelNoAlbumArtUri();
     void testCollectionData();
     void testDataAllSongs();
     void testDataAllSongsNoData();
-    void testDataArtistAlbums();
-    void testDataArtistAlbumsNoData();
+    void testDataAlbums();
+    void testDataAlbumsNoData();
     void testDataAlbumSongs();
     void testDataAlbumSongsNoData();
     void testDataPlaylists();
@@ -65,13 +64,13 @@ private slots:
     void testDataPlaylistSongsNoData();
     void testDataAnyOtherRole();
     void testUpdateAlbumArt();
-    void testAlbumCacheReady();
 
 private:
 
     MpCollectionDataModel   *mTest;
     TestHelper              *mHelper;
     MpMpxCollectionData     *mStubData;
+    QTranslator             *mMpTranslator; // Own
 
 };
 

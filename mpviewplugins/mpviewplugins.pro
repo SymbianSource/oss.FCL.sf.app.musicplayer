@@ -16,6 +16,8 @@
 
 TEMPLATE = subdirs
 SUBDIRS  = mpcollectionviewplugin \
-           mpplaybackviewplugin
+           mpplaybackviewplugin \
+           mpsettingsviewplugin \
+	   mpdetailsviewplugin
 
 CONFIG += ordered

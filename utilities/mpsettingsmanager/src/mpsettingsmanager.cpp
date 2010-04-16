@@ -76,6 +76,12 @@ MpSettingsManager::MpSettingsManager():
     mRepeat = mSettingsManager->readItemValue(repeatProfileKey).toInt();
     mSettingsManager->startMonitoring(repeatProfileKey);
     
+    XQSettingsKey presetProfileKey(XQSettingsKey::TargetCentralRepository, 
+             KMPCenRepSettingsFeature, 
+             KMPCenRepSettingPresetIdKey);
+    mPreset = mSettingsManager->readItemValue(presetProfileKey).toInt();
+    mSettingsManager->startMonitoring(presetProfileKey);
+
     TX_EXIT
 }
 
@@ -120,6 +126,14 @@ bool MpSettingsManager::repeat()
     return instance()->mRepeat;
 }
 
+/*!
+ Returns the preset setting.
+ */
+int MpSettingsManager::preset()
+{
+    return instance()->mPreset;
+}
+
 
 /*!
  Slot to be called when a setting is changed.
@@ -138,6 +152,11 @@ void MpSettingsManager::valueChanged(const XQSettingsKey& key,
             mRepeat = value.toInt();
             TX_LOG_ARGS("Repeat changed to "<< mRepeat);
             emit repeatChanged( mRepeat );
+            break;
+        case KMPCenRepSettingPresetIdKey:
+            mPreset = value.toInt();
+            TX_LOG_ARGS("Preset changed to "<< mPreset);
+            emit presetChanged( mPreset );
             break;
         default :
             TX_LOG_ARGS(" unhandled cenrep key: " << key.key() << 
@@ -176,4 +195,19 @@ void MpSettingsManager::setRepeat(bool repeat)
             repeat ? 1 : 0);
     TX_EXIT
 }
+
+/*!
+ Slot to be called to request an update on the \a preset setting.
+ */
+void MpSettingsManager::setPreset(int preset)
+{
+    TX_STATIC_ENTRY_ARGS("preset=" << preset);
+    XQSettingsKey presetProfileKey(XQSettingsKey::TargetCentralRepository, 
+            KMPCenRepSettingsFeature, 
+            KMPCenRepSettingPresetIdKey);
+    instance()->mSettingsManager->writeItemValue(
+            presetProfileKey, preset);
+    TX_EXIT
+}
+
 

@@ -24,4 +24,5 @@ EXPORTS
 	_ZThn8_N18MpNowPlayingWidgetD0Ev @ 23 NONAME
 	_ZThn8_N18MpNowPlayingWidgetD1Ev @ 24 NONAME
 	_ZN18MpNowPlayingWidget10setEnabledEb @ 25 NONAME
+	_ZN18MpNowPlayingWidget11changeEventEP6QEvent @ 26 NONAME
 

@@ -49,6 +49,7 @@ private slots:
     void testTitleChange();
     void testArtistChange();
     void testSetEnabled();
+    void testThemeChange();
 
 private:
 

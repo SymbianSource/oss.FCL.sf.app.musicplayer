@@ -22,9 +22,11 @@
 #include <hbmainwindow.h>
 #include <hbInstance.h>
 #include <hblabel.h>
+#include <hbevent.h>
 
 #include "unittest_mpnowplayingwidget.h"
 #include "stub/inc/mpnowplayingbackend.h"
+#include "stub/inc/hbcolorscheme.h"
 #include "mpcommondefs.h"
 
 // Do this so we can access all member variables.
@@ -106,8 +108,10 @@ void TestMpNowPlayingWidget::testConstructor()
     QVERIFY(mTestPrivate->mPrimaryText != 0);
     QVERIFY(mTestPrivate->mSecondaryText != 0);
     QVERIFY(mTestPrivate->mBackEnd != 0);
-    QVERIFY(mTestPrivate->mPlayIcon != 0);
-    QVERIFY(mTestPrivate->mPauseIcon != 0);
+    QVERIFY(mTestPrivate->mPlayIconNormal != 0);
+    QVERIFY(mTestPrivate->mPauseIconNormal != 0);
+    QVERIFY(mTestPrivate->mPlayIconPressed != 0);
+    QVERIFY(mTestPrivate->mPauseIconPressed != 0);
     QVERIFY(mTestPrivate->mIcon != 0);
     QVERIFY(mTestPrivate->mDocumentLoader != 0);
     QCOMPARE(mTestPrivate->mState, NotPlaying);
@@ -215,6 +219,43 @@ void TestMpNowPlayingWidget::testSetEnabled()
 
     mTestPrivate->mBackEnd->triggerArtistChanged(QString("Artist"));
     QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Artist"));
+}
+
+/*!
+ Tests ThemeChange.
+ */
+void TestMpNowPlayingWidget::testThemeChange()
+{
+    
+    HbEvent event(HbEvent::ThemeChanged);
+    HbColorTheme::global()->setCurrentTheme(1);
+    //TODO final color resources should be qtc_multimedia_trans_normal when available
+    QColor normalColor( HbColorScheme::color("foreground") );
+    //TODO final color resources should be qtc_multimedia_trans_pressed when available
+    QColor pressedColor( HbColorScheme::color("popupbackground") );
+    
+    mTest->changeEvent(&event);
+    
+    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
+    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
+    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
+    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
+    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
+    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
+    
+    HbColorTheme::global()->setCurrentTheme(0);
+    
+    mTest->changeEvent(&event);
+    
+    normalColor = HbColorScheme::color("foreground");
+    pressedColor = HbColorScheme::color("popupbackground");
+    
+    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
+    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
+    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
+    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
+    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
+    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
 }
 
 // End of file

@@ -1,0 +1,774 @@
+CTC++ sym 5.0
+Tue Mar 16 12:57:21 2010
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/src/mpmpxdetailsframeworkwrapper.cpp
+3 1268659888
+0 0 35 0 MpMpxDetailsFrameworkWrapper::MpMpxDetailsFrameworkWrapper
+0 90 0 0 ( QObject * parent = 0 )
+0 91 35 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper.h
+1 0 46 0 MpMpxDetailsFrameworkWrapper::~MpMpxDetailsFrameworkWrapper
+0 90 0 0 ( )
+0 91 36 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper.h
+2 0 56 0 MpMpxDetailsFrameworkWrapper::songData
+0 90 0 0 ( )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper.h
+0 13 59 1 d_ptr -> songData ( )
+3 0 65 0 MpMpxDetailsFrameworkWrapper::retrieveSong
+0 90 0 0 ( )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper.h
+%70,4,1,0,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/moc_unittest_mpmpxdetailsframeworkwrapper.cpp
+3 1268659888
+0 0 64 0 TestMpMpxDetailsFrameworkWrapper::getStaticMetaObject
+0 90 0 0 ( )
+0 91 30 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 13 64 1 staticMetaObject
+1 0 67 0 TestMpMpxDetailsFrameworkWrapper::metaObject
+0 90 0 0 ( )
+0 91 30 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 25 69 1 QObject::d_ptr -> metaObject
+1 13 69 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 72 0 TestMpMpxDetailsFrameworkWrapper::qt_metacast
+0 90 0 0 ( const char * )
+0 91 30 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\inc/unittest_mpmpxdetailsframeworkwrapper.h
+1 20 74 1 ! _clname
+2 13 74 2 0
+2 20 75 1 ! strcmp ( _clname , qt_meta_stringdata_TestMpMpxDetailsFrameworkWrapper )
+3 13 76 2 static_cast < void * > ( const_cast < TestMpMpxDetailsFrameworkWrapper * > ( this ) )
+4 13 77 1 QObject::qt_metacast ( _clname )
+3 0 80 0 TestMpMpxDetailsFrameworkWrapper::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 30 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\inc/unittest_mpmpxdetailsframeworkwrapper.h
+3 20 83 1 _id < 0
+5 13 84 2 _id
+4 20 85 1 _c == QMetaObject::InvokeMetaMethod
+0 1 86 2 switch ( _id )
+6 14 87 2 0
+7 12 87 3
+8 14 88 2 1
+9 12 88 3
+10 14 89 2 2
+11 12 89 3
+12 14 90 2 3
+13 12 90 3
+14 14 91 2 4
+15 12 91 3
+16 14 92 2 5
+17 12 92 3
+18 14 93 2 6
+19 12 93 3
+20 14 94 2 7
+21 12 94 3
+22 14 95 2 8
+23 12 95 3
+24 14 96 2 9
+25 12 96 3
+26 14 97 2 10
+27 12 97 3
+28 15 98 2
+29 13 102 1 _id
+%104,4,30,5,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/moc_mpmpxdetailsframeworkwrapper.cpp
+3 1268659891
+0 0 46 0 MpMpxDetailsFrameworkWrapper::getStaticMetaObject
+0 90 0 0 ( )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\../../inc/mpmpxdetailsframeworkwrapper.h
+0 13 46 1 staticMetaObject
+1 0 49 0 MpMpxDetailsFrameworkWrapper::metaObject
+0 90 0 0 ( )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\../../inc/mpmpxdetailsframeworkwrapper.h
+0 25 51 1 QObject::d_ptr -> metaObject
+1 13 51 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 54 0 MpMpxDetailsFrameworkWrapper::qt_metacast
+0 90 0 0 ( const char * )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\../../inc/mpmpxdetailsframeworkwrapper.h
+1 20 56 1 ! _clname
+2 13 56 2 0
+2 20 57 1 ! strcmp ( _clname , qt_meta_stringdata_MpMpxDetailsFrameworkWrapper )
+3 13 58 2 static_cast < void * > ( const_cast < MpMpxDetailsFrameworkWrapper * > ( this ) )
+4 13 59 1 QObject::qt_metacast ( _clname )
+3 0 62 0 MpMpxDetailsFrameworkWrapper::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\../../inc/mpmpxdetailsframeworkwrapper.h
+3 20 65 1 _id < 0
+5 13 66 2 _id
+6 13 67 1 _id
+%69,4,7,4,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/src/mpmpxdetailsframeworkwrapper_p.cpp
+3 1268737034
+0 0 43 0 MpMpxDetailsFrameworkWrapperPrivate::MpMpxDetailsFrameworkWrapperPrivate
+0 90 0 0 ( MpMpxDetailsFrameworkWrapper * qq )
+0 91 37 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+1 60 50 3
+0 63 50 3 XLeaveException & l
+1 63 50 3 ...
+2 0 57 0 MpMpxDetailsFrameworkWrapperPrivate::~MpMpxDetailsFrameworkWrapperPrivate
+0 90 0 0 ( )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+3 60 61 2
+2 63 61 2 XLeaveException & l
+3 63 61 2 ...
+4 0 69 0 MpMpxDetailsFrameworkWrapperPrivate::constructProviderL
+0 90 0 0 ( )
+0 91 54 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+5 0 85 0 MpMpxDetailsFrameworkWrapperPrivate::destructProviderL
+0 90 0 0 ( )
+0 91 55 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+0 20 88 1 iPlaybackUtility
+6 0 103 0 MpMpxDetailsFrameworkWrapperPrivate::HandlePlaybackMessage
+0 90 0 0 ( CMPXMessage * aMessage , TInt aError )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+7 0 114 0 MpMpxDetailsFrameworkWrapperPrivate::HandlePropertyL
+0 90 0 0 ( TMPXPlaybackProperty aProperty , TInt aValue , TInt aError )
+0 91 44 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+8 0 122 0 MpMpxDetailsFrameworkWrapperPrivate::HandleSubPlayerNamesL
+0 90 0 0 ( TUid aPlayer , const MDesC16Array * aSubPlayers , TBool aComplete , TInt aError )
+0 91 45 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+9 0 130 0 MpMpxDetailsFrameworkWrapperPrivate::HandleMediaL
+0 90 0 0 ( const CMPXMedia & aProperties , TInt aError )
+0 91 47 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+1 20 136 1 KErrNone != aError
+4 13 139 2
+2 20 143 1 aProperties . IsSupported ( KMPXMediaGeneralTitle )
+0 1 148 1 else
+3 20 152 1 aProperties . IsSupported ( KMPXMediaMusicArtist )
+0 1 157 1 else
+4 20 161 1 aProperties . IsSupported ( KMPXMediaMusicAlbum )
+0 1 166 1 else
+5 20 169 1 changed
+6 20 174 1 aProperties . IsSupported ( TMPXAttribute ( KMPXMediaMusicAlbumArtFileName ) )
+0 1 179 1 else
+7 20 185 1 aProperties . IsSupported ( KMPXMediaGeneralComment )
+0 1 191 1 else
+8 20 195 1 aProperties . IsSupported ( TMPXAttribute ( KMPXMediaMusicComposer ) )
+0 1 201 1 else
+9 20 205 1 aProperties . IsSupported ( TMPXAttribute ( KMPXMediaMusicYear ) )
+0 1 209 1 else
+10 20 214 1 aProperties . IsSupported ( TMPXAttribute ( KMPXMediaMusicAlbumTrack ) )
+0 1 219 1 else
+11 20 223 1 aProperties . IsSupported ( TMPXAttribute ( KMPXMediaMusicGenre ) )
+0 1 228 1 else
+12 20 232 1 changed
+10 0 241 0 MpMpxDetailsFrameworkWrapperPrivate::songData
+0 90 0 0 ( )
+0 91 50 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+5 13 244 1 iSongData
+11 0 250 0 MpMpxDetailsFrameworkWrapperPrivate::retrieveSong
+0 90 0 0 ( )
+0 91 51 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+12 60 253 2
+6 63 253 2 XLeaveException & l
+7 63 253 2 ...
+13 0 260 0 MpMpxDetailsFrameworkWrapperPrivate::doRetrieveSongL
+0 90 0 0 ( )
+0 91 56 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpmpxdetailsframeworkwrapper_p.h
+%282,14,8,13,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/src/unittest_mpmpxdetailsframeworkwrapper.cpp
+3 1268664710
+0 0 140 0 referenceGeneralTitle
+0 90 0 0 ( int index )
+0 91 140 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+0 20 144 1 title . Match ( KOff ) == KErrNotFound
+0 13 148 1 result
+1 0 151 0 referenceMusicArtist
+0 90 0 0 ( int index )
+0 91 151 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+1 20 155 1 artist . Match ( KOff ) == KErrNotFound
+1 13 159 1 result
+2 0 162 0 referenceMusicAlbum
+0 90 0 0 ( int index )
+0 91 162 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+2 20 166 1 album . Match ( KOff ) == KErrNotFound
+2 13 170 1 result
+3 0 173 0 referenceMusicAlbumArtFileName
+0 90 0 0 ( int index )
+0 91 173 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+3 20 177 1 musicAlbumArtFileName . Match ( KOff ) == KErrNotFound
+3 13 181 1 result
+4 0 184 0 referenceComment
+0 90 0 0 ( int index )
+0 91 184 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+4 20 188 1 musicComment . Match ( KOff ) == KErrNotFound
+4 13 192 1 result
+5 0 195 0 referenceComposer
+0 90 0 0 ( int index )
+0 91 195 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+5 20 199 1 composer . Match ( KOff ) == KErrNotFound
+5 13 203 1 result
+6 0 206 0 referenceYear
+0 90 0 0 ( int index )
+0 91 206 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+6 25 208 1 ( KAllSongsTestData [ index ] . Year >= 0 )
+6 13 208 1 ( KAllSongsTestData [ index ] . Year >= 0 ) ? KAllSongsTestData [ index ] . Year : 0
+7 0 211 0 referenceMusicAlbumTrack
+0 90 0 0 ( int index )
+0 91 211 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+7 20 215 1 musicAlbumTrack . Match ( KOff ) == KErrNotFound
+7 13 219 1 result
+8 0 222 0 referenceMusicGenre
+0 90 0 0 ( int index )
+0 91 222 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+8 20 226 1 musicGenre . Match ( KOff ) == KErrNotFound
+8 13 230 1 result
+9 0 233 0 referenceMusicUri
+0 90 0 0 ( int index )
+0 91 233 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+9 20 237 1 musicUri . Match ( KOff ) == KErrNotFound
+9 13 241 1 result
+10 0 247 0 main
+0 90 0 0 ( int argc , char * argv [ ] )
+0 91 247 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\src\unittest_mpmpxdetailsframeworkwrapper.cpp
+10 13 261 1 res
+11 0 264 0 TestMpMpxDetailsFrameworkWrapper::TestMpMpxDetailsFrameworkWrapper
+0 90 0 0 ( )
+0 91 34 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+12 0 271 0 TestMpMpxDetailsFrameworkWrapper::~TestMpMpxDetailsFrameworkWrapper
+0 90 0 0 ( )
+0 91 35 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+13 0 279 0 TestMpMpxDetailsFrameworkWrapper::initTestCase
+0 90 0 0 ( )
+0 91 46 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+14 0 286 0 TestMpMpxDetailsFrameworkWrapper::cleanupTestCase
+0 90 0 0 ( )
+0 91 47 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+15 0 293 0 TestMpMpxDetailsFrameworkWrapper::init
+0 90 0 0 ( )
+0 91 48 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 298 1 do
+0 1 298 1 while ( 0 )
+16 0 308 0 TestMpMpxDetailsFrameworkWrapper::cleanup
+0 90 0 0 ( )
+0 91 49 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 316 1 do
+0 1 316 1 while ( 0 )
+17 0 324 0 TestMpMpxDetailsFrameworkWrapper::testConstructor
+0 90 0 0 ( )
+0 91 52 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 326 1 do
+10 20 326 2 ! QTest::qVerify ( ( mTestPrivate -> q_ptr ) , "mTestPrivate->q_ptr" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 326 )
+11 13 326 3
+0 1 326 1 while ( 0 )
+0 1 327 1 do
+11 20 327 2 ! QTest::qVerify ( ( mTestPrivate -> iPlaybackUtility ) , "mTestPrivate->iPlaybackUtility" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 327 )
+12 13 327 3
+0 1 327 1 while ( 0 )
+0 1 328 1 do
+12 20 328 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData ) , "mTestPrivate->iSongData" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 328 )
+13 13 328 3
+0 1 328 1 while ( 0 )
+18 0 335 0 TestMpMpxDetailsFrameworkWrapper::testSongData
+0 90 0 0 ( )
+0 91 53 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 337 1 do
+13 20 337 2 ! QTest::qCompare ( mTestPrivate -> iSongData , mTest -> songData ( ) , "mTestPrivate->iSongData" , "mTest->songData()" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 337 )
+14 13 337 3
+0 1 337 1 while ( 0 )
+19 0 340 0 TestMpMpxDetailsFrameworkWrapper::testHandleProperty
+0 90 0 0 ( )
+0 91 57 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+20 0 346 0 TestMpMpxDetailsFrameworkWrapper::testHandleSubPlayerNames
+0 90 0 0 ( )
+0 91 58 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+21 0 355 0 TestMpMpxDetailsFrameworkWrapper::testHandlePlaybackMessage
+0 90 0 0 ( )
+0 91 54 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+22 0 373 0 TestMpMpxDetailsFrameworkWrapper::verifyEmptyTestData
+0 90 0 0 ( )
+0 91 39 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 375 1 do
+14 20 375 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> title ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->title().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 375 )
+15 13 375 3
+0 1 375 1 while ( 0 )
+0 1 376 1 do
+15 20 376 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> album ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->album().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 376 )
+16 13 376 3
+0 1 376 1 while ( 0 )
+0 1 377 1 do
+16 20 377 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> artist ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->artist().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 377 )
+17 13 377 3
+0 1 377 1 while ( 0 )
+0 1 378 1 do
+17 20 378 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> comment ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->comment().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 378 )
+18 13 378 3
+0 1 378 1 while ( 0 )
+0 1 379 1 do
+18 20 379 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> year ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->year().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 379 )
+19 13 379 3
+0 1 379 1 while ( 0 )
+0 1 380 1 do
+19 20 380 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> genre ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->genre().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 380 )
+20 13 380 3
+0 1 380 1 while ( 0 )
+0 1 381 1 do
+20 20 381 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> composer ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->composer().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 381 )
+21 13 381 3
+0 1 381 1 while ( 0 )
+0 1 382 1 do
+21 20 382 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> albumTrack ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->albumTrack().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 382 )
+22 13 382 3
+0 1 382 1 while ( 0 )
+0 1 383 1 do
+22 20 383 2 ! QTest::qVerify ( ( mTestPrivate -> iSongData -> link ( ) . isEmpty ( ) ) , "mTestPrivate->iSongData->link().isEmpty()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 383 )
+23 13 383 3
+0 1 383 1 while ( 0 )
+23 0 386 0 TestMpMpxDetailsFrameworkWrapper::verify
+0 90 0 0 ( int index )
+0 91 40 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 388 1 do
+23 20 388 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> title ( ) , referenceGeneralTitle ( index ) , "mTestPrivate->songData()->title()" , "referenceGeneralTitle( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 388 )
+24 13 388 3
+0 1 388 1 while ( 0 )
+0 1 389 1 do
+24 20 389 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> album ( ) , referenceMusicAlbum ( index ) , "mTestPrivate->songData()->album()" , "referenceMusicAlbum( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 389 )
+25 13 389 3
+0 1 389 1 while ( 0 )
+0 1 390 1 do
+25 20 390 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> artist ( ) , referenceMusicArtist ( index ) , "mTestPrivate->songData()->artist()" , "referenceMusicArtist( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 390 )
+26 13 390 3
+0 1 390 1 while ( 0 )
+0 1 392 1 do
+26 20 392 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> comment ( ) , referenceComment ( index ) , "mTestPrivate->songData()->comment()" , "referenceComment( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 392 )
+27 13 392 3
+0 1 392 1 while ( 0 )
+0 1 393 1 do
+27 20 393 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> composer ( ) , referenceComposer ( index ) , "mTestPrivate->songData()->composer()" , "referenceComposer( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 393 )
+28 13 393 3
+0 1 393 1 while ( 0 )
+0 1 394 1 do
+28 20 394 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> year ( ) . toInt ( ) , referenceYear ( index ) , "mTestPrivate->songData()->year().toInt()" , "referenceYear( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 394 )
+29 13 394 3
+0 1 394 1 while ( 0 )
+0 1 395 1 do
+29 20 395 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> albumTrack ( ) , referenceMusicAlbumTrack ( index ) , "mTestPrivate->songData()->albumTrack()" , "referenceMusicAlbumTrack( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 395 )
+30 13 395 3
+0 1 395 1 while ( 0 )
+0 1 396 1 do
+30 20 396 2 ! QTest::qCompare ( mTestPrivate -> songData ( ) -> genre ( ) , referenceMusicGenre ( index ) , "mTestPrivate->songData()->genre()" , "referenceMusicGenre( index )" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpmpxdetailsframeworkwrapper\\src\\unittest_mpmpxdetailsframeworkwrapper.cpp" , 396 )
+31 13 396 3
+0 1 396 1 while ( 0 )
+24 0 399 0 TestMpMpxDetailsFrameworkWrapper::doTestHandleMedia
+0 90 0 0 ( int index , TInt aResult )
+0 91 42 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+31 20 404 1 aResult != KErrNone
+0 1 408 1 else
+25 0 418 0 TestMpMpxDetailsFrameworkWrapper::testHandleMedia
+0 90 0 0 ( )
+0 91 55 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+26 0 507 0 TestMpMpxDetailsFrameworkWrapper::testRetrieveSong
+0 90 0 0 ( )
+0 91 56 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+27 0 514 0 TestMpMpxDetailsFrameworkWrapper::handleSongDetailInfoChanged
+0 90 0 0 ( )
+0 91 41 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+28 0 522 0 TestMpMpxDetailsFrameworkWrapper::loadTestData
+0 90 0 0 ( TInt aPos )
+0 91 38 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/inc/unittest_mpmpxdetailsframeworkwrapper.h
+0 1 524 1 do
+0 1 524 1 while ( 0 )
+32 20 525 1 iMediaTestData
+0 1 536 1 do
+0 1 536 1 while ( 0 )
+33 20 538 1 title . Match ( KOff ) == KErrNotFound
+0 1 539 2 do
+0 1 539 2 while ( 0 )
+34 20 544 1 artist . Match ( KOff ) == KErrNotFound
+0 1 545 2 do
+0 1 545 2 while ( 0 )
+35 20 550 1 musicAlbum . Match ( KOff ) == KErrNotFound
+0 1 551 2 do
+0 1 551 2 while ( 0 )
+36 20 556 1 musicAlbumArtFileName . Match ( KOff ) == KErrNotFound
+0 1 557 2 do
+0 1 557 2 while ( 0 )
+37 20 562 1 comment . Match ( KOff ) == KErrNotFound
+0 1 563 2 do
+0 1 563 2 while ( 0 )
+38 20 568 1 composer . Match ( KOff ) == KErrNotFound
+0 1 569 2 do
+0 1 569 2 while ( 0 )
+39 20 573 1 KAllSongsTestData [ aPos ] . Year != - 1
+0 1 583 2 do
+0 1 583 2 while ( 0 )
+0 1 584 2 do
+0 1 584 2 while ( 0 )
+40 20 589 1 musicAlbumTrack . Match ( KOff ) == KErrNotFound
+0 1 590 2 do
+0 1 590 2 while ( 0 )
+41 20 595 1 genre . Match ( KOff ) == KErrNotFound
+0 1 596 2 do
+0 1 596 2 while ( 0 )
+42 20 601 1 musicUri . Match ( KOff ) == KErrNotFound
+0 1 602 2 do
+0 1 602 2 while ( 0 )
+0 1 605 1 do
+0 1 605 1 while ( 0 )
+%608,29,32,43,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/moc_mpsongdata.cpp
+3 1268659893
+0 0 72 0 MpSongData::getStaticMetaObject
+0 90 0 0 ( )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+0 13 72 1 staticMetaObject
+1 0 75 0 MpSongData::metaObject
+0 90 0 0 ( )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+0 25 77 1 QObject::d_ptr -> metaObject
+1 13 77 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 80 0 MpSongData::qt_metacast
+0 90 0 0 ( const char * )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+1 20 82 1 ! _clname
+2 13 82 2 0
+2 20 83 1 ! strcmp ( _clname , qt_meta_stringdata_MpSongData )
+3 13 84 2 static_cast < void * > ( const_cast < MpSongData * > ( this ) )
+4 13 85 1 QObject::qt_metacast ( _clname )
+3 0 88 0 MpSongData::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 31 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+3 20 91 1 _id < 0
+5 13 92 2 _id
+4 20 93 1 _c == QMetaObject::InvokeMetaMethod
+0 1 94 2 switch ( _id )
+6 14 95 2 0
+7 12 95 3
+8 14 96 2 1
+9 12 96 3
+10 14 97 2 2
+11 12 97 3
+12 14 98 2 3
+13 12 98 3
+14 14 99 2 4
+5 20 100 4 _a [ 0 ]
+15 12 100 3
+16 14 101 2 5
+6 20 102 4 _a [ 0 ]
+17 12 102 3
+18 14 103 2 6
+7 20 104 4 _a [ 0 ]
+19 12 104 3
+20 14 105 2 7
+8 20 106 4 _a [ 0 ]
+21 12 106 3
+22 14 107 2 8
+9 20 108 4 _a [ 0 ]
+23 12 108 3
+24 14 109 2 9
+25 12 109 3
+26 14 110 2 10
+10 20 111 4 _a [ 0 ]
+27 12 111 3
+28 14 112 2 11
+11 20 113 4 _a [ 0 ]
+29 12 113 3
+30 14 114 2 12
+12 20 115 4 _a [ 0 ]
+31 12 115 3
+32 14 116 2 13
+13 20 117 4 _a [ 0 ]
+33 12 117 3
+34 14 118 2 14
+14 20 119 4 _a [ 0 ]
+35 12 119 3
+36 15 120 2
+37 13 124 1 _id
+4 0 128 0 MpSongData::albumArtReady
+0 90 0 0 ( )
+0 91 70 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+5 0 134 0 MpSongData::playbackInfoChanged
+0 90 0 0 ( )
+0 91 71 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+6 0 140 0 MpSongData::songDetailInfoChanged
+0 90 0 0 ( )
+0 91 72 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub/inc/mpsongdata.h
+%144,7,38,15,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/src/mpxplaybackutility.cpp
+3 1268659893
+0 0 25 0 MMPXPlaybackUtility::NewL
+0 90 0 0 ( const TUid & , MMPXPlaybackObserver * )
+0 91 25 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+0 13 32 1 obj
+1 0 35 0 MMPXPlaybackUtility::ConstructL
+0 90 0 0 ( )
+0 91 43 3 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+2 0 43 0 MMPXPlaybackUtility::~MMPXPlaybackUtility
+0 90 0 0 ( )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+3 0 48 0 MMPXPlaybackUtility::MMPXPlaybackUtility
+0 90 0 0 ( )
+0 91 42 3 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+4 0 60 0 MMPXPlaybackUtility::AddObserverL
+0 90 0 0 ( MMPXPlaybackObserver & aPlaybackObserver )
+0 91 57 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+5 0 66 0 MMPXPlaybackUtility::RemoveObserverL
+0 90 0 0 ( MMPXPlaybackObserver & aPlaybackObserver )
+0 91 58 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+0 20 69 1 iPlaybackObserver == & aPlaybackObserver
+6 0 75 0 MMPXPlaybackUtility::GetClientsL
+0 90 0 0 ( RArray<TProcessId> & aClients )
+0 91 59 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+7 0 80 0 MMPXPlaybackUtility::InitL
+0 90 0 0 ( const CMPXCollectionPlaylist & , TBool )
+0 91 80 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+8 0 85 0 MMPXPlaybackUtility::InitL
+0 90 0 0 ( const TDesC & , const TDesC8 * )
+0 91 85 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+9 0 90 0 MMPXPlaybackUtility::InitL
+0 90 0 0 ( RFile & aShareableFile )
+0 91 62 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+10 0 95 0 MMPXPlaybackUtility::Close
+0 90 0 0 ( )
+0 91 63 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+11 0 103 0 MMPXPlaybackUtility::CancelRequest
+0 90 0 0 ( )
+0 91 64 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+12 0 108 0 MMPXPlaybackUtility::CommandL
+0 90 0 0 ( TMPXPlaybackCommand , TInt )
+0 91 108 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+13 0 113 0 MMPXPlaybackUtility::CommandL
+0 90 0 0 ( CMPXCommand & , MMPXPlaybackCallback * )
+0 91 113 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+14 0 118 0 MMPXPlaybackUtility::StateL
+0 90 0 0 ( )
+0 91 67 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+1 13 121 1 iState
+15 0 124 0 MMPXPlaybackUtility::Source
+0 90 0 0 ( )
+0 91 68 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+2 13 127 1 iMpxSource
+16 0 130 0 MMPXPlaybackUtility::PlayerManager
+0 90 0 0 ( )
+0 91 69 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+3 13 133 1 * iMpxPlayerManager
+17 0 136 0 MMPXPlaybackUtility::SetL
+0 90 0 0 ( TMPXPlaybackProperty aProperty , TInt aValue )
+0 91 70 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+18 0 141 0 MMPXPlaybackUtility::ValueL
+0 90 0 0 ( MMPXPlaybackCallback & aCallback , TMPXPlaybackProperty aProperty )
+0 91 71 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+19 0 146 0 MMPXPlaybackUtility::PropertyL
+0 90 0 0 ( MMPXPlaybackCallback & aCallback , TMPXPlaybackProperty aProperty )
+0 91 72 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+20 0 151 0 MMPXPlaybackUtility::SupportedMimeTypes
+0 90 0 0 ( )
+0 91 73 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+4 13 154 1 0
+21 0 157 0 MMPXPlaybackUtility::SupportedExtensions
+0 90 0 0 ( )
+0 91 74 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+5 13 160 1 0
+22 0 163 0 MMPXPlaybackUtility::SupportedSchemas
+0 90 0 0 ( )
+0 91 75 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+6 13 166 1 0
+23 0 169 0 MMPXPlaybackUtility::SetPriority
+0 90 0 0 ( TInt aPriority )
+0 91 76 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+24 0 174 0 MMPXPlaybackUtility::AddSubscriptionL
+0 90 0 0 ( const CMPXSubscription & aSubscription )
+0 91 77 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+25 0 179 0 MMPXPlaybackUtility::RemoveSubscriptionL
+0 90 0 0 ( const CMPXSubscription & aSubscription )
+0 91 78 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+26 0 184 0 MMPXPlaybackUtility::ClearSubscriptionsL
+0 90 0 0 ( )
+0 91 79 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+27 0 189 0 MMPXPlaybackUtility::InitStreamingL
+0 90 0 0 ( const TDesC & aUri , const TDesC8 * aType , const TInt aAccessPoint )
+0 91 80 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+28 0 194 0 MMPXPlaybackUtility::InitStreamingL
+0 90 0 0 ( RFile & aShareableFile , const TInt aAccessPoint )
+0 91 81 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplaybackutility.h
+29 0 199 0 MMPXPlaybackUtility::NewL
+0 90 0 0 ( const TMPXCategory , const TUid & , MMPXPlaybackObserver * )
+0 91 199 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+7 13 203 1 0
+30 0 206 0 MMPXPlaybackUtility::UtilityL
+0 90 0 0 ( const TMPXCategory , const TUid & )
+0 91 206 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+8 13 209 1 0
+31 0 212 0 MMPXPlaybackUtility::UtilityL
+0 90 0 0 ( const TUid & )
+0 91 212 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpmpxdetailsframeworkwrapper\stub\src\mpxplaybackutility.cpp
+1 20 214 1 ! singleton
+9 13 217 1 singleton
+%220,32,10,2,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/src/mpsongdata.cpp
+3 1268659895
+0 0 62 0 MpSongData::MpSongData
+0 90 0 0 ( QObject * parent = 0 )
+0 91 34 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+1 0 83 0 MpSongData::~MpSongData
+0 90 0 0 ( )
+0 91 35 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+2 0 93 0 MpSongData::albumArt
+0 90 0 0 ( QPixmap & pixmap )
+0 91 62 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+0 20 96 1 ! mAlbumArt . isNull ( )
+0 1 99 1 else
+3 0 109 0 MpSongData::title
+0 90 0 0 ( )
+0 91 58 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+0 13 112 1 mTitle
+4 0 118 0 MpSongData::album
+0 90 0 0 ( )
+0 91 59 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+1 13 121 1 mAlbum
+5 0 127 0 MpSongData::artist
+0 90 0 0 ( )
+0 91 60 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+2 13 130 1 mArtist
+6 0 136 0 MpSongData::comment
+0 90 0 0 ( )
+0 91 61 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+3 13 139 1 mComment
+7 0 145 0 MpSongData::composer
+0 90 0 0 ( )
+0 91 65 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+4 13 148 1 mComposer
+8 0 155 0 MpSongData::genre
+0 90 0 0 ( )
+0 91 64 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+5 13 158 1 mGenre
+9 0 165 0 MpSongData::albumTrack
+0 90 0 0 ( )
+0 91 66 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+6 13 168 1 mAlbumTrack
+10 0 174 0 MpSongData::link
+0 90 0 0 ( )
+0 91 67 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+7 13 177 1 mLink
+11 0 183 0 MpSongData::year
+0 90 0 0 ( )
+0 91 63 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+8 13 186 1 mYear
+12 0 193 0 MpSongData::setTitle
+0 90 0 0 ( const QString & title )
+0 91 37 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+1 20 197 1 title != mTitle
+9 13 202 1 change
+13 0 208 0 MpSongData::setAlbum
+0 90 0 0 ( const QString & album )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+2 20 212 1 album != mAlbum
+10 13 217 1 change
+14 0 223 0 MpSongData::setArtist
+0 90 0 0 ( const QString & artist )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+3 20 227 1 artist != mArtist
+11 13 232 1 change
+15 0 238 0 MpSongData::setComment
+0 90 0 0 ( const QString & comment )
+0 91 40 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+4 20 242 1 comment != mComment
+12 13 247 1 change
+16 0 254 0 MpSongData::setComposer
+0 90 0 0 ( const QString & compoer )
+0 91 44 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+5 20 258 1 composer != mComposer
+13 13 263 1 change
+17 0 269 0 MpSongData::setGenre
+0 90 0 0 ( const QString & genre )
+0 91 43 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+6 20 273 1 genre != mGenre
+14 13 278 1 change
+18 0 285 0 MpSongData::setYear
+0 90 0 0 ( int date )
+0 91 42 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+7 20 289 1 QString::number ( year ) != mYear
+8 20 291 2 year >= 0 && year < 9999
+0 1 293 2 else
+15 13 298 1 change
+19 0 304 0 MpSongData::setAlbumTrack
+0 90 0 0 ( const QString & albumtrack )
+0 91 45 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+9 20 308 1 track != mAlbumTrack
+16 13 313 1 change
+20 0 319 0 MpSongData::setLink
+0 90 0 0 ( const QString & link )
+0 91 46 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+21 0 329 0 MpSongData::setAlbumArtUri
+0 90 0 0 ( const QString & albumArtUri )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+22 0 343 0 MpSongData::thumbnailReady
+0 90 0 0 ( const QPixmap & pixmap , void * data , int id , int error )
+0 91 54 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+10 20 351 1 error == 0 && mReqId == id
+0 1 356 1 else
+23 0 368 0 MpSongData::commitPlaybackInfo
+0 90 0 0 ( )
+0 91 49 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+24 0 378 0 MpSongData::commitSongDetailInfo
+0 90 0 0 ( )
+0 91 51 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpsongdata.h
+%384,25,17,11,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/src/mpxplayermanager.cpp
+3 1268659896
+0 0 21 0 MMPXPlayerManager::MMPXPlayerManager
+0 90 0 0 ( )
+0 91 32 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+1 0 26 0 MMPXPlayerManager::~MMPXPlayerManager
+0 90 0 0 ( )
+0 91 33 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+2 0 31 0 MMPXPlayerManager::GetPlayerTypesL
+0 90 0 0 ( RArray<TMPXPlaybackPlayerType> & aTypes )
+0 91 36 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+3 0 36 0 MMPXPlayerManager::PlayerTypeDisplayNameL
+0 90 0 0 ( TMPXPlaybackPlayerType aType )
+0 91 37 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+0 13 39 1 0
+4 0 42 0 MMPXPlayerManager::GetPlayerListL
+0 90 0 0 ( RArray<TUid> & aPlayers )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+5 0 47 0 MMPXPlayerManager::GetPlayerListL
+0 90 0 0 ( RArray<TUid> & aPlayers , TMPXPlaybackPlayerType aType )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+6 0 52 0 MMPXPlayerManager::SubPlayerNamesL
+0 90 0 0 ( MMPXPlaybackCallback & aCallback , TUid aPlayer )
+0 91 40 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+7 0 57 0 MMPXPlayerManager::SelectPlayersL
+0 90 0 0 ( TMPXPlaybackPlayerType aType )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+8 0 62 0 MMPXPlayerManager::SelectSubPlayerL
+0 90 0 0 ( TUid aPlayer , TInt aSubPlayerIndex )
+0 91 42 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+9 0 67 0 MMPXPlayerManager::SelectPlayerL
+0 90 0 0 ( TUid aPlayer )
+0 91 43 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+10 0 72 0 MMPXPlayerManager::ClearSelectPlayersL
+0 90 0 0 ( )
+0 91 44 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+11 0 77 0 MMPXPlayerManager::GetSelectionL
+0 90 0 0 ( TMPXPlaybackPlayerType & aType , TUid & aPlayer , TInt & aSubPlayerIndex , HBufC * & aSubPlayerName )
+0 91 45 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+12 0 85 0 MMPXPlayerManager::CurrentPlayer
+0 90 0 0 ( )
+0 91 49 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxplayermanager.h
+1 13 88 1 0
+%91,13,2,0,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/src/mpxsource.cpp
+3 1268659896
+0 0 21 0 MMPXSource::MMPXSource
+0 90 0 0 ( )
+0 91 34 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+1 0 26 0 MMPXSource::~MMPXSource
+0 90 0 0 ( )
+0 91 35 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+2 0 31 0 MMPXSource::PlaylistL
+0 90 0 0 ( )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+0 13 34 1 0
+3 0 37 0 MMPXSource::FileL
+0 90 0 0 ( )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+1 13 40 1 0
+4 0 43 0 MMPXSource::UriL
+0 90 0 0 ( )
+0 91 40 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+2 13 46 1 0
+5 0 49 0 MMPXSource::MediaL
+0 90 0 0 ( const TArray<TMPXAttribute> & aAttrs , MMPXPlaybackCallback & aCallback )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+6 0 54 0 MMPXSource::MediaL
+0 90 0 0 ( const TArray<TMPXAttribute> & aAttrs , MMPXPlaybackCallback & aCallback , CMPXAttributeSpecs * aSpecs )
+0 91 42 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpmpxdetailsframeworkwrapper/stub/inc/mpxsource.h
+%58,7,3,0,0,0
+END OF SYMBOLFILE

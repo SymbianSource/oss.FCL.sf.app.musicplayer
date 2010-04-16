@@ -35,11 +35,13 @@ class MpCollectionDocumentLoader;
 class MpCollectionContainerFactory;
 class MpCollectionContainer;
 class MpCollectionDataModel;
+class MpEngine;
 class MpMpxFrameworkWrapper;
 class MpMpxCollectionData;
 class MpNowPlayingWidget;
 class MpSnapshotWidget;
-class MpCollectionSongScanner;
+class QTranslator;
+class HbPopup;
 
 class MpCollectionView : public MpViewBase
 {
@@ -53,6 +55,7 @@ public:
     void initializeView();
     void activateView();
     void deactivateView();
+    void setDefaultView();
 
     void orientationChange( Qt::Orientation orientation );
 
@@ -78,9 +81,6 @@ public slots:
 
     void startPlaybackView();
     void attachNowPlayingBanner( bool active );
-    void nowPlayingBannerActivated();
-    void nowPlayingBannerChosenFxComplete1( const HbEffect::EffectStatus &status );
-    void nowPlayingBannerChosenFxComplete2( const HbEffect::EffectStatus &status );
     void containerTransitionComplete( const HbEffect::EffectStatus &status );
 
     void shufflePlayAll();
@@ -93,9 +93,17 @@ public slots:
     void songsDeleted( bool success );
     void playlistsRenamed( bool success );
 
-    void handleScanningComplete();
-
+    void prepareToAddToPlaylist();
+    void handleIsolatedCollectionOpened( MpMpxCollectionData* collectionData );
+    void addToCurrentPlaylist( MpMpxCollectionData* collectionData );
+    void createNewPlaylist( MpMpxCollectionData* collectionData );
+    void arrangeSongs();
     void openContextMenu( int index, const QPointF &coords );
+    void outstandingPopupClosing();
+
+    void handleUsbBlocked( bool blocked );
+    void handleLibraryAboutToUpdate();
+    void handleLibraryUpdated();
 
 private:
 
@@ -106,26 +114,28 @@ private:
     void setPlaylistToolBar();
 
     HbAction *createToolBarAction( QActionGroup *actionsGroup,
-        const QString& iconOn,
-        const QString& iconOff,
-        const QString& toolTip );
+        const QString& icon );
 
     void updateMenu();
     void updateToolBar();
     void setSoftkey();
-    void clearSoftkey();
 
     void setBannerVisibility( bool visible );
     int generateShuffleIndex();
-    void launchAddToPlaylistDialog( QList<int> selection );
+    void launchAddToPlaylistDialog( QList<int> &selection );
     void startContainerTransition( TCollectionContext contextFrom, TCollectionContext contextTo );
-    void requestDelete(QList<int> selection);
+    void requestDelete( QList<int> &selection );
+    QModelIndexList getModelIndexes( const QString &label, QAbstractItemModel* model, bool &ok );
+    QString getText(const QString &label,const QString &text, bool &ok);
+    void setOutstandingPopup(HbPopup *popup);
+    bool queryNewPlaylistName(QString &newPlaylistName , const QStringList &playlists );
 
 private:
 
     TCollectionContext              mCollectionContext;
 
     MpMpxFrameworkWrapper           *mMpxWrapper;           // Own
+    MpEngine                        *mMpEngine;             // Not own
     MpMpxCollectionData             *mCollectionData;       // Not own
 
     MpCollectionContainerFactory    *mContainerFactory;     // Own
@@ -135,7 +145,6 @@ private:
     bool                            mActivated;
     MpNowPlayingWidget              *mNowPlayingBanner;     // Own
     bool                            mBannerAttached;
-    bool                            mEffectOnGoing;
 
     HbMainWindow                    *mWindow;               // Not own
     HbAction                        *mSoftKeyQuit;          // Not own
@@ -148,8 +157,14 @@ private:
     HbToolBar                       *mPlaylistToolBar;
 
     MpSnapshotWidget                *mSnapshot;
-    MpCollectionSongScanner         *mSongScanner;          // Own
-    bool                            mScanning;
+
+    QTranslator                     *mMpTranslator;         // Own
+    QTranslator                     *mCommonTranslator;     // Own
+
+    bool                            mActivationWaiting;
+    HbPopup                         *mOutstandingPopup;     // Not own
+
+    bool                            mUsbBlocked;
 
 };
 

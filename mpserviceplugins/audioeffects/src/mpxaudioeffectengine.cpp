@@ -36,9 +36,9 @@
 
 #include "mpxaudioeffectengine.h"
 
-// Music setting
-const TUid KCRUidMPXMPSettings = {0x101FFCDC};
-const TUint32 KMPXMPEqPresetId = 0x00000001;
+const TUid KMPCenRepSettingsFeature = {0x10207C92};
+const TUint32 KMPCenRepSettingPresetIdKey = 0x00000004;
+
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -328,8 +328,8 @@ EXPORT_C void CMPXAudioEffectEngine::SetEqualizerL()
     TInt presetId( KEqualizerPresetNone );
     TRAP_IGNORE(
         {
-        CRepository* repository = CRepository::NewL( KCRUidMPXMPSettings );
-        repository->Get( KMPXMPEqPresetId, presetId );
+        CRepository* repository = CRepository::NewL( KMPCenRepSettingsFeature );
+        repository->Get( KMPCenRepSettingPresetIdKey, presetId );
         delete repository;
         repository = NULL;
         } );

@@ -17,4 +17,5 @@ EXPORTS
 	?staticMetaObject@MpNowPlayingWidget@@2UQMetaObject@@B @ 16 NONAME ; struct QMetaObject const MpNowPlayingWidget::staticMetaObject
 	?paint@MpNowPlayingWidget@@UAEXPAVQPainter@@PBVQStyleOptionGraphicsItem@@PAVQWidget@@@Z @ 17 NONAME ; void MpNowPlayingWidget::paint(class QPainter *, class QStyleOptionGraphicsItem const *, class QWidget *)
 	?setEnabled@MpNowPlayingWidget@@QAEX_N@Z @ 18 NONAME ; void MpNowPlayingWidget::setEnabled(bool)
+	?changeEvent@MpNowPlayingWidget@@EAEXPAVQEvent@@@Z @ 19 NONAME ; void MpNowPlayingWidget::changeEvent(class QEvent *)
 

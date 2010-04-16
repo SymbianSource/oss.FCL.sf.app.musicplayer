@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -44,7 +44,7 @@ MpFetcherTestAppView::~MpFetcherTestAppView()
 void MpFetcherTestAppView::handleOk(const QVariant &result)
 {
     qDebug() << "MpFetcherTestAppView::handleOk";
-    
+
     if (!result.canConvert<QString>())
     {
         mErrorEdit->setText("Corrupt result");
@@ -54,7 +54,7 @@ void MpFetcherTestAppView::handleOk(const QVariant &result)
         mResultEdit->setText(result.value<QString>());
         qDebug() << "MpFetcherTestAppView::handleOk" << ": result=" << result.value<QString>();
     }
-    
+
 }
 
 void MpFetcherTestAppView::handleError(int errorCode, const QString& errorMessage)
@@ -67,7 +67,7 @@ void MpFetcherTestAppView::handleError(int errorCode, const QString& errorMessag
 void MpFetcherTestAppView::createLayout()
 {
     qDebug() <<  "MpFetcherTestAppView::createLayout";
-    
+
     QGraphicsLinearLayout* layout = new QGraphicsLinearLayout(Qt::Vertical);
 
     if (layout)
@@ -77,7 +77,7 @@ void MpFetcherTestAppView::createLayout()
         if (topLayout)
         {
             topLayout->addStretch(5);
-            
+
             mResultEdit = new HbLineEdit;
             HbLabel* label = new HbLabel("Result:");
             if (mResultEdit && label)
@@ -86,7 +86,7 @@ void MpFetcherTestAppView::createLayout()
                 mResultEdit->setMaxRows(5);
                 topLayout->addItem(mResultEdit);
             }
-            
+
             mErrorCodeEdit = new HbLineEdit;
             label = new HbLabel("Error code:");
             if (mErrorCodeEdit && label)
@@ -94,7 +94,7 @@ void MpFetcherTestAppView::createLayout()
                 topLayout->addItem(label);
                 topLayout->addItem(mErrorCodeEdit);
             }
-            
+
             mErrorEdit = new HbLineEdit;
             label = new HbLabel("Error description:");
             if (mErrorEdit && label)
@@ -103,7 +103,7 @@ void MpFetcherTestAppView::createLayout()
                 mErrorEdit->setMaxRows(5);
                 topLayout->addItem(mErrorEdit);
             }
-            
+
             layout->addItem(topLayout);
             layout->setStretchFactor(topLayout, 5);
         }
@@ -129,17 +129,17 @@ void MpFetcherTestAppView::createLayout()
 void MpFetcherTestAppView::fetchSong()
 {
     qDebug() <<  "MpFetcherTestAppView::fetchSong START";
-    
+
     mResultEdit->setText("");
     mErrorEdit->setText("");
     mErrorCodeEdit->setText("");
-    
+
     if (!mReq)
     {
         mReq = mAppMgr.create("com.nokia.services.media.Music", "fetch(QString)", true);
-        
+
         qDebug() <<  "MpFetcherTestAppView::fetchSong: mReq=" << mReq;
-        
+
         if (!mReq)
         {
             mErrorEdit->setText("Failed to create REQ");
@@ -151,7 +151,7 @@ void MpFetcherTestAppView::fetchSong()
             connect(mReq, SIGNAL(requestError(int,const QString&)), SLOT(handleError(int,const QString&)));
         }
     }
-    
+
     // Set arguments for request (application title)
     QList<QVariant> args;
     args << QVariant(QString("<app_name>"));
@@ -163,6 +163,6 @@ void MpFetcherTestAppView::fetchSong()
         mErrorEdit->setText("Failed to send REQ");
         qDebug() <<  "MpFetcherTestAppView::fetchSong: XQAiwRequest::send returned false";
     }
-    
+
     qDebug() <<  "MpFetcherTestAppView::fetchSong END";
 }

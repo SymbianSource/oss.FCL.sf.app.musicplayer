@@ -492,8 +492,8 @@ void TestMpMpxCollectionData::testSetCollectionContextL()
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAlbum);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextArtistAlbums);
-    
+    QCOMPARE(mTestPrivate->iContext,ECollectionContextAlbums);
+
     // All songs in one or multiple albums
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAlbum);

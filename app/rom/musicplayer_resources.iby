@@ -21,6 +21,6 @@
 #include <data_caging_paths_for_iby.hrh>
 
 data = DATAZ_\APP_RESOURCE_DIR\musicplayer.rsc      APP_RESOURCE_DIR\musicplayer.rsc 
-//data = DATAZ_\QT_TRANSLATIONS_DIR\musicplayer.qm    QT_TRANSLATIONS_DIR\musicplayer.qm 
+data = DATAZ_\QT_TRANSLATIONS_DIR\musicplayer.qm    QT_TRANSLATIONS_DIR\musicplayer.qm 
 
 #endif	// MUSICPLAYER_RESOURCES_IBY

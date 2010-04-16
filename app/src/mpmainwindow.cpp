@@ -22,18 +22,20 @@
 #include <xqpluginloader.h>
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
+#include <QTranslator>
+#include <QLocale>
 
 #include "mpmainwindow.h"
-#include "mpmediakeyhandler.h"
 #include "mpcommondefs.h"
 #include "mpviewbase.h"
 #include "musicfetcher.h"
+#include "mpengine.h"
 #include "mptrace.h"
 
 /*!
    \class MpMainWindow
    \brief The MpMainWindow class provides Main Window functionalities.
-   
+
    MpMainWindow handles activation of views
 
 */
@@ -44,9 +46,10 @@
 
 MpMainWindow::MpMainWindow()
     : MpxViewFramework(),
-      mMediaKeyHandler(0),
       mCollectionViewPlugin(0),
       mPlaybackViewPlugin(0),
+      mSettingsViewPlugin(0),
+      mDetailsViewPlugin(0),
       mCurrentViewPlugin(0),
       mPreviousViewPlugin(0),
       mMusicFetcher(0)
@@ -60,7 +63,6 @@ MpMainWindow::MpMainWindow()
 MpMainWindow::~MpMainWindow()
 {
     TX_ENTRY
-    delete mMediaKeyHandler;
     delete mMusicFetcher;
 
     if (mCollectionViewPlugin) {
@@ -70,6 +72,14 @@ MpMainWindow::~MpMainWindow()
     if (mPlaybackViewPlugin) {
         mPlaybackViewPlugin->destroyView();
         delete mPlaybackViewPlugin;
+    }
+    if (mSettingsViewPlugin) {
+        mSettingsViewPlugin->destroyView();
+        delete mSettingsViewPlugin;
+    }
+    if (mDetailsViewPlugin) {
+        mDetailsViewPlugin->destroyView();
+        delete mDetailsViewPlugin;
     }
 
     TX_EXIT
@@ -82,6 +92,18 @@ Initialize and activate the collection view
 void MpMainWindow::initialize()
 {
     TX_ENTRY
+
+    //Load musicplayer translator
+    QTranslator translator;
+    QString lang = QLocale::system().name();
+    QString path = QString("z:/resource/qt/translations/");
+
+    bool translatorLoaded = false;
+    translatorLoaded = translator.load(path + "musicplayer_" + lang);
+    TX_LOG_ARGS("Loading musicplayer translator ok=" << translatorLoaded);
+    if ( translatorLoaded ) {
+        qApp->installTranslator( &translator );
+    }
 
 #ifdef _DEBUG
     QList<XQPluginInfo> impls;
@@ -97,8 +119,7 @@ void MpMainWindow::initialize()
         // Set the Collection View and Playback View to fetcher mode
         mMusicFetcher = new MusicFetcher();
     }
-    
-    setViewSwitchingEnabled(false);
+
     XQPluginLoader collectionLoader(MpCommon::KCollectionViewUid);
     XQPluginLoader playbackLoader(MpCommon::KPlaybackViewUid);
 
@@ -119,7 +140,7 @@ void MpMainWindow::initialize()
             TX_LOG_ARGS("connection error: " << err);
         }
         else {
-            collectionView->setTitle("Music");
+            collectionView->setTitle(hbTrId("txt_mus_title_music"));
         }
         // Collection view is the default view.
         activateView(MpMainWindow::CollectionView);
@@ -142,11 +163,14 @@ void MpMainWindow::initialize()
             TX_LOG_ARGS("connection error: " << err);
         }
         else {
-            playbackView->setTitle("Music");
+            playbackView->setTitle(hbTrId("txt_mus_title_music"));
         }
     }
 
-    mMediaKeyHandler = new MpMediaKeyHandler();
+    MpEngine *engine = MpEngine::instance();
+    connect( engine, SIGNAL( libraryRefreshed() ), this, SLOT( handleLibraryUpdated() ) );
+    connect( engine, SIGNAL( exitApplication() ), this, SLOT( handleExitApplication() ) );
+
     TX_EXIT
 }
 
@@ -165,7 +189,7 @@ MpxViewPlugin* MpMainWindow::currentViewPlugin()
 void MpMainWindow::handleCommand( int commandCode )
 {
     TX_ENTRY_ARGS("commandCode=" << commandCode );
-    
+
     switch ( commandCode ) {
         case MpCommon::Exit:
             if ( mCurrentViewPlugin ) {
@@ -179,6 +203,12 @@ void MpMainWindow::handleCommand( int commandCode )
         case MpCommon::ActivatePlaybackView:
             activateView(PlaybackView);
             break;
+        case MpCommon::ActivateSettingsView:
+            activateView(SettingsView);
+            break;
+        case MpCommon::ActivateDetailsView:
+            activateView(DetailsView);
+            break;
     }
     TX_EXIT
 }
@@ -191,7 +221,7 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     TX_ENTRY_ARGS("viewType=" << viewType );
 
     if ( mCurrentViewPlugin ) {
-        
+
         disconnectView();
         mCurrentViewPlugin->deactivateView();
         mPreviousViewPlugin = mCurrentViewPlugin;
@@ -203,6 +233,30 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     }
     else if ( viewType == MpMainWindow::PlaybackView && mPlaybackViewPlugin ) {
         mCurrentViewPlugin = mPlaybackViewPlugin;
+    }
+    else if ( viewType == MpMainWindow::SettingsView ) {
+        if ( mSettingsViewPlugin ) {
+            mCurrentViewPlugin = mSettingsViewPlugin;
+        }
+		else {
+			XQPluginLoader settingsLoader( MpCommon::KSettingsViewUid );
+            QObject* settingsInstance = settingsLoader.instance();
+            mSettingsViewPlugin = qobject_cast<MpxViewPlugin*>( settingsInstance )->viewPlugin();
+            mSettingsViewPlugin->createView();
+            mCurrentViewPlugin = mSettingsViewPlugin;
+        }
+    }
+    else if ( viewType == MpMainWindow::DetailsView ) {
+        if ( mDetailsViewPlugin ) {
+            mCurrentViewPlugin = mDetailsViewPlugin;
+        }
+        else {
+            XQPluginLoader detailsLoader( MpCommon::KDetailsViewUid );
+            QObject* detailsInstance = detailsLoader.instance();
+            mDetailsViewPlugin = qobject_cast<MpxViewPlugin*>( detailsInstance )->viewPlugin();
+            mDetailsViewPlugin->createView();
+            mCurrentViewPlugin = mDetailsViewPlugin;
+        }
     }
 
     if ( mCurrentViewPlugin ) {
@@ -253,6 +307,41 @@ void MpMainWindow::disconnectView()
 					 SIGNAL( orientationChanged( Qt::Orientation ) ),
 					 mCurrentViewPlugin,
 					 SLOT( orientationChange( Qt::Orientation ) ) );
+
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when Library has changed.
+ */
+void MpMainWindow::handleLibraryUpdated()
+{
+    TX_ENTRY
+
+    // If library changed while playing back, always return to AllSongs collection view.
+    if ( mPlaybackViewPlugin &&
+         mCurrentViewPlugin == mPlaybackViewPlugin &&
+         mCollectionViewPlugin ) {
+
+        activateView( CollectionView );
+        MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
+        collectionView->setDefaultView();
+    }
+
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when application must exit.
+ */
+void MpMainWindow::handleExitApplication()
+{
+    TX_ENTRY
+
+    if ( mCurrentViewPlugin ) {
+        disconnectView();
+    }
+    qApp->quit();
 
     TX_EXIT
 }

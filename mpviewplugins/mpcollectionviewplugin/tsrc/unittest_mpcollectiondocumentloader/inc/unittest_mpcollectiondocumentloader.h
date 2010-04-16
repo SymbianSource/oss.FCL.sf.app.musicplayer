@@ -42,9 +42,8 @@ public slots:
 
 private slots:
     void testCreateMpNowPlayingWidget();
-    void testCreateMpCollectionInfoBar();
     void testCreateQObject();
-    
+
 private:
 
     MpCollectionDocumentLoader          *mTest;

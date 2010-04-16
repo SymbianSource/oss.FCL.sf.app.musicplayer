@@ -22,18 +22,12 @@
 
 #include "unittest_mpcollectionalbumartmanager.h"
 #include "stub/inc/thumbnailmanager_qt.h"
+#include "stub/inc/mpmpxcollectiondata.h"
 
 // Do this so we can access all member variables.
 #define private public
 #include "mpcollectionalbumartmanager.h"
 #undef private
-
-// Max request defined in mpcollectionalbumartmanager.cpp
-const int KMaxThumbnailReq = 5;
-
-const char* ALBUM_URI_1 = "album1.mp3";
-const char* ALBUM_URI_2 = "album2.mp3";
-const char* ALBUM_URI_3 = "album3.mp3";
 
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
@@ -56,13 +50,15 @@ int main(int argc, char *argv[])
 }
 
 TestMpCollectionAlbumArtManager::TestMpCollectionAlbumArtManager()
-    : mTest(0)
+    : mTest(0),
+      mStubData(0)
 {
 }
 
 TestMpCollectionAlbumArtManager::~TestMpCollectionAlbumArtManager()
 {
     delete mTest;
+    delete mStubData;
 }
 
 /*!
@@ -70,8 +66,10 @@ TestMpCollectionAlbumArtManager::~TestMpCollectionAlbumArtManager()
  */
 void TestMpCollectionAlbumArtManager::initTestCase()
 {
+    mStubData = new MpMpxCollectionData();
+
     // Create an icon (any icon will do) to help with testing.
-    mIcon = new HbIcon( QString(":/icons/default_album.png"));
+    mIcon = QIcon(":/icons/default_album.png");
 }
 
 /*!
@@ -79,7 +77,6 @@ void TestMpCollectionAlbumArtManager::initTestCase()
  */
 void TestMpCollectionAlbumArtManager::cleanupTestCase()
 {
-    delete mIcon;
 }
 
 /*!
@@ -87,7 +84,9 @@ void TestMpCollectionAlbumArtManager::cleanupTestCase()
  */
 void TestMpCollectionAlbumArtManager::init()
 {
-    mTest = new MpCollectionAlbumArtManager();
+    mTest = new MpCollectionAlbumArtManager(mStubData);
+    mStubData->mCount = 100;
+    mStubData->mItemDataReturn = true;
 }
 
 /*!
@@ -117,34 +116,31 @@ void TestMpCollectionAlbumArtManager::testMemberCleanup()
  */
 void TestMpCollectionAlbumArtManager::testAlbumArtNoCache()
 {
-    HbIcon icon = mTest->albumArt(ALBUM_URI_1, 1);
+    const QIcon* icon = mTest->albumArt(1);
     // Verify that:
-    // - It didn't return an icon
+    // - It returned default icon
     // - A request has been made to thumbnail manager
-    QVERIFY(icon.isNull() == true);
-    QCOMPARE(mTest->mRequestCount, 1);
-    QCOMPARE(mTest->mTnmReqMap.count(), 1);
+    QVERIFY(icon->isNull() == false);
+    QCOMPARE(mTest->mPendingRequest, true);
     QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 1);
 }
 
 /*!
  Tests albumArt() request when art is not in local cache.
- Request more than max to test request queue.
+ Request more than 1 to test request queue.
  */
 void TestMpCollectionAlbumArtManager::testAlbumArtNoCacheQueue()
 {
-    int max = KMaxThumbnailReq + 1;
-    for ( int i = 0; i < max; i++) {
-        HbIcon icon = mTest->albumArt(ALBUM_URI_1, i);
-        QVERIFY(icon.isNull() == true);
+    for ( int i = 0; i < 3; i++) {
+        const QIcon* icon = mTest->albumArt(i);
+        QVERIFY(icon->isNull() == false);
     }
     // Verify that:
     // - Max number of requests were sent to thumbnail manager
     // - A request has been queued
-    QCOMPARE(mTest->mRequestCount, KMaxThumbnailReq);
-    QCOMPARE(mTest->mTnmReqMap.count(), KMaxThumbnailReq);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, KMaxThumbnailReq);
-    QCOMPARE(mTest->mRequestQueue.count(), 1);
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
+    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 1);
 }
 
 /*!
@@ -152,17 +148,31 @@ void TestMpCollectionAlbumArtManager::testAlbumArtNoCacheQueue()
  */
 void TestMpCollectionAlbumArtManager::testAlbumArtCache()
 {
-    mTest->mImageCache.insert(ALBUM_URI_1, *mIcon);
+    mTest->mImageCache.insert(0, new QIcon(mIcon));
 
-    HbIcon icon = mTest->albumArt(ALBUM_URI_1, 1);
+    const QIcon* icon = mTest->albumArt(0);
     // Verify that:
     // - A valid icon has been returned
     // - No request has been sent to thumbnail manager
-    QVERIFY(icon.isNull() == false);
-    QVERIFY(icon == *mIcon);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QVERIFY(icon->isNull() == false);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 0);
+}
+
+/*!
+ Tests albumArt() request when item doesn't have AlbumArtUri.
+ */
+void TestMpCollectionAlbumArtManager::testAlbumArtNoUri()
+{
+    mTest->mCollectionData->mItemDataReturn = false;
+    const QIcon* icon = mTest->albumArt(0);
+    // Verify that:
+    // - It returned default icon
+    // - There is no request pending from thumbnail manager
+    QVERIFY(icon->isNull() == false);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
 }
 
 /*!
@@ -171,84 +181,53 @@ void TestMpCollectionAlbumArtManager::testAlbumArtCache()
 void TestMpCollectionAlbumArtManager::testAlbumArtFail()
 {
     mTest->mThumbnailManager->mGetThumbFails = true;
-    HbIcon icon = mTest->albumArt(ALBUM_URI_1, 1);
+    const QIcon* icon = mTest->albumArt(0);
     // Verify that:
-    // - It didn't return an icon
+    // - It returned default icon
     // - There is no request pending from thumbnail manager
-    QVERIFY(icon.isNull() == true);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QVERIFY(icon->isNull() == false);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
 }
 
 /*!
- Tests cacheAlbumArt() request with empty list.
+ Tests cacheFirstScreen() request with empty list.
  */
-void TestMpCollectionAlbumArtManager::testCacheAlbumArtEmpty()
+void TestMpCollectionAlbumArtManager::testCacheFirstScreenEmpty()
 {
-    bool cachingStarted = mTest->cacheAlbumArt(QStringList());
-    QCOMPARE(cachingStarted, false);
+    mTest->mCollectionData->mCount = 0;
+    mTest->cacheFirstScreen();
+    QCOMPARE(mTest->mPendingRequest, false);
     QCOMPARE(mTest->mCachingInProgress, false);
     QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 0);
 }
 
 /*!
- Tests cacheAlbumArt() request with 3 URIs.
+ Tests cacheFirstScreen() request with 1 item in the list.
  */
-void TestMpCollectionAlbumArtManager::testCacheAlbumArt()
+void TestMpCollectionAlbumArtManager::testCacheFirstScreen()
 {
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, true);
+    mTest->mCollectionData->mCount = 1;
+    mTest->cacheFirstScreen();
     QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mTnmReqMap.count(), 3);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 3);
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
+    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 1);
 }
 
 /*!
- Tests cacheAlbumArt() request with one item already in local cache.
+ Tests cacheFirstScreen() request with all items already in local cache.
  */
-void TestMpCollectionAlbumArtManager::testCacheAlbumArtCached()
+void TestMpCollectionAlbumArtManager::testCacheFirstScreenAllCached()
 {
-    mTest->mImageCache.insert(ALBUM_URI_1, *mIcon);
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, true);
-    QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mTnmReqMap.count(), 2);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 2);
-}
-
-/*!
- Tests cacheAlbumArt() request with all items already in local cache.
- */
-void TestMpCollectionAlbumArtManager::testCacheAlbumArtAllCached()
-{
-    mTest->mImageCache.insert(ALBUM_URI_1, *mIcon);
-    mTest->mImageCache.insert(ALBUM_URI_2, *mIcon);
-    mTest->mImageCache.insert(ALBUM_URI_3, *mIcon);
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, false);
-    QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    mTest->mCollectionData->mCount = 3;
+    mTest->mImageCache.insert(0, new QIcon(mIcon));
+    mTest->mImageCache.insert(1, new QIcon(mIcon));
+    mTest->mImageCache.insert(2, new QIcon(mIcon));
+    mTest->cacheFirstScreen();
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 0);
-}
-
-/*!
- Tests cacheAlbumArt() request when thumbnail request fails.
- */
-void TestMpCollectionAlbumArtManager::testCacheAlbumArtFail()
-{
-    mTest->mThumbnailManager->mGetThumbFails = true;
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, false);
-    QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
 }
 
 /*!
@@ -256,60 +235,53 @@ void TestMpCollectionAlbumArtManager::testCacheAlbumArtFail()
  */
 void TestMpCollectionAlbumArtManager::testCancel()
 {
-    // First send enough requests to trigger max number of request to
-    // thumbnail manager and also queue the extra request.
-    int max = KMaxThumbnailReq + 1;
-    for ( int i = 0; i < max; i++) {
-        HbIcon icon = mTest->albumArt(ALBUM_URI_1, i);
-        QVERIFY(icon.isNull() == true);
+    // First send enough requests to trigger requests to be queued.
+    for ( int i = 0; i < 3; i++) {
+        const QIcon* icon = mTest->albumArt(i);
+        QVERIFY(icon->isNull() == false);
     }
-    QCOMPARE(mTest->mRequestCount, KMaxThumbnailReq);
-    QCOMPARE(mTest->mTnmReqMap.count(), KMaxThumbnailReq);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, KMaxThumbnailReq);
-    QCOMPARE(mTest->mRequestQueue.count(), 1);
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
+    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 1);
 
     // Verify that:
     // - All requests to thumbnail manager are cancelled
     // - Queue is emptied
     mTest->cancel();
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QCOMPARE(mTest->mPendingRequest, false);
     QCOMPARE(mTest->mRequestQueue.count(), 0);
-    QCOMPARE(mTest->mThumbnailManager->mCancelCounter, KMaxThumbnailReq);
+    QCOMPARE(mTest->mThumbnailManager->mCancelCounter, 1);
 }
 
 /*!
  Tests thumbnailReady() slot.
- Tests completion of cacheAlbumArt() request.
+ Tests completion of cacheFirstScreen() request.
  */
 void TestMpCollectionAlbumArtManager::testThumbnailReadyCache()
 {
     connect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-    QSignalSpy spy(mTest, SIGNAL(albumCacheReady()));
+    QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
 
     // First send cacheAlbumArt() request with 3 items.
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, true);
+    mTest->mCollectionData->mCount = 3;
+    mTest->cacheFirstScreen();
     QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mTnmReqMap.count(), 3);
-
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 3);
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
 
     // Emit thumbnailReady() signal for each request. Then verify that:
-    // - Test object emitted signal albumCacheReady()
+    // - Test object emitted signal albumArtReady() for 3 items
     // - 3 items are present in local cache
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        emit thumbnailReady(mIcon->pixmap(), 0, reqId, 0);
+    for ( int i = 0; i < 3; i++ ) {
+        void *clientData = reinterpret_cast<void *>(i);
+        emit thumbnailReady(mIcon.pixmap(50,50), clientData, i+1, 0);
     }
-    QCOMPARE(spy.count(), 1);
+
+    QCOMPARE(spy.count(), 3);
     QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mImageCache.count(), 3);
     disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
@@ -317,36 +289,32 @@ void TestMpCollectionAlbumArtManager::testThumbnailReadyCache()
 
 /*!
  Tests thumbnailReady() slot.
- Tests completion of cacheAlbumArt() request with error code returned.
+ Tests completion of cacheFirstScreen() request with error code returned.
  */
 void TestMpCollectionAlbumArtManager::testThumbnailReadyCacheError()
 {
     connect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-    QSignalSpy spy(mTest, SIGNAL(albumCacheReady()));
+    QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
 
     // First send cacheAlbumArt() request with 3 items.
-    QStringList list;
-    list << ALBUM_URI_1 << ALBUM_URI_2 << ALBUM_URI_3;
-    bool cachingStarted = mTest->cacheAlbumArt(list);
-    QCOMPARE(cachingStarted, true);
+    mTest->mCollectionData->mCount = 3;
+    mTest->cacheFirstScreen();
     QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mTnmReqMap.count(), 3);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, 3);
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
 
     // Emit thumbnailReady() signal for each request with error. Then verify that:
-    // - Test object emitted signal albumCacheReady()
+    // - Test object doesn't emit signal albumArtReady()
     // - 0 item is present in local cache
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        emit thumbnailReady(mIcon->pixmap(), 0, reqId, -1);
+    for ( int i = 0; i < 3; i++ ) {
+        void *clientData = reinterpret_cast<void *>(i);
+        emit thumbnailReady(mIcon.pixmap(50,50), clientData, i+1, -1);
     }
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.count(), 0);
     QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mImageCache.count(), 0);
     disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
@@ -363,28 +331,23 @@ void TestMpCollectionAlbumArtManager::testThumbnailReadyAlbumArt()
     QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
 
     // First send 3 albumArt() requests.
-    HbIcon icon = mTest->albumArt(ALBUM_URI_1, 1);
-    QVERIFY(icon.isNull() == true);
-    icon = mTest->albumArt(ALBUM_URI_2, 2);
-    QVERIFY(icon.isNull() == true);
-    icon = mTest->albumArt(ALBUM_URI_3, 3);
-    QVERIFY(icon.isNull() == true);
-    QCOMPARE(mTest->mRequestCount, 3);
-    QCOMPARE(mTest->mTnmReqMap.count(), 3);
+    for ( int i = 0; i < 3; i++) {
+        const QIcon* icon = mTest->albumArt(i);
+        QVERIFY(icon->isNull() == false);
+    }
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
 
     // Emit thumbnailReady() signal for each request. Then verify that:
     // - Test object emitted signal albumArtReady() 3 times
     // - 3 items are present in local cache
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        int *clientData = new int(reqId);
-        emit thumbnailReady(mIcon->pixmap(), clientData, reqId, 0);
+    for ( int i = 0; i < 3; i++ ) {
+        void *clientData = reinterpret_cast<void *>(i);
+        emit thumbnailReady(mIcon.pixmap(50,50), clientData, i+1, 0);
     }
     QCOMPARE(spy.count(), 3);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mImageCache.count(), 3);
     disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
@@ -402,105 +365,24 @@ void TestMpCollectionAlbumArtManager::testThumbnailReadyAlbumArtError()
     QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
 
     // First send 3 albumArt() requests.
-    HbIcon icon = mTest->albumArt(ALBUM_URI_1, 1);
-    QVERIFY(icon.isNull() == true);
-    icon = mTest->albumArt(ALBUM_URI_2, 2);
-    QVERIFY(icon.isNull() == true);
-    icon = mTest->albumArt(ALBUM_URI_3, 3);
-    QVERIFY(icon.isNull() == true);
-    QCOMPARE(mTest->mRequestCount, 3);
-    QCOMPARE(mTest->mTnmReqMap.count(), 3);
+    for ( int i = 0; i < 3; i++) {
+        const QIcon* icon = mTest->albumArt(i);
+        QVERIFY(icon->isNull() == false);
+    }
+    QCOMPARE(mTest->mPendingRequest, true);
+    QCOMPARE(mTest->mRequestQueue.count(), 2);
 
     // Emit thumbnailReady() signal for each request with error. Then verify that:
     // - Test object doesn't emitted signal albumArtReady()
     // - 0 items are present in local cache
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        int *clientData = new int(reqId);
-        emit thumbnailReady(mIcon->pixmap(), clientData, reqId, -1);
+    for ( int i = 0; i < 3; i++ ) {
+        void *clientData = reinterpret_cast<void *>(i);
+        emit thumbnailReady(mIcon.pixmap(50,50), clientData, i+1, -1);
     }
     QCOMPARE(spy.count(), 0);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
+    QCOMPARE(mTest->mPendingRequest, false);
+    QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mImageCache.count(), 0);
-    disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-        mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-}
-
-/*!
- Tests thumbnailReady() slot.
- Tests completion of albumArt() request with pending request in queue.
- */
-void TestMpCollectionAlbumArtManager::testThumbnailReadyAlbumArtQueue()
-{
-    connect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-        mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-    QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
-
-    // First send enough requests to trigger max number of request to
-    // thumbnail manager and also queue the extra request.
-    int max = KMaxThumbnailReq + 1;
-    for ( int i = 0; i < max; i++) {
-        HbIcon icon = mTest->albumArt(ALBUM_URI_1, i);
-        QVERIFY(icon.isNull() == true);
-    }
-    QCOMPARE(mTest->mRequestCount, KMaxThumbnailReq);
-
-    // Emit thumbnailReady() signal for each request. Then verify that:
-    // - Test object emitted signal albumArtReady() 5 times
-    // - The extra request in queue is sent to thumbnail manager
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        int *clientData = new int(reqId);
-        emit thumbnailReady(mIcon->pixmap(), clientData, reqId, 0);
-    }
-    QCOMPARE(spy.count(), KMaxThumbnailReq);
-    QCOMPARE(mTest->mRequestCount, 1);
-    QCOMPARE(mTest->mTnmReqMap.count(), 1);
-    QCOMPARE(mTest->mThumbnailManager->mThumbnailReqCounter, max);
-    disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-        mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-}
-
-/*!
- Tests thumbnailReady() slot.
- Tests completion of albumArt() request with pending request in queue.
- Queue item's request for thumbnail fails.
- */
-void TestMpCollectionAlbumArtManager::testThumbnailReadyAlbumArtQueueError()
-{
-    connect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-        mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
-    QSignalSpy spy(mTest, SIGNAL(albumArtReady(int)));
-
-    // First send enough requests to trigger max number of request to
-    // thumbnail manager and also queue the extra request.
-    int max = KMaxThumbnailReq + 1;
-    for ( int i = 0; i < max; i++) {
-        HbIcon icon = mTest->albumArt(ALBUM_URI_1, i);
-        QVERIFY(icon.isNull() == true);
-    }
-    QCOMPARE(mTest->mRequestCount, KMaxThumbnailReq);
-
-    mTest->mThumbnailManager->mGetThumbFails = true;
-    // Emit thumbnailReady() signal for each request. Then verify that:
-    // - The extra request in queue is removed
-    // - There is no request pending from thumbnail manager
-    QMapIterator<int, QString> iter(mTest->mTnmReqMap);
-    while ( iter.hasNext() ) {
-        iter.next();
-        int reqId = iter.key();
-        int *clientData = new int(reqId);
-        emit thumbnailReady(mIcon->pixmap(), clientData, reqId, 0);
-    }
-    QCOMPARE(spy.count(), KMaxThumbnailReq);
-    QCOMPARE(mTest->mRequestCount, 0);
-    QCOMPARE(mTest->mTnmReqMap.count(), 0);
-    QCOMPARE(mTest->mRequestQueue.isEmpty(), true);
     disconnect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
         mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
 }

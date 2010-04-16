@@ -2,21 +2,9 @@
     
     <qresource prefix="/docml" >
         <file alias="musiccollection.docml">musiccollection.docml</file>
-        <file alias="musiccollection_infobar.docml">musiccollection_infobar.docml</file>
     </qresource>
     
-    <qresource prefix="/icons" >
-        <file alias="all_songs.svg">all_songs.svg</file>
-        <file alias="artists.svg">artists.svg</file>
-        <file alias="playlists.svg">playlists.svg</file>
-        <file alias="search.svg">search.svg</file>
-        <file alias="ovi.svg">ovi.svg</file>
-        <file alias="all_songs_on.svg">all_songs_on.svg</file>
-        <file alias="artists_on.svg">artists_on.svg</file>
-        <file alias="playlists_on.svg">playlists_on.svg</file>
-        <file alias="search_on.svg">search_on.svg</file>
-        <file alias="ovi_on.svg">ovi_on.svg</file>
-        
+    <qresource prefix="/icons" >      
         <file alias="default_album.png">default_album.png</file>    
     </qresource>
     

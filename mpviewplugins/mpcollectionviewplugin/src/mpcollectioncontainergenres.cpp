@@ -20,6 +20,7 @@
 
 #include <hbdocumentloader.h>
 #include <hblistview.h>
+#include <hbindexfeedback.h>
 
 #include "mpcollectioncontainergenres.h"
 #include "mptrace.h"
@@ -78,6 +79,7 @@ void MpCollectionContainerGenres::setupContainer()
         QGraphicsWidget *widget;
         widget = mDocumentLoader->findWidget(QString("genreList"));
         mList = qobject_cast<HbListView*>(widget);
+        mIndexFeedback->setItemView(mList);
         initializeList();
     }
     TX_EXIT

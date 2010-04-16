@@ -20,4 +20,7 @@ EXPORTS
 	?instance@MpSettingsManager@@SAPAV1@XZ @ 19 NONAME ; class MpSettingsManager * MpSettingsManager::instance(void)
 	?shuffle@MpSettingsManager@@SA_NXZ @ 20 NONAME ; bool MpSettingsManager::shuffle(void)
 	?firstStartup@MpSettingsManager@@SA_NXZ @ 21 NONAME ; bool MpSettingsManager::firstStartup(void)
+	?presetChanged@MpSettingsManager@@IAEXH@Z @ 22 NONAME ; void MpSettingsManager::presetChanged(int)
+	?setPreset@MpSettingsManager@@SAXH@Z @ 23 NONAME ; void MpSettingsManager::setPreset(int)
+	?preset@MpSettingsManager@@SAHXZ @ 24 NONAME ; int MpSettingsManager::preset(void)
 

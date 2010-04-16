@@ -114,7 +114,52 @@ int MpMpxCollectionData::itemCount( int index )
 {
     return d_ptr->itemCount(index);
 }
-  
+
+/*!
+ Returns the current container id.
+ */
+int MpMpxCollectionData::containerId()
+{
+    return d_ptr->containerId();
+}
+
+/*!
+ Returns id of the item specified by \a index
+ */
+int MpMpxCollectionData::itemId(int index)
+{
+    return d_ptr->itemId(index);
+}
+
+/*!
+ Removes item specified by \a index, also internally caches the item for drag
+ and drop operations.
+ 
+ \sa testCachedItem() insertCachedItem()
+ */
+void MpMpxCollectionData::removeItem(int index)
+{
+    d_ptr->removeItem(index);
+}
+
+/*!
+ Test wether the cached item matches \a itemId.
+ \sa removeItem() insertCachedItem()
+ */
+bool MpMpxCollectionData::testCachedItem( int itemId )
+{
+    return d_ptr->testCachedItem( itemId );
+}
+
+/*!
+ Inserts the cached item in the location specified by \a index
+ \sa removeItem() testCachedItem()
+ */
+void MpMpxCollectionData::insertCachedItem(int index)
+{
+    return d_ptr->insertCachedItem( index );
+}
+
 /*!
  Sets the media \a entries from the MPX framework.
  Internal usage only from MpMpxFrameworkWrapper.

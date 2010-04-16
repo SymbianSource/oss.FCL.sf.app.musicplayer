@@ -43,15 +43,18 @@ public:
     static bool firstStartup();
     static bool shuffle();
     static bool repeat();
+    static int preset();
 
 public slots:
     void valueChanged(const XQSettingsKey& key, const QVariant& value);
     static void setShuffle(bool shuffle);
     static void setRepeat(bool repeat);
+    static void setPreset(int preset);
         
 signals:
     void shuffleChanged(bool shuffle);
     void repeatChanged(bool repeat);
+    void presetChanged(int preset);
     
 private:
     Q_DISABLE_COPY(MpSettingsManager)
@@ -59,6 +62,7 @@ private:
     bool mFirstStartup;
     bool mShuffle;
     bool mRepeat;
+    int  mPreset;
 };
 
 #endif    // MPSETTINGSMANAGER_H

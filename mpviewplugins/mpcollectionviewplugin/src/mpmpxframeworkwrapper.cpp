@@ -27,21 +27,54 @@
 */
 
 /*!
-    \fn void playlistOpened()
+    \fn void collectionPlaylistOpened()
 
-    This signal is emitted when
+    This signal is emitted when A new collection playlist is opened and 
+    playback is initialized.
 
-    \sa openCollectionItem()
  */
 
+/*!
+    \fn void playlistSaved( bool success )
+
+    This signal is emitted when playlist save operation is completed, it 
+    indicates the operation \a success .
+
+ */
+
+/*!
+    \fn void songsDeleted( bool success )
+
+    This signal is emitted when song delete operation is completed, it 
+    indicates the operation \a success .
+
+ */
+
+/*!
+    \fn void playlistsRenamed( bool success )
+
+    This signal is emitted when playlist rename operation is completed, it
+    indicates the operation  \a success .
+
+ */
+
+/*!
+    \fn void isolatedCollectionOpened( MpMpxCollectionData* collectionData )
+
+    This signal is emitted when an isolated collection is opened on \a context
+
+ */
+ 
+ 
+ 
 /*!
  Constructs the utility wrapper.
  */
 MpMpxFrameworkWrapper::MpMpxFrameworkWrapper( MpCommon::MpViewMode viewMode, QObject *parent )
-    : QObject(parent)
+    : QObject( parent )
 {
-    d_ptr = new MpMpxFrameworkWrapperPrivate(this);
-    d_ptr->init(viewMode);
+    d_ptr = new MpMpxFrameworkWrapperPrivate( this );
+    d_ptr->init( viewMode );
 }
 
 /*!
@@ -59,7 +92,7 @@ MpMpxFrameworkWrapper::~MpMpxFrameworkWrapper()
  */
 void MpMpxFrameworkWrapper::openCollection( TCollectionContext context )
 {
-    d_ptr->openCollection(context);
+    d_ptr->openCollection( context );
 }
 
 /*!
@@ -69,17 +102,7 @@ void MpMpxFrameworkWrapper::openCollection( TCollectionContext context )
  */
 void MpMpxFrameworkWrapper::openCollectionItem( int index )
 {
-    d_ptr->openCollectionItem(index);
-}
-
-/*!
- Opens the collection in its current state.
-
- \sa collectionOpened()
- */
-void MpMpxFrameworkWrapper::reopenCollection()
-{
-    d_ptr->reopenCollection();
+    d_ptr->openCollectionItem( index );
 }
 
 /*!
@@ -98,47 +121,55 @@ void MpMpxFrameworkWrapper::back()
  */
 void MpMpxFrameworkWrapper::findPlaylists( QStringList &playlists )
 {
-    d_ptr->findPlaylists(playlists);
+    d_ptr->findPlaylists( playlists );
 }
 
 /*!
- Creates a new playlist with name \a playlistName and adds \a selection.
+ Creates a new playlist with name \a playlistName and adds \a selection and optionally uses \a collectionData.
  */
-void MpMpxFrameworkWrapper::createPlaylist( QString playlistName, QList<int> selection )
+void MpMpxFrameworkWrapper::createPlaylist( QString &playlistName, QList<int> &selection, MpMpxCollectionData* collectionData )
 {
-    d_ptr->createPlaylist(playlistName, selection);
+    d_ptr->createPlaylist( playlistName, selection, collectionData );
 }
 
 /*!
  Adds \a selection to the playlist specified in \a playlistIndex.
  */
-void MpMpxFrameworkWrapper::saveToPlaylist( int playlistIndex, QList<int> selection )
+void MpMpxFrameworkWrapper::saveToPlaylist( int playlistIndex, QList<int> &selection )
 {
-    d_ptr->saveToPlaylist(playlistIndex, selection);
+    d_ptr->saveToPlaylist( playlistIndex, selection );
 }
 
 /*!
  Rename a playlist by \a index with \a name.
  */
-void MpMpxFrameworkWrapper::renamePlaylist( QString newName, int index )
+void MpMpxFrameworkWrapper::renamePlaylist( QString &newName, int index )
 {
-    d_ptr->renamePlaylist(newName, index);
+    d_ptr->renamePlaylist( newName, index );
+}
+
+/*!
+ Adds \a selection to the current playlist from the specified \a collectionData.
+ */
+void MpMpxFrameworkWrapper::saveToCurrentPlaylist( QList<int> &selection, MpMpxCollectionData *collectionData )
+{
+    d_ptr->saveToCurrentPlaylist( selection, collectionData );
 }
 
 /*!
  Rename a playlist with \a name.
  */
-void MpMpxFrameworkWrapper::renamePlaylist( QString newName )
+void MpMpxFrameworkWrapper::renamePlaylist( QString &newName )
 {
-    d_ptr->renamePlaylist(newName);
+    d_ptr->renamePlaylist( newName );
 }
 
 /*!
  Deletes \a selection from the collection.
  */
-void MpMpxFrameworkWrapper::deleteSongs( QList<int> selection )
+void MpMpxFrameworkWrapper::deleteSongs( QList<int> &selection )
 {
-    d_ptr->deleteSongs(selection);
+    d_ptr->deleteSongs( selection );
 }
 
 /*!
@@ -146,7 +177,33 @@ void MpMpxFrameworkWrapper::deleteSongs( QList<int> selection )
  */
 void MpMpxFrameworkWrapper::setShuffle( bool active )
 {
-    d_ptr->setShuffle(active);
+    d_ptr->setShuffle( active );
+}
+
+/*!
+ Initiate a playback preview for the selected item.
+ */
+void MpMpxFrameworkWrapper::previewItem( int index )
+{
+    d_ptr->previewItem( index );
+}
+
+
+/*!
+ Opens the an isolated collection with \a context.
+ \sa isolatedCollectionOpened()
+ */
+void MpMpxFrameworkWrapper::openIsolatedCollection( TCollectionContext context )
+{
+       d_ptr->openIsolatedCollection( context );     
+}
+
+/*!
+ Releases the resources used for the isolated collection.
+ */
+void MpMpxFrameworkWrapper::releaseIsolatedCollection()
+{
+    d_ptr->releaseIsolatedCollection();
 }
 
 /*!
@@ -158,25 +215,23 @@ MpMpxCollectionData *MpMpxFrameworkWrapper::collectionData()
 }
 
 /*!
- Initiates collection scanning.
+ Slot to be called to reopen the collection in its current state.
+
+ \sa collectionOpened()
  */
-void MpMpxFrameworkWrapper::scan()
+void MpMpxFrameworkWrapper::reopenCollection()
 {
-    d_ptr->scan();
+    d_ptr->reopenCollection();
 }
 
 /*!
- Cancels ongoing collection scanning.
+ Slot to be called to request a reorder operation , indicates that 
+ the item with \a playlistId , \a songId is to be moved from 
+ \a originalOrdinal to \a newOrdinal.
  */
-void MpMpxFrameworkWrapper::cancelScan()
+void MpMpxFrameworkWrapper::reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal )
 {
-    d_ptr->cancelScan();
+    d_ptr->reorderPlaylist( playlistId, songId, originalOrdinal, newOrdinal );
 }
 
-/*!
- Initiate a playback preview for the selected item.
- */
-void MpMpxFrameworkWrapper::previewItem( int index )
-{
-    d_ptr->previewItem(index);
-}
+

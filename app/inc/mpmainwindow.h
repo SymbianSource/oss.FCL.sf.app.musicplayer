@@ -25,7 +25,6 @@
 
 // Forward declarations
 class MpxViewPlugin;
-class MpMediaKeyHandler;
 class MusicFetcher;
 
 // Class declaration
@@ -38,7 +37,9 @@ public:
 
     enum ViewType {
         CollectionView = 1,
-        PlaybackView };
+        PlaybackView,
+        SettingsView,
+        DetailsView };
 
     MpMainWindow();
     ~MpMainWindow();
@@ -48,6 +49,8 @@ public:
 
 public slots:
     void handleCommand( int commandCode );
+    void handleLibraryUpdated();
+    void handleExitApplication();
 
 private:
     void activateView(ViewType);
@@ -55,10 +58,11 @@ private:
     void disconnectView();
 
 private:
-    MpMediaKeyHandler     *mMediaKeyHandler;      // Own
 
     MpxViewPlugin         *mCollectionViewPlugin; // Not own
     MpxViewPlugin         *mPlaybackViewPlugin;   // Not own
+    MpxViewPlugin         *mSettingsViewPlugin;   // Not own
+    MpxViewPlugin         *mDetailsViewPlugin;    // Not own
     MpxViewPlugin         *mCurrentViewPlugin;    // Not own
     MpxViewPlugin         *mPreviousViewPlugin;   // Not own
     MusicFetcher		  *mMusicFetcher; 		  // Own

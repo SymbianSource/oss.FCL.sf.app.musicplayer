@@ -45,6 +45,8 @@ public:
 
     void setEnabled(bool enabled );
     bool handleClickEvent( QGraphicsSceneMouseEvent *event );
+    void handleMousePressEvent(QGraphicsSceneMouseEvent *event, bool pressed);
+    void handleThemeChange();
 
 public slots:
 
@@ -58,8 +60,10 @@ private:
     SimplifiedPlayerState   mState;
     MpNowPlayingBackEnd     *mBackEnd;
 
-	HbIcon                  *mPlayIcon;
-    HbIcon                  *mPauseIcon;
+	HbIcon                  *mPlayIconNormal;
+    HbIcon                  *mPauseIconNormal;
+    HbIcon                  *mPlayIconPressed;
+    HbIcon                  *mPauseIconPressed;
     HbLabel                 *mIcon;
 
     HbDocumentLoader        *mDocumentLoader;

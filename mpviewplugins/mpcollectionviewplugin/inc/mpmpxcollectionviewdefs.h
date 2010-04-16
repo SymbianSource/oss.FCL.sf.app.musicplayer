@@ -25,7 +25,7 @@
 enum TCollectionContext {
     ECollectionContextUnknown = 0,
     ECollectionContextAllSongs,
-    ECollectionContextArtistAlbums,
+    ECollectionContextAlbums,
     ECollectionContextAlbumSongs,
     ECollectionContextPlaylists,
     ECollectionContextPlaylistSongs,

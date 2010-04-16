@@ -19,10 +19,11 @@
 
 #include <hbdocumentloader.h>
 #include <hblistview.h>
+#include <hbgroupbox.h>
+#include <hblabel.h>
 
 #include "mpcollectioncontainerplaylists.h"
 #include "mpmpxcollectiondata.h"
-#include "mpcollectioninfobar.h"
 #include "mptrace.h"
 
 
@@ -47,8 +48,7 @@
  */
 MpCollectionContainerPlaylists::MpCollectionContainerPlaylists( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionListContainer(loader, parent),
-      mInfoBar(0),
-      mListInitialized(false)
+      mInfoBar(0)
 {
     TX_LOG
 }
@@ -72,53 +72,56 @@ MpCollectionContainerPlaylists::~MpCollectionContainerPlaylists()
 void MpCollectionContainerPlaylists::setupContainer()
 {
     TX_ENTRY_ARGS("mCollectionContext=" << mCollectionContext);
-
-    if ( !mList ) {
+    if ( mCollectionData->count() ) {
         bool ok = false;
-        mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "playlist", &ok);
-
-        if ( !ok ) {
-            TX_LOG_ARGS("Error: invalid xml file.");
-            Q_ASSERT_X(ok, "MpCollectionContainerPlaylists::setupContainer", "invalid xml file");
-        }
-
         QGraphicsWidget *widget;
-        widget = mDocumentLoader->findWidget(QString("playlistDetail"));
-        mInfoBar = qobject_cast<MpCollectionInfoBar*>(widget);
-
-        widget = mDocumentLoader->findWidget(QString("playlistList"));
-        mList = qobject_cast<HbListView*>(widget);
-        initializeList();
-    }
-
-    int count = mCollectionData->count();
-    QString details;
-    QString detailsCount;
-    QString playlist;
-    switch ( mCollectionContext ) {
-    case ECollectionContextPlaylists:
-        details.setNum(count);
-        details.append( tr(" playlist(s)") );
-        mInfoBar->setText(details);
-        break;
-    case ECollectionContextPlaylistSongs:
-        if ( mViewMode == MpCommon::FetchView ) {
-            details = "Select a song";
-        }
-        else {
-            details = QString( tr("Playlist: ") );
-            playlist = mCollectionData->collectionTitle();
-            if ( playlist.isEmpty() ) {
-                playlist = QString( tr("Unknown") );
+        if ( mCollectionContext == ECollectionContextPlaylists ) {
+            mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "playlists", &ok);
+            if ( !ok ) {
+                TX_LOG_ARGS("Error: invalid xml file.");
+                Q_ASSERT_X(ok, "MpCollectionContainerPlaylists::setupContainer", "invalid xml file");
             }
-            details.append(playlist);
-            detailsCount.setNum(count);
+            if ( !mList ) {
+                widget = mDocumentLoader->findWidget(QString("playlistsList"));
+                mList = qobject_cast<HbListView*>(widget);
+                initializeList();
+            }
+            if ( mInfoBar ) {
+                delete mInfoBar;
+                mInfoBar = 0;
+            }
         }
-        mInfoBar->setText(details, detailsCount);
-        break;
-    default:
-        TX_LOG_ARGS("Error: Wrong context; should never get here.");
-        break;
+        else if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
+            mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "playlistSongs", &ok);
+            if ( !ok ) {
+                TX_LOG_ARGS("Error: invalid xml file.");
+                Q_ASSERT_X(ok, "MpCollectionContainerPlaylists::setupContainer", "invalid xml file");
+            }
+
+            widget = mDocumentLoader->findWidget(QString("playlistSongsDetail"));
+            mInfoBar = qobject_cast<HbGroupBox*>(widget);
+
+            QString details;
+            if ( mViewMode == MpCommon::FetchView ) {
+                details = "Select a song";
+            }
+            else {
+                details = mCollectionData->collectionTitle();
+            }
+            mInfoBar->setHeading(details);
+        }
+        if ( mNoMusic ) {
+            delete mNoMusic;
+            mNoMusic = 0;
+        }
+    }
+    else {
+        if ( mInfoBar ) {
+            delete mInfoBar;
+            mInfoBar = 0;
+        }
+        // Call empty list from base class
+        setupEmptyListContainer();
     }
     TX_EXIT
 }

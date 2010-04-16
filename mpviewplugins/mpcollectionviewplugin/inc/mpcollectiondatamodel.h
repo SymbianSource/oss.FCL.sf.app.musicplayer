@@ -35,21 +35,28 @@ public:
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
-
-    void refreshModel();
+    Qt::DropActions supportedDropActions() const;
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    QStringList mimeTypes() const;
+    QMimeData *mimeData(const QModelIndexList &indexes) const;
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action,
+                              int row, int column, const QModelIndex &parent);
+    
     MpMpxCollectionData *collectionData();
+    
+signals:
+    void orderChanged( int containerId, int itemId, int itemOrdinal, int newOrdinal );
 
 public slots:
 
     void updateAlbumArt( int index );
-    void albumCacheReady();
+    void refreshModel();
 
 private:
 
     MpMpxCollectionData             *mCollectionData;
 	MpCollectionAlbumArtManager     *mAlbumArtManager;  // Own
     int                             mRowCount;
-    bool                            mCachingInProgress;
 
 };
 

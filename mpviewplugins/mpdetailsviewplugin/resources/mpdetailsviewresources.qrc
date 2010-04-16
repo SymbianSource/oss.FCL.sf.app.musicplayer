@@ -1,0 +1,9 @@
+<RCC>    
+    <qresource prefix="/detailsviewdocml" >
+        <file alias="detailsview.docml">detailsview.docml</file>
+    </qresource>
+    
+    <qresource prefix="/detailsviewicons" >
+        <file alias="defaultalbumart.png">defaultalbumart.png</file>
+    </qresource>
+</RCC>

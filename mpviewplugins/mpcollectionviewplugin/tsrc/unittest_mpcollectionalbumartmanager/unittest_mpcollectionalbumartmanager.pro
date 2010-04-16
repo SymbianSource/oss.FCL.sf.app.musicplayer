@@ -31,10 +31,12 @@ LIBS += -lestor.dll \
 
 HEADERS += inc/unittest_mpcollectionalbumartmanager.h \
            stub/inc/thumbnailmanager_qt.h \
+           stub/inc/mpmpxcollectiondata.h \
            ../../inc/mpcollectionalbumartmanager.h \
                
 SOURCES += src/unittest_mpcollectionalbumartmanager.cpp \
            stub/src/thumbnailmanager_qt.cpp \
+           stub/src/mpmpxcollectiondata.cpp \
            ../../src/mpcollectionalbumartmanager.cpp
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc

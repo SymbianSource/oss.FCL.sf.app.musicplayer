@@ -23,6 +23,7 @@
 #include <hbiconitem.h>
 #include <hbdocumentloader.h>
 #include <hbinstance.h>
+#include <hbcolorscheme.h>
 
 #include "mpnowplayingwidget_p.h"
 #include "mpnowplayingwidget.h"
@@ -57,9 +58,20 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPla
     QGraphicsWidget *widget;
     bool widgetsOk = false;
 
-
-    mPlayIcon = new HbIcon( QString(":/icons/play.png"));
-    mPauseIcon = new HbIcon( QString(":/icons/pause.png"));
+    //TODO final color resources should be qtc_multimedia_trans_normal when available
+    QColor normalColor( HbColorScheme::color("foreground") );
+    //TODO final color resources should be qtc_multimedia_trans_pressed when available
+    QColor pressedColor( HbColorScheme::color("popupbackground") );
+    
+    mPlayIconNormal = new HbIcon( QString("qtg_mono_play"));
+    mPlayIconNormal->setColor( normalColor );
+    mPauseIconNormal = new HbIcon( QString("qtg_mono_pause"));
+    mPauseIconNormal->setColor( normalColor );
+    
+    mPlayIconPressed = new HbIcon( QString("qtg_mono_play"));
+    mPlayIconPressed->setColor( pressedColor );
+    mPauseIconPressed = new HbIcon( QString("qtg_mono_pause"));
+    mPauseIconPressed->setColor( pressedColor );
 
     mDocumentLoader = new HbDocumentLoader();
     if (mDocumentLoader) {
@@ -75,10 +87,15 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPla
 
         widget = mDocumentLoader->findWidget(QString("primaryText"));
         mPrimaryText = qobject_cast<HbLabel*>(widget);
+        //TODO final color resource should be qtc_multimedia_trans_normal when available
+        mPrimaryText->setTextColor( normalColor );
+       
 
         widget = mDocumentLoader->findWidget(QString("secondaryText"));
         mSecondaryText = qobject_cast<HbLabel*>(widget);
-
+        //TODO final color resource should be qtc_multimedia_trans_normal when available
+        mSecondaryText->setTextColor( normalColor );
+        
         widget = mDocumentLoader->findWidget(QString("playPause"));
         mIcon = qobject_cast<HbLabel*>(widget);
 
@@ -107,8 +124,10 @@ MpNowPlayingWidgetPrivate::~MpNowPlayingWidgetPrivate()
 {
     TX_ENTRY
     delete mBackEnd;
-    delete mPlayIcon;
-    delete mPauseIcon;
+    delete mPlayIconNormal;
+    delete mPauseIconNormal;
+    delete mPlayIconPressed;
+    delete mPauseIconPressed;
     delete mDocumentLoader;
     TX_EXIT
 }
@@ -157,6 +176,66 @@ bool MpNowPlayingWidgetPrivate::handleClickEvent(QGraphicsSceneMouseEvent *event
    }
 }
 
+/*!
+ \internal
+ Changes text and icon color when \a pressed
+ */
+void MpNowPlayingWidgetPrivate::handleMousePressEvent(QGraphicsSceneMouseEvent *event, bool pressed)
+{   
+    //TODO final color resources should be qtc_multimedia_trans_pressed when available
+    QColor pressedColor( HbColorScheme::color("popupbackground") );
+    //TODO final color resources should be qtc_multimedia_trans_normal when available
+    QColor normalColor( HbColorScheme::color("foreground") );
+    
+    if( mIcon->windowFrameGeometry().contains( event->pos() ) && pressed) {            
+        if ( mState == Playing ) {
+            mIcon->setIcon( *mPauseIconPressed );
+        }
+        else {             
+            mIcon->setIcon( *mPlayIconPressed );
+        }
+    }
+    else if( q_ptr->rect().contains( event->pos() ) && pressed ){
+        mPrimaryText->setTextColor( pressedColor );
+        mSecondaryText->setTextColor( pressedColor );
+    }
+    else { 
+        mPrimaryText->setTextColor( normalColor );
+        mSecondaryText->setTextColor( normalColor );
+        if( mState == Playing){        
+            mIcon->setIcon( *mPauseIconNormal );
+        }
+        else{
+            mIcon->setIcon( *mPlayIconNormal );
+        }
+    }
+}
+
+/*!
+ \internal
+ Handles theme change
+ */
+void MpNowPlayingWidgetPrivate::handleThemeChange()
+{
+    //TODO final color resources should be qtc_multimedia_trans_pressed when available
+    QColor pressedColor( HbColorScheme::color("popupbackground") );
+    //TODO final color resources should be qtc_multimedia_trans_normal when available
+    QColor normalColor( HbColorScheme::color("foreground") );
+    
+    mPrimaryText->setTextColor( normalColor );
+    mSecondaryText->setTextColor( normalColor );
+    mPauseIconNormal->setColor( normalColor );
+    mPlayIconNormal->setColor( normalColor );
+    mPauseIconPressed->setColor( pressedColor );
+    mPlayIconPressed->setColor( pressedColor );
+    
+    if( mState == Playing){               
+        mIcon->setIcon( *mPauseIconNormal );
+    }
+    else{        
+        mIcon->setIcon( *mPlayIconNormal );
+    }
+}
 
 /*!
  \internal
@@ -171,12 +250,12 @@ void MpNowPlayingWidgetPrivate::setState( SimplifiedPlayerState state )
                 emit q_ptr->playbackAttachmentChanged( false );
             break;
         case Playing:
-            mIcon->setIcon(*mPauseIcon);
+            mIcon->setIcon(*mPauseIconNormal);
             if (mState == NotPlaying)
                 emit q_ptr->playbackAttachmentChanged( true );
             break;
         case Paused:
-            mIcon->setIcon(*mPlayIcon);
+            mIcon->setIcon(*mPlayIconNormal);
             if (mState == NotPlaying)
                 emit q_ptr->playbackAttachmentChanged( true );
             break;

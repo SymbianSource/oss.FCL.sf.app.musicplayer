@@ -28,10 +28,8 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 HEADERS += inc/unittest_mpcollectiondocumentloader.h \
            ../../inc/mpcollectiondocumentloader.h \
-           stub/inc/mpnowplayingwidget.h \
-           stub/inc/mpcollectioninfobar.h
+           stub/inc/mpnowplayingwidget.h
                
 SOURCES += src/unittest_mpcollectiondocumentloader.cpp \
            ../../src/mpcollectiondocumentloader.cpp \
-           stub/src/mpnowplayingwidget.cpp \
-           stub/src/mpcollectioninfobar.cpp
+           stub/src/mpnowplayingwidget.cpp

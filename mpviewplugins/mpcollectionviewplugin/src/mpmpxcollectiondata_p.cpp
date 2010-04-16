@@ -44,7 +44,8 @@ MpMpxCollectionDataPrivate::MpMpxCollectionDataPrivate( MpMpxCollectionData *wra
     : q_ptr( wrapper ),
       iContainerMedia(0),
       iMediaArray(0),
-      iContext( ECollectionContextUnknown )
+      iContext( ECollectionContextUnknown ),
+      iCachedRemovedItem ( 0 )
 {
     TX_LOG
 }
@@ -56,6 +57,7 @@ MpMpxCollectionDataPrivate::~MpMpxCollectionDataPrivate()
 {
     TX_ENTRY
     delete iContainerMedia;
+    delete iCachedRemovedItem;
     TX_EXIT
 }
 
@@ -172,6 +174,83 @@ int MpMpxCollectionDataPrivate::itemCount( int index )
     }
     TX_EXIT
     return count;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::containerId()
+{
+    int id = -1;
+    TRAPD( err, id = DoGetContainerIdL() );
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS("id=" << id);
+    }
+    else {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return id;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::itemId(int index)
+{
+    TX_ENTRY_ARGS("index=" << index);
+    int id = -1;
+    TRAPD(err, id = DoGetItemIdL(index));
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS("id=" << id);
+    }
+    else {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return id;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::removeItem(int index)
+{
+    TX_ENTRY_ARGS("index=" << index);
+     TRAPD(err,  DoRemoveItemL(index));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+bool MpMpxCollectionDataPrivate::testCachedItem( int itemId )
+{
+    TX_ENTRY_ARGS( "itemId=" << itemId);
+    bool match = false;
+    TRAPD( err, match = DoTestCachedItemL( itemId ) );
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS("match=" << match);
+    }
+    else {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return match;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::insertCachedItem(int index)
+{
+    TX_ENTRY_ARGS("index=" << index);
+    iMediaArray->Insert( iCachedRemovedItem, index );
+    iCachedRemovedItem = 0; //ownership tranferred above.
+    TX_EXIT
 }
 
 /*!
@@ -303,6 +382,52 @@ int MpMpxCollectionDataPrivate::DoGetItemCountL( int index )
 /*!
  \internal
  */
+int MpMpxCollectionDataPrivate::DoGetContainerIdL()
+{
+    if ( !iContainerMedia->IsSupported( KMPXMediaGeneralId ) ) {
+        User::Leave(KErrNotFound);
+    }
+    return iContainerMedia->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::DoGetItemIdL( int index )
+{
+    CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
+    if ( !currentMedia->IsSupported( KMPXMediaGeneralId ) ) {
+        User::Leave(KErrNotFound);
+    }
+    return currentMedia->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::DoRemoveItemL( int index )
+{
+    delete iCachedRemovedItem;
+    iCachedRemovedItem = 0;
+    iCachedRemovedItem = CMPXMedia::NewL( *iMediaArray->AtL( index ) );
+    iMediaArray->Remove( index );
+}
+
+/*!
+ \internal
+ */
+bool MpMpxCollectionDataPrivate::DoTestCachedItemL( int itemId )
+{
+    if ( !iCachedRemovedItem && !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
+        User::Leave(KErrNotFound);
+    }
+    return ( itemId == iCachedRemovedItem->ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
+}
+
+
+/*!
+ \internal
+ */
 void MpMpxCollectionDataPrivate::SetCollectionContextL()
 {
     TX_ENTRY
@@ -324,7 +449,7 @@ void MpMpxCollectionDataPrivate::SetCollectionContextL()
                 iContext = ECollectionContextAllSongs;
                 break;
             case EMPXAlbum:
-                iContext = ECollectionContextArtistAlbums;
+                iContext = ECollectionContextAlbums;
                 break;
             case EMPXPlaylist:
                 iContext = ECollectionContextPlaylists;

@@ -22,13 +22,14 @@
 #include <QObject>
 
 #include <hbwidget.h>
-#include <hbeffect.h>
 
 #include "mpcollectioncontainer.h"
 #include "mpmpxcollectionviewdefs.h"
 
 class HbListView;
 class HbAbstractViewItem;
+class HbLabel;
+class HbIndexFeedback;
 
 class MpCollectionListContainer : public MpCollectionContainer
 {
@@ -46,20 +47,19 @@ public slots:
 
     virtual void itemActivated( const QModelIndex &index );
     virtual void onLongPressed(HbAbstractViewItem *listViewItem, const QPointF &coords);
-    void itemChosenFxComplete1( const HbEffect::EffectStatus &status );
-    void itemChosenFxComplete2( const HbEffect::EffectStatus &status );
 
 
 protected:
 
     explicit MpCollectionListContainer( HbDocumentLoader *loader, QGraphicsItem *parent=0 );
     virtual void initializeList();
+    void setupEmptyListContainer();
 
 protected:
 
     HbListView              *mList;
-    QModelIndex             mChosenIndex;
-    bool                    mEffectOnGoing;
+    HbLabel                 *mNoMusic;
+    HbIndexFeedback         *mIndexFeedback;
 
 };
 

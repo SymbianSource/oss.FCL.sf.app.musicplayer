@@ -32,21 +32,23 @@ HEADERS += inc/unittest_mpmpxframeworkwrapper.h \
     ../../inc/mpmpxframeworkwrapper.h \
     ../../inc/mpmpxframeworkwrapper_p.h \
     stub/inc/mpmpxcollectiondata.h \
-	stub/inc/mpxcollectionopenutility.h \
-	stub/inc/mpxcollectionuihelper.h \
-	stub/inc/mpxcollectionutility.h \
-	stub/inc/mpxcollectionhelperfactory.h \
-	stub/inc/mpxharvesterutility.h \
-	stub/inc/mpxplaybackutility.h 
+    stub/inc/mpxcollectionopenutility.h \
+    stub/inc/mpxcollectionuihelper.h \
+    stub/inc/mpxcollectionutility.h \
+    stub/inc/mpxcollectionhelperfactory.h \
+    stub/inc/mpxharvesterutility.h \
+    stub/inc/mpxplaybackutility.h \
+    stub/inc/mpmpxisolatedcollectionhelper.h
 
 SOURCES += src/unittest_mpmpxframeworkwrapper.cpp \
     ../../src/mpmpxframeworkwrapper.cpp \
-	stub/src/mpmpxcollectiondata.cpp \
-	stub/src/mpxcollectionopenutility.cpp \
-	stub/src/mpxcollectionuihelper.cpp \
-	stub/src/mpxcollectionutility.cpp \
-	stub/src/mpxcollectionhelperfactory.cpp \
-	stub/src/mpxharvesterutility.cpp \
-	stub/src/mpxplaybackutility.cpp 
+    stub/src/mpmpxcollectiondata.cpp \
+    stub/src/mpxcollectionopenutility.cpp \
+    stub/src/mpxcollectionuihelper.cpp \
+    stub/src/mpxcollectionutility.cpp \
+    stub/src/mpxcollectionhelperfactory.cpp \
+    stub/src/mpxharvesterutility.cpp \
+    stub/src/mpxplaybackutility.cpp \
+    stub/src/mpmpxisolatedcollectionhelper.cpp
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc

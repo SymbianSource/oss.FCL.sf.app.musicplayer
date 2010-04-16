@@ -77,7 +77,8 @@ MpPlaybackData::MpPlaybackData( QObject *parent )
       mReqId(KUndefined),
       mDuration(0),
       mPosition(0),
-      mAlbumArt()
+      mAlbumArt(),
+      mPlaybackState(Stopped)
 {
     TX_ENTRY
     mThumbnailManager = new ThumbnailManager(this);

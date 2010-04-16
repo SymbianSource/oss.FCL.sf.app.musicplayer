@@ -40,10 +40,8 @@ LIBS += -lestor.dll \
     -lmpxviewframeworkqt.dll \
     -lmpxcollectionhelper.dll \
     -lmpnowplayingbanner.dll  \
-    -lhbcore \
-    -lhbwidgets \
-    -lhbtools \
-    -lmpsettingsmanager
+    -lmpsettingsmanager \
+    -lmpengine
     
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
 
@@ -55,13 +53,12 @@ SOURCES += src/mpcollectionviewplugin.cpp \
     	   src/mpcollectioncontainer.cpp \
     	   src/mpcollectionlistcontainer.cpp \
     	   src/mpcollectioncontainerallsongs.cpp \
-    	   src/mpcollectioncontainerartists.cpp \
+    	   src/mpcollectioncontaineralbums.cpp \
     	   src/mpcollectioncontainerplaylists.cpp \
     	   src/mpcollectioncontainergenres.cpp \
     	   src/mpcollectiondatamodel.cpp \
     	   src/mpcollectionalbumartmanager.cpp \
-    	   src/mpcollectioninfobar.cpp \
-           src/mpcollectionsongscanner.cpp \
+           src/mpmpxisolatedcollectionhelper.cpp \
            src/mpmpxframeworkwrapper.cpp \
            src/mpmpxframeworkwrapper_p.cpp \
            src/mpmpxcollectiondata.cpp \
@@ -76,15 +73,14 @@ HEADERS = ../../inc/mpviewbase.h \
     	  inc/mpcollectioncontainer.h \
     	  inc/mpcollectionlistcontainer.h \
     	  inc/mpcollectioncontainerallsongs.h \
-    	  inc/mpcollectioncontainerartists.h \
+    	  inc/mpcollectioncontaineralbums.h \
     	  inc/mpcollectioncontainerplaylists.h  \
     	  inc/mpcollectioncontainergenres.h  \
     	  inc/mpcollectiondatamodel.h \
     	  inc/mpcollectionalbumartmanager.h \
-    	  inc/mpcollectioninfobar.h \
-          inc/mpcollectionsongscanner.h \
           inc/mpmpxcollectionviewdefs.h \
           inc/mpmpxframeworkwrapper.h \
+          inc/mpmpxisolatedcollectionhelper.h \
           inc/mpmpxframeworkwrapper_p.h \
           inc/mpmpxcollectiondata.h \
           inc/mpmpxcollectiondata_p.h  \

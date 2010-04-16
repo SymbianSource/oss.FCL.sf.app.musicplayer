@@ -36,41 +36,45 @@ class MpMpxFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxFrameworkWrapper(
+    explicit MpMpxFrameworkWrapper( 
         MpCommon::MpViewMode viewMode=MpCommon::DefaultView, QObject *parent=0 );
     virtual ~MpMpxFrameworkWrapper();
 
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
-    void reopenCollection();
     void back();
     void findPlaylists( QStringList &playlists );
-    void createPlaylist( QString playlistName, QList<int> selection );
-    void saveToPlaylist( int playlistIndex, QList<int> selection );
-    void renamePlaylist( QString newName, int index );
-    void renamePlaylist( QString newName );
-    void deleteSongs( QList<int> selection );
+    void createPlaylist( QString &playlistName, QList<int> &selection, MpMpxCollectionData* collectionData = 0  );
+    void saveToPlaylist( int playlistIndex, QList<int> &selection );
+    void saveToCurrentPlaylist( QList<int> &selection, MpMpxCollectionData *collectionData );    
+    void renamePlaylist( QString &newName, int index );
+    void renamePlaylist( QString &newName );
+    void deleteSongs( QList<int> &selection );
     void setShuffle( bool active );
-    void scan();
-    void cancelScan();
+    
     void previewItem( int index );
-
+    void openIsolatedCollection( TCollectionContext context );
+    void releaseIsolatedCollection();
+    
     MpMpxCollectionData *collectionData();
-
+    
 signals:
 
     void collectionPlaylistOpened();
     void playlistSaved( bool success );
     void songsDeleted( bool success );
     void playlistsRenamed( bool success );
+    
+    void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
 
-    void scanStarted();
-    void scanEnded();
-    void scanCountChanged( int count );
+public slots:
+
+    void reopenCollection();
+    void reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal );
 
 private:
 
-    Q_DISABLE_COPY(MpMpxFrameworkWrapper)
+    Q_DISABLE_COPY( MpMpxFrameworkWrapper )
     MpMpxFrameworkWrapperPrivate *d_ptr;
 
 };

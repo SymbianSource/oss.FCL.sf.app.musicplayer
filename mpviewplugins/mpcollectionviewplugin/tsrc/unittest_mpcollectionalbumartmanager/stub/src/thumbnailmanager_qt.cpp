@@ -93,14 +93,7 @@ int ThumbnailManager::getThumbnail( const QString& fileName, void *clientData,
 {
     Q_UNUSED(fileName);
     Q_UNUSED(priority);
-
-    if (clientData) {
-        // Delete this to prevent memory leak
-        int *data = (int *)clientData;
-        delete data;
-
-        data = 0;
-    }
+    Q_UNUSED(clientData);
 
     if ( mGetThumbFails ) {
         return -1;

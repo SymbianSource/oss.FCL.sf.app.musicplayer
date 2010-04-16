@@ -20,13 +20,11 @@
 #define MPCOLLECTIONALBUMARTMANAGER_H
 
 #include <QObject>
-#include <QHash>
-#include <QMap>
-#include <QQueue>
-#include <QPair>
-#include <QBitmap>
-#include <hbicon.h>
+#include <QCache>
+#include <QIcon>
+#include <QList>
 
+class MpMpxCollectionData;
 class ThumbnailManager;
 
 class MpCollectionAlbumArtManager : public QObject
@@ -35,31 +33,34 @@ class MpCollectionAlbumArtManager : public QObject
 
 public:
 
-    explicit MpCollectionAlbumArtManager( QObject *parent=0 );
+    explicit MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent=0 );
     virtual ~MpCollectionAlbumArtManager();
 
-    HbIcon albumArt( const QString &albumArtUri, int index );
-    bool cacheAlbumArt( const QStringList albumArtList );
+    const QIcon* albumArt( int index );
+    void cacheFirstScreen();
     void cancel();
 
 signals:
 
     void albumArtReady( int index );
-    void albumCacheReady();
 
 public slots:
 
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
+    void thumbnailReady( QPixmap pixmap, void *data, int id, int error );
 
 private:
 
+    MpMpxCollectionData             *mCollectionData;
     ThumbnailManager                *mThumbnailManager;
-    QHash<QString, HbIcon>          mImageCache;
-    QMap<int, QString>              mTnmReqMap;
+    QCache<int, QIcon>              mImageCache;
     bool                            mCachingInProgress;
 
-    QQueue< QPair<QString, int> >   mRequestQueue;
-    int                             mRequestCount;
+    QIcon                           *mDefaultIcon;
+
+    QList<int>                      mRequestQueue;
+    bool                            mPendingRequest;
+    int                             mRequestId;
+
 };
 
 #endif // MPCOLLECTIONALBUMARTMANAGER_H

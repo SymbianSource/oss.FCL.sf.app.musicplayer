@@ -15,17 +15,16 @@
 *
 */
 
-#include <QBrush>
-#include <QColor>
-
+#include <QIcon>
+#include <QList>
+#include <qmimedata.h>
 #include <hbicon.h>
+#include <hbnamespace.h>
 
 #include "mpcollectiondatamodel.h"
 #include "mpcollectionalbumartmanager.h"
 #include "mpmpxcollectiondata.h"
 #include "mptrace.h"
-
-const int KInitCacheSize = 11;
 
 /*!
     \class MpCollectionDataModel
@@ -46,18 +45,24 @@ const int KInitCacheSize = 11;
 */
 
 /*!
+    \fn void orderChanged( int containerId, int itemId, int itemOrdinal, int newOrdinal )
+
+    This signal is emitted when a reorder operations is propagated to the 
+    model, indicates that the item with \a containerId , \a itemId is to 
+    be moved from \a itemOrdinal to \a newOrdinal.
+ */
+
+/*!
  Constructs the collection data model.
  */
 MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent )
     : QAbstractListModel(parent),
       mCollectionData(data),
-      mRowCount(0),
-      mCachingInProgress(false)
+      mRowCount(0)
 {
     TX_ENTRY
-    mAlbumArtManager = new MpCollectionAlbumArtManager();
+    mAlbumArtManager = new MpCollectionAlbumArtManager(mCollectionData);
     connect( mAlbumArtManager, SIGNAL(albumArtReady(int)), this, SLOT(updateAlbumArt(int)) );
-    connect( mAlbumArtManager, SIGNAL(albumCacheReady()), this, SLOT(albumCacheReady()) );
     TX_EXIT
 }
 
@@ -84,12 +89,7 @@ int MpCollectionDataModel::rowCount( const QModelIndex &parent ) const
 {
     TX_LOG
     Q_UNUSED(parent);
-    if ( mCachingInProgress ) {
-        return 0;
-    }
-    else {
-        return mRowCount;
-    }
+    return mRowCount;
 }
 
 /*!
@@ -117,94 +117,144 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
             display << primaryText;
         }
         else {
-            display << QString( tr("Unknown") );
+            display << hbTrId("txt_mus_other_unknown4");
         }
 
         // Fetch the secondary text, which depends on the current context, if available.
         QString secondaryText;
         switch ( context ) {
             case ECollectionContextAllSongs:
-            case ECollectionContextArtistAlbums:
+            case ECollectionContextAlbums:
             case ECollectionContextPlaylistSongs:
                 secondaryText = mCollectionData->itemData(row, MpMpxCollectionData::Artist);
                 if ( !secondaryText.isEmpty() ) {
                     display << secondaryText;
                 }
                 else {
-                    display << QString( tr("Unknown") );
+                    display << hbTrId("txt_mus_other_unknown3");
                 }
                 break;
-            case ECollectionContextPlaylists:
-                secondaryText = mCollectionData->itemData(row, MpMpxCollectionData::Count);
-                if ( !secondaryText.isEmpty() ) {
-                    display << secondaryText;
-                }
+            default:
                 break;
         }
         returnValue = display;
     }
     else if ( role == Qt::DecorationRole ) {
         switch ( context ) {
-            case ECollectionContextArtistAlbums:
-                bool defaultArt = true;
-                QString albumArtUri = mCollectionData->itemData(row, MpMpxCollectionData::AlbumArtUri);
-                if ( !albumArtUri.isEmpty() ) {
-                     HbIcon icon = mAlbumArtManager->albumArt(albumArtUri, row);
-                     if ( !icon.isNull() ) {
-                         returnValue = icon;
-                         defaultArt = false;
-                     }
-                }
-                if ( defaultArt ) {
-                    // No album art, use default album art
-                    HbIcon icon(QString(":/icons/default_album.png"));
-                    returnValue = icon;
-                }
+            case ECollectionContextAlbums:
+                const QIcon *icon = mAlbumArtManager->albumArt(row);
+                QVariant iconVariant(QVariant::Icon, icon);
+                returnValue = iconVariant;
                 break;
         }
+    }
+    else if ( role == Hb::IndexFeedbackRole ) {
+        QString feedbackIndex;
+        feedbackIndex = mCollectionData->itemData(row, MpMpxCollectionData::Title);
+        returnValue = feedbackIndex;
     }
     TX_EXIT
     return returnValue;
 }
 
 /*!
- Must be called when data has changed and model needs to be refreshed
- to reflect the new data.
+ \reimp
  */
-void MpCollectionDataModel::refreshModel()
+Qt::DropActions MpCollectionDataModel::supportedDropActions() const
 {
-    TX_ENTRY
-    // Cancel all outstanding album art request first, then reset the model.
-    mAlbumArtManager->cancel();
-    mRowCount = mCollectionData->count();
+    return Qt::MoveAction;
+}
 
-    TCollectionContext context = mCollectionData->context();
-    if ( context == ECollectionContextArtistAlbums ) {
-        // Before providing the new data to the view (list, grid, etc.), we want
-        // to make sure that we have enough album arts for the first screen.
-        if ( mRowCount > 0 ) {
-            int initCount = ( mRowCount > KInitCacheSize ) ? KInitCacheSize : mRowCount;
-            QStringList albumArtList;
-            QString albumArtUri;
-            for ( int i = 0; i < initCount; i++ ) {
-                albumArtUri = mCollectionData->itemData(i, MpMpxCollectionData::AlbumArtUri);
-                if ( !albumArtUri.isEmpty() ) {
-                     albumArtList << albumArtUri;
-                }
-            }
-            mCachingInProgress = mAlbumArtManager->cacheAlbumArt(albumArtList);
-            if ( !mCachingInProgress ) {
-                reset();
-            }
-        }
-        else {
-            reset();
-        }
+/*! 
+ \reimp
+*/
+bool MpCollectionDataModel::removeRows(int row, int count, const QModelIndex &parent )
+{
+    if ( count > 1 ) {
+        return false;
     }
-    else {
-        reset();
+    beginRemoveRows ( parent, row, row);
+    //This call internally caches the item, to be inserted if it it drag and drop.
+    mCollectionData->removeItem(row);
+    mRowCount--;
+    endRemoveRows();
+    return true;
+}
+
+/*! 
+ \reimp
+*/
+QStringList MpCollectionDataModel::mimeTypes() const
+{
+    QStringList types;
+    types << QLatin1String("application/x-mpcollectiondatamodelrowandids");
+    return types;
+}
+
+/*! 
+ \reimp
+*/
+QMimeData *MpCollectionDataModel::mimeData(const QModelIndexList &indexes) const
+{
+    if (indexes.count() <= 0)
+        return 0;
+    QStringList types = mimeTypes();
+    if (types.isEmpty())
+        return 0;
+    QMimeData *data = new QMimeData();
+    QString format = types.at(0);
+    QByteArray encoded;
+    QDataStream stream(&encoded, QIODevice::WriteOnly);
+    stream << indexes.at(0).row();
+    stream << mCollectionData->containerId();
+    stream << mCollectionData->itemId( indexes.at(0).row() );
+    
+    data->setData(format, encoded);
+    return data;
+}
+
+/*! 
+ \reimp
+*/
+bool MpCollectionDataModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
+                          int row, int column, const QModelIndex &parent)
+{
+    Q_UNUSED(column);
+    // check if the action is supported
+    if (!data || action != Qt::MoveAction ) {
+        return false;
     }
-    TX_EXIT
+    // check if the format is supported
+    QStringList types = mimeTypes();
+    if (types.isEmpty()) {
+        return false;
+    }
+    QString format = types.at(0);
+    if (!data->hasFormat(format)) {
+        return false;
+    }
+    // decode and insert
+    QByteArray encoded = data->data(format);
+    QDataStream stream(&encoded, QIODevice::ReadOnly);
+    int rowFrom = -1;
+    int mpxContainerId = -1;
+    int mpxItemId = -1;
+    if (!stream.atEnd()) {
+        stream >> rowFrom;
+        stream >> mpxContainerId;
+        stream >> mpxItemId;
+    } 
+    if ( rowFrom == -1 || mpxContainerId == -1 || mpxItemId == -1  || 
+            !mCollectionData->testCachedItem( mpxItemId )) {
+        return false;
+    }    
+        
+    beginInsertRows( parent, row, row );
+    emit orderChanged( mpxContainerId, mpxItemId, rowFrom, row );
+    mCollectionData->insertCachedItem( row );
+    mRowCount++;
+    endInsertRows();
+    return true;
 }
 
 /*!
@@ -221,7 +271,7 @@ MpMpxCollectionData *MpCollectionDataModel::collectionData()
 void MpCollectionDataModel::updateAlbumArt( int index )
 {
     TX_ENTRY_ARGS("index=" << index);
-    if ( index > 0 && index < mRowCount ) {
+    if ( index >= 0 && index < mRowCount ) {
         QModelIndex modelIndex = QAbstractItemModel::createIndex(index, 0);
         emit dataChanged(modelIndex, modelIndex);
     }
@@ -229,14 +279,23 @@ void MpCollectionDataModel::updateAlbumArt( int index )
 }
 
 /*!
- Slot to be called when album art cache is ready.
+ Slot to be called when data has changed and model needs to be refreshed
+ to reflect the new data.
  */
-void MpCollectionDataModel::albumCacheReady()
+void MpCollectionDataModel::refreshModel()
 {
     TX_ENTRY
-    if ( mCachingInProgress ) {
-        mCachingInProgress = false;
-        reset();
+    // Cancel all outstanding album art request first, then reset the model.
+    mAlbumArtManager->cancel();
+    mRowCount = mCollectionData->count();
+
+    TCollectionContext context = mCollectionData->context();
+    if ( context == ECollectionContextAlbums ) {
+        // Before providing the new data to the view (list, grid, etc.), we want
+        // to make sure that we have enough album arts for the first screen.
+        mAlbumArtManager->cacheFirstScreen();
     }
+    reset();
     TX_EXIT
 }
+

@@ -45,32 +45,19 @@ CONFIG += service
 
 # Input
 LIBS += -lecom.dll \
-    -lmpxplaybackutility.dll \
-    -lmpxcollectionutility.dll \
-    -lmpxcommon.dll \
     -lestor.dll  \
     -lfbscli.dll \
     -lxqplugins.dll \
     -lmpxviewframeworkqt.dll \
-    -lhbcore.dll \
-    -lhbwidgets.dll \
-    -lhbtools.dll \
-    -lremconcoreapi.dll \
-    -lremconinterfacebase.dll \
     -lxqserviceutil \
-    -lmusicfetcher
+    -lmusicfetcher \
+    -lmpengine
     
     
 SOURCES += src/main.cpp \
-           src/mpmainwindow.cpp \
-           src/mpmediakeyhandler.cpp \
-           src/mpmediakeyhandler_p.cpp \
-           src/mpmediakeyremconresponse.cpp
+           src/mpmainwindow.cpp
            
-HEADERS =  inc/mpmainwindow.h \
-           inc/mpmediakeyhandler.h \
-           inc/mpmediakeyhandler_p.h\
-           inc/mpmediakeyremconresponse.h
+HEADERS =  inc/mpmainwindow.h
 
 MMP_RULES+=EXPORTUNFROZEN
 
@@ -81,3 +68,5 @@ symbian: {
     }
     
 RESOURCES += resources/musiplayerapp.qrc
+
+TRANSLATIONS = musicplayer.ts

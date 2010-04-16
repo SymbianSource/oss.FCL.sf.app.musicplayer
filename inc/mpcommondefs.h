@@ -26,6 +26,8 @@ namespace MpCommon
     const long int KMusicPlayerUid      = {0x10207C62};
     const long int KCollectionViewUid   = {0x10207C63};
     const long int KPlaybackViewUid     = {0x10207C64};
+    const long int KSettingsViewUid     = {0x10207C66};
+    const long int KDetailsViewUid      = {0x2002D0AA};
 
     /*!
      Command code sent from the views to the application main window
@@ -34,7 +36,9 @@ namespace MpCommon
     enum MpCommandCode {
         Exit,
         ActivateCollectionView,
-        ActivatePlaybackView
+        ActivatePlaybackView,
+		ActivateSettingsView,
+		ActivateDetailsView
     };
 
     /*!

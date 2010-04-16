@@ -20,7 +20,7 @@
 
 #include "mpcollectionlistcontainer.h"
 
-class MpCollectionInfoBar;
+class HbGroupBox;
 
 class MpCollectionContainerPlaylists : public MpCollectionListContainer
 {
@@ -37,8 +37,7 @@ private:
 
 private:
 
-    MpCollectionInfoBar     *mInfoBar;
-    bool                    mListInitialized;
+    HbGroupBox      *mInfoBar;              // Own
 
 };
 

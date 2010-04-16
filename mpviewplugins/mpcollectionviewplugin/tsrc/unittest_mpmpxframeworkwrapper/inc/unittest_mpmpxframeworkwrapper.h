@@ -47,24 +47,29 @@ public slots:
 private slots:
 
     void testConstructor();
+    void testReleaseIsolatedCollection();
     void testCollectionData();
     void testHandleOpenEntries();
     void testHandleOpenPlaylist();    
-    void testHandleOperationComplete();  
+    void testHandleOperationComplete();
+    void testHandleIsolatedOpen();
     void testOpenCollection();  
     void testDoIncrementalOpen();
     void testReopenCollection();
     void testOpenCollectionItem();  
     void testGoBack();
     void testFindPlaylists();
-    void testCreatePlaylist();        
+    void testCreatePlaylist();
+    void testCreatePlaylistWithProvidedCollectionData();   
     void testSaveToPlaylist();
+    void testSaveToCurrentPlaylist();
     void testRenamePlaylist();
     void testDeleteSongs();
     void testSetShuffle();
     void testScan();
     void testCancelScan();
     void testPreviewItem();
+    void testOpenIsolatedCollection();
     void testHandleCollectionMessage();
     void testPreparePlaylistMediaSongsContext();
     void testPreparePlaylistMediaArtistAlbumsContext();

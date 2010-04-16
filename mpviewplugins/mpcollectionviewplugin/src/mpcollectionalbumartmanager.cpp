@@ -21,9 +21,11 @@
 #include <thumbnailmanager_qt.h>
 
 #include "mpcollectionalbumartmanager.h"
+#include "mpmpxcollectiondata.h"
 #include "mptrace.h"
 
-const int KMaxThumbnailReq = 5;
+const int KInitCacheSize = 10;
+const int KMaxCacheSize = 50;
 
 /*!
     \class MpCollectionAlbumArtManager
@@ -53,19 +55,25 @@ const int KMaxThumbnailReq = 5;
 /*!
  Constructs the album art manager.
  */
-MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( QObject *parent )
+MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent )
     : QObject(parent),
+      mCollectionData(data),
+      mThumbnailManager(0),
       mCachingInProgress(false),
-      mRequestCount(0)
+      mDefaultIcon(0),
+      mPendingRequest(false)
 {
     TX_ENTRY
     mThumbnailManager = new ThumbnailManager(this);
     mThumbnailManager->setMode(ThumbnailManager::Default);
     mThumbnailManager->setQualityPreference(ThumbnailManager::OptimizeForQuality);
     mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailSmall);
-    
+
     connect( mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
              this, SLOT(thumbnailReady(QPixmap, void *, int, int)) );
+
+    mImageCache.setMaxCost(KMaxCacheSize);
+    mDefaultIcon = new QIcon(":/icons/default_album.png");
     TX_EXIT
 }
 
@@ -76,89 +84,66 @@ MpCollectionAlbumArtManager::~MpCollectionAlbumArtManager()
 {
     TX_ENTRY
     cancel();
-    mImageCache.clear();
+    delete mThumbnailManager;
+    delete mDefaultIcon;
     TX_EXIT
 }
 
 /*!
- Returns the album art for the given \a albumArtUri. If the album art is not
+ Returns the album art for the given \a index. If the album art is not
  available in its cache, an asynchronous request is made to the thumbnail manager
- and a null icon is returned.
+ and default icon is returned.
 
  \sa signal albumArtReady
  */
-HbIcon MpCollectionAlbumArtManager::albumArt( const QString& albumArtUri, int index )
+const QIcon* MpCollectionAlbumArtManager::albumArt( int index )
 {
-    TX_ENTRY_ARGS("albumArtUri=" << albumArtUri << ", index=" << index);
-    HbIcon icon;
-    if ( mImageCache.contains(albumArtUri) ) {
-        icon = mImageCache.value(albumArtUri);
-        TX_EXIT_ARGS("true - album art returned");
-    }
-    else {
-        if ( mRequestCount < KMaxThumbnailReq ) {
-            // Using negative index as priority will ensure that thumbnail requests
-            // are processed in the order they were requested.
-            int *clientData = new int(index);
-            int reqId = mThumbnailManager->getThumbnail( albumArtUri, clientData, -index );
-            if ( reqId != -1 ) {
-                mTnmReqMap.insert( reqId, albumArtUri );
-                mRequestCount++;
-                TX_EXIT_ARGS("false - album art requested");
+    TX_ENTRY_ARGS("index=" << index);
+    QIcon *icon = mImageCache[index];
+    if ( !icon ) {
+        icon = mDefaultIcon;
+        if ( !mRequestQueue.contains(index) ) {
+            // Icon was not found in cache. If the item has AlbumArtUri, request it
+            // through ThumbnailManager interface.
+            QString albumArtUri = mCollectionData->itemData(index, MpMpxCollectionData::AlbumArtUri);
+            if ( !albumArtUri.isEmpty() ) {
+                if ( !mPendingRequest ) {
+                    void *clientData = reinterpret_cast<void *>(index);
+                    mRequestId = mThumbnailManager->getThumbnail( albumArtUri, clientData );
+                    if ( mRequestId != -1 ) {
+                        mPendingRequest = true;
+                        TX_EXIT_ARGS("false - album art requested");
+                    }
+                    else {
+                        TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");
+                    }
+                }
+                else {
+                    mRequestQueue.append( index );
+                    TX_EXIT_ARGS("false - request queued");
+                }
             }
-            else {
-                TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");
-            }
-        }
-        else {
-            mRequestQueue.enqueue( qMakePair(albumArtUri, index) );
-            TX_EXIT_ARGS("false - request queued");
         }
     }
     return icon;
 }
 
 /*!
- Request to cache the album art for the items specified in \a albumArtList.
- Returns 'true' if caching is started. If all items already exist in cache,
- 'false' is returned.
-
- \sa signal albumCacheReady
+ Before providing the new data to the view (list, grid, etc.), we want
+ to make sure that we have enough album arts for the first screen.
  */
-bool MpCollectionAlbumArtManager::cacheAlbumArt( const QStringList albumArtList )
+void MpCollectionAlbumArtManager::cacheFirstScreen()
 {
     TX_ENTRY
-    int allAvailable = true;
-    if ( !albumArtList.empty() ) {
-        QString albumArtUri;
-        int reqId;
-        QStringListIterator iter(albumArtList);
-        while ( iter.hasNext() ) {
-            albumArtUri = iter.next();
-            if ( !mImageCache.contains(albumArtUri) ) {
-                reqId = mThumbnailManager->getThumbnail( albumArtUri );
-                if ( reqId != -1 ) {
-                    mTnmReqMap.insert( reqId, albumArtUri );
-                    mRequestCount++;
-                    allAvailable = false;
-                }
-                else {
-                    TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");
-                }
-                TX_LOG_ARGS(albumArtUri);
-            }
-        }
+    int count = mCollectionData->count();
+    int initCount = ( count > KInitCacheSize ) ? KInitCacheSize : count;
+    for ( int i = 0; i < initCount; i++ ) {
+        albumArt(i);
     }
-
-    if ( allAvailable ) {
-        TX_EXIT_ARGS("Caching is done!");
-        return false;
-    }
-    else {
-        TX_EXIT_ARGS("Caching is in progress!");
+    if ( mPendingRequest ) {
         mCachingInProgress = true;
-        return true;
     }
+    TX_EXIT
 }
 
 /*!
@@ -169,83 +154,55 @@ bool MpCollectionAlbumArtManager::cacheAlbumArt( const QStringList albumArtList 
 void MpCollectionAlbumArtManager::cancel()
 {
     TX_ENTRY
-    if ( !mTnmReqMap.empty() ) {
-        QMapIterator<int, QString> iter(mTnmReqMap);
-        while ( iter.hasNext() ) {
-            iter.next();
-            bool result = mThumbnailManager->cancelRequest(iter.key());
-        }
+    if ( mPendingRequest ) {
+        mThumbnailManager->cancelRequest(mRequestId);
     }
-    mTnmReqMap.clear();
+    mImageCache.clear();
     mRequestQueue.clear();
-    mRequestCount = 0;
+    mPendingRequest = false;
     mCachingInProgress = false;
     TX_EXIT
 }
 
-
 /*!
  Slot to be called when thumbnail bitmap generation or loading is complete.
  */
-void MpCollectionAlbumArtManager::thumbnailReady( const QPixmap& pixmap, void *data, int id, int error )
+void MpCollectionAlbumArtManager::thumbnailReady( QPixmap pixmap, void *data, int id, int error )
 {
-    TX_ENTRY_ARGS("id=" << id << ", error=" << error);
-
-    // Find the index
-    if ( mTnmReqMap.contains(id) ) {
-        // Remove the request whether it completed successfully or with error.
-        QString albumArtUri = mTnmReqMap[id];
-        mTnmReqMap.remove( id );
-        mRequestCount--;
-
-        if ( mCachingInProgress ) {
-            if ( error == 0 ) {
-                QIcon qicon(pixmap);
-                HbIcon icon(qicon);
-                mImageCache.insert(albumArtUri, icon);
-            }
-            else {
-                TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");
-            }
-            if ( mTnmReqMap.empty() ) {
-                TX_LOG_ARGS("Album art cache ready!");
-                mCachingInProgress = false;
-                emit albumCacheReady();
-                return;
-            }
+    int index = reinterpret_cast<int>(data);
+    TX_ENTRY_ARGS("index=" << index << ", id=" << id << ", error=" << error);
+    if ( !error && id == mRequestId && !pixmap.isNull() ) {
+        // Find the index
+        mImageCache.insert(index, new QIcon(pixmap));
+        TX_LOG_ARGS("Album art ready for index=" << index);
+        if ( !mCachingInProgress ) {
+            emit albumArtReady(index);
         }
-        else {
-            if ( error == 0 ) {
-                int *clientData = (int *)data;
-                int index = *clientData;
-                delete clientData;
+    }
+    else {
+        TX_EXIT_ARGS("Err: thumbnail manager returned error for getThumbnail request!");
+    }
 
-                QIcon qicon(pixmap);
-                HbIcon icon(qicon);
-                mImageCache.insert(albumArtUri, icon);
-                TX_LOG_ARGS("Album art ready for index=" << index);
-                emit albumArtReady(index);
-            }
-            else {
-                TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");
+    if ( mCachingInProgress ) {
+        if ( index >= (KInitCacheSize - 1) || !mRequestQueue.count() ) {
+            mCachingInProgress = false;
+            for ( int i = 0; i <= KInitCacheSize; ++i ) {
+                if ( mImageCache.contains(i) ) {
+                    emit albumArtReady(i);
+                }
             }
         }
     }
 
-    // Check to see if any request is pending in the queue
-    while ( !mRequestQueue.isEmpty()
-            && (mRequestCount < KMaxThumbnailReq) ) {
-        QPair<QString, int> req = mRequestQueue.dequeue();
-        QString albumArtUri = req.first;
-        int index = req.second;
-
-        // Using negative index as priority will ensure that thumbnail requests
-        // are processed in the order they were requested.
-        int *clientData = new int(index);
-        int reqId = mThumbnailManager->getThumbnail( albumArtUri, clientData, -index );
-        if ( reqId != -1 ) {
-            mTnmReqMap.insert( reqId, albumArtUri );
-            mRequestCount++;
+    mPendingRequest = false;
+    if ( mRequestQueue.count() ) {
+        int index = mRequestQueue.takeFirst();
+        QString albumArtUri = mCollectionData->itemData(index, MpMpxCollectionData::AlbumArtUri);
+        void *clientData = reinterpret_cast<void *>(index);
+        mRequestId = mThumbnailManager->getThumbnail( albumArtUri, clientData );
+        if ( mRequestId != -1 ) {
+            mPendingRequest = true;
+            TX_EXIT_ARGS("next album art requested");
         }
         else {
             TX_EXIT_ARGS("Err: thumbnail manager returned (-1) for getThumbnail request!");

@@ -1,0 +1,686 @@
+CTC++ sym 5.0
+Tue Mar 16 12:58:02 2010
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/moc_thumbnailmanager_qt.cpp
+3 1268393574
+0 0 50 0 ThumbnailManager::getStaticMetaObject
+0 90 0 0 ( )
+0 91 29 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\stub/inc/thumbnailmanager_qt.h
+0 13 50 1 staticMetaObject
+1 0 53 0 ThumbnailManager::metaObject
+0 90 0 0 ( )
+0 91 29 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\stub/inc/thumbnailmanager_qt.h
+0 25 55 1 QObject::d_ptr -> metaObject
+1 13 55 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 58 0 ThumbnailManager::qt_metacast
+0 90 0 0 ( const char * )
+0 91 29 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\stub/inc/thumbnailmanager_qt.h
+1 20 60 1 ! _clname
+2 13 60 2 0
+2 20 61 1 ! strcmp ( _clname , qt_meta_stringdata_ThumbnailManager )
+3 13 62 2 static_cast < void * > ( const_cast < ThumbnailManager * > ( this ) )
+4 13 63 1 QObject::qt_metacast ( _clname )
+3 0 66 0 ThumbnailManager::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 29 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\stub/inc/thumbnailmanager_qt.h
+3 20 69 1 _id < 0
+5 13 70 2 _id
+4 20 71 1 _c == QMetaObject::InvokeMetaMethod
+0 1 72 2 switch ( _id )
+6 14 73 2 0
+7 12 73 3
+8 15 74 2
+9 13 78 1 _id
+4 0 82 0 ThumbnailManager::thumbnailReady
+0 90 0 0 ( QPixmap , void * , int , int )
+0 91 118 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\stub/inc/thumbnailmanager_qt.h
+%87,5,10,5,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/moc_mpsongdata.cpp
+3 1268393574
+0 0 72 0 MpSongData::getStaticMetaObject
+0 90 0 0 ( )
+0 91 32 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+0 13 72 1 staticMetaObject
+1 0 75 0 MpSongData::metaObject
+0 90 0 0 ( )
+0 91 32 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+0 25 77 1 QObject::d_ptr -> metaObject
+1 13 77 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 80 0 MpSongData::qt_metacast
+0 90 0 0 ( const char * )
+0 91 32 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+1 20 82 1 ! _clname
+2 13 82 2 0
+2 20 83 1 ! strcmp ( _clname , qt_meta_stringdata_MpSongData )
+3 13 84 2 static_cast < void * > ( const_cast < MpSongData * > ( this ) )
+4 13 85 1 QObject::qt_metacast ( _clname )
+3 0 88 0 MpSongData::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 32 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+3 20 91 1 _id < 0
+5 13 92 2 _id
+4 20 93 1 _c == QMetaObject::InvokeMetaMethod
+0 1 94 2 switch ( _id )
+6 14 95 2 0
+7 12 95 3
+8 14 96 2 1
+9 12 96 3
+10 14 97 2 2
+11 12 97 3
+12 14 98 2 3
+13 12 98 3
+14 14 99 2 4
+5 20 100 4 _a [ 0 ]
+15 12 100 3
+16 14 101 2 5
+6 20 102 4 _a [ 0 ]
+17 12 102 3
+18 14 103 2 6
+7 20 104 4 _a [ 0 ]
+19 12 104 3
+20 14 105 2 7
+8 20 106 4 _a [ 0 ]
+21 12 106 3
+22 14 107 2 8
+9 20 108 4 _a [ 0 ]
+23 12 108 3
+24 14 109 2 9
+25 12 109 3
+26 14 110 2 10
+10 20 111 4 _a [ 0 ]
+27 12 111 3
+28 14 112 2 11
+11 20 113 4 _a [ 0 ]
+29 12 113 3
+30 14 114 2 12
+12 20 115 4 _a [ 0 ]
+31 12 115 3
+32 14 116 2 13
+13 20 117 4 _a [ 0 ]
+33 12 117 3
+34 14 118 2 14
+14 20 119 4 _a [ 0 ]
+35 12 119 3
+36 15 120 2
+37 13 124 1 _id
+4 0 128 0 MpSongData::albumArtReady
+0 90 0 0 ( )
+0 91 71 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+5 0 134 0 MpSongData::playbackInfoChanged
+0 90 0 0 ( )
+0 91 72 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+6 0 140 0 MpSongData::songDetailInfoChanged
+0 90 0 0 ( )
+0 91 73 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\../../inc/mpsongdata.h
+%144,7,38,15,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/src/mpsongdata.cpp
+3 1268393574
+0 0 62 0 MpSongData::MpSongData
+0 90 0 0 ( QObject * parent = 0 )
+0 91 35 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+1 0 88 0 MpSongData::~MpSongData
+0 90 0 0 ( )
+0 91 36 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+0 20 91 1 mThumbnailManager
+2 0 100 0 MpSongData::albumArt
+0 90 0 0 ( QPixmap & pixmap )
+0 91 63 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+1 20 103 1 ! mAlbumArt . isNull ( )
+0 1 106 1 else
+3 0 116 0 MpSongData::title
+0 90 0 0 ( )
+0 91 59 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+0 13 119 1 mTitle
+4 0 125 0 MpSongData::album
+0 90 0 0 ( )
+0 91 60 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+1 13 128 1 mAlbum
+5 0 134 0 MpSongData::artist
+0 90 0 0 ( )
+0 91 61 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+2 13 137 1 mArtist
+6 0 143 0 MpSongData::comment
+0 90 0 0 ( )
+0 91 62 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+3 13 146 1 mComment
+7 0 152 0 MpSongData::composer
+0 90 0 0 ( )
+0 91 66 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+4 13 155 1 mComposer
+8 0 162 0 MpSongData::genre
+0 90 0 0 ( )
+0 91 65 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+5 13 165 1 mGenre
+9 0 172 0 MpSongData::albumTrack
+0 90 0 0 ( )
+0 91 67 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+6 13 175 1 mAlbumTrack
+10 0 181 0 MpSongData::link
+0 90 0 0 ( )
+0 91 68 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+7 13 184 1 mLink
+11 0 190 0 MpSongData::year
+0 90 0 0 ( )
+0 91 64 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+8 13 193 1 mYear
+12 0 200 0 MpSongData::setTitle
+0 90 0 0 ( const QString & title )
+0 91 38 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+2 20 204 1 title != mTitle
+9 13 209 1 change
+13 0 215 0 MpSongData::setAlbum
+0 90 0 0 ( const QString & album )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+3 20 219 1 album != mAlbum
+10 13 224 1 change
+14 0 230 0 MpSongData::setArtist
+0 90 0 0 ( const QString & artist )
+0 91 40 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+4 20 234 1 artist != mArtist
+11 13 239 1 change
+15 0 245 0 MpSongData::setComment
+0 90 0 0 ( const QString & comment )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+5 20 249 1 comment != mComment
+12 13 254 1 change
+16 0 261 0 MpSongData::setComposer
+0 90 0 0 ( const QString & compoer )
+0 91 45 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+6 20 265 1 composer != mComposer
+13 13 270 1 change
+17 0 276 0 MpSongData::setGenre
+0 90 0 0 ( const QString & genre )
+0 91 44 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+7 20 280 1 genre != mGenre
+14 13 285 1 change
+18 0 292 0 MpSongData::setYear
+0 90 0 0 ( int date )
+0 91 43 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+8 20 296 1 QString::number ( year ) != mYear
+9 20 298 2 year >= 0 && year < 9999
+0 1 300 2 else
+15 13 305 1 change
+19 0 311 0 MpSongData::setAlbumTrack
+0 90 0 0 ( const QString & albumtrack )
+0 91 46 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+10 20 315 1 track != mAlbumTrack
+16 13 320 1 change
+20 0 326 0 MpSongData::setLink
+0 90 0 0 ( const QString & link )
+0 91 47 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+21 0 336 0 MpSongData::setAlbumArtUri
+0 90 0 0 ( const QString & albumArtUri )
+0 91 42 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+11 20 339 1 ! albumArtUri . isEmpty ( )
+12 20 341 2 mReqId != KUndefined
+13 20 345 2 ok
+14 20 347 3 mReqId == KUndefined
+0 1 354 1 else
+22 0 366 0 MpSongData::thumbnailReady
+0 90 0 0 ( const QPixmap & pixmap , void * data , int id , int error )
+0 91 55 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+15 20 374 1 error == 0 && mReqId == id
+0 1 379 1 else
+23 0 391 0 MpSongData::commitPlaybackInfo
+0 90 0 0 ( )
+0 91 50 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+24 0 401 0 MpSongData::commitSongDetailInfo
+0 90 0 0 ( )
+0 91 52 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/inc/mpsongdata.h
+%407,25,17,16,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/moc_unittest_mpsongdata.cpp
+3 1268393574
+0 0 106 0 TestMpSongData::getStaticMetaObject
+0 90 0 0 ( )
+0 91 27 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\inc/unittest_mpsongdata.h
+0 13 106 1 staticMetaObject
+1 0 109 0 TestMpSongData::metaObject
+0 90 0 0 ( )
+0 91 27 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\inc/unittest_mpsongdata.h
+0 25 111 1 QObject::d_ptr -> metaObject
+1 13 111 1 QObject::d_ptr -> metaObject ? QObject::d_ptr -> metaObject : & staticMetaObject
+2 0 114 0 TestMpSongData::qt_metacast
+0 90 0 0 ( const char * )
+0 91 27 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\inc/unittest_mpsongdata.h
+1 20 116 1 ! _clname
+2 13 116 2 0
+2 20 117 1 ! strcmp ( _clname , qt_meta_stringdata_TestMpSongData )
+3 13 118 2 static_cast < void * > ( const_cast < TestMpSongData * > ( this ) )
+4 13 119 1 QObject::qt_metacast ( _clname )
+3 0 122 0 TestMpSongData::qt_metacall
+0 90 0 0 ( QMetaObject::Call , int , void * * )
+0 91 27 1 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\inc/unittest_mpsongdata.h
+3 20 125 1 _id < 0
+5 13 126 2 _id
+4 20 127 1 _c == QMetaObject::InvokeMetaMethod
+0 1 128 2 switch ( _id )
+6 14 129 2 0
+7 12 129 3
+8 14 130 2 1
+9 12 130 3
+10 14 131 2 2
+11 12 131 3
+12 14 132 2 3
+13 12 132 3
+14 14 133 2 4
+15 12 133 3
+16 14 134 2 5
+17 12 134 3
+18 14 135 2 6
+19 12 135 3
+20 14 136 2 7
+21 12 136 3
+22 14 137 2 8
+23 12 137 3
+24 14 138 2 9
+25 12 138 3
+26 14 139 2 10
+27 12 139 3
+28 14 140 2 11
+29 12 140 3
+30 14 141 2 12
+31 12 141 3
+32 14 142 2 13
+33 12 142 3
+34 14 143 2 14
+35 12 143 3
+36 14 144 2 15
+37 12 144 3
+38 14 145 2 16
+39 12 145 3
+40 14 146 2 17
+41 12 146 3
+42 14 147 2 18
+43 12 147 3
+44 14 148 2 19
+45 12 148 3
+46 14 149 2 20
+47 12 149 3
+48 14 150 2 21
+49 12 150 3
+50 14 151 2 22
+51 12 151 3
+52 14 152 2 23
+53 12 152 3
+54 14 153 2 24
+55 12 153 3
+56 14 154 2 25
+57 12 154 3
+58 14 155 2 26
+59 12 155 3
+60 14 156 2 27
+61 12 156 3
+62 14 157 2 28
+63 12 157 3
+64 14 158 2 29
+65 12 158 3
+66 14 159 2 30
+67 12 159 3
+68 14 160 2 31
+69 12 160 3
+70 14 161 2 32
+71 12 161 3
+72 14 162 2 33
+73 12 162 3
+74 14 163 2 34
+75 12 163 3
+76 14 164 2 35
+77 12 164 3
+78 14 165 2 36
+79 12 165 3
+80 15 166 2
+81 13 170 1 _id
+4 0 174 0 TestMpSongData::thumbnailReady
+0 90 0 0 ( const QPixmap & pixmap , void * data , int id , int error )
+0 91 36 3 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\inc/unittest_mpsongdata.h
+%179,5,82,5,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/src/thumbnailmanager_qt.cpp
+3 1268393577
+0 0 26 0 ThumbnailManager::getInitCounter
+0 90 0 0 ( )
+0 91 103 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+0 13 28 1 gInitCounter
+1 0 34 0 ThumbnailManager::resetInitCounter
+0 90 0 0 ( )
+0 91 104 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+2 0 42 0 ThumbnailManager::ThumbnailManager
+0 90 0 0 ( QObject * parentPtr = 0 )
+0 91 107 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+3 0 54 0 ThumbnailManager::~ThumbnailManager
+0 90 0 0 ( )
+0 91 108 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+4 0 62 0 ThumbnailManager::setMode
+0 90 0 0 ( ThumbnailMode mode )
+0 91 109 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+1 13 65 1 true
+5 0 71 0 ThumbnailManager::setQualityPreference
+0 90 0 0 ( QualityPreference qualityPreference )
+0 91 110 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+2 13 75 1 true
+6 0 81 0 ThumbnailManager::setThumbnailSize
+0 90 0 0 ( ThumbnailSize thumbnailSize )
+0 91 111 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+3 13 84 1 true
+7 0 90 0 ThumbnailManager::getThumbnail
+0 90 0 0 ( const QString & fileName , void * clientData = 0 , int priority = tnmWrapperPriorityIdle )
+0 91 112 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+0 20 96 1 clientData
+1 20 104 1 mGetThumbFails
+4 13 105 2 - 1
+5 13 109 1 mThumbnailReqCounter
+8 0 115 0 ThumbnailManager::cancelRequest
+0 90 0 0 ( int id )
+0 91 114 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/stub/inc/thumbnailmanager_qt.h
+6 13 119 1 true
+%120,9,7,2,0,0
+@Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/src/unittest_mpsongdata.cpp
+3 1268395912
+0 0 34 0 main
+0 90 0 0 ( int argc , char * argv [ ] )
+0 91 34 0 Z:\musicplayer\mpviewplugins\mpdetailsviewplugin\tsrc\unittest_mpsongdata\src\unittest_mpsongdata.cpp
+0 13 48 1 res
+1 0 52 0 TestMpSongData::TestMpSongData
+0 90 0 0 ( )
+0 91 31 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+2 0 59 0 TestMpSongData::~TestMpSongData
+0 90 0 0 ( )
+0 91 32 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+3 0 67 0 TestMpSongData::initTestCase
+0 90 0 0 ( )
+0 91 39 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+4 0 75 0 TestMpSongData::cleanupTestCase
+0 90 0 0 ( )
+0 91 40 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+5 0 83 0 TestMpSongData::init
+0 90 0 0 ( )
+0 91 41 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+6 0 91 0 TestMpSongData::cleanup
+0 90 0 0 ( )
+0 91 42 1 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+7 0 100 0 TestMpSongData::testMemberCleanup
+0 90 0 0 ( )
+0 91 45 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 106 1 do
+0 20 106 2 ! QTest::qCompare ( ThumbnailManager::getInitCounter ( ) , 0 , "ThumbnailManager::getInitCounter()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 106 )
+1 13 106 3
+0 1 106 1 while ( 0 )
+8 0 112 0 TestMpSongData::testAlbumArtIsNull
+0 90 0 0 ( )
+0 91 46 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 116 1 do
+1 20 116 2 ! QTest::qVerify ( ( dummyAlbumArt . isNull ( ) == true ) , "dummyAlbumArt.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 116 )
+2 13 116 3
+0 1 116 1 while ( 0 )
+9 0 123 0 TestMpSongData::testAlbumArtNotNull
+0 90 0 0 ( )
+0 91 47 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+10 0 133 0 TestMpSongData::testTitleIsNull
+0 90 0 0 ( )
+0 91 48 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 135 1 do
+2 20 135 2 ! QTest::qVerify ( ( mTest -> mTitle . isNull ( ) == true ) , "mTest->mTitle.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 135 )
+3 13 135 3
+0 1 135 1 while ( 0 )
+11 0 141 0 TestMpSongData::testAlbumIsNull
+0 90 0 0 ( )
+0 91 49 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 143 1 do
+3 20 143 2 ! QTest::qVerify ( ( mTest -> mAlbum . isNull ( ) == true ) , "mTest->mAlbum.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 143 )
+4 13 143 3
+0 1 143 1 while ( 0 )
+12 0 149 0 TestMpSongData::testArtistIsNull
+0 90 0 0 ( )
+0 91 50 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 151 1 do
+4 20 151 2 ! QTest::qVerify ( ( mTest -> mArtist . isNull ( ) == true ) , "mTest->mArtist.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 151 )
+5 13 151 3
+0 1 151 1 while ( 0 )
+13 0 157 0 TestMpSongData::testCommentIsNull
+0 90 0 0 ( )
+0 91 51 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 159 1 do
+5 20 159 2 ! QTest::qVerify ( ( mTest -> mComment . isNull ( ) == true ) , "mTest->mComment.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 159 )
+6 13 159 3
+0 1 159 1 while ( 0 )
+14 0 165 0 TestMpSongData::testComposerIsNull
+0 90 0 0 ( )
+0 91 52 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 167 1 do
+6 20 167 2 ! QTest::qVerify ( ( mTest -> mComposer . isNull ( ) == true ) , "mTest->mComposer.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 167 )
+7 13 167 3
+0 1 167 1 while ( 0 )
+15 0 173 0 TestMpSongData::testGenreIsNull
+0 90 0 0 ( )
+0 91 53 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 175 1 do
+7 20 175 2 ! QTest::qVerify ( ( mTest -> mGenre . isNull ( ) == true ) , "mTest->mGenre.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 175 )
+8 13 175 3
+0 1 175 1 while ( 0 )
+16 0 182 0 TestMpSongData::testAlbumtrackIsNull
+0 90 0 0 ( )
+0 91 54 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 184 1 do
+8 20 184 2 ! QTest::qVerify ( ( mTest -> mAlbumTrack . isNull ( ) == true ) , "mTest->mAlbumTrack.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 184 )
+9 13 184 3
+0 1 184 1 while ( 0 )
+17 0 190 0 TestMpSongData::testLinkIsNull
+0 90 0 0 ( )
+0 91 55 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 192 1 do
+9 20 192 2 ! QTest::qVerify ( ( mTest -> mLink . isNull ( ) == true ) , "mTest->mLink.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 192 )
+10 13 192 3
+0 1 192 1 while ( 0 )
+18 0 198 0 TestMpSongData::testYearIsNull
+0 90 0 0 ( )
+0 91 56 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 200 1 do
+10 20 200 2 ! QTest::qVerify ( ( mTest -> mYear . isNull ( ) == true ) , "mTest->mYear.isNull() == true" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 200 )
+11 13 200 3
+0 1 200 1 while ( 0 )
+19 0 206 0 TestMpSongData::testSetTitleTrue
+0 90 0 0 ( )
+0 91 57 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 211 1 do
+11 20 211 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 211 )
+12 13 211 3
+0 1 211 1 while ( 0 )
+20 0 218 0 TestMpSongData::testSetTitleFalse
+0 90 0 0 ( )
+0 91 58 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 223 1 do
+12 20 223 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 223 )
+13 13 223 3
+0 1 223 1 while ( 0 )
+21 0 229 0 TestMpSongData::testsetAlbumTrue
+0 90 0 0 ( )
+0 91 59 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 234 1 do
+13 20 234 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 234 )
+14 13 234 3
+0 1 234 1 while ( 0 )
+22 0 241 0 TestMpSongData::testsetAlbumFalse
+0 90 0 0 ( )
+0 91 60 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 246 1 do
+14 20 246 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 246 )
+15 13 246 3
+0 1 246 1 while ( 0 )
+23 0 253 0 TestMpSongData::testsetArtistTrue
+0 90 0 0 ( )
+0 91 61 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 258 1 do
+15 20 258 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 258 )
+16 13 258 3
+0 1 258 1 while ( 0 )
+24 0 265 0 TestMpSongData::testsetArtistFalse
+0 90 0 0 ( )
+0 91 62 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 270 1 do
+16 20 270 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 270 )
+17 13 270 3
+0 1 270 1 while ( 0 )
+25 0 276 0 TestMpSongData::testsetCommentTrue
+0 90 0 0 ( )
+0 91 63 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 281 1 do
+17 20 281 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 281 )
+18 13 281 3
+0 1 281 1 while ( 0 )
+26 0 288 0 TestMpSongData::testsetCommentFalse
+0 90 0 0 ( )
+0 91 64 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 293 1 do
+18 20 293 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 293 )
+19 13 293 3
+0 1 293 1 while ( 0 )
+27 0 299 0 TestMpSongData::testsetComposerTrue
+0 90 0 0 ( )
+0 91 65 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 304 1 do
+19 20 304 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 304 )
+20 13 304 3
+0 1 304 1 while ( 0 )
+28 0 311 0 TestMpSongData::testsetComposerFalse
+0 90 0 0 ( )
+0 91 66 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 316 1 do
+20 20 316 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 316 )
+21 13 316 3
+0 1 316 1 while ( 0 )
+29 0 322 0 TestMpSongData::testsetGenreTrue
+0 90 0 0 ( )
+0 91 67 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 327 1 do
+21 20 327 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 327 )
+22 13 327 3
+0 1 327 1 while ( 0 )
+30 0 334 0 TestMpSongData::testsetGenreFalse
+0 90 0 0 ( )
+0 91 68 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 339 1 do
+22 20 339 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 339 )
+23 13 339 3
+0 1 339 1 while ( 0 )
+31 0 345 0 TestMpSongData::testsetYearTrue
+0 90 0 0 ( )
+0 91 69 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 350 1 do
+23 20 350 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 350 )
+24 13 350 3
+0 1 350 1 while ( 0 )
+32 0 357 0 TestMpSongData::testsetYearFalse
+0 90 0 0 ( )
+0 91 70 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+33 0 371 0 TestMpSongData::testsetAlbumTrackTrue
+0 90 0 0 ( )
+0 91 71 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 376 1 do
+24 20 376 2 ! QTest::qCompare ( result , true , "result" , "true" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 376 )
+25 13 376 3
+0 1 376 1 while ( 0 )
+34 0 383 0 TestMpSongData::testsetAlbumTrackFalse
+0 90 0 0 ( )
+0 91 72 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 388 1 do
+25 20 388 2 ! QTest::qCompare ( result , false , "result" , "false" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 388 )
+26 13 388 3
+0 1 388 1 while ( 0 )
+35 0 394 0 TestMpSongData::testsetAlbumArtUri
+0 90 0 0 ( )
+0 91 73 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 401 1 do
+26 20 401 2 ! QTest::qVerify ( ( spy . isValid ( ) ) , "spy.isValid()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 401 )
+27 13 401 3
+0 1 401 1 while ( 0 )
+0 1 402 1 do
+27 20 402 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 402 )
+28 13 402 3
+0 1 402 1 while ( 0 )
+0 1 405 1 do
+28 20 405 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 405 )
+29 13 405 3
+0 1 405 1 while ( 0 )
+0 1 409 1 do
+29 20 409 2 ! QTest::qCompare ( spy . count ( ) , 1 , "spy.count()" , "1" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 409 )
+30 13 409 3
+0 1 409 1 while ( 0 )
+0 1 410 1 do
+30 20 410 2 ! QTest::qCompare ( mTest -> mAlbumArt , mTest -> mDefaultAlbumArt , "mTest->mAlbumArt" , "mTest->mDefaultAlbumArt" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 410 )
+31 13 410 3
+0 1 410 1 while ( 0 )
+0 1 413 1 do
+31 20 413 2 ! QTest::qCompare ( spy . count ( ) , 2 , "spy.count()" , "2" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 413 )
+32 13 413 3
+0 1 413 1 while ( 0 )
+0 1 414 1 do
+32 20 414 2 ! QTest::qCompare ( mTest -> mAlbumArt , mTest -> mDefaultAlbumArt , "mTest->mAlbumArt" , "mTest->mDefaultAlbumArt" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 414 )
+33 13 414 3
+0 1 414 1 while ( 0 )
+36 0 421 0 TestMpSongData::testThumbnailReady
+0 90 0 0 ( )
+0 91 74 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 427 1 do
+33 20 427 2 ! QTest::qVerify ( ( spy . isValid ( ) ) , "spy.isValid()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 427 )
+34 13 427 3
+0 1 427 1 while ( 0 )
+0 1 428 1 do
+34 20 428 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 428 )
+35 13 428 3
+0 1 428 1 while ( 0 )
+0 1 433 1 do
+35 20 433 2 ! QTest::qCompare ( spy . count ( ) , 1 , "spy.count()" , "1" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 433 )
+36 13 433 3
+0 1 433 1 while ( 0 )
+0 1 434 1 do
+36 20 434 2 ! QTest::qCompare ( mTest -> mAlbumArt , dummyAlbumArt , "mTest->mAlbumArt" , "dummyAlbumArt" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 434 )
+37 13 434 3
+0 1 434 1 while ( 0 )
+0 1 437 1 do
+37 20 437 2 ! QTest::qCompare ( spy . count ( ) , 2 , "spy.count()" , "2" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 437 )
+38 13 437 3
+0 1 437 1 while ( 0 )
+0 1 438 1 do
+38 20 438 2 ! QTest::qCompare ( mTest -> mAlbumArt , mTest -> mDefaultAlbumArt , "mTest->mAlbumArt" , "mTest->mDefaultAlbumArt" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 438 )
+39 13 438 3
+0 1 438 1 while ( 0 )
+37 0 446 0 TestMpSongData::testCommitPlaybackInfo
+0 90 0 0 ( )
+0 91 75 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 450 1 do
+39 20 450 2 ! QTest::qVerify ( ( spy . isValid ( ) ) , "spy.isValid()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 450 )
+40 13 450 3
+0 1 450 1 while ( 0 )
+0 1 451 1 do
+40 20 451 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 451 )
+41 13 451 3
+0 1 451 1 while ( 0 )
+0 1 454 1 do
+41 20 454 2 ! QTest::qCompare ( spy . count ( ) , 1 , "spy.count()" , "1" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 454 )
+42 13 454 3
+0 1 454 1 while ( 0 )
+38 0 461 0 TestMpSongData::testCommitSongDetailInfo
+0 90 0 0 ( )
+0 91 76 2 Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpsongdata/inc/unittest_mpsongdata.h
+0 1 465 1 do
+42 20 465 2 ! QTest::qVerify ( ( spy . isValid ( ) ) , "spy.isValid()" , "" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 465 )
+43 13 465 3
+0 1 465 1 while ( 0 )
+0 1 466 1 do
+43 20 466 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 466 )
+44 13 466 3
+0 1 466 1 while ( 0 )
+0 1 469 1 do
+44 20 469 2 ! QTest::qCompare ( spy . count ( ) , 1 , "spy.count()" , "1" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 469 )
+45 13 469 3
+0 1 469 1 while ( 0 )
+%471,39,46,45,0,0
+END OF SYMBOLFILE
+4 1 do
+45 20 464 2 ! QTest::qCompare ( spy . count ( ) , 0 , "spy.count()" , "0" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 464 )
+46 13 464 3
+0 1 464 1 while ( 0 )
+0 1 467 1 do
+46 20 467 2 ! QTest::qCompare ( spy . count ( ) , 1 , "spy.count()" , "1" , "Z:\\musicplayer\\mpviewplugins\\mpdetailsviewplugin\\tsrc\\unittest_mpsongdata\\src\\unittest_mpsongdata.cpp" , 467 )
+47 13 467 3
+0 1 467 1 while ( 0 )
+%469,39,48,47,0,0
+END OF SYMBOLFILE

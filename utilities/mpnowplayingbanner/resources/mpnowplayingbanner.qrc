@@ -2,8 +2,4 @@
     <qresource prefix="/xml" >   
         <file alias="nowplaying.docml">nowplaying.docml</file>
     </qresource>
-    <qresource prefix="/icons" >
-        <file alias="play.svg">play.svg</file>
-        <file alias="pause.svg">pause.svg</file>
-    </qresource>
 </RCC>

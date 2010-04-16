@@ -150,13 +150,13 @@ void TestMpSettingsManager::testShuffleGetAndSet()
     test->mShuffle = true;
     MpSettingsManager::setShuffle(false);
     QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingShuffleKey),QVariant(false));
-    QCOMPARE(test->mShuffle, true); //should not chaqnge until sotred in cenrep
+    QCOMPARE(test->mShuffle, true); //should not chaqnge until stored in cenrep
 
   
     test->mShuffle = false;
     test->setShuffle(true);
     QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingShuffleKey),QVariant(true));
-    QCOMPARE(test->mShuffle, false);//should not chaqnge until sotred in cenrep
+    QCOMPARE(test->mShuffle, false);//should not chaqnge until stored in cenrep
 
     //make sure there are not unecesary request to cenrep.
     QCOMPARE(test->mSettingsManager->writeItemValueRequestCount(KMPCenRepSettingShuffleKey),2);
@@ -176,18 +176,44 @@ void TestMpSettingsManager::testRepeatGetAndSet()
     test->mRepeat = true;
     MpSettingsManager::setRepeat(false);
     QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingRepeatKey),QVariant(false));
-    QCOMPARE(test->mRepeat, true); //should not chaqnge until sotred in cenrep
+    QCOMPARE(test->mRepeat, true); //should not chaqnge until stored in cenrep
 
   
     test->mRepeat = false;
     test->setRepeat(true);
     QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingRepeatKey),QVariant(true));
-    QCOMPARE(test->mRepeat, false);//should not chaqnge until sotred in cenrep
+    QCOMPARE(test->mRepeat, false);//should not chaqnge until stored in cenrep
 
     //make sure there are not unecesary request to cenrep.
     QCOMPARE(test->mSettingsManager->writeItemValueRequestCount(KMPCenRepSettingRepeatKey),2);
     QCOMPARE(test->mSettingsManager->readItemValueRequestCount(KMPCenRepSettingRepeatKey),0);
     QCOMPARE(test->mSettingsManager->startMonitoringRequestCount(KMPCenRepSettingRepeatKey), 0);
+}
+
+/*!
+testPresetGetAndSet
+ */
+void TestMpSettingsManager::testPresetGetAndSet()
+{
+    MpSettingsManager *test;
+    test = MpSettingsManager::instance();
+    test->mSettingsManager->clear();
+    
+    test->mPreset = 1;
+    MpSettingsManager::setPreset(0);
+    QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingPresetIdKey),QVariant(0));
+    QCOMPARE(test->mPreset, 1); //should not chaqnge until stored in cenrep
+
+  
+    test->mPreset = 0;
+    test->setPreset(1);
+    QCOMPARE(test->mSettingsManager->writeRequestValue(KMPCenRepSettingPresetIdKey),QVariant(1));
+    QCOMPARE(test->mPreset, 0);//should not chaqnge until stored in cenrep
+
+    //make sure there are not unecesary request to cenrep.
+    QCOMPARE(test->mSettingsManager->writeItemValueRequestCount(KMPCenRepSettingPresetIdKey),2);
+    QCOMPARE(test->mSettingsManager->readItemValueRequestCount(KMPCenRepSettingPresetIdKey),0);
+    QCOMPARE(test->mSettingsManager->startMonitoringRequestCount(KMPCenRepSettingPresetIdKey), 0);
 }
 
 /*!
@@ -235,6 +261,30 @@ void TestMpSettingsManager::testValueChangedRepeatCase()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0), QVariant(true) );
     QCOMPARE(test->mRepeat, true);
+
+}
+
+/*!
+ testValueChangedPresetCase.
+ */ 
+void TestMpSettingsManager::testValueChangedPresetCase()
+{
+    MpSettingsManager *test;
+    test = MpSettingsManager::instance();
+      
+    XQSettingsKey presetProfileKey(XQSettingsKey::TargetCentralRepository, 
+            KMPCenRepSettingsFeature, 
+            KMPCenRepSettingPresetIdKey);
+    test->mPreset = 1;
+    test->valueChanged(presetProfileKey, QVariant(0));
+    QCOMPARE(test->mPreset, 0);
+
+    test->mPreset = 0;
+    QSignalSpy spy( test, SIGNAL(presetChanged(int) ) );
+    test->mSettingsManager->emitValueChanged(presetProfileKey, QVariant(1));
+    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.at(0).at(0), QVariant(1) );
+    QCOMPARE(test->mPreset, 1);
 
 }
 

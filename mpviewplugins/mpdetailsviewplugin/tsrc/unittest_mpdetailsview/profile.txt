@@ -1,0 +1,1094 @@
+*****************************************************************************
+*           CTC++, Test Coverage Analyzer for C/C++, Version 6.5.5          *
+*                                                                           *
+*                         EXECUTION PROFILE LISTING                         *
+*                                                                           *
+*                    Copyright (c) 1993-2009 Testwell Oy                    *
+*****************************************************************************
+
+
+Symbol file(s) used   : MON.sym (Fri Mar 12 15:14:36 2010)
+Data file(s) used     : MON.dat (Fri Mar 12 15:56:49 2010)
+Listing produced at   : Fri Mar 12 16:01:10 2010
+Coverage view         : As instrumented
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpmpxdetailsframeworkwrapper.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    46 FUNCTION MpMpxDetailsFrameworkWrapper::getStaticMetaObject()
+         0            -    46 return staticMetaObject
+
+***TER   0 % (  0/  2) of FUNCTION MpMpxDetailsFrameworkWrapper::getStaticMetaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    49 FUNCTION MpMpxDetailsFrameworkWrapper::metaObject()
+         0          0 -    51 ternary-?: QObject::d_ptr -> metaObject
+         0            -    51 return QObject::d_ptr -> metaObject ? QObject:..
+
+***TER   0 % (  0/  4) of FUNCTION MpMpxDetailsFrameworkWrapper::metaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    54 FUNCTION MpMpxDetailsFrameworkWrapper::qt_metacast()
+         0          0 -    56 if (! _clname)
+         0            -    56   return 0
+         0          0 -    57 if (! strcmp ( _clname , qt_meta_stringdata_Mp..
+         0            -    58   return static_cast < void * > ( const_cast <..
+         0            -    59 return QObject::qt_metacast ( _clname )
+
+***TER   0 % (  0/  8) of FUNCTION MpMpxDetailsFrameworkWrapper::qt_metacast()
+-----------------------------------------------------------------------------
+
+         0          0 -    62 FUNCTION MpMpxDetailsFrameworkWrapper::qt_metacall()
+         0          0 -    65 if (_id < 0)
+         0            -    66   return _id
+         0            -    67 return _id
+
+***TER   0 % (  0/  5) of FUNCTION MpMpxDetailsFrameworkWrapper::qt_metacall()
+-----------------------------------------------------------------------------
+
+
+***TER   0 % (  0/ 19) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpmpxdetailsframeworkwrapper.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpdetailsview.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    79 FUNCTION MpDetailsView::getStaticMetaObject()
+         0            -    79 return staticMetaObject
+
+***TER   0 % (  0/  2) of FUNCTION MpDetailsView::getStaticMetaObject()
+-----------------------------------------------------------------------------
+
+       200          0      82 FUNCTION MpDetailsView::metaObject()
+         0        200 -    84 ternary-?: QObject::d_ptr -> metaObject
+       200                 84 return QObject::d_ptr -> metaObject ? QObject:..
+
+***TER  75 % (  3/  4) of FUNCTION MpDetailsView::metaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    87 FUNCTION MpDetailsView::qt_metacast()
+         0          0 -    89 if (! _clname)
+         0            -    89   return 0
+         0          0 -    90 if (! strcmp ( _clname , qt_meta_stringdata_Mp..
+         0            -    91   return static_cast < void * > ( const_cast <..
+         0            -    92 return HbView::qt_metacast ( _clname )
+
+***TER   0 % (  0/  8) of FUNCTION MpDetailsView::qt_metacast()
+-----------------------------------------------------------------------------
+
+         4          0      95 FUNCTION MpDetailsView::qt_metacall()
+         0          4 -    98 if (_id < 0)
+         0            -    99   return _id
+         4          0 -   100 if (_c == QMetaObject::InvokeMetaMethod)
+                          101   switch ( _id )
+         0            -   102   case 0:
+         0            -   102     break
+         4                103   case 1:
+         4                103     break
+         0            -   104   case 2:
+         0            -   104     break
+         0            -   105   case 3:
+         0            -   105     break
+         0            -   106   case 4:
+         0            -   106     break
+         0            -   107   case 5:
+         0            -   107     break
+         0            -   108   case 6:
+         0            -   108     break
+         0            -   109   case 7:
+         0            -   109     break
+         0            -   110   case 8:
+         0            -   110     break
+         0            -   111   case 9:
+         0            -   111     break
+         0            -   112   case 10:
+         0            -   112     break
+         0            -   113   case 11:
+         0            -   113     break
+         0            -   114   case 12:
+         0            -   114     break
+         0            -   115   case 13:
+         0            -   115     break
+         0            -   116   case 14:
+         0            -   116     break
+         0            -   117   case 15:
+         0            -   117     break
+         0            -   118   default:
+         4                122 return _id
+
+***TER  15 % (  6/ 40) of FUNCTION MpDetailsView::qt_metacall()
+-----------------------------------------------------------------------------
+
+         4          4     126 FUNCTION MpDetailsView::command()
+
+***TER 100 % (  1/  1) of FUNCTION MpDetailsView::command()
+-----------------------------------------------------------------------------
+
+
+***TER  18 % ( 10/ 55) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpdetailsview.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_unittest_mpdetailsview.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    86 FUNCTION TestMpDetailsView::getStaticMetaObject()
+         0            -    86 return staticMetaObject
+
+***TER   0 % (  0/  2) of FUNCTION TestMpDetailsView::getStaticMetaObject()
+-----------------------------------------------------------------------------
+
+       224          0      89 FUNCTION TestMpDetailsView::metaObject()
+         0        224 -    91 ternary-?: QObject::d_ptr -> metaObject
+       224                 91 return QObject::d_ptr -> metaObject ? QObject:..
+
+***TER  75 % (  3/  4) of FUNCTION TestMpDetailsView::metaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    94 FUNCTION TestMpDetailsView::qt_metacast()
+         0          0 -    96 if (! _clname)
+         0            -    96   return 0
+         0          0 -    97 if (! strcmp ( _clname , qt_meta_stringdata_Te..
+         0            -    98   return static_cast < void * > ( const_cast <..
+         0            -    99 return HbView::qt_metacast ( _clname )
+
+***TER   0 % (  0/  8) of FUNCTION TestMpDetailsView::qt_metacast()
+-----------------------------------------------------------------------------
+
+        56          0     102 FUNCTION TestMpDetailsView::qt_metacall()
+         4         52     105 if (_id < 0)
+         4                106   return _id
+        52          0 -   107 if (_c == QMetaObject::InvokeMetaMethod)
+                          108   switch ( _id )
+         0            -   109   case 0:
+         0            -   109     break
+         0            -   110   case 1:
+         0            -   110     break
+         0            -   111   case 2:
+         0            -   111     break
+         0            -   112   case 3:
+         0            -   112     break
+         0            -   113   case 4:
+         0            -   113     break
+         0            -   114   case 5:
+         0            -   114     break
+         0            -   115   case 6:
+         0            -   115     break
+         0            -   116   case 7:
+         0            -   116     break
+         0            -   117   case 8:
+         0            -   117     break
+         0            -   118   case 9:
+         0            -   118     break
+         0            -   119   case 10:
+         0            -   119     break
+         0            -   120   case 11:
+         0            -   120     break
+         0            -   121   case 12:
+         0            -   121     break
+         0            -   122   case 13:
+         0            -   122     break
+         0            -   123   case 14:
+         0            -   123     break
+         4                124   case 15:
+         4                124     break
+         4                125   case 16:
+         4                125     break
+        16                126   case 17:
+        16                126     break
+        16                127   case 18:
+        16                127     break
+         4                128   case 19:
+         4                128     break
+         4                129   case 20:
+         4                129     break
+         4                130   case 21:
+         4                130     break
+         0            -   131   default:
+        52                135 return _id
+
+***TER  38 % ( 20/ 52) of FUNCTION TestMpDetailsView::qt_metacall()
+-----------------------------------------------------------------------------
+
+         4          4     139 FUNCTION TestMpDetailsView::back()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::back()
+-----------------------------------------------------------------------------
+
+         0          0 -   145 FUNCTION TestMpDetailsView::albumArtChanged()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::albumArtChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   151 FUNCTION TestMpDetailsView::share()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::share()
+-----------------------------------------------------------------------------
+
+         0          0 -   157 FUNCTION TestMpDetailsView::webViewLoaded()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::webViewLoaded()
+-----------------------------------------------------------------------------
+
+         0          0 -   164 FUNCTION TestMpDetailsView::playbackInfoChanged()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::playbackInfoChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   170 FUNCTION TestMpDetailsView::songDetailInfoChanged()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::songDetailInfoChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   176 FUNCTION TestMpDetailsView::toggleDetailsGroupBox()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::toggleDetailsGroupBox()
+-----------------------------------------------------------------------------
+
+         0          0 -   183 FUNCTION TestMpDetailsView::toggleInspireMeGroupBox()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::toggleInspireMeGroupBox()
+-----------------------------------------------------------------------------
+
+         0          0 -   190 FUNCTION TestMpDetailsView::retrieveInformationFinished()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::retrieveInformationFinished()
+-----------------------------------------------------------------------------
+
+         0          0 -   197 FUNCTION TestMpDetailsView::retrieveInformationNetworkError()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::retrieveInformationNetworkError()
+-----------------------------------------------------------------------------
+
+         0          0 -   204 FUNCTION TestMpDetailsView::retrieveInformationSslErrors()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::retrieveInformationSslErrors()
+-----------------------------------------------------------------------------
+
+         0          0 -   211 FUNCTION TestMpDetailsView::DownloadFinished()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::DownloadFinished()
+-----------------------------------------------------------------------------
+
+         0          0 -   218 FUNCTION TestMpDetailsView::addContext()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::addContext()
+-----------------------------------------------------------------------------
+
+         0          0 -   224 FUNCTION TestMpDetailsView::close()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::close()
+-----------------------------------------------------------------------------
+
+         0          0 -   230 FUNCTION TestMpDetailsView::thumbnailReady()
+
+***TER   0 % (  0/  1) of FUNCTION TestMpDetailsView::thumbnailReady()
+-----------------------------------------------------------------------------
+
+
+***TER  30 % ( 24/ 81) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_unittest_mpdetailsview.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/src/mpdetailsview.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+        16         16      61 FUNCTION MpDetailsView::MpDetailsView()
+        16          0 -    82 if (mDocumentLoader)
+        16          0 -    85 if (widgetsOk)
+        16          0 -    90   if (mContainer)
+                          115 else
+
+***TER  57 % (  4/  7) of FUNCTION MpDetailsView::MpDetailsView()
+-----------------------------------------------------------------------------
+
+        16         16     124 FUNCTION MpDetailsView::~MpDetailsView()
+        16          0 -   127 if (mFrameworkWrapper)
+        16          0 -   130 if (mSoftKeyBack)
+        16          0 -   133 if (mDocumentLoader)
+        16          0 -   136 if (mManager)
+        16          0 -   139 if (mDownloadManager)
+        16          0 -   142 if (mThumbnailManager)
+
+***TER  54 % (  7/ 13) of FUNCTION MpDetailsView::~MpDetailsView()
+-----------------------------------------------------------------------------
+
+        16         16     153 FUNCTION MpDetailsView::initializeView()
+        16          0 -   165 if (translatorLoaded)
+         0         16 -   172 if (translatorLoaded)
+
+***TER  60 % (  3/  5) of FUNCTION MpDetailsView::initializeView()
+-----------------------------------------------------------------------------
+
+         4          4     230 FUNCTION MpDetailsView::activateView()
+
+***TER 100 % (  1/  1) of FUNCTION MpDetailsView::activateView()
+-----------------------------------------------------------------------------
+
+         4          4     243 FUNCTION MpDetailsView::deactivateView()
+
+***TER 100 % (  1/  1) of FUNCTION MpDetailsView::deactivateView()
+-----------------------------------------------------------------------------
+
+        16         16     254 FUNCTION MpDetailsView::setupMenu()
+
+***TER 100 % (  1/  1) of FUNCTION MpDetailsView::setupMenu()
+-----------------------------------------------------------------------------
+
+         4          4     266 FUNCTION MpDetailsView::back()
+
+***TER 100 % (  1/  1) of FUNCTION MpDetailsView::back()
+-----------------------------------------------------------------------------
+
+         0          0 -   276 FUNCTION MpDetailsView::share()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::share()
+-----------------------------------------------------------------------------
+
+         0          0 -   285 FUNCTION MpDetailsView::albumArtChanged()
+         0          0 -   292 if (! mCompositePixmap . isNull ( ))
+                          294 else
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::albumArtChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   301 FUNCTION MpDetailsView::loadSharePlayer()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::loadSharePlayer()
+-----------------------------------------------------------------------------
+
+         0          0 -   311 FUNCTION MpDetailsView::webViewLoaded()
+         0          0 -   314 if (ok)
+                          317 else
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::webViewLoaded()
+-----------------------------------------------------------------------------
+
+         0          0 -   327 FUNCTION MpDetailsView::composeAlbumCover()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::composeAlbumCover()
+-----------------------------------------------------------------------------
+
+         0          0 -   342 FUNCTION MpDetailsView::keyValues()
+         0          0 -   346 if (keys . length ( ) != values . length ( ))
+                          348 else
+         0          0 -   349   for (;i < keys . length ( );)
+         0          0 -   351     if (0 != tValue . length ( ))
+         0            -   358 return str . left ( str . length ( ) - 1 )
+
+***TER   0 % (  0/  8) of FUNCTION MpDetailsView::keyValues()
+-----------------------------------------------------------------------------
+
+         0          0 -   364 FUNCTION MpDetailsView::handleParsedXML()
+         0          0 -   369 if (rootElement . attribute ( "type" ) == tr (..
+         0          0 -   373   while (! entry . isNull ( ))
+         0          0 -   375     if (entry . attribute ( "type" ) == tr ( "..
+         0          0 -   377       while (! link . isNull ( ))
+         0          0 -   380         if (link . attribute ( "rel" ) == tr (..
+         0          0 -   390 else if (rootElement . attribute ( "type" ) ==..
+         0          0 -   395   while (! entry . isNull ( ) && count<KRecomm..
+         0          0 -   397     if (entry . attribute ( "type" ) == tr ( "..
+         0          0 -   399       while (! link . isNull ( ))
+         0          0 -   401         if (link . attribute ( "title" ) == tr..
+         0            -   403           break
+                          404         else
+         0          0 -   416   for (;i < KRecommendationNum;)
+         0          0 -   421     if (mRecommendationAlbumArtsLink . at ( i ..
+                          428 else
+
+***TER   0 % (  0/ 26) of FUNCTION MpDetailsView::handleParsedXML()
+-----------------------------------------------------------------------------
+
+         0          0 -   437 FUNCTION MpDetailsView::setAlbumArtUri()
+         0          0 -   441 if (! albumArtUri . isEmpty ( ))
+         0          0 -   443   if (id == KUndefined)
+                          449 else
+
+***TER   0 % (  0/  5) of FUNCTION MpDetailsView::setAlbumArtUri()
+-----------------------------------------------------------------------------
+
+         0          0 -   460 FUNCTION MpDetailsView::RenderInspireMeGroupBox()
+         0          0 -   463 for (;i < KRecommendationNum;)
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::RenderInspireMeGroupBox()
+-----------------------------------------------------------------------------
+
+         0          0 -   487 FUNCTION MpDetailsView::recommendationAlbumArtReady()
+         0          0 -   491 if (mAlbumArtsReadyCount == KRecommendationNum)
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::recommendationAlbumArtReady()
+-----------------------------------------------------------------------------
+
+         0          0 -   501 FUNCTION MpDetailsView::playbackInfoChanged()
+         0          0 -   510 for (;i < mReplys . count ( );)
+         0          0 -   512   if (reply != 0)
+         0          0 -   524 for (;i < KRecommendationNum;)
+         0          0 -   531   if (file . exists ( ))
+         0          0 -   532     if (file . remove ( ))
+                          535     else
+                          538   else
+
+***TER   0 % (  0/ 11) of FUNCTION MpDetailsView::playbackInfoChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   562 FUNCTION MpDetailsView::songDetailInfoChanged()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::songDetailInfoChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   597 FUNCTION MpDetailsView::toggleDetailsGroupBox()
+         0          0 -   600 if (! mInspireMeGroupBox -> isCollapsed ( ))
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::toggleDetailsGroupBox()
+-----------------------------------------------------------------------------
+
+         0          0 -   609 FUNCTION MpDetailsView::toggleInspireMeGroupBox()
+         0          0 -   612 if (! mSongDetailsGroupBox -> isCollapsed ( ))
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::toggleInspireMeGroupBox()
+-----------------------------------------------------------------------------
+
+         0          0 -   621 FUNCTION MpDetailsView::constructRequest()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::constructRequest()
+-----------------------------------------------------------------------------
+
+         0          0 -   647 FUNCTION MpDetailsView::retrieveInformation()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::retrieveInformation()
+-----------------------------------------------------------------------------
+
+         0          0 -   662 FUNCTION MpDetailsView::retrieveInformationFinished()
+         0          0 -   670 if (reply -> error ( ) == QNetworkReply::NoErr..
+         0          0 -   673   if (parsingSuccess)
+                          675   else
+                          680 else
+
+***TER   0 % (  0/  5) of FUNCTION MpDetailsView::retrieveInformationFinished()
+-----------------------------------------------------------------------------
+
+         0          0 -   691 FUNCTION MpDetailsView::retrieveInformationNetworkError()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::retrieveInformationNetworkError()
+-----------------------------------------------------------------------------
+
+         0          0 -   701 FUNCTION MpDetailsView::retrieveInformationSslErrors()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::retrieveInformationSslErrors()
+-----------------------------------------------------------------------------
+
+         0          0 -   711 FUNCTION MpDetailsView::DownloadFinished()
+         0          0 -   714 if (reply -> error ( ) == QNetworkReply::NoErr..
+         0          0 -   720   if (fileName . isEmpty ( ))
+                          722   else
+         0          0 -   723     if (! file . open ( QIODevice::ReadWrite ))
+                          725     else
+                          734 else
+
+***TER   0 % (  0/  7) of FUNCTION MpDetailsView::DownloadFinished()
+-----------------------------------------------------------------------------
+
+         0          0 -   746 FUNCTION MpDetailsView::thumbnailReady()
+         0          0 -   756 if (error == 0)
+                          761 else
+
+***TER   0 % (  0/  3) of FUNCTION MpDetailsView::thumbnailReady()
+-----------------------------------------------------------------------------
+
+         0          0 -   773 FUNCTION MpDetailsView::addContext()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::addContext()
+-----------------------------------------------------------------------------
+
+         0          0 -   782 FUNCTION MpDetailsView::close()
+
+***TER   0 % (  0/  1) of FUNCTION MpDetailsView::close()
+-----------------------------------------------------------------------------
+
+
+***TER  15 % ( 18/122) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/src/mpdetailsview.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpsongdata.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    72 FUNCTION MpSongData::getStaticMetaObject()
+         0            -    72 return staticMetaObject
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::getStaticMetaObject()
+-----------------------------------------------------------------------------
+
+        64          0      75 FUNCTION MpSongData::metaObject()
+         0         64 -    77 ternary-?: QObject::d_ptr -> metaObject
+        64                 77 return QObject::d_ptr -> metaObject ? QObject:..
+
+***TER  75 % (  3/  4) of FUNCTION MpSongData::metaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    80 FUNCTION MpSongData::qt_metacast()
+         0          0 -    82 if (! _clname)
+         0            -    82   return 0
+         0          0 -    83 if (! strcmp ( _clname , qt_meta_stringdata_Mp..
+         0            -    84   return static_cast < void * > ( const_cast <..
+         0            -    85 return QObject::qt_metacast ( _clname )
+
+***TER   0 % (  0/  8) of FUNCTION MpSongData::qt_metacast()
+-----------------------------------------------------------------------------
+
+         0          0 -    88 FUNCTION MpSongData::qt_metacall()
+         0          0 -    91 if (_id < 0)
+         0            -    92   return _id
+         0          0 -    93 if (_c == QMetaObject::InvokeMetaMethod)
+                           94   switch ( _id )
+         0            -    95   case 0:
+         0            -    95     break
+         0            -    96   case 1:
+         0            -    96     break
+         0            -    97   case 2:
+         0            -    97     break
+         0            -    98   case 3:
+         0            -    98     break
+         0            -    99   case 4:
+         0          0 -   100       if (_a [ 0 ])
+         0            -   100     break
+         0            -   101   case 5:
+         0          0 -   102       if (_a [ 0 ])
+         0            -   102     break
+         0            -   103   case 6:
+         0          0 -   104       if (_a [ 0 ])
+         0            -   104     break
+         0            -   105   case 7:
+         0          0 -   106       if (_a [ 0 ])
+         0            -   106     break
+         0            -   107   case 8:
+         0          0 -   108       if (_a [ 0 ])
+         0            -   108     break
+         0            -   109   case 9:
+         0            -   109     break
+         0            -   110   case 10:
+         0          0 -   111       if (_a [ 0 ])
+         0            -   111     break
+         0            -   112   case 11:
+         0          0 -   113       if (_a [ 0 ])
+         0            -   113     break
+         0            -   114   case 12:
+         0          0 -   115       if (_a [ 0 ])
+         0            -   115     break
+         0            -   116   case 13:
+         0          0 -   117       if (_a [ 0 ])
+         0            -   117     break
+         0            -   118   case 14:
+         0          0 -   119       if (_a [ 0 ])
+         0            -   119     break
+         0            -   120   default:
+         0            -   124 return _id
+
+***TER   0 % (  0/ 58) of FUNCTION MpSongData::qt_metacall()
+-----------------------------------------------------------------------------
+
+         0          0 -   128 FUNCTION MpSongData::albumArtReady()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::albumArtReady()
+-----------------------------------------------------------------------------
+
+         0          0 -   134 FUNCTION MpSongData::playbackInfoChanged()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::playbackInfoChanged()
+-----------------------------------------------------------------------------
+
+         0          0 -   140 FUNCTION MpSongData::songDetailInfoChanged()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::songDetailInfoChanged()
+-----------------------------------------------------------------------------
+
+
+***TER   4 % (  3/ 75) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_mpsongdata.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_thumbnailmanager_qt.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    50 FUNCTION ThumbnailManager::getStaticMetaObject()
+         0            -    50 return staticMetaObject
+
+***TER   0 % (  0/  2) of FUNCTION ThumbnailManager::getStaticMetaObject()
+-----------------------------------------------------------------------------
+
+        64          0      53 FUNCTION ThumbnailManager::metaObject()
+         0         64 -    55 ternary-?: QObject::d_ptr -> metaObject
+        64                 55 return QObject::d_ptr -> metaObject ? QObject:..
+
+***TER  75 % (  3/  4) of FUNCTION ThumbnailManager::metaObject()
+-----------------------------------------------------------------------------
+
+         0          0 -    58 FUNCTION ThumbnailManager::qt_metacast()
+         0          0 -    60 if (! _clname)
+         0            -    60   return 0
+         0          0 -    61 if (! strcmp ( _clname , qt_meta_stringdata_Th..
+         0            -    62   return static_cast < void * > ( const_cast <..
+         0            -    63 return QObject::qt_metacast ( _clname )
+
+***TER   0 % (  0/  8) of FUNCTION ThumbnailManager::qt_metacast()
+-----------------------------------------------------------------------------
+
+         0          0 -    66 FUNCTION ThumbnailManager::qt_metacall()
+         0          0 -    69 if (_id < 0)
+         0            -    70   return _id
+         0          0 -    71 if (_c == QMetaObject::InvokeMetaMethod)
+                           72   switch ( _id )
+         0            -    73   case 0:
+         0            -    73     break
+         0            -    74   default:
+         0            -    78 return _id
+
+***TER   0 % (  0/ 10) of FUNCTION ThumbnailManager::qt_metacall()
+-----------------------------------------------------------------------------
+
+         0          0 -    82 FUNCTION ThumbnailManager::thumbnailReady()
+
+***TER   0 % (  0/  1) of FUNCTION ThumbnailManager::thumbnailReady()
+-----------------------------------------------------------------------------
+
+
+***TER  12 % (  3/ 25) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/moc_thumbnailmanager_qt.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/qrc_mpdetailsviewresources.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         4          0   10532 FUNCTION qInitResources_mpdetailsviewresources()
+         4              10536 return 1
+
+***TER 100 % (  2/  2) of FUNCTION qInitResources_mpdetailsviewresources()
+-----------------------------------------------------------------------------
+
+         0          0 - 10541 FUNCTION qCleanupResources_mpdetailsviewresources()
+         0            - 10545 return 1
+
+***TER   0 % (  0/  2) of FUNCTION qCleanupResources_mpdetailsviewresources()
+-----------------------------------------------------------------------------
+
+         4          4   10548 FUNCTION qCleanupResources_mpdetailsviewresources__dest_class__::qCleanupResources_mpdetailsviewresources__dest_class__()
+
+***TER 100 % (  1/  1) of FUNCTION qCleanupResources_mpdetailsviewresources__dest_class__::qCleanupResources_mpdetailsviewresources__dest_class__()
+-----------------------------------------------------------------------------
+
+         0          0 - 10548 FUNCTION qCleanupResources_mpdetailsviewresources__dest_class__::~qCleanupResources_mpdetailsviewresources__dest_class__()
+
+***TER   0 % (  0/  1) of FUNCTION qCleanupResources_mpdetailsviewresources__dest_class__::~qCleanupResources_mpdetailsviewresources__dest_class__()
+-----------------------------------------------------------------------------
+
+
+***TER  50 % (  3/  6) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/qrc_mpdetailsviewresources.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/mpmpxdetailsframeworkwrapper.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+        16         16      25 FUNCTION MpMpxDetailsFrameworkWrapper::MpMpxDetailsFrameworkWrapper()
+
+***TER 100 % (  1/  1) of FUNCTION MpMpxDetailsFrameworkWrapper::MpMpxDetailsFrameworkWrapper()
+-----------------------------------------------------------------------------
+
+        16         16      36 FUNCTION MpMpxDetailsFrameworkWrapper::~MpMpxDetailsFrameworkWrapper()
+
+***TER 100 % (  1/  1) of FUNCTION MpMpxDetailsFrameworkWrapper::~MpMpxDetailsFrameworkWrapper()
+-----------------------------------------------------------------------------
+
+        16          0      46 FUNCTION MpMpxDetailsFrameworkWrapper::songData()
+        16                 48 return iSongData
+
+***TER 100 % (  2/  2) of FUNCTION MpMpxDetailsFrameworkWrapper::songData()
+-----------------------------------------------------------------------------
+
+         4          4      54 FUNCTION MpMpxDetailsFrameworkWrapper::retrieveSong()
+
+***TER 100 % (  1/  1) of FUNCTION MpMpxDetailsFrameworkWrapper::retrieveSong()
+-----------------------------------------------------------------------------
+
+
+***TER 100 % (  5/  5) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/mpmpxdetailsframeworkwrapper.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/mpsongdata.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+        16         16      62 FUNCTION MpSongData::MpSongData()
+
+***TER 100 % (  1/  1) of FUNCTION MpSongData::MpSongData()
+-----------------------------------------------------------------------------
+
+         0          0 -    88 FUNCTION MpSongData::~MpSongData()
+         0          0 -    91 if (mThumbnailManager)
+
+***TER   0 % (  0/  3) of FUNCTION MpSongData::~MpSongData()
+-----------------------------------------------------------------------------
+
+         0          0 -   100 FUNCTION MpSongData::albumArt()
+         0          0 -   103 if (! mAlbumArt . isNull ( ))
+                          106 else
+
+***TER   0 % (  0/  3) of FUNCTION MpSongData::albumArt()
+-----------------------------------------------------------------------------
+
+         0          0 -   116 FUNCTION MpSongData::title()
+         0            -   119 return mTitle
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::title()
+-----------------------------------------------------------------------------
+
+         0          0 -   125 FUNCTION MpSongData::album()
+         0            -   128 return mAlbum
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::album()
+-----------------------------------------------------------------------------
+
+         0          0 -   134 FUNCTION MpSongData::artist()
+         0            -   137 return mArtist
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::artist()
+-----------------------------------------------------------------------------
+
+         0          0 -   143 FUNCTION MpSongData::comment()
+         0            -   146 return mComment
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::comment()
+-----------------------------------------------------------------------------
+
+         0          0 -   152 FUNCTION MpSongData::composer()
+         0            -   155 return mComposer
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::composer()
+-----------------------------------------------------------------------------
+
+         0          0 -   162 FUNCTION MpSongData::genre()
+         0            -   165 return mGenre
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::genre()
+-----------------------------------------------------------------------------
+
+         0          0 -   172 FUNCTION MpSongData::albumTrack()
+         0            -   175 return mAlbumTrack
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::albumTrack()
+-----------------------------------------------------------------------------
+
+         0          0 -   181 FUNCTION MpSongData::link()
+         0            -   184 return mLink
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::link()
+-----------------------------------------------------------------------------
+
+         0          0 -   190 FUNCTION MpSongData::year()
+         0            -   193 return mYear
+
+***TER   0 % (  0/  2) of FUNCTION MpSongData::year()
+-----------------------------------------------------------------------------
+
+         0          0 -   200 FUNCTION MpSongData::setTitle()
+         0          0 -   204 if (title != mTitle)
+         0            -   209 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setTitle()
+-----------------------------------------------------------------------------
+
+         0          0 -   215 FUNCTION MpSongData::setAlbum()
+         0          0 -   219 if (album != mAlbum)
+         0            -   224 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setAlbum()
+-----------------------------------------------------------------------------
+
+         0          0 -   230 FUNCTION MpSongData::setArtist()
+         0          0 -   234 if (artist != mArtist)
+         0            -   239 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setArtist()
+-----------------------------------------------------------------------------
+
+         0          0 -   245 FUNCTION MpSongData::setComment()
+         0          0 -   249 if (comment != mComment)
+         0            -   254 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setComment()
+-----------------------------------------------------------------------------
+
+         0          0 -   261 FUNCTION MpSongData::setComposer()
+         0          0 -   265 if (composer != mComposer)
+         0            -   270 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setComposer()
+-----------------------------------------------------------------------------
+
+         0          0 -   276 FUNCTION MpSongData::setGenre()
+         0          0 -   280 if (genre != mGenre)
+         0            -   285 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setGenre()
+-----------------------------------------------------------------------------
+
+         0          0 -   292 FUNCTION MpSongData::setYear()
+         0          0 -   296 if (QString::number ( year ) != mYear)
+         0          0 -   298   if (year >= 0 && year < 9999)
+         0            -   303 return change
+
+***TER   0 % (  0/  6) of FUNCTION MpSongData::setYear()
+-----------------------------------------------------------------------------
+
+         0          0 -   309 FUNCTION MpSongData::setAlbumTrack()
+         0          0 -   313 if (track != mAlbumTrack)
+         0            -   318 return change
+
+***TER   0 % (  0/  4) of FUNCTION MpSongData::setAlbumTrack()
+-----------------------------------------------------------------------------
+
+         0          0 -   324 FUNCTION MpSongData::setLink()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::setLink()
+-----------------------------------------------------------------------------
+
+         0          0 -   334 FUNCTION MpSongData::setAlbumArtUri()
+         0          0 -   337 if (! albumArtUri . isEmpty ( ))
+         0          0 -   339   if (mReqId != KUndefined)
+         0          0 -   343   if (ok)
+         0          0 -   345     if (mReqId == KUndefined)
+                          352 else
+
+***TER   0 % (  0/  9) of FUNCTION MpSongData::setAlbumArtUri()
+-----------------------------------------------------------------------------
+
+         0          0 -   364 FUNCTION MpSongData::thumbnailReady()
+         0          0 -   372 if (error == 0 && mReqId == id)
+                          377 else
+
+***TER   0 % (  0/  3) of FUNCTION MpSongData::thumbnailReady()
+-----------------------------------------------------------------------------
+
+         0          0 -   389 FUNCTION MpSongData::commitPlaybackInfo()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::commitPlaybackInfo()
+-----------------------------------------------------------------------------
+
+         0          0 -   399 FUNCTION MpSongData::commitSongDetailInfo()
+
+***TER   0 % (  0/  1) of FUNCTION MpSongData::commitSongDetailInfo()
+-----------------------------------------------------------------------------
+
+
+***TER   1 % (  1/ 74) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/mpsongdata.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/src/unittest_mpdetailsview.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         4          0      62 FUNCTION main()
+         4                 76 return res
+
+***TER 100 % (  2/  2) of FUNCTION main()
+-----------------------------------------------------------------------------
+
+         4          4      80 FUNCTION TestMpDetailsView::TestMpDetailsView()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::TestMpDetailsView()
+-----------------------------------------------------------------------------
+
+         4          4      87 FUNCTION TestMpDetailsView::~TestMpDetailsView()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::~TestMpDetailsView()
+-----------------------------------------------------------------------------
+
+         4          4      95 FUNCTION TestMpDetailsView::initTestCase()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::initTestCase()
+-----------------------------------------------------------------------------
+
+         4          4     103 FUNCTION TestMpDetailsView::cleanupTestCase()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::cleanupTestCase()
+-----------------------------------------------------------------------------
+
+        16         16     111 FUNCTION TestMpDetailsView::init()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::init()
+-----------------------------------------------------------------------------
+
+        16         16     120 FUNCTION TestMpDetailsView::cleanup()
+
+***TER 100 % (  1/  1) of FUNCTION TestMpDetailsView::cleanup()
+-----------------------------------------------------------------------------
+
+         4          4     126 FUNCTION TestMpDetailsView::testactivateView()
+                          129 do
+         0          4 -   129   if (! QTest::qVerify ( ( mTest -> mActivated..
+         0            -   129     return
+                          129 while ( 0 )
+
+***TER  50 % (  2/  4) of FUNCTION TestMpDetailsView::testactivateView()
+-----------------------------------------------------------------------------
+
+         4          4     132 FUNCTION TestMpDetailsView::testdeactivateView()
+                          135 do
+         0          4 -   135   if (! QTest::qVerify ( ( mTest -> mActivated..
+         0            -   135     return
+                          135 while ( 0 )
+
+***TER  50 % (  2/  4) of FUNCTION TestMpDetailsView::testdeactivateView()
+-----------------------------------------------------------------------------
+
+         4          4     138 FUNCTION TestMpDetailsView::testbackSlot()
+                          141 do
+         0          4 -   141   if (! QTest::qVerify ( ( spy . isValid ( ) )..
+         0            -   141     return
+                          141 while ( 0 )
+                          142 do
+         0          4 -   142   if (! QTest::qCompare ( spy . count ( ) , 0 ..
+         0            -   142     return
+                          142 while ( 0 )
+                          145 do
+         0          4 -   145   if (! QTest::qCompare ( spy . count ( ) , 1 ..
+         0            -   145     return
+                          145 while ( 0 )
+
+***TER  40 % (  4/ 10) of FUNCTION TestMpDetailsView::testbackSlot()
+-----------------------------------------------------------------------------
+
+
+***TER  62 % ( 16/ 26) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/src/unittest_mpdetailsview.cpp
+-----------------------------------------------------------------------------
+
+
+
+MONITORED SOURCE FILE : Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/thumbnailmanager_qt.cpp
+INSTRUMENTATION MODE  : function-decision
+
+    START/       END/
+      TRUE      FALSE    LINE DESCRIPTION
+=============================================================================
+
+         0          0 -    26 FUNCTION ThumbnailManager::getInitCounter()
+         0            -    28 return gInitCounter
+
+***TER   0 % (  0/  2) of FUNCTION ThumbnailManager::getInitCounter()
+-----------------------------------------------------------------------------
+
+         0          0 -    34 FUNCTION ThumbnailManager::resetInitCounter()
+
+***TER   0 % (  0/  1) of FUNCTION ThumbnailManager::resetInitCounter()
+-----------------------------------------------------------------------------
+
+        32         32      42 FUNCTION ThumbnailManager::ThumbnailManager()
+
+***TER 100 % (  1/  1) of FUNCTION ThumbnailManager::ThumbnailManager()
+-----------------------------------------------------------------------------
+
+        16         16      54 FUNCTION ThumbnailManager::~ThumbnailManager()
+
+***TER 100 % (  1/  1) of FUNCTION ThumbnailManager::~ThumbnailManager()
+-----------------------------------------------------------------------------
+
+         0          0 -    62 FUNCTION ThumbnailManager::setMode()
+         0            -    65 return true
+
+***TER   0 % (  0/  2) of FUNCTION ThumbnailManager::setMode()
+-----------------------------------------------------------------------------
+
+        32          0      71 FUNCTION ThumbnailManager::setQualityPreference()
+        32                 75 return true
+
+***TER 100 % (  2/  2) of FUNCTION ThumbnailManager::setQualityPreference()
+-----------------------------------------------------------------------------
+
+        32          0      81 FUNCTION ThumbnailManager::setThumbnailSize()
+        32                 84 return true
+
+***TER 100 % (  2/  2) of FUNCTION ThumbnailManager::setThumbnailSize()
+-----------------------------------------------------------------------------
+
+         0          0 -    90 FUNCTION ThumbnailManager::getThumbnail()
+         0          0 -    96 if (clientData)
+         0          0 -   104 if (mGetThumbFails)
+         0            -   105   return - 1
+         0            -   109 return mThumbnailReqCounter
+
+***TER   0 % (  0/  7) of FUNCTION ThumbnailManager::getThumbnail()
+-----------------------------------------------------------------------------
+
+         0          0 -   115 FUNCTION ThumbnailManager::cancelRequest()
+         0            -   119 return true
+
+***TER   0 % (  0/  2) of FUNCTION ThumbnailManager::cancelRequest()
+-----------------------------------------------------------------------------
+
+
+***TER  30 % (  6/ 20) of SOURCE FILE Z:/musicplayer/mpviewplugins/mpdetailsviewplugin/tsrc/unittest_mpdetailsview/stub/src/thumbnailmanager_qt.cpp
+-----------------------------------------------------------------------------
+
+
+
+
+
+SUMMARY
+=======
+
+Number of monitored source files  : 11
+Number of source lines            : 12735
+Number of measurement points      : 630
+TER                               : 18% (decision)

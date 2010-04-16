@@ -23,6 +23,9 @@
 #include <hbabstractviewitem.h>
 #include <hblistviewitem.h>
 #include <hbscrollbar.h>
+#include <hbdocumentloader.h>
+#include <hblabel.h>
+#include <hbindexfeedback.h>
 
 #include "mpcollectionlistcontainer.h"
 #include "mpcollectiondatamodel.h"
@@ -45,9 +48,12 @@
 MpCollectionListContainer::MpCollectionListContainer( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionContainer(loader, parent),
       mList(0),
-      mEffectOnGoing(false)
+      mNoMusic(0),
+      mIndexFeedback( new HbIndexFeedback())
 {
-    TX_LOG
+    TX_ENTRY
+    mIndexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
+    TX_EXIT
 }
 
 /*!
@@ -55,7 +61,10 @@ MpCollectionListContainer::MpCollectionListContainer( HbDocumentLoader *loader, 
  */
 MpCollectionListContainer::~MpCollectionListContainer()
 {
-    TX_LOG
+    TX_ENTRY
+    delete mNoMusic;
+    delete mIndexFeedback;
+    TX_EXIT
 }
 
 /*!
@@ -64,12 +73,7 @@ MpCollectionListContainer::~MpCollectionListContainer()
  */
 void MpCollectionListContainer::initialize()
 {
-    TX_ENTRY
-    HbEffect::add(QString("viewItem"), QString(":/effects/select.fxml"),
-        QString("chosen") );
-    HbEffect::add(QString("viewItem"), QString(":/effects/select_end.fxml"),
-        QString("chosenEnd") );
-    TX_EXIT
+    TX_LOG
 }
 
 /*!
@@ -79,8 +83,9 @@ void MpCollectionListContainer::setDataModel( MpCollectionDataModel *dataModel )
 {
     TX_ENTRY
     MpCollectionContainer::setDataModel(dataModel);
-    mList->setModel(0);
-    mList->setModel(dataModel);
+    if ( mList ) {
+        mList->setModel(dataModel);
+    }
     TX_EXIT
 }
 
@@ -91,13 +96,7 @@ void MpCollectionListContainer::setDataModel( MpCollectionDataModel *dataModel )
 void MpCollectionListContainer::itemActivated( const QModelIndex &index )
 {
     TX_ENTRY_ARGS("index=" << index.row());
-    if ( !mEffectOnGoing ) {
-        HbAbstractViewItem *listViewItem = mList->itemByIndex(index);
-        mEffectOnGoing = true;
-        mChosenIndex = index;
-        HbEffect::start(listViewItem, QString("viewItem"), QString("chosen"),
-            this, "itemChosenFxComplete1");
-    }
+    emit MpCollectionContainer::itemActivated( index.row() );
     TX_EXIT
 }
 
@@ -112,34 +111,11 @@ void MpCollectionListContainer::onLongPressed( HbAbstractViewItem *listViewItem,
 }
 
 /*!
- Slot for item selected effects part 1.
- */
-void MpCollectionListContainer::itemChosenFxComplete1(
-    const HbEffect::EffectStatus &status )
-{
-    Q_UNUSED(status);
-    HbAbstractViewItem *listViewItem = mList->itemByIndex(mChosenIndex);
-    HbEffect::start(listViewItem, QString("viewItem"), QString("chosenEnd"),
-        this, "itemChosenFxComplete2");
-}
-
-/*!
- Slot for item selected effects part 2. The end.
- */
-void MpCollectionListContainer::itemChosenFxComplete2(
-    const HbEffect::EffectStatus &status )
-{
-    Q_UNUSED(status);
-    mEffectOnGoing = false;
-    emit MpCollectionContainer::itemActivated( mChosenIndex.row() );
-}
-
-
-/*!
  \internal
  */
- void MpCollectionListContainer::initializeList()
- {
+void MpCollectionListContainer::initializeList()
+{
+    TX_ENTRY
     mList->setItemRecycling(true);
     mList->setScrollingStyle( HbListView::PanOrFlick );
     mList->setClampingStyle( HbListView::BounceBackClamping );
@@ -154,5 +130,25 @@ void MpCollectionListContainer::itemChosenFxComplete2(
     mList->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
 
     mList->listItemPrototype()->setGraphicsSize(HbListViewItem::Thumbnail);
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpCollectionListContainer::setupEmptyListContainer()
+{
+    TX_ENTRY
+    bool ok = false;
+    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "emptyList", &ok);
+    if ( !ok ) {
+        TX_LOG_ARGS("Error: invalid xml file.");
+        Q_ASSERT_X(ok, "MpCollectionListContainer::setupContainer", "invalid xml file");
+    }
+
+    QGraphicsWidget *widget;
+    widget = mDocumentLoader->findWidget(QString("noMusic"));
+    mNoMusic = qobject_cast<HbLabel*>(widget);
+    TX_EXIT
 }
 

@@ -19,11 +19,11 @@
 
 #include <hbdocumentloader.h>
 #include <hblistview.h>
-#include <hblabel.h>
+#include <hbgroupbox.h>
+#include <hbindexfeedback.h>
 
 #include "mpcollectioncontainerallsongs.h"
 #include "mpmpxcollectiondata.h"
-#include "mpcollectioninfobar.h"
 #include "mptrace.h"
 
 /*!
@@ -66,31 +66,36 @@ MpCollectionContainerAllSongs::~MpCollectionContainerAllSongs()
 void MpCollectionContainerAllSongs::setupContainer()
 {
     TX_ENTRY
-    bool ok = false;
-    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "allSongs", &ok);
-    if ( !ok ) {
-        TX_LOG_ARGS("Error: invalid xml file.");
-        Q_ASSERT_X(ok, "MpCollectionContainerAllSongs::setupContainer", "invalid xml file");
-    }
+    if ( mCollectionData->count() ) {
+        bool ok = false;
+        mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "allSongs", &ok);
+        if ( !ok ) {
+            TX_LOG_ARGS("Error: invalid xml file.");
+            Q_ASSERT_X(ok, "MpCollectionContainerAllSongs::setupContainer", "invalid xml file");
+        }
+        QGraphicsWidget *widget;
+        widget = mDocumentLoader->findWidget(QString("allSongsDetail"));
+        mInfoBar = qobject_cast<HbGroupBox*>(widget);
 
-    QString details;
-    if ( mViewMode == MpCommon::FetchView ) {
-        details = "Select a song";
+        widget = mDocumentLoader->findWidget(QString("allSongsList"));
+        mList = qobject_cast<HbListView*>(widget);
+        mIndexFeedback->setItemView(mList);
+        initializeList();
+
+        QString details;
+        if ( mViewMode == MpCommon::FetchView ) {
+            details = "Select a song";
+        }
+        else {
+            int count = mCollectionData->count();
+            details = hbTrId("txt_mus_subhead_ln_songs", count);
+        }
+        mInfoBar->setHeading(details);
     }
     else {
-        int count = mCollectionData->count();
-        details.setNum(count);
-        details.append(" songs");
+        // Call empty list from base class
+        setupEmptyListContainer();
     }
-
-    QGraphicsWidget *widget;
-    widget = mDocumentLoader->findWidget(QString("allSongsDetail"));
-    mInfoBar = qobject_cast<MpCollectionInfoBar*>(widget);
-    mInfoBar->setText(details);
-
-    widget = mDocumentLoader->findWidget(QString("allSongsList"));
-    mList = qobject_cast<HbListView*>(widget);
-    initializeList();
     TX_EXIT
 }
 

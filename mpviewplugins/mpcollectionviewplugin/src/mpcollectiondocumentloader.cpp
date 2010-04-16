@@ -18,7 +18,6 @@
 // INCLUDE FILES
 #include "mpcollectiondocumentloader.h"
 #include "mpnowplayingwidget.h"
-#include "mpcollectioninfobar.h"
 #include "mpcommondefs.h"
 #include "mptrace.h"
 
@@ -42,12 +41,6 @@ QObject *MpCollectionDocumentLoader::createObject(const QString& type, const QSt
 
     if (type == MpNowPlayingWidget::staticMetaObject.className()) {
         QObject *object = new MpNowPlayingWidget(MpCommon::KMusicPlayerUid);
-        object->setObjectName(name);
-        TX_EXIT
-        return object;
-    }
-    else if (type == MpCollectionInfoBar::staticMetaObject.className()) {
-        QObject *object = new MpCollectionInfoBar();
         object->setObjectName(name);
         TX_EXIT
         return object;

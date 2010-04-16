@@ -19,6 +19,7 @@
 #include <QGraphicsSceneMouseEvent>
 
 #include <hbicon.h>
+#include <hbevent.h>
 
 #include "mpnowplayingwidget.h"
 #include "mpnowplayingwidget_p.h"
@@ -99,6 +100,8 @@ void MpNowPlayingWidget::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     TX_ENTRY
     if ( event->button() == Qt::LeftButton ) {
+        d_ptr->handleMousePressEvent( event, true );
+        update();
         event->accept();
     }
     else {
@@ -114,6 +117,8 @@ void MpNowPlayingWidget::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
     TX_ENTRY
     if ( event->button() == Qt::LeftButton ) {
+        d_ptr->handleMousePressEvent( event, false );
+        update();
         if ( !d_ptr->handleClickEvent( event ) && rect().contains( event->pos() ) ) {
             emit clicked();
         }
@@ -123,5 +128,16 @@ void MpNowPlayingWidget::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
         event->ignore();
     }
     TX_EXIT
+}
+
+/*!
+    \reimp
+ */
+void MpNowPlayingWidget::changeEvent(QEvent *event)
+{
+    if (event->type() == HbEvent::ThemeChanged) {
+            d_ptr->handleThemeChange();
+    }
+    HbWidgetBase::changeEvent(event);
 }
 

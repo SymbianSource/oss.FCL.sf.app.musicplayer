@@ -26,6 +26,8 @@ class HbMainWindow;
 class MpMpxPbFrameworkWrapper;
 class MpPlaybackData;
 class MpPlaybackWidget;
+class MpEqualizerWidget;
+class QTranslator;
 
 
 class MpPlaybackView : public MpViewBase
@@ -47,18 +49,21 @@ signals:
 
 public slots:
 
-    void startCollectionView();
+    void startSettingsView();
     void back();
     void exit();
 
     void playbackStateChanged();
-
+    
+    void flip();
+    
     void toggleShuffle();
-    void shuffleChanged(bool shuffle);
+    void shuffleChanged( bool shuffle );
     void toggleRepeat();
-    void repeatChanged(bool repeat);
+    void repeatChanged( bool repeat );
 
     void handleSongSelected();
+    void showEqualizerDialog();
 
 private:
 
@@ -70,6 +75,7 @@ private:
     MpMpxPbFrameworkWrapper *mFrameworkWrapper; // Own
     MpPlaybackData          *mPlaybackData;     // Not own
     MpPlaybackWidget        *mPlaybackWidget;   // Not own
+    MpEqualizerWidget       *mEqualizerWidget;  // Own
 
     HbMainWindow            *mWindow;           // Not own
     HbAction                *mSoftKeyBack;      // Own
@@ -83,6 +89,9 @@ private:
     HbAction                *mPlayPauseAction;  // Not own
     HbAction                *mRepeatAction;     // Not own
     HbAction                *mShuffleAction;    // Not own
+    
+    QTranslator             *mMpTranslator;     // Own
+    QTranslator             *mCommonTranslator; // Own
 
     bool                    mShuffle;
     bool                    mRepeat;

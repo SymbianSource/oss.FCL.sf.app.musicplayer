@@ -37,12 +37,17 @@ LIBS += -lmpxplaybackutility.dll \
         -lmpxcollectionutility.dll \
         -lestor.dll \
 	-lmpxviewframeworkqt.dll \
-	-lhbcore \
-	-lhbwidgets \
-	-lhbtools \
+	-laudioequalizerutility.dll \
 	-lmpsettingsmanager
 	
-symbian:TARGET.EPOCALLOWDLLDATA = 1
+symbian:
+{
+TARGET.EPOCALLOWDLLDATA = 1
+    
+BLD_INF_RULES.prj_exports += \
+    "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/nullsound.mp3" \
+    "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
+}
 
 HEADERS = ../../inc/mpviewbase.h \
       inc/mpplaybackviewplugin.h \
@@ -50,14 +55,20 @@ HEADERS = ../../inc/mpviewbase.h \
       inc/mpmpxpbframeworkwrapper.h \
       inc/mpmpxpbframeworkwrapper_p.h \
       inc/mpplaybackdata.h \
-      inc/mpplaybackwidget.h
+      inc/mpplaybackwidget.h \
+      inc/mpequalizerwrapper.h \
+      inc/mpequalizerwrapper_p.h \
+      inc/mpequalizerwidget.h
 
 SOURCES += src/mpplaybackviewplugin.cpp \
        src/mpplaybackview.cpp \
        src/mpplaybackdata.cpp \
        src/mpplaybackwidget.cpp \
        src/mpmpxpbframeworkwrapper.cpp \
-       src/mpmpxpbframeworkwrapper_p.cpp
+       src/mpmpxpbframeworkwrapper_p.cpp \
+       src/mpequalizerwrapper.cpp \
+       src/mpequalizerwrapper_p.cpp \
+       src/mpequalizerwidget.cpp
        
 RESOURCES += resources/mpplaybackviewpluginresources.qrc
 

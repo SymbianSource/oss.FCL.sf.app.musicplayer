@@ -19,9 +19,10 @@
 #define TESTMPCOLLECTIONALBUMARTMANAGER_H
 
 #include <QtTest/QtTest>
+#include <QIcon>
 
 class MpCollectionAlbumArtManager;
-class HbIcon;
+class MpMpxCollectionData;
 
 class TestMpCollectionAlbumArtManager : public QObject
 {
@@ -34,7 +35,7 @@ public:
 
 signals:
 
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
+    void thumbnailReady( QPixmap pixmap, void *data, int id, int error );
 
 public slots:
 
@@ -49,24 +50,22 @@ private slots:
     void testAlbumArtNoCache();
     void testAlbumArtNoCacheQueue();
     void testAlbumArtCache();
+    void testAlbumArtNoUri();
     void testAlbumArtFail();
-    void testCacheAlbumArtEmpty();
-    void testCacheAlbumArt();
-    void testCacheAlbumArtCached();
-    void testCacheAlbumArtAllCached();
-    void testCacheAlbumArtFail();
+    void testCacheFirstScreenEmpty();
+    void testCacheFirstScreen();
+    void testCacheFirstScreenAllCached();
     void testCancel();
     void testThumbnailReadyCache();
     void testThumbnailReadyCacheError();
     void testThumbnailReadyAlbumArt();
     void testThumbnailReadyAlbumArtError();
-    void testThumbnailReadyAlbumArtQueue();
-    void testThumbnailReadyAlbumArtQueueError();
 
 private:
 
     MpCollectionAlbumArtManager *mTest;
-    HbIcon                      *mIcon;
+    MpMpxCollectionData         *mStubData;
+    QIcon                       mIcon;
 
 };
 

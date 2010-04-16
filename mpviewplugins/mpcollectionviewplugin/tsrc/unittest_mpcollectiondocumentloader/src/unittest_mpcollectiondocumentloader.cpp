@@ -22,7 +22,6 @@
 
 #include "unittest_mpcollectiondocumentloader.h"
 #include "mpnowplayingwidget.h"
-#include "mpcollectioninfobar.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -102,26 +101,11 @@ void TestMpCollectionDocumentLoader::testCreateMpNowPlayingWidget()
     QCOMPARE(theObject->objectName(),QString("myMpNowPlayingWidget"));
     QVERIFY(qobject_cast<MpNowPlayingWidget*>(theObject));
     delete theObject;
-    
+
 }
 
 /*!
- Tests the correct creation of MpCollectionInfoBar.
- */
-void TestMpCollectionDocumentLoader::testCreateMpCollectionInfoBar()
-{
-    cleanup();
-    init();
-    QObject *theObject;
-    theObject = mTest->createObject(QString("MpCollectionInfoBar"),QString("myMpCollectionInfoBar"));
-    QCOMPARE(theObject->metaObject()->className(),"MpCollectionInfoBar");
-    QCOMPARE(theObject->objectName(),QString("myMpCollectionInfoBar"));
-    QVERIFY(qobject_cast<MpCollectionInfoBar*>(theObject));
-    delete theObject;
-}
-
-/*!
- Tests the correct creation of QObject, this should be pased to the 
+ Tests the correct creation of QObject, this should be pased to the
  base clas and base clas should return a named object.
  */
 void TestMpCollectionDocumentLoader::testCreateQObject()
@@ -134,5 +118,5 @@ void TestMpCollectionDocumentLoader::testCreateQObject()
     QCOMPARE(theObject->objectName(),QString("myQObject"));
     delete theObject;
 }
- 
+
 // End of file

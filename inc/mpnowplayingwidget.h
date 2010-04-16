@@ -51,6 +51,7 @@ signals:
 private:
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+    void changeEvent(QEvent *event);
 
 private:
     Q_DISABLE_COPY(MpNowPlayingWidget)

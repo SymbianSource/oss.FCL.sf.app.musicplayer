@@ -20,4 +20,7 @@ EXPORTS
 	_ZTI17MpSettingsManager @ 19 NONAME
 	_ZTV17MpSettingsManager @ 20 NONAME
 	_ZN17MpSettingsManager12firstStartupEv @ 21 NONAME
+	_ZN17MpSettingsManager13presetChangedEi @ 22 NONAME
+	_ZN17MpSettingsManager6presetEv @ 23 NONAME
+	_ZN17MpSettingsManager9setPresetEi @ 24 NONAME
 

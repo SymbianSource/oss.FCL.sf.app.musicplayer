@@ -20,8 +20,9 @@
 #define MPCOLLECTIONALBUMARTMANAGER_H
 
 #include <QObject>
+#include <QIcon>
 
-class HbIcon;
+class MpMpxCollectionData;
 
 class MpCollectionAlbumArtManager : public QObject
 {
@@ -34,22 +35,20 @@ public:
     static void resetInitCounter();
 
     // Stub functions
-    explicit MpCollectionAlbumArtManager( QObject *parent=0 );
+    explicit MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent=0 );
     virtual ~MpCollectionAlbumArtManager();
-    HbIcon albumArt( const QString &albumArtUri, int index );
-    bool cacheAlbumArt( const QStringList albumArtList );
+
+    const QIcon* albumArt( int index );
+    void cacheFirstScreen();
     void cancel();
 
 signals:
 
     void albumArtReady( int index );
-    void albumCacheReady();
 
 public:
 
-    HbIcon      *mIcon;
-    bool        mAlbumArtReturn;
-    bool        mCacheAlbumArtReturn;
+    QIcon       *mIcon;
     int         mAlbumArtCount;
     int         mCacheAlbumArtCount;
 

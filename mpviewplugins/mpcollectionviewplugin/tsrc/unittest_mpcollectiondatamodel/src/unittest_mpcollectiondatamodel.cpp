@@ -18,6 +18,9 @@
 #include <QAbstractItemModel>
 #include <QSignalSpy>
 #include <QMetaType>
+#include <QTranslator>
+#include <QLocale>
+
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbicon.h>
@@ -58,7 +61,8 @@ int main(int argc, char *argv[])
 TestMpCollectionDataModel::TestMpCollectionDataModel()
     : mTest(0),
       mHelper(0),
-      mStubData(0)
+      mStubData(0),
+      mMpTranslator(0)
 {
 }
 
@@ -67,6 +71,7 @@ TestMpCollectionDataModel::~TestMpCollectionDataModel()
     delete mTest;
     delete mHelper;
     delete mStubData;
+    delete mMpTranslator;
 }
 
 /*!
@@ -74,6 +79,16 @@ TestMpCollectionDataModel::~TestMpCollectionDataModel()
  */
 void TestMpCollectionDataModel::initTestCase()
 {
+    QString lang = QLocale::system().name();
+    QString path = QString("z:/resource/qt/translations/");
+    bool translatorLoaded = false;
+
+    mMpTranslator = new QTranslator(this);
+    translatorLoaded = mMpTranslator->load(path + "musicplayer_" + lang);
+    if ( translatorLoaded ) {
+        qApp->installTranslator(mMpTranslator);
+    }
+
     mStubData = new MpMpxCollectionData();
     mHelper = new TestHelper();
 }
@@ -123,6 +138,21 @@ void TestMpCollectionDataModel::testMemberCleanup()
 }
 
 /*!
+ Tests refreshModel() request.
+ */
+void TestMpCollectionDataModel::testRefreshModel()
+{
+    mTest->mCollectionData->mCount = 100;
+    mTest->mCollectionData->mContext = ECollectionContextAlbums;
+    mTest->refreshModel();
+    // Verify that:
+    // - It sets correct row count
+    QCOMPARE(mTest->mRowCount, 100);
+    QCOMPARE(mTest->mAlbumArtManager->mCacheAlbumArtCount, 1);
+    // Stub QAbstractListModel to verify call to reset()
+}
+
+/*!
  Tests refreshModel() request with empty data model.
  */
 void TestMpCollectionDataModel::testRefreshModelZeroCount()
@@ -131,72 +161,7 @@ void TestMpCollectionDataModel::testRefreshModelZeroCount()
     mTest->refreshModel();
     // Verify that:
     // - It sets correct row count
-    // - It doesn't attempt to cache initial set of album art
     QCOMPARE(mTest->mRowCount, 0);
-    QCOMPARE(MpMpxCollectionData::getItemDataCounter(), 0);
-    QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mAlbumArtManager->mCacheAlbumArtCount, 0);
-    // AK - Stub QAbstractListModel to verify call to reset()
-}
-
-/*!
- Tests refreshModel() request with large data size.
- */
-void TestMpCollectionDataModel::testRefreshModelLargeData()
-{
-    mTest->mCollectionData->mCount = 100;
-    mTest->mCollectionData->mContext = ECollectionContextArtistAlbums;
-    mTest->refreshModel();
-    // Verify that:
-    // - It sets correct row count
-    // - It caches the initial cache size
-    QCOMPARE(mTest->mRowCount, 100);
-    QCOMPARE(MpMpxCollectionData::getItemDataCounter(), KInitCacheSize);
-    QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mAlbumArtManager->mCacheAlbumArtCount, 1);
-
-    // Verify that:
-    // - rowCount returns 0 when caching is in progress
-    QCOMPARE(mTest->rowCount(QModelIndex()), 0);
-}
-
-/*!
- Tests refreshModel() request with small data size.
- */
-void TestMpCollectionDataModel::testRefreshModelSmallData()
-{
-    mTest->mCollectionData->mCount = 3;
-    mTest->mCollectionData->mContext = ECollectionContextArtistAlbums;
-    mTest->refreshModel();
-    // Verify that:
-    // - It sets correct row count
-    // - It caches all data
-    QCOMPARE(mTest->mRowCount, 3);
-    QCOMPARE(MpMpxCollectionData::getItemDataCounter(), 3);
-    QCOMPARE(mTest->mCachingInProgress, true);
-    QCOMPARE(mTest->mAlbumArtManager->mCacheAlbumArtCount, 1);
-}
-
-/*!
- Tests refreshModel() request with data that has no album art.
- */
-void TestMpCollectionDataModel::testRefreshModelNoAlbumArtUri()
-{
-    mTest->mCollectionData->mCount = 100;
-    mTest->mCollectionData->mItemDataReturn = false;
-    mTest->mCollectionData->mContext = ECollectionContextArtistAlbums;
-    mTest->refreshModel();
-    // Verify that:
-    // - It sets correct row count
-    // - Caching is not in progress
-    QCOMPARE(mTest->mRowCount, 100);
-    QCOMPARE(MpMpxCollectionData::getItemDataCounter(), KInitCacheSize);
-    QCOMPARE(mTest->mCachingInProgress, false);
-    QCOMPARE(mTest->mAlbumArtManager->mCacheAlbumArtCount, 1);
-
-    // Verify that:
-    // - rowCount returns actual data size when caching is not in progress
-    QCOMPARE(mTest->rowCount(QModelIndex()), 100);
 }
 
 /*!
@@ -248,8 +213,8 @@ void TestMpCollectionDataModel::testDataAllSongsNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), QString("Unknown"));
-    QCOMPARE(dataList.at(1), QString("Unknown"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
@@ -257,13 +222,13 @@ void TestMpCollectionDataModel::testDataAllSongsNoData()
 }
 
 /*!
- Tests data() request for ArtistAlbums context.
+ Tests data() request for Albums context.
  */
-void TestMpCollectionDataModel::testDataArtistAlbums()
+void TestMpCollectionDataModel::testDataAlbums()
 {
     mTest->mCollectionData->mCount = 100;
     mTest->mRowCount = 100;
-    mTest->mCollectionData->mContext = ECollectionContextArtistAlbums;
+    mTest->mCollectionData->mContext = ECollectionContextAlbums;
 
     QModelIndex modelIndex = mHelper->indexFor(1);
 
@@ -273,24 +238,21 @@ void TestMpCollectionDataModel::testDataArtistAlbums()
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
     QCOMPARE(dataList.at(0), QString("Title"));
-    // AK - Second data will eventually change to "Album"
     QCOMPARE(dataList.at(1), QString("Artist"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("HbIcon"));
-    HbIcon icon = data.value<HbIcon>();
-    QCOMPARE(icon.iconName(), QString(":/icons/artists"));
+    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
 }
 
 /*!
- Tests data() request for ArtistAlbums context with no data available.
+ Tests data() request for Albums context with no data available.
  */
-void TestMpCollectionDataModel::testDataArtistAlbumsNoData()
+void TestMpCollectionDataModel::testDataAlbumsNoData()
 {
     mTest->mCollectionData->mCount = 100;
     mTest->mRowCount = 100;
-    mTest->mCollectionData->mContext = ECollectionContextArtistAlbums;
+    mTest->mCollectionData->mContext = ECollectionContextAlbums;
     mTest->mCollectionData->mItemDataReturn = false;
 
     QModelIndex modelIndex = mHelper->indexFor(1);
@@ -300,14 +262,12 @@ void TestMpCollectionDataModel::testDataArtistAlbumsNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), QString("Unknown"));
-    QCOMPARE(dataList.at(1), QString("Unknown"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("HbIcon"));
-    HbIcon icon = data.value<HbIcon>();
-    QCOMPARE(icon.iconName(), QString(":/icons/default_album.png"));
+    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
 }
 
 /*!
@@ -350,7 +310,7 @@ void TestMpCollectionDataModel::testDataAlbumSongsNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 1);
-    QCOMPARE(dataList.at(0), QString("Unknown"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
 }
 
 /*!
@@ -368,9 +328,8 @@ void TestMpCollectionDataModel::testDataPlaylists()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 2);
+    QCOMPARE(dataList.count(), 1);
     QCOMPARE(dataList.at(0), QString("Title"));
-    QCOMPARE(dataList.at(1), QString("Count"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
@@ -393,9 +352,8 @@ void TestMpCollectionDataModel::testDataPlaylistsNoData()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), QString("Unknown"));
-    QCOMPARE(dataList.at(1), QString("Count"));
+    QCOMPARE(dataList.count(), 1);
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
 }
 
 /*!
@@ -439,8 +397,8 @@ void TestMpCollectionDataModel::testDataPlaylistSongsNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), QString("Unknown"));
-    QCOMPARE(dataList.at(1), QString("Unknown"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
@@ -480,22 +438,6 @@ void TestMpCollectionDataModel::testUpdateAlbumArt()
 
     disconnect( this, SIGNAL(updateAlbumArt(int)),
         mTest->mAlbumArtManager, SIGNAL(albumArtReady(int)) );
-}
-
-/*!
- Tests albumCacheReady() slot.
- */
-void TestMpCollectionDataModel::testAlbumCacheReady()
-{
-    connect( this, SIGNAL(albumCacheReady()),
-        mTest->mAlbumArtManager, SIGNAL(albumCacheReady()) );
-    mTest->mCachingInProgress = true;
-
-    emit albumCacheReady();
-    QCOMPARE(mTest->mCachingInProgress, false);
-
-    disconnect( this, SIGNAL(albumCacheReady()),
-        mTest->mAlbumArtManager, SIGNAL(albumCacheReady()) );
 }
 
 // End of file

@@ -31,11 +31,13 @@ LIBS += -lestor.dll \
 # Input
 HEADERS += inc/unittest_mpnowplayingwidget.h \
            stub/inc/mpnowplayingbackend.h \
+           stub/inc/hbcolorscheme.h \
            ../../../../inc/mpnowplayingwidget.h \
            ../../inc/mpnowplayingwidget_p.h
                
 SOURCES += src/unittest_mpnowplayingwidget.cpp \
            stub/src/mpnowplayingbackend.cpp \
+           stub/src/hbcolorscheme.cpp \
            ../../src/mpnowplayingwidget.cpp \
            ../../src/mpnowplayingwidget_p.cpp
 

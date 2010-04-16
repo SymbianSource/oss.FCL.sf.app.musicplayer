@@ -28,10 +28,7 @@ INCLUDEPATH += . \
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
      
 LIBS += -lmpxplaybackutility.dll \
-        -lmpxcommon.dll \
-        -lhbcore \
-        -lhbwidgets \
-        -lhbtools
+        -lmpxcommon.dll
         
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
 

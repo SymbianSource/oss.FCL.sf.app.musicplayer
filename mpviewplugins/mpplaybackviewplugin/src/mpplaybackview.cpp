@@ -23,6 +23,8 @@
 #include <hbtoolbar.h>
 #include <hbaction.h>
 #include <hbicon.h>
+#include <QTranslator>
+#include <QLocale>
 
 #include "mpplaybackview.h"
 #include "mpplaybackwidget.h"
@@ -31,6 +33,7 @@
 #include "mpsettingsmanager.h"
 #include "mpcommondefs.h"
 #include "mptrace.h"
+#include "mpequalizerwidget.h"
 
 
 /*!
@@ -54,15 +57,18 @@
  Constructs the playback view.
  */
 MpPlaybackView::MpPlaybackView()
-    : mFrameworkWrapper(0),
-      mPlaybackData(0),
-      mPlaybackWidget(0),
-      mSoftKeyBack(0),
-      mActivated(false),
-      mPlayIcon(0),
-      mPauseIcon(0),
-      mShuffleOnIcon(0),
-      mShuffleOffIcon(0)
+    : mFrameworkWrapper( 0 ),
+      mPlaybackData( 0 ),
+      mPlaybackWidget( 0 ),
+      mEqualizerWidget( new MpEqualizerWidget() ),
+      mSoftKeyBack( 0 ),
+      mActivated( false ),
+      mPlayIcon( 0 ),
+      mPauseIcon( 0 ),
+      mShuffleOnIcon( 0 ),
+      mShuffleOffIcon( 0 ),
+      mMpTranslator( 0 ),
+      mCommonTranslator( 0 )
 {
     TX_LOG
 }
@@ -79,6 +85,9 @@ MpPlaybackView::~MpPlaybackView()
     delete mPauseIcon;
     delete mShuffleOnIcon;
     delete mShuffleOffIcon;
+    delete mEqualizerWidget;
+    delete mMpTranslator;
+    delete mCommonTranslator;
     TX_EXIT
 }
 
@@ -90,28 +99,49 @@ void MpPlaybackView::initializeView()
 {
     TX_ENTRY
 
+    //Load musicplayer and common translators
+    QString lang = QLocale::system().name();
+    QString path = QString( "z:/resource/qt/translations/" );
+    bool translatorLoaded = false;
+
+    mMpTranslator = new QTranslator( this );
+    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
+    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
+    if ( translatorLoaded ) {
+        qApp->installTranslator( mMpTranslator );
+    }
+
+    mCommonTranslator = new QTranslator( this );
+    translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
+    TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
+    if ( translatorLoaded ) {
+        qApp->installTranslator( mCommonTranslator );
+    }
+
     mWindow = mainWindow();
 
-    mSoftKeyBack = new HbAction(Hb::BackAction, this);
-    connect( mSoftKeyBack, SIGNAL(triggered()), this, SLOT(back()) );
+    mSoftKeyBack = new HbAction( Hb::BackAction, this );
+    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
     mFrameworkWrapper = new MpMpxPbFrameworkWrapper();
     mPlaybackData = mFrameworkWrapper->playbackData();
-    connect( mPlaybackData, SIGNAL(playbackStateChanged()),
-             this, SLOT(playbackStateChanged()) );
+    connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
+             this, SLOT( playbackStateChanged() ) );
 
-    mPlaybackWidget = new MpPlaybackWidget(mPlaybackData);
-    connect( mPlaybackWidget, SIGNAL(setPlaybackPosition(int)), mFrameworkWrapper, SLOT( setPosition(int) ) );
+    mPlaybackWidget = new MpPlaybackWidget( mPlaybackData );
+    connect( mPlaybackWidget, SIGNAL( setPlaybackPosition( int ) ), mFrameworkWrapper, SLOT( setPosition( int ) ) );
 
-    setWidget(mPlaybackWidget);
+    setWidget( mPlaybackWidget );
     setupMenu();
     setupToolbar();
 
+    mEqualizerWidget->prepareDialog();
+
     // Observe changes in settings.
-    connect( MpSettingsManager::instance(), SIGNAL(shuffleChanged(bool)),
-             this, SLOT(shuffleChanged(bool)) );
-    connect( MpSettingsManager::instance(), SIGNAL(repeatChanged(bool)),
-             this, SLOT(repeatChanged(bool)) );
+    connect( MpSettingsManager::instance(), SIGNAL( shuffleChanged( bool ) ),
+             this, SLOT( shuffleChanged( bool ) ) );
+    connect( MpSettingsManager::instance(), SIGNAL( repeatChanged( bool ) ),
+             this, SLOT( repeatChanged( bool ) ) );
 
     TX_EXIT
 }
@@ -123,7 +153,7 @@ void MpPlaybackView::activateView()
 {
     TX_ENTRY
     mActivated = true;
-    mWindow->addSoftKeyAction(Hb::SecondarySoftKey, mSoftKeyBack);
+    setNavigationAction( mSoftKeyBack );
     TX_EXIT
 }
 
@@ -133,18 +163,24 @@ void MpPlaybackView::activateView()
 void MpPlaybackView::deactivateView()
 {
     TX_ENTRY
-    mWindow->removeSoftKeyAction(Hb::SecondarySoftKey, mSoftKeyBack);
+    if ( mEqualizerWidget->isActive() ) {
+        mEqualizerWidget->close();
+    }
+
+    menu()->close();
+
+    setNavigationAction( 0 );
     mActivated = false;
     TX_EXIT
 }
 
 /*!
- Slot to be called to activate collection view.
+ Slot to be called to activate settings view.
  */
-void MpPlaybackView::startCollectionView()
+void MpPlaybackView::startSettingsView()
 {
     TX_LOG
-    emit command( MpCommon::ActivateCollectionView );
+    emit command( MpCommon::ActivateSettingsView );
 }
 
 /*!
@@ -174,20 +210,20 @@ void MpPlaybackView::exit()
 /*!
  Slot to handle playback state changed.
  */
-void MpPlaybackView::playbackStateChanged( )
+void MpPlaybackView::playbackStateChanged()
 {
     TX_ENTRY
     switch ( mPlaybackData->playbackState() ) {
         case MpPlaybackData::Playing:
-            TX_LOG_ARGS("MpPlaybackData::Playing")
+            TX_LOG_ARGS( "MpPlaybackData::Playing" )
             mPlayPauseAction->setIcon( *mPauseIcon );
             break;
         case MpPlaybackData::Paused:
-            TX_LOG_ARGS("MpPlaybackData::Paused")
+            TX_LOG_ARGS( "MpPlaybackData::Paused" )
             mPlayPauseAction->setIcon( *mPlayIcon );
             break;
         case MpPlaybackData::Stopped:
-            TX_LOG_ARGS("MpPlaybackData::Paused")
+            TX_LOG_ARGS( "MpPlaybackData::Paused" )
             if ( mViewMode == MpCommon::FetchView ) {
                 back();
             }
@@ -203,12 +239,22 @@ void MpPlaybackView::playbackStateChanged( )
 }
 
 /*!
+ Slot to handle flip action.
+ */
+void MpPlaybackView::flip()
+{
+    TX_ENTRY
+    emit command( MpCommon::ActivateDetailsView );
+    TX_EXIT
+}
+
+/*!
  Slot to handle shuffle toggle.
  */
 void MpPlaybackView::toggleShuffle()
 {
     mFrameworkWrapper->setShuffle( !mShuffle );
-    MpSettingsManager::setShuffle(!mShuffle);
+    MpSettingsManager::setShuffle( !mShuffle );
 }
 
 /*!
@@ -217,7 +263,7 @@ void MpPlaybackView::toggleShuffle()
 void MpPlaybackView::shuffleChanged( bool shuffle )
 {
     mShuffle = shuffle;
-    mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon);
+    mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon );
 }
 
 /*!
@@ -225,17 +271,17 @@ void MpPlaybackView::shuffleChanged( bool shuffle )
  */
 void MpPlaybackView::toggleRepeat()
 {
-    mFrameworkWrapper->setRepeat(!mRepeat);
-    MpSettingsManager::setRepeat(!mRepeat);
+    mFrameworkWrapper->setRepeat( !mRepeat );
+    MpSettingsManager::setRepeat( !mRepeat );
 }
 
 /*!
  Slot to handle /a repeat setting change.
  */
-void MpPlaybackView::repeatChanged(bool repeat)
+void MpPlaybackView::repeatChanged( bool repeat )
 {
     mRepeat = repeat;
-    mRepeatAction->setText( mRepeat ?  tr("Repeat off") : tr("Repeat on"));
+    mRepeatAction->setText( mRepeat ?  hbTrId( "txt_mus_opt_repeat_off" ) : hbTrId( "txt_mus_opt_repeat_on" ) );
 }
 
 /*!
@@ -258,11 +304,12 @@ void MpPlaybackView::setupMenu()
     if ( mViewMode == MpCommon::DefaultView ) {
         mRepeat = MpSettingsManager::repeat();
         HbMenu* myMenu = new HbMenu();
-        connect( myMenu->addAction(tr("Go to music library")), SIGNAL(triggered()), this, SLOT(startCollectionView()) );
-        mRepeatAction = myMenu->addAction( mRepeat ?  tr("Repeat off") : tr("Repeat on"));
-        connect( mRepeatAction , SIGNAL(triggered()), this, SLOT(toggleRepeat()) );
-        connect( myMenu->addAction(tr("Exit")), SIGNAL(triggered()), this, SLOT(exit()) );
-        setMenu(myMenu);
+        connect( myMenu->addAction( hbTrId( "txt_mus_opt_equalizer" ) ), SIGNAL( triggered() ), this, SLOT( showEqualizerDialog() ) );
+        connect( myMenu->addAction( hbTrId( "txt_mus_opt_audio_effects" ) ), SIGNAL( triggered() ), this, SLOT( startSettingsView() ) );
+        mRepeatAction = myMenu->addAction( mRepeat ?  hbTrId( "txt_mus_opt_repeat_off" ) : hbTrId( "txt_mus_opt_repeat_on" ) );
+        connect( mRepeatAction , SIGNAL( triggered() ), this, SLOT( toggleRepeat() ) );
+        connect( myMenu->addAction( hbTrId( "txt_common_opt_exit" ) ), SIGNAL( triggered() ), this, SLOT( exit() ) );
+        setMenu( myMenu );
     }
     TX_EXIT
 }
@@ -274,72 +321,86 @@ void MpPlaybackView::setupToolbar()
 {
     TX_ENTRY
     HbToolBar *toolBar = this->toolBar();
-    toolBar->setOrientation(Qt::Horizontal);
+    toolBar->setOrientation( Qt::Horizontal );
     QActionGroup *actionsGroup = new QActionGroup( toolBar );
 
     if ( mViewMode == MpCommon::DefaultView ) {
-        mShuffleOnIcon = new HbIcon(":/playbackviewicons/shuffle_on.svg");
-        mShuffleOffIcon = new HbIcon( ":/playbackviewicons/shuffle_off.svg");
-        mShuffleAction = new HbAction(actionsGroup);
+        mShuffleOnIcon = new HbIcon( "qtg_mono_shuffle" );
+        mShuffleOffIcon = new HbIcon( "qtg_mono_shuffle_off" );
+        mShuffleAction = new HbAction( actionsGroup );
         mShuffle = MpSettingsManager::shuffle();
-        mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon);
+        mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon );
         mShuffleAction->setCheckable( false );
 
-        connect( mShuffleAction, SIGNAL(triggered(bool)),
-                 this, SLOT(toggleShuffle()) );
+        connect( mShuffleAction, SIGNAL( triggered( bool ) ),
+                 this, SLOT( toggleShuffle() ) );
         toolBar->addAction( mShuffleAction );
 
-        HbAction *action = new HbAction(actionsGroup);
-        action->setIcon( HbIcon( ":/playbackviewicons/prev.svg") );
+        HbAction *action = new HbAction( actionsGroup );
+        action->setIcon( HbIcon( "qtg_mono_previous" ) );
         action->setCheckable( false );
-        connect( action, SIGNAL(triggered(bool)),
-                 mFrameworkWrapper, SLOT(skipBackward()) );
+        connect( action, SIGNAL( triggered( bool ) ),
+                 mFrameworkWrapper, SLOT( skipBackward() ) );
         toolBar->addAction( action );
 
-        mPlayPauseAction = new HbAction(actionsGroup);
-        mPlayIcon = new HbIcon(":/playbackviewicons/play.svg");
-        mPauseIcon = new HbIcon( ":/playbackviewicons/pause.svg" );
+        mPlayPauseAction = new HbAction( actionsGroup );
+        mPlayIcon = new HbIcon( "qtg_mono_play" );
+        mPauseIcon = new HbIcon( "qtg_mono_pause" );
         mPlayPauseAction->setIcon( *mPlayIcon );
         mPlayPauseAction->setCheckable( false );
-        connect( mPlayPauseAction, SIGNAL(triggered(bool)),
-                 mFrameworkWrapper, SLOT(playPause()) );
+        connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
+                 mFrameworkWrapper, SLOT( playPause() ) );
         toolBar->addAction( mPlayPauseAction );
 
-        action = new HbAction(actionsGroup);
-        action->setIcon( HbIcon(":/playbackviewicons/next.svg") );
+        action = new HbAction( actionsGroup );
+        action->setIcon( HbIcon( "qtg_mono_next" ) );
         action->setCheckable( false );
-        connect( action, SIGNAL(triggered(bool)),
-                 mFrameworkWrapper, SLOT(skipForward()) );
+        connect( action, SIGNAL( triggered( bool ) ),
+                 mFrameworkWrapper, SLOT( skipForward() ) );
         toolBar->addAction( action );
 
-        HbIcon icon( ":/playbackviewicons/info.svg" );
-        action = new HbAction(actionsGroup);
+        HbIcon icon( "qtg_mono_info" );
+        action = new HbAction( actionsGroup );
         action->setIcon( icon );
         action->setCheckable( false );
-    /*
-        connect( action, SIGNAL(triggered(bool)),
-                 this, SLOT( flip()) );
-    */
+
+        connect( action, SIGNAL( triggered( bool ) ),
+                 this, SLOT( flip() ) );
+
         toolBar->addAction( action );
     }
     else {
         // Fetch mode
-        HbAction *action = new HbAction(actionsGroup);
-        action->setIcon( HbIcon(":/playbackviewicons/select.png") );
+        HbAction *action = new HbAction( actionsGroup );
+        action->setIcon( HbIcon( "qtg_mono_tick" ) );
         action->setCheckable( false );
-        connect( action, SIGNAL(triggered(bool)),
-                 this, SLOT(handleSongSelected()) );
+        connect( action, SIGNAL( triggered( bool ) ),
+                 this, SLOT( handleSongSelected() ) );
         toolBar->addAction( action );
-    
-        mPlayPauseAction = new HbAction(actionsGroup);
-        mPlayIcon = new HbIcon(":/playbackviewicons/play.svg");
-        mPauseIcon = new HbIcon( ":/playbackviewicons/pause.svg" );
+
+        mPlayPauseAction = new HbAction( actionsGroup );
+        mPlayIcon = new HbIcon( "qtg_mono_play" );
+        mPauseIcon = new HbIcon( "qtg_mono_pause" );
         mPlayPauseAction->setIcon( *mPlayIcon );
         mPlayPauseAction->setCheckable( false );
-        connect( mPlayPauseAction, SIGNAL(triggered(bool)),
-                 mFrameworkWrapper, SLOT(playPause()) );
+        connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
+                 mFrameworkWrapper, SLOT( playPause() ) );
         toolBar->addAction( mPlayPauseAction );
     }
     TX_EXIT
 }
 
+/*!
+ Slot to be called to activate equalizer dialog.
+ */
+void MpPlaybackView::showEqualizerDialog()
+{
+    TX_ENTRY
+
+    if( mEqualizerWidget )
+    {
+        mEqualizerWidget->exec();
+    }
+
+    TX_EXIT
+}

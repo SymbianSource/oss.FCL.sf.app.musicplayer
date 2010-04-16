@@ -58,6 +58,11 @@ public:
     bool isAutoPlaylist();
     bool isAutoPlaylist( int index );
     int itemCount( int index );
+    int containerId();
+    int itemId(int index);
+    void removeItem(int index);
+    bool testCachedItem( int itemId );
+    void insertCachedItem(int index);
 
     void setMpxMedia( const CMPXMedia& entries );
     const CMPXMedia& containerMedia();

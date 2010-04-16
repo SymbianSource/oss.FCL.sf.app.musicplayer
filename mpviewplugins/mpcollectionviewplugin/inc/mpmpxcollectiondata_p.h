@@ -43,6 +43,11 @@ public:
     bool isAutoPlaylist();
     bool isAutoPlaylist( int index );
     int itemCount( int index );
+    int containerId();
+    int itemId(int index);
+    void removeItem(int index);
+    bool testCachedItem( int itemId );
+    void insertCachedItem(int index);
 
     void setMpxMedia( const CMPXMedia& entries );
     const CMPXMedia& containerMedia();
@@ -53,6 +58,11 @@ private:
     bool DoIsAutoPlaylistL();
     bool DoIsAutoPlaylistL( int index );
     int DoGetItemCountL( int index );
+    int DoGetContainerIdL();
+    int DoGetItemIdL( int index );
+    void DoRemoveItemL( int index );
+    bool DoTestCachedItemL( int itemId );
+    
     void SetCollectionContextL();
     void DoSetMpxMediaL( const CMPXMedia& entries );
 
@@ -64,6 +74,8 @@ private:
     CMPXMediaArray          *iMediaArray;           // Not owned
 
     TCollectionContext      iContext;
+    
+    CMPXMedia               *iCachedRemovedItem; //Owned
 
 };
 

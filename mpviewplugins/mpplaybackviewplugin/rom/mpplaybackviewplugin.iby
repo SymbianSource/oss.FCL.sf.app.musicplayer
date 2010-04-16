@@ -22,4 +22,6 @@
 
 ECOM_PLUGIN( mpplaybackviewplugin.dll, mpplaybackviewplugin.rsc )
 
+data=ZSYSTEM\data\nullsound.mp3                nullsound.mp3
+
 #endif //MPPLAYBACKVIEWPLUGIN_IBY

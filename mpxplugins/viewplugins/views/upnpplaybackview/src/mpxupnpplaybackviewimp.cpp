@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Implementation of Upnp Playback view
-*  Version     : %version: e003sa33#35.1.3.1.5 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: e003sa33#35.1.3.1.6 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -263,7 +263,7 @@ void CMPXUPnPPlaybackViewImp::DoHandlePlaybackMessageL(
                 {
 		        MPX_DEBUG1( "HandlePlaybackMessageL - EStateChanged" );
                 UpdateMiddleSoftKeyDisplayL();
-                UpdateToolbar();
+                UpdateToolbarL();
                 break;
                 }
             default:
@@ -774,7 +774,7 @@ void CMPXUPnPPlaybackViewImp::DynInitToolbarL(TInt aResourceId, CAknToolbar* aTo
     if ( aResourceId == R_MPX_PBV_TOUCH_TOOLBAR )
         {
         // Put initializations here to take effect before toolbar is shown
-        UpdateToolbar();
+        UpdateToolbarL();
         aToolbar->UpdateBackground();
         }
     }

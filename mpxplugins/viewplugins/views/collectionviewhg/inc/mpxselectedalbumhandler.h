@@ -31,7 +31,7 @@ public:
     *  @since S60 5.2
     *  @param aMedia Album to be stored
     */
-    virtual void SaveSelectedAlbum (CMPXMedia &aMedia) = 0;
+    virtual void SaveSelectedAlbumL (CMPXMedia &aMedia) = 0;
 
     /**
     *  Restores selected album.

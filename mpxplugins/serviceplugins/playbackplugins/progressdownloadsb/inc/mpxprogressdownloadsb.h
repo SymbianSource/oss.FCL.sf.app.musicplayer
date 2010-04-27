@@ -208,7 +208,7 @@ NONSHARABLE_CLASS(CMPXProgressDownloadSB) : public CMPXPlaybackPlugin,
 
         void ResetEnhancedMediaClient();
 
-        void MoveDownloadedFileToMusicFolderL();
+        void MoveDownloadedFileToMusicFolder();
 
         /**
         *  Consumes the rights for the current media according

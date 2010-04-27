@@ -237,7 +237,7 @@ void CMPXCommonContainerMediaHelper::HandleCollectionMediaL(
                         // Update the list box item
                         *media = aMedia;
                         // Refresh the list box item
-                        iCommonContainer->DrawLbxItem( index );
+                        iCommonContainer->DrawLbxItemL( index );
                         break;
                         }
                     }

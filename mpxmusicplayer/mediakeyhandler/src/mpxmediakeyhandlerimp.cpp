@@ -472,7 +472,7 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                         	}
                         }
 
-					if( iMuted && aValue > 0 ) // unmute
+					if( !iMuted && aValue > 0 ) // unmute
 			            {
 			            iMuted = EFalse;
 			            iCurrentVol = aValue;
@@ -1107,15 +1107,18 @@ void CMPXMediaKeyHandlerImp::MrccatoCommand(
         case ERemConCoreApiVolumeDown:
             {
             iTimer->Cancel();
-            
-            MMPXPlaybackUtility* pbUtil = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
-            CleanupClosePushL(*pbUtil);
-                
+            MMPXPlaybackUtility* pbUtil( NULL );
+            MPX_TRAPD( err, pbUtil = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer ));
+            if( err != KErrNone )
+                {
+                MPX_DEBUG2( "CMPXMediaKeyHandlerImp::MrccatoCommand ERemConCoreApiVolumeDown leave err%d", err );
+                break;
+                }
             TMPXPlaybackState playerState( EPbStateNotInitialised );
-            playerState = pbUtil->StateL();
-                    
-            CleanupStack::PopAndDestroy(pbUtil);
-            
+            TRAP_IGNORE( playerState = pbUtil->StateL());
+            pbUtil->Close();
+            pbUtil = NULL;
+
             if( playerState == EPbStatePlaying || IsAppForeground() )
                 {
                 iIncreaseVol = (aOperationId == ERemConCoreApiVolumeUp ? ETrue: EFalse);

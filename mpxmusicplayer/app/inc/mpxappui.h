@@ -307,7 +307,7 @@ private:
      *
      * @param aParameter AIW parameter passed in by other applications
      */
-    TBool IsBrowserClosed(const TDesC8& aParameter);
+    TBool IsBrowserClosedL(const TDesC8& aParameter);
 
     /**
      * Brings the browser to the foreground.
@@ -658,17 +658,17 @@ private:
      *
      *  @param aVolume volume value.
      */
-    void SetVolume( const TInt aVolume );
+    void SetVolumeL( const TInt aVolume );
 
     /**
      *  Mutes the playback volume.
      */
-    void MuteVolume();
+    void MuteVolumeL();
 
     /**
      *  Unmutes the playback volume.
      */
-    void UnMuteVolume();
+    void UnMuteVolumeL();
 
     /**
      *  Translates Playback commands to MPX commands
@@ -681,7 +681,7 @@ private:
     *
     *  @param music player need memory
     */
-    void CheckAvailableMemory( TInt aNeedMemory );
+    void CheckAvailableMemoryL( TInt aNeedMemory );
 
 #ifdef FF_OOM_MONITOR2_COMPONENT
     /**

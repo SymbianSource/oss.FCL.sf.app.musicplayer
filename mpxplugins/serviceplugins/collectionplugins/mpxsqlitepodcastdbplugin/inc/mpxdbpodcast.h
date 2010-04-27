@@ -148,13 +148,16 @@ class CMPXDbPodcast :
         * @param aEpisodeId the ID of the episode to be removed
         * @param aUriArray on return contains the URI of the deleted episode
         * @param aItemChangedMessages on return contains changed messages
+        * @param IsAdd denotes whether DeleteEpisodeL is called as part of 
+        * adding an episode or deleting an episode ,if called as part of adding
+        * pass ETrue else if part of deletion pass EFalse.
         * @param aDeleteRecord indicates whether the client has explictly requested
         *                to delete the records from the database. If ETrue, records
         *                associated with the media will be deleted from the database;
         *                if EFalse, the record will be marked as deleted only.
         */
         void DeleteEpisodeL(TUint32 aEpisodeId, CDesCArray& aUriArray,
-            CMPXMessageArray& aItemChangedMessages, TBool aDeleteRecord);
+            CMPXMessageArray& aItemChangedMessages, TBool IsAdd, TBool aDeleteRecord);
 
         /**
         * Remove episodes matching a category from the Podcast table
@@ -618,6 +621,8 @@ class CMPXDbPodcast :
         * @param aRecordset episode record to be removed
         * @param aUriArray, on return will be filled with all the paths that were removed
         * @param aItemChangedMessages: change events as result of the episode removal
+        * @param IsAdd denotes whether DoDeleteEpisodeL is called as part of 
+        * adding an episode or deleting an episode.
         * @param aDeleteRecord: indicates whether the client has explictly requested
         *                to delete the records from the database. If ETrue, records
         *                associated with the media will be deleted from the database;
@@ -626,7 +631,7 @@ class CMPXDbPodcast :
         * @return Error code.
         */
         void DoDeleteEpisodeL(RSqlStatement& aRecordset, CDesCArray& aUriArray,
-            CMPXMessageArray& aItemChangedMessages, TBool aDeleteRecord = EFalse);
+            CMPXMessageArray& aItemChangedMessages, TBool IsAdd, TBool aDeleteRecord = EFalse);
 
         /**
         * Constructs the fields and corresponding values to be written into the Podcast

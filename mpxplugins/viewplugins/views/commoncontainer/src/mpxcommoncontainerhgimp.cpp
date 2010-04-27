@@ -429,9 +429,9 @@ void CMPXCommonContainerHgImp::SetLbxEmptyTextL( const TDesC& aText )
 // Draws a list box item
 // -----------------------------------------------------------------------------
 //
-void CMPXCommonContainerHgImp::DrawLbxItem( TInt aIndex )
+void CMPXCommonContainerHgImp::DrawLbxItemL( TInt aIndex )
     {
-    MPX_DEBUG2( "CMPXCommonContainerHgImp::DrawLbxItem (aIndex=%d)", aIndex );
+    MPX_DEBUG2( "CMPXCommonContainerHgImp::DrawLbxItemL (aIndex=%d)", aIndex );
     if ( iListWidget && iBottomIndex > 0 )
         {
         CHgItem* item = &iListWidget->ItemL(aIndex);
@@ -521,7 +521,7 @@ void CMPXCommonContainerHgImp::HandleLbxItemAdditionL()
             	}
     	    }
         SetDefaultIconL();
-	    SetScrollbarType();
+	    SetScrollbarTypeL();
     	}
     }
 
@@ -706,7 +706,7 @@ void CMPXCommonContainerHgImp::HandleMarkableListProcessCommandL(
 // Custom handling of menu pane for markable lists
 // ---------------------------------------------------------------------------
 //
-void CMPXCommonContainerHgImp::HandleMarkableListDynInitMenuPane(
+void CMPXCommonContainerHgImp::HandleMarkableListDynInitMenuPaneL(
     TInt aResourceId,
     CEikMenuPane* aMenuPane )
     {
@@ -899,7 +899,7 @@ void CMPXCommonContainerHgImp::HandleResourceChange( TInt aType )
                 {
             	iListWidget->InitScreenL(clientRect);
                 }
-            SetScrollbarType();
+            SetScrollbarTypeL();
             }
         );
     }
@@ -1003,20 +1003,24 @@ void CMPXCommonContainerHgImp::Request(
         iThumbnailReqMap[ i ] = EFalse;
         }
 
-
-    if ( aDirection == EHgBufferReset  || aDirection == EHgBufferScrollDown || aDirection == EHgBufferScrollUp)
-        {
-        // For index range in visible-area
-        ProvideDataIntersectL(aBufferStart, aBufferEnd);
-        // For index range elsewhere
-        ProvideDataDifferenceL(aBufferStart, aBufferEnd);
-       }
-    else
-        {
-        ProvideDataL(aBufferStart, aBufferEnd);
-        }
-
-	//RefreshL(aBufferStart);
+    MPX_TRAPD( err,
+            if ( aDirection == EHgBufferReset || aDirection == EHgBufferScrollDown || aDirection == EHgBufferScrollUp)
+                {
+                // For index range in visible-area
+                ProvideDataIntersectL(aBufferStart, aBufferEnd);
+                // For index range elsewhere
+                ProvideDataDifferenceL(aBufferStart, aBufferEnd);
+                }
+            else
+                {
+                ProvideDataL(aBufferStart, aBufferEnd);
+                } );
+    
+    if( err != KErrNone )
+    	{
+        MPX_DEBUG2( "CMPXCommonContainerHgImp::Request leave err = %d", err );
+    	}
+	//Refresh(aBufferStart);
     // When in main collection view, list can be refresh
     // without waiting on thumbnails since this list doesn't
     // require thumbnails.
@@ -1230,15 +1234,28 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
 
     if ( aError == KErrNone && ret )
         {
+            CMPXMedia* currentMedia( NULL );
             const CMPXMediaArray& mediaArray = iListBoxArray->MediaArray();
-            CMPXMedia* currentMedia( mediaArray.AtL( index ) );
+            MPX_TRAPD( err, currentMedia = mediaArray.AtL( index ) );
+            if( err != KErrNone )
+            	{
+                __ASSERT_DEBUG( EFalse, User::Panic( _L( "CMPXCommonContainerHgImp::ThumbnailReady()" ), err ) );
+                return;
+            	}
+            
             if ( currentMedia->IsSupported( KMPXMediaGeneralId ) )
                 {
                 CFbsBitmap* bmap = aThumbnail.DetachBitmap();
                 if ( bmap )
                     {
-                    CGulIcon* icon = CGulIcon::NewL(bmap, NULL);
-
+					CGulIcon* icon( NULL );
+					MPX_TRAP( err,  icon = CGulIcon::NewL( bmap, NULL ) );
+					if( err != KErrNone )
+						{
+						__ASSERT_DEBUG( EFalse, User::Panic( _L( "CMPXCommonContainerHgImp::ThumbnailReady()" ), err ) );
+						return;
+						}
+					
                     if ( iScrollerWithTitle && !iTitleSet )
                         {
                         iScrollerWithTitle->TitleItem().SetIcon(icon);
@@ -1250,9 +1267,13 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
                         }
                     else
                         {
-                        iListWidget->ItemL(index).SetIcon(icon);
+                        MPX_TRAPD( err, iListWidget->ItemL(index).SetIcon(icon); )
+                        if( err != KErrNone )
+                        	{
+                            MPX_DEBUG2( "CMPXCommonContainerHgImp::ThumbnailReady--iListWidget->ItemL(index).SetIcon(icon) leave err%d", err);
+                        	}
                         iThumbnailReqMap[index] = ETrue;
-                        RefreshL(index);
+                        Refresh( index );
                         }
                     }
 				}
@@ -1267,21 +1288,22 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
 				TInt index = iAlbumArtRequest->iIndex;
 
 				const TDesC&   albumArtUri = *(iAlbumArtRequest->iAlbumArtUri);
-
+				TRAP_IGNORE
+				(
 				CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( albumArtUri, KMPXAlbumMimeType );
-
 				delete iAlbumArtRequest->iAlbumArtUri;
 				delete iAlbumArtRequest;
 				// Using negative index as priority will ensure that thumbnail requests
 				// are processed in the order they were requested.
 				TInt ret = NULL;
 				TInt reqId;
-				TRAPD(err, reqId = (TInt) iThumbnailManager->GetThumbnailL( *source, (TAny*)ret, -index ));
+				MPX_TRAP(err, reqId = (TInt) iThumbnailManager->GetThumbnailL( *source, (TAny*)ret, -index ));
 				if ( err == KErrNone)
 					{
 					iThumbnailReqHashMap.InsertL( reqId, index );
 					}
 				CleanupStack::PopAndDestroy( source );
+				);
 				}
 			 else
 				{
@@ -1302,7 +1324,8 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
 			{
 			return;
 			}
-
+		TRAP_IGNORE
+		(
 		//no albumart supported
 		SetDefaultIconL(index);
         if ( iScrollerWithTitle && !iTitleSet )
@@ -1315,9 +1338,10 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
         else
             {
             iThumbnailReqMap[index] = ETrue;
-            RefreshL(index);
+            Refresh(index);
             }
-    	}
+        );
+        }
 
     }
 
@@ -1338,7 +1362,7 @@ void CMPXCommonContainerHgImp::RefreshNoThumbnailL(TInt aIndex)
         }
     else
         {
-        RefreshL(aIndex);
+        Refresh(aIndex);
         }
     }
 // ---------------------------------------------------------------------------
@@ -1347,7 +1371,7 @@ void CMPXCommonContainerHgImp::RefreshNoThumbnailL(TInt aIndex)
 // avoid too many redraws. In some cases, multiple refresh is unavoidable.
 // ---------------------------------------------------------------------------
 //
-void CMPXCommonContainerHgImp::RefreshL(TInt aIndex)
+void CMPXCommonContainerHgImp::Refresh(TInt aIndex)
     {
     MPX_FUNC( "CMPXCommonContainerHgImp::Refresh" );
 
@@ -2428,7 +2452,7 @@ TTypeUid::Ptr CMPXCommonContainerHgImp::MopSupplyObject( TTypeUid aId )
 // CMPXCommonContainerHgImp::SetScrollbarType
 // -----------------------------------------------------------------------------
 //
-void CMPXCommonContainerHgImp::SetScrollbarType()
+void CMPXCommonContainerHgImp::SetScrollbarTypeL()
     {
     MPX_FUNC( "CMPXCommonContainerHgImp::SetScrollbarType" );
 

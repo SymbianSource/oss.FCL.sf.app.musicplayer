@@ -124,12 +124,13 @@ class CMPXDbHandler :
         * @return playlist Id of the playlist
         */
         TUint32 AddSongToPlaylistL(const CMPXMedia& aMedia);
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED        
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Add an abstractalbum to the collection
         * @param aMedia abstractalbum media object with URI of the abstractalbum.
+        * @param aMessageArray change event message to notify client of the changes
         * @return abstractalbum Id of the abstractalbum created
-        */  
+        */
         TUint32 AddAbstractAlbumL(const CMPXMedia& aMedia, CMPXMessageArray* aMessageArray=NULL);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
@@ -142,19 +143,30 @@ class CMPXDbHandler :
         */
         CMPXDbActiveTask::TChangeVisibility UpdateSongL(const CMPXMedia& aMedia,
             CMPXMessageArray& aItemChangedMessages);
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED        
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
-        * Update songs info for songs associated with abstractalbum
+        * Update abstractalbum info to AbstractAlbum table and Songs associated with abstractalbum
         *           in the music collection database
-        * @param aMedia songDetails object  which contains file path,
+        * @param aMedia media object         
+        * @param aItemChangedMessages a list of change events as a result of the
+        *           song update
+        * @return ETrue if UI visible change else EFalse
+        */
+        CMPXDbActiveTask::TChangeVisibility UpdateAbstractAlbumL(const CMPXMedia& aMedia,
+            CMPXMessageArray& aItemChangedMessages);
+
+        /**
+        * Update all songs which associate with AbstractAlbum to new AbstractAlbum info 
+        * in the collection
+        * @param aMedia media object  which contains file path,
         *           artist, composer, name(title), track, etc...
         * @param aItemChangedMessages a list of change events as a result of the
         *           song update
         * @return ETrue if UI visible change else EFalse
-        */       
-        CMPXDbActiveTask::TChangeVisibility UpdateAbstractAlbumSongsL(const CMPXMedia& aMedia,
+        */
+        CMPXDbActiveTask::TChangeVisibility UpdateSongsAbstractAlbumInfoL(const CMPXMedia& aMedia,
             CMPXMessageArray& aItemChangedMessages);
-#endif // ABSTRACTAUDIOALBUM_INCLUDED      
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Update playlist info in the music collection database
         * @param aMedia playlist details object which contains file path,
@@ -241,15 +253,16 @@ class CMPXDbHandler :
             CMPXMessageArray& aItemChangedMessages);
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
-        * Remove a abstractalbum This will remove all the songs from the abstractalbum
+        * Remove a abstractalbum, remove entry from AbstractAlbum table, 
+        * Thumbnail table, corresponding alb from file system
         * @param aAbstractAlbumId ID of the abstractalbum to remove
-        * @param aUriArray a descriptor array to contain the URI of the deleted file
         * @param aItemChangedMessages a list of change events as a result of the
         *        abstractalbum removal
+        * @param aFileDeleted indicate if alb file already deleted from file system
         */
-        void RemoveAbstractAlbumL(TUint32 aAbstractAlbumId, CDesCArray& aUriArray,
-            CMPXMessageArray& aItemChangedMessages);
-#endif // ABSTRACTAUDIOALBUM_INCLUDED         
+        void RemoveAbstractAlbumL(TUint32 aAbstractAlbumId,
+            CMPXMessageArray& aItemChangedMessages, TBool aFileDeleted); 
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
         /**
         * Remove a song from the specified playlist.
@@ -878,17 +891,8 @@ class CMPXDbHandler :
         */
         void DoRemovePlaylistL(TUint32 aPlaylistId, CDesCArray& aUriArray,
             CMPXMessageArray& aItemChangedMessages);
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED        
-        /**
-        * Deletes a specified abstractalbum.
-        * @param aAbstractAlbumId the abstractalbum to be deleted.
-        * @param aUriArray on return contains the URIs of the items deleted.
-        * @param aItemChangedMessages on return contains changed messages for all
-        *        affected items
-        */
-        void DoRemoveAbstractAlbumL(TUint32 aAbstractalbumId, CDesCArray& aUriArray,
-            CMPXMessageArray& aItemChangedMessages);
-#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
+
         /**
         * Deletes a song from a playlist.
         * @param aPlaylistId identifies the playlist.
@@ -900,6 +904,22 @@ class CMPXDbHandler :
         */
         void DoRemoveSongFromPlaylistL(TUint32 aPlaylistId, const TMPXItemId& aSongId,
             TInt aOrdinal, CMPXMessageArray& aItemChangedMessages);
+
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED  
+        /**
+        * Remove all abstractalbum items with no songs associated,
+        * TN and .alb files also removed.
+        *
+        */
+        void RemoveAbstractAlbumsWithNoSongL();
+        
+          /**
+        /* When refresh library, Remove .alb entry from AbstractAlnum table, TN table if .alb files deleted 
+        /* from file manager 
+        */
+        void AbstractAlbumCleanUpL();
+       
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
         /**
         * Deletes all song records marked as deleted.
@@ -1008,10 +1028,11 @@ class CMPXDbHandler :
         * @see MMPXDbMusicObserver
         */
         virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory,
-            const TDesC& aName, TInt aDriveId,
+            const TDesC& aName,
+            TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist,
-            const TDesC& aAlbumArtist=KNullDesC,
-            const TDesC& aGenre=KNullDesC);
+            const TDesC& aUri,
+            const TDesC& aAlbumArtist=KNullDesC);
 #else
 
         /**
@@ -1045,7 +1066,7 @@ class CMPXDbHandler :
         * @see MMPXDbMusicObserver
         */
         virtual void HandlePlaybackTimeModifiedL(CMPXMessageArray& aItemChangedMessages);
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED      
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * @see MMPXDbMusicObserver
         */

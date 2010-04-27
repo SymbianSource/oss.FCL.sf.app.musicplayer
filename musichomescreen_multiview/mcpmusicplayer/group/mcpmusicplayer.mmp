@@ -63,4 +63,6 @@ LIBRARY                 fbscli.lib
 LIBRARY                 aknskins.lib
 LIBRARY                 aknicon.lib
 LIBRARY                 mpxcollectionutility.lib
+LIBRARY                 mpxharvesterutility.lib
+
 //  End of File

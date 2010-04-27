@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  MPX common playback view implementation
-*  Version     : %version: da1mmcf#41.1.6.1.1.1.12 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: e003sa33#41.1.6.1.1.1.13 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -120,7 +120,7 @@ protected:
      *
      * @param aPlaybackState Current playback state.
      */
-    IMPORT_C virtual void UpdatePlaybackState(
+    IMPORT_C virtual void UpdatePlaybackStateL(
         TMPXPlaybackState aPlaybackState );
 
     /**
@@ -292,7 +292,7 @@ protected:
     /**
      * Checks if UPnP AP is defined
      */
-    IMPORT_C virtual TBool IsUpnpVisible();
+    IMPORT_C virtual TBool IsUpnpVisibleL();
 
     /**
      * Displays the available players in the Play via submenu
@@ -612,7 +612,7 @@ protected:
     /**
      * Updates the middle (play/pause) toolbar control key icon based on playback state
      */
-    IMPORT_C void UpdateToolbar();
+    IMPORT_C void UpdateToolbarL();
   
   	/** 
 	 * Launch Metadata Dialog to show the file details

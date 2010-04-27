@@ -37,9 +37,6 @@ _LIT( KImageFileType, "image/jpeg" );
 
 // CONSTANTS
 
-
-
-
 // ============================ MEMBER FUNCTIONS ==============================
 
 // ----------------------------------------------------------------------------
@@ -48,11 +45,11 @@ _LIT( KImageFileType, "image/jpeg" );
 //
 CMPXDbAbstractAlbum* CMPXDbAbstractAlbum::NewL(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory)
+    TMPXGeneralCategory aCategory, RFs& aFs)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::NewL");
 
-    CMPXDbAbstractAlbum* self = CMPXDbAbstractAlbum::NewLC(aDbManager, aCategory);
+    CMPXDbAbstractAlbum* self = CMPXDbAbstractAlbum::NewLC(aDbManager, aCategory, aFs);
     CleanupStack::Pop(self);
     return self;
     }
@@ -63,11 +60,11 @@ CMPXDbAbstractAlbum* CMPXDbAbstractAlbum::NewL(
 //
 CMPXDbAbstractAlbum* CMPXDbAbstractAlbum::NewLC(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory)
+    TMPXGeneralCategory aCategory, RFs& aFs)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::NewLC");
 
-    CMPXDbAbstractAlbum* self = new (ELeave) CMPXDbAbstractAlbum(aDbManager, aCategory);
+    CMPXDbAbstractAlbum* self = new (ELeave) CMPXDbAbstractAlbum(aDbManager, aCategory, aFs);
     CleanupStack::PushL(self);
     self->ConstructL();
     return self;
@@ -103,9 +100,9 @@ TInt CMPXDbAbstractAlbum::GetDriveIdL(
 // ----------------------------------------------------------------------------
 //
 TUint32 CMPXDbAbstractAlbum::AddItemL(
+    const TDesC& aUri,
     const TDesC& aName,
     const TDesC& aAlbumArtist,
-    const TDesC& aGenre,
     TInt aDriveId,
     TBool& aNewRecord,
     TBool aCaseSensitive)
@@ -113,19 +110,21 @@ TUint32 CMPXDbAbstractAlbum::AddItemL(
     MPX_FUNC("CMPXDbAbstractAlbum::AddItemL");
 
     TUint32 rowId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), EMPXAbstractAlbum,
-        aName, aCaseSensitive));
-  
+        aUri, aCaseSensitive));
+    aNewRecord = !CategoryItemExistsL(aDriveId, rowId);
+
     if ( aNewRecord )
         {
+        HBufC* uri = MPXDbCommonUtil::ProcessSingleQuotesLC(aUri);
         HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(aName);
         HBufC* albumartist = MPXDbCommonUtil::ProcessSingleQuotesLC(aAlbumArtist);
-        HBufC* genre = MPXDbCommonUtil::ProcessSingleQuotesLC(aGenre);
-        
-        iDbManager.ExecuteQueryL(aDriveId, KQueryAbstractAlbumInsert, rowId, name, albumartist, genre, 0, MPXDbCommonUtil::GetVolIdMatchDriveIdL(iDbManager.Fs(), aDriveId));
-        CleanupStack::PopAndDestroy(3, name);        
+
+        iDbManager.ExecuteQueryL(aDriveId, KQueryAbstractAlbumInsert, rowId, uri, name, albumartist, 0, MPXDbCommonUtil::GetVolIdMatchDriveIdL(iDbManager.Fs(), aDriveId));
+        CleanupStack::PopAndDestroy(3, uri);
         }
     else
         {
+        MPX_DEBUG1("CMPXDbAbstractAlbum::AddItemL, increase song count for abstractalbum");
         // increment the number of songs for the category
         HBufC* query = PreProcessStringLC(KQueryCategoryIncrementSongCount);
         iDbManager.ExecuteQueryL(aDriveId, *query, rowId);
@@ -135,7 +134,36 @@ TUint32 CMPXDbAbstractAlbum::AddItemL(
     return rowId;
     }
 
+// ----------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::AddUpdatedItemL
+// ----------------------------------------------------------------------------
+//
+TUint32 CMPXDbAbstractAlbum::AddUpdatedItemL(TUint32 aOldId, const TDesC& newUri)
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::AddUpdatedItemL");
+    iRenameTN = ETrue;
+    
+    //get the existing item based on aOldId
+    HBufC* query = NULL;
+    query = PreProcessStringLC(KQueryCategoryItem);
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query, aOldId));
+    CleanupStack::PopAndDestroy(query);
+    
+    CleanupClosePushL(recordset);
+    TBool newRecord(ETrue);
+    if (recordset.Next() != KSqlAtRow)
+        {
+        User::Leave(KErrNotFound);
+        }
+    //save the existing entry fields values for renaming purpose
+    const TDesC& name(MPXDbCommonUtil::GetColumnTextL (recordset, EAbstractAlbumName));
+    const TDesC& albumartist(MPXDbCommonUtil::GetColumnTextL (recordset, EAbstractAlbumArtist));
 
+    TUint32 itemId = AddItemL(newUri, name, albumartist, GetDriveIdL(aOldId), newRecord, EFalse);
+    CleanupStack::PopAndDestroy(&recordset);
+
+    return itemId;
+    }
 
 // ----------------------------------------------------------------------------
 // CMPXDbAbstractAlbum::DecrementSongsForCategoryL
@@ -151,8 +179,7 @@ void CMPXDbAbstractAlbum::DecrementSongsForCategoryL(
     MPX_FUNC("CMPXDbAbstractAlbum::DecrementSongsForCategoryL");
     
     TInt songCount = GetSongsCountL(aDriveId, aId);
-       // if just one song uses this category. Use <= just in case
-       //while MTP connection, just decrease songCount in DB, do not do deletion.
+    //while MTP connection, just decrease songCount in DB, do not do deletion.
     if ( songCount > 0 )
         {
         aItemExist = ETrue;
@@ -162,74 +189,91 @@ void CMPXDbAbstractAlbum::DecrementSongsForCategoryL(
         CleanupStack::PopAndDestroy(query);
         songCount--;
         }
-    
-    if ((songCount == 0) && !aMtpInUse)
+    if (songCount == 0)
         {
-        HBufC* uri = DeleteAbstractAlbumL(aId, aDriveId);
-        MPX_DEBUG1("CMPXDbAbstractAlbum::DeleteAbstractAlbumL,implicitly delete AbstractAlbum Object when it has 0 references");  
-        aItemExist = EFalse;
-        if (aItemChangedMessages)
-            {
-            // add the item changed message
-            MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemDeleted,
-                EMPXAbstractAlbum, KDBPluginUid);   
-            }
-        delete uri;
-        }
+        //get uri
+        HBufC* uri = GetUriL(aId);
+        CleanupStack::PushL(uri);
+            
+        if (!aMtpInUse)
+	        {       
+	        DeleteAbstractAlbumEntryL(aId, aDriveId);
+	        MPX_DEBUG1("CMPXDbAbstractAlbum::DecrementSongsForCategoryL,implicitly delete AbstractAlbum Object when it has 0 references");
+	        aItemExist = EFalse;
+	        if (aItemChangedMessages)
+	            {
+	            // add the item changed message
+	            MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemDeleted,
+	                EMPXAbstractAlbum, KDBPluginUid);
+	            }
+	        //delete .alb file from file system                
+	        TInt err = BaflUtils::DeleteFile(iFs, *uri);                       
+	        if(KErrNone != err)
+	            {
+	            MPX_DEBUG2("CMPXDbAbstractAlbum::DecrementSongsForCategoryL,File not deleted from file system with err=%d", err);
+	            }   
+	        }
+        if(!iRenameTN)
+	        {
+	        HandleTNL(*uri);
+	        }   
+        CleanupStack::PopAndDestroy(uri);
+        }  
     }
 
-
 // ----------------------------------------------------------------------------
-// CMPXDbAbstractAlbum::DeleteAbstractAlbumL
+// CMPXDbAbstractAlbum::RemoveAbstractAlbumL
 // ----------------------------------------------------------------------------
 //
-HBufC* CMPXDbAbstractAlbum::DeleteAbstractAlbumL(
-    TUint32 aAbstractAlbumId, TInt aDriveId)
+void CMPXDbAbstractAlbum::RemoveAbstractAlbumL(TUint32 aAbstractAlbumId, 
+    CMPXMessageArray& aItemChangedMessages, TBool aFileDeleted)
     {
-    MPX_FUNC("CMPXDbAbstractAlbum::DeleteAbstractAlbumL");
-
-    //before delete category, get the abstract album path
-    HBufC* uri = GetNameL(aAbstractAlbumId);
-    // delete the category
-    if (uri)
-        {
-        CleanupStack::PushL(uri);
-         
-    if (aDriveId)
-        DeleteCategoryL(aAbstractAlbumId, aDriveId);
-    else
-        {
-        TInt drive = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(),
-            ExecuteIntQueryL(KCriterionCategoryVolumeId, aAbstractAlbumId));
-        DeleteCategoryL(aAbstractAlbumId, drive);
-        }
-//delete abstract album .alb from TN table
-#ifdef RD_MPX_TNM_INTEGRATION
-        // remove from thumbnail database table
-        CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
-                *uri, KImageFileType );
-        iTNManager->DeleteThumbnails( *source );
-        CleanupStack::PopAndDestroy( source );
-#endif //RD_MPX_TNM_INTEGRATION
-
-       
-        //delete abstract album .alb file from file system
-        RFs rFs;
-        User::LeaveIfError( rFs.Connect() );
-        CleanupClosePushL( rFs );
-
-        TInt err = BaflUtils::DeleteFile(rFs, *uri);
+    MPX_FUNC("CMPXDbAbstractAlbum::RemoveAbstractAlbumL");
+    HBufC* uri = GetUriL(aAbstractAlbumId);
+    CleanupStack::PushL(uri);
+    
+    DeleteAbstractAlbumEntryL(aAbstractAlbumId);
+    HandleTNL(*uri);
+    if (!aFileDeleted)
+        {             
+        TInt err = BaflUtils::DeleteFile(iFs, *uri);                       
         if(KErrNone != err)
             {
-            MPX_DEBUG2("CMPXDbAbstractAlbum::DeleteAbstractAlbumL,File not deleted from file system with err=%d", err);
-            }
-
-        CleanupStack::PopAndDestroy( &rFs );
-        }
-
-    CleanupStack::Pop(uri);
-    return uri;
+            MPX_DEBUG2("CMPXDbAbstractAlbum::RemoveAbstractAlbumL,File not deleted from file system with err=%d", err);
+            }   
+        }   
+    MPXDbCommonUtil::AddItemChangedMessageL(aItemChangedMessages, aAbstractAlbumId, EMPXItemDeleted, EMPXAbstractAlbum, KDBPluginUid);            
+    CleanupStack::PopAndDestroy(uri);
     }
+
+
+// ----------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::HandleTNL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAbstractAlbum::HandleTNL( const TDesC& aOldPath,
+        const TDesC& aNewPath, TInt aPriority )
+  {
+  MPX_FUNC("CMPXDbAbstractAlbum::HandleTNL");
+
+  if (aNewPath.Compare(KNullDesC)==0 && aOldPath.Compare(KNullDesC)!=0)
+      {         
+      // remove from thumbnail database table
+      MPX_DEBUG1("CMPXDbAbstractAlbum::HandleTNL, delete TN");  
+      CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
+               aOldPath, KImageFileType );
+      iTNManager->DeleteThumbnails( *source );
+      CleanupStack::PopAndDestroy( source );
+      }
+   else if (aNewPath.Compare(KNullDesC)!=0)
+      {
+      //rename thumbnail
+      MPX_DEBUG1("CMPXDbAbstractAlbum::HandleTNL, rename TN");
+      iTNManager->RenameThumbnailsL( aOldPath,  aNewPath, aPriority );
+      //after rename, reset flag
+      iRenameTN = EFalse;
+      }
+ }
 
 
 // ----------------------------------------------------------------------------
@@ -262,11 +306,33 @@ void CMPXDbAbstractAlbum::UpdateItemL(
         MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
                 EMPXAbstractAlbum, KDBPluginUid, ETrue, 0 );
         }
-
     CleanupStack::PopAndDestroy(setStr);
     CleanupStack::PopAndDestroy(values);
     CleanupStack::PopAndDestroy(fields);
     }
+
+
+// ----------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::GetUriL
+// ----------------------------------------------------------------------------
+//
+HBufC* CMPXDbAbstractAlbum::GetUriL(
+    TUint32 aId)
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::GetUriL");
+
+    RSqlStatement recordset(GetCategoryRecordL(aId));
+    CleanupClosePushL(recordset);
+
+    if (recordset.Next() != KSqlAtRow)
+        {
+        User::LeaveIfError(KErrNotFound);
+        }
+    HBufC* uri = MPXDbCommonUtil::GetColumnTextL(recordset, EAbstractAlbumUri).AllocL();
+    CleanupStack::PopAndDestroy(&recordset);
+    return uri;
+    }
+
 
 // ----------------------------------------------------------------------------
 // CMPXDbAbstractAlbum::UpdateMediaL
@@ -277,41 +343,41 @@ void CMPXDbAbstractAlbum::UpdateMediaL(
     const TArray<TMPXAttribute>& aAttrs,
     CMPXMedia& aMedia)
     {
-     MPX_FUNC("CMPXDbAbstractAlbum::UpdateMediaL");
+    MPX_FUNC("CMPXDbAbstractAlbum::UpdateMediaL");
 
-       TInt count(aAttrs.Count());
-       for (TInt i = 0; i < count; ++i)
-           {
-           TInt contentId(aAttrs[i].ContentId());
-           TUint attributeId(aAttrs[i].AttributeId());
+    TInt count(aAttrs.Count());
+    for (TInt i = 0; i < count; ++i)
+       {
+       TInt contentId(aAttrs[i].ContentId());
+       TUint attributeId(aAttrs[i].AttributeId());
 
            if (contentId == KMPXMediaIdGeneral)
                {
                if (attributeId & EMPXMediaGeneralId)
                    {
+                   MPX_DEBUG1("    EMPXMediaGeneralId");
                    aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId,
                        aRecord.ColumnInt64(EAbstractAlbumUniqueId));
                    }
                if (attributeId & EMPXMediaGeneralTitle)
                    {
+                   MPX_DEBUG1("    EMPXMediaGeneralTitle");
                    TPtrC title(MPXDbCommonUtil::GetColumnTextL(aRecord, EAbstractAlbumName));
                    aMedia.SetTextValueL(KMPXMediaGeneralTitle, title);
                    MPX_DEBUG2("    AbstractAlbumName[%S]", &title);
-                   }                          
+                   }
                if (attributeId & EMPXMediaGeneralCount)
                    {
+                   MPX_DEBUG1("    EMPXMediaGeneralCount");
                    TInt songCount = GetSongsCountL(KDbManagerAllDrives,
                                 aRecord.ColumnInt64(EAbstractAlbumUniqueId));
                    aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount, songCount );
                    }
-               if (attributeId & EMPXMediaGeneralDrive)
-                   {
+               if (attributeId & EMPXMediaGeneralDrive ||
+                    (attributeId & EMPXMediaGeneralUri))
+                   {                       
                    TUint32 volId(aRecord.ColumnInt64(EAbstractAlbumVolumeId));
                    TInt driveId = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(), volId);
-
-                   // LTAN-7GH6BZ, crash if eject memory card when adding song to existing AbstractAlbum
-                   // due to special timing issue, it is possible drive number is -1 and create a
-                   // panic when use for TDriveUnit
                    MPX_DEBUG3("volId = %d, driveId = %d", volId, driveId);
 
                    // handle possibly delay from framework notification
@@ -321,62 +387,99 @@ void CMPXDbAbstractAlbum::UpdateMediaL(
                        User::Leave(KErrNotReady);
                        }
                    TDriveUnit driveUnit(driveId);
-
-                   aMedia.SetTextValueL(KMPXMediaGeneralDrive, driveUnit.Name());
-
+                   if (attributeId & EMPXMediaGeneralUri)
+                       {                              
+                       TPtrC uri(MPXDbCommonUtil::GetColumnTextL(aRecord, EAbstractAlbumUri));
+                       aMedia.SetTextValueL(KMPXMediaGeneralUri, uri);
+                       MPX_DEBUG2("    AbstractAlbum URI[%S]", &uri);
+                       }
+                  if (attributeId & EMPXMediaGeneralDrive)
+                       {
+                       aMedia.SetTextValueL(KMPXMediaGeneralDrive, driveUnit.Name());
+                       }
                    }
-               } // end if contentId == KMPXMediaIdGeneral          
+               } // end if contentId == KMPXMediaIdGeneral
+
            else if ( contentId == KMPXMediaIdMusic)
                {
                if (attributeId & EMPXMediaMusicAlbumArtist)
-                   {         
+                   {
+                   MPX_DEBUG1("    EMPXMediaMusicAlbumArtist");
                    TPtrC albumartist(MPXDbCommonUtil::GetColumnTextL(aRecord, EAbstractAlbumArtist));
                    aMedia.SetTextValueL(KMPXMediaMusicAlbumArtist, albumartist);
-                   
-                  
-                   
                    MPX_DEBUG2("    albumartist[%S]", &albumartist);
-                   } 
-               if (attributeId & EMPXMediaMusicGenre)
-                   {                 
-                   TPtrC genre(MPXDbCommonUtil::GetColumnTextL(aRecord, EAbstractAlbumGenre));
-                   aMedia.SetTextValueL(KMPXMediaMusicGenre, genre);
-                   MPX_DEBUG2("    Genre[%S]", &genre);
                    }
                }
-               
+
            } // end for
        aMedia.SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
        aMedia.SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAbstractAlbum);
     }
 
+// ----------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::GetAllItemsWithNoSongL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAbstractAlbum::GetAllItemsWithNoSongL(RArray<TUint32>& aItemsIds)
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::GetAllItemsWithNoSongL");
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAbstractAlbumsWithNoSong));
+    CleanupClosePushL(recordset);
+
+    TInt err(KErrNone);
+    while ((err = recordset.Next()) == KSqlAtRow)
+        {
+        TUint32 uniqueID(recordset.ColumnInt64(EAbstractAlbumUniqueId));
+        aItemsIds.AppendL(uniqueID);
+        }
+    CleanupStack::PopAndDestroy(&recordset);
+    if (err!= KSqlAtEnd)
+        {
+        User::Leave(KErrCorrupt);
+        } 	
+    }
+
 
 // ----------------------------------------------------------------------------
-// CMPXDbAbstractAlbum::GenerateAlbumFieldsValuesL
+// CMPXDbAbstractAlbum::GenerateAbstractAlbumFieldsValuesL
 // ----------------------------------------------------------------------------
 //
 void CMPXDbAbstractAlbum::GenerateAbstractAlbumFieldsValuesL(const CMPXMedia& aMedia, CDesCArray& aFields, CDesCArray& aValues)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::GenerateAbstractAlbumFieldsValuesL");
-//support Winlogo use case
-   if (aMedia.IsSupported(KMPXMediaGeneralTitle))
+    //support Winlogo use case
+    if (aMedia.IsSupported(KMPXMediaGeneralTitle))
         {
         TPtrC truncatedName(aMedia.ValueText(KMPXMediaGeneralTitle).Left(KMCMaxTextLen));
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCCategoryName, truncatedName);
         }
-//support Winlogo use case
-   if (aMedia.IsSupported(KMPXMediaMusicAlbumArtist))
+    //support Winlogo use case
+    if (aMedia.IsSupported(KMPXMediaMusicAlbumArtist))
         {
         TPtrC truncatedAlbumArtist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAlbumArtist, truncatedAlbumArtist);
         }
-   if (aMedia.IsSupported(KMPXMediaMusicGenre))
+     }
+
+// ----------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::DeleteAbstractAlbumEntryL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAbstractAlbum::DeleteAbstractAlbumEntryL(
+    TUint32 aAbstractAlbumId, TInt aDriveId)
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::DeleteAbstractAlbumEntryL");
+
+    //delete entry from table        
+    if (aDriveId)
+        DeleteCategoryL(aAbstractAlbumId, aDriveId);
+    else
         {
-        TPtrC truncatedGenre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));
-        MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicGenre, truncatedGenre);    
+        TInt drive = MPXDbCommonUtil::GetDriveIdMatchVolIdL(iDbManager.Fs(),
+        ExecuteIntQueryL(KCriterionCategoryVolumeId, aAbstractAlbumId));
+        DeleteCategoryL(aAbstractAlbumId, drive);
         }
     }
-
 
 // ----------------------------------------------------------------------------
 // CMPXDbAlbum::CreateTableL
@@ -420,8 +523,9 @@ TBool CMPXDbAbstractAlbum::CheckTableL(
 //
 CMPXDbAbstractAlbum::CMPXDbAbstractAlbum(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory) :
-    CMPXDbCategory(aDbManager, aCategory)
+    TMPXGeneralCategory aCategory, RFs& aFs) :
+    CMPXDbCategory(aDbManager, aCategory),
+    iFs(aFs)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::CMPXDbAbstractAlbum");
     }
@@ -438,26 +542,27 @@ void CMPXDbAbstractAlbum::ConstructL()
 #ifdef RD_MPX_TNM_INTEGRATION
     // Create Thumbnail Manager instance. This object is the observer.
     iTNManager = CThumbnailManager::NewL( *this );
+    iRenameTN = EFalse;
 #endif //RD_MPX_TNM_INTEGRATION
     }
 
 
 
 // ---------------------------------------------------------------------------
-// CMPXDbAbstractAlbum::ThumbnailReady 
+// CMPXDbAbstractAlbum::ThumbnailReady
 // Callback but not used here
 // ---------------------------------------------------------------------------
-void CMPXDbAbstractAlbum::ThumbnailPreviewReady( 
+void CMPXDbAbstractAlbum::ThumbnailPreviewReady(
         MThumbnailData& /*aThumbnail*/, TThumbnailRequestId /*aId*/ )
     {
     }
-        
+
 
 // ---------------------------------------------------------------------------
 // CMPXDbAbstractAlbum::ThumbnailReady
 // Callback but not used here
 // ---------------------------------------------------------------------------
-void CMPXDbAbstractAlbum::ThumbnailReady( TInt /*aError*/, 
+void CMPXDbAbstractAlbum::ThumbnailReady( TInt /*aError*/,
         MThumbnailData& /*aThumbnail*/, TThumbnailRequestId /*aId*/ )
     {
     }

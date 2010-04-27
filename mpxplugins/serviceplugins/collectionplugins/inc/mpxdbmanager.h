@@ -391,7 +391,7 @@ class CMPXDbManager :
          * @param aSize - On return, the total size of the databases on the RAM drive.
          * @return TInt System error.
          */
-        TInt GetTotalRamDatabasesSize(TInt& aSize);
+        TInt GetTotalRamDatabasesSizeL(TInt& aSize);
 
         /**
         * Remove dummy file

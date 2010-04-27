@@ -234,7 +234,7 @@ public:
      *
      * @since 3.2
      */
-    virtual void DrawLbxItem( TInt aIndex ) = 0;
+    virtual void DrawLbxItemL( TInt aIndex ) = 0;
 
     /**
      * Set Find box's focus.
@@ -327,7 +327,7 @@ public:
     /**
      * Custom handling of menu pane for markable lists
      */
-    virtual void HandleMarkableListDynInitMenuPane(
+    virtual void HandleMarkableListDynInitMenuPaneL(
         TInt aResourceId,
         CEikMenuPane* aMenuPane ) = 0;
 

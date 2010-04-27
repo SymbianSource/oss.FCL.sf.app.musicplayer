@@ -259,7 +259,7 @@ void CMPXAppUi::ConstructL()
 #ifdef FF_OOM_MONITOR2_COMPONENT
     CheckAvailableMemoryByOomL( KLowestMemoryNeeded );
 #else
-    CheckAvailableMemory( KLowestMemoryNeeded );
+    CheckAvailableMemoryL( KLowestMemoryNeeded );
 #endif    //FF_OOM_MONITOR2_COMPONENT
 
     if ( !IsEmbedded() )
@@ -383,7 +383,7 @@ CMPXAppUi::~CMPXAppUi()
     {
     MPX_DEBUG1( "-->CMPXAppUi::~CMPXAppUi()" );
 #ifdef FF_OOM_MONITOR2_COMPONENT
-    SetMpxOomPriorityL( ROomMonitorSession::EOomPriorityNormal );
+    TRAP_IGNORE( SetMpxOomPriorityL( ROomMonitorSession::EOomPriorityNormal ) );
 #endif //FF_OOM_MONITOR2_COMPONENT
 
     if ( !IsEmbedded() )
@@ -749,6 +749,7 @@ void CMPXAppUi::HandleMediaKeyCommand(
         {
         case EPbCmdSetVolume:
             {
+            TRAP_IGNORE(
             TMPXPlaybackState playerState( EPbStateNotInitialised );
             playerState = iPlaybackUtility->StateL();
             if ( !MPXUser::IsCallOngoing( KMPXCallTypeGenericVoice ) ||
@@ -769,16 +770,18 @@ void CMPXAppUi::HandleMediaKeyCommand(
                     {
 					if ( aData != iCurrentVolume )
                         {
-                        SetVolume( aData );
+                        SetVolumeL( aData );
                         }
                     // popup volume control even if volume didn't change
                     HandlePopupL( EPbCmdSetVolume );
                     }
                 }
+            );
             break;
             }
         case EPbCmdMuteVolume:
             {
+            TRAP_IGNORE(
             TMPXPlaybackState playerState( EPbStateNotInitialised );
             playerState = iPlaybackUtility->StateL();
             if ( !MPXUser::IsCallOngoing( KMPXCallTypeGenericVoice ) ||
@@ -796,14 +799,16 @@ void CMPXAppUi::HandleMediaKeyCommand(
                 // or if we're actively playing during call
                 if ( IsForeground() || EPbStatePlaying == playerState || EPbStatePlaying == pdPlayerState )
                     {
-                    MuteVolume();
+                    MuteVolumeL();
                     HandlePopupL( EPbCmdMuteVolume );
                     }
                 }
+            );
             break;
             }
         case EPbCmdUnMuteVolume:
             {
+            TRAP_IGNORE(
             TMPXPlaybackState playerState( EPbStateNotInitialised );
             playerState = iPlaybackUtility->StateL();
             if ( !MPXUser::IsCallOngoing( KMPXCallTypeGenericVoice ) ||
@@ -821,10 +826,11 @@ void CMPXAppUi::HandleMediaKeyCommand(
                     }
                 if ( IsForeground() || EPbStatePlaying == playerState || EPbStatePlaying == pdPlayerState )
                     {
-                    UnMuteVolume();
+                    UnMuteVolumeL();
                     HandlePopupL( EPbCmdUnMuteVolume );
                     }
                 }
+            );
             break;
             }
         default:
@@ -838,15 +844,15 @@ void CMPXAppUi::HandleMediaKeyCommand(
                 // music is foreground app and not displaying
                 // dialogs or the options menu
                 if ( iView )
-                    {
-                    MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand sending command %d to view", MPXCmdForPbCmd(aCommand) );
-                    iView->HandleCommandL( MPXCmdForPbCmd(aCommand) );
+                    {                    
+                    MPX_TRAPD( err, iView->HandleCommandL( MPXCmdForPbCmd(aCommand) ) );
+                    MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand sending command %d to view err%d", MPXCmdForPbCmd(aCommand), err );
                     }
                 }
             else
                 {
                 TMPXPlaybackState playerState( EPbStateNotInitialised );
-                playerState = iPlaybackUtility->StateL();
+                MPX_TRAPD( err, playerState = iPlaybackUtility->StateL() );
                 if ( foregroundApp && IsDisplayingDialog() )
                     {
                     // displaying dialog in the foreground
@@ -859,13 +865,13 @@ void CMPXAppUi::HandleMediaKeyCommand(
                         {
                         // In playing/paused state, all media keys are active.
                         // Now playing view is not bring to foreground.
-                        // Seeking forward/backwards is also "playing"
-                        MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand Dialog displaying, sending command %d to DoHandleMediaKeyCommandL", aCommand );
-                        DoHandleMediaKeyCommandL( aCommand );
+                        // Seeking forward/backwards is also "playing"                       
+                        MPX_TRAP( err, DoHandleMediaKeyCommandL( aCommand ) );
+                        MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand Dialog displaying, sending command %d to DoHandleMediaKeyCommandL err%d", aCommand, err );
                         }
                     else
                         {
-                        MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand Dialog displaying, inactive state, command %d ignored", aCommand );
+                        MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand Dialog displaying, inactive state, command %d, err%d ignored", aCommand , err );
                         }
                     }
                 else
@@ -876,21 +882,21 @@ void CMPXAppUi::HandleMediaKeyCommand(
                         EPbStateSeekingForward == playerState ||
                         EPbStateSeekingBackward == playerState )
                         {
-                        MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, sending command %d to DoHandleMediaKeyCommandL", aCommand );
-                        DoHandleMediaKeyCommandL( aCommand );
+                        MPX_TRAP( err, DoHandleMediaKeyCommandL( aCommand ) );
+                        MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, sending command %d to DoHandleMediaKeyCommandL err%d", aCommand, err );
                         }
                     else if ( ( aCommand == EPbCmdPlay || aCommand == EPbCmdPlayPause ) && iView )
                         {
                         if ( !foregroundApp )
-                            {
-                            MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, active idle foreground, sending command %d to DoHandleMediaKeyCommandL", aCommand );
+                            {                
                             // not foreground, play without loading playback view
-                            DoHandleMediaKeyCommandL( aCommand );
+                            MPX_TRAP( err, DoHandleMediaKeyCommandL( aCommand ) );
+                            MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, active idle foreground, sending command %d to DoHandleMediaKeyCommandL err%d", aCommand, err );
                             }
                         else
-                            {
-                            MPX_DEBUG2( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, sending command %d to view", aCommand );
-                            iView->HandleCommandL( MPXCmdForPbCmd(aCommand) );
+                            {                           
+                            MPX_TRAP( err, iView->HandleCommandL( MPXCmdForPbCmd(aCommand) ) );
+                            MPX_DEBUG3( "CMPXAppUi::HandleMediaKeyCommand Menu displaying/not foreground, sending command %d to view err%d", aCommand, err );
                             }
                         }
                     else if ( aCommand == EPbCmdPlay || aCommand == EPbCmdPlayPause )
@@ -2012,32 +2018,28 @@ void CMPXAppUi::HandleBroadcastMessageL( const CMPXMessage& aMessage )
         }
     else if ( op == EMcMsgDiskRemoved )
         {
-        if ( !IsEmbedded() )
+        TBool usbDiskRemovalEvent( EFalse );
+        if ( (op == EMcMsgDiskRemoved) && iIsUsbOnGoing )
             {
-            TBool usbDiskRemovalEvent(EFalse);
-            if ( (op == EMcMsgDiskRemoved) && iIsUsbOnGoing )
-                {
-                usbDiskRemovalEvent = ETrue;
-                }
-            else
-                {
-                MPX_DEBUG1( "CMPXAppUi::HandleBroadcastMessageL. MMC ejected and the application needs to close." );
-                RunAppShutter();
-				return;
-                }
+            usbDiskRemovalEvent = ETrue;
+            }
+        else
+            {
+            MPX_DEBUG1( "CMPXAppUi::HandleBroadcastMessageL. MMC ejected and the application needs to close." );
+            RunAppShutter();
+            return;
+            }
 
             CMPXCollectionPath* cPath = iCollectionUtility->Collection().PathL ( );
             CleanupStack::PushL ( cPath );
             if ( cPath->Levels ( )> 1 && !iFormattingOnGoing && !usbDiskRemovalEvent &&
                  iCurrentViewType.iUid != KMPXPluginTypePlaybackUid )
                 {
+            cPath->Back();
+            iCollectionUtility->Collection().OpenL( *cPath );
 
-                    cPath->Back ( );
-                    iCollectionUtility->Collection().OpenL ( *cPath );
-                    
-                }
-            CleanupStack::PopAndDestroy ( cPath );
             }
+        CleanupStack::PopAndDestroy( cPath );
         }
     // Re-open the collection view after a refresh
     // and after album art or metadata dialog or add songs editor dialog closes
@@ -3939,7 +3941,7 @@ MCoeMessageObserver::TMessageResponse CMPXAppUi::HandleMessageL(
         ASSERT(!IsEmbedded());////browser should not send messages to music player if it is not RootApp.
         if ( aMessageParameters.Length() )
             {
-            if ( IsBrowserClosed(aMessageParameters) )
+            if ( IsBrowserClosedL(aMessageParameters) )
                 {
                 if ( iAppStartedByBrowser )
                     {
@@ -4016,7 +4018,7 @@ TBool CMPXAppUi::ProcessCommandParametersL( CApaCommandLine& aCommandLine )
                 // Convert param to 8-bit.
                 HBufC8* param8 = HBufC8::NewLC( param.Length() );
                 param8->Des().Copy( param );
-                if ( IsBrowserClosed(*param8) )
+                if ( IsBrowserClosedL(*param8) )
                     {
                     Exit();
                     }
@@ -4284,10 +4286,10 @@ void CMPXAppUi::HandleServerAppExit(TInt /*aReason*/)
     }
 #ifdef RD_BROWSER_PROGRESSIVE_DOWNLOAD
 // -----------------------------------------------------------------------------
-// CMPXAppUi::IsBrowserClosed
+// CMPXAppUi::IsBrowserClosedL
 // -----------------------------------------------------------------------------
 //
-TBool CMPXAppUi::IsBrowserClosed(
+TBool CMPXAppUi::IsBrowserClosedL(
     const TDesC8& aParams )
     {
     TBool ret(EFalse);
@@ -4353,10 +4355,10 @@ TBool CMPXAppUi::SuppressCollectionView()
     }
 
 // -----------------------------------------------------------------------------
-// CMPXAppUi::SetVolume
+// CMPXAppUi::SetVolumeL
 // -----------------------------------------------------------------------------
 //
-void CMPXAppUi::SetVolume( const TInt aVolume )
+void CMPXAppUi::SetVolumeL( const TInt aVolume )
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -4375,10 +4377,10 @@ void CMPXAppUi::SetVolume( const TInt aVolume )
     }
 
 // -----------------------------------------------------------------------------
-// CMPXAppUi::MuteVolume
+// CMPXAppUi::MuteVolumeL
 // -----------------------------------------------------------------------------
 //
-void CMPXAppUi::MuteVolume()
+void CMPXAppUi::MuteVolumeL()
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -4396,10 +4398,10 @@ void CMPXAppUi::MuteVolume()
     }
 
 // -----------------------------------------------------------------------------
-// CMPXAppUi::UnMuteVolume
+// CMPXAppUi::UnMuteVolumeL
 // -----------------------------------------------------------------------------
 //
-void CMPXAppUi::UnMuteVolume()
+void CMPXAppUi::UnMuteVolumeL()
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -4482,10 +4484,10 @@ TInt CMPXAppUi::MPXCmdForPbCmd(
     }
 
 // -----------------------------------------------------------------------------
-// CMPXAppUi::CheckAvailableMemory
+// CMPXAppUi::CheckAvailableMemoryL
 // -----------------------------------------------------------------------------
 //
-void CMPXAppUi::CheckAvailableMemory( TInt aNeedMemory )
+void CMPXAppUi::CheckAvailableMemoryL( TInt aNeedMemory )
     {
     TMemoryInfoV1Buf info;
     UserHal::MemoryInfo(info);

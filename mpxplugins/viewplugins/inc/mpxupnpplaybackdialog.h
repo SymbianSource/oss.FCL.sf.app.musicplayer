@@ -105,7 +105,7 @@ protected:
      *
      * @param aPlaybackState Current playback state.
      */
-    void UpdatePlaybackState(
+    void UpdatePlaybackStateL(
         TMPXPlaybackState aPlaybackState );
 
     /**
@@ -460,21 +460,21 @@ private:
      *
      *  @param aVolume volume value.
      */
-    void SetVolume( const TInt aVolume );
+    void SetVolumeL( const TInt aVolume );
 
     /**
      *  Mutes the playback volume.
      */
-    void MuteVolume();
+    void MuteVolumeL();
 
     /**
      *  Unmutes the playback volume.
      */
-    void UnMuteVolume();
+    void UnMuteVolumeL();
     /**
      *  Update toolbar.
      */
-    void UpdateToolbar();
+    void UpdateToolbarL();
     /**
      * From MAknToolbarObserver
      * Processes user commands.

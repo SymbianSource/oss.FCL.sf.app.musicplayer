@@ -102,7 +102,7 @@ CMPXPdCommandHandler::~CMPXPdCommandHandler()
         TRAP_IGNORE( iPdPlaybackUtility->RemoveObserverL( *this ) );
         TRAP_IGNORE( iPdPlaybackUtility->CommandL( EPbCmdStop ) );
         TRAP_IGNORE( iPdPlaybackUtility->CommandL( EPbCmdClose ) );
-        iPdPlaybackUtility->PlayerManager().ClearSelectPlayersL();
+        TRAP_IGNORE( iPdPlaybackUtility->PlayerManager().ClearSelectPlayersL() );
         iPdPlaybackUtility->Close();
         }
     if ( iViewUtility )

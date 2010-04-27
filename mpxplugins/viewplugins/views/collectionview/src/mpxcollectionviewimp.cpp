@@ -1432,7 +1432,7 @@ void CMPXCollectionViewImp::ActivateReorderGrabbedModeL()
         }
     iContainer->Common()->SetLbxCurrentItemIndexAndDraw( currentItem );
     //show new indicator
-    iContainer->Common()->DrawLbxItem(currentItem);
+    iContainer->Common()->DrawLbxItemL(currentItem);
     UpdateReorderNaviPaneL();
     }
 
@@ -2009,7 +2009,7 @@ TBool CMPXCollectionViewImp::IsUpnpVisible()
 #ifdef UPNP_INCLUDED
    	if ( iUpnpCopyCommand  && iUpnpFrameworkSupport) 	  
         {
-        returnValue = iUpnpCopyCommand->IsAvailableL();   
+        TRAP_IGNORE( returnValue = iUpnpCopyCommand->IsAvailableL() );   
         }
 #endif
     return returnValue; 
@@ -6342,7 +6342,7 @@ void CMPXCollectionViewImp::DynInitMenuPaneL(
     if (!(aResourceId == R_AVKON_MENUPANE_MARKABLE_LIST && usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive))
         {
         // Custom handling of menu pane for markable lists
-        iContainer->Common()->HandleMarkableListDynInitMenuPane(
+        iContainer->Common()->HandleMarkableListDynInitMenuPaneL(
             aResourceId,
             aMenuPane );
         }

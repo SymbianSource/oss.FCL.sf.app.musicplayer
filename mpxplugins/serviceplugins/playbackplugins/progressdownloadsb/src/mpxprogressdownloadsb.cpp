@@ -341,7 +341,7 @@ void CMPXProgressDownloadSB::CommandL(
                     if ( !iFileSaved )
                         {
                         iDrmMediaUtility->Close(); // release file handle so we can move file.
-                        MoveDownloadedFileToMusicFolderL();
+                        MoveDownloadedFileToMusicFolder();
                         }
                     }
                 iDrmMediaUtility->Close();
@@ -357,7 +357,7 @@ void CMPXProgressDownloadSB::CommandL(
                     if ( !iFileSaved )
                         {
                         iDrmMediaUtility->Close(); // release file handle so we can move file.
-                        MoveDownloadedFileToMusicFolderL();
+                        MoveDownloadedFileToMusicFolder();
                         }
                     }
                 iDrmMediaUtility->Close();
@@ -646,7 +646,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
 
     RApaLsSession aps;
     error  = aps.Connect(); // always fail in console test
-    if ( KErrNone == error )
+    if ( iPdPath != NULL && KErrNone == error )
         {
         CleanupClosePushL(aps);
         TUid ignore;
@@ -669,7 +669,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
             {
             TRAP( err, metaDataUtility->OpenFileL( *iFileHandle, iMimeType.Des8() ) );
             }
-        else
+        else if ( iPdPath != NULL )
             {
             TRAP( err, metaDataUtility->OpenFileL( *iPdPath, iMimeType.Des8() ) );
             }
@@ -680,7 +680,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
             {
             TRAP( err, metaDataUtility->OpenFileL( *iFileHandle ) );
             }
-        else
+        else if( iPdPath != NULL )
             {
             TRAP( err, metaDataUtility->OpenFileL( *iPdPath ) );
             }
@@ -791,7 +791,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
                         break;
                         }
                     case EMetaDataJpeg:
-                        if ( attrM & EMPXMediaMusicAlbumArtFileName )
+                        if ( ( iPdPath != NULL ) && attrM & EMPXMediaMusicAlbumArtFileName )
                             {
                             media->SetTextValueL(
                                 TMPXAttribute(KMPXMediaIdMusic,EMPXMediaMusicAlbumArtFileName),
@@ -814,7 +814,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
 	}
 
 
-   if (attrG & EMPXMediaGeneralUri)
+   if ( ( iPdPath != NULL ) && attrG & EMPXMediaGeneralUri)
         {
         media->SetTextValueL(
             TMPXAttribute(KMPXMediaIdGeneral,EMPXMediaGeneralUri),
@@ -851,7 +851,7 @@ void CMPXProgressDownloadSB::MediaL(const TArray<TMPXAttribute>& aAttrs)
 
         }
 
-   if (attrG & EMPXMediaGeneralSize)
+   if ( ( iPdPath != NULL ) && attrG & EMPXMediaGeneralSize)
         {
         RFs fs;
         User::LeaveIfError(fs.Connect());
@@ -1029,7 +1029,7 @@ void CMPXProgressDownloadSB::Event(
                                     {
                                     ConsumeRights( ContentAccess::EPause );
                                     }
-                                MoveDownloadedFileToMusicFolderL();
+                                MoveDownloadedFileToMusicFolder();
                                 }
                             }
                         else if ( event->GetErrorCode() == KErrDied || event->GetErrorCode() == KErrInUse ||
@@ -1204,7 +1204,7 @@ void CMPXProgressDownloadSB::Event(
                         (iState == EStateInitialising && iErrorOfStreamClosedEvent == KErrCANoRights)) 
                         && !iFileSaved )
                          {
-                         MoveDownloadedFileToMusicFolderL();
+                         MoveDownloadedFileToMusicFolder();
                          }
                      iErrorOfStreamClosedEvent = KErrNone ;
 
@@ -1246,7 +1246,12 @@ void CMPXProgressDownloadSB::Event(
                 {
                 delete iPdPath;
                 iPdPath = NULL;
-                iPdPath = iMovedFileName.AllocL();
+                MPX_TRAPD( err, iPdPath = iMovedFileName.AllocL() );
+                if( err != KErrNone )
+                	{
+                    MPX_DEBUG2("iPdPath = iMovedFileName.AllocL() with leave err=%d", err ); 
+                    break;
+                	}
                 iFileSaved = ETrue;
                 }
             else
@@ -1258,7 +1263,12 @@ void CMPXProgressDownloadSB::Event(
                     iMAudioProgDLSource->FileName( ptr );
                     delete iPdPath;
                     iPdPath = NULL;
-                    iPdPath = ptr.AllocL();
+                    MPX_TRAPD(err, iPdPath = ptr.AllocL() );
+                    if( err != KErrNone )
+                    	{
+                        MPX_DEBUG2("iPdPath = ptr.AllocL() with leave err=%d", err ); 
+                        break;
+                    	}
                     iFileSaved = ETrue;
                     }
                 }
@@ -1393,12 +1403,29 @@ void CMPXProgressDownloadSB::SetVolume( TInt aVolume )
             changed = ETrue;
             }
         }
-
+    
     // Change setting in cenrep
-    if ( aVolume != iVolumeWatcher->CurrentValueL() )
+    TInt currentVol( 0 );
+    MPX_TRAPD( volError, currentVol = iVolumeWatcher->CurrentValueL() );
+    if ( volError == KErrNone && aVolume != currentVol )
         {
-        iVolumeWatcher->SetValueL( aVolume );
+        MPX_TRAP( volError, iVolumeWatcher->SetValueL( aVolume ) );
+        if( aVolume == 0 )
+            {
+            MPX_TRAP( volError, iMuteWatcher->SetValueL( ETrue ) );
+            }
+        else if( aVolume > 0 )
+            {
+            TBool currentMute( EFalse );
+            
+            MPX_TRAP( volError, currentMute = iMuteWatcher->CurrentValueL() );
+            if( volError == KErrNone && currentMute )
+                {
+                MPX_TRAP( volError, iMuteWatcher->SetValueL( EFalse ) );
+                }
+            }
         }
+
 
     // Notify observer if value changed
     if ( changed )
@@ -1468,16 +1495,16 @@ void CMPXProgressDownloadSB::SetMute( TBool aMute )
 // CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL
 // -----------------------------------------------------------------------------
 //
-void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL()
+void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder()
     {
-    if ( iFileSaved ||
+    if ( iFileSaved || iPdPath == NULL ||
          ( (*iPdPath).Length() == 0 ) ||
          iMAudioProgDLSource->GetDownloadStatus() == MProgDLSource::EDeleted )
         {
         return;
         }
 
-    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL() entering");
+    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder() entering");
     TParse parse;
     parse.Set(*iPdPath,NULL,NULL);
     TPtrC drive = parse.Drive();
@@ -1494,7 +1521,7 @@ void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL()
         iFileSaved = ETrue;
         }
 
-    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolderL() exiting");
+    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder() exiting");
     }
 
 // ----------------------------------------------------------------------------

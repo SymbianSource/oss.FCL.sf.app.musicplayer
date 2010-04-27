@@ -493,7 +493,7 @@ void CMPXWaitNoteDialog::DisplayProcessWaitDialogL( TInt aDlgRsc,
 
     iProcessWaitDialog = new ( ELeave ) CAknWaitDialog(
                                     ( CEikDialog** )&iProcessWaitDialog,
-                                    iVisDelayOff );
+                                    EFalse );
     
     iProcessWaitDialog->PrepareLC( aDlgRsc );
     iProcessWaitDialog->SetTextL( aLabel );
@@ -512,3 +512,4 @@ void CMPXWaitNoteDialog::CancelProcessWaitDialogL()
         }
     }
 // End of file
+

@@ -93,6 +93,10 @@ const TInt KMPXAllTracksInvalid     = -40001;
 // Error code to indicate that playback not allowed during video call
 const TInt KMPXErrorVideoCall       = -40002;
 
+// Error code to indicate expired DRM rights
+const TInt KMPXErrorExpiredRights       = -40003;
+
+
 #endif  // MPXCONSTANTS_H   
             
 // End of File

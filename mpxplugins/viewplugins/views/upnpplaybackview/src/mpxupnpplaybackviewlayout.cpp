@@ -97,6 +97,7 @@ void CMPXUPnPPlaybackViewLayout::ConstructL()
     {
     MPX_FUNC( "CMPXUPnPPlaybackViewLayout::ConstructL" );
     iPodcastAlbumArt = EFalse;
+    InitCommonLayoutL();
     }
 
 // ---------------------------------------------------------------------------

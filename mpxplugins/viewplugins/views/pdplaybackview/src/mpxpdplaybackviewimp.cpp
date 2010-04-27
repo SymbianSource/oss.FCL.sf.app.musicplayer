@@ -277,7 +277,7 @@ void CMPXPdPlaybackViewImp::DoHandlePlaybackMessageL(
                 MPX_DEBUG2( "CMPXPdPlaybackViewImp::DoHandlePlaybackMessageL - EStateChanged(%d)", type );
 
                 UpdateMiddleSoftKeyDisplayL();
-                UpdateToolbar();
+                UpdateToolbarL();
                 TMPXPlaybackState state =
                     static_cast<TMPXPlaybackState>( type );
                 DoHandleStateChangedL( state, data );
@@ -313,7 +313,7 @@ void CMPXPdPlaybackViewImp::DoHandleStateChangedL(
         {
         case EPbStateInitialising:
             {
-            UpdatePlaybackState( aState );
+            UpdatePlaybackStateL( aState );
             UpdateDownloadStateLabelL();
             RequestMediaL();
             break;
@@ -730,7 +730,7 @@ void CMPXPdPlaybackViewImp::DynInitToolbarL(TInt aResourceId, CAknToolbar* aTool
         // Put initializations here to take effect before toolbar is shown
         aToolbar->SetItemDimmed( EMPXPbvCmdPreviousListItem, ETrue, EFalse );
         aToolbar->SetItemDimmed( EMPXPbvCmdNextListItem, ETrue, EFalse );
-        UpdateToolbar();
+        UpdateToolbarL();
         aToolbar->UpdateBackground();
         }
     }
@@ -749,7 +749,7 @@ void CMPXPdPlaybackViewImp::OfferToolbarEventL( TInt aCommandId )
 // Updates the middle toolbar button
 // ---------------------------------------------------------------------------
 //
-void CMPXPdPlaybackViewImp::UpdateToolbar()
+void CMPXPdPlaybackViewImp::UpdateToolbarL()
     {
     MPX_FUNC( "CMPXPdPlaybackViewImp::UpdateToolbar" );
 

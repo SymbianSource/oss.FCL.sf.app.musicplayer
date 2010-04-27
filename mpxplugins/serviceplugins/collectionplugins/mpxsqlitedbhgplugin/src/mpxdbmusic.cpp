@@ -112,7 +112,7 @@ CMPXDbMusic::CMPXDbMusic(
     iObserver(aObserver)
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     ,iArtNeedUpdated(ETrue)
-#endif	
+#endif
     {
     MPX_FUNC("CMPXDbMusic::CMPXDbMusic");
     }
@@ -260,19 +260,19 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::DoUpdateSongL(
         if(iArtNeedUpdated)
             {
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
-		    // Update Album table
-		    if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
-		        {
-		        TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
-		        iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
-		        }
+	        // Update Album table
+	        if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) || aMedia.IsSupported(KMPXMediaMusicArtist))
+	            {
+	            TUint32 albumId = recordset.ColumnInt64(EMusicAlbum);
+	            iObserver.UpdateCategoryItemL(EMPXAlbum, albumId, aMedia, driveUnit, aItemChangedMessages);
+	            }
 
-		    // Update Artist table
-		    if ( aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) )
-		        {
-		        TUint32 artistId = recordset.ColumnInt64(EMusicArtist);
-		        iObserver.UpdateCategoryItemL(EMPXArtist, artistId, aMedia, driveUnit, aItemChangedMessages);
-		        }
+	        // Update Artist table
+	        if ( aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName) )
+	            {
+	            TUint32 artistId = recordset.ColumnInt64(EMusicArtist);
+	            iObserver.UpdateCategoryItemL(EMPXArtist, artistId, aMedia, driveUnit, aItemChangedMessages);
+	            }
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
             }
         iArtNeedUpdated = ETrue;  //reset flag
@@ -822,13 +822,12 @@ void CMPXDbMusic::GetSongsForComposerL(
 // ----------------------------------------------------------------------------
 //
 void CMPXDbMusic::GetAllSongsForAbstractAlbumL(
-    TInt aDrive,
-    TInt aAbstractAlbumId,
+    TUint aAbstractAlbumId,
     const TArray<TMPXAttribute>& aAttrs,
     CMPXMediaArray& aMediaArray)
     {
-    MPX_FUNC("CMPXDbMusic::GetAllSongsL");
-    ExecuteMediaQueryL(aDrive, aAttrs, aMediaArray, KQueryMusicGetSongsForAbstractAlbum(), aAbstractAlbumId);
+    MPX_FUNC("CMPXDbMusic::GetAllSongsForAbstractAlbumL");
+    ExecuteMediaQueryL(aAttrs, aMediaArray, KQueryMusicGetSongsForAbstractAlbum(), aAbstractAlbumId);
     }
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 
@@ -1866,12 +1865,12 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED 
                     TParsePtrC parse(albumArtFilename);
                     TPtrC ext(parse.Ext());
-					//set flag to false, so .alb will not overwrite art field in album, artist table 
-					// when song with embedded art
-	                if ((ext.CompareF(KAbstractAlbumExt)== 0) && containEmbeddedArt)
-	                    {
-	                    iArtNeedUpdated = EFalse;
-	                    }
+                    //set flag to false, so .alb will not overwrite art field in album, artist table 
+                    // when song with embedded art
+                    if ((ext.CompareF(KAbstractAlbumExt)== 0) && containEmbeddedArt)
+                        {
+                        iArtNeedUpdated = EFalse;
+                        }
                           
                     if ( ((ext.CompareF(KAbstractAlbumExt)== 0) && !containEmbeddedArt) || (ext.CompareF(KAbstractAlbumExt)!= 0))                    
                         {
@@ -2020,7 +2019,7 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
             } // end switch
         } // end for
 
-    // get the current artist/album/genre/composer
+    // get the current artist/album/genre/composer/abstractalbum
     // this is required because the recordset may be reused by the code below
     TUint32 artistId(0);
     TUint32 albumId(0);
@@ -2267,7 +2266,13 @@ HBufC* CMPXDbMusic::GenerateMusicMatchingCriteriaLC(
                 {
                 // validate the drive letter, TDriveUnit panics if given drive isn't between
                 // 'A' to 'Z'
-                TDriveUnit driveUnit(aCriteria.ValueText(KMPXMediaGeneralDrive));
+                const TDesC& drive = aCriteria.ValueText(KMPXMediaGeneralDrive);
+                TInt driveInt = 0;
+                if( drive == KNullDesC || RFs::CharToDrive( drive[0], driveInt )!= KErrNone )
+                    {
+                    User::Leave(KErrArgument);
+                    }               
+                TDriveUnit driveUnit(drive);
                 MPXDbCommonUtil::AddSqlCriterionL(*sqlCriteria, KCriterionMusicVolume,
                     MPXDbCommonUtil::GetVolIdMatchDriveIdL(iDbManager.Fs(), driveUnit));
                 volumeAdded = ETrue;
@@ -2389,9 +2394,20 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
             TPtrC name(aMedia.ValueText(aAttribute).Left(KMCMaxTextLen));
 
             // construct the new ID for the category record
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+            // genre and abstractalbum are not case sensitive
+            TBool caseSensitive = ETrue;         
+            if ((aCategory == EMPXGenre) || (aCategory == EMPXAbstractAlbum))
+                caseSensitive = EFalse;
+                      
+            aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory,
+                name, caseSensitive);
+
+#else
             // only genre is not case sensitive
             aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory,
                 name, (aCategory != EMPXGenre));
+#endif
             if (!aOldId || (aOldId != aItemId))
                 {
                 // only add if the ID changed,
@@ -2401,20 +2417,28 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                     {
                     if (aMedia.ValueTObjectL<TMPXGeneralCategory>(KMPXMediaGeneralCategory) == EMPXSong )
                         {
-                        iObserver.AddCategoryItemL(aCategory, name, aDriveId,
-                            aItemChangedMessages, itemAdded, KNullDesC, KNullDesC);                                 
+                        iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
+                          aItemChangedMessages, itemAdded, name, KNullDesC);                
                         }
                     else
-                        {         
-                        TPtrC albumartist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
-                        //get AlbumArt, Genre for AbstractAlbum
-                        MPX_DEBUG2("    Music albumartist[%S]", &albumartist);            
-                        TPtrC genre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));                               
-                        MPX_DEBUG2("    Music Genre[%S]", &genre);    
-                           
-                        // ignore the return value
-                        iObserver.AddCategoryItemL(aCategory, name, aDriveId,
-                          aItemChangedMessages, itemAdded, albumartist, genre);    
+                        {     
+                        TPtrC albumartist(KNullDesC);
+                        TPtrC abstractAlbumName(KNullDesC);
+                        if (aMedia.IsSupported(KMPXMediaMusicAlbumArtist) )
+                            {                         
+                            albumartist.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
+                            //get AlbumArt AbstractAlbum
+                            MPX_DEBUG2("     albumartist[%S]", &albumartist);
+                             }
+                        if (aMedia.IsSupported(KMPXMediaGeneralTitle) )
+                          {                         
+                          abstractAlbumName.Set(aMedia.ValueText(KMPXMediaGeneralTitle).Left(KMCMaxTextLen));
+                          MPX_DEBUG2("     abstractAlbumName[%S]", &abstractAlbumName);
+                          }                                                     
+                      // ignore the return value 
+                      
+                      iObserver.AddCategoryItemL(aCategory, abstractAlbumName, aDriveId,
+                          aItemChangedMessages, itemAdded, name, albumartist);       
                         }
                     }
                 else
@@ -2429,24 +2453,29 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
             }
         else
             {
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+            // genre and abstractalbum are not case sensitive
+            aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory, KNullDesC,
+                (aCategory != EMPXGenre)&&(aCategory != EMPXAbstractAlbum));
+#else
             // only genre is not case sensitive
             aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory, KNullDesC,
                 (aCategory != EMPXGenre));
+#endif
             if (!aOldId || (aOldId != aItemId))
                 {
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED                                        
                 if(aCategory == EMPXAbstractAlbum)
-                    {              
-                    //get AlbumArt, Genre for AbstractAlbum
+                    {                         
+                    //get AlbumArt for AbstractAlbum
                     TPtrC albumartist(aMedia.ValueText(KMPXMediaMusicAlbumArtist).Left(KMCMaxTextLen));
-                    MPX_DEBUG2("    Music albumartist[%S]", &albumartist);
-                    TPtrC genre(aMedia.ValueText(KMPXMediaMusicGenre).Left(KMCMaxTextLen));
-                    MPX_DEBUG2("    Music Genre[%S]", &genre);    
-                                           
+                    MPX_DEBUG2("    Music albumartist[%S]", &albumartist);                       
+                    TPtrC abstractAlbumName(aMedia.ValueText(KMPXMediaGeneralTitle).Left(KMCMaxTextLen));
+                    MPX_DEBUG2("    Music abstractAlbumName[%S]", &abstractAlbumName);     
                     // ignore the return value
-                    iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
-                    aItemChangedMessages, itemAdded, albumartist, genre);      
-                    }
+                    iObserver.AddCategoryItemL(aCategory, abstractAlbumName, aDriveId,
+                       aItemChangedMessages, itemAdded, KNullDesC, albumartist);     
+                    }            
                else
 #endif // ABSTRACTAUDIOALBUM_INCLUDED        
                       {              
@@ -2457,12 +2486,8 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                  updated = ETrue;
                  }
             }
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED
-            //no need to delete old item for abstractalbum
-            if (aOldId && (aOldId != aItemId) && (aCategory != EMPXAbstractAlbum))
-#else
-            if (aOldId && (aOldId != aItemId))
-#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
+        if (aOldId && (aOldId != aItemId))
             {
             iObserver.DeleteSongForCategoryL(aCategory, aOldId, aDriveId,
                 aItemChangedMessages, itemNotRemoved);

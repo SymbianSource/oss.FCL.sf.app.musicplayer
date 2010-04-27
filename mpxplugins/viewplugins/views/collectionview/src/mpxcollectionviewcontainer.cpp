@@ -120,13 +120,13 @@ void CMPXCollectionViewContainer::SetPlaybackStatusByIdL(
         if ( index != KErrNotFound )
             {
             // Update the previous item as not playing anymore
-            iCommonContainer->DrawLbxItem( index );
+            iCommonContainer->DrawLbxItemL( index );
             }
         index = iLbxArray->GetPlaybackIndex();
         if ( index != KErrNotFound )
             {
             // Update new item as playing
-            iCommonContainer->DrawLbxItem( index );
+            iCommonContainer->DrawLbxItemL( index );
             }
         }
     }

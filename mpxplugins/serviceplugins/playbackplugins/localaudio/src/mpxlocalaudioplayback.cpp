@@ -435,10 +435,28 @@ void CMPXLocalAudioPlayback::CommandL(TMPXPlaybackCommand aCmd, TInt aData)
             {
             // Re-init audio effects
             MPX_DEBUG1("CMPXLocalAudioPlayback::CommandL EPbApplyEffect");
+            iAudioEffects->DestroyAudioEffect();
             if( ( aData == KAudioEffectsID || aData == KEqualizerID ) &&
                 ( EStateInitialised == iState ) )
                 {
-                TRAP_IGNORE( iAudioEffects->CreateAudioEffectsL() );
+                TRAPD(err, iAudioEffects->CreateAudioEffectsL() );
+                if(err)
+                    {
+                    MPX_DEBUG2("EPbApplyEffect err = %d", err);
+                    TRAPD(err, iAudioEffects->CreateAudioEffectsL() );
+                    if(err)
+                        {
+                        MPX_DEBUG2("EPbApplyEffect again err = %d", err);
+                        }
+					else
+						{
+                        MPX_DEBUG1("EPbApplyEffect again set");
+						}
+                    }
+				else
+					{
+                    MPX_DEBUG1("EPbApplyEffect set");
+					}
                 iAudioEffectsOn = ETrue;
                 }
             break;

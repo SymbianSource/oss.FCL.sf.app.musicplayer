@@ -777,11 +777,19 @@ EXPORT_C void CMPXDbManager::CloseDatabaseL(
             {
             if (iDatabaseHandles[i].iDrive == aDrive)
                 {
+                TBool inTransaction = InTransaction();
                 TInt transactionCount = iTransactionCount;
-                if (iTransactionCount > 0) 
+                iTransactionCount = 0;								
+								
+                if (inTransaction) //if the transaction is ongoing, try committing
                     {
-                    iTransactionCount = 0;
-                    DoCommitL();
+                    //if transaction committing fails, try roll-back	
+                    TInt error = iDatabase.Exec( KCommitTransaction );
+                    if ( error != KErrNone )
+                        {
+                        //The error is ignored since we can't do nothing about it
+                        iDatabase.Exec( KRollbackTransaction ); 
+                        }
                     }
                 	
 #ifdef __RAMDISK_PERF_ENABLE                	
@@ -811,8 +819,9 @@ EXPORT_C void CMPXDbManager::CloseDatabaseL(
                     MPX_DEBUG2("CMPXDbManager::CloseDatabaseL found %d", aDrive);
                     CloseDatabaseAtIndexL( i );
                     }
-                    
-                if (transactionCount > 0) 
+                
+                //Let MTP handle the transcation if there is any 
+                if ( inTransaction ) 
                     {
                     DoBeginL();
                     iTransactionCount = transactionCount;
@@ -2806,7 +2815,7 @@ EXPORT_C void CMPXDbManager::EnsureRamSpaceL()
         else
             {
             TInt size=0;
-            TInt err = GetTotalRamDatabasesSize(size);
+            TInt err = GetTotalRamDatabasesSizeL(size);
             if ( err || (size > iMaximumAllowedRAMDiskSpaceToCopy) )
                 {
                 // Databases using too much RAM space, copy back to normal drive and continue to harvest.
@@ -2965,7 +2974,7 @@ TInt CMPXDbManager::GetTotalDatabasesSize(TInt& aSize)
 // CMPXDbManager::GetTotalRamDatabasesSize
 // ---------------------------------------------------------------------------
 //
-TInt CMPXDbManager::GetTotalRamDatabasesSize(TInt& aSize)
+TInt CMPXDbManager::GetTotalRamDatabasesSizeL(TInt& aSize)
     {
     MPX_FUNC("CMPXDbManager::GetTotalRamDatabasesSize");
     TInt err = KErrNotSupported;
@@ -2993,21 +3002,21 @@ TInt CMPXDbManager::GetTotalRamDatabasesSize(TInt& aSize)
         filename.Format(KSecurePath, User::Identity().iUid, temp);
         CleanupStack::PopAndDestroy(temp);
         dbFilename.Append(filename);
-        MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Database name = %S", &dbFilename);
+        MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSizeL - Database name = %S", &dbFilename);
         TEntry entry;
         err = iFs.Entry( dbFilename, entry );
         if ( (err != KErrNone) && (err != KErrNotFound) )
             {
             break;
             }
-        MPX_DEBUG3("CMPXDbManager::GetTotalRamDatabasesSize - Size of Db %S = %d", &dbFilename, entry.iSize);
+        MPX_DEBUG3("CMPXDbManager::GetTotalRamDatabasesSizeL - Size of Db %S = %d", &dbFilename, entry.iSize);
         // sum up size
         size += entry.iSize;
         }
     aSize = size;
-    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Total Size of Dbs = %d", size);
+    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSizeL - Total Size of Dbs = %d", size);
 #endif //__RAMDISK_PERF_ENABLE    
-    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSize - Return err = %d", err);
+    MPX_DEBUG2("CMPXDbManager::GetTotalRamDatabasesSizeL - Return err = %d", err);
     return err;
     }
 

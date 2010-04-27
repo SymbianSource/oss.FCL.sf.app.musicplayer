@@ -353,7 +353,7 @@ void CMPXCommonContainerAvkonImp::SetLbxEmptyTextL( const TDesC& aText )
 // Draws a list box item
 // -----------------------------------------------------------------------------
 //
-void CMPXCommonContainerAvkonImp::DrawLbxItem( TInt aIndex )
+void CMPXCommonContainerAvkonImp::DrawLbxItemL( TInt aIndex )
     {
     ASSERT( iListBox );
     TInt topIndex( TopLbxItemIndex() );
@@ -552,7 +552,7 @@ void CMPXCommonContainerAvkonImp::HandleMarkableListProcessCommandL( TInt aComma
 // Custom handling of menu pane for markable lists
 // ---------------------------------------------------------------------------
 //
-void CMPXCommonContainerAvkonImp::HandleMarkableListDynInitMenuPane(
+void CMPXCommonContainerAvkonImp::HandleMarkableListDynInitMenuPaneL(
     TInt aResourceId,
     CEikMenuPane* aMenuPane )
     {

@@ -2590,11 +2590,11 @@ void CMPXDbPlugin::DoRemoveL(
             mediaId = iDbHandler->GetPlaylistIdMatchingUriL(uri);
             iDbHandler->RemovePlaylistL(mediaId, *fp, *itemChangedMessages);
             }
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED            
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
         else if (category == EMPXAbstractAlbum )
             {
             mediaId = iDbHandler->GetAbstractAlbumIdMatchingUriL(uri);
-            iDbHandler->RemoveAbstractAlbumL(mediaId, *fp, *itemChangedMessages);            
+            iDbHandler->RemoveAbstractAlbumL(mediaId, *itemChangedMessages, EFalse);
             }
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         else
@@ -3530,18 +3530,14 @@ TUint32 CMPXDbPlugin::DoAddItemL(
        case EMPXAbstractAlbum:
             {
             if (aMedia.IsSupported(KMPXMediaGeneralUri))
-                { 
-                   
+                {
+                //add abstractalbum to AbstractAlbum table
                 itemId = iDbHandler->AddAbstractAlbumL(aMedia, &aMessageArray);
-            
+
+                //in case aMedia as mediaArray which contains songs as arrayContents, need to update all songs associated
                 if ( aMedia.IsSupported(KMPXMediaArrayContents))
                     {
-                    //need to update songs information to music table           
-                    CMPXMediaArray* array = aMedia.Value<CMPXMediaArray>(KMPXMediaArrayContents);                        
-                    if (array->Count())            
-                        {                  
-                        iDbHandler->UpdateAbstractAlbumSongsL(aMedia, aMessageArray);
-                        }
+                    iDbHandler->UpdateSongsAbstractAlbumInfoL(aMedia, aMessageArray);
                     }
                 }
             else
@@ -3719,7 +3715,20 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbPlugin::DoSetItemL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
         case EMPXAbstractAlbum:
             {
-            visibleChange = iDbHandler->UpdateAbstractAlbumSongsL(aMedia, aMessageArray);
+            //update all songes which associate with ABSTRACTALBUM
+            if (aMedia.IsSupported(KMPXMediaGeneralUri))
+                {
+                //in case aMedia as mediaArray which contains songs as arrayContents, need to update all songs associated
+                if ( aMedia.IsSupported(KMPXMediaArrayContents))
+                    {
+                    iDbHandler->UpdateSongsAbstractAlbumInfoL(aMedia, aMessageArray);
+                    }
+                //only update field values in abstractalbum table, or renaming (change uri) for abstractalbum table
+                else
+                    {
+                    visibleChange = iDbHandler->UpdateAbstractAlbumL(aMedia, aMessageArray);
+                    }
+                }
             }
             break;
 #endif // ABSTRACTAUDIOALBUM_INCLUDED

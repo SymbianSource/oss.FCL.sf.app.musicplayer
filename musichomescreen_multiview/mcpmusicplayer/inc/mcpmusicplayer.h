@@ -24,6 +24,7 @@
 #include <mcpplugin.h>
 #include <mcppluginobserver.h>
 #include <mpxcollectionobserver.h>
+#include <mpxharvesterutilityobserver.h>
 #include "aiplayerpluginengineobserver.h"
 #include "filemonitorobserver.h"
 #include "applicationmonitorobserver.h"
@@ -37,6 +38,7 @@ class CApplicationMonitor;
 class CPNSMonitor;
 class RResourceFile;
 class MMPXCollectionUtility;
+class MMPXHarvesterUtility;
 
 /**
  *  Music Player MCP plugin.
@@ -387,6 +389,11 @@ private: // data
      */
     MMPXCollectionUtility* iCollectionUtility;
 
+    /**
+     * harvester utility
+     */
+    MMPXHarvesterUtility* iHarvester;
+    
     CPeriodic* iMusicPlayerOpeningTimer;
     };
 

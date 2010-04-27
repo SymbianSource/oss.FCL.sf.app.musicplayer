@@ -205,7 +205,7 @@ private:
      *
      * @return ETrue if visible, EFalse otherwise
      */
-    TBool IsUpnpVisible();
+    TBool IsUpnpVisibleL();
 
     /**
      * Displays the available players in the Play via submenu

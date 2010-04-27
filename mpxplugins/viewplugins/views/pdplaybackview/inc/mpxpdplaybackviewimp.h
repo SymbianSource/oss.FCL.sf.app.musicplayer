@@ -221,7 +221,7 @@ private:
     * @since 5.0
     *
     */
-	void UpdateToolbar();
+	void UpdateToolbarL();
 
 private:    // data
     CMPXPdPlaybackViewLayout* iPlaybackViewLayout;    // owned

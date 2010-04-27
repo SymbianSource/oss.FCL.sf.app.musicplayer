@@ -174,7 +174,7 @@ protected:
      * @param  aText Enumeration value identifying the text
      * @return layout variant id
      */
-    IMPORT_C TMPXPbvLayoutVariants GetTextVariant(TMPXPbvTextIndicator aText);
+    IMPORT_C TMPXPbvLayoutVariants GetTextVariantL(TMPXPbvTextIndicator aText);
 
 	/**
      * Get layout data for an indicator item
@@ -182,8 +182,16 @@ protected:
      * @param  aIndicator Enumeration value identifying the indicator
      * @return Layout variant id
      */
-    IMPORT_C TMPXPbvLayoutVariants GetIndicatorVariant(TMPXPbvIndicator aIndicator);
+    IMPORT_C TMPXPbvLayoutVariants GetIndicatorVariantL(TMPXPbvIndicator aIndicator);
 
+	/**
+     * Init common layout data
+     * @since 5.0
+     */    
+    IMPORT_C void InitCommonLayoutL();
+    
+private:
+    TBool iShowRockerGraphics;
     };
 
 #endif  // CMPXCOMMONPLAYBACKVIEWLAYOUT_H

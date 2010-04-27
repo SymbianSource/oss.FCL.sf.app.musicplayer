@@ -447,7 +447,7 @@ void CMPXPodcastPlaybackViewImp::DynInitToolbarL(TInt aResourceId, CAknToolbar* 
     if (aResourceId == R_MPX_PBV_TOUCH_TOOLBAR)
         {
         // Put initializations here to take effect before toolbar is shown
-        UpdateToolbar();
+        UpdateToolbarL();
         aToolbar->UpdateBackground();
        }
     }
@@ -501,7 +501,7 @@ void CMPXPodcastPlaybackViewImp::DoHandlePlaybackMessageL(
             {
             case TMPXPlaybackMessage::EStateChanged:
                 UpdateMiddleSoftKeyDisplayL();
-                UpdateToolbar();
+                UpdateToolbarL();
                 break;
 
             default:
@@ -515,7 +515,7 @@ void CMPXPodcastPlaybackViewImp::DoHandlePlaybackMessageL(
 // Updates the middle toolbar button
 // ---------------------------------------------------------------------------
 //
-void CMPXPodcastPlaybackViewImp::UpdateToolbar()
+void CMPXPodcastPlaybackViewImp::UpdateToolbarL()
     {
     MPX_FUNC("CMPXPodcastPlaybackViewImp::UpdateToolbar");
 

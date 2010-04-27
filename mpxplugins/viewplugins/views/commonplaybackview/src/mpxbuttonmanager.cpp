@@ -203,7 +203,7 @@ TKeyResponse CMPXButtonManager::OfferKeyEventL(
     MPX_DEBUG3("CMPXButtonManager::OfferKeyEventL(%d, %d) entering", aKeyEvent.iScanCode, aType);
 
     TKeyResponse response( EKeyWasNotConsumed );
-    response = SetAvkonButtonState(aKeyEvent, aType);
+    response = SetAvkonButtonStateL(aKeyEvent, aType);
     MPX_DEBUG2("CMPXButtonManager::OfferKeyEventL() exiting %d", response);
     return response;
     }
@@ -327,7 +327,7 @@ void CMPXButtonManager::CreateRockerAvkonButtonsL(const CCoeControl &aContainer)
 // CMPXCommonPlaybackViewContainer::SetAvkonButtonState
 // -----------------------------------------------------------------------------
 //
-TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
+TKeyResponse CMPXButtonManager::SetAvkonButtonStateL(const TKeyEvent& aKeyEvent,
         TEventCode aType)
     {
 
@@ -335,7 +335,7 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
 
     if (aKeyEvent.iScanCode == EStdKeyLeftArrow || aKeyEvent.iCode == EKeyLeftArrow)
         {    
-        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState LeftArrow" );
+        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL LeftArrow" );
         if (aType == EEventKeyDown)
             {
             if (!iIsTouchUi)
@@ -358,13 +358,13 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
             iLongKeyTimer->Cancel();
             if (iIsLongPress)
                {
-               MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState LeftArrow long press" );
+               MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL LeftArrow long press" );
                iIsLongPress = EFalse;
                iObserver->HandleButtonCommandL(EMPXPbvCmdEndSeek);
                }
             else
                {
-               MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState LeftArrow short press" );
+               MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL LeftArrow short press" );
                iObserver->HandleButtonCommandL(EMPXPbvCmdPreviousListItem);
                }
             iIsLongPress = EFalse;
@@ -396,13 +396,13 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
                 iLongKeyTimer->Cancel();
                 if (iIsLongPress)
                     {
-                    MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState RightArrow long press" );
+                    MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL RightArrow long press" );
                     iIsLongPress = EFalse;
                     iObserver->HandleButtonCommandL(EMPXPbvCmdEndSeek);
                     }
                 else
                     {
-				            MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState RightArrow short press" );
+				            MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL RightArrow short press" );
                    iObserver->HandleButtonCommandL(EMPXPbvCmdNextListItem);
                    }
                 iIsLongPress = EFalse;
@@ -413,7 +413,7 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
     else if (aKeyEvent.iScanCode == EStdKeyDevice3 || aKeyEvent.iCode == EKeyDevice3
             || aKeyEvent.iScanCode == EStdKeyEnter || aKeyEvent.iCode == EKeyEnter)
    		{
-   		MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState EStdKeyDevice3 or EStdKeyEnter pressed" );
+   		MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL EStdKeyDevice3 or EStdKeyEnter pressed" );
         if (!iIsTouchUi)
             {
             if (aType == EEventKeyDown)
@@ -468,7 +468,7 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
    		}
     else if (aKeyEvent.iScanCode == EStdKeyDownArrow || aKeyEvent.iCode == EKeyDownArrow)
         {
-        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState EStdKeyDownArrow pressed" );
+        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL EStdKeyDownArrow pressed" );
         if (iVolumeInRocker || iStopInRocker)
            {	
            if (!iIsTouchUi)
@@ -507,7 +507,7 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
 		    }
     else if (aKeyEvent.iScanCode == EStdKeyUpArrow || aKeyEvent.iCode == EKeyUpArrow)
         {
-        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonState EStdKeyUpArrow pressed" );
+        MPX_DEBUG1( "CMPXButtonManager::SetAvkonButtonStateL EStdKeyUpArrow pressed" );
         if(iVolumeInRocker)
             {
 	    	    if (!iIsTouchUi)
@@ -543,15 +543,15 @@ TKeyResponse CMPXButtonManager::SetAvkonButtonState(const TKeyEvent& aKeyEvent,
 TInt CMPXButtonManager::TimerCallback(TAny* aPtr)
     {
     //HandleLongPress();
-    static_cast<CMPXButtonManager*>(aPtr)->HandleLongPress();
-    return KErrNone;
+    MPX_TRAPD( err, static_cast<CMPXButtonManager*>(aPtr)->HandleLongPressL() );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
 // CMPlayerPlaybackContainer::HandleLongPress
 // -----------------------------------------------------------------------------
 //
-void CMPXButtonManager::HandleLongPress()
+void CMPXButtonManager::HandleLongPressL()
     {
     iObserver->HandleButtonCommandL(iLongPressCommandId);
     iLongKeyTimer->Cancel();

@@ -33,7 +33,7 @@
 #include <mpxcollectionutility.h>
 #include <mpxcollectionframeworkdefs.h>
 #include <AknTaskList.h>
-
+#include <mpxharvesterutility.h>
 
 
 #include "cpglobals.h" //to be moved to domain API
@@ -171,6 +171,7 @@ void CMCPMusicPlayer::ConstructL()
         iArtBitmapMask = NULL;
         }
     iCollectionUtility = MMPXCollectionUtility::NewL( this, KMcModeDefault );
+    iHarvester = CMPXHarvesterFactory::NewL();
     iMusicPlayerOpeningTimer = CPeriodic::NewL( CActive::EPriorityLow );
     MPX_DEBUG1("CMCPMusicPlayer::ConstructL --->");
     }
@@ -212,6 +213,10 @@ CMCPMusicPlayer::~CMCPMusicPlayer()
     	{
     	iCollectionUtility->Close();
     	}
+    if ( iHarvester )
+        {
+        iHarvester->Close();
+        }
     delete iMusicPlayerOpeningTimer;
     MPX_DEBUG1("CMCPMusicPlayer::~CMCPMusicPlayer --->");
     }

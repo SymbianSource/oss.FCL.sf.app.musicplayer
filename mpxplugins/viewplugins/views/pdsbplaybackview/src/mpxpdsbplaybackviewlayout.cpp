@@ -87,6 +87,7 @@ CMPXPdSbPlaybackViewLayout::CMPXPdSbPlaybackViewLayout()
 void CMPXPdSbPlaybackViewLayout::ConstructL()
     {
     MPX_FUNC( "CMPXPdSbPlaybackViewLayout::ConstructL" );
+    InitCommonLayoutL();
     }
 
 //  End of File

@@ -173,7 +173,7 @@ NONSHARABLE_CLASS( CMPXButtonManager ) :public CCoeControl,
         /**
         * Sets the avkon rocker button state and send observer commands
         */
-        TKeyResponse SetAvkonButtonState( const TKeyEvent& aKeyEvent, TEventCode aType );
+        TKeyResponse SetAvkonButtonStateL( const TKeyEvent& aKeyEvent, TEventCode aType );
 
         /**
         * Callback for long-press timer
@@ -183,7 +183,7 @@ NONSHARABLE_CLASS( CMPXButtonManager ) :public CCoeControl,
         /**
         * Handle long press event.
         */
-        void HandleLongPress();
+        void HandleLongPressL();
 
     private:    // Data
         TRect iParentRect;

@@ -46,7 +46,8 @@ SOURCE          mpxcollectionviewhgcontainer.cpp
 SOURCE          mpxcollectionviewhglistboxarray.cpp
 SOURCE          mpxcollectionviewhgplaylisthelper.cpp
 SOURCE          mpxcollectionviewhgtnloader.cpp
-SOURCE          mpxpopuplist.cpp
+SOURCE          mpxpopuplist.cpp 
+SOURCE          mpxcollectionviewhgswitchbuffer.cpp
 
 START RESOURCE  ../data/mpxcollectionviewhg.rss
 HEADER

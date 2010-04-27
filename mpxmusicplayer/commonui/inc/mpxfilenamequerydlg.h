@@ -60,6 +60,11 @@ NONSHARABLE_CLASS( CMPXFileNameQueryDlg ): public CAknTextQueryDialog
          * @see CAknTextQueryDialog
          */
     	TBool OkToExitL( TInt aButtonId );
+    	
+    	/**
+    	 * @see CAknTextQueryDialog
+    	 */
+    	TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType ); 
 
 	private:
         /**

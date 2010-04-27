@@ -97,6 +97,14 @@ private:
      * Helper function used inside DoHandleCollectionMessageL
      */
     inline TInt GetTrackCountL(TInt aDrive,TInt aColDbId, TInt aColTable);
+    static TInt AsyncCallHarvesterEventL( TAny* aSelf );
+private:
+    enum TAsyncEvent
+    	{
+    	ECmdIdle,
+    	ECmdScan,
+    	ECmdCancleScan   	
+    	};
     
 private: // data
     MMPXHarvesterUtility*  iHarvesterUtil;
@@ -115,6 +123,9 @@ private: // data
      * EFalse when CollectionDB has no change
      */
     TBool                  isCollectionDBChanged;
+    CAsyncCallBack*        iAsyncCallBack; //owned
+    TAsyncEvent            iAsyncEvent;
+    TBool                  iCancelScan;
     };
 
 

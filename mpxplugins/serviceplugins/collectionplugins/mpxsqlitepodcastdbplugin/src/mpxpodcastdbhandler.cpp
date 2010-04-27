@@ -1211,8 +1211,9 @@ void CMPXPodcastDbHandler::DoRemoveEpisodeL(
         }
 #endif
 
-    // delete the episode
-    iDbPodcast->DeleteEpisodeL(aEpisodeId, aUriArray, aItemChangedMessages, deleteRecord);
+    // delete the episode 
+	// IsAdd is passed EFalse to ensure the episode count will be decremented
+    iDbPodcast->DeleteEpisodeL(aEpisodeId, aUriArray, aItemChangedMessages, EFalse, deleteRecord);
     }
 
 // ----------------------------------------------------------------------------

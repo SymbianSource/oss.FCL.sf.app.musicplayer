@@ -263,7 +263,7 @@ public:
      *
      * @since 3.2
      */
-    void DrawLbxItem( TInt aIndex );
+    void DrawLbxItemL( TInt aIndex );
 
     /**
      * Set Find box's focus.
@@ -356,7 +356,7 @@ public:
     /**
      * Custom handling of menu pane for markable lists
      */
-    void HandleMarkableListDynInitMenuPane(
+    void HandleMarkableListDynInitMenuPaneL(
         TInt aResourceId,
         CEikMenuPane* aMenuPane );
 
@@ -552,7 +552,7 @@ private:
 
     void ProvideDataL( TInt aStart, TInt aEnd );
 
-    void SetScrollbarType();
+    void SetScrollbarTypeL();
 
     void CancelTNRequest();
 
@@ -579,7 +579,7 @@ private:
     /**
      * Refresh list as needed
      */
-    void RefreshL(TInt aIndex);
+    void Refresh(TInt aIndex);
 
     /**
      * Refresh list as needed

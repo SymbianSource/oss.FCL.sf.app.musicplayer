@@ -81,8 +81,8 @@ EXPORT_C TRect CMPXCommonPlaybackViewLayout::IndicatorLayout(
     TAknLayoutRect res;
 
     TMPXPbvLayoutVariants lafVariant(EPbvUndefinedVariant);
-    lafVariant = GetIndicatorVariant(aIndicator);
-    if (lafVariant == EPbvUndefinedVariant)
+    MPX_TRAPD( err, lafVariant = GetIndicatorVariantL(aIndicator) );
+    if ( err != KErrNone || lafVariant == EPbvUndefinedVariant)
        {
        // unsupported
        ASSERT(0);
@@ -178,8 +178,8 @@ EXPORT_C void CMPXCommonPlaybackViewLayout::LayoutLabel(
     TInt /*aOffsety*/ /* =0 */ )
     {
     TMPXPbvLayoutVariants lafVariant(EPbvUndefinedVariant);
-    lafVariant = GetTextVariant(aText);
-    if (lafVariant == EPbvUndefinedVariant)
+    MPX_TRAPD( err, lafVariant = GetTextVariantL(aText) );
+    if ( lafVariant == EPbvUndefinedVariant || err != KErrNone )
         {
         ASSERT(0);
         }
@@ -520,6 +520,19 @@ EXPORT_C TRect CMPXCommonPlaybackViewLayout::ButtonLayout(const TRect& aParentRe
     return res.Rect();
     }
 
+// ---------------------------------------------------------------------------
+//  Init common layout data
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CMPXCommonPlaybackViewLayout::InitCommonLayoutL()
+	{
+    TInt flags( 0 );
+    CRepository* repository = CRepository::NewL( KCRUidMPXMPFeatures );
+    User::LeaveIfError( repository->Get( KMPXMPLocalVariation, flags ));
+    delete repository;
+    repository = NULL;
+    iShowRockerGraphics = static_cast<TBool>( flags & KMPXRockerMappingSupport );
+	}
 
 // ---------------------------------------------------------------------------
 //  Determine the layout (touch, non-touch, landscape, portrait, rocker, etc...)
@@ -529,12 +542,6 @@ EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::DetermineLayoutVari
     {
     TMPXPbvLayoutVariants variant(EPbvUndefinedVariant);
 
-    TInt flags( 0 );
-    CRepository* repository = CRepository::NewL( KCRUidMPXMPFeatures );
-    User::LeaveIfError( repository->Get( KMPXMPLocalVariation, flags ));
-    delete repository;
-    repository = NULL;
-    TBool showRockerGraphics = static_cast<TBool>( flags & KMPXRockerMappingSupport );
 
     TBool isLandscape = Layout_Meta_Data::IsLandscapeOrientation();
 
@@ -548,19 +555,19 @@ EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::DetermineLayoutVari
         {
         variant = EPbvLandscapeNhdTouchWithFM;
         }
-    else if (!showRockerGraphics && !isLandscape )
+    else if (!iShowRockerGraphics && !isLandscape )
         {
         variant = EPbvPortraitWithoutRocker;
         }
-    else if (!showRockerGraphics && isLandscape)
+    else if (!iShowRockerGraphics && isLandscape)
         {
         variant = EPbvLandscapeWithoutRocker;
         }
-    else if (showRockerGraphics && !isLandscape)
+    else if (iShowRockerGraphics && !isLandscape)
         {
         variant = EPbvPortraitWithRocker;
         }
-    else if (showRockerGraphics && isLandscape)
+    else if (iShowRockerGraphics && isLandscape)
         {
         variant = EPbvLandscapeWithRocker;
         }
@@ -569,11 +576,12 @@ EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::DetermineLayoutVari
     return(variant);
     }
 
+
 // ---------------------------------------------------------------------------
 //  Determine the layout variant for a text item
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetTextVariant(TMPXPbvTextIndicator aText)
+EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetTextVariantL(TMPXPbvTextIndicator aText)
     {
     TMPXPbvLayoutVariants layoutVariant = DetermineLayoutVariant();
     TMPXPbvLayoutVariants textVariant;
@@ -608,7 +616,7 @@ EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetTextVariant(TMPX
 // Determine the layout variant type for an indicator item
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetIndicatorVariant(TMPXPbvIndicator aIndicator)
+EXPORT_C TMPXPbvLayoutVariants CMPXCommonPlaybackViewLayout::GetIndicatorVariantL(TMPXPbvIndicator aIndicator)
     {
     TMPXPbvLayoutVariants layoutVariant = DetermineLayoutVariant();
     TMPXPbvLayoutVariants indicatorVariant;

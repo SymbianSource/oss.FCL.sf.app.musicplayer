@@ -228,6 +228,26 @@ TBool CMPXFileNameQueryDlg::OkToExitL( TInt aButtonId )
     }
 
 // -----------------------------------------------------------------------------
+// CMPXFileNameQueryDlg::OfferKeyEventL
+// 
+// -----------------------------------------------------------------------------
+// 
+TKeyResponse CMPXFileNameQueryDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType ) 
+    { 
+    TKeyResponse response = EKeyWasNotConsumed;
+    // consume 'enter' so it won't acknowledge the dialog
+    if ( aType == EEventKey && aKeyEvent.iCode == EKeyEnter ) 
+        { 
+        response = EKeyWasConsumed;
+        } 
+    else
+        {
+        response = CAknTextQueryDialog::OfferKeyEventL(aKeyEvent, aType); 
+        }
+    return response;
+    }
+
+// -----------------------------------------------------------------------------
 // CMPXFileNameQueryDlg::IsValidName
 // -----------------------------------------------------------------------------
 //

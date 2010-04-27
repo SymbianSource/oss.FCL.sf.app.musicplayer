@@ -421,14 +421,13 @@ class CMPXDbMusic :
 
 
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-	    /**
+        /**
         * Returns all songs for a given abstractalbum.
-        * @param aDrive drive ID AbstractAlbum stored
         * @param aAbstractAlbumId abstractalbum to get the songs for
         * @param aAttrs attributes to be retrieved
         * @param aMediaArray returns the song attributes.
         */
-        void GetAllSongsForAbstractAlbumL(TInt aDrive, TInt aAbstractAlbumId,
+        void GetAllSongsForAbstractAlbumL(TUint aAbstractAlbumId,
             const TArray<TMPXAttribute>& aAttrs, CMPXMediaArray& aMediaArray);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
@@ -679,8 +678,8 @@ class CMPXDbMusic :
             CMPXMessageArray* aItemChangedMessages, TUint32& aItemId);
 
         TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
-        	const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
-         	CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
+          const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
+          CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:
         * EMPXMediaGeneralId, EMPXMediaGeneralType, EMPXMediaGeneralCategory,
@@ -696,7 +695,7 @@ class CMPXDbMusic :
         * @return ETrue if the media contains one or more supported attribute;
         *  otherwise EFalse.
         */
-		TBool IsSupported(const CMPXMedia& aMedia);
+        TBool IsSupported(const CMPXMedia& aMedia);
 
     private:    // from MMPXTable
 
@@ -734,8 +733,8 @@ class CMPXDbMusic :
         * Column indexes in the music table
         */
         enum TMusicColumns
-        	{
-        	EMusicUniqueId = KMPXTableDefaultIndex,
+            {
+            EMusicUniqueId = KMPXTableDefaultIndex,
             EMusicDbFlag,
             EMusicVolumeId,
             EMusicTitle,

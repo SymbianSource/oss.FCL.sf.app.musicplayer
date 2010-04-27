@@ -317,7 +317,7 @@ void CMPXUPnPPlaybackDialog::UpdateViewL()
 
     if ( GetUPnPPlaybackDialogCustomControl() && !iSwitchingView )
         {
-        UpdatePlaybackState( iPlaybackState );
+        UpdatePlaybackStateL( iPlaybackState );
         UpdateTrackInfoL( iMedia );
         UpdateTrackPlaybackPositionL( iPosition, iDuration );
         UpdateTrackPosInPlaylistL();
@@ -434,11 +434,11 @@ void CMPXUPnPPlaybackDialog::UpdateTrackInfoL(
 // Update current playback state.
 // ---------------------------------------------------------------------------
 //
-void CMPXUPnPPlaybackDialog::UpdatePlaybackState(
+void CMPXUPnPPlaybackDialog::UpdatePlaybackStateL(
     TMPXPlaybackState aPlaybackState )
     {
-    MPX_FUNC( "CMPXUPnPPlaybackDialog::UpdatePlaybackState()" );
-    MPX_DEBUG2("CMPXUPnPPlaybackDialog::UpdatePlaybackState(%d): Entering", aPlaybackState);
+    MPX_FUNC( "CMPXUPnPPlaybackDialog::UpdatePlaybackStateL()" );
+    MPX_DEBUG2("CMPXUPnPPlaybackDialog::UpdatePlaybackStateL(%d): Entering", aPlaybackState);
 
     if ( GetUPnPPlaybackDialogCustomControl() && !iSwitchingView )
         {
@@ -486,7 +486,7 @@ void CMPXUPnPPlaybackDialog::UpdatePlaybackState(
             }
 
         GetUPnPPlaybackDialogCustomControl()->UpdateButtons( aPlaybackState );
-        UpdateToolbar();
+        UpdateToolbarL();
         }
     else
         {
@@ -1116,7 +1116,7 @@ void CMPXUPnPPlaybackDialog::DoHandleStateChangedL(
         }
     else
         {
-        UpdatePlaybackState( aState );
+        UpdatePlaybackStateL( aState );
 
         switch ( aState )
             {
@@ -1338,7 +1338,7 @@ void CMPXUPnPPlaybackDialog::HandleAllTracksInvalidL()
     MPX_FUNC( "CMPXUPnPPlaybackDialog::HandleAllTracksInvalidL()" );
 
     iPlaybackUtility->CommandL( EPbCmdStop );
-    UpdatePlaybackState( EPbStateStopped );
+    UpdatePlaybackStateL( EPbStateStopped );
 
     // Do not display error if view is not active
     if ( GetUPnPPlaybackDialogCustomControl() )
@@ -1920,7 +1920,7 @@ void CMPXUPnPPlaybackDialog::PreLayoutDynInitL()
         {
         delete iMedia;
         iMedia = NULL;
-        UpdatePlaybackState( iPlaybackState );
+        UpdatePlaybackStateL( iPlaybackState );
         UpdateTrackInfoL( iMedia );
         }
     else if ( iMedia == NULL )
@@ -1935,7 +1935,7 @@ void CMPXUPnPPlaybackDialog::PreLayoutDynInitL()
                 if ( playlist->Count() > 0 )
                     {
                     RequestMediaL();
-                    UpdatePlaybackState( iPlaybackState );
+                    UpdatePlaybackStateL( iPlaybackState );
                     }
                 else
                     {
@@ -2144,37 +2144,56 @@ void CMPXUPnPPlaybackDialog::HandleMediaKeyCommand(
         {
         case EPbCmdSetVolume:
             {
-    		TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
-            if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
-                {
-				if ( aData != iCurrentVolume )
-					{
-					SetVolume( aData );
-					}
-				// popup volume control even if volume didn't change
-				HandlePopupL( EPbCmdSetVolume );
-				}
-            break;
+                    MPX_TRAPD( err,
+                    TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
+                    if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
+                        {
+                        if ( aData != iCurrentVolume )
+                            {
+                            SetVolumeL( aData );
+                            }
+                        // popup volume control even if volume didn't change
+                        HandlePopupL( EPbCmdSetVolume );
+                        }
+                    );
+                    if( err != KErrNone )
+                    	{
+                        MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleMediaKeyCommand EPbCmdSetVolume leave err%d", err ); 
+                    	}
+                    break;
             }
         case EPbCmdMuteVolume:
-            {
-    		TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
-            if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
-                {
-				MuteVolume();
-				HandlePopupL( EPbCmdMuteVolume );
-				}
-            break;
+                    {
+                    MPX_TRAPD( err, 
+                    TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
+                    if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
+                        {
+                        MuteVolumeL();
+                        HandlePopupL( EPbCmdMuteVolume );
+                        }
+                    );
+                    if( err != KErrNone )
+                    	{
+                        MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleMediaKeyCommand EPbCmdMuteVolume leave err%d", err ); 
+                    	}
+                    break;
             }
         case EPbCmdUnMuteVolume:
-            {
-    		TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
-            if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
-                {
-				UnMuteVolume();
-				HandlePopupL( EPbCmdUnMuteVolume );
-				}
-            break;
+                    {
+                    MPX_TRAPD( err,
+                    TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
+                    if ( iAvkonAppUi->IsForeground() || playerState == EPbStatePlaying )
+                        {
+                        UnMuteVolumeL();
+                        HandlePopupL( EPbCmdUnMuteVolume );
+                        }
+                    );
+                    if( err != KErrNone )
+                     	{
+                        MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleMediaKeyCommand EPbCmdUnMuteVolume leave err%d", err ); 
+                     	}
+
+                    break;
             }
         default:
             {
@@ -2197,14 +2216,14 @@ void CMPXUPnPPlaybackDialog::HandleMediaKeyCommand(
                      playerState == EPbStateSeekingBackward )
                     {
                     MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleCustomCommand not foreground, sending command %d to HandleMediaKeyCommandL", aCommand );
-                    TRAP_IGNORE( DoHandleMediaKeyCommandL( aCommand ) );
-                    }
-                else if ( aCommand == EPbCmdPlay || aCommand == EPbCmdPlayPause )
-                    {
+                            TRAP_IGNORE( DoHandleMediaKeyCommandL( aCommand ) );
+                            }
+                        else if ( aCommand == EPbCmdPlay || aCommand == EPbCmdPlayPause )
+                            {
                     MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleCustomCommand not foreground, active idle foreground, sending command %d to HandleMediaKeyCommandL", aCommand );
-                    // not foreground, play without loading playback view
-                    TRAP_IGNORE( DoHandleMediaKeyCommandL( aCommand ) );
-                    }
+                            // not foreground, play without loading playback view
+                            TRAP_IGNORE( DoHandleMediaKeyCommandL( aCommand ) );
+                            }
                 else
                     {
                     MPX_DEBUG2( "CMPXUPnPPlaybackDialog::HandleCustomCommand not foreground, inactive state, command %d ignored", aCommand );
@@ -2411,7 +2430,7 @@ TInt CMPXUPnPPlaybackDialog::DelayedExit( TAny* aPtr )
 // CMPXUPnPPlaybackDialog::SetVolume
 // -----------------------------------------------------------------------------
 //
-void CMPXUPnPPlaybackDialog::SetVolume( const TInt aVolume )
+void CMPXUPnPPlaybackDialog::SetVolumeL( const TInt aVolume )
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -2428,7 +2447,7 @@ void CMPXUPnPPlaybackDialog::SetVolume( const TInt aVolume )
 // CMPXUPnPPlaybackDialog::MuteVolume
 // -----------------------------------------------------------------------------
 //
-void CMPXUPnPPlaybackDialog::MuteVolume()
+void CMPXUPnPPlaybackDialog::MuteVolumeL()
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -2444,7 +2463,7 @@ void CMPXUPnPPlaybackDialog::MuteVolume()
 // CMPXUPnPPlaybackDialog::UnMuteVolume
 // -----------------------------------------------------------------------------
 //
-void CMPXUPnPPlaybackDialog::UnMuteVolume()
+void CMPXUPnPPlaybackDialog::UnMuteVolumeL()
     {
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -2460,7 +2479,7 @@ void CMPXUPnPPlaybackDialog::UnMuteVolume()
 // Updates the middle toolbar button
 // ---------------------------------------------------------------------------
 //
-void CMPXUPnPPlaybackDialog::UpdateToolbar()
+void CMPXUPnPPlaybackDialog::UpdateToolbarL()
     {
     if ( AknLayoutUtils::PenEnabled() )
         {
@@ -2547,7 +2566,7 @@ void CMPXUPnPPlaybackDialog::DynInitToolbarL(TInt aResourceId, CAknToolbar* aToo
     if ( toolbar == aToolbar )
         {
         // Put initializations here to take effect before toolbar is shown
-        UpdateToolbar();
+        UpdateToolbarL();
         aToolbar->UpdateBackground();
        }
     }

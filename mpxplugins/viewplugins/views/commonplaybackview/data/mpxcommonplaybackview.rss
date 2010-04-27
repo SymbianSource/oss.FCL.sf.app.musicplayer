@@ -2255,7 +2255,7 @@ RESOURCE AVKON_BUTTON r_mpx_pbv_rocker_stop_avkon_button
 //
 RESOURCE AVKON_TOOLBAR r_mpx_pbv_touch_toolbar
     {
-    flags = KAknToolbarFixed|KAknToolbarTransparent|KAknToolbarWithoutCba;
+    flags = KAknToolbarFixed|KAknToolbarWithoutCba;
     items =
         {
         TBAR_CTRL

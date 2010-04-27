@@ -1364,6 +1364,26 @@ EXPORT_C TInt CMPXCommonUiHelper::HandleErrorL(
             usingGlobalNote = ETrue;
             break;
             }
+        case KMPXErrorExpiredRights:
+            {
+            // if cannot retrieve value from aMedia, use invalid_group error	
+			if( !aMedia )
+			    {
+			    errorText = StringLoader::LoadLC( R_MPX_INVALID_GROUP_TEXT );
+			    }	
+			else
+				{
+				if ( aMedia->IsSupported( KMPXMediaGeneralTitle ) )
+				    {
+            		const TDesC& trackTitle( aMedia->ValueText( 
+            			                           KMPXMediaGeneralTitle ) );
+            	    errorText = StringLoader::LoadLC( 
+            		                            R_MPX_DRM_EXPIRED_PLAYBACK, 
+            			  	                    trackTitle );
+            	    }
+                }
+            break;
+            }
         case KErrLocked:
             errorText = StringLoader::LoadLC( R_MPX_CANNOT_PROCEED_WITH_OPERATION );
             break;

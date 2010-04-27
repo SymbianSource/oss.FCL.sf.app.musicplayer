@@ -503,7 +503,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateViewL()
 
     if ( iContainer && !iSwitchingView )
         {
-        UpdatePlaybackState( iPlaybackState );
+        UpdatePlaybackStateL( iPlaybackState );
         UpdateTrackInfoL( iMedia );
         UpdateTrackPlaybackPositionL( iPosition, iDuration );
         UpdateTrackPosInPlaylistL();
@@ -615,7 +615,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateTrackInfoL(
 // Update current playback state.
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CMPXCommonPlaybackViewImp::UpdatePlaybackState(
+EXPORT_C void CMPXCommonPlaybackViewImp::UpdatePlaybackStateL(
     TMPXPlaybackState aPlaybackState )
     {
     MPX_DEBUG2("CMPXCommonPlaybackViewImp::UpdatePlaybackState(%d): Entering", aPlaybackState);
@@ -1354,7 +1354,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoHandleStateChangedL(
     {
     MPX_FUNC_EX( "CMPXCommonPlaybackViewImp::DoHandleStateChangedL" );
     MPX_DEBUG2( "CMPXCommonPlaybackViewImp::DoHandleStateChangedL %d", aState );
-    UpdatePlaybackState( aState );
+    UpdatePlaybackStateL( aState );
 
     switch ( aState )
         {
@@ -1497,6 +1497,11 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleErrorL( TInt aError )
             case KErrCANewFileHandleRequired:
             case KErrPermissionDenied:
                 {
+                if (aError == KErrCANoPermission ||
+                    aError == KErrCANoRights)
+                    {
+                    iCommonUiHelper->HandleErrorL( KMPXErrorExpiredRights, iMedia );
+                    }
                 TBool skip(ETrue);
 
                 if ( iMedia )
@@ -1654,7 +1659,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleAllTracksInvalidL()
     MPX_DEBUG2("CMPXCommonPlaybackViewImp::HandleAllTracksInvalidL: iDatabaseNotReady (%d)", iDatabaseNotReady);
 
     iPlaybackUtility->CommandL( EPbCmdStop );
-    UpdatePlaybackState( EPbStateStopped );
+    UpdatePlaybackStateL( EPbStateStopped );
 
     TInt mpxWindowGroupId = CEikonEnv::Static()->RootWin().Identifier();
 
@@ -2591,7 +2596,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
         {
         delete iMedia;
         iMedia = NULL;
-        UpdatePlaybackState( iPlaybackState );
+        UpdatePlaybackStateL( iPlaybackState );
         UpdateTrackInfoL( iMedia );
         }
     else
@@ -2617,7 +2622,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
                     if ( playlist->Count() > 0 )
                         {
                         RequestMediaL();
-                        UpdatePlaybackState( iPlaybackState );
+                        UpdatePlaybackStateL( iPlaybackState );
                         }
                     else
                         {
@@ -2862,8 +2867,13 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                         ETrue );
                     }
 
+                // Check if HDMI cable is connected    
+                TBool isHDMIConnected = iTvOutConfig->HdmiCableConnected(); 
+                aMenuPane->SetItemDimmed( EMPXPbvCmdOpenMusicSettings, isHDMIConnected );
+                aMenuPane->SetItemDimmed( EMPXPbvCmdEqualizer, isHDMIConnected );
+                
                 // Check if FM Transmitter is supported
-                if ( !FeatureManager::FeatureSupported( KFeatureIdFmtx ) )
+                if ( !FeatureManager::FeatureSupported( KFeatureIdFmtx ) || isHDMIConnected )
 					{
 					aMenuPane->SetItemDimmed(
 						EMPXPbvCmdFMTransmitter,
@@ -2873,7 +2883,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
 
                 if ( iUpnpFrameworkSupport )
                     {
-                    if ( !iMedia || !IsUpnpVisible() )
+                    if ( !iMedia || !IsUpnpVisibleL() )
                         {
                         GetCurrentPlayerDetails();
                         if ( iCurrentPlayerType == EPbLocal )
@@ -2893,7 +2903,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
                     {
                     return;
                     }
-                aMenuPane->SetItemDimmed( EMPXPbvCmdOpenMusicSettings, iTvOutConfig->HdmiCableConnected());        
                 }
             break;
             }
@@ -3022,10 +3031,10 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
         else
             {
             if ( StatusPane()->CurrentLayoutResId() !=
-                 R_AVKON_STATUS_PANE_LAYOUT_USUAL )
+                 R_AVKON_WIDESCREEN_PANE_LAYOUT_USUAL_FLAT )
                 {
                 TRAP_IGNORE(
-                    StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL ));
+                    StatusPane()->SwitchLayoutL( R_AVKON_WIDESCREEN_PANE_LAYOUT_USUAL_FLAT ));
                 }
             }
 
@@ -3134,7 +3143,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleSettingChange(
 // Taken from Gallery upnp support implementation
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CMPXCommonPlaybackViewImp::IsUpnpVisible()
+EXPORT_C TBool CMPXCommonPlaybackViewImp::IsUpnpVisibleL()
     {
     MPX_FUNC( "CMPXCommonPlaybackViewImp::IsUpnpVisible" );
     TBool returnValue = EFalse;
@@ -3542,7 +3551,7 @@ EXPORT_C CMPXMedia* CMPXCommonPlaybackViewImp::PrepareMediaForPlaylistLC(
 EXPORT_C TBool CMPXCommonPlaybackViewImp::IsCommandSupportedL()
     {
     TBool forwardCommand = ETrue;
-    if ( iUpnpFrameworkSupport && IsUpnpVisible() )
+    if ( iUpnpFrameworkSupport && IsUpnpVisibleL() )
         {
         // retrieve iCurrentPlayerType info
         GetCurrentPlayerDetails();
@@ -3908,9 +3917,9 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL()
 // Updates the middle toolbar button
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbar()
+EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbarL()
     {
-    MPX_FUNC("CMPXCommonPlaybackViewImp::UpdateToolbar");
+    MPX_FUNC("CMPXCommonPlaybackViewImp::UpdateToolbarL");
 
     if ( AknLayoutUtils::PenEnabled() )
         {
@@ -3987,29 +3996,34 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbar()
 //
 TInt CMPXCommonPlaybackViewImp::HandleDelayedError( TAny* aPtr )
     {
+	TInt ret( KErrNone );
     CMPXCommonPlaybackViewImp* pv = reinterpret_cast<CMPXCommonPlaybackViewImp*>( aPtr );
     pv->iDelayedErrorTimer->Cancel();
-
     // compare index
     if ( pv->iPlaybackUtility )
     	{
         MMPXSource* source( pv->iPlaybackUtility->Source() );
         if ( source )
     	    {
-            CMPXCollectionPlaylist* pl( source->PlaylistL() );
-        	if ( pl )
-                {
-                CleanupStack::PushL( pl );
-                if ( pv->iErrIndex == pl->Index() )
-                	{
-                	pv->HandleErrorL( pv->iLastDelayedErr );
-                	}
-                CleanupStack::PopAndDestroy( pl );
-                }
+            CMPXCollectionPlaylist* pl( NULL );
+            MPX_TRAP( ret, pl = source->PlaylistL() );
+            if( ret != KErrNone )
+            	{
+                return ret;
+            	}
+
+			if ( pv->iErrIndex == pl->Index() )
+				{
+				MPX_TRAP( ret, pv->HandleErrorL( pv->iLastDelayedErr ) );
+				}
+			
+			delete pl;
+			pl = NULL;
+
             }
     	}
 
-    return KErrNone;
+    return ret;
     }
 
 // ---------------------------------------------------------------------------
@@ -4077,7 +4091,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL()
         {
         toolbar->SetToolbarVisibility(EFalse);
         }
-    iViewUtility->ActivateViewL( TUid::Uid(KMPXPluginTypeMetadataEditorUid) );
+    TRAP_IGNORE( iViewUtility->ActivateViewL( TUid::Uid(KMPXPluginTypeMetadataEditorUid) ) );
     if ( toolbar )
         {
         toolbar->SetToolbarVisibility(ETrue);

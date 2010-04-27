@@ -96,6 +96,7 @@ void CMPXEmbeddedPlaybackViewLayout::ConstructL()
     {
     MPX_FUNC( "CMPXEmbeddedPlaybackViewLayout::ConstructL" );
     iCommonUiHelper = CMPXCommonUiHelper::NewL();
+    InitCommonLayoutL();
     }
 
 // ---------------------------------------------------------------------------

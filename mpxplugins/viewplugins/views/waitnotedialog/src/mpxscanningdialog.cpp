@@ -54,6 +54,8 @@ CMPXScanningWaitDialog::CMPXScanningWaitDialog( MMPXWaitNoteObserver* aObs,
     iTotalNewTracks = 0;
     iInitialCount = 0;
     isCollectionDBChanged = EFalse;
+    iAsyncEvent = ECmdIdle;
+
     }
 
 
@@ -63,8 +65,13 @@ CMPXScanningWaitDialog::CMPXScanningWaitDialog( MMPXWaitNoteObserver* aObs,
 //
 void CMPXScanningWaitDialog::ConstructL()
     {
-    iHarvesterUtil = CMPXHarvesterFactory::NewL();
+	 MPX_DEBUG1("CMPXScanningWaitDialog::ConstructL <---");
     BaseConstructL();
+
+	TCallBack callback( CMPXScanningWaitDialog::AsyncCallHarvesterEventL, this );
+	iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityHigh );
+	iAsyncCallBack->Set( callback );
+    MPX_DEBUG1("CMPXScanningWaitDialog::ConstructL --->");
     }
 
 
@@ -93,6 +100,9 @@ CMPXScanningWaitDialog::~CMPXScanningWaitDialog()
         {
         iHarvesterUtil->Close();
         }
+    iHarvesterUtil = NULL;
+    delete iAsyncCallBack;
+    iAsyncCallBack = NULL;
     }
 
 // ---------------------------------------------------------------------------
@@ -136,8 +146,14 @@ void CMPXScanningWaitDialog::PreNoteDisplayHandleL()
         }
         
     // Start the scanning in harvester
-    iHarvesterUtil->ScanL();
-    iScanningError = KErrNone;
+    // Just to be faster, lets just create a small async callback and then
+    // call ScanL   
+    if( !iAsyncCallBack->IsActive() )
+    	{
+		iAsyncEvent = ECmdScan;
+		iCancelScan = EFalse;
+		iAsyncCallBack->CallBack();
+    	}
     }
 
 // ---------------------------------------------------------------------------
@@ -154,16 +170,19 @@ void CMPXScanningWaitDialog::PostNoteHandleL( TInt aButtonId )
     HBufC* text = NULL;
     if( aButtonId == EAknSoftkeyCancel )
         {
-        iScanningError = KErrCancel;
-        // If harvester crashed,..... restart it.
-        MPX_TRAPD( err, iHarvesterUtil->CancelScanL() );
-        if( err != KErrNone )
-            {
-            iHarvesterUtil->Close();
-            iHarvesterUtil = NULL;
-            iHarvesterUtil = CMPXHarvesterFactory::NewL(); 
-            }
-        
+		// cancel scan in harvester
+		// Just to be faster, lets just create a small async callback and then
+		// call CancelScanL   
+		if( !iAsyncCallBack->IsActive() )
+			{
+			iAsyncEvent = ECmdCancleScan;
+			iAsyncCallBack->CallBack();
+			}      
+		else
+			{
+		    iCancelScan = ETrue;
+			}
+
         // When stop refreshing library, prompt a process waiting dialog.
         // Inform user to wait for the updating library.
         HBufC* waitText = StringLoader::LoadLC( R_MPX_UPDATING_LIBRARY_TXT );  
@@ -272,7 +291,10 @@ void CMPXScanningWaitDialog::HandleCollectionMessage(
 void CMPXScanningWaitDialog::HandleDatabaseCorruptionL()
     {
     // Cleanup Harvester
-    iHarvesterUtil->RecreateDatabasesL();
+	if( iHarvesterUtil != NULL )
+		{
+	    iHarvesterUtil->RecreateDatabasesL();
+		}
     }
 
 // ---------------------------------------------------------------------------
@@ -283,6 +305,7 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
     const CMPXMessage& aMessage )
     {
     MPX_FUNC( "CMPXScanningWaitDialog::DoHandleCollectionMessageL" );
+    
     TMPXMessageId id( aMessage.ValueTObjectL<TMPXMessageId>( KMPXMessageGeneralId ) );
     if ( KMPXMessageGeneral == id )
         {
@@ -487,6 +510,47 @@ TInt CMPXScanningWaitDialog::GetTrackCountL(TInt aDrive,TInt aColDbId, TInt aCol
     MPX_DEBUG2("--->CMPXScanningWaitDialog::GetTrackCountL() count = %d", count );
 
     return count;
+    }
+// ---------------------------------------------------------------------------
+// async callback 
+// ---------------------------------------------------------------------------
+//
+TInt CMPXScanningWaitDialog::AsyncCallHarvesterEventL( TAny* aSelf )
+    {
+	MPX_DEBUG1("CMPXScanningWaitDialog::CallHarvesterScanL <---");
+	CMPXScanningWaitDialog* self = static_cast<CMPXScanningWaitDialog*>( aSelf );
+	if( self->iHarvesterUtil == NULL )
+		{
+	    self->iHarvesterUtil = CMPXHarvesterFactory::NewL();
+		}
+	if( self->iAsyncEvent == ECmdScan )
+		{
+	    if( !self->iCancelScan )
+	    	{
+		    self->iHarvesterUtil->ScanL();
+		    self->iScanningError = KErrNone;
+	    	}
+	    else
+	    	{
+	        self->iCancelScan = EFalse;
+	    	}
+		}
+	
+	if( self->iAsyncEvent == ECmdCancleScan || self->iCancelScan )
+		{
+	    self->iScanningError = KErrCancel; 
+        // If harvester crashed,..... restart it.
+		MPX_TRAPD( err, self->iHarvesterUtil->CancelScanL() );
+		if( err != KErrNone )
+			{
+		    self->iHarvesterUtil->Close();
+		    self->iHarvesterUtil = NULL;
+		    self->iHarvesterUtil = CMPXHarvesterFactory::NewL(); 
+			}
+		}
+	self->iAsyncEvent = ECmdIdle;
+    MPX_DEBUG1("CMPXScanningWaitDialog::CallHarvesterScanL --->");
+    return KErrNone;
     }
 // END OF FILE
 

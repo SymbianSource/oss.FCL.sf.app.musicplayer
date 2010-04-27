@@ -94,6 +94,7 @@ CMPXUPnPPlaybackDialogLayout::CMPXUPnPPlaybackDialogLayout()
 void CMPXUPnPPlaybackDialogLayout::ConstructL()
     {
     MPX_FUNC( "CMPXUPnPPlaybackDialogLayout::ConstructL" );
+    InitCommonLayoutL();
     }
 
 // ---------------------------------------------------------------------------

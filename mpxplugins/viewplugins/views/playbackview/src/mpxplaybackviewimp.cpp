@@ -208,7 +208,7 @@ void CMPXPlaybackViewImp::DoHandlePlaybackMessageL(
             {
             case TMPXPlaybackMessage::EStateChanged:
                 UpdateMiddleSoftKeyDisplayL();
-                UpdateToolbar();
+                UpdateToolbarL();
                 break;
 
             default:
@@ -228,7 +228,7 @@ void CMPXPlaybackViewImp::DynInitToolbarL(TInt aResourceId, CAknToolbar* aToolba
     if (aResourceId == R_MPX_PBV_TOUCH_TOOLBAR)
         {
         // Put initializations here to take effect before toolbar is shown
-        UpdateToolbar();
+        UpdateToolbarL();
     	aToolbar->UpdateBackground();
        }
     }

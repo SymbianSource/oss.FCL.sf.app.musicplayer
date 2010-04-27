@@ -1241,7 +1241,7 @@ void CMPXPodcastCollectionViewImp::HandleDynInitUpnpL(
     {
     MPX_FUNC("CMPXPodcastCollectionViewImp::HandleDynInitUpnpL()");
 
-    if ( !IsUpnpVisible() )
+    if ( !IsUpnpVisibleL() )
         {
         GetCurrentPlayerDetails();
 
@@ -1314,9 +1314,9 @@ void CMPXPodcastCollectionViewImp::HandleDynInitUpnpL(
 // Checks if UPnP access point is defined
 // -----------------------------------------------------------------------------
 //
-TBool CMPXPodcastCollectionViewImp::IsUpnpVisible()
+TBool CMPXPodcastCollectionViewImp::IsUpnpVisibleL()
     {
-    MPX_FUNC( "CMPXPodcastCollectionViewImp::IsUpnpVisible" );
+    MPX_FUNC( "CMPXPodcastCollectionViewImp::IsUpnpVisibleL" );
     
     TBool returnValue = EFalse;
 #ifdef UPNP_INCLUDED
@@ -3854,7 +3854,7 @@ void CMPXPodcastCollectionViewImp::DynInitMenuPaneL(
     if (!(aResourceId == R_AVKON_MENUPANE_MARKABLE_LIST && usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive))
         {
         // Custom handling of menu pane for markable lists
-        iContainer->Common()->HandleMarkableListDynInitMenuPane(
+        iContainer->Common()->HandleMarkableListDynInitMenuPaneL(
             aResourceId,
             aMenuPane );
         }

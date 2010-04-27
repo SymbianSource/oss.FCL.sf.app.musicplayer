@@ -67,11 +67,11 @@ CMpxTNLoader::~CMpxTNLoader ( )
 TInt CMpxTNLoader::LoadThumbnail( TAny* aSelf )
     {
     CMpxTNLoader* self = (CMpxTNLoader*)aSelf;
-    self->LoadNextTN();
-    return KErrNone;
+    MPX_TRAPD( err, self->LoadNextTNL() );
+    return err;
     }
 
-void CMpxTNLoader::LoadNextTN()
+void CMpxTNLoader::LoadNextTNL()
     {
     if( iPaused )
         return;

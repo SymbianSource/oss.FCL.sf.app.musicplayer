@@ -1653,7 +1653,7 @@ RESOURCE CBA r_mpx_collection_albumsongs_list_cba
         CBA_BUTTON
             {
             id = EAknSoftkeyYes;
-            txt = qtn_mus_sk1_play;
+            txt = "";
             },
         CBA_BUTTON
             {
@@ -1663,7 +1663,7 @@ RESOURCE CBA r_mpx_collection_albumsongs_list_cba
         CBA_BUTTON
             {
             id = EAknSoftkeyYes;
-            txt = qtn_mus_sk1_play;
+            txt = "";
             }
         };
     }

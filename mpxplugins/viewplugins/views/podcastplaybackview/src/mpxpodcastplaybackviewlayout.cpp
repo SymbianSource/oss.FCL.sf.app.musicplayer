@@ -91,6 +91,7 @@ CMPXPodcastPlaybackViewLayout::CMPXPodcastPlaybackViewLayout()
 void CMPXPodcastPlaybackViewLayout::ConstructL()
     {
     MPX_FUNC( "CMPXPodcastPlaybackViewLayout::ConstructL" );
+    InitCommonLayoutL();
     }
 
 // ---------------------------------------------------------------------------

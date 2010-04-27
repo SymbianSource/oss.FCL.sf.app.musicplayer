@@ -74,7 +74,7 @@ private: // NEW FUNCTIONS
     TInt FindLoadingById(TThumbnailRequestId aId, TBool aRemove = EFalse);
     TInt FindLoadingByIndex(TInt aIndex, TBool aRemove = EFalse);
     static TInt LoadThumbnail( TAny* aSelf );
-    void LoadNextTN();
+    void LoadNextTNL();
 
     static TInt ResumeCallback(TAny* aPtr);
     

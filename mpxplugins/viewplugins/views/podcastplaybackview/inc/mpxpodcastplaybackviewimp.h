@@ -182,7 +182,7 @@ private:
      * Updates the middle (play/pause) toolbar control key
      * icon based on playback state
      */
-    void UpdateToolbar();
+    void UpdateToolbarL();
 
 private:    // data
 

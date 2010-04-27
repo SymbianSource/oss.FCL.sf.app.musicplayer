@@ -128,7 +128,7 @@ public:
      *
      *  @param aMedia Album to be stored
      */
-     void SaveSelectedAlbum (CMPXMedia &aMedia);
+     void SaveSelectedAlbumL (CMPXMedia &aMedia);
 
      /**
      *  Restores selected album.
@@ -282,7 +282,7 @@ private:
      *
      * @return ETrue if visible, EFalse otherwise
      */
-    TBool IsUpnpVisible();
+    TBool IsUpnpVisibleL();
 
     /**
      * Displays the available players in the Play via submenu
@@ -878,7 +878,6 @@ private:
  	 * Display information about MusicPlayer version.
  	 */
      void  DisplayAboutDlgL() const;
-	 	 
 	/*
  	 * Internal functions to show the Educating user URI.
  	 */

@@ -402,9 +402,14 @@ void CMusicContentPublisher::DoPublishModifiedL()
     MPX_FUNC("CMusicContentPublisher::DoPublishModifiedL");
     if (iCPSInterface && iInstanceId )
         {
-        CLiwMap * datamap = iPublishingDataMap.GetModifiedLC();
-        // Must re-publish all actions even if only one of them has changed,
-        // otherwise non-modified actions won't work any more
+        // Must re-publish all data and actions even if only one of them has changed,
+        // otherwise non-modified data might go missing        
+        CLiwMap * datamap = NULL;
+        if ( iPublishingDataMap.IsModified() )
+            {
+            datamap = iPublishingDataMap.GetAllLC();
+            }
+
         CLiwMap * actionmap = NULL;
         if ( iPublishingActionMap.IsModified() )
             {

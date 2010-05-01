@@ -35,6 +35,7 @@ HEADERS += inc/unittest_mpcollectioncontainers.h \
            ../../inc/mpcollectioncontainer.h \
            ../../inc/mpcollectionlistcontainer.h \
            ../../inc/mpcollectioncontainerallsongs.h \
+           ../../inc/mpcollectioncontainerartists.h \
            ../../inc/mpcollectioncontaineralbums.h \
            ../../inc/mpcollectioncontainerplaylists.h \
            ../../inc/mpcollectioncontainergenres.h \
@@ -48,6 +49,7 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainer.cpp \
            ../../src/mpcollectionlistcontainer.cpp \
            ../../src/mpcollectioncontainerallsongs.cpp \
+           ../../src/mpcollectioncontainerartists.cpp \
            ../../src/mpcollectioncontaineralbums.cpp \
            ../../src/mpcollectioncontainerplaylists.cpp \
            ../../src/mpcollectioncontainergenres.cpp \ 

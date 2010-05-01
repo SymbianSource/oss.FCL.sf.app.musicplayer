@@ -19,6 +19,7 @@
 #include <QLocale>
 #include <hbmessagebox.h>
 #include <hbprogressdialog.h>
+#include <hbaction.h>
 #include <hbinstance.h>
 #include <xqsharablefile.h>
 
@@ -66,7 +67,7 @@
  */
 
 /*!
-    \fn void libraryRefreshed()
+    \fn void libraryUpdated()
 
     This signal is emitted when MpSongScannerHelper ends scanning,
     or USB-MTP Synchronization finishes.
@@ -182,7 +183,7 @@ MpEngine::MpEngine()
     : mMpxHarvesterWrapper(0),
       mSongScanner(0),
       mMediaKeyHandler(0),
-      mUsbBlockingNote(0),
+      mUsbOutstandingNote(0),
       mMpxCollectionWrapper(0),
       mMpxPlaybackWrapper(0),
       mMpTranslator(0),
@@ -284,8 +285,8 @@ void MpEngine::close( )
     mSongScanner = 0;
     delete mMediaKeyHandler;
     mMediaKeyHandler = 0;   
-    delete mUsbBlockingNote;
-    mUsbBlockingNote = 0;
+    delete mUsbOutstandingNote;
+    mUsbOutstandingNote = 0;
     delete mMpxPlaybackWrapper;
     mMpxPlaybackWrapper = 0;
     delete mMpxHarvesterWrapper;
@@ -301,20 +302,6 @@ void MpEngine::close( )
 */
 
 /*!
- Refresh library by starting the scan.
- If scanning is already ongoing, this request is ignored.
- */
-void MpEngine::refreshLibrary()
-{
-    TX_ENTRY
-    if ( !verifyUsbBlocking( true ) ) {
-        emit libraryAboutToRefresh();
-        mSongScanner->scan();
-    }
-    TX_EXIT
-}
-
-/*!
  \
  Used to verify if an action can be executed depending on USB blocking state.
  If not, a notification note might be displayed.
@@ -326,10 +313,11 @@ bool MpEngine::verifyUsbBlocking( bool showMessage )
     if ( mUsbBlockingState == USB_Connected ) {
         result = true;
         if ( showMessage ) {
-            HbMessageBox dialog ( HbMessageBox::MessageTypeInformation );
-            dialog.setText( QString( tr( "USB connection in progress. Cannot proceed with operation" ) ) );
-            dialog.setModal( true );
-            dialog.exec();
+            HbMessageBox *dialog = new HbMessageBox( HbMessageBox::MessageTypeInformation );
+            dialog->setText( hbTrId( "txt_mus_info_usb_conn_in_progress" ) );
+            dialog->setModal( true );
+            setOutstandingPopup( dialog );
+            mUsbOutstandingNote->show();;
         }
     }
     TX_EXIT
@@ -344,6 +332,20 @@ void MpEngine::checkForSystemEvents()
 {
     TX_ENTRY
     mMpxHarvesterWrapper->checkForSystemEvents();
+    TX_EXIT
+}
+
+/*!
+ Slot to be called to start Refresh library process.
+ If scanning is already ongoing, this request is ignored.
+ */
+void MpEngine::refreshLibrary()
+{
+    TX_ENTRY
+    if ( !verifyUsbBlocking( true ) ) {
+        emit libraryAboutToUpdate();
+        mSongScanner->scan();
+    }
     TX_EXIT
 }
 
@@ -364,7 +366,7 @@ void MpEngine::handleScanEnded( int count, int error ) {
     Q_UNUSED( count );
     Q_UNUSED( error );
     mMediaKeyHandler->setEnabled(true);
-    emit libraryRefreshed();
+    emit libraryUpdated();
     TX_EXIT
 }
 
@@ -383,7 +385,7 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
             break;
         case DiskRemoved:
             if ( mUsbBlockingState != USB_Synchronizing ) {
-                emit libraryRefreshed();
+                emit libraryUpdated();
             }
             break;
         case DiskInserted:
@@ -391,7 +393,7 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
                 refreshLibrary();
             }
             else if ( mUsbBlockingState == USB_Connected ) {
-                emit libraryRefreshed();
+                emit libraryUpdated();
             }
             break;
         default:
@@ -428,12 +430,12 @@ void MpEngine::handleUsbEvent( MpxUsbEvents event )
 }
 
 /*!
- Slot to be called when mUsbBlockingNote is about to close.
+ Slot to be called when mUsbOutstandingNote is about to close.
  */
-void MpEngine::handleBlockingNoteClosing()
+void MpEngine::handleOutstandingNoteClosing()
 {
     TX_ENTRY
-    mUsbBlockingNote = 0;
+    mUsbOutstandingNote = 0;
     TX_EXIT
 }
 
@@ -463,18 +465,20 @@ void MpEngine::handleUsbMassStorageEndEvent()
 
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
-    
-    if ( mUsbBlockingNote ) {
-        mUsbBlockingNote->close();
-    }
-    HbMessageBox promptRefresh( HbMessageBox::MessageTypeQuestion );
-    promptRefresh.setText( QString( tr( "List may need refreshing due to recent USB synchronisation. Refresh now?" ) ) );
-    promptRefresh.setTimeout( HbPopup::NoTimeout );
-    promptRefresh.setModal( true );
-    HbAction *action = promptRefresh.exec();
-    if ( action == promptRefresh.primaryAction() ) {
-        refreshLibrary();
-    }
+
+    HbAction *action;
+    HbMessageBox *promptRefresh = new HbMessageBox( HbMessageBox::MessageTypeQuestion );
+    promptRefresh->setText( hbTrId( "txt_mus_info_music_may_need_to_be_refreshed" ) );
+    promptRefresh->setTimeout( HbPopup::NoTimeout );
+    promptRefresh->setModal( true );
+    promptRefresh->clearActions();
+    action = new HbAction( hbTrId( "txt_common_button_yes" ) );
+    connect( action, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+    promptRefresh->addAction( action );
+    action = new HbAction( hbTrId( "txt_common_button_no" ) );
+    promptRefresh->addAction( action );
+    setOutstandingPopup( promptRefresh );
+    mUsbOutstandingNote->show();
     TX_EXIT
 }
 
@@ -490,7 +494,7 @@ void MpEngine::handleUsbMtpStartEvent()
     emit usbBlocked(true);
     
     //Cancel any ongoing operation.
-    emit libraryAboutToRefresh();
+    emit libraryAboutToUpdate();
     
     launchBlockingNote();
     
@@ -508,11 +512,11 @@ void MpEngine::handleUsbMtpEndEvent()
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
     
-    if ( mUsbBlockingNote ) {
-        mUsbBlockingNote->close();
+    if ( mUsbOutstandingNote ) {
+        mUsbOutstandingNote->close();
     }
     if ( mPreviousUsbState == USB_Synchronizing ) {
-        emit libraryRefreshed();
+        emit libraryUpdated();
     }
     TX_EXIT
 }
@@ -547,19 +551,38 @@ void MpEngine::changeUsbBlockingState( UsbBlockingState state )
 void MpEngine::launchBlockingNote()
 {
     TX_ENTRY
-    if ( !mUsbBlockingNote ) {
-        mUsbBlockingNote = new HbProgressDialog( HbProgressDialog::WaitDialog );        
-        mUsbBlockingNote->setModal( true );
-        mUsbBlockingNote->setPrimaryAction( 0 );
-        mUsbBlockingNote->setTextAlignment( Qt::AlignCenter );
-        mUsbBlockingNote->setAttribute( Qt::WA_DeleteOnClose );
-        mUsbBlockingNote->setDismissPolicy( HbPopup::NoDismiss );        
-        mUsbBlockingNote->setText( QString( tr( "USB connection in progress" ) ) );
-        connect( mUsbBlockingNote, SIGNAL( aboutToClose() ), this, SLOT( handleBlockingNoteClosing() ) );
-    }
-    
-    mUsbBlockingNote->show();
 
+    HbProgressDialog *usbBlockingNote = new HbProgressDialog( HbProgressDialog::WaitDialog );
+    usbBlockingNote->setModal( true );
+    if ( usbBlockingNote->actions().count() ) {
+        //Hide cancel action.
+        usbBlockingNote->actions().at( 0 )->setVisible( false );
+    }
+    usbBlockingNote->setDismissPolicy( HbPopup::NoDismiss );
+    usbBlockingNote->setText( hbTrId( "txt_mus_info_usb_conn_in_progress" ) );
+    setOutstandingPopup( usbBlockingNote );
+    mUsbOutstandingNote->show();
+
+    TX_EXIT
+}
+
+/*!
+ \internal
+ sets \a popup as the current outstanding popup and cancels any other active popup.
+ */
+void MpEngine::setOutstandingPopup( HbPopup *popup )
+{
+    TX_ENTRY
+    //Close previous popup (Normally blocking usb note)
+    if ( mUsbOutstandingNote ) {
+        disconnect( mUsbOutstandingNote, SIGNAL( aboutToClose() ), this, SLOT( handleOutstandingNoteClosing() ) );
+        mUsbOutstandingNote->close();
+    }
+
+    //Set new outstanding popup
+    popup->setAttribute( Qt::WA_DeleteOnClose );
+    connect( popup, SIGNAL( aboutToClose() ), this, SLOT( handleOutstandingNoteClosing() ) );
+    mUsbOutstandingNote = popup;
     TX_EXIT
 }
 

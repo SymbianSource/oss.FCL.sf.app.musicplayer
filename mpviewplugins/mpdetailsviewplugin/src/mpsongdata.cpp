@@ -61,13 +61,6 @@ const int KUndefined = -1;
  */
 MpSongData::MpSongData( QObject *parent )
     : QObject( parent ),
-      mTitle( NULL ),
-      mAlbum( NULL ),
-      mArtist( NULL ),
-      mComposer( NULL),
-      mGenre( NULL ),
-      mYear( NULL ),
-      mAlbumTrack( NULL ),
       mAlbumArt(),
       mReqId( KUndefined )
 {

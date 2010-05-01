@@ -29,7 +29,7 @@
 class MMPXDbAlbumObserver
     {
     public:
-        virtual TInt HandleIsUnknownArtistL(TUint32 aId) = 0;    
+        virtual TInt HandleIsUnknownArtistL(TUint32 aId) = 0;
         virtual TUint32 HandleArtistForAlbumL( const TUint32 aId ) = 0;
     };
 /**
@@ -99,7 +99,7 @@ class CMPXDbAlbum :
         */
         void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TUint32 aArtist);
-        
+
 		/**
 	* Gets the details for all category items.
 	* @param aAttrs attributes to be returned
@@ -109,7 +109,7 @@ class CMPXDbAlbum :
 			CMPXMediaArray& aMediaArray);
 
 		/**
-	* Update a category item. 
+	* Update a category item.
 	* @param aId: The ID of the category to update
 	* @param aMedia: The media data
 	* @param aDriveId: The Drive Id the name (category) belongs
@@ -122,17 +122,17 @@ class CMPXDbAlbum :
 		/**
 	* Get albums count for a specified artist
 	* @param aId: The ID of the artist
-	*/		
+	*/
 	    TInt GetAlbumsCountForArtistL(TUint32 aArtistId);
 
 		/**
 	* Get songs count for a specified album and a specified artist
 	* @param aArtistId: The ID of the artist
 	* @param aAlbumId: The ID of the album
-	*/		
+	*/
 		TInt GetSongsCountInAlbumMatchingArtistL(TUint32 aArtistId, TUint32 aAlbumId);
-		
-    private:	
+
+    private:
         /**
         * Updates the media with information from the table
         * @param aRecord record containing the source fields
@@ -149,12 +149,12 @@ class CMPXDbAlbum :
         * @param aValues values of each field of Album table
         * @return a string containing the selection criteria. The ownership is passed to the caller.
         */
-		void GenerateAlbumFieldsValuesL(const CMPXMedia& aMedia, 
+		void GenerateAlbumFieldsValuesL(const CMPXMedia& aMedia,
 			CDesCArray& aFields, CDesCArray& aValues);
 
 
 		TBool IsUnknownArtistL(TUint32 aId);
-		
+
 		TUint32 ArtistForAlbumL(const TUint32 aId);
 
     private:    // from MMPXTable

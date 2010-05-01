@@ -22,7 +22,6 @@
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
 
-//#include <mpxpodcastdbplugin.mbg>
 #include <mpxcmn.h>
 #include <mpxcollectionpluginobserver.h>
 #include <mpxmediacontainerdefs.h>
@@ -338,7 +337,7 @@ void CMPXPodcastDbPlugin::CommandL(
                 for (TInt i=0; i<count; ++i)
                     {
                     MPX_DEBUG2("At drive %i", driveArray[i]);
-                    if ((driveArray[i] != EDriveC) && (!iDbHandler->IsRemoteDrive(static_cast<TDriveNumber>(driveArray[i]))))
+                    if ((driveArray[i] != EDriveC) && (!iDbHandler->IsRemoteDrive(static_cast<TDriveNumber>(driveArray[i])))) 
                         {
                         MPX_DEBUG2("Closing database %i", driveArray[i]);
                         TRAP_IGNORE( iDbHandler->CloseDatabaseL( driveArray[i] ) );
@@ -366,7 +365,7 @@ void CMPXPodcastDbPlugin::CommandL(
             for( TInt i=0; i<count; ++i )
                 {
                 MPX_DEBUG2("At drive %i", driveArray[i]);
-                if (( driveArray[i] != EDriveC ) && (!iDbHandler->IsRemoteDrive(static_cast<TDriveNumber>(driveArray[i]))))
+                if (( driveArray[i] != EDriveC ) && (!iDbHandler->IsRemoteDrive(static_cast<TDriveNumber>(driveArray[i])))) 
                     {
                     TUint driveStatus(0);
                     User::LeaveIfError( DriveInfo::GetDriveStatus(
@@ -738,7 +737,6 @@ TBool CMPXPodcastDbPlugin::DoOpenL(
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     CleanupStack::PushL(array);
 
-//    TInt count(0);
     TInt levels(aPath.Levels());
     TBool isEpisode(EFalse);
 
@@ -2285,7 +2283,7 @@ void CMPXPodcastDbPlugin::DoRetrieveUriForDeletionL(
             fp->AppendL(*uri);
             CleanupStack::PopAndDestroy(uri);
             iSelections.Remove(0);
-
+            
             }
         aCmd.SetNoNewLCObjectL (KMPXCommandCollectionRetrieveMediaUriArray, fp);
         if (iFirstDeleteStep)
@@ -2723,8 +2721,8 @@ TBool CMPXPodcastDbPlugin::DoSetAsyncL()
         }
     else // Single item
         {
-        if ( iDbHandler )
-            {
+        if(iDbHandler)
+            {		
             visibleChange = iDbHandler->UpdateEpisodeL(*task, msgArray);
             done = ETrue;
             }
@@ -2863,7 +2861,7 @@ void CMPXPodcastDbPlugin::DoHandleOperationCompletedL(
             }
         iDbHandler->EndTransactionL( err );
         }
-
+    
     // Broadcase change messages
     //
     if (iActiveTask->GetVisibleChange())
@@ -2877,9 +2875,9 @@ void CMPXPodcastDbPlugin::DoHandleOperationCompletedL(
     if (aErr != KErrCancel)
         {
         iObs->HandleCommandComplete(NULL, aErr);
-        }
+        }    
     }
-
+     
 
 // ----------------------------------------------------------------------------------------------------------
 // Complete a delete operation
@@ -3096,7 +3094,7 @@ void CMPXPodcastDbPlugin::SetAttributesL(
         EMPXMediaGeneralUri | EMPXMediaGeneralFlags | EMPXMediaGeneralCount |
         EMPXMediaGeneralPlayCount | EMPXMediaGeneralLastPlaybackPosition |
         EMPXMediaGeneralCollectionId | EMPXMediaGeneralDate));
-
+    
     aAttrs.AppendL(TMPXAttribute(KMPXMediaIdPodcast,
         EMPXMediaPodcastType | EMPXMediaPodcastCategoryGroup | EMPXMediaPodcastIsPlaying));
 

@@ -116,8 +116,7 @@ void TestMpEqualizerWidget::testPrepareDialog()
     QVERIFY(mTest->dismissPolicy() == HbDialog::NoDismiss);
     QVERIFY(mTest->frameType() == HbPopup::Strong);
     QVERIFY(mTest->headingWidget() != 0);
-    QVERIFY(mTest->primaryAction() != 0);
-    QVERIFY(mTest->secondaryAction() != 0);
+    QVERIFY(mTest->actions().count() != 0);
     QVERIFY(mTest->contentWidget() == 0);
     
     

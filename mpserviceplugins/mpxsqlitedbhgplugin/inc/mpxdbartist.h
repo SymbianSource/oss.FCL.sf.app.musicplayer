@@ -62,7 +62,7 @@ class CMPXDbArtist :
         * Destructor
         */
         virtual ~CMPXDbArtist();
-       
+
     public:
         /**
         * Add a category item. If the record already exists, its counter will
@@ -77,7 +77,7 @@ class CMPXDbArtist :
         */
         TUint32 AddItemL(const TDesC& aName, const TDesC& aArt, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
-        
+
         /**
         * Gets the details for all category items.
         * @param aAttrs attributes to be returned
@@ -85,9 +85,9 @@ class CMPXDbArtist :
         */
         void GetAllCategoryItemsL(const TArray<TMPXAttribute>& aAttrs,
             CMPXMediaArray& aMediaArray);
-        
+
         /**
-        * Update a category item. 
+        * Update a category item.
         * @param aId: The ID of the category to update
         * @param aMedia: The media data
         * @param aDriveId: The Drive Id the name (category) belongs
@@ -95,14 +95,14 @@ class CMPXDbArtist :
         *        category was updated
         */
         void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
-        
+
         /*
         * Checks if the specified artist item is unknown
         * @param aId identifies the artist item
         * @return ETrue if it is unknown, EFalse otherwise
-        */        
+        */
         TBool IsUnknownArtistL(TUint32 aId);
-        
+
     private:
 
         /**
@@ -121,9 +121,9 @@ class CMPXDbArtist :
         * @param aValues values of each field of Artist table
         * @return a string containing the selection criteria. The ownership is passed to the caller.
         */
-        void GenerateArtistFieldsValuesL(const CMPXMedia& aMedia, 
+        void GenerateArtistFieldsValuesL(const CMPXMedia& aMedia,
             CDesCArray& aFields, CDesCArray& aValues);
-       
+
         /**
         * Gets the Album counts for a Artist item
         * @param aId identifies the Artist item
@@ -142,7 +142,7 @@ class CMPXDbArtist :
         * @see MMPXTable
         */
         virtual TBool CheckTableL(RSqlDatabase& aDatabase);
-        
+
     private:
 
         /**

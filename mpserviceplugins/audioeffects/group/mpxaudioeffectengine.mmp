@@ -52,7 +52,6 @@ LIBRARY         bassboosteffect.lib
 LIBRARY         mediaclientaudio.lib 
 LIBRARY         loudnesseffect.lib
 LIBRARY         audioequalizerutility.lib
-LIBRARY         equalizer.lib
 LIBRARY         customcommandutility.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         centralrepository.lib

@@ -78,7 +78,7 @@ private:
     MpEqualizerWidget       *mEqualizerWidget;  // Own
 
     HbMainWindow            *mWindow;           // Not own
-    HbAction                *mSoftKeyBack;      // Own
+    HbAction                *mNavigationBack;   // Own
     bool                    mActivated;
 
     HbIcon                  *mPlayIcon;         // Own

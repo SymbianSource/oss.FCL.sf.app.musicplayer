@@ -47,10 +47,12 @@ SOURCES += src/mpcollectionviewplugin.cpp \
     	   src/mpcollectioncontainer.cpp \
     	   src/mpcollectionlistcontainer.cpp \
     	   src/mpcollectioncontainerallsongs.cpp \
+    	   src/mpcollectioncontainerartists.cpp \
     	   src/mpcollectioncontaineralbums.cpp \
     	   src/mpcollectioncontainerplaylists.cpp \
     	   src/mpcollectioncontainergenres.cpp \
-         src/mpsnapshotwidget.cpp
+           src/mpsnapshotwidget.cpp \
+           src/mpcollectionpopuphandler.cpp
 
 HEADERS = ../../inc/mpviewbase.h \
           inc/mpcollectionviewplugin.h \
@@ -60,9 +62,11 @@ HEADERS = ../../inc/mpviewbase.h \
     	  inc/mpcollectioncontainer.h \
     	  inc/mpcollectionlistcontainer.h \
     	  inc/mpcollectioncontainerallsongs.h \
+    	  inc/mpcollectioncontainerartists.h \
     	  inc/mpcollectioncontaineralbums.h \
     	  inc/mpcollectioncontainerplaylists.h  \
     	  inc/mpcollectioncontainergenres.h  \
-        inc/mpsnapshotwidget.h
+          inc/mpsnapshotwidget.h \
+          inc/mpcollectionpopuphandler.h
        
 RESOURCES += resources/mpcollectionviewresources.qrc

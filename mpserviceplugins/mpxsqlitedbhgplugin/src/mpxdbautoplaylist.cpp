@@ -301,7 +301,7 @@ void CMPXDbAutoPlaylist::GetPlaylistDetailsL(TMPXAutoPlaylistType aType, TInt& a
     MPX_FUNC("CMPXDbAutoPlaylist::GetPlaylistDetails");
 
     HBufC* query = NULL;
-  
+
     switch ( aType )
     	{
 		case EMPXMostPlayedPlaylist:
@@ -320,7 +320,7 @@ void CMPXDbAutoPlaylist::GetPlaylistDetailsL(TMPXAutoPlaylistType aType, TInt& a
 			User::Leave(KErrArgument);
 			break;
 		}
-    
+
     RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query));
     CleanupClosePushL(recordset);
 
@@ -331,10 +331,10 @@ void CMPXDbAutoPlaylist::GetPlaylistDetailsL(TMPXAutoPlaylistType aType, TInt& a
         aCount++;
         sum += recordset.ColumnInt64(KMPXTableDefaultIndex);
         }
-    
+
     CleanupStack::PopAndDestroy(&recordset);
     CleanupStack::PopAndDestroy(query);
-    
+
     if (err != KSqlAtEnd)
         {
         User::Leave(KErrCorrupt);

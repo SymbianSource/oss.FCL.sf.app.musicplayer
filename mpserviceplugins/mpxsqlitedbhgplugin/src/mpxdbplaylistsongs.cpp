@@ -525,7 +525,7 @@ void CMPXDbPlaylistSongs::GetSongsL(
     attributes.AppendL(KMPXMediaGeneralType);
     attributes.AppendL(KMPXMediaGeneralCategory);
     attributes.AppendL(KMPXMediaGeneralId);
-    
+
     // cannot execute a joined query to the music table
     // because the song records in the music table may be on a different drive
     ExecuteMediaQueryL(attributes.Array(), aMediaArray, KQueryPlaylistSongsGetSongs, aPlaylistId);
@@ -546,7 +546,7 @@ TBool CMPXDbPlaylistSongs::GetSongsL(
     {
     MPX_DEBUG2("-->CMPXDbPlaylistSongs::GetSongsL(playlist 0x%x)", aPlaylistId);
     TBool valid(EFalse);
-    
+
     RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryPlaylistSongsGetSongsInfo,
     		aPlaylistId));
     CleanupClosePushL(recordset);

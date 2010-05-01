@@ -86,7 +86,7 @@ CMPXDbArtist::CMPXDbArtist(
     CMPXDbManager& aDbManager,
     TMPXGeneralCategory aCategory,
     MMPXDbArtistObserver& aObserver) :
-    CMPXDbCategory(aDbManager, aCategory), 
+    CMPXDbCategory(aDbManager, aCategory),
     iObserver(aObserver)
     {
     MPX_FUNC("CMPXDbArtist::CMPXDbArtist");
@@ -122,7 +122,7 @@ TUint32 CMPXDbArtist::AddItemL(
     aNewRecord = !CategoryItemExistsL(aDriveId, rowId);
 
     if (aNewRecord)
-        {      
+        {
         // insert new
         HBufC* query = PreProcessStringLC(KQueryArtistInsert);
         HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(aName);
@@ -141,18 +141,18 @@ TUint32 CMPXDbArtist::AddItemL(
         query = PreProcessStringLC(KQueryCategoryItem);
         RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query, rowId));
         CleanupStack::PopAndDestroy(query);
-        
+
         CleanupClosePushL(recordset);
-        
+
         if (recordset.Next() != KSqlAtRow)
             {
             User::Leave(KErrNotFound);
         }
-            
+
         // Album Art
         TPtrC art(KNullDesC);
         art.Set(MPXDbCommonUtil::GetColumnTextL(recordset, EArtistArt));
-    
+
         // the current one is Unknown and the new one is Not Unknown
         if ( art == KNullDesC && aArt != KNullDesC )
             {
@@ -166,9 +166,9 @@ TUint32 CMPXDbArtist::AddItemL(
             CleanupStack::PopAndDestroy(setStr);
             CleanupStack::PopAndDestroy(artReplaceSingleQuote);
             }
-        
+
         CleanupStack::PopAndDestroy(&recordset);
-        
+
         // increment the number of songs for the category
         query = PreProcessStringLC(KQueryCategoryIncrementSongCount);
         iDbManager.ExecuteQueryL(aDriveId, *query, rowId);
@@ -185,16 +185,16 @@ TUint32 CMPXDbArtist::AddItemL(
 TBool CMPXDbArtist::IsUnknownArtistL(TUint32 aId)
     {
 	MPX_FUNC("CMPXDbArtist::IsUnknownArtistL");
-	
+
     HBufC* name = GetNameL(aId);
-	
+
 	TInt ret = EFalse;
 	if (*name == KNullDesC)
 		{
 		ret = ETrue;
 		}
 	delete name;
-	
+
 	return ret;
     }
 
@@ -220,7 +220,7 @@ void CMPXDbArtist::UpdateMediaL(
             if (attributeId & EMPXMediaGeneralId)
                 {
                 MPX_DEBUG1("	EMPXMediaGeneralId");
-				
+
                 aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId,
                     aRecord.ColumnInt64(EArtistUniqueId));
 				MPX_DEBUG2("	Id[%d]", aRecord.ColumnInt64(EArtistUniqueId));
@@ -228,7 +228,7 @@ void CMPXDbArtist::UpdateMediaL(
             if (attributeId & EMPXMediaGeneralTitle)
                 {
                 MPX_DEBUG1("	EMPXMediaGeneralTitle");
-				
+
                 TPtrC artist( MPXDbCommonUtil::GetColumnTextL(aRecord, EArtistName) );
                 aMedia.SetTextValueL(KMPXMediaGeneralTitle,
                     MPXDbCommonUtil::GetColumnTextL(aRecord, EArtistName));
@@ -245,7 +245,7 @@ void CMPXDbArtist::UpdateMediaL(
                 TInt songCount = GetSongsCountL( KDbManagerAllDrives,
                                     aRecord.ColumnInt64( EArtistUniqueId ) );
 				aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount, songCount); // mod by anjokela
-				
+
                 MPX_DEBUG1("	EMPXMediaGeneralCount");
 				MPX_DEBUG2("	SongCount[%d]", songCount);
                 }
@@ -255,7 +255,7 @@ void CMPXDbArtist::UpdateMediaL(
             if (attributeId & EMPXMediaMusicAlbumArtFileName)
                 {
                 MPX_DEBUG1("    EMPXMediaMusicAlbumArtFileName");
-                TPtrC art(KNullDesC);                
+                TPtrC art(KNullDesC);
                 art.Set(MPXDbCommonUtil::GetColumnTextL(aRecord, EArtistArt));
                 aMedia.SetTextValueL(KMPXMediaMusicAlbumArtFileName, art);
                 MPX_DEBUG2("    Art[%S]", &art);
@@ -279,7 +279,7 @@ void CMPXDbArtist::GenerateArtistFieldsValuesL(const CMPXMedia& aMedia, CDesCArr
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicArt, albumArtFilename);
         }
     }
-	
+
 // ----------------------------------------------------------------------------
 // CMPXDbArtist::GetAlbumsCountL
 // ----------------------------------------------------------------------------
@@ -287,14 +287,14 @@ void CMPXDbArtist::GenerateArtistFieldsValuesL(const CMPXMedia& aMedia, CDesCArr
 TInt CMPXDbArtist::GetAlbumsCountL(TUint32 aId)
     {
     MPX_FUNC("CMPXDbArtist::GetAlbumsCountL");
-	
+
 	return iObserver.HandleGetAlbumsCountForArtistL(aId);
     }
-	
+
 // ----------------------------------------------------------------------------
 // CMPXDbArtist::GetAllCategoryItemsL
 // ----------------------------------------------------------------------------
-//	
+//
 void CMPXDbArtist::GetAllCategoryItemsL(
     const TArray<TMPXAttribute>& aAttrs,
     CMPXMediaArray& aMediaArray)
@@ -313,9 +313,9 @@ void CMPXDbArtist::GetAllCategoryItemsL(
 // ----------------------------------------------------------------------------
 //
 void CMPXDbArtist::UpdateItemL(
-    TUint32 aId, 
-    const CMPXMedia& aMedia, 
-    TInt aDriveId, 
+    TUint32 aId,
+    const CMPXMedia& aMedia,
+    TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages)
     {
     MPX_FUNC("CMPXDbAlbum::UpdateItemL");

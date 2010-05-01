@@ -35,7 +35,7 @@
 class CMPXM3uPlaylistExporter : public CActive
     {
 public: // Constructors and destructor
-
+    
     /**
     * Two-phased constructor
     *
@@ -58,7 +58,7 @@ public: // Constructors and destructor
     */
     IMPORT_C virtual ~CMPXM3uPlaylistExporter();
 
-
+    
 protected:
 
     /**
@@ -68,22 +68,22 @@ protected:
     * @param aObserver reference to the playlist plugin observer
     * @param aPlaylist playlist to be externalized
     * @param aStatus caller's request status
-    * @return object of constructed
+    * @return object of constructed    
     */
     IMPORT_C CMPXM3uPlaylistExporter(
         RFs* aFs,
         MMPXPlaylistPluginObserver* aObserver,
         const CMPXMedia& aPlaylist,
         TRequestStatus& aStatus );
-
+    
     /**
     * 2nd phase constructor
     *
     * @param aFilePath File path for where the playlist should be placed
     */
     IMPORT_C virtual void ConstructL(
-        const TDesC& aFilePath);
-
+        const TDesC& aFilePath);    
+   
     /**
     *  From CActive
     *  Handles an active object's request completion event
@@ -100,7 +100,7 @@ protected:
     * Does a step of the task
     */
     IMPORT_C virtual void DoTaskStep();
-
+    
 private:
 
     /**
@@ -108,7 +108,7 @@ private:
     * the given medias have been processed
     */
     void ExternalizeL();
-
+    
     /**
     * Populates iLines with HBufC8's each representing one line of playlist
     * file.
@@ -135,7 +135,7 @@ private:
 
     /**
     * Creates a string containing iItem's relative or absolute path (path
-    * is relative if the audio clip is stored to the same directory, or
+    * is relative if the audio clip is stored to the same directory, or 
     * it's sub-directories, as the playlist file). The stirng is stored to
     * iLine.
     */
@@ -166,7 +166,7 @@ private:
     * interface
     */
     void NotifyClient(TInt aError);
-
+         
 protected:    // Data
 
     const CMPXMedia&                    iPlaylist;
@@ -181,13 +181,13 @@ protected:    // Data
 
     RFs*                                iFs;       // not owned
     MMPXPlaylistPluginObserver*         iObserver; // not owned
-
+    
     TInt                                iCurrentMedia;
     TBool                               iMoreToDo;
 
-    TRequestStatus*                     iCallerStatus;
+    TRequestStatus*                     iCallerStatus;    
     };
 
 #endif   // MPXM3UPLAYLISTIMPORTER_H
-
+            
 

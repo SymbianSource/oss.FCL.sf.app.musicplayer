@@ -138,7 +138,7 @@ void TestMpDetailsView::testdeactivateView()
      }
 
 void TestMpDetailsView::testbackSlot() {
-    connect(this, SIGNAL(back()), mTest->mSoftKeyBack, SIGNAL(triggered()));
+    connect(this, SIGNAL(back()), mTest->mNavigationBack, SIGNAL(triggered()));
     QSignalSpy spy(mTest, SIGNAL(command(int)));
     QVERIFY(spy.isValid());
     QCOMPARE(spy.count(),0);

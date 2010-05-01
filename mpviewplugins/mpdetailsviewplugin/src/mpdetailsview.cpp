@@ -63,7 +63,7 @@ MpDetailsView::MpDetailsView()
       mFrameworkWrapper( 0 ),
       mActivated( false ),
       mWindow( 0 ),
-      mSoftKeyBack( 0 ),
+      mNavigationBack( 0 ),
       mSongText( NULL ),
       mAlbumText( NULL ),
       mArtistText( NULL ),
@@ -127,8 +127,8 @@ MpDetailsView::~MpDetailsView()
     if ( mFrameworkWrapper ) {
         delete mFrameworkWrapper;
     }
-    if ( mSoftKeyBack ) {
-        delete mSoftKeyBack;
+    if ( mNavigationBack ) {
+        delete mNavigationBack;
     }
     if ( mDocumentLoader ) {
         delete mDocumentLoader;
@@ -174,7 +174,7 @@ void MpDetailsView::initializeView()
         }
         
     mWindow = mainWindow();
-    mSoftKeyBack = new HbAction( Hb::BackAction, this );    
+    mNavigationBack = new HbAction( Hb::BackNaviAction, this );
     mFrameworkWrapper = new MpMpxDetailsFrameworkWrapper( );
     mSongData = mFrameworkWrapper->songData();
     
@@ -213,7 +213,7 @@ void MpDetailsView::initializeView()
     // TODO: might need later
     setupMenu();
       
-    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    connect( mNavigationBack, SIGNAL( triggered() ), this, SLOT( back() ) );
     connect( mShareButton, SIGNAL( clicked() ), this, SLOT( share() ) );    
     connect( mSongData, SIGNAL( albumArtReady() ), this, SLOT( albumArtChanged() ) ); 
     connect( mSongData, SIGNAL( playbackInfoChanged() ), this, SLOT( playbackInfoChanged() ) );
@@ -229,7 +229,7 @@ void MpDetailsView::initializeView()
 void MpDetailsView::activateView()
 {
     TX_ENTRY    
-    setNavigationAction( mSoftKeyBack );
+    setNavigationAction( mNavigationBack );
     mFrameworkWrapper->retrieveSong();
         
     mActivated = true;

@@ -340,21 +340,22 @@ class CMPXDbManager :
         *
         * @return ETrue if the dummy file is created successfully, EFalse otherwise
         */
-        TBool BlockDiskSpace( TDriveUnit aDrive, TInt aOrigDbSize, TBool aIsMTPInUse = EFalse );
+        TBool BlockDiskSpace( TInt aIndex, TBool aIsMTPInUse = EFalse );
         
         /**
         * To copy db from regular drive to RAM
         *
         * @return ETrue if succeed 
-        * @leave KErrDiskFull if there is any difficulty copying files
+        * 
+        * No-operation if fails
         */
-        TBool DoCopyDBToRamL( TDriveUnit aDrive, TBool aIsMTPInUse );
+        TBool DoCopyDBToRam( TInt aIndex, TBool aIsMTPInUse );
 
         /**
         * To copy db back regular drive from RAM
         *
         */
-        void DoCopyDBFromRamL( TInt aIndex );
+        void DoCopyDBFromRam( TInt aIndex );
     
         /**
         * To replace dummy file with new content
@@ -390,7 +391,7 @@ class CMPXDbManager :
          * @param aSize - On return, the total size of the databases on the RAM drive.
          * @return TInt System error.
          */
-        TInt GetTotalRamDatabasesSize(TInt& aSize);
+        TInt GetTotalRamDatabasesSizeL(TInt& aSize);
 
         /**
         * Remove dummy file
@@ -399,9 +400,7 @@ class CMPXDbManager :
         */
         void RemoveDummyFile( TInt index );
 
-        
-
-/**
+        /**
         * Check if disksapce is enough to operatte. If not, it leaves with KErrDiskFull
         *
         */
@@ -416,6 +415,12 @@ class CMPXDbManager :
          * Commit transaction, leaves on error
          */
         void DoCommitL();
+
+        /**
+        * Create full path and filename on a specified drive unit.
+        * @param aDrive identifies the drive unit
+        */
+        HBufC* CreateFullFilenameL(TDriveUnit aDrive);
 
     protected:  // Types
 
@@ -449,10 +454,9 @@ class CMPXDbManager :
         void CreateTablesL(RSqlDatabase& aDatabase, TBool aCorrupt);
 
         /**
-        * Opens a specified database.
-        * @param aDrive identifies the drive unit of the database to open
+        * Opens root database at C-drive.
         */
-        void OpenDatabaseL(TDriveUnit aDrive);
+        void OpenRootDatabaseL();
 
         /**
         * Creates a specified database.
@@ -462,15 +466,27 @@ class CMPXDbManager :
 
         /**
         * Attached a specified database.
-        * @param aDrive identifies the drive unit of the database to attach
+        * @param aIndex  Index to iDatabaseHandles
         */
-        void AttachDatabaseL(TDriveUnit aDrive);
+        void AttachDatabaseL(TInt aIndex);
 
         /**
         * Detach a specified database.
-        * @param aDrive identifies the drive unit of the database to detach
+        * @param aIndex  Index to iDatabaseHandles
         */
-        void DetachDatabaseL(TDriveUnit aDrive);
+        void DetachDatabaseL(TInt aIndex);
+
+        /**
+        * Open database
+        * @param aIndex Index to iDatabaseHandles
+        */
+        void OpenDatabaseAtIndexL( TInt aIndex );
+        
+        /**
+        * Close database
+        * @param aIndex Index to iDatabaseHandles
+        */
+        void CloseDatabaseAtIndexL(TInt aIndex);
 
         /**
         * Create filename on a specified drive unit.

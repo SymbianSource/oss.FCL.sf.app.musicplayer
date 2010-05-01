@@ -99,7 +99,7 @@ class CMPXDbAutoPlaylist :
         void GetAllPlaylistsL(CMPXMediaArray& aMediaArray);
 
     private:
-        
+
         /**
         * Get count and duration information of the auto-playlist
         * @param aType the type of the auto-playlist

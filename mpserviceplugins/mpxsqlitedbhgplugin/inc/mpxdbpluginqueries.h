@@ -155,7 +155,7 @@ _LIT(KQueryMusicGetRecentlyPlayed, "SELECT Music.*,Artist.Name,Album.Name,Genre.
 _LIT(KQueryMusicGetMostPlayed, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.PlayCount<>0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY PlayCount DESC, TimePlayed DESC LIMIT %u");
 _LIT(KQueryMusicGetRecentlyAdded, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND (julianday(Music.TimeAdded)>julianday('now','-7 days')) AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY 11 DESC");
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KQueryMusicGetSongsForAbstractAlbum,"SELECT Music.*,AbstractAlbum.Name FROM :dbname.Music,:dbname.AbstractAlbum WHERE Music.Deleted=0 AND Music.AbstractAlbum=AbstractAlbum.UniqueId AND AbstractAlbum.UniqueId=%u");
+_LIT(KQueryMusicGetSongsForAbstractAlbum,"SELECT Music.*,AbstractAlbum.Uri FROM :dbname.Music,:dbname.AbstractAlbum WHERE Music.Deleted=0 AND Music.AbstractAlbum=AbstractAlbum.UniqueId AND AbstractAlbum.UniqueId=%u");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryMusicSong, "SELECT UniqueId,DbFlag,VolumeId,Title,0,'',0,Location FROM :dbname.Music WHERE %S");
 _LIT(KQueryMusicFindAll, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE %S AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId %S");
@@ -222,8 +222,11 @@ _LIT(KQueryMusicGetDurationRecentlyAdded, "SELECT Duration FROM :dbname.Music WH
 
 // Select songs information from music, playlistsongs and playlistsonginfo via playlistid order by playlistsongs's ordinal
 _LIT(KQueryMusicGetAllSongsbyPl,"select mu.UniqueId,mu.DbFlag,mu.VolumeId,mu.Title,mu.Artist,mu.Art,0,mu.Location,pl.UniqueId as PlUId, pl.ordinal from :dbname.music as mu,:pldbname.playlistsongs as pl where mu.Deleted=0 AND mu.uniqueid = pl.songid and pl.playlistid =%u ORDER BY 10");
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name,pl.UniqueId as PlUId,pl.ordinal FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer,:pldbname.playlistsongs as pl WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId AND Music.UniqueId=pl .songid and pl .PlaylistId=%u ORDER BY 40");
-
+#else
+_LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name,pl.UniqueId as PlUId,pl.ordinal FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer,:pldbname.playlistsongs as pl WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId AND Music.UniqueId=pl .songid and pl .PlaylistId=%u ORDER BY 37");
+#endif
 _LIT(KQuerySongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND Artist=%u AND Album=%u");
 _LIT(KQueryMusicGetArtistForAlbum, "SELECT Artist FROM :dbname.Music,:dbname.Artist WHERE Music.Deleted=0 AND Music.Artist=Artist.UniqueId AND Music.Album=%u");
 
@@ -268,7 +271,7 @@ _LIT(KAuxiliaryDropTable,"DROP TABLE Auxiliary");
 _LIT(KAuxiliaryCheckTable, "SELECT Id,Version,TimeRefreshed,TimeSynced,Corrupt,SaveDeletedRecordCount FROM AUXILIARY");
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.5.0',%u)");
-#else 
+#else
 _LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.4.0',%u)");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryAuxiliarySetTime, "UPDATE :dbname.Auxiliary SET TimeRefreshed='%S', Corrupt=0");
@@ -351,7 +354,7 @@ _LIT(KQueryPlaylistSongsGetSongsInfo, " SELECT PlaylistSongs.*,PlaylistSongInfo.
 _LIT(KQueryPlaylistSongsGetSongInfo, "SELECT PlaylistSongs.UniqueId,PlaylistSongs.SongId,PlaylistSongs.PlaylistId,PlaylistSongs.Ordinal,PlaylistSongInfo.VolumeId,PlaylistSongInfo.DbFlag,PlaylistSongInfo.Uri,PlaylistSongInfo.Title FROM :dbname.PlaylistSongs,:dbname.PlaylistSongInfo WHERE PlaylistSongs.UniqueId=%u AND PlaylistSongs.SongId=%u AND PlaylistSongs.SongId=PlaylistSongInfo.SongId");
 
 _LIT(KQueryPlaylistSongsUpdateSongOrdinalAfterDelete, "UPDATE :dbname.PlaylistSongs SET Ordinal=Ordinal-1 WHERE PlaylistId=%u AND Ordinal>%u");
-_LIT(KQueryPlaylistSongsUpdateSongOrdinal, "UPDATE :dbname.PlaylistSongs SET Ordinal=%u WHERE SongId=%u");
+_LIT(KQueryPlaylistSongsUpdateSongOrdinal, "UPDATE :dbname.PlaylistSongs SET Ordinal=%u WHERE UniqueId=%u");
 _LIT(KQueryPlaylistSongsMoveSongUp, "UPDATE :dbname.PlaylistSongs SET Ordinal=Ordinal+1 WHERE PlaylistId=%u AND Ordinal>=%u AND Ordinal<%u");
 _LIT(KQueryPlaylistSongsMoveSongDown, "UPDATE :dbname.PlaylistSongs SET Ordinal=Ordinal-1 WHERE PlaylistId=%u AND Ordinal<=%u AND Ordinal>%u");
 
@@ -427,7 +430,7 @@ _LIT(KAlbumCreateTable,"CREATE TABLE Album("
     L"Name TEXT COLLATE NOCASE,"
     L"SongCount INTEGER,"
     L"Artist INTEGER,"
-	L"Art TEXT)");
+    L"Art TEXT)");
 
 _LIT(KAlbumCheckTable,"SELECT UniqueId,Name,SongCount,Artist,Art FROM Album");
 
@@ -458,16 +461,17 @@ _LIT(KQueryArtistName, "SELECT Artist.Name FROM :dbname.Artist WHERE UniqueId=%u
 //
 _LIT(KAbstractAlbumCreateTable,"CREATE TABLE AbstractAlbum("
     L"UniqueId INTEGER PRIMARY KEY,"
+    L"Uri TEXT,"
     L"Name TEXT COLLATE NOCASE,"
     L"AlbumArtist TEXT,"
-    L"Genre TEXT,"
     L"SongCount INTEGER,"
     L"VolumeId INTEGER)");
 
-_LIT(KAbstractAlbumCheckTable,"SELECT UniqueId,Name,SongCount,VolumeId FROM AbstractAlbum");
+_LIT(KAbstractAlbumCheckTable,"SELECT UniqueId,Uri,Name,AlbumArtist,SongCount,VolumeId FROM AbstractAlbum");
 _LIT(KCriterionAbstractAlbumVolumeId, "VolumeId=%u");
-_LIT(KQueryAbstractAlbumInsert, "INSERT INTO :dbname.AbstractAlbum(UniqueId,Name,AlbumArtist,Genre,SongCount,VolumeId) VALUES(%u,'%S','%S','%S',%u,%u)");
+_LIT(KQueryAbstractAlbumInsert, "INSERT INTO :dbname.AbstractAlbum(UniqueId,Uri,Name,AlbumArtist,SongCount,VolumeId) VALUES(%u,'%S','%S','%S',%u,%u)");
 _LIT(KQueryAbstractAlbumUpdate, "UPDATE :dbname.AbstractAlbum SET %S WHERE UniqueId=%u");
 _LIT(KCriterionCategoryVolumeId, "SELECT VolumeId FROM :dbname.AbstractAlbum WHERE UniqueId=%u");
+_LIT(KQueryAbstractAlbumsWithNoSong, "SELECT * FROM :dbname.AbstractAlbum WHERE SongCount=0");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 #endif // MPXDBPLUGINQUERIES_H

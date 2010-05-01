@@ -144,7 +144,16 @@ TUint32 CMPXDbPodcast::AddEpisodeL(
         CMPXMessageArray* itemChangedMessages = CMPXMediaArray::NewL();
         CleanupStack::PushL( itemChangedMessages );
         
-        DeleteEpisodeL( episodeId, *fp, *itemChangedMessages, ETrue );
+		//Isadd is passed as true as its called from AddEpisodeL
+        //IsAdd true means dont decrement  the episode count from tables like
+        //Artist Genere, Album, and Composer , which is not needed when 
+        //DeleteEpisodeL is called as part of Add operation
+        TRAPD( err, DeleteEpisodeL( episodeId, *fp, *itemChangedMessages, ETrue, ETrue ) );
+        
+        if ( err != KErrNone ) // EpisodeExistL has found a record from a previously deleted episode, cleanup it now
+            {
+            iDbManager.ExecuteQueryL( aDrive, KQueryPodcastDelete(), episodeId );
+            }
         
         CleanupStack::PopAndDestroy( itemChangedMessages );
         CleanupStack::PopAndDestroy( fp );
@@ -187,7 +196,7 @@ void CMPXDbPodcast::CleanupL()
 void CMPXDbPodcast::DeleteEpisodeL(
     TUint32 aEpisodeId,
     CDesCArray& aUriArray,
-    CMPXMessageArray& aItemChangedMessages,
+    CMPXMessageArray& aItemChangedMessages, TBool IsAdd,
     TBool aDeleteRecord)
     {
     MPX_FUNC("CMPXDbPodcast::DeleteEpisodeL");
@@ -199,7 +208,7 @@ void CMPXDbPodcast::DeleteEpisodeL(
         {
         User::Leave(KErrNotFound);
         }
-    DoDeleteEpisodeL(recordset, aUriArray, aItemChangedMessages, aDeleteRecord);
+    DoDeleteEpisodeL(recordset, aUriArray, aItemChangedMessages, IsAdd, aDeleteRecord);
     CleanupStack::PopAndDestroy(&recordset);
     }
 
@@ -1224,7 +1233,7 @@ void CMPXDbPodcast::DeleteRecordsetL(
 void CMPXDbPodcast::DoDeleteEpisodeL(
     RSqlStatement& aRecordset,
     CDesCArray& aUriArray,
-    CMPXMessageArray& aItemChangedMessages,
+    CMPXMessageArray& aItemChangedMessages, TBool IsAdd ,
     TBool aDeleteRecord)
     {
     MPX_FUNC("CMPXDbPodcast::DoDeleteEpisodeL");
@@ -1235,22 +1244,28 @@ void CMPXDbPodcast::DoDeleteEpisodeL(
     aUriArray.AppendL(*uri);
     TDriveUnit driveUnit(*uri);
     CleanupStack::PopAndDestroy(uri);
+   
+    //if adding then dont delete episode category 
+    if(!IsAdd)
+        {
+        // process the author
+        iObserver.DeleteEpisodeForCategoryL(EMPXArtist, aRecordset.ColumnInt64(EPodcastArtist),
+            driveUnit, &aItemChangedMessages );
+    
+        // process the title
+        iObserver.DeleteEpisodeForCategoryL(EMPXAlbum, aRecordset.ColumnInt64(EPodcastAlbum),
+            driveUnit, &aItemChangedMessages);
+    
+        // process the genre
+        iObserver.DeleteEpisodeForCategoryL(EMPXGenre, aRecordset.ColumnInt64(EPodcastGenre),
+            driveUnit, &aItemChangedMessages);
+    
+        // process the composer
+        iObserver.DeleteEpisodeForCategoryL(EMPXComposer, aRecordset.ColumnInt64(EPodcastComposer),
+            driveUnit, &aItemChangedMessages);
+        }
+  
 
-    // process the author
-    iObserver.DeleteEpisodeForCategoryL(EMPXArtist, aRecordset.ColumnInt64(EPodcastArtist),
-        driveUnit, &aItemChangedMessages);
-
-    // process the title
-    iObserver.DeleteEpisodeForCategoryL(EMPXAlbum, aRecordset.ColumnInt64(EPodcastAlbum),
-        driveUnit, &aItemChangedMessages);
-
-    // process the genre
-    iObserver.DeleteEpisodeForCategoryL(EMPXGenre, aRecordset.ColumnInt64(EPodcastGenre),
-        driveUnit, &aItemChangedMessages);
-
-    // process the composer
-    iObserver.DeleteEpisodeForCategoryL(EMPXComposer, aRecordset.ColumnInt64(EPodcastComposer),
-        driveUnit, &aItemChangedMessages);
 
     // add a change event for removing the episode itself
     TUint32 episodeId(aRecordset.ColumnInt64(EPodcastUniqueId));

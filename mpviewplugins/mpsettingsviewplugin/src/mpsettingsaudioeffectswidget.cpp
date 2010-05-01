@@ -83,6 +83,7 @@ void MpSettingsAudioEffectsWidget::initialize()
     slider->setContentWidgetData( QString( "toolTipVisible" ), false );
     slider->setContentWidgetData( QString( "tickPosition" ), Hb::SliderTicksRight );
     slider->setContentWidgetData( QString( "sliderPosition" ),mFrameworkWrapper->balance() );
+    slider->setContentWidgetData( QString( "trackFilled" ), false );
     if ( mFrameworkWrapper->loudness() == true ) {
         loudnessItem->setContentWidgetData( QString( "text" ), hbTrId( "txt_mus_setlabel_loudness_val_on" ) );
         loudnessItem->setContentWidgetData( QString( "additionalText" ), hbTrId( "txt_mus_setlabel_loudness_val_off" ) );

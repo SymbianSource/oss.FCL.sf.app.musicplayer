@@ -318,7 +318,7 @@ class CMPXDbMusic :
         * @param aMedia returns the song information
         */
         void GetSongL(TInt aSongId, const TArray<TMPXAttribute>& aAttrs, CMPXMedia& aMedia);
-        
+
         /**
         * Returns all songs in the playlist.
         * @param aDrive identifies in db
@@ -421,14 +421,13 @@ class CMPXDbMusic :
 
 
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-	    /**
+        /**
         * Returns all songs for a given abstractalbum.
-        * @param aDrive drive ID AbstractAlbum stored
         * @param aAbstractAlbumId abstractalbum to get the songs for
         * @param aAttrs attributes to be retrieved
         * @param aMediaArray returns the song attributes.
         */
-        void GetAllSongsForAbstractAlbumL(TInt aDrive, TInt aAbstractAlbumId,
+        void GetAllSongsForAbstractAlbumL(TUint aAbstractAlbumId,
             const TArray<TMPXAttribute>& aAttrs, CMPXMediaArray& aMediaArray);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
@@ -525,24 +524,9 @@ class CMPXDbMusic :
 
         /**
          * Get the ID of Artist which belongs to the specified Album
-		 * @param aId, the ID of Album
+         * @param aId, the ID of Album
          */
         TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
-        
-        /**
-        * Signals the start of a refresh operation
-        */
-        void RefreshStartL();
-
-        /**
-        * Signals the end of a refresh operation
-        */
-        void RefreshEndL();
-
-        /*
-        * Refresh music basic table
-        */
-        void RefreshBasicTableL();
 
         /*
         * Check the integrity of the music basic table
@@ -693,9 +677,9 @@ class CMPXDbMusic :
             const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TUint32& aItemId);
 
-		TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
-			const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
-			CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
+        TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
+          const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
+          CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:
         * EMPXMediaGeneralId, EMPXMediaGeneralType, EMPXMediaGeneralCategory,
@@ -711,7 +695,7 @@ class CMPXDbMusic :
         * @return ETrue if the media contains one or more supported attribute;
         *  otherwise EFalse.
         */
-		TBool IsSupported(const CMPXMedia& aMedia);
+        TBool IsSupported(const CMPXMedia& aMedia);
 
     private:    // from MMPXTable
 
@@ -749,8 +733,8 @@ class CMPXDbMusic :
         * Column indexes in the music table
         */
         enum TMusicColumns
-        	{
-        	EMusicUniqueId = KMPXTableDefaultIndex,
+            {
+            EMusicUniqueId = KMPXTableDefaultIndex,
             EMusicDbFlag,
             EMusicVolumeId,
             EMusicTitle,
@@ -811,7 +795,9 @@ class CMPXDbMusic :
         // file extensions to check DRM type, owned
         CDesCArrayFlat* iExtensionsDrm;
         MMPXDbMusicObserver& iObserver;
-        TBool iRefresh;
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED 
+        TBool iArtNeedUpdated;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
     };
 
 #endif // MPXDBMUSIC_H

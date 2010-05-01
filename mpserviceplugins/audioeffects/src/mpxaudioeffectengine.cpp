@@ -36,9 +36,9 @@
 
 #include "mpxaudioeffectengine.h"
 
+// Music setting
 const TUid KMPCenRepSettingsFeature = {0x10207C92};
 const TUint32 KMPCenRepSettingPresetIdKey = 0x00000004;
-
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -207,7 +207,7 @@ EXPORT_C void CMPXAudioEffectEngine::SetStereoWideningL()
         {
         if(!iStereoEffect)  // If stereo widening is ON and not constructed
             {
-            TUint stereoLevel = 100;
+            TUint stereoLevel = 30;
             // cmdUtil ownership passed into new object           
             MPX_TRAPD(error, 
                   iStereoEffect = CStereoWidening::NewL(*iMdaPlayer, 
@@ -220,7 +220,7 @@ EXPORT_C void CMPXAudioEffectEngine::SetStereoWideningL()
             }
 
         iStereoEffect->EnableL();
-        TUint8 level = 100;
+        TUint8 level = 30;
         iStereoEffect->SetStereoWideningLevelL( level );
         iStereoEffect->ApplyL();
         }
@@ -328,7 +328,7 @@ EXPORT_C void CMPXAudioEffectEngine::SetEqualizerL()
     TInt presetId( KEqualizerPresetNone );
     TRAP_IGNORE(
         {
-        CRepository* repository = CRepository::NewL( KMPCenRepSettingsFeature );
+        CRepository* repository = CRepository::NewL( KMPCenRepSettingsFeature  );
         repository->Get( KMPCenRepSettingPresetIdKey, presetId );
         delete repository;
         repository = NULL;

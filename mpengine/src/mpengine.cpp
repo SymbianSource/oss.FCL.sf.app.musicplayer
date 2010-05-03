@@ -18,11 +18,14 @@
 #include <QTranslator>
 #include <QLocale>
 #include <hbmessagebox.h>
-#include <hbnotificationdialog.h>
+#include <hbprogressdialog.h>
 #include <hbinstance.h>
+#include <xqsharablefile.h>
 
 #include "mpengine.h"
-#include "mpmpxframeworkwrapper.h"
+#include "mpmpxharvesterframeworkwrapper.h"
+#include "mpmpxcollectionframeworkwrapper.h"
+#include "mpmpxplaybackframeworkwrapper.h"
 #include "mpsongscanner.h"
 #include "mpmediakeyhandler.h"
 #include "mptrace.h"
@@ -33,6 +36,12 @@
 
     MP Engine provides Qt style interface to the MPX framework
     utilities. Its implementation is hidden using private class data pattern.
+*/
+
+/*!
+-------------------------------------------------------------------------------
+    Harvesting related signals
+-------------------------------------------------------------------------------
 */
 
 /*!
@@ -120,42 +129,68 @@
 
  */
 
+
+/*!
+-------------------------------------------------------------------------------
+    Collection related signals
+-------------------------------------------------------------------------------
+*/
+
+/*!
+    \fn void collectionPlaylistOpened()
+
+    This signal is emitted when A new collection playlist is opened and 
+    playback is initialized.
+
+ */
+
+/*!
+    \fn void playlistSaved( bool success )
+
+    This signal is emitted when playlist save operation is completed, it 
+    indicates the operation \a success .
+
+ */
+
+/*!
+    \fn void songsDeleted( bool success )
+
+    This signal is emitted when song delete operation is completed, it 
+    indicates the operation \a success .
+
+ */
+
+/*!
+    \fn void playlistsRenamed( bool success )
+
+    This signal is emitted when playlist rename operation is completed, it
+    indicates the operation  \a success .
+
+ */
+
+/*!
+    \fn void isolatedCollectionOpened( MpMpxCollectionData* collectionData )
+
+    This signal is emitted when an isolated collection is opened on \a context
+
+ */
+
 /*!
  Constructs music player engine.
  */
 MpEngine::MpEngine()
-    : mMpxWrapper(0),
+    : mMpxHarvesterWrapper(0),
       mSongScanner(0),
       mMediaKeyHandler(0),
       mUsbBlockingNote(0),
+      mMpxCollectionWrapper(0),
+      mMpxPlaybackWrapper(0),
       mMpTranslator(0),
       mUsbBlockingState(USB_NotConnected),
-      mPreviousUsbState(USB_NotConnected)
+      mPreviousUsbState(USB_NotConnected),
+      mViewMode(MpCommon::DefaultView)
 {
-    TX_ENTRY
-
-    mMpxWrapper = new MpMpxFrameworkWrapper();
-    connect( mMpxWrapper, SIGNAL( scanStarted() ), this, SLOT( handleScanStarted() ) );
-    connect( mMpxWrapper, SIGNAL( scanEnded(int, int) ), this, SLOT( handleScanEnded(int, int) ) );
-    connect( mMpxWrapper, SIGNAL( diskEvent(MpxDiskEvents) ), this, SLOT( handleDiskEvent(MpxDiskEvents) ) );
-    connect( mMpxWrapper, SIGNAL( usbEvent(MpxUsbEvents) ), this, SLOT( handleUsbEvent(MpxUsbEvents) ) );
-
-    mSongScanner = new MpSongScanner( mMpxWrapper );
-    mMediaKeyHandler = new MpMediaKeyHandler();
-
-    //Load musicplayer translator
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
-
-    TX_EXIT
+    TX_LOG
 }
 
 /*!
@@ -164,10 +199,6 @@ MpEngine::MpEngine()
 MpEngine::~MpEngine()
 {
     TX_ENTRY
-    delete mMpTranslator;
-    delete mSongScanner;
-    delete mMediaKeyHandler;
-    delete mUsbBlockingNote;
     TX_EXIT
 }
 
@@ -181,14 +212,105 @@ MpEngine * MpEngine::instance()
 }
 
 /*!
+ Initialize engine
+ */
+void MpEngine::initialize( MpCommon::MpViewMode viewMode, TUid hostUid )
+{
+    TX_ENTRY
+    mViewMode = viewMode;
+    mHostUid = hostUid;
+    
+    //Load musicplayer translator
+    QString lang = QLocale::system().name();
+    QString path = QString( "z:/resource/qt/translations/" );
+    bool translatorLoaded = false;
+
+    mMpTranslator = new QTranslator( this );
+    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
+    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
+    if ( translatorLoaded ) {
+        qApp->installTranslator( mMpTranslator );
+    }
+    
+    if( mViewMode == MpCommon::DefaultView || mViewMode == MpCommon::FetchView ){
+        // Harvesting Wrapper
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mViewMode, mHostUid );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ), 
+                 this, SLOT( handleScanStarted() ), Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ), 
+                 this, SLOT( handleScanEnded(int, int) ), Qt::QueuedConnection );
+        qRegisterMetaType<MpxDiskEvents>("MpxDiskEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( diskEvent(MpxDiskEvents) ), 
+                 this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
+        qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ), 
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );
+        mSongScanner = new MpSongScanner( mMpxHarvesterWrapper );
+        mMediaKeyHandler = new MpMediaKeyHandler();
+        
+        // Collection Wrapper
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mViewMode, mHostUid );
+        connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
+                this, SIGNAL( collectionPlaylistOpened() ),
+                Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( playlistSaved( bool ) ),
+                this, SIGNAL( playlistSaved( bool ) ),
+                Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( songsDeleted( bool ) ),
+                this, SIGNAL( songsDeleted( bool ) ),
+                Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( playlistsRenamed( bool ) ),
+                this, SIGNAL( playlistsRenamed( bool ) ),
+                Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
+                this, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
+                Qt::QueuedConnection );
+    }
+
+    // Playback Wrapper 
+    mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mViewMode, mHostUid );
+
+    TX_EXIT
+}
+
+/*!
+  Deinitialize wrappers
+ */
+void MpEngine::close( )
+{
+    delete mMpTranslator;
+    mMpTranslator = 0;
+    delete mSongScanner;
+    mSongScanner = 0;
+    delete mMediaKeyHandler;
+    mMediaKeyHandler = 0;   
+    delete mUsbBlockingNote;
+    mUsbBlockingNote = 0;
+    delete mMpxPlaybackWrapper;
+    mMpxPlaybackWrapper = 0;
+    delete mMpxHarvesterWrapper;
+    mMpxHarvesterWrapper = 0;
+    delete mMpxCollectionWrapper;
+    mMpxCollectionWrapper = 0;
+}
+
+/*!
+-------------------------------------------------------------------------------
+    Harvesting related
+-------------------------------------------------------------------------------
+*/
+
+/*!
  Refresh library by starting the scan.
  If scanning is already ongoing, this request is ignored.
  */
 void MpEngine::refreshLibrary()
 {
     TX_ENTRY
-    emit libraryAboutToRefresh();
-    mSongScanner->scan();
+    if ( !verifyUsbBlocking( true ) ) {
+        emit libraryAboutToRefresh();
+        mSongScanner->scan();
+    }
     TX_EXIT
 }
 
@@ -212,6 +334,17 @@ bool MpEngine::verifyUsbBlocking( bool showMessage )
     }
     TX_EXIT
     return result;
+}
+
+/*!
+ \
+ Request Harvester to check if there are any system events active.
+ */
+void MpEngine::checkForSystemEvents()
+{
+    TX_ENTRY
+    mMpxHarvesterWrapper->checkForSystemEvents();
+    TX_EXIT
 }
 
 /*!
@@ -249,13 +382,16 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
             mMediaKeyHandler->setEnabled(true);
             break;
         case DiskRemoved:
-            if ( mUsbBlockingState == USB_NotConnected ) {
-                emit exitApplication();
+            if ( mUsbBlockingState != USB_Synchronizing ) {
+                emit libraryRefreshed();
             }
             break;
         case DiskInserted:
             if ( mUsbBlockingState == USB_NotConnected ) {
                 refreshLibrary();
+            }
+            else if ( mUsbBlockingState == USB_Connected ) {
+                emit libraryRefreshed();
             }
             break;
         default:
@@ -292,6 +428,16 @@ void MpEngine::handleUsbEvent( MpxUsbEvents event )
 }
 
 /*!
+ Slot to be called when mUsbBlockingNote is about to close.
+ */
+void MpEngine::handleBlockingNoteClosing()
+{
+    TX_ENTRY
+    mUsbBlockingNote = 0;
+    TX_EXIT
+}
+
+/*!
  To be called when EMcMsgUSBMassStorageStart event is received.
  */
 void MpEngine::handleUsbMassStorageStartEvent()
@@ -302,13 +448,8 @@ void MpEngine::handleUsbMassStorageStartEvent()
     changeUsbBlockingState( USB_Synchronizing );
     emit usbBlocked(true);
     
-    if ( !mUsbBlockingNote ) {
-        mUsbBlockingNote = new HbNotificationDialog();
-        mUsbBlockingNote->setText( QString( tr( "USB connection in progress" ) ) );
-        mUsbBlockingNote->setModal( true );
-        mUsbBlockingNote->setTimeout( HbPopup::NoTimeout );
-    }
-    mUsbBlockingNote->show();
+    launchBlockingNote();
+    
     TX_EXIT
 }
 
@@ -324,8 +465,7 @@ void MpEngine::handleUsbMassStorageEndEvent()
     emit usbBlocked(false);
     
     if ( mUsbBlockingNote ) {
-        delete mUsbBlockingNote;
-        mUsbBlockingNote = 0;
+        mUsbBlockingNote->close();
     }
     HbMessageBox promptRefresh( HbMessageBox::MessageTypeQuestion );
     promptRefresh.setText( QString( tr( "List may need refreshing due to recent USB synchronisation. Refresh now?" ) ) );
@@ -349,13 +489,11 @@ void MpEngine::handleUsbMtpStartEvent()
     changeUsbBlockingState( USB_Synchronizing );
     emit usbBlocked(true);
     
-    if ( !mUsbBlockingNote ) {
-        mUsbBlockingNote = new HbNotificationDialog();
-        mUsbBlockingNote->setText( QString( tr( "USB connection in progress" ) ) );
-        mUsbBlockingNote->setModal( true );
-        mUsbBlockingNote->setTimeout( HbPopup::NoTimeout );
-    }
-    mUsbBlockingNote->show();
+    //Cancel any ongoing operation.
+    emit libraryAboutToRefresh();
+    
+    launchBlockingNote();
+    
     TX_EXIT
 }
 
@@ -371,8 +509,7 @@ void MpEngine::handleUsbMtpEndEvent()
     emit usbBlocked(false);
     
     if ( mUsbBlockingNote ) {
-        delete mUsbBlockingNote;
-        mUsbBlockingNote = 0;
+        mUsbBlockingNote->close();
     }
     if ( mPreviousUsbState == USB_Synchronizing ) {
         emit libraryRefreshed();
@@ -386,10 +523,8 @@ void MpEngine::handleUsbMtpEndEvent()
 void MpEngine::handleUsbMtpNotActive()
 {
     TX_ENTRY
-
     changeUsbBlockingState( USB_Connected );
     emit usbBlocked(true);
-
     TX_EXIT
 }
 
@@ -400,9 +535,274 @@ void MpEngine::handleUsbMtpNotActive()
 void MpEngine::changeUsbBlockingState( UsbBlockingState state )
 {
     TX_ENTRY
-
     mPreviousUsbState = mUsbBlockingState;
     mUsbBlockingState = state;
+    TX_EXIT
+}
+
+/*!
+ Internal
+ Used to launch the usb blocking note
+ */
+void MpEngine::launchBlockingNote()
+{
+    TX_ENTRY
+    if ( !mUsbBlockingNote ) {
+        mUsbBlockingNote = new HbProgressDialog( HbProgressDialog::WaitDialog );        
+        mUsbBlockingNote->setModal( true );
+        mUsbBlockingNote->setPrimaryAction( 0 );
+        mUsbBlockingNote->setTextAlignment( Qt::AlignCenter );
+        mUsbBlockingNote->setAttribute( Qt::WA_DeleteOnClose );
+        mUsbBlockingNote->setDismissPolicy( HbPopup::NoDismiss );        
+        mUsbBlockingNote->setText( QString( tr( "USB connection in progress" ) ) );
+        connect( mUsbBlockingNote, SIGNAL( aboutToClose() ), this, SLOT( handleBlockingNoteClosing() ) );
+    }
+    
+    mUsbBlockingNote->show();
 
     TX_EXIT
 }
+
+/*!
+-------------------------------------------------------------------------------
+    Collection related
+-------------------------------------------------------------------------------
+*/
+
+/*!
+ Opens the collection for the given \a context.
+
+ \sa collectionOpened()
+ */
+void MpEngine::openCollection( TCollectionContext context )
+{
+    mMpxCollectionWrapper->openCollection( context );
+}
+
+/*!
+ Opens the collection at a specific \a index.
+
+ \sa collectionOpened(), playlistOpened()
+ */
+void MpEngine::openCollectionItem( int index )
+{
+    mMpxCollectionWrapper->openCollectionItem( index );
+}
+
+/*!
+ Navigates back to the container of the current items.
+
+ \sa collectionOpened()
+ */
+void MpEngine::back()
+{
+    mMpxCollectionWrapper->back();
+}
+
+/*!
+ Loads the user created \a playLists.
+
+ */
+void MpEngine::findPlaylists( QStringList &playlists )
+{
+    mMpxCollectionWrapper->findPlaylists( playlists );
+}
+
+/*!
+ Creates a new playlist with name \a playlistName and adds \a selection and optionally uses \a collectionData.
+ */
+void MpEngine::createPlaylist( QString &playlistName, QList<int> &selection, MpMpxCollectionData* collectionData )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->createPlaylist( playlistName, selection, collectionData );
+    }
+}
+
+/*!
+ Adds \a selection to the playlist specified in \a playlistIndex.
+ */
+void MpEngine::saveToPlaylist( int playlistIndex, QList<int> &selection )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->saveToPlaylist( playlistIndex, selection );
+    }
+}
+
+/*!
+ Rename a playlist by \a index with \a name.
+ */
+void MpEngine::renamePlaylist( QString &newName, int index )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->renamePlaylist( newName, index );
+    }
+}
+
+/*!
+ Adds \a selection to the current playlist from the specified \a collectionData.
+ */
+void MpEngine::saveToCurrentPlaylist( QList<int> &selection, MpMpxCollectionData *collectionData )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->saveToCurrentPlaylist( selection, collectionData );
+    }
+}
+
+/*!
+ Rename a playlist with \a name.
+ */
+void MpEngine::renamePlaylist( QString &newName )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->renamePlaylist( newName );
+    }
+}
+
+/*!
+ Deletes \a selection from the collection.
+ */
+void MpEngine::deleteSongs( QList<int> &selection )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->deleteSongs( selection );
+    }
+}
+
+
+
+/*!
+ Initiate a playback preview for the selected item.
+ */
+void MpEngine::previewItem( int index )
+{
+    mMpxCollectionWrapper->previewItem( index );
+}
+
+
+/*!
+ Opens the an isolated collection with \a context.
+ \sa isolatedCollectionOpened()
+ */
+void MpEngine::openIsolatedCollection( TCollectionContext context )
+{
+    if ( !verifyUsbBlocking( true ) ) {
+        mMpxCollectionWrapper->openIsolatedCollection( context );
+    }
+}
+
+/*!
+ Releases the resources used for the isolated collection.
+ */
+void MpEngine::releaseIsolatedCollection()
+{
+    mMpxCollectionWrapper->releaseIsolatedCollection();
+}
+
+/*!
+ Returns pointer to MpMpxCollectionData, which is the collection data.
+ */
+MpMpxCollectionData *MpEngine::collectionData()
+{
+    return mMpxCollectionWrapper->collectionData();
+}
+
+/*!
+ Slot to be called to reopen the collection in its current state.
+
+ \sa collectionOpened()
+ */
+void MpEngine::reopenCollection()
+{
+    mMpxCollectionWrapper->reopenCollection();
+}
+
+/*!
+ Slot to be called to request a reorder operation , indicates that 
+ the item with \a playlistId , \a songId is to be moved from 
+ \a originalOrdinal to \a newOrdinal.
+ */
+void MpEngine::reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal )
+{
+    mMpxCollectionWrapper->reorderPlaylist( playlistId, songId, originalOrdinal, newOrdinal );
+}
+
+/*!
+ Returns pointer to MpPlaybackData, which is the playback data.
+ */
+MpPlaybackData *MpEngine::playbackData()
+{
+    return mMpxPlaybackWrapper->playbackData();
+}
+/*!
+ Slot to be called to request embedded playback of item with Uri aFilename
+ */
+
+void MpEngine::playEmbedded( QString aFilename )
+{
+    mMpxPlaybackWrapper->play( aFilename );
+}
+
+/*!
+ Slot to be called to request embedded playback of item with file handle
+ */
+
+void MpEngine::playEmbedded(const XQSharableFile& file )
+{
+    mMpxPlaybackWrapper->play( file );
+}
+/*!
+ Slot to handle a play pause.
+ */
+void MpEngine::playPause()
+{
+    mMpxPlaybackWrapper->playPause();
+}
+
+/*!
+ Slot to handle a stop.
+ */
+void MpEngine::stop()
+{
+    mMpxPlaybackWrapper->stop();
+}
+
+/*!
+ Slot to handle a skeep forward.
+ */
+void MpEngine::skipForward()
+{
+    mMpxPlaybackWrapper->skipForward();
+}
+
+/*!
+ Slot to handle a skeep backwards.
+ */
+void MpEngine::skipBackward()
+{
+    mMpxPlaybackWrapper->skipBackward();
+}
+
+/*!
+ Slot to handle a request to change \a position.
+ */
+void MpEngine::setPosition( int position )
+{
+    mMpxPlaybackWrapper->setPosition( position );
+}
+
+/*!
+ Slot to handle a request to change shuffle \a mode.
+ */
+void MpEngine::setShuffle( bool mode )
+{
+    mMpxPlaybackWrapper->setShuffle( mode );
+}
+
+/*!
+ Slot to handle a request to change repeat \a mode.
+ */
+void MpEngine::setRepeat( bool mode )
+{
+    mMpxPlaybackWrapper->setRepeat( mode );
+}
+

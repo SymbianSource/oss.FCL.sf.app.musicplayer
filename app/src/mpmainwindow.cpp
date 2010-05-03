@@ -22,13 +22,13 @@
 #include <xqpluginloader.h>
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
+#include <xqsharablefile.h>
 #include <QTranslator>
 #include <QLocale>
 
 #include "mpmainwindow.h"
-#include "mpcommondefs.h"
 #include "mpviewbase.h"
-#include "musicfetcher.h"
+#include "musicservices.h"
 #include "mpengine.h"
 #include "mptrace.h"
 
@@ -51,8 +51,8 @@ MpMainWindow::MpMainWindow()
       mSettingsViewPlugin(0),
       mDetailsViewPlugin(0),
       mCurrentViewPlugin(0),
-      mPreviousViewPlugin(0),
-      mMusicFetcher(0)
+      mVerticalViewType( CollectionView ),
+      mMusicServices(0)
 {
     TX_LOG
 }
@@ -63,8 +63,10 @@ MpMainWindow::MpMainWindow()
 MpMainWindow::~MpMainWindow()
 {
     TX_ENTRY
-    delete mMusicFetcher;
-
+    if(mMusicServices){
+        delete mMusicServices;
+    }
+    
     if (mCollectionViewPlugin) {
         mCollectionViewPlugin->destroyView();
         delete mCollectionViewPlugin;
@@ -81,6 +83,9 @@ MpMainWindow::~MpMainWindow()
         mDetailsViewPlugin->destroyView();
         delete mDetailsViewPlugin;
     }
+
+    MpEngine::instance()->close();
+
 
     TX_EXIT
 }
@@ -115,76 +120,33 @@ void MpMainWindow::initialize()
 #endif // _DEBUG
 
     if ( XQServiceUtil::isService() ) {
-        // Music Fetcher mode
+        // Music Service mode
         // Set the Collection View and Playback View to fetcher mode
-        mMusicFetcher = new MusicFetcher();
-    }
-
-    XQPluginLoader collectionLoader(MpCommon::KCollectionViewUid);
-    XQPluginLoader playbackLoader(MpCommon::KPlaybackViewUid);
-
-    // Loading the collection plugin
-    QObject* collectionInstance = collectionLoader.instance();
-    TX_LOG_ARGS("collection instance: " << reinterpret_cast<int>(collectionInstance));
-    mCollectionViewPlugin = qobject_cast<MpxViewPlugin*>( collectionInstance )->viewPlugin();
-    TX_LOG_ARGS("collection view plugin: " << reinterpret_cast<int>(mCollectionViewPlugin));
-    if ( mCollectionViewPlugin ) {
-        mCollectionViewPlugin->createView();
-        MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
-        if ( mMusicFetcher ) {
-            collectionView->setViewMode(MpCommon::FetchView);
-            collectionView->setTitle(mMusicFetcher->contextTitle());
-            int err = connect(collectionView, SIGNAL(songSelected(QString)), mMusicFetcher, SLOT(itemSelected(QString)));
-            TX_LOG_ARGS("connection error: " << err);
-            err = connect(mMusicFetcher, SIGNAL(titleReady(const QString&)), collectionView, SLOT(setTitle(const QString&)));
-            TX_LOG_ARGS("connection error: " << err);
-        }
-        else {
-            collectionView->setTitle(hbTrId("txt_mus_title_music"));
-        }
-        // Collection view is the default view.
-        activateView(MpMainWindow::CollectionView);
-    }
-
-    // Pre-load the playback plugin
-    QObject* playbackInstance = playbackLoader.instance();
-    TX_LOG_ARGS("playback instance: " << reinterpret_cast<int>(playbackInstance));
-    mPlaybackViewPlugin = qobject_cast<MpxViewPlugin*>( playbackInstance )->viewPlugin();
-    TX_LOG_ARGS("playback view plugin: " << reinterpret_cast<int>(mPlaybackViewPlugin));
-    if ( mPlaybackViewPlugin ) {
-        mPlaybackViewPlugin->createView();
-        MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
-        if ( mMusicFetcher ) {
-            playbackView->setViewMode(MpCommon::FetchView);
-            playbackView->setTitle(mMusicFetcher->contextTitle());
-            int err = connect(playbackView, SIGNAL(songSelected(QString)), mMusicFetcher, SLOT(itemSelected(QString)));
-            TX_LOG_ARGS("connection error: " << err);
-            err = connect(mMusicFetcher, SIGNAL(titleReady(const QString&)), playbackView, SLOT(setTitle(const QString&)));
-            TX_LOG_ARGS("connection error: " << err);
-        }
-        else {
-            playbackView->setTitle(hbTrId("txt_mus_title_music"));
-        }
+        mMusicServices = new MusicServices();
+        int err = connect(mMusicServices, SIGNAL(serviceActive( TUid )), this, SLOT(initializeServiceView( TUid )));
+        TX_LOG_ARGS("connection error: " << err);
+        XQServiceUtil::toBackground( false );
     }
 
     MpEngine *engine = MpEngine::instance();
-    connect( engine, SIGNAL( libraryRefreshed() ), this, SLOT( handleLibraryUpdated() ) );
-    connect( engine, SIGNAL( exitApplication() ), this, SLOT( handleExitApplication() ) );
 
+    if ( !mMusicServices ) {
+        engine->initialize(MpCommon::DefaultView);
+      
+        loadView(CollectionView);
+        activateView(CollectionView);
+
+        connect(this, SIGNAL( orientationChanged( Qt::Orientation ) ), SLOT( switchView( Qt::Orientation ) ) );
+        connect( engine, SIGNAL( libraryRefreshed() ), SLOT( handleLibraryUpdated() ) );
+        engine->checkForSystemEvents();
+        loadView( PlaybackView );
+    }
+    setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
     TX_EXIT
 }
 
 /*!
- Returns the current view plugin.
- */
-MpxViewPlugin* MpMainWindow::currentViewPlugin()
-{
-    TX_LOG
-    return mCurrentViewPlugin;
-}
-
-/*!
- Handle the \a commandCode.
+ Slot to be called to handle the \a commandCode.
  */
 void MpMainWindow::handleCommand( int commandCode )
 {
@@ -214,59 +176,49 @@ void MpMainWindow::handleCommand( int commandCode )
 }
 
 /*!
+ Slot to be called to switch view based on \a orientation.
+ */
+void MpMainWindow::switchView( Qt::Orientation orientation )
+{
+        if (orientation == Qt::Vertical) {
+            activateView( mVerticalViewType );   
+        }
+
+}
+
+/*!
  Activate the \a viewType view.
  */
 void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
 {
     TX_ENTRY_ARGS("viewType=" << viewType );
 
-    if ( mCurrentViewPlugin ) {
-
+    bool doTransition = true;
+    Hb::ViewSwitchFlags  transitionFlags = Hb::ViewSwitchDefault;
+    
+    if ( mCurrentViewPlugin ) {     
         disconnectView();
         mCurrentViewPlugin->deactivateView();
-        mPreviousViewPlugin = mCurrentViewPlugin;
+        if ( viewType  == CollectionView && mCurrentViewPlugin == mPlaybackViewPlugin ||
+                  viewType  == PlaybackView && mCurrentViewPlugin == mDetailsViewPlugin ||
+                  viewType  == PlaybackView && mCurrentViewPlugin == mSettingsViewPlugin ) {
+            transitionFlags |= Hb::ViewSwitchUseBackAnim;
+        }
         mCurrentViewPlugin = 0;
     }
 
-    if ( viewType == MpMainWindow::CollectionView && mCollectionViewPlugin ) {
-        mCurrentViewPlugin = mCollectionViewPlugin;
-    }
-    else if ( viewType == MpMainWindow::PlaybackView && mPlaybackViewPlugin ) {
-        mCurrentViewPlugin = mPlaybackViewPlugin;
-    }
-    else if ( viewType == MpMainWindow::SettingsView ) {
-        if ( mSettingsViewPlugin ) {
-            mCurrentViewPlugin = mSettingsViewPlugin;
-        }
-		else {
-			XQPluginLoader settingsLoader( MpCommon::KSettingsViewUid );
-            QObject* settingsInstance = settingsLoader.instance();
-            mSettingsViewPlugin = qobject_cast<MpxViewPlugin*>( settingsInstance )->viewPlugin();
-            mSettingsViewPlugin->createView();
-            mCurrentViewPlugin = mSettingsViewPlugin;
-        }
-    }
-    else if ( viewType == MpMainWindow::DetailsView ) {
-        if ( mDetailsViewPlugin ) {
-            mCurrentViewPlugin = mDetailsViewPlugin;
-        }
-        else {
-            XQPluginLoader detailsLoader( MpCommon::KDetailsViewUid );
-            QObject* detailsInstance = detailsLoader.instance();
-            mDetailsViewPlugin = qobject_cast<MpxViewPlugin*>( detailsInstance )->viewPlugin();
-            mDetailsViewPlugin->createView();
-            mCurrentViewPlugin = mDetailsViewPlugin;
-        }
-    }
+    // loadView will not reload the view if is already loaded.
+    mCurrentViewPlugin = loadView( viewType );
+    Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        addView( mCurrentViewPlugin->getView() );
+        
+        mVerticalViewType = viewType;
+        
+        addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );
+        setCurrentView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) , doTransition , transitionFlags);
         mCurrentViewPlugin->activateView();
         connectView();
-    }
-
-    if ( mPreviousViewPlugin ) {
-        removeView( mPreviousViewPlugin->getView() );
     }
     TX_EXIT
 }
@@ -283,11 +235,6 @@ void MpMainWindow::connectView()
 					 SIGNAL(command(int)),
 					 this,
 					 SLOT(handleCommand(int)));
-
-	QObject::connect(this,
-					 SIGNAL( orientationChanged( Qt::Orientation ) ),
-					 mCurrentViewPlugin,
-					 SLOT( orientationChange( Qt::Orientation ) ) );
     TX_EXIT
 }
 
@@ -302,12 +249,6 @@ void MpMainWindow::disconnectView()
 					 SIGNAL(command(int)),
 					 this,
 					 SLOT(handleCommand(int)));
-
-	QObject::disconnect(this,
-					 SIGNAL( orientationChanged( Qt::Orientation ) ),
-					 mCurrentViewPlugin,
-					 SLOT( orientationChange( Qt::Orientation ) ) );
-
     TX_EXIT
 }
 
@@ -332,17 +273,92 @@ void MpMainWindow::handleLibraryUpdated()
 }
 
 /*!
- Slot to be called when application must exit.
+ Reimp.
  */
-void MpMainWindow::handleExitApplication()
-{
-    TX_ENTRY
 
-    if ( mCurrentViewPlugin ) {
-        disconnectView();
+
+void MpMainWindow::initializeServiceView( TUid hostUid ){
+    
+    MpEngine *engine = MpEngine::instance();
+        
+    switch (mMusicServices->currentService()) {
+ 
+    case MusicServices::EUriFetcher:
+        {
+            engine->initialize( MpCommon::FetchView, hostUid );
+            loadView( CollectionView, MpCommon::FetchView );
+            MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
+            connect(collectionView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
+            activateView( CollectionView );           
+            loadView(PlaybackView, MpCommon::FetchView );
+            MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
+            connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
+            connect( engine, SIGNAL( libraryRefreshed() ), this, SLOT( handleLibraryUpdated() ) );
+            engine->checkForSystemEvents();
+            break;
+        }
+    case MusicServices::EPlayback:
+        {
+            engine->initialize( MpCommon::EmbeddedView, hostUid );
+            loadView(PlaybackView, MpCommon::EmbeddedView );   
+            MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
+            connect(mMusicServices, SIGNAL(playReady(QString)), engine, SLOT(playEmbedded(QString)));
+            connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), engine, SLOT(playEmbedded(const XQSharableFile&)));
+            connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
+            activateView( PlaybackView );
+            break;
+        }
+        default:
+        Q_ASSERT_X(false, "MpMainWindow::initializeServiceView", "undefined service");
+        break;
     }
-    qApp->quit();
+}
 
-    TX_EXIT
+/*!
+  loads a view if type \a  type, return the view plugin, if view is already loaded it will not reload the view.
+ */
+MpxViewPlugin* MpMainWindow::loadView( ViewType type, MpCommon::MpViewMode viewMode )
+{
+    MpxViewPlugin** plugin = 0;
+    long int pluginUid = 0;    
+    switch (type) { 
+    case CollectionView:
+        pluginUid = MpCommon::KCollectionViewUid;
+        plugin = &mCollectionViewPlugin;
+        break;
+    case PlaybackView:
+        pluginUid = MpCommon::KPlaybackViewUid;
+        plugin = &mPlaybackViewPlugin;
+        break;
+    case SettingsView:
+        pluginUid = MpCommon::KSettingsViewUid;
+        plugin = &mSettingsViewPlugin;
+        break;
+    case DetailsView:
+        pluginUid = MpCommon::KDetailsViewUid;
+        plugin = &mDetailsViewPlugin;
+        break;
+
+    default:
+        Q_ASSERT_X(false, "MpMainWindow::loadView", "undefined view type");
+        break;
+    }
+    Q_ASSERT( plugin && pluginUid);
+    if ( plugin && !(*plugin) ) {
+        //plugin was not loded before, loding plugin.
+        XQPluginLoader pluginLoader( pluginUid );
+        QObject* pluginInstance = pluginLoader.instance();
+        (*plugin) = qobject_cast<MpxViewPlugin*>( pluginInstance )->viewPlugin();
+        Q_ASSERT( *plugin );
+        
+        if ( *plugin ) {
+            (*plugin)->createView();
+            MpViewBase* view = reinterpret_cast<MpViewBase*>( (*plugin)->getView() );
+            view->setTitle( mMusicServices ? mMusicServices->contextTitle() : hbTrId("txt_mus_title_music"));
+            view->setViewMode( viewMode );
+        }
+    }
+    Q_ASSERT( plugin ? *plugin : 0 );
+    return plugin ? *plugin : 0;
 }
 

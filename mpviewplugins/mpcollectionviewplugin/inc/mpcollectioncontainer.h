@@ -41,7 +41,6 @@ public:
 
     virtual void initialize() = 0;
     virtual void setDataModel( MpCollectionDataModel *dataModel );
-    virtual void orientationChange( Qt::Orientation orientation );
     void setViewMode( MpCommon::MpViewMode viewMode );
 
 signals:

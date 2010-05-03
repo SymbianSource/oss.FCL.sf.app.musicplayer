@@ -48,7 +48,8 @@ namespace MpCommon
      */
     enum MpViewMode {
         DefaultView,
-        FetchView
+        FetchView,
+        EmbeddedView
     };
 }
 

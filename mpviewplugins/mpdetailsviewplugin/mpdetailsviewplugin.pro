@@ -48,7 +48,8 @@ SOURCES += src/mpdetailsviewplugin.cpp \
     	   src/mpmpxdetailsframeworkwrapper_p.cpp \
     	   src/mpsongdata.cpp
 
-HEADERS = inc/mpdetailsviewplugin.h \
+HEADERS = ../../inc/mpviewbase.h \
+        inc/mpdetailsviewplugin.h \
     	  inc/mpdetailsview.h \
     	  inc/mpmpxdetailsframeworkwrapper.h \
     	  inc/mpmpxdetailsframeworkwrapper_p.h \

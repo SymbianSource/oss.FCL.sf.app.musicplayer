@@ -18,12 +18,13 @@
 #ifndef MPDETAILSVIEW_H
 #define MPDETAILSVIEW_H
 
-#include <hbview.h>
 #include <qpixmap>
 #include <qpointer.h>
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QMap>
+
+#include "mpviewbase.h"
 
 class QGraphicsWebView;
 class QNetworkAccessManager;
@@ -45,7 +46,7 @@ class MpSongData;
 class MpMpxDetailsFrameworkWrapper;
 
 //class declaration
-class MpDetailsView : public HbView
+class MpDetailsView : public MpViewBase
 {
     Q_OBJECT
     

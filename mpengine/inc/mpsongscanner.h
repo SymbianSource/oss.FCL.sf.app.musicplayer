@@ -19,7 +19,7 @@
 #ifndef MPSONGSCANNER_H
 #define MPSONGSCANNER_H
 
-class MpMpxFrameworkWrapper;
+class MpMpxHarvesterFrameworkWrapper;
 class HbProgressDialog;
 
 #include <QObject>
@@ -31,7 +31,7 @@ class MpSongScanner : public QObject
 
 public:
 
-    explicit MpSongScanner( MpMpxFrameworkWrapper *wrapper, QObject *parent=0 );
+    explicit MpSongScanner( MpMpxHarvesterFrameworkWrapper *wrapper, QObject *parent=0 );
     virtual ~MpSongScanner();
 
     void scan();
@@ -48,9 +48,9 @@ public slots:
 
 private:
 
-    MpMpxFrameworkWrapper       *mMpxWrapper;       // Not own
-    HbProgressDialog            *mScanProgressNote; // Own
-    TBool                       mScanning;
+    MpMpxHarvesterFrameworkWrapper       *mMpxWrapper;       // Not own
+    HbProgressDialog                     *mScanProgressNote; // Own
+    TBool                                mScanning;
 
 };
 

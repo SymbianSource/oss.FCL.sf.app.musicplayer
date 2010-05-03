@@ -60,15 +60,13 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     mLayout->setMinimumSize( 0.0, 0.0 );
     setLayout( mLayout );
     bool widgetsOk = false;
-    bool layoutOk = false;
     mDocumentLoader = new HbDocumentLoader();
     HbMainWindow *mainWindow = hbInstance->allMainWindows()[0];
 
     if ( mDocumentLoader ) {
         mDocumentLoader->load( QString(":/playbackviewdocml/playbackwidget.docml"), &widgetsOk);
-        layoutOk = loadLayout( mainWindow->orientation() );
     }
-    if ( widgetsOk && layoutOk ) {
+    if ( widgetsOk ) {
         QGraphicsWidget *tmpWidgetPtr;
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("playbackWidgetContainer"));
         tmpWidgetPtr->setParentItem(this);
@@ -90,11 +88,7 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     else {
         TX_LOG_ARGS("Error: invalid xml file.");
         Q_ASSERT_X(widgetsOk, "MpPlaybackWidget", "invalid xml file - widget");
-        Q_ASSERT_X(layoutOk, "MpPlaybackWidget", "invalid xml file - layout");
     }
-
-    connect( mainWindow, SIGNAL(orientationChanged(Qt::Orientation)),
-             this, SLOT(loadLayout(Qt::Orientation)) );
 
     connect( mProgressBar, SIGNAL(sliderPressed()), this, SLOT(handleSliderPressed()) );
     connect( mProgressBar, SIGNAL(sliderReleased()), this, SLOT(handleSliderReleased()) );
@@ -105,8 +99,7 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     connect( mPlaybackData, SIGNAL(positionChanged()), this, SLOT(positionChanged()) );
     connect( mPlaybackData, SIGNAL(albumArtReady()), this, SLOT(albumArtChanged()) );
 
-    mCompositePixmap = QPixmap( 360, 360 );
-    mCompositePixmap.fill( Qt::transparent );
+
 
     TX_EXIT
 }
@@ -173,36 +166,14 @@ void MpPlaybackWidget::positionChanged()
 void MpPlaybackWidget::albumArtChanged( )
 {
     TX_ENTRY
-    QPixmap pixmap;
-    mPlaybackData->albumArt( pixmap );
-    composeAlbumCover( pixmap );
+    HbIcon icon;
+    mPlaybackData->albumArt( icon );
 
-    QIcon qicon;
-    if ( !mCompositePixmap.isNull() ) {
-        qicon = QIcon( mCompositePixmap );
-    }
-    else {
-        qicon = QIcon( pixmap );
-    }
-    HbIcon icon( qicon );
+
     mAlbumArt->setIcon( icon );
     TX_EXIT
 }
 
-/*!
- Orientation change. Load layout based on the \a orientation.
- */
-bool MpPlaybackWidget::loadLayout( Qt::Orientation orientation )
-{
-    bool ret(false);
-    if ( orientation == Qt::Vertical ) {
-        mDocumentLoader->load(QString(":/playbackviewdocml/playbackwidget.docml"), "portrait", &ret);
-    }
-    else {
-        mDocumentLoader->load(QString(":/playbackviewdocml/playbackwidget.docml"), "landscape", & ret);
-    }
-    return ret;
-}
 
 /*!
  Slot to handle slider pressed.
@@ -262,17 +233,4 @@ QString MpPlaybackWidget::formatDuration( int seconds )
     }
 }
 
-/*!
- Compose the album art.
- */
-void MpPlaybackWidget::composeAlbumCover( QPixmap& albumart )
-{
-    TX_ENTRY
-    mCompositePixmap.fill( Qt::transparent );
-    QPainter painter(&mCompositePixmap);
-    painter.setCompositionMode(QPainter::CompositionMode_Clear);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter.fillRect(mCompositePixmap.rect(), Qt::transparent);
-    painter.drawPixmap(QRect(0, 0,360,360), albumart);
-    TX_EXIT
-}
+

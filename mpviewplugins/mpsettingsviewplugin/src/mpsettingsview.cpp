@@ -83,7 +83,6 @@ void MpSettingsView::initializeView()
     }
 
     mWindow = mainWindow();
-    setTitle(hbTrId("txt_mus_title_music"));
     mSoftKeyBack = new HbAction(Hb::BackAction, this);
     mAudioEffectsWidget = new MpSettingsAudioEffectsWidget(this);
     mAudioEffectsWidget->initialize();

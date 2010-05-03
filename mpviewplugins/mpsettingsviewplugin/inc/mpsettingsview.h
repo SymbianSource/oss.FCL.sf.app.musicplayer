@@ -18,7 +18,7 @@
 #ifndef MPSETTINGSVIEW_H
 #define MPSETTINGSVIEW_H
 
-#include <hbview.h>
+#include "mpviewbase.h"
 
 
 class HbAction;
@@ -26,7 +26,7 @@ class HbMainWindow;
 class MpSettingsAudioEffectsWidget;
 
 //class declaration
-class MpSettingsView : public HbView
+class MpSettingsView : public MpViewBase
 {
     Q_OBJECT
 

@@ -36,10 +36,13 @@ public:
     static MMPXPlaybackUtility* UtilityL(const TUid& aModeId = KPbModeDefault);
     void Close();
     void SetL(TMPXPlaybackProperty aProperty, TInt aValue);
+    void CommandL(TMPXPlaybackCommand aCmd, TInt aData=0);
 
 public:
     TInt                    iBalance;
+    TInt                    iEffectId;
     TMPXPlaybackProperty    iProperty;
+    TMPXPlaybackCommand     iCommand;
 
 };
 

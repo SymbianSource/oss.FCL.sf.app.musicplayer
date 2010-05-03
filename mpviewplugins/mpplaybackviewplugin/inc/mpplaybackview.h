@@ -23,7 +23,7 @@
 class HbAction;
 class HbIcon;
 class HbMainWindow;
-class MpMpxPbFrameworkWrapper;
+class MpEngine;
 class MpPlaybackData;
 class MpPlaybackWidget;
 class MpEqualizerWidget;
@@ -72,7 +72,7 @@ private:
 
 private:
 
-    MpMpxPbFrameworkWrapper *mFrameworkWrapper; // Own
+    MpEngine                *mMpEngine;         // Own
     MpPlaybackData          *mPlaybackData;     // Not own
     MpPlaybackWidget        *mPlaybackWidget;   // Not own
     MpEqualizerWidget       *mEqualizerWidget;  // Own

@@ -22,7 +22,6 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
-// ../loc/mpxpodcastcollectiondb.loc	APP_LAYER_LOC_EXPORT_PATH(mpxpodcastcollectiondb.loc)
 
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv

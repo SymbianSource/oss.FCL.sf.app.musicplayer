@@ -26,9 +26,11 @@
  Stub function.
 */
 CMPXAudioEffectProperties::CMPXAudioEffectProperties():iBalance(0),
+                                                       iLoudness(EFalse),
                                                        iLoadFromFile(EFalse),
                                                        iSaveToFile(EFalse),
                                                        iLeave(EFalse)
+                                                       
 {
 }
 
@@ -50,9 +52,25 @@ TInt CMPXAudioEffectProperties::Balance()
 /*!
  Stub function.
 */
+TBool CMPXAudioEffectProperties::Loudness()
+{
+    return iLoudness;
+}
+
+/*!
+ Stub function.
+*/
 void CMPXAudioEffectProperties::SetBalance(TInt aBalance)
 {
     iBalance = aBalance;
+}
+
+/*!
+ Stub function.
+*/
+void CMPXAudioEffectProperties::SetLoudness(TBool aLoudness)
+{
+    iLoudness = aLoudness;
 }
 
 /*!
@@ -62,6 +80,9 @@ void CMPXAudioEffectProperties::Reset()
 {
     MPX_DEBUG1("CMPXAudioEffectProperties::Reset");
     iBalance = 0;
+    iLoudness = EFalse;
+    iLeave = EFalse;
+    iLoadFromFile = EFalse;
 }
 
 /*!
@@ -81,7 +102,7 @@ void CMPXAudioEffectProperties::LoadFromFileL()
 {
     MPX_DEBUG1("CMPXAudioEffectProperties::LoadFromFileL <---");
     if(iLeave){
-        User::Leave(KErrNotFound);
+        Reset();
     }else{
         iLoadFromFile = ETrue;
     }

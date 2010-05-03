@@ -20,11 +20,10 @@
 
 #include <QObject>
 
-#include <hbview.h>
 #include <hbeffect.h>
 
-#include "mpmpxcollectionviewdefs.h"
 #include "mpviewbase.h"
+#include "mpmpxcollectionviewdefs.h"
 
 class QActionGroup;
 class HbMainWindow;
@@ -36,7 +35,6 @@ class MpCollectionContainerFactory;
 class MpCollectionContainer;
 class MpCollectionDataModel;
 class MpEngine;
-class MpMpxFrameworkWrapper;
 class MpMpxCollectionData;
 class MpNowPlayingWidget;
 class MpSnapshotWidget;
@@ -56,8 +54,6 @@ public:
     void activateView();
     void deactivateView();
     void setDefaultView();
-
-    void orientationChange( Qt::Orientation orientation );
 
 signals:
 
@@ -134,7 +130,6 @@ private:
 
     TCollectionContext              mCollectionContext;
 
-    MpMpxFrameworkWrapper           *mMpxWrapper;           // Own
     MpEngine                        *mMpEngine;             // Not own
     MpMpxCollectionData             *mCollectionData;       // Not own
 

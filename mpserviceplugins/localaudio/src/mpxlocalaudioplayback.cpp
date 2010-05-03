@@ -50,11 +50,8 @@
 
 // CONSTANTS
 const TUid  KLocalPlaybackUid={0x101FFC06};
-// added because of build warning
-#if defined(__HIGH_RESOLUTION_VOLUME)
-_LIT(KWmaExtension, ".wma");
-_LIT(KRaExtension, ".ra");
-#endif
+//_LIT(KWmaExtension, ".wma");
+//_LIT(KRaExtension, ".ra"); 
 
     
 // ============================ LOCAL FUNCTIONS ==============================
@@ -307,7 +304,25 @@ void CMPXLocalAudioPlayback::CommandL(TMPXPlaybackCommand aCmd, TInt aData)
                     {
                     if (iConsumeStarted)
                         {
-                        TRAP_IGNORE( ConsumeRightsL( ContentAccess::EContinue ) );
+                        TRAPD( drmErr, ConsumeRightsL( ContentAccess::EContinue ) );
+                        if ( drmErr == KErrCANoRights )
+                            {
+                            iDrmMediaUtility->Close();
+                            iPlayer->Stop();
+                            iIsPlaying = EFalse;
+                            iAudioEffects->DestroyAudioEffect();
+                            iPlayer->Close();
+                            iObs->HandlePluginEvent(
+                                    MMPXPlaybackPluginObserver::EPStopped, 0,
+                                    drmErr);
+                            iFile.Close();
+                            iState = EStateNotInitialised;
+                            iObs->HandlePluginEvent(
+                                    MMPXPlaybackPluginObserver::EPClosed,
+                                    EPbCmdStop, drmErr);
+                            iClosedByAudioPolicy = EFalse;
+                            break;
+                            }
                         }
                     else
                         {
@@ -483,6 +498,25 @@ void CMPXLocalAudioPlayback::SetL(TMPXPlaybackProperty aProperty,TInt aValue)
                 {
                 iPlayer->Pause();
                 iPlayer->SetPosition(pos);
+                //Handle error of license expired when tapping the progress playing bar 
+                TRAPD( drmErr, ConsumeRightsL( ContentAccess::EContinue ) );
+                if ( drmErr == KErrCANoRights )
+                    {
+                    iDrmMediaUtility->Close();
+                    iPlayer->Stop();
+                    iIsPlaying = EFalse;
+                    iAudioEffects->DestroyAudioEffect();
+                    iPlayer->Close();
+                    iObs->HandlePluginEvent(
+                            MMPXPlaybackPluginObserver::EPStopped, 0, drmErr);
+                    iFile.Close();
+                    iState = EStateNotInitialised;
+                    iObs->HandlePluginEvent(
+                            MMPXPlaybackPluginObserver::EPClosed, EPbCmdStop,
+                            drmErr);
+                    iClosedByAudioPolicy = EFalse;
+                    return;
+                    }
                 iPlayer->Play();
                 }
             else

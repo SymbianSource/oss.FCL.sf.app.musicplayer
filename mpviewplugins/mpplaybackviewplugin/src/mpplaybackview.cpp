@@ -28,7 +28,7 @@
 
 #include "mpplaybackview.h"
 #include "mpplaybackwidget.h"
-#include "mpmpxpbframeworkwrapper.h"
+#include "mpengine.h"
 #include "mpplaybackdata.h"
 #include "mpsettingsmanager.h"
 #include "mpcommondefs.h"
@@ -57,7 +57,7 @@
  Constructs the playback view.
  */
 MpPlaybackView::MpPlaybackView()
-    : mFrameworkWrapper( 0 ),
+    : mMpEngine( 0 ),
       mPlaybackData( 0 ),
       mPlaybackWidget( 0 ),
       mEqualizerWidget( new MpEqualizerWidget() ),
@@ -79,7 +79,6 @@ MpPlaybackView::MpPlaybackView()
 MpPlaybackView::~MpPlaybackView()
 {
     TX_ENTRY
-    delete mFrameworkWrapper;
     delete mSoftKeyBack;
     delete mPlayIcon;
     delete mPauseIcon;
@@ -123,13 +122,13 @@ void MpPlaybackView::initializeView()
     mSoftKeyBack = new HbAction( Hb::BackAction, this );
     connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
-    mFrameworkWrapper = new MpMpxPbFrameworkWrapper();
-    mPlaybackData = mFrameworkWrapper->playbackData();
+    mMpEngine = MpEngine::instance();
+    mPlaybackData = mMpEngine->playbackData();
     connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
              this, SLOT( playbackStateChanged() ) );
 
     mPlaybackWidget = new MpPlaybackWidget( mPlaybackData );
-    connect( mPlaybackWidget, SIGNAL( setPlaybackPosition( int ) ), mFrameworkWrapper, SLOT( setPosition( int ) ) );
+    connect( mPlaybackWidget, SIGNAL( setPlaybackPosition( int ) ), mMpEngine, SLOT( setPosition( int ) ) );
 
     setWidget( mPlaybackWidget );
     setupMenu();
@@ -190,10 +189,20 @@ void MpPlaybackView::back()
 {
     TX_ENTRY
     // Stop the playback preview when returning to collection in fetch mode
-    if ( mViewMode == MpCommon::FetchView ) {
-        mFrameworkWrapper->stop();
+    switch ( mViewMode ) {
+        case MpCommon::EmbeddedView:
+            TX_LOG_ARGS( "MpCommon::EmbeddedView" )
+            mMpEngine->stop();
+            emit songSelected( "" );
+            break;
+        case MpCommon::FetchView:
+            TX_LOG_ARGS( "MpCommon::FetchView" )
+            mMpEngine->stop(); //Intentional fallthrough        
+        default: 
+            emit command( MpCommon::ActivateCollectionView );
+            break;
     }
-    emit command( MpCommon::ActivateCollectionView );
+    
     TX_EXIT
 }
 
@@ -253,7 +262,7 @@ void MpPlaybackView::flip()
  */
 void MpPlaybackView::toggleShuffle()
 {
-    mFrameworkWrapper->setShuffle( !mShuffle );
+    mMpEngine->setShuffle( !mShuffle );
     MpSettingsManager::setShuffle( !mShuffle );
 }
 
@@ -271,7 +280,7 @@ void MpPlaybackView::shuffleChanged( bool shuffle )
  */
 void MpPlaybackView::toggleRepeat()
 {
-    mFrameworkWrapper->setRepeat( !mRepeat );
+    mMpEngine->setRepeat( !mRepeat );
     MpSettingsManager::setRepeat( !mRepeat );
 }
 
@@ -290,7 +299,7 @@ void MpPlaybackView::repeatChanged( bool repeat )
 void MpPlaybackView::handleSongSelected()
 {
     TX_ENTRY
-    mFrameworkWrapper->stop();
+    mMpEngine->stop();
     emit songSelected( mPlaybackData->uri() );
     TX_EXIT
 }
@@ -324,23 +333,29 @@ void MpPlaybackView::setupToolbar()
     toolBar->setOrientation( Qt::Horizontal );
     QActionGroup *actionsGroup = new QActionGroup( toolBar );
 
-    if ( mViewMode == MpCommon::DefaultView ) {
+    if ( mViewMode == MpCommon::DefaultView || mViewMode == MpCommon::EmbeddedView ) {
         mShuffleOnIcon = new HbIcon( "qtg_mono_shuffle" );
         mShuffleOffIcon = new HbIcon( "qtg_mono_shuffle_off" );
         mShuffleAction = new HbAction( actionsGroup );
         mShuffle = MpSettingsManager::shuffle();
         mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon );
         mShuffleAction->setCheckable( false );
-
-        connect( mShuffleAction, SIGNAL( triggered( bool ) ),
-                 this, SLOT( toggleShuffle() ) );
+        
+        if ( mViewMode == MpCommon::DefaultView ) {
+            connect( mShuffleAction, SIGNAL( triggered( bool ) ),
+                         this, SLOT( toggleShuffle() ) );
+        }
+        else {
+            mShuffleAction->setEnabled( false );
+        }
+        
         toolBar->addAction( mShuffleAction );
 
         HbAction *action = new HbAction( actionsGroup );
         action->setIcon( HbIcon( "qtg_mono_previous" ) );
         action->setCheckable( false );
         connect( action, SIGNAL( triggered( bool ) ),
-                 mFrameworkWrapper, SLOT( skipBackward() ) );
+                 mMpEngine, SLOT( skipBackward() ) );
         toolBar->addAction( action );
 
         mPlayPauseAction = new HbAction( actionsGroup );
@@ -349,24 +364,28 @@ void MpPlaybackView::setupToolbar()
         mPlayPauseAction->setIcon( *mPlayIcon );
         mPlayPauseAction->setCheckable( false );
         connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
-                 mFrameworkWrapper, SLOT( playPause() ) );
+                 mMpEngine, SLOT( playPause() ) );
         toolBar->addAction( mPlayPauseAction );
 
         action = new HbAction( actionsGroup );
         action->setIcon( HbIcon( "qtg_mono_next" ) );
         action->setCheckable( false );
         connect( action, SIGNAL( triggered( bool ) ),
-                 mFrameworkWrapper, SLOT( skipForward() ) );
+                 mMpEngine, SLOT( skipForward() ) );
         toolBar->addAction( action );
 
         HbIcon icon( "qtg_mono_info" );
         action = new HbAction( actionsGroup );
         action->setIcon( icon );
         action->setCheckable( false );
-
-        connect( action, SIGNAL( triggered( bool ) ),
-                 this, SLOT( flip() ) );
-
+        //TODO: Remove once song details takes hostUid from engine
+        if ( mViewMode == MpCommon::DefaultView ) {
+            connect( action, SIGNAL( triggered( bool ) ),
+                     this, SLOT( flip() ) );
+        }
+        else {
+            action->setEnabled( false );
+        }
         toolBar->addAction( action );
     }
     else {
@@ -384,9 +403,11 @@ void MpPlaybackView::setupToolbar()
         mPlayPauseAction->setIcon( *mPlayIcon );
         mPlayPauseAction->setCheckable( false );
         connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
-                 mFrameworkWrapper, SLOT( playPause() ) );
+                 mMpEngine, SLOT( playPause() ) );
         toolBar->addAction( mPlayPauseAction );
     }
+    
+    
     TX_EXIT
 }
 

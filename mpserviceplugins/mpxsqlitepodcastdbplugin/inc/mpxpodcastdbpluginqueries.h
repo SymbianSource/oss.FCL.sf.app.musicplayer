@@ -16,7 +16,6 @@
 */
 
 
-
 #ifndef MPXPODCASTDBPLUGINQUERIES_H
 #define MPXPODCASTDBPLUGINQUERIES_H
 
@@ -67,7 +66,7 @@ _LIT(KQueryPodcastDeleteForCategory, "UPDATE :dbname.Podcast SET Deleted=0 WHERE
 _LIT(KQueryPodcastCleanup, "DELETE FROM :dbname.Podcast WHERE Deleted=1");
 
 _LIT(KQueryPodcastGetTitle, "SELECT Title FROM :dbname.Podcast WHERE Deleted=0 AND UniqueId=%u");
-_LIT(KQueryPodcastVolume, "SELECT VolumeId FROM :dbname.Podcast WHERE Deleted=0 AND UniqueId=%u");
+_LIT(KQueryPodcastVolume, "SELECT VolumeId FROM :dbname.Podcast WHERE UniqueId=%u");
 _LIT(KQueryPodcastAllVolumeIds, "SELECT VolumeId FROM :dbname.Podcast WHERE Deleted=0");
 
 // LTAN-79N8ND/EVXG-7FABHC: temporary fix.  Symbian 9.4 SQLite cannot resolve column number correctly,
@@ -95,7 +94,7 @@ _LIT(KQueryPodcastGetUrisFrom, "SELECT UniqueId,Location FROM :dbname.Podcast WH
 //       optimized query is faster by more than 100ms.
 
 // categories included
-_LIT(KQueryPodcastGetEpisode, "SELECT Podcast.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Podcast,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Podcast.Deleted=0 AND Podcast.UniqueId=%u AND Podcast.Album=Album.UniqueId AND Podcast.Artist=Artist.UniqueId AND Podcast.Genre=Genre.UniqueId AND Podcast.Composer=Composer.UniqueId");
+_LIT(KQueryPodcastGetEpisode, "SELECT Podcast.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Podcast,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Podcast.UniqueId=%u AND Podcast.Album=Album.UniqueId AND Podcast.Artist=Artist.UniqueId AND Podcast.Genre=Genre.UniqueId AND Podcast.Composer=Composer.UniqueId");
 
 // LTAN-79N8ND/EVXG-7FABHC: temporary fix.  Symbian 9.4 SQLite cannot resolve column number correctly,
 // Use column number instead of column name for ORDER BY, needed when FROM uses more than 1 table

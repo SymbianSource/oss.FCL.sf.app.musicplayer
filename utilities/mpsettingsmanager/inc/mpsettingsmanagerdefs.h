@@ -19,10 +19,12 @@
 #define MPSETTINGSMANAGERDEFS_H
 
     // CenRep Keys
-    const qint32 KMPCenRepSettingsFeature           = {0x10207C92};
-    const qint32 KMPCenRepSettingShuffleKey         = {0x00000001};
-    const qint32 KMPCenRepSettingRepeatKey          = {0x00000002};
-    const qint32 KMPCenRepSettingFirstStartupKey    = {0x00000003};
-    const qint32 KMPCenRepSettingPresetIdKey        = {0x00000004};
+    const qint32 KMPCenRepSettingsFeature            = {0x10207C92};
+    const qint32 KMPCenRepSettingShuffleKey          = {0x00000001};
+    const qint32 KMPCenRepSettingRepeatKey           = {0x00000002};
+    const qint32 KMPCenRepSettingFirstStartupKey     = {0x00000003};
+    const qint32 KMPCenRepSettingPresetIdKey         = {0x00000004};
+    const qint32 KMPCenRepSettingRamdiskEnabled      = {0x00000005};
+    const qint32 KMPCenRepSettingRamdiskMaxDiskSpace = {0x00000006};
 
 #endif	// MPSETTINGSMANAGERDEFS_H

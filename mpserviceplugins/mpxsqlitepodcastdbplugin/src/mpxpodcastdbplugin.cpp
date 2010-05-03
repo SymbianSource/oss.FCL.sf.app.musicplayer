@@ -738,6 +738,7 @@ TBool CMPXPodcastDbPlugin::DoOpenL(
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     CleanupStack::PushL(array);
 
+//    TInt count(0);
     TInt levels(aPath.Levels());
     TBool isEpisode(EFalse);
 
@@ -2793,7 +2794,7 @@ void CMPXPodcastDbPlugin::DoHandleChangeL(
     MPX_FUNC("CMPXPodcastDbPlugin::DoHandleChangeL");
 
     TMPXCommandId cmdId = iActiveTask->GetTask();
-    if((iActiveTask->GetVisibleChange() | CMPXDbActiveTask::EAllVisible)
+    if((iActiveTask->GetVisibleChange() & CMPXDbActiveTask::EAllVisible)
         && (cmdId == KMPXCommandIdCollectionSet ||
             cmdId == KMPXCommandIdCollectionAdd ||
             cmdId == KMPXCommandIdCollectionRemove ||

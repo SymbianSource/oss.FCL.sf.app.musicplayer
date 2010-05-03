@@ -39,7 +39,8 @@ LIBS += -lmpxplaybackutility.dll \
 	
 symbian:TARGET.EPOCALLOWDLLDATA = 1
 
-HEADERS += inc/mpsettingsviewplugin.h \
+HEADERS += ../../inc/mpviewbase.h \
+      inc/mpsettingsviewplugin.h \
       inc/mpsettingsview.h \
       inc/mpsettingsaudioeffectswidget.h \
       inc/mpmpxasframeworkwrapper.h \

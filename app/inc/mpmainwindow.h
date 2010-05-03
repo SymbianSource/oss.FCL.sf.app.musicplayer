@@ -23,15 +23,16 @@
 #include <hbmainwindow.h>
 #include <mpxviewframeworkqt.h>
 
+#include "mpcommondefs.h"
+
 // Forward declarations
 class MpxViewPlugin;
-class MusicFetcher;
+class MusicServices;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
 {
     Q_OBJECT
-    Q_PROPERTY(MpxViewPlugin* mCurrentViewPlugin READ currentViewPlugin)
 
 public:
 
@@ -45,27 +46,31 @@ public:
     ~MpMainWindow();
 
     void initialize();
-    MpxViewPlugin* currentViewPlugin();
 
 public slots:
     void handleCommand( int commandCode );
     void handleLibraryUpdated();
-    void handleExitApplication();
+
+    void switchView( Qt::Orientation orientation );
+    void initializeServiceView( TUid hostUid );
 
 private:
     void activateView(ViewType);
     void connectView();
     void disconnectView();
 
+    MpxViewPlugin*  loadView( ViewType type, MpCommon::MpViewMode viewMode= MpCommon::DefaultView );
+
 private:
 
-    MpxViewPlugin         *mCollectionViewPlugin; // Not own
-    MpxViewPlugin         *mPlaybackViewPlugin;   // Not own
-    MpxViewPlugin         *mSettingsViewPlugin;   // Not own
-    MpxViewPlugin         *mDetailsViewPlugin;    // Not own
-    MpxViewPlugin         *mCurrentViewPlugin;    // Not own
-    MpxViewPlugin         *mPreviousViewPlugin;   // Not own
-    MusicFetcher		  *mMusicFetcher; 		  // Own
+    MpxViewPlugin         *mCollectionViewPlugin; // Own
+    MpxViewPlugin         *mPlaybackViewPlugin;   // Own
+    MpxViewPlugin         *mSettingsViewPlugin;   // Own
+    MpxViewPlugin         *mDetailsViewPlugin;    // Own
+
+    MpxViewPlugin         *mCurrentViewPlugin;    // Own
+    ViewType              mVerticalViewType;
+    MusicServices         *mMusicServices;        // Own
 
 };
 

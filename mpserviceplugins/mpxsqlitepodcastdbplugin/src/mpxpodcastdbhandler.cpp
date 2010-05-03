@@ -795,7 +795,7 @@ void CMPXPodcastDbHandler::OpenDatabaseL(
     iDbManager->OpenDatabaseL(aDrive);
 
     // Verify the volume ID after a remount event
-    VerifyVolumeIdL();
+    VerifyVolumeIdL( aDrive );
     }
 
 // ----------------------------------------------------------------------------
@@ -1425,52 +1425,64 @@ TBool CMPXPodcastDbHandler::InTransaction()
 // Verifies that the volume ID of the database matches the drive
 // ----------------------------------------------------------------------------
 //
-void CMPXPodcastDbHandler::VerifyVolumeIdL()
+void CMPXPodcastDbHandler::VerifyVolumeIdL( TInt aDrive )
     {
     MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL <--");
 
-    TInt count( iDbDrives.Count() );
-    for( TInt i=0; i<count; ++i )
+    if( iDbManager->IsOpen(aDrive) )
         {
-        if( iDbManager->IsOpen(iDbDrives[i]) )
+        TVolumeInfo volInfo;
+        iFs.Volume(volInfo, aDrive );
+        TUint curId(volInfo.iUniqueID);
+
+        TInt volId = iDbAuxiliary->IdL( aDrive );
+
+        // New database, no volume id set, mask out top bit because this is an uint
+        //
+        MPX_DEBUG3("CMPXPodcastDbHandler::VerifyVolumeIdL drive:%i db:%i", curId, volId);
+        if( volId == 0 && (curId&0x7FFFFFFF) )
             {
-            TVolumeInfo volInfo;
-            iFs.Volume(volInfo, iDbDrives[i] );
-            TUint curId(volInfo.iUniqueID);
+            MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- New ID");
+            BeginTransactionL();
+            TRAPD( err, iDbAuxiliary->SetIdL( aDrive, curId&0x7FFFFFFF ) );
+            EndTransactionL( err );
 
-            TInt volId = iDbAuxiliary->IdL( iDbDrives[i] );
-
-            // New database, no volume id set, mask out top bit because this is an uint
-            //
-            MPX_DEBUG3("CMPXPodcastDbHandler::VerifyVolumeIdL drive:%i db:%i", curId, volId);
-            if( volId == 0 )
+            // KSqlDbCorrupted indicates DB corrupted, need to recreate.
+            if ( err == KSqlDbCorrupted )
                 {
-                MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- New ID");
+                MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- Corrupted DB");
+                iDbManager->RecreateDatabaseL( aDrive );
                 BeginTransactionL();
-                TRAPD( err, iDbAuxiliary->SetIdL( iDbDrives[i], curId&0x7FFFFFFF ) );
-                EndTransactionL( err );
-
-                // KSqlDbCorrupted indicates DB corrupted, need to recreate.
-                if ( err == KSqlDbCorrupted )
-                    {
-                    MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- Corrupted DB");
-                    iDbManager->RecreateDatabaseL(iDbDrives[i]);
-                    BeginTransactionL();
-                    TRAPD(err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
-                    EndTransactionL( err );
-                    }
-                }
-            // Unmatched volume id, mark db as corrupt
-            //
-            else if ( (curId&0x7FFFFFFF) != (volId&0x7FFFFFFFF) )
-                {
-                MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- ID match FAILED");
-                iDbManager->RecreateDatabaseL(iDbDrives[i]);
-                BeginTransactionL();
-                TRAPD(err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
+                TRAPD( err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
                 EndTransactionL( err );
                 }
             }
+        // Unmatched volume id, mark db as corrupt
+        //
+        else if ( (curId&0x7FFFFFFF) != (volId&0x7FFFFFFFF) )
+            {
+            MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -- ID match FAILED");
+            iDbManager->RecreateDatabaseL( aDrive );
+            BeginTransactionL();
+            TRAPD( err, iDbAuxiliary->SetDBCorruptedL( ETrue ) );
+            EndTransactionL( err );
+            }
+        }
+    MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -->");
+    }
+
+
+// ----------------------------------------------------------------------------
+// Verifies that the volume ID of the database matches the drive
+// ----------------------------------------------------------------------------
+//
+void CMPXPodcastDbHandler::VerifyVolumeIdL()
+    {
+    MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL <--");
+    TInt count( iDbDrives.Count() );
+    for( TInt i=0; i<count; ++i )
+        {
+        VerifyVolumeIdL(iDbDrives[i]);
         }
     MPX_DEBUG1("CMPXPodcastDbHandler::VerifyVolumeIdL -->");
     }

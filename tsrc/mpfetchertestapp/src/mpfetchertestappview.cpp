@@ -16,6 +16,7 @@
 */
 
 #include <xqaiwrequest.h>
+#include <xqservicerequest.h>
 #include <QGraphicsLinearLayout>
 #include <hbpushbutton.h>
 #include <hblineedit.h>
@@ -119,6 +120,18 @@ void MpFetcherTestAppView::createLayout()
                 connect(button, SIGNAL(clicked()), SLOT(fetchSong()));
                 bottomLayout->addItem(button);
             }
+            HbPushButton* playButton = new HbPushButton("Play song");
+            if (playButton)
+            {
+                connect(playButton, SIGNAL(clicked()), SLOT(viewSong()));
+                bottomLayout->addItem(playButton);
+            }
+            HbPushButton* viewButton = new HbPushButton("Play song caged");
+            if (viewButton)
+            {
+                connect(viewButton, SIGNAL(clicked()), SLOT(viewSongCaged()));
+                bottomLayout->addItem(viewButton);
+            }
             layout->addItem(bottomLayout);
         }
 
@@ -133,10 +146,14 @@ void MpFetcherTestAppView::fetchSong()
     mResultEdit->setText("");
     mErrorEdit->setText("");
     mErrorCodeEdit->setText("");
-
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    
     if (!mReq)
     {
-        mReq = mAppMgr.create("com.nokia.services.media.Music", "fetch(QString)", true);
+        mReq = mAppMgr.create("com.nokia.symbian.IMusicFetch", "fetch()", true);
 
         qDebug() <<  "MpFetcherTestAppView::fetchSong: mReq=" << mReq;
 
@@ -153,16 +170,159 @@ void MpFetcherTestAppView::fetchSong()
     }
 
     // Set arguments for request (application title)
+//    QList<QVariant> args;
+//    args << QVariant(QString("<app_name>"));
+//    mReq->setArguments(args);
+    QString title("WindowTitle");
+    QVariant title2(QString("app_name"));
+    XQRequestInfo info;
+    info.setInfo(title, title2);
+    mReq->setInfo(info);
+    // Make the request
+    if (!mReq->send())
+    {   
+        mErrorEdit->setText("Failed to send REQ");
+        qDebug() <<  "MpFetcherTestAppView::fetchSong: XQAiwRequest::send returned false";
+    }
+
+    qDebug() <<  "MpFetcherTestAppView::fetchSong END";
+}
+
+void MpFetcherTestAppView::playSong()
+{
+    qDebug() <<  "MpFetcherTestAppView::playSong START";
+
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    if (!mReq)
+    {
+        mReq = mAppMgr.create("com.nokia.symbian.IFileViewMusic", "playMedia(QString,QString)", true);
+
+        qDebug() <<  "MpFetcherTestAppView::playSong: mReq=" << mReq;
+
+        if (!mReq)
+        {
+            mErrorEdit->setText("Failed to create REQ");
+            return;
+        }
+        else
+        {
+            connect(mReq, SIGNAL(requestOk(const QVariant&)), SLOT(handleOk(const QVariant&)));
+            connect(mReq, SIGNAL(requestError(int,const QString&)), SLOT(handleError(int,const QString&)));
+        }
+    }
+
+    // Set arguments for request (application title)
     QList<QVariant> args;
-    args << QVariant(QString("<app_name>"));
+    args << QString("<app_name>");
+    args << mResultEdit->text();
+    
     mReq->setArguments(args);
 
     // Make the request
     if (!mReq->send())
     {
         mErrorEdit->setText("Failed to send REQ");
-        qDebug() <<  "MpFetcherTestAppView::fetchSong: XQAiwRequest::send returned false";
+        qDebug() <<  "MpFetcherTestAppView::playSong: XQAiwRequest::send returned false";
     }
 
-    qDebug() <<  "MpFetcherTestAppView::fetchSong END";
+    qDebug() <<  "MpFetcherTestAppView::playSong END";
+}
+
+void MpFetcherTestAppView::viewSong()
+{
+    
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    QFile file(mResultEdit->text());
+
+    mReq = mAppMgr.create(file);
+    if (mReq == NULL)
+    {
+           // No handlers for the URI
+           return;
+     }
+    // By default operation is "view(QString)"
+
+    // Set function parameters
+   QList<QVariant> args;
+   args << file.fileName();
+   mReq->setArguments(args);
+   QString title("WindowTitle");
+   QVariant title2(QString("<app_name>View"));
+   XQRequestInfo info;
+   info.setInfo(title, title2);
+   mReq->setInfo(info);
+   // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+   // If making multiple requests to same service, you can save the request as member variable
+   // In this example all done.
+
+
+}
+
+void MpFetcherTestAppView::viewSongCaged()
+{
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    XQSharableFile sf;
+    // Open the file for sharing from own private  directory
+    // If you have handle available, just set it by "setHandle()" function
+    if (!sf.open(mResultEdit->text()))
+    {
+        // Failed to open sharable file
+        return;
+    }
+
+    // Create request for the sharable file
+    mReq = mAppMgr.create(sf);
+    if (!mReq)
+   {
+         // No viewer app found for the file
+         // As we opened the handle, we need to close it !
+         sf.close(); 
+         return;  
+   }
+    // By default operation is "view(XQSharableFile)"
+
+    // Set function parameters
+    // Not only one sharable handle supported,  otherwise upon send EArgumentError error occurs
+    QList<QVariant> args;
+    args << qVariantFromValue(sf);  
+    mReq->setArguments(args);
+    QString title("WindowTitle");
+   QVariant title2(QString("<app_name>Caged"));
+   XQRequestInfo info;
+   info.setInfo(title, title2);
+   mReq->setInfo(info);
+   // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+      // Handle error
+   }
+
+    // As we opened the handle, we need to close it !
+    sf.close(); 
+
+   // If making multiple requests to same service, you can save the mReq as member variable
+   // In this example all done.
+
+
 }

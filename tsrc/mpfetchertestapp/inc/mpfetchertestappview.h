@@ -37,6 +37,10 @@ private slots:
     void handleError(int errorCode, const QString& errorMessage);
     
     void fetchSong();
+    void playSong();
+    void viewSong();
+    void viewSongCaged();
+    
     
 private:
     void createLayout();

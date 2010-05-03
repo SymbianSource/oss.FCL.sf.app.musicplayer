@@ -34,7 +34,9 @@ public:
     
     // Stub functions
     TInt Balance();
+    TBool Loudness();
     void SetBalance(TInt aBalance);
+    void SetLoudness(TBool aLoudness);
     void Reset();
     void SaveToFileL();
     void LoadFromFileL();
@@ -42,6 +44,7 @@ public:
 public:
     
     TInt    iBalance;
+    TBool   iLoudness;
     TBool   iLoadFromFile;
     TBool   iSaveToFile;
     TBool   iLeave;

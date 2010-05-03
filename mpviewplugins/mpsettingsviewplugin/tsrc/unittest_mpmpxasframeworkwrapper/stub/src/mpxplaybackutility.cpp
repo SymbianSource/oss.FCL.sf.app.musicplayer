@@ -24,8 +24,9 @@
 /*!
  Stub function.
 */
-MMPXPlaybackUtility::MMPXPlaybackUtility():iProperty(EPbPropertyVolume),
-                                           iBalance(0)
+MMPXPlaybackUtility::MMPXPlaybackUtility():iBalance(0),
+                                            iProperty(EPbPropertyVolume)
+                                           
 {
 }
 
@@ -60,6 +61,15 @@ void MMPXPlaybackUtility::SetL(TMPXPlaybackProperty aProperty, TInt aValue)
 {
     iProperty = aProperty;
     iBalance = aValue;
+}
+
+/*!
+ Stub function.
+*/
+void MMPXPlaybackUtility::CommandL(TMPXPlaybackCommand aCmd, TInt aData)
+{
+    iCommand = aCmd;
+    iEffectId = aData;
 }
 
 //end of file

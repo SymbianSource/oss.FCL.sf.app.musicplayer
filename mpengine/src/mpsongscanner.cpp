@@ -19,9 +19,10 @@
 #include <hbnotificationdialog.h>
 #include <hblabel.h>
 #include <hbfontspec.h>
+#include <hbmessagebox.h>
 
 #include "mpsongscanner.h"
-#include "mpmpxframeworkwrapper.h"
+#include "mpmpxharvesterframeworkwrapper.h"
 #include "mptrace.h"
 
 /*!
@@ -43,7 +44,7 @@
 /*!
  Constructs the song scanner.
  */
-MpSongScanner::MpSongScanner( MpMpxFrameworkWrapper *wrapper, QObject *parent )
+MpSongScanner::MpSongScanner( MpMpxHarvesterFrameworkWrapper *wrapper, QObject *parent )
     : QObject( parent ),
       mMpxWrapper(wrapper),
       mScanProgressNote(0),
@@ -124,35 +125,48 @@ void MpSongScanner::handleScanStarted()
  */
 void MpSongScanner::handleScanEnded( int numItemsAdded, int error )
 {
-    QString added;
-
-    HbNotificationDialog *finishedDialog = new HbNotificationDialog();
-    finishedDialog->setModal(true);
-    finishedDialog->setAttribute( Qt::WA_DeleteOnClose );
-
-    added = hbTrId( "txt_mus_dpopinfo_ln_songs_added", numItemsAdded );
-    finishedDialog->setText( added );
-
-    if( error < 0) {
-        if ( mScanProgressNote ) {     
-            mScanProgressNote->cancel();
+    if (error == KErrDiskFull) {
+		if ( mScanProgressNote ) {     
+                mScanProgressNote->cancel();
         }
-        finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-        finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
+        HbMessageBox *diskFullDialog = new HbMessageBox();
+        diskFullDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
+        diskFullDialog->setText( hbTrId( "txt_mus_title_refresh_cancelled" ) );
+        diskFullDialog->setTimeout( HbPopup::NoTimeout);
+        diskFullDialog->exec();
+        mScanning = false;
+               
     }
-    else if ( mScanning ) {
-        if ( mScanProgressNote ) {     
-            mScanProgressNote->cancel();
+    else{
+        QString added;
+        HbNotificationDialog *finishedDialog = new HbNotificationDialog();
+        finishedDialog->setModal(true);
+        finishedDialog->setAttribute( Qt::WA_DeleteOnClose );
+    
+        added = hbTrId( "txt_mus_dpopinfo_ln_songs_added", numItemsAdded );
+        finishedDialog->setText( added );
+              
+        if( error < 0) {
+            if ( mScanProgressNote ) {     
+                mScanProgressNote->cancel();
+            }
+            finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
+            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
         }
-        finishedDialog->setIcon( HbIcon( QString("qtg_large_ok") ) );
-        finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_complete" ) );
+        else if ( mScanning ) {
+            if ( mScanProgressNote ) {     
+                mScanProgressNote->cancel();
+            }
+            finishedDialog->setIcon( HbIcon( QString("qtg_large_ok") ) );
+            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_complete" ) );
+        }
+        else {
+            finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
+            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
+        }
+        mScanning = false;
+        finishedDialog->show();
     }
-    else {
-        finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-        finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
-    }
-    mScanning = false;
-    finishedDialog->show();
 }
 
 /*!

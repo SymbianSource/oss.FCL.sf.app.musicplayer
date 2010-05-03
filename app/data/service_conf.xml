@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <service>
-  <name>Music Fetcher</name>
+  <name>musicplayer</name>
   <filepath>No path</filepath>
-  <description>Music Fetcher</description>
+  <description>Music Services</description>
   <interface>
-     <name>com.nokia.services.media.Music</name>
+     <name>com.nokia.symbian.IMusicFetch</name>
      <version>1.0</version>
-     <description>Interface for fetching music URIs</description>
+     <description>Music fetcher service</description>
+   </interface>
+   <interface>
+     <name>com.nokia.symbian.IFileView</name>
+     <version>1.0</version>
+     <description>Interface for showing Files</description>
    </interface>
 </service>

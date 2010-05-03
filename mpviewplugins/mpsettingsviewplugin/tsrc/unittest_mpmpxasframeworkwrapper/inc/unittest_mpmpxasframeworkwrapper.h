@@ -44,8 +44,10 @@ public slots:
 private slots:
     void testConstructor();
     void testBalance();
+    void testLoudness();
     void testSetBalance();
-    void testPersistBalance();
+    void testSetLoudness();
+    
     
 private:
 

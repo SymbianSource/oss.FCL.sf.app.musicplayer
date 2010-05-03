@@ -27,31 +27,45 @@ INCLUDEPATH += . \
     	../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
-LIBS += -lxqservice \
+LIBS += -lestor.dll \
     -lmpxplaybackutility.dll \
     -lmpxcollectionutility.dll \
     -lmpxharvesterutility.dll \
     -lmpxcommon.dll \
+    -lmpxcollectionhelper.dll \
     -lremconcoreapi.dll \
-    -lremconinterfacebase.dll
+    -lremconinterfacebase.dll \
+    -lmpsettingsmanager \
+    -lmpdata.dll \
+    -lxqserviceutil
     
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
 
 HEADERS += ../inc/mpengine.h \
-           inc/mpmpxframeworkwrapper.h \
-           inc/mpmpxframeworkwrapper_p.h \
+           inc/mpmpxharvesterframeworkwrapper.h \
+           inc/mpmpxharvesterframeworkwrapper_p.h \
+           inc/mpmpxplaybackframeworkwrapper.h \
+           inc/mpmpxplaybackframeworkwrapper_p.h \
            inc/mpsongscanner.h \
            inc/mpmediakeyhandler.h \
            inc/mpmediakeyhandler_p.h\
-           inc/mpmediakeyremconresponse.h
+           inc/mpmediakeyremconresponse.h \
+           inc/mpmpxcollectionframeworkwrapper.h \
+           inc/mpmpxisolatedcollectionhelper.h \
+           inc/mpmpxcollectionframeworkwrapper_p.h
 
 SOURCES += src/mpengine.cpp \
-           src/mpmpxframeworkwrapper.cpp \
-           src/mpmpxframeworkwrapper_p.cpp \
+           src/mpmpxharvesterframeworkwrapper.cpp \
+           src/mpmpxharvesterframeworkwrapper_p.cpp \
+           src/mpmpxplaybackframeworkwrapper.cpp \
+           src/mpmpxplaybackframeworkwrapper_p.cpp \
            src/mpsongscanner.cpp \
            src/mpmediakeyhandler.cpp \
            src/mpmediakeyhandler_p.cpp \
-           src/mpmediakeyremconresponse.cpp
+           src/mpmediakeyremconresponse.cpp \
+           src/mpmpxcollectionframeworkwrapper.cpp \
+           src/mpmpxisolatedcollectionhelper.cpp \
+           src/mpmpxcollectionframeworkwrapper_p.cpp       
 
 DEFINES += BUILD_MPENGINE_LIB
 

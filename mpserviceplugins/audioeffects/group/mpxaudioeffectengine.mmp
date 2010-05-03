@@ -34,7 +34,6 @@ SOURCE          mpxaudioeffectengine.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
-//USERINCLUDE     ../../../../inc	// remove because of checksource error
 
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/mmf/common

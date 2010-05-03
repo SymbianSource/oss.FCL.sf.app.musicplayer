@@ -18,7 +18,8 @@ TEMPLATE = subdirs
 
 symbian {
     include(app/rom/rom.pri)
-    include(musicfetcher/rom/rom.pri)
+    include(musicservices/rom/rom.pri)
+    include(mpdata/rom/rom.pri)
     include(mpengine/rom/rom.pri)
     include(utilities/mpsettingsmanager/rom/rom.pri)
     include(utilities/mpnowplayingbanner/rom/rom.pri)
@@ -29,26 +30,26 @@ symbian {
     include(mpserviceplugins/audioeffects/rom/rom.pri)
     include(mpserviceplugins/localaudio/rom/rom.pri)
     include(mpserviceplugins/mpxsqlitedbcommon/rom/rom.pri)
-    include(mpserviceplugins/mpxsqlitedbplugin/rom/rom.pri)
+    include(mpserviceplugins/mpxsqlitedbhgplugin/rom/rom.pri)
     include(mpserviceplugins/mpxsqlitepodcastdbplugin/rom/rom.pri)
     include(mpserviceplugins/mpxinmemoryplugin/rom/rom.pri)
     include(mpserviceplugins/m3uplaylistplugin/rom/rom.pri)
     }
 
 SUBDIRS = utilities \
-          musicfetcher \
+          musicservices \
           app \
+          mpdata \
           mpengine \
           mpviewplugins 
 
 CONFIG += ordered
 
 BLD_INF_RULES.prj_mmpfiles += "./mpserviceplugins/audioeffects/group/mpxaudioeffectengine.mmp" \
-"./mpserviceplugins/localaudio/group/mpxlocalaudioplayback.mmp" \
-"./mpserviceplugins/mpxsqlitedbcommon/group/mpxsqlitedbcommon.mmp" \
-"./mpserviceplugins/mpxsqlitedbplugin/group/mpxsqlitedbplugin.mmp" \
-"./mpserviceplugins/mpxsqlitepodcastdbplugin/group/mpxsqlitepodcastdbplugin.mmp" \
-"./mpserviceplugins/mpxinmemoryplugin/group/mpxinmemoryplugin.mmp" \
-"./mpserviceplugins/m3uplaylistplugin/group/mpxm3uplaylistparsers.mmp" \
-"./mpserviceplugins/m3uplaylistplugin/group/mpxm3uplaylistplugin.mmp"
-
+    "./mpserviceplugins/localaudio/group/mpxlocalaudioplayback.mmp" \
+    "./mpserviceplugins/mpxsqlitedbcommon/group/mpxsqlitedbcommon.mmp" \
+    "./mpserviceplugins/mpxsqlitedbhgplugin/group/mpxsqlitedbhgplugin.mmp" \
+    "./mpserviceplugins/mpxsqlitepodcastdbplugin/group/mpxsqlitepodcastdbplugin.mmp" \
+    "./mpserviceplugins/mpxinmemoryplugin/group/mpxinmemoryplugin.mmp" \
+    "./mpserviceplugins/m3uplaylistplugin/group/mpxm3uplaylistparsers.mmp" \
+    "./mpserviceplugins/m3uplaylistplugin/group/mpxm3uplaylistplugin.mmp"

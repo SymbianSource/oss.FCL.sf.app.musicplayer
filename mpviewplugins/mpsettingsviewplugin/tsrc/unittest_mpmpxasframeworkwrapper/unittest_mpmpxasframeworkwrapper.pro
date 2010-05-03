@@ -22,7 +22,7 @@ DEPENDPATH += .
 INCLUDEPATH += . \
     ../../inc \
     ../../../../inc \
-    
+    ../../../../mpserviceplugins/inc
 
     
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 

@@ -135,9 +135,8 @@ QGraphicsWidget* MpCollectionViewPlugin::getView()
  */
 void MpCollectionViewPlugin::orientationChange( Qt::Orientation orientation )
 {
-    if ( mState == Activated ) {
-        mView->orientationChange(orientation);
-    }
+    TX_LOG
+    Q_UNUSED( orientation );
 }
 
 /*!

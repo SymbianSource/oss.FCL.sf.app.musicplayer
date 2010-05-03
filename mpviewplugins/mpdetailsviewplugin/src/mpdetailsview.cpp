@@ -210,7 +210,6 @@ void MpDetailsView::initializeView()
             this, SLOT( thumbnailReady( QPixmap , void * , int , int  ) ) );
     mDefaultRecommendationAlbumArt = QPixmap( ":/detailsviewicons/defaultalbumart.png" );
     
-    setTitle( tr("Music") );
     // TODO: might need later
     setupMenu();
       

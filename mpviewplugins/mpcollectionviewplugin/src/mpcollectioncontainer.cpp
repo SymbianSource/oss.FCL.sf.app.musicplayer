@@ -79,14 +79,6 @@ void MpCollectionContainer::setDataModel( MpCollectionDataModel *dataModel )
 }
 
 /*!
- Loads the correct layout based on the \a orientation.
- */
-void MpCollectionContainer::orientationChange( Qt::Orientation orientation )
-{
-    Q_UNUSED(orientation);
-}
-
-/*!
  Sets the view mode.
  */
 void MpCollectionContainer::setViewMode( MpCommon::MpViewMode viewMode )

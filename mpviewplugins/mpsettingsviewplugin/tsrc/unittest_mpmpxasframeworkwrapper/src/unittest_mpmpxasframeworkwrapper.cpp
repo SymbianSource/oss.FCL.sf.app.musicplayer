@@ -103,6 +103,12 @@ void TestMpMpxAsFrameworkWrapper::testConstructor()
 {
     QVERIFY(mTestPrivate->iPlaybackUtility == 0);
     QVERIFY(mTestPrivate->iAudioEffectProperties != 0);
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iLoadFromFile, TBool(ETrue));
+    mTestPrivate->iAudioEffectProperties->iLeave = ETrue;
+    mTestPrivate->iAudioEffectProperties->LoadFromFileL();
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iBalance, 0);
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iLoudness, TBool(EFalse));
+    
 }
 
 /*!
@@ -110,19 +116,22 @@ void TestMpMpxAsFrameworkWrapper::testConstructor()
  */
 void TestMpMpxAsFrameworkWrapper::testBalance()
 {
-    for(TInt i = -10; i < 10; i++){
-        mTest->persistBalance(i);
-        QCOMPARE(mTestPrivate->iAudioEffectProperties->iBalance, i);
-        QCOMPARE(mTestPrivate->iAudioEffectProperties->iSaveToFile, TBool(ETrue));
-        mTestPrivate->iAudioEffectProperties->iSaveToFile = EFalse;
-        QCOMPARE(mTest->balance(), i);
-        QCOMPARE(mTestPrivate->iAudioEffectProperties->iLoadFromFile, TBool(ETrue));
-        mTestPrivate->iAudioEffectProperties->iLoadFromFile = EFalse;
-    }
-    mTestPrivate->iAudioEffectProperties->iLeave = ETrue;
-    QCOMPARE(mTest->balance(),0);
+    QCOMPARE( mTest->balance(), 0 );
+    mTest->setBalance( -100 );
+    QCOMPARE( mTest->balance(), -100 );
+    mTest->setBalance( 100 );
+    QCOMPARE( mTest->balance(), 100 );
 }
 
+/*!
+ test loudness
+ */
+void TestMpMpxAsFrameworkWrapper::testLoudness()
+{
+    QCOMPARE(mTest->loudness(), false);
+    mTest->setLoudness(true);
+    QCOMPARE(mTest->loudness(), true);
+}
 
 /*!
  test setBalance
@@ -133,22 +142,34 @@ void TestMpMpxAsFrameworkWrapper::testSetBalance()
         mTest->setBalance(i);
         QVERIFY(mTestPrivate->iPlaybackUtility != 0);
         QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyBalance);
-        QCOMPARE(mTestPrivate->iPlaybackUtility->iBalance, i);        
+        QCOMPARE(mTestPrivate->iPlaybackUtility->iBalance, i);   
+        QCOMPARE(mTestPrivate->iAudioEffectProperties->iBalance, i);
+        QCOMPARE(mTestPrivate->iAudioEffectProperties->iSaveToFile, TBool(ETrue));
+        mTestPrivate->iAudioEffectProperties->iLoadFromFile = EFalse;
+        
     }   
 }
 
 /*!
- test persistBalance
+ test setLoudness   
  */
-void TestMpMpxAsFrameworkWrapper::testPersistBalance()
-{
-    for(TInt i = -10; i < 10; i++){
-        mTest->persistBalance(i);
-        QCOMPARE(mTestPrivate->iAudioEffectProperties->iBalance, i);
-        QCOMPARE(mTestPrivate->iAudioEffectProperties->iSaveToFile, TBool(ETrue));
-        mTestPrivate->iAudioEffectProperties->iSaveToFile = EFalse;
-    }   
+void TestMpMpxAsFrameworkWrapper::testSetLoudness()
+{   
+    mTest->setLoudness(true);
+    QVERIFY(mTestPrivate->iPlaybackUtility != 0);
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iLoudness, TBool(ETrue));
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iSaveToFile, TBool(ETrue));
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCommand, EPbApplyEffect );
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iEffectId, 0x101FFC02 );
+    mTestPrivate->iAudioEffectProperties->iLoadFromFile = EFalse;
+    mTest->setLoudness(false);
+    QVERIFY(mTestPrivate->iPlaybackUtility != 0);
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iLoudness, TBool(EFalse));
+    QCOMPARE(mTestPrivate->iAudioEffectProperties->iSaveToFile, TBool(ETrue));
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCommand, EPbApplyEffect );
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iEffectId, 0x101FFC02 );
+    mTestPrivate->iAudioEffectProperties->iLoadFromFile = EFalse;
 }
-    
+
     
 // end of file

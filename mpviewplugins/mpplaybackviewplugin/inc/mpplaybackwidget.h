@@ -50,8 +50,6 @@ public slots:
     void positionChanged();
     void albumArtChanged();
 
-    bool loadLayout( Qt::Orientation orientation );
-
 private slots:
 
     void handleSliderPressed();
@@ -61,7 +59,6 @@ private slots:
 private:
 
     QString formatDuration( int seconds );
-    void composeAlbumCover( QPixmap& albumart );
 
 private:
 
@@ -75,7 +72,7 @@ private:
     HbLabel                 *mAlbumArt;         // Not own
     HbProgressSlider        *mProgressBar;      // Not own
 
-    QPixmap                 mCompositePixmap;
+
 
     bool                    mProgreesBarDragging;
     int                     mDuration;

@@ -33,12 +33,12 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
      
 LIBS += -lmpxplaybackutility.dll \
         -lmpxcommon.dll \
-        -lthumbnailmanagerqt.dll \
-        -lmpxcollectionutility.dll \
         -lestor.dll \
-	-lmpxviewframeworkqt.dll \
-	-laudioequalizerutility.dll \
-	-lmpsettingsmanager
+		-lmpxviewframeworkqt.dll \
+		-laudioequalizerutility.dll \
+		-lmpsettingsmanager \
+		-lmpengine \
+		-lmpdata.dll
 	
 symbian:
 {
@@ -50,11 +50,8 @@ BLD_INF_RULES.prj_exports += \
 }
 
 HEADERS = ../../inc/mpviewbase.h \
-      inc/mpplaybackviewplugin.h \
+	  inc/mpplaybackviewplugin.h \
       inc/mpplaybackview.h \
-      inc/mpmpxpbframeworkwrapper.h \
-      inc/mpmpxpbframeworkwrapper_p.h \
-      inc/mpplaybackdata.h \
       inc/mpplaybackwidget.h \
       inc/mpequalizerwrapper.h \
       inc/mpequalizerwrapper_p.h \
@@ -62,10 +59,7 @@ HEADERS = ../../inc/mpviewbase.h \
 
 SOURCES += src/mpplaybackviewplugin.cpp \
        src/mpplaybackview.cpp \
-       src/mpplaybackdata.cpp \
        src/mpplaybackwidget.cpp \
-       src/mpmpxpbframeworkwrapper.cpp \
-       src/mpmpxpbframeworkwrapper_p.cpp \
        src/mpequalizerwrapper.cpp \
        src/mpequalizerwrapper_p.cpp \
        src/mpequalizerwidget.cpp

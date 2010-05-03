@@ -21,7 +21,7 @@ DEPENDPATH += .
 INCLUDEPATH += . \
 	 inc \
 	 ../inc \
-         ../musicfetcher/inc
+         ../musicservices/inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 CONFIG += hb
@@ -37,7 +37,7 @@ symbian: {
 # Service provider specific configuration.
 # If in-process plugin specific implementation
 # will be possible in future, service configuration
-# can be located in musicfetcher library's pro file.
+# can be located in musicservices library's pro file.
 SERVICE.FILE = data/service_conf.xml
 SERVICE.OPTIONS = embeddable
 CONFIG += service
@@ -49,8 +49,9 @@ LIBS += -lecom.dll \
     -lfbscli.dll \
     -lxqplugins.dll \
     -lmpxviewframeworkqt.dll \
+    -lxqservice \
     -lxqserviceutil \
-    -lmusicfetcher \
+    -lmusicservices \
     -lmpengine
     
     
@@ -70,3 +71,44 @@ symbian: {
 RESOURCES += resources/musiplayerapp.qrc
 
 TRANSLATIONS = musicplayer.ts
+
+RSS_RULES += \
+"    datatype_list =" \
+"        {" \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-midi\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/midi\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/sp-midi\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-beatnik-rmf\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-rmf\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/rmf\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/mobile-xmf\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/vnd.nokia.mobile-xmf\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-mrv.xml\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-mrv.wbxml\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-ms-wma\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"x-caf-audio/x-ms-wma\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-pn-realaudio\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-realaudio\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/vnd.rn-realaudio\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"playlist/mpegurl\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/mpeg\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/mp3\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/m4a\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-mp3\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/3gpp\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/3gpp2\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/mp4\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/aac\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/basic\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/amr\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/amr-wb\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/awb\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-amr\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-epoc-wve\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-sibo-wve\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/wav\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-wav\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-au\"; }," \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/au\"; }, " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/vnd.nokia.ringing-tone\"; }" \
+"        };" \     

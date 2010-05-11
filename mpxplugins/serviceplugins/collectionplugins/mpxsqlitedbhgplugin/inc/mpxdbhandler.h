@@ -1082,8 +1082,16 @@ class CMPXDbHandler :
     /**
     * @see MMPXDbAlbumObserver
     */
-        virtual TBool HandleIsUnknownArtistL(TUint32 aArtistId);
-        virtual TUint32 HandleArtistForAlbumL(const TUint32 aAlbumId);
+    virtual TBool HandleIsUnknownArtistL(TUint32 aArtistId);
+    virtual TUint32 HandleArtistForAlbumL(const TUint32 aAlbumId);
+        
+    /**
+    * Get the Albumart of song which belongs to the specified Album.     
+    * @param aId, The Album ID.
+    * @param aArt, the AlbumArt uri.
+	* @returns alternative albumart retrieved in the specified Album.
+    */
+    virtual HBufC* HandleAlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt);
 
     private:	// From MMPXDbPlaylistObserver
 	/**

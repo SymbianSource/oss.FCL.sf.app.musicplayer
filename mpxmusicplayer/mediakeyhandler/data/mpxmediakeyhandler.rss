@@ -40,6 +40,17 @@ RESOURCE TBUF
 // RESOURCE DEFINITIONS 
 
 // -----------------------------------------------------------------------------
+// r_mpx_avsrc_name_text
+// AV source name shown in AVRCP 1.4 devices.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_avsrc_name_text
+    {
+    buf = qtn_svk_title_music_player;
+    }
+
+
+// -----------------------------------------------------------------------------
 // r_mpx_volume_popup_text
 // Text shown in volume popup dialog.
 // -----------------------------------------------------------------------------

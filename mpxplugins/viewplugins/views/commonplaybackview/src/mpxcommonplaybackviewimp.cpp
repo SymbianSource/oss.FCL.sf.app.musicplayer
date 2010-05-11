@@ -162,10 +162,6 @@ _LIT(KMPXRealAudioMimeType, "audio/x-realaudio");
 _LIT(KMPXRnRealAudioMimeType, "audio/vnd.rn-realaudio");
 #endif
 
-#define THUMBNAIL_CENREP_UID 0x102830B0 // from thumbnailmanageruids.hrh
-const TUint32 KSizeAudioFullscreenWidth = 0x16;
-const TUint32 KSizeAudioFullscreenHeight = 0x17;
-
 // ======== MEMBER FUNCTIONS ========
 
 
@@ -212,16 +208,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::ConstructL()
     TInt flags( 0 );
     CRepository* repository( CRepository::NewLC( KCRUidMPXMPFeatures ));
     User::LeaveIfError( repository->Get( KMPXMPLocalVariation, flags ));
-    CleanupStack::PopAndDestroy( repository );
-    repository = NULL;
-
-    repository = CRepository::NewLC( TUid::Uid(THUMBNAIL_CENREP_UID));
-
-    TInt xSize( 0 );
-    TInt ySize( 0 );
-    User::LeaveIfError( repository->Get( KSizeAudioFullscreenWidth, xSize ));
-    User::LeaveIfError( repository->Get( KSizeAudioFullscreenHeight, ySize ));
-    iFullScreenImageSize.SetSize(xSize,ySize);
     CleanupStack::PopAndDestroy( repository );
     repository = NULL;
 
@@ -757,12 +743,13 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateAlbumArtL(
             const TDesC& album = aMedia->ValueText( KMPXMediaGeneralUri );
             if(!iOldUri || iOldUri->Compare(album)!= 0)
                 {
+				TRect albumArtRect( iLayout->IndicatorLayout( ClientRect(), EAlbumArtArea ));
                 // Request for pre-generated TN size
                 MPX_TRAP( err,
                     iMPXUtility->ExtractAlbumArtL(
                     *aMedia,
                     *iContainer,
-                    iFullScreenImageSize ); );
+                    albumArtRect.Size() ); );
 
                 // cancel timer
                 if ( iTNRequestTimer->IsActive())
@@ -968,6 +955,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateFMTransmitterInfoL(
                     TInt err = freqMHzStr.Num( freqMHz, realFormat );
                     if ( err > 0 )
                         {
+                        AknTextUtils::LanguageSpecificNumberConversion( freqMHzStr );
                         HBufC* labelFormatText = StringLoader::LoadL(
                             R_MPX_FM_FREQUENCY_LABEL,
                             freqMHzStr );
@@ -2566,28 +2554,20 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
     // Set title
     // Ignore errors from updating title pane since if that is not
     // updated, still want to activate view
-    TRAP_IGNORE(
+    TRAP_IGNORE( UpdateTitlePaneL() );
+
+    if ( !AknLayoutUtils::PenEnabled() )
         {
-        UpdateTitlePaneL();
-        CAknNavigationControlContainer* naviPane(
-            static_cast<CAknNavigationControlContainer*>
-            ( StatusPane()->ControlL( TUid::Uid( EEikStatusPaneUidNavi ))));
-        if ( naviPane )
+        CEikButtonGroupContainer* cba = Cba();
+        if ( cba )
             {
-            naviPane->PushDefaultL();
-            }
-        } );
-
-    CEikButtonGroupContainer* cba = Cba();
-    if ( cba )
-        {
-
 #ifdef __ENABLE_MSK
-        iCommonUiHelper->SetMiddleSoftKeyLabelL(
-            *cba,
-            R_TEXT_SOFTKEY_EMPTY,
-            EAknSoftkeyForwardKeyEvent );
+            iCommonUiHelper->SetMiddleSoftKeyLabelL(
+                *cba,
+                R_TEXT_SOFTKEY_EMPTY,
+                EAknSoftkeyForwardKeyEvent );
 #endif // __ENABLE_MSK
+            }
         }
 
     iPlaybackState = iPlaybackUtility->StateL();
@@ -3039,11 +3019,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
             }
 
         iContainer->SetRect( ClientRect() );
-        delete iOldUri;
-        iOldUri = NULL;
-        // Update album art
-        TRAP_IGNORE( UpdateAlbumArtL( iMedia ));
-        TRAP_IGNORE( UpdateTrackInfoL( iMedia ));
         iContainer->DrawDeferred();
         }
     }
@@ -3878,7 +3853,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL()
     {
     MPX_FUNC("CMPXCommonPlaybackViewImp::UpdateMiddleSoftKeyDisplayL");
 
-    if (iContainer)
+    if (iContainer && !AknLayoutUtils::PenEnabled() )
             {
         CEikButtonGroupContainer* cba = Cba();
         if (cba)
@@ -3997,6 +3972,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbarL()
 TInt CMPXCommonPlaybackViewImp::HandleDelayedError( TAny* aPtr )
     {
 	TInt ret( KErrNone );
+	TInt index( KErrNotFound );
     CMPXCommonPlaybackViewImp* pv = reinterpret_cast<CMPXCommonPlaybackViewImp*>( aPtr );
     pv->iDelayedErrorTimer->Cancel();
     // compare index
@@ -4011,8 +3987,11 @@ TInt CMPXCommonPlaybackViewImp::HandleDelayedError( TAny* aPtr )
             	{
                 return ret;
             	}
-
-			if ( pv->iErrIndex == pl->Index() )
+            if ( pl )
+                {
+                index = pl->Index();  
+                }  
+			if ( pv->iErrIndex == index )
 				{
 				MPX_TRAP( ret, pv->HandleErrorL( pv->iLastDelayedErr ) );
 				}
@@ -4056,7 +4035,8 @@ TInt CMPXCommonPlaybackViewImp::HandleTNRequestForCustomSizeL( TAny* aPtr )
                     pv->iMPXUtility->ExtractAlbumArtL(
                     *pv->iMedia,
                     *pv->iContainer,
-                    albumArtRect.Size() ); );                
+                    albumArtRect.Size(),
+                    EFalse ); );
                 }
             }
 

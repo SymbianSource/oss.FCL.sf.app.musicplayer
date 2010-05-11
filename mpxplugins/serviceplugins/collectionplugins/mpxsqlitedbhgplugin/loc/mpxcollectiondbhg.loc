@@ -76,14 +76,14 @@
 #define qtn_nmp_all_by "All"
 
 // d:Title for first item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_all_tracks "All songs"
 
 // d:Title for second item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_pls "Playlists"
 
@@ -105,8 +105,8 @@
 #define qtn_mus_title_album "Album"
 
 // d:Title for fifth item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_genres "Genres"
 
@@ -117,8 +117,8 @@
 #define qtn_mus_title_composers "Composers"
 
 // d:Title for Most Played item in the playlists menu
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_most_played "Most played"
 
@@ -129,8 +129,8 @@
 #define qtn_mus_pl_most_played "Most played"
 
 // d:Title for Recently Played item in the playlists menu
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_recently_played "Recently played"
 
@@ -141,8 +141,8 @@
 #define qtn_mus_pl_recently_played "Recently played"
 
 // d:Title for Recently Added item in the playlists menu
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_recently_downloaded "Recently added"
 
@@ -179,7 +179,7 @@
 #define qtn_mus_title_music_menu "Music Menu"
 
 // d:Title for Artists & Albums view in portrait mode
-// l:title_pane_t2/opt9
+// l:title_pane_t1/opt3
 // r:5.2
 //
 #define qtn_mus_title_artists_and_albums "Artists & Albums"
@@ -203,7 +203,7 @@
 #define qtn_mus_music_one_song_duration "1 song - %U"
 
 // d:Title for Songs view
-// l:title_pane_t2/opt9
+// l:title_pane_t1/opt3
 // r:5.2
 //
 #define qtn_mus_title_tracks "Songs"

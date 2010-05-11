@@ -222,11 +222,14 @@ _LIT(KQueryMusicGetDurationRecentlyAdded, "SELECT Duration FROM :dbname.Music WH
 
 // Select songs information from music, playlistsongs and playlistsonginfo via playlistid order by playlistsongs's ordinal
 _LIT(KQueryMusicGetAllSongsbyPl,"select mu.UniqueId,mu.DbFlag,mu.VolumeId,mu.Title,mu.Artist,mu.Art,0,mu.Location,pl.UniqueId as PlUId, pl.ordinal from :dbname.music as mu,:pldbname.playlistsongs as pl where mu.Deleted=0 AND mu.uniqueid = pl.songid and pl.playlistid =%u ORDER BY 10");
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name,pl.UniqueId as PlUId,pl.ordinal FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer,:pldbname.playlistsongs as pl WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId AND Music.UniqueId=pl .songid and pl .PlaylistId=%u ORDER BY 40");
+#else
 _LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name,pl.UniqueId as PlUId,pl.ordinal FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer,:pldbname.playlistsongs as pl WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId AND Music.UniqueId=pl .songid and pl .PlaylistId=%u ORDER BY 37");
-
+#endif
 _LIT(KQuerySongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND Artist=%u AND Album=%u");
 _LIT(KQueryMusicGetArtistForAlbum, "SELECT Artist FROM :dbname.Music,:dbname.Artist WHERE Music.Deleted=0 AND Music.Artist=Artist.UniqueId AND Music.Album=%u");
-
+_LIT(KQueryMusicGetAlbumartForAlbum, "SELECT Art FROM :dbname.Music WHERE Music.Deleted=0 AND Music.Album=%u");
 // == Category table queries ==================================================
 //
 _LIT(KCategoryTablePlaceholder, "##table##");

@@ -33,6 +33,9 @@
 #include "mpxdbalbum.h"
 
 // CONSTANTS
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT( KAbstractAlbumExt, ".alb" );
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
 
 // ============================ MEMBER FUNCTIONS ==============================
 
@@ -202,7 +205,8 @@ void CMPXDbAlbum::DecrementSongsForCategoryL(
     TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages,
     TBool& aItemExist,
-    const TUint32 aArtist)
+    const TUint32 aArtist,
+    const TDesC& aArt)
     {
     MPX_FUNC("CMPXDbAlbum::DecrementSongsForCategoryL");
 
@@ -237,8 +241,7 @@ void CMPXDbAlbum::DecrementSongsForCategoryL(
         }
 
         TUint32 artistId = recordset.ColumnInt64(EAlbumArtist);
-
-        CleanupStack::PopAndDestroy(&recordset);
+        TBool itemModified = EFalse;
 
         // the current artist is equal to deleted song's artist
         if ( artistId == aArtist )
@@ -252,15 +255,62 @@ void CMPXDbAlbum::DecrementSongsForCategoryL(
 
                 iDbManager.ExecuteQueryL(aDriveId, KQueryAlbumUpdate, setStr, aId);
                 CleanupStack::PopAndDestroy(setStr);
-                
-                if (aItemChangedMessages)
-                    {
-                    // add the item changed message
-                    MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
-                        EMPXAlbum, KDBPluginUid, ETrue, 0 );  
-                    }
+                itemModified = ETrue;
                 }
             }
+        
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED      
+    TBool nonEmbeddedArt = EFalse;
+    if (aArt.Length()>0)
+        {
+        TParsePtrC parse(aArt);
+        TPtrC ext(parse.Ext());
+        //set flag to false, so .alb will not overwrite art field in album, artist table 
+        // when song with embedded art
+        if (ext.CompareF(KAbstractAlbumExt)== 0) 
+            {     
+            nonEmbeddedArt = ETrue;        
+            }
+        }
+  if (!nonEmbeddedArt)       
+       {
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+       TPtrC art(MPXDbCommonUtil::GetColumnTextL(recordset, EAlbumArt));
+        // the current art is equal to deleted song's art      
+        if(aArt.Length()>0 && art.Length()>0 && aArt.CompareF(art) ==0 )
+            {
+            MPX_DEBUG2("AlbumArt of the Song to be deleted is [%S]", &aArt);
+            
+            //need to get alternative art in the same album to display
+            HBufC* newArt = AlbumartForAlbumL(aId, aArt);
+            CleanupStack::PushL(newArt);
+
+            //update Album table only if alternative albumart found
+            if (newArt)
+                {
+                MPX_DEBUG1("CMPXDbAlbum::DecrementSongsForCategoryL, get newArt");
+                HBufC* artReplaceSingleQuote = MPXDbCommonUtil::ProcessSingleQuotesLC( *newArt );
+                _LIT( KFormatArt, "Art=\'%S\'" );
+                HBufC* setStr = HBufC::NewLC(256);                 
+                setStr->Des().Format( KFormatArt, artReplaceSingleQuote );
+
+                iDbManager.ExecuteQueryL(aDriveId, KQueryAlbumUpdate, setStr, aId);
+                CleanupStack::PopAndDestroy(setStr);
+                CleanupStack::PopAndDestroy(artReplaceSingleQuote);
+                itemModified = ETrue;                     
+                }
+           CleanupStack::PopAndDestroy(newArt);             
+           }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED            
+         }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+        if (aItemChangedMessages && itemModified)
+           {
+           // add the item changed message
+           MPXDbCommonUtil::AddItemAlbumChangedMessageL(*aItemChangedMessages, aId, EMPXItemModified,
+                      EMPXAlbum, KDBPluginUid, ETrue, 0 );
+           }
+        CleanupStack::PopAndDestroy(&recordset);
         
         // decrement the number of songs for the category
         query = PreProcessStringLC(KQueryCategoryDecrementSongCount);
@@ -507,6 +557,15 @@ TBool CMPXDbAlbum::IsUnknownArtistL(TUint32 aId)
 TUint32 CMPXDbAlbum::ArtistForAlbumL(const TUint32 aId)
     {
     return iObserver.HandleArtistForAlbumL(aId);
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbAlbum::AlbumartForAlbumL
+// ----------------------------------------------------------------------------
+//
+HBufC* CMPXDbAlbum::AlbumartForAlbumL(const TUint32 aId, TPtrC aArt)
+    {
+    return iObserver.HandleAlbumartForAlbumL(aId, aArt);
     }
 
 // ----------------------------------------------------------------------------

@@ -2114,6 +2114,7 @@ void CMPXDbHandler::DoRemoveSongL(
     TUint32 albumID(0);
     TUint32 genreID(0);
     TUint32 composerID(0);
+    HBufC*  art(NULL);
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     TUint32 abstractAlbumID(0);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
@@ -2121,11 +2122,12 @@ void CMPXDbHandler::DoRemoveSongL(
 
 // Get information from the Music table first
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-    HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, abstractAlbumID, drive);
+    HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, abstractAlbumID, drive, art);
 #else
-    HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, drive);
+    HBufC* uri = iDbMusic->GetSongInfoL(aSongId, artistID, albumID, genreID, composerID, drive, art);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 
+    CleanupStack::PushL(art);
     // add the URI to the return array
     CleanupStack::PushL(uri);
     aUriArray.AppendL(*uri);
@@ -2134,9 +2136,10 @@ void CMPXDbHandler::DoRemoveSongL(
     // Update the category records
     TBool categoryExist( EFalse );
     iDbArtist->DecrementSongsForCategoryL(artistID, drive, &aItemChangedMessages, categoryExist);
-    iDbAlbum->DecrementSongsForCategoryL(albumID, drive, &aItemChangedMessages, categoryExist, artistID);
+    iDbAlbum->DecrementSongsForCategoryL(albumID, drive, &aItemChangedMessages, categoryExist, artistID, *art);
     iDbGenre->DecrementSongsForCategoryL(genreID, drive, &aItemChangedMessages, categoryExist);
     iDbComposer->DecrementSongsForCategoryL(composerID, drive, &aItemChangedMessages, categoryExist);
+    CleanupStack::PopAndDestroy(art);
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     if (abstractAlbumID)
         {
@@ -3355,9 +3358,22 @@ TBool CMPXDbHandler::HandleIsUnknownArtistL(TUint32 aArtistId)
     return iDbArtist->IsUnknownArtistL(aArtistId);
     }
 
+// ---------------------------------------------------------------------------
+// CMPXDbHandler::HandleArtistForAlbumL
+// ---------------------------------------------------------------------------
+//
 TUint32 CMPXDbHandler::HandleArtistForAlbumL(const TUint32 aAlbumId)
     {
     return iDbMusic->ArtistForAlbumL(aAlbumId);
+    }
+
+// ---------------------------------------------------------------------------
+// CMPXDbHandler::HandleAlbumartForAlbumL
+// ---------------------------------------------------------------------------
+//
+HBufC*  CMPXDbHandler::HandleAlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt)
+    {
+    return iDbMusic->AlbumartForAlbumL(aAlbumId, aArt);
     }
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED   
 // ----------------------------------------------------------------------------------------------------------

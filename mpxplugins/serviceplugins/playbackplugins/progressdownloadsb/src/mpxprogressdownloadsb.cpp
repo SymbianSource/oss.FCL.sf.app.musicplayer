@@ -320,6 +320,7 @@ void CMPXProgressDownloadSB::CommandL(
                 break;
                 }
             case EPbCmdPause:
+            	{
                 if ( EPbDlStateDownloadCompleted == iDownloadState && iConsumeStarted )
                     {
                     ConsumeRights( ContentAccess::EPause );
@@ -327,6 +328,7 @@ void CMPXProgressDownloadSB::CommandL(
                 TInt ret = iMStreamControl->Pause();
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPPaused, 0, ret);
                 break;
+                }  
             case EPbCmdStop:
                 iMStreamControl->Stop();
                 iObs->HandlePluginEvent(MMPXPlaybackPluginObserver::EPStopped,

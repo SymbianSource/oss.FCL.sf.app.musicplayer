@@ -73,6 +73,7 @@ LIBRARY         remconcoreapi.lib
 LIBRARY         remconinterfacebase.lib
 LIBRARY         mpxplaybackutility.lib
 LIBRARY         mpxcommon.lib
+LIBRARY         charconv.lib // Unicode character conversions
 #ifdef IAD_INCLUDE_UPNP
 LIBRARY         upnpcommand.lib
 #endif

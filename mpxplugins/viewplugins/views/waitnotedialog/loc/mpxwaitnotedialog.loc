@@ -94,7 +94,7 @@
 // l:popup_note_wait_window
 // r:3.1
 //
-#define qtn_nmp_note_usb_connection_in_progress "USB connection in progress"
+#define qtn_nmp_note_usb_connection_in_progress "USB connection active"
 
 // d:Wait note shown when a disk format operation is in progress
 // l:popup_note_wait_window
@@ -114,4 +114,9 @@
 //
 #define qtn_mus_note_updating_library "Updating Library. \n Please wait."
 
+// d:Wait note shown when MTP connection in progress
+// l:popup_note_wait_window
+// r:5.2
+//
+#define qtn_mus_note_media_transfer_in_progress "Media transfer in progress"
 // End of File

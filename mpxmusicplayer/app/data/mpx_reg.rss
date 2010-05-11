@@ -90,7 +90,9 @@ RESOURCE APP_REGISTRATION_INFO
         DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-wav"; },
         DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-au"; },
         DATATYPE { priority = EDataTypePriorityMPX; type = "audio/au"; },
-        DATATYPE { priority = EDataTypePriorityMPX; type = "application/vnd.nokia.ringing-tone"; }
+        DATATYPE { priority = EDataTypePriorityMPX; type = "application/vnd.nokia.ringing-tone"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-mpegurl"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mpegurl"; }
         };
     }
 

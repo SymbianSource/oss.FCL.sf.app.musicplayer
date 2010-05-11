@@ -54,12 +54,15 @@ public:
     *              TMPXAttribute( KMPXMediaIdGeneral, EMPXMediaGeneralUri )
     * @param aObs callback after the operation completed.
     * @param aSize The size of the required destination BMP.
+    * @param aLargestFromCache ETrue, get the largest available from image cache, EFalse
+    *                          get the size specified in aSize.
     * @param aDisplayMode the display mode of the destination BMP
     * @return bitmap object
     */
     IMPORT_C void ExtractAlbumArtL(const CMPXMedia& aProp,
                                    MMPXAlbumArtUtilObserver& aObs,
                                    const TSize& aSize,
+                                   TBool aLargestFromCache = ETrue,
                                    TDisplayMode aDisplayMode = EColor64K);
 
    /**
@@ -124,8 +127,6 @@ private:
     CThumbnailManager*          iThumbnailManager;      // Owned
     TDisplayMode            iDisplayMode ; //Owned
     TSize                       iImageSize;
-    TSize                       iFullScreenImageSize;
-    TSize                       iGridViewImageSize;
     TInt iReqId;
     HBufC* iFilename;
     MMPXAlbumArtUtilObserver* iObserver;

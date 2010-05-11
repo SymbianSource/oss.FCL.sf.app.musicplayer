@@ -27,6 +27,7 @@
 #include <bautils.h>
 #include <StringLoader.h>
 #include <apgwgnam.h>
+#include <utf.h>
 
 #ifdef UPNP_INCLUDED
 #include <upnpcopycommand.h>  
@@ -68,6 +69,19 @@ const TInt KMPXVolumeSteps(1);
 const TInt KTenStepsVolume = 10;   
 const TInt KTwentyStepsVolume = 20;
 
+const TRemConCoreApiOperationId KSupportedCoreFeatures[] = {
+        ERemConCoreApiVolumeUp,
+        ERemConCoreApiVolumeDown,
+        ERemConCoreApiPlay,
+        ERemConCoreApiStop,
+        ERemConCoreApiPause,
+        ERemConCoreApiRewind,
+        ERemConCoreApiFastForward,
+        ERemConCoreApiForward,
+        ERemConCoreApiBackward,
+        ERemConCoreApiPausePlayFunction
+};
+
 _LIT( KMPXMediaKeyHandlerRscPath, "mpxmediakeyhandler.rsc" );
 
 
@@ -105,10 +119,24 @@ void CMPXMediaKeyHandlerImp::ConstructL(
 
     // Register to remote control framework
     iInterfaceSelector = CRemConInterfaceSelector::NewL();
-    iCoreTarget = CRemConCoreApiTarget::NewL( *iInterfaceSelector, *this );
+
+    // For AVRCP 1.4 support, pass the core features to the target API. 
+    TInt entrySize = sizeof( KSupportedCoreFeatures[0] );
+    TRemConCoreApiOperationId* entries = (TRemConCoreApiOperationId*) &KSupportedCoreFeatures[0];
+    TInt count = sizeof( KSupportedCoreFeatures ) / entrySize;
+    RArray<TRemConCoreApiOperationId> coreFeatures( entrySize, entries, count );
+    iCoreTarget = CRemConCoreApiTarget::NewL( *iInterfaceSelector, *this, coreFeatures );
+
     // For handling AVRCP 1.3 metadata
     iMetaDataHandler = MMPXMetaDataHandler::NewL(*iInterfaceSelector);
-    iInterfaceSelector->OpenTargetL();
+    
+    // For AVRCP 1.4 support, make the player named. 
+    HBufC* avsrcname = StringLoader::LoadLC( R_MPX_AVSRC_NAME_TEXT );
+    HBufC8* avsrcname8 = CnvUtfConverter::ConvertFromUnicodeToUtf8L( avsrcname->Des() );
+    CleanupStack::PushL( avsrcname8 );
+    iInterfaceSelector->OpenTargetL(ERemConAudioPlayer, ERemConNoSubType, *avsrcname8);
+    CleanupStack::PopAndDestroy( avsrcname8 );
+    CleanupStack::PopAndDestroy( avsrcname );
     iResponseHandler = CMPXRemConKeyResponse::NewL( *iCoreTarget );
 
     // Timer for implementing repeat

@@ -448,7 +448,8 @@ HBufC* CMPXDbMusic::GetSongInfoL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     TUint32& aAbstractAlbumId,
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
-    TInt& aDriveId)
+    TInt& aDriveId,
+    HBufC*& aArt)
     {
     MPX_FUNC("CMPXDbMusic::GetSongInfoL");
 
@@ -469,6 +470,7 @@ HBufC* CMPXDbMusic::GetSongInfoL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     aAbstractAlbumId = recordset.ColumnInt64(EMusicAbstractAlbum);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
+    aArt = MPXDbCommonUtil::GetColumnTextL(recordset, EMusicArt).AllocL();
     HBufC* uri = ConstructUriL(recordset);
 
     CleanupStack::PopAndDestroy(&recordset);
@@ -1063,6 +1065,31 @@ TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId)
     }
 
 // ----------------------------------------------------------------------------
+// CMPXDbMusic::AlbumartForAlbumL
+// ----------------------------------------------------------------------------
+//
+HBufC* CMPXDbMusic::AlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt)
+    {
+	  MPX_FUNC("CMPXDbMusic::AlbumartForAlbumL");
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAlbumartForAlbum, aAlbumId));
+    HBufC* albumart(NULL);
+   
+    CleanupClosePushL(recordset);
+    TInt err(KErrNone);
+    while ((err = recordset.Next()) == KSqlAtRow)
+        {     
+        TPtrC art(MPXDbCommonUtil::GetColumnTextL(recordset, KMPXTableDefaultIndex));		
+        if (art.Length()>0 && art.Compare(KNullDesC)!=0 &&  art.CompareF(aArt)!=0 )
+            {
+            albumart = art.AllocL(); 
+            break;
+            }	
+        }
+       
+    CleanupStack::PopAndDestroy(&recordset);
+    return albumart;
+    }
+// ----------------------------------------------------------------------------
 // CMPXDbMusic::SongExistsL
 // ----------------------------------------------------------------------------
 //
@@ -1150,11 +1177,19 @@ void CMPXDbMusic::UpdateMediaGeneralL(
         MPX_DEBUG1("    !aMedia.IsSupported(KMPXMediaGeneralId)");
         TUint32 songId(aMusicTable.ColumnInt64(EMusicUniqueId));
         TInt columnCount(aMusicTable.ColumnCount());
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        if(columnCount == 40 && aMusicTable.ColumnIndex(_L("PlUId"))==38)
+            {
+            TUint32 pListUId(aMusicTable.ColumnInt64(38));
+            aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, TMPXItemId(pListUId, songId));
+            }
+#else
         if(columnCount == 37 && aMusicTable.ColumnIndex(_L("PlUId"))==35)
             {
             TUint32 pListUId(aMusicTable.ColumnInt64(35));
             aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, TMPXItemId(pListUId, songId));
             }
+#endif
         else
             {
             aMedia.SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, songId);

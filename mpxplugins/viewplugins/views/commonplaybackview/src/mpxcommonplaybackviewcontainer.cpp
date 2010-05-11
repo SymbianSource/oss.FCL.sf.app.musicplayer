@@ -725,8 +725,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::ExtractAlbumArtCompleted(
         }
 
     DrawDeferred();
-    //Window().Invalidate( iAlbumArtRect );
-    //Window().Invalidate( iSliderPaneRect );
     }
 
 // ---------------------------------------------------------------------------
@@ -805,8 +803,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandleResourceChange( TInt aType 
     else if ( aType == KEikDynamicLayoutVariantSwitch )
         {
         iLayoutObserver->HandleLayoutChange();
-        UpdateBackgroundSkinControlContext( Rect() );
-
         }
     else
         {
@@ -1267,7 +1263,7 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::HandlePointerEventL(const TPointe
                     MTouchFeedback* feedback = MTouchFeedback::Instance();
                     if (feedback)
                         {
-                        feedback->InstantFeedback(ETouchFeedbackBasic);
+                        feedback->InstantFeedback(ETouchFeedbackPopUp);
                         }
 
                     if ( iCommandObserver )

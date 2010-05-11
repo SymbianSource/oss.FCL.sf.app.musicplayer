@@ -258,7 +258,7 @@
 
 // d:Collection details popup label.
 // d:Label for collection details popup, available phone memory.
-// l:list_single_heading_pane_t1_cp2
+// l:list_single_heading_pane_t2_cp2
 // r:5.0
 //
 #define qtn_nmp_details_phone_memory "Phone Memory"
@@ -371,8 +371,9 @@
 //
 #define qtn_nmp_prmpt_new_name "New name:"
 
-// d:Unknown in listbox.
-// l:list_single_graphic_pane_t1
+// d:Text for an item with unknown description
+// d:Part of text for wait note
+// l:popup_note_wait_window
 // r:5.0
 //
 #define qtn_mp_list_unknown "Unknown"
@@ -390,8 +391,8 @@
 #define qtn_mus_title_unknown_album "Unknown album"
 
 // d:Unknown genre in title.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_unknown_genre "Unknown genre"
 

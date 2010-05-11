@@ -4359,7 +4359,16 @@ void CMPXCollectionViewHgContainer::HandleFindAllL(
 			    {
                 if( iCurrentViewType == EMPXViewMediawall )
                     {
-                    ShowAlbumSongsDialogL( aResults );
+					// do not call ShowAlbumSongsDialogL if song count = 0
+					// otherwise panic occurs
+                    if( songArray->Count() )
+                        {
+                        ShowAlbumSongsDialogL( aResults );
+                        }
+                    else
+                        {
+                        iMediaWall->StartOpeningAnimationL( EFalse );
+                        }
                     }
                 else
                     {
@@ -4478,7 +4487,8 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
     TInt songCount = songArray->Count();
 
     CDesC16ArrayFlat* songList = new (ELeave) CDesC16ArrayFlat(songCount);
-
+    CleanupStack::PushL(songList); 
+    
     if ( songCount > 1 )
         {
         HBufC* shuffleText = StringLoader::LoadLC(
@@ -4528,6 +4538,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
 
     CTextListBoxModel* model = listBox->Model();
     model->SetItemTextArray( songList );
+    CleanupStack::Pop(); // songList
     model->SetOwnershipType( ELbmOwnsItemArray );
     CleanupStack::Pop( dialog );
     iDialog = dialog;

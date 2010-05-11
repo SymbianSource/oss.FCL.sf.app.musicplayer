@@ -29,17 +29,9 @@
 #include "mpxalbumartutil.h"
 #include <thumbnaildata.h>
 #include <thumbnailobjectsource.h>
-#include <centralrepository.h>
-
-#define THUMBNAIL_CENREP_UID 0x102830B0
-
-const TUint32 KSizeAudioGridWidth = 0x12;
-const TUint32 KSizeAudioGridHeight = 0x13;
-const TUint32 KSizeAudioFullscreenWidth = 0x16;
-const TUint32 KSizeAudioFullscreenHeight = 0x17;
-
 
 _LIT( KMPXAlbumMimeType, "audio/mpeg3" );
+
 // ============================== MEMBER FUNCTIONS ============================
 
 // ----------------------------------------------------------------------------
@@ -90,25 +82,10 @@ CMPXAlbumArtUtil::CMPXAlbumArtUtil()
 //
 void CMPXAlbumArtUtil::ConstructL()
     {
-     MPX_FUNC("CMPXAlbumArtUtil::ConstructL()");
-     iThumbnailManager = CThumbnailManager::NewL( *this );
-     iThumbnailManager->SetFlagsL( CThumbnailManager::EDefaultFlags );
-     iThumbnailManager->SetQualityPreferenceL( CThumbnailManager::EOptimizeForPerformance );
-	 //cenrep
-     CRepository* repository;
-     repository = CRepository::NewL( TUid::Uid(THUMBNAIL_CENREP_UID));
-
-     TInt xSize( 0 );
-     TInt ySize( 0 );
-     User::LeaveIfError( repository->Get( KSizeAudioGridWidth, xSize ));
-     User::LeaveIfError( repository->Get( KSizeAudioGridHeight, ySize ));
-     iGridViewImageSize.SetSize(xSize,ySize);
-
-     User::LeaveIfError( repository->Get( KSizeAudioFullscreenWidth, xSize ));
-     User::LeaveIfError( repository->Get( KSizeAudioFullscreenHeight, ySize ));
-     iFullScreenImageSize.SetSize(xSize,ySize);
-     delete repository;
-     repository = NULL;
+	MPX_FUNC("CMPXAlbumArtUtil::ConstructL()");
+	iThumbnailManager = CThumbnailManager::NewL( *this );
+	iThumbnailManager->SetFlagsL( CThumbnailManager::EDefaultFlags );
+	iThumbnailManager->SetQualityPreferenceL( CThumbnailManager::EOptimizeForPerformance );
     }
 
 // ----------------------------------------------------------------------------
@@ -118,6 +95,7 @@ void CMPXAlbumArtUtil::ConstructL()
 EXPORT_C void CMPXAlbumArtUtil::ExtractAlbumArtL(const CMPXMedia& aMedia,
                                             MMPXAlbumArtUtilObserver& aObs,
                                             const TSize& aSize,
+                                            TBool aLargestFromCache,
                                             TDisplayMode aDisplayMode /*= EColor64K*/)
     {
     MPX_DEBUG1("CMPXAlbumArtUtil::ExtractAlbumArtL(): Entering");
@@ -150,18 +128,16 @@ EXPORT_C void CMPXAlbumArtUtil::ExtractAlbumArtL(const CMPXMedia& aMedia,
          aMedia.IsSupported( KMPXMediaMusicAlbumArtFileName ))
         {
         iFilename = aMedia.ValueText( KMPXMediaMusicAlbumArtFileName ).AllocL();
-        if(aSize == iFullScreenImageSize)
-            {
+
+        if ( aLargestFromCache )
+			{
             iThumbnailManager->SetThumbnailSizeL(EAudioFullScreenThumbnailSize);
-            }
-        else if(aSize == iGridViewImageSize)
-            { 
-            iThumbnailManager->SetThumbnailSizeL(EAudioGridThumbnailSize);
-            } 
-        else
-            {
+			}
+		else
+			{
             iThumbnailManager->SetThumbnailSizeL(aSize);
-            }
+			}
+
         ExtractThumbnailL(&aMedia);
         }
     else

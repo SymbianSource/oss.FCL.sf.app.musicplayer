@@ -323,13 +323,19 @@ HBufC* CMPXDbAbstractAlbum::GetUriL(
 
     RSqlStatement recordset(GetCategoryRecordL(aId));
     CleanupClosePushL(recordset);
-
-    if (recordset.Next() != KSqlAtRow)
+    HBufC* uri = NULL;
+    if (recordset.Next() == KSqlAtRow)
         {
-        User::LeaveIfError(KErrNotFound);
+        uri = MPXDbCommonUtil::GetColumnTextL(recordset, EAbstractAlbumUri).AllocL();     
         }
-    HBufC* uri = MPXDbCommonUtil::GetColumnTextL(recordset, EAbstractAlbumUri).AllocL();
-    CleanupStack::PopAndDestroy(&recordset);
+    else
+        {
+        //entry is deleted due to garbage collection 
+        MPX_DEBUG1("CMPXDbAbstractAlbum::GetUriL, no uri, entry is deleted due to garbage collection"); 
+        TPtrC nullUri(KNullDesC);
+        uri = nullUri.AllocL();
+        }
+    CleanupStack::PopAndDestroy(&recordset);    
     return uri;
     }
 

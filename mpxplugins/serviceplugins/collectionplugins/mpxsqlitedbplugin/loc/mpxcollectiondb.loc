@@ -77,14 +77,14 @@
 #define qtn_nmp_all_by "All"
 
 // d:Title for first item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_all_tracks "All songs"
 
 // d:Title for second item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_pls "Playlists"
 
@@ -106,8 +106,8 @@
 #define qtn_mus_title_album "Album"
 
 // d:Title for fifth item in music library menu.
-// l:title_pane_t2/opt9
-// r:5.0
+// l:title_pane_t1/opt3
+// r:5.2
 //
 #define qtn_mus_title_genres "Genres"
 

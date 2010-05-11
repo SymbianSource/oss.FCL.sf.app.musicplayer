@@ -662,6 +662,7 @@ private:
     CIdle*                                  iIdle;
     TBool                                   iTryingExit;
     DRM::CDrmUiHandling* iDrmUiHandler;
+	MMPXPlaybackUtility* iPlaybackUtility;  // not own, but need to close
     };
 
 #endif  // MPXMETADATAEDITORDIALOG_H

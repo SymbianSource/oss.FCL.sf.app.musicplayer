@@ -200,7 +200,8 @@ void CAiPlayerPluginEngine::HandleMediaL( const CMPXMedia& aMedia,
                 TRAPD(err,iAlbumArtUtil->ExtractAlbumArtL(
                         *iMedia,
                         *this,
-                        TSize(70,70)));
+                        TSize(70,70),
+                        EFalse));
                 
                 if (err != KErrNone)
                     {

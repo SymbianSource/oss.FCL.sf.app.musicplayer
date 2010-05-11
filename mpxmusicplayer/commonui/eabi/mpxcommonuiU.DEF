@@ -18,7 +18,7 @@ EXPORTS
 	_ZN14CMPXSaveHelperD1Ev @ 17 NONAME
 	_ZN14CMPXSaveHelperD2Ev @ 18 NONAME
 	_ZN16CMPXAlbumArtUtil13CancelRequestEv @ 19 NONAME
-	_ZN16CMPXAlbumArtUtil16ExtractAlbumArtLERK9CMPXMediaR24MMPXAlbumArtUtilObserverRK5TSize12TDisplayMode @ 20 NONAME
+	_ZN16CMPXAlbumArtUtil16ExtractAlbumArtLERK9CMPXMediaR24MMPXAlbumArtUtilObserverRK5TSizei12TDisplayMode @ 20 NONAME
 	_ZN16CMPXAlbumArtUtil4NewLEv @ 21 NONAME
 	_ZN16CMPXAlbumArtUtilD0Ev @ 22 NONAME
 	_ZN16CMPXAlbumArtUtilD1Ev @ 23 NONAME
@@ -53,18 +53,18 @@ EXPORTS
 	_ZN18CMPXCommonUiHelper23IsForegroundApplicationEi @ 52 NONAME
 	_ZN18CMPXCommonUiHelper23IsHostMessagingBrowserLEv @ 53 NONAME
 	_ZN18CMPXCommonUiHelper24RemoveMiddleSoftKeyLabelER24CEikButtonGroupContainer @ 54 NONAME
-	_ZN18CMPXCommonUiHelper26DisplayableDurationInTextLEx @ 55 NONAME
-	_ZN18CMPXCommonUiHelper4NewLEP21MMPXCollectionUtility @ 56 NONAME
-	_ZN23CMPXLbxExtendedFeatures17SpeedNaviUpdatingEi @ 57 NONAME
-	_ZN23CMPXLbxExtendedFeatures18EnableSpeedScrollLEi @ 58 NONAME
-	_ZN23CMPXLbxExtendedFeatures18HandleLbxKeyEventLERK9TKeyEvent10TEventCode @ 59 NONAME
-	_ZN23CMPXLbxExtendedFeatures4NewLEP15CEikTextListBoxi @ 60 NONAME
-	_ZN23CMPXLbxExtendedFeaturesD0Ev @ 61 NONAME
-	_ZN23CMPXLbxExtendedFeaturesD1Ev @ 62 NONAME
-	_ZN23CMPXLbxExtendedFeaturesD2Ev @ 63 NONAME
-	_ZTI13CMPXImageUtil @ 64 NONAME ; #<TI>#
-	_ZTI16CMPXAlbumArtUtil @ 65 NONAME ; #<TI>#
-	_ZTV13CMPXImageUtil @ 66 NONAME ; #<VT>#
-	_ZTV16CMPXAlbumArtUtil @ 67 NONAME ; #<VT>#
-	_ZN18CMPXCommonUiHelper25CancelCollectionOperationEv @ 68 NONAME
+	_ZN18CMPXCommonUiHelper25CancelCollectionOperationEv @ 55 NONAME
+	_ZN18CMPXCommonUiHelper26DisplayableDurationInTextLEx @ 56 NONAME
+	_ZN18CMPXCommonUiHelper4NewLEP21MMPXCollectionUtility @ 57 NONAME
+	_ZN23CMPXLbxExtendedFeatures17SpeedNaviUpdatingEi @ 58 NONAME
+	_ZN23CMPXLbxExtendedFeatures18EnableSpeedScrollLEi @ 59 NONAME
+	_ZN23CMPXLbxExtendedFeatures18HandleLbxKeyEventLERK9TKeyEvent10TEventCode @ 60 NONAME
+	_ZN23CMPXLbxExtendedFeatures4NewLEP15CEikTextListBoxi @ 61 NONAME
+	_ZN23CMPXLbxExtendedFeaturesD0Ev @ 62 NONAME
+	_ZN23CMPXLbxExtendedFeaturesD1Ev @ 63 NONAME
+	_ZN23CMPXLbxExtendedFeaturesD2Ev @ 64 NONAME
+	_ZTI13CMPXImageUtil @ 65 NONAME
+	_ZTI16CMPXAlbumArtUtil @ 66 NONAME
+	_ZTV13CMPXImageUtil @ 67 NONAME
+	_ZTV16CMPXAlbumArtUtil @ 68 NONAME
 

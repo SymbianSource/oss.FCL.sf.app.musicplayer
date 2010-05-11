@@ -2975,7 +2975,9 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL()
         {
         HBufC* stringBuf = iCommonUiHelper->UnitConversionL(sizeNum);
         CleanupStack::PushL(stringBuf);
-        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSize, *stringBuf,
+        TPtr stringBufPtr = stringBuf->Des();
+        AknTextUtils::DisplayTextLanguageSpecificNumberConversion(stringBufPtr);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdSize, stringBufPtr,
                 KNullDesC);
         CleanupStack::PopAndDestroy(stringBuf);
         }
@@ -3026,6 +3028,7 @@ if ( iMedia->IsSupported( KMPXMediaGeneralDate ) )
             {
             modDatePtr.Append( KMPXSpace );
             modDatePtr.Append( modTimePtr );
+            AknTextUtils::DisplayTextLanguageSpecificNumberConversion(modDatePtr);
             SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
                     modDatePtr,
                     KNullDesC);

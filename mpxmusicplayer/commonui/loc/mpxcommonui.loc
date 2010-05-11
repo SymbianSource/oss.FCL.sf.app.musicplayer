@@ -162,20 +162,20 @@
 // *** Playlist ***
 
 // d:Options menu item for adding to a playlist.
-// l:list_single_pane_t1_cp2/opt3
-// r:3.1
+// l:heading_pane_t1
+// r:5.2
 //
 #define qtn_mus_options_add_to_pl "Add to a playlist"
 
 // d:Options menu item for adding to a new playlist.
-// l:list_single_popup_submenu_pane_t1
-// r:3.1
+// l:list_single_pane_t1_cp2
+// r:5.2
 //
 #define qtn_nmp_sub_add_to_playlist_new "New playlist"
 
 // d:Options menu item for adding to a saved playlist.
-// l:list_single_popup_submenu_pane_t1
-// r:3.1
+// l:list_single_pane_t1_cp2
+// r:5.2
 //
 #define qtn_nmp_sub_add_to_playlist_saved "Saved playlist"
 

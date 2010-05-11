@@ -652,7 +652,9 @@ void CMPXRestorePath::DoHandleCollectionMessageL( const CMPXMessage& aMessage )
             // USB mass storage dismounts the disk, but in that case
             // we do want to revert back to first song of all songs
             //
-            else if( type == EMcMsgDiskInserted &&
+			//if refresh started save the path info
+			//
+            else if( ( type == EMcMsgDiskInserted || EMcMsgRefreshStart ) &&
                      !iUSBOngoing )
                 {
                 SavePathL();

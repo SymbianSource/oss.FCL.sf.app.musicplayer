@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <widget name="mainContainer" type="HbWidget">
+        <widget name="nowPlaying" type="MpNowPlayingWidget">
+            <sizehint type="MAXIMUM" height="0.0" />
+        </widget>
+        <widget name="container" type="HbWidget">
+            <sizehint height="expr(var(hb-param-screen-height) - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+        </widget>
+        <layout orientation="Vertical" spacing="0un" type="linear">
+            <contentsmargins bottom="0.0un" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0un"/>
+            <linearitem itemname="container" spacing="0.0un"/>
+            <linearitem itemname="nowPlaying" spacing="0.0un"/>
+        </layout>
+    </widget>
+
+    <section name="showBanner">
+        <widget name="nowPlaying">
+            <sizehint type="MAXIMUM" height="expr(2*var(hb-param-margin-gene-middle-vertical) + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary))" />
+            <sizehint type="MINIMUM" height="expr(2*var(hb-param-margin-gene-middle-vertical) + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary))" />
+            <sizehint type="PREFERRED" height="expr(2*var(hb-param-margin-gene-middle-vertical) + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary))" />            
+        </widget>
+    </section>
+    
+    <section name="hideBanner">
+        <widget name="nowPlaying">
+            <sizehint type="MAXIMUM" height="0.0" />
+            <sizehint type="MINIMUM" height="0.0" />
+            <sizehint type="PREFERRED" height="0.0" />        
+        </widget>
+    </section>
+    
+    <section name="allSongs">
+        <widget name="container">
+            <widget name="allSongsDetail" type="HbGroupBox">
+                <bool name="collapsable" value="FALSE"/>
+                <real name="z" value="1.0"/>
+            </widget>
+            <widget name="allSongsList" type="HbListView">
+                <sizehint height="expr(var(hb-param-screen-height) - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="0un" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="allSongsDetail" spacing="0.0"/>
+                <linearitem itemname="allSongsList" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+
+    <section name="albums">
+        <widget name="container">
+            <widget name="albumsList" type="HbListView">
+                <sizehint height="expr(var(hb-param-screen-height) - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="0un" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="albumsList" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+
+    <section name="albumSongs">
+        <widget name="container">
+            <widget name="albumSongsDetail" type="HbGroupBox">
+                <bool name="collapsable" value="FALSE"/>
+                <real name="z" value="1.0"/>
+            </widget>
+            <layout orientation="Vertical" spacing="0un" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="albumSongsDetail" spacing="0.0"/>
+                <linearitem itemname="albumsList" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+    
+    <section name="playlists">
+        <widget name="container">
+            <widget name="playlistsList" type="HbListView">
+                <sizehint height="expr(var(hb-param-screen-height) - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="0un" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="playlistsList" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+
+    <section name="playlistSongs">
+        <widget name="container">
+            <widget name="playlistSongsDetail" type="HbGroupBox">
+                <bool name="collapsable" value="FALSE"/>
+            </widget>
+            <layout orientation="Vertical" spacing="0un" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="playlistSongsDetail" spacing="0.0"/>
+                <linearitem itemname="playlistsList" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+
+    <section name="emptyList">
+        <widget name="container">
+            <widget name="noMusic" type="HbLabel">
+                <string name="plainText" locid="txt_mus_info_no_music"/>
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <fontspec name="fontSpec" role="Primary"/>
+            </widget>
+
+            <layout type="linear" orientation="Vertical" >
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <stretchitem stretchfactor="1"/>
+                <linearitem itemname="noMusic" spacing="0.0"/>
+                <stretchitem stretchfactor="1"/>
+            </layout>
+        </widget>
+    </section>
+
+</hbdocument>

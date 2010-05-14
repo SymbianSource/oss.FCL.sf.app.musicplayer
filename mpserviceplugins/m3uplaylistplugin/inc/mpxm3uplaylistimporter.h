@@ -39,7 +39,7 @@ class CMPXMediaArray;
 class CMPXM3uPlaylistImporter : public CActive
     {
 public: // Constructors and destructor
-
+    
     /**
     * Two-phased constructor
     *
@@ -63,7 +63,7 @@ public: // Constructors and destructor
     * Destructor
     */
     IMPORT_C virtual ~CMPXM3uPlaylistImporter();
-
+    
 protected:
 
     /**
@@ -81,14 +81,14 @@ protected:
                 const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>& aTopCharacterSet,
                 const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>& aAvailableCharacterSet,
                 TRequestStatus& aStatus );
-
+    
     /**
     * 2nd phase constructor
     *
     * @param aPlaylistUri URI of the playlist file to be internalized
     */
     IMPORT_C virtual void ConstructL( const TDesC& aPlaylistUri );
-
+   
     /**
     *  From CActive
     *  Handles an active object's request completion event
@@ -105,7 +105,7 @@ protected:
     * Does a step of the task
     */
     IMPORT_C virtual void DoTaskStep();
-
+    
     /**
     * Does a step of the task, leave if there is an error
     */
@@ -117,7 +117,7 @@ private:
     * Reads data from playlist file to the buffer
     */
     void ReadPlaylistFileToBufferL();
-
+    
     /**
     * Auto detects the character encoding from the supplied character
     * set
@@ -132,7 +132,7 @@ private:
         const TDesC8& aSample,
         const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>& aCharacterSet,
         TUint& aCharSetId);
-
+    
     /**
     * Parses the buffer where playlist file was read to.
     */
@@ -175,12 +175,12 @@ private:
     * compose CMPXMedia to be sent back to the client
     */
     void ComposePlaylistL();
-
+    
     /**
     * Reset data members for after completing the current request
     */
     void Cleanup();
-
+    
     /**
     * Notify client of the specified error through MMPXPlaylistPluginObserver
     * interface
@@ -195,7 +195,7 @@ protected:
         EMPXM3UParseWithAutoDetectEncoding,
         EMPXM3UComposePlaylistMedia
         };
-
+                         
 protected:    // Data
 
     HBufC*                              iBuffer;
@@ -207,12 +207,12 @@ protected:    // Data
 
     RFs*                                iFs;      // not owned
     MMPXPlaylistPluginObserver*         iObserver;// not owned
-
+    
     TBool                               iExtendedFormat;
-
+    
     TRequestStatus*                     iCallerStatus;
 
-    TInt                                iEndLineNumber;
+    TInt                                iEndLineNumber;  
     TInt                                iCurrentLineNumber;
     TBool                               iMoreToDo;
     TBool                               iEndOfFile;
@@ -220,15 +220,15 @@ protected:    // Data
 
     CMPXMediaArray*                     iAutoEncodingPlaylistArray;
     TInt                                iAutoEncodingInvalidItems;
-
+    
     CMPXMedia*                          iPlaylist;
-
+    
     TMPXM3UImporterState                iState;
-
+    
     const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>&     iTopCharacterSet;
     const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>&     iAvailableCharacterSet;
     };
 
 #endif   // MPXM3UPLAYLISTIMPORTER_H
-
+            
 

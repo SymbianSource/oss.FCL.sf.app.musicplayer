@@ -18,15 +18,15 @@ EXPORTS
 	_ZN8MpEngine14collectionDataEv @ 17 NONAME
 	_ZN8MpEngine14createPlaylistER7QStringR5QListIiEP19MpMpxCollectionData @ 18 NONAME
 	_ZN8MpEngine14handleUsbEventE12MpxUsbEvents @ 19 NONAME
-	_ZN8MpEngine14openCollectionE18TCollectionContext @ 20 NONAME
-	_ZN8MpEngine14refreshLibraryEv @ 21 NONAME
-	_ZN8MpEngine14renamePlaylistER7QString @ 22 NONAME
-	_ZN8MpEngine14renamePlaylistER7QStringi @ 23 NONAME
-	_ZN8MpEngine14saveToPlaylistEiR5QListIiE @ 24 NONAME
-	_ZN8MpEngine15handleDiskEventE13MpxDiskEvents @ 25 NONAME
-	_ZN8MpEngine15handleScanEndedEii @ 26 NONAME
-	_ZN8MpEngine15reorderPlaylistEiiii @ 27 NONAME
-	_ZN8MpEngine16libraryRefreshedEv @ 28 NONAME
+	_ZN8MpEngine14libraryUpdatedEv @ 20 NONAME
+	_ZN8MpEngine14openCollectionE18TCollectionContext @ 21 NONAME
+	_ZN8MpEngine14refreshLibraryEv @ 22 NONAME
+	_ZN8MpEngine14renamePlaylistER7QString @ 23 NONAME
+	_ZN8MpEngine14renamePlaylistER7QStringi @ 24 NONAME
+	_ZN8MpEngine14saveToPlaylistEiR5QListIiE @ 25 NONAME
+	_ZN8MpEngine15handleDiskEventE13MpxDiskEvents @ 26 NONAME
+	_ZN8MpEngine15handleScanEndedEii @ 27 NONAME
+	_ZN8MpEngine15reorderPlaylistEiiii @ 28 NONAME
 	_ZN8MpEngine16playlistsRenamedEb @ 29 NONAME
 	_ZN8MpEngine16reopenCollectionEv @ 30 NONAME
 	_ZN8MpEngine16staticMetaObjectE @ 31 NONAME DATA 16
@@ -35,32 +35,33 @@ EXPORTS
 	_ZN8MpEngine18launchBlockingNoteEv @ 34 NONAME
 	_ZN8MpEngine18openCollectionItemEi @ 35 NONAME
 	_ZN8MpEngine19getStaticMetaObjectEv @ 36 NONAME
-	_ZN8MpEngine20checkForSystemEventsEv @ 37 NONAME
-	_ZN8MpEngine20handleUsbMtpEndEventEv @ 38 NONAME
-	_ZN8MpEngine21handleUsbMtpNotActiveEv @ 39 NONAME
-	_ZN8MpEngine21libraryAboutToRefreshEv @ 40 NONAME
-	_ZN8MpEngine21saveToCurrentPlaylistER5QListIiEP19MpMpxCollectionData @ 41 NONAME
-	_ZN8MpEngine22changeUsbBlockingStateENS_16UsbBlockingStateE @ 42 NONAME
-	_ZN8MpEngine22handleUsbMtpStartEventEv @ 43 NONAME
-	_ZN8MpEngine22openIsolatedCollectionE18TCollectionContext @ 44 NONAME
-	_ZN8MpEngine24collectionPlaylistOpenedEv @ 45 NONAME
-	_ZN8MpEngine24isolatedCollectionOpenedEP19MpMpxCollectionData @ 46 NONAME
-	_ZN8MpEngine25handleBlockingNoteClosingEv @ 47 NONAME
+	_ZN8MpEngine19setOutstandingPopupEP7HbPopup @ 37 NONAME
+	_ZN8MpEngine20checkForSystemEventsEv @ 38 NONAME
+	_ZN8MpEngine20handleUsbMtpEndEventEv @ 39 NONAME
+	_ZN8MpEngine20libraryAboutToUpdateEv @ 40 NONAME
+	_ZN8MpEngine21handleUsbMtpNotActiveEv @ 41 NONAME
+	_ZN8MpEngine21saveToCurrentPlaylistER5QListIiEP19MpMpxCollectionData @ 42 NONAME
+	_ZN8MpEngine22changeUsbBlockingStateENS_16UsbBlockingStateE @ 43 NONAME
+	_ZN8MpEngine22handleUsbMtpStartEventEv @ 44 NONAME
+	_ZN8MpEngine22openIsolatedCollectionE18TCollectionContext @ 45 NONAME
+	_ZN8MpEngine24collectionPlaylistOpenedEv @ 46 NONAME
+	_ZN8MpEngine24isolatedCollectionOpenedEP19MpMpxCollectionData @ 47 NONAME
 	_ZN8MpEngine25releaseIsolatedCollectionEv @ 48 NONAME
-	_ZN8MpEngine28handleUsbMassStorageEndEventEv @ 49 NONAME
-	_ZN8MpEngine30handleUsbMassStorageStartEventEv @ 50 NONAME
-	_ZN8MpEngine4backEv @ 51 NONAME
-	_ZN8MpEngine4stopEv @ 52 NONAME
-	_ZN8MpEngine5closeEv @ 53 NONAME
-	_ZN8MpEngine8instanceEv @ 54 NONAME
-	_ZN8MpEngine9playPauseEv @ 55 NONAME
-	_ZN8MpEngine9setRepeatEb @ 56 NONAME
-	_ZN8MpEngineC1Ev @ 57 NONAME
-	_ZN8MpEngineC2Ev @ 58 NONAME
-	_ZN8MpEngineD0Ev @ 59 NONAME
-	_ZN8MpEngineD1Ev @ 60 NONAME
-	_ZN8MpEngineD2Ev @ 61 NONAME
-	_ZNK8MpEngine10metaObjectEv @ 62 NONAME
-	_ZTI8MpEngine @ 63 NONAME
-	_ZTV8MpEngine @ 64 NONAME
+	_ZN8MpEngine28handleOutstandingNoteClosingEv @ 49 NONAME
+	_ZN8MpEngine28handleUsbMassStorageEndEventEv @ 50 NONAME
+	_ZN8MpEngine30handleUsbMassStorageStartEventEv @ 51 NONAME
+	_ZN8MpEngine4backEv @ 52 NONAME
+	_ZN8MpEngine4stopEv @ 53 NONAME
+	_ZN8MpEngine5closeEv @ 54 NONAME
+	_ZN8MpEngine8instanceEv @ 55 NONAME
+	_ZN8MpEngine9playPauseEv @ 56 NONAME
+	_ZN8MpEngine9setRepeatEb @ 57 NONAME
+	_ZN8MpEngineC1Ev @ 58 NONAME
+	_ZN8MpEngineC2Ev @ 59 NONAME
+	_ZN8MpEngineD0Ev @ 60 NONAME
+	_ZN8MpEngineD1Ev @ 61 NONAME
+	_ZN8MpEngineD2Ev @ 62 NONAME
+	_ZNK8MpEngine10metaObjectEv @ 63 NONAME
+	_ZTI8MpEngine @ 64 NONAME
+	_ZTV8MpEngine @ 65 NONAME
 

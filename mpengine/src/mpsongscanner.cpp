@@ -113,7 +113,6 @@ void MpSongScanner::handleScanStarted()
     title->setFontSpec(HbFontSpec(HbFontSpec::Primary));
 
     mScanProgressNote->setHeadingWidget( title );
-    mScanProgressNote->setTextAlignment( Qt::AlignCenter );
     mScanProgressNote->setText( QString("") );
     mScanProgressNote->setAttribute( Qt::WA_DeleteOnClose );
     mScanProgressNote->show();
@@ -133,7 +132,8 @@ void MpSongScanner::handleScanEnded( int numItemsAdded, int error )
         diskFullDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
         diskFullDialog->setText( hbTrId( "txt_mus_title_refresh_cancelled" ) );
         diskFullDialog->setTimeout( HbPopup::NoTimeout);
-        diskFullDialog->exec();
+        diskFullDialog->setAttribute( Qt::WA_DeleteOnClose );
+        diskFullDialog->show();
         mScanning = false;
                
     }

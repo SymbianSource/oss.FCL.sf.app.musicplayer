@@ -46,7 +46,7 @@ public slots:
         
 private:
     HbMainWindow                 *mWindow;             // not own
-    HbAction                     *mSoftKeyBack;        // own
+    HbAction                     *mNavigationBack;     // own
     MpSettingsAudioEffectsWidget *mAudioEffectsWidget; // not own
 
     Q_DISABLE_COPY(MpSettingsView)

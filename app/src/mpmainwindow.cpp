@@ -137,7 +137,7 @@ void MpMainWindow::initialize()
         activateView(CollectionView);
 
         connect(this, SIGNAL( orientationChanged( Qt::Orientation ) ), SLOT( switchView( Qt::Orientation ) ) );
-        connect( engine, SIGNAL( libraryRefreshed() ), SLOT( handleLibraryUpdated() ) );
+        connect( engine, SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
         engine->checkForSystemEvents();
         loadView( PlaybackView );
     }
@@ -293,7 +293,7 @@ void MpMainWindow::initializeServiceView( TUid hostUid ){
             loadView(PlaybackView, MpCommon::FetchView );
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
             connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
-            connect( engine, SIGNAL( libraryRefreshed() ), this, SLOT( handleLibraryUpdated() ) );
+            connect( engine, SIGNAL( libraryUpdated() ), this, SLOT( handleLibraryUpdated() ) );
             engine->checkForSystemEvents();
             break;
         }

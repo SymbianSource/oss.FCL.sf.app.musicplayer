@@ -46,7 +46,7 @@
  */
 MpSettingsView::MpSettingsView()
     : mWindow(0),
-      mSoftKeyBack(0),
+      mNavigationBack(0),
       mAudioEffectsWidget(0)
 {
     TX_LOG
@@ -58,7 +58,7 @@ MpSettingsView::MpSettingsView()
 MpSettingsView::~MpSettingsView()
 {
     TX_ENTRY
-    delete mSoftKeyBack;
+    delete mNavigationBack;
     TX_EXIT
 }
 
@@ -83,17 +83,17 @@ void MpSettingsView::initializeView()
     }
 
     mWindow = mainWindow();
-    mSoftKeyBack = new HbAction(Hb::BackAction, this);
+    mNavigationBack = new HbAction(Hb::BackNaviAction, this);
     mAudioEffectsWidget = new MpSettingsAudioEffectsWidget(this);
     mAudioEffectsWidget->initialize();
     setWidget( mAudioEffectsWidget );
 
-    connect( mSoftKeyBack,
+    connect( mNavigationBack,
                 SIGNAL(triggered()),
                 this,
                 SLOT(back()) );
 
-    connect( mSoftKeyBack,
+    connect( mNavigationBack,
                 SIGNAL(triggered()),
                 mAudioEffectsWidget,
                 SLOT(persistBalance()) );
@@ -106,7 +106,7 @@ void MpSettingsView::initializeView()
 void MpSettingsView::activateView()
 {
     TX_ENTRY
-    setNavigationAction( mSoftKeyBack );
+    setNavigationAction( mNavigationBack );
     TX_EXIT
 }
 

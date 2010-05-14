@@ -76,8 +76,8 @@ public:
     bool                            mEffectOnGoing;
 
     HbMainWindow                    *mWindow;               // Not own
-    HbAction                        *mSoftKeyQuit;          // Not own
-    HbAction                        *mSoftKeyBack;          // Not own
+    HbAction                        *mNavigationQuit;       // Not own
+    HbAction                        *mNavigationBack;       // Not own
 
     MpCollectionDocumentLoader      *mDocumentLoader;       // Own
     HbWidget                        *mMainContainer;        // Own

@@ -50,7 +50,7 @@ class CMPXDbAbstractAlbum :
         * @return New CMPXDbCategory instance.
         */
         static CMPXDbAbstractAlbum* NewL(CMPXDbManager& aDbManager,
-            TMPXGeneralCategory aCategory);
+            TMPXGeneralCategory aCategory, RFs& aFs);
 
         /**
         * Two-phased constructor.
@@ -59,7 +59,7 @@ class CMPXDbAbstractAlbum :
         * @return New CMPXDbCategory instance on the cleanup stack.
         */
         static CMPXDbAbstractAlbum* NewLC(CMPXDbManager& aDbManager,
-            TMPXGeneralCategory aCategory);
+            TMPXGeneralCategory aCategory, RFs& aFs);
 
         /**
         * Destructor
@@ -84,9 +84,17 @@ class CMPXDbAbstractAlbum :
         *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
-        TUint32 AddItemL( const TDesC& aName, const TDesC& aAlbumArtist, const TDesC& aGenre, TInt aDriveId, TBool& aNewRecord,
-            TBool aCaseSensitive = ETrue);
-        
+        TUint32 AddItemL( const TDesC& aUri, const TDesC& aName, const TDesC& aAlbumArtist, TInt aDriveId, TBool& aNewRecord,
+            TBool aCaseSensitive = EFalse);
+
+        /**
+        *  Add existing item to table with same entry fields values except new Uri.
+        * @param aOldId: existing item Id
+        * @param newUri: new Uri
+        * @return The unique id of the row added.
+        */      
+        TUint32 AddUpdatedItemL(TUint32 aOldId, const TDesC& newUri);
+
         /**
         * Decrement the number of songs for the item. If the count gets to 0, remove
         * the item.
@@ -103,13 +111,17 @@ class CMPXDbAbstractAlbum :
         */
         void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, TBool aMtpInUse);
-  
+        
         /**
-        * Remove a abstractalbum and return its URI
-        * @param aAbstractAlbumId identifies the abstractalbum
-        * @return HBufC containing the URI. Ownership is transferred.
+        * Remove a abstractalbum, remove entry from AbstractAlbum table, 
+        * Thumbnail table, corresponding alb from file system
+        * @param aAbstractAlbumId ID of the abstractalbum to remove
+        * @param aItemChangedMessages a list of change events as a result of the
+        *        abstractalbum removal
+        * @param aFileDeleted indicate if alb file already deleted from file system
         */
-        HBufC* DeleteAbstractAlbumL(TUint32 aAbstractAlbumId, TInt aDriveId = 0);
+        void RemoveAbstractAlbumL(TUint32 aAbstractalbumId, 
+            CMPXMessageArray& aItemChangedMessages, TBool aFileDeleted);
         
         /**
         * Update a category item.
@@ -120,6 +132,29 @@ class CMPXDbAbstractAlbum :
         *        category was updated
         */
         void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+          
+        /**
+        * Delete or Rename Thumbnail from TN DB by calling Thumbnail manager
+        * Rename Thumbnail if aNewPath is not NULL, otherwise Delete Thumbnail
+        * @param aOldPath: old Uri
+        * @param aNewPath: new Uri
+        * @param aPriority: priority pass to Thumbnail manager
+        */
+        void HandleTNL( const TDesC& aOldPath, const TDesC& aNewPath = KNullDesC, TInt aPriority =0 );
+
+        /**
+        * Get the uri field for a given ID.
+        * @param aId identifies the abstractalbum item
+        * @return uri that matches aId. Ownership is abandoned.
+        */
+        HBufC* GetUriL(TUint32 aId);
+
+        /**
+        * Get Ids of albstractalbum with no song associated.
+        * Rename Thumbnail if aNewPath is not NULL, otherwise Delete Thumbnail
+        * @param aItemsIds: array of Ids for abstractalbums which have no song associated.
+        */
+        void GetAllItemsWithNoSongL(RArray<TUint32>& aItemsIds);
 
     private:
 
@@ -142,35 +177,37 @@ class CMPXDbAbstractAlbum :
         */
         void GenerateAbstractAlbumFieldsValuesL(const CMPXMedia& aMedia,
             CDesCArray& aFields, CDesCArray& aValues);
-
+        
+        /**
+        * Remove a abstractalbum from AbstractAlbum table
+        * @param aAbstractAlbumId identifies the abstractalbum
+        * @param aDriveId drive Id
+        */
+        void DeleteAbstractAlbumEntryL(TUint32 aAbstractAlbumId,  TInt aDriveId = 0);
+        
 
         /**
         * @see MMPXTable
         */
         virtual void CreateTableL(RSqlDatabase& aDatabase, TBool aCorruptTable);
 
-
-        
         /**
         * @see MMPXTable
         */
         virtual TBool CheckTableL(RSqlDatabase& aDatabase);
-        
-        
-    
+
         /**
         * C++ constructor.
         * @param aDbManager database manager to use for database interactions
         * @param aCategory identifies the category
         */
-        CMPXDbAbstractAlbum(CMPXDbManager& aDbManager, TMPXGeneralCategory aCategory);
+        CMPXDbAbstractAlbum(CMPXDbManager& aDbManager, TMPXGeneralCategory aCategory, RFs& aFs);
 
         /**
         * Second phase constructor.
         */
         void ConstructL();
-        
-        
+
         /**
         * MThumbnailManagerObserver
         */
@@ -180,7 +217,7 @@ class CMPXDbAbstractAlbum :
         * MThumbnailManagerObserver
         */
         void ThumbnailReady(
-            TInt aError, 
+            TInt aError,
             MThumbnailData& aThumbnail, TThumbnailRequestId aId );
 
     public:
@@ -191,9 +228,9 @@ class CMPXDbAbstractAlbum :
         enum TAbstractAlbumColumns
             {
             EAbstractAlbumUniqueId = KMPXTableDefaultIndex,
+            EAbstractAlbumUri,
             EAbstractAlbumName,
             EAbstractAlbumArtist,
-            EAbstractAlbumGenre,
             EAbstractAlbumSongCount,
             EAbstractAlbumVolumeId,
             EAbstractAlbumFieldCount
@@ -201,6 +238,8 @@ class CMPXDbAbstractAlbum :
 
     private:    // Data
         CThumbnailManager*        iTNManager;
+        TBool                     iRenameTN;
+        RFs&                      iFs;
 
     };
 #endif // MPXDBAbstractAlbum_H

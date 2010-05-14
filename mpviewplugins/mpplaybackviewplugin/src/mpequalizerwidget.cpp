@@ -86,18 +86,19 @@ void MpEqualizerWidget::prepareDialog()
 {
     TX_ENTRY
     
+    HbAction *action;
     setTimeout(NoTimeout);
+	setModal( true );
     setDismissPolicy(HbDialog::NoDismiss);
     setFrameType(HbPopup::Strong);
-    setHeadingWidget(new HbLabel(hbTrId("txt_mus_title_select_preset")));    
-    setPrimaryAction(new HbAction(hbTrId("txt_common_button_ok")));
-    setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel")));
-    
+    setHeadingWidget(new HbLabel(hbTrId("txt_mus_title_select_preset")));
+
+
     if ( mEqualizerReady ) {
         mOriginalPreset = mEqualizerWrapper->activePreset();
         QStringList listItems = mEqualizerWrapper->presetNames();
         listItems.prepend(hbTrId("txt_mus_list_off"));
-    
+
         int presetSelected;
         if (mOriginalPreset == KEqualizerPresetNone) {
             presetSelected = 0;     //First list item corresponds to "OFF"
@@ -105,25 +106,23 @@ void MpEqualizerWidget::prepareDialog()
         else {
             presetSelected = mOriginalPreset;
         }
-    
+
         mPresetsList = new HbRadioButtonList(listItems, presetSelected, HbRadioButtonList::NoPreview, this);
         setContentWidget( mPresetsList );  //mPresetsList now owned by HbDialog
-    
+
         connect( mPresetsList, 
                SIGNAL(itemSelected(int)), 
                this, 
                SLOT(presetSelected(int)));
     }
     
-    connect( secondaryAction(),
-            SIGNAL( triggered(bool) ),
-            this,
-            SLOT( cancelSelected(bool) ) );
-    
-    connect( primaryAction(),
-            SIGNAL( triggered(bool) ),
-            this,
-            SLOT( okSelected(bool) ) );
+    clearActions();
+    action = new HbAction( hbTrId( "txt_common_button_ok" ) );
+    connect( action, SIGNAL( triggered( bool ) ), this, SLOT( okSelected( bool ) ) );
+    addAction( action );
+    action = new HbAction( hbTrId( "txt_common_button_cancel" ) );
+    connect( action, SIGNAL( triggered( bool ) ), this, SLOT( cancelSelected( bool ) ) );
+    addAction( action );
     
     TX_EXIT
 }

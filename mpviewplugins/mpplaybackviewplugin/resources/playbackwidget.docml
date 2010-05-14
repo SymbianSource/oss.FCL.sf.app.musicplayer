@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<hbdocument version="0.9">
+    
+    <widget name="playbackWidgetContainer" type="HbWidget">
+        
+        <widget name="albumText" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <fontspec name="fontSpec" role="Secondary"/>            
+        </widget>
+        
+        <widget name="artistText" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <fontspec name="fontSpec" role="Secondary"/>            
+        </widget>
+        
+        <widget name="songText" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <fontspec name="fontSpec" role="Primary"/>             
+        </widget>
+        
+        <widget name="albumArt" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+        </widget>
+        
+        <widget name="progressBar" type="HbProgressSlider">
+            <fontspec name="fontSpec" role="PrimarySmall"/>
+        </widget>
+
+  		<widget name="textContainer" type="HbWidget"/>
+  		
+        <bool name="visible" value="TRUE"/>
+        
+    </widget>
+
+    <widget name="albumArt">
+        <sizehint height="var(hb-param-screen-width)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+        <sizehint height="var(hb-param-screen-width)" type="PREFERRED" width="var(hb-param-screen-width)"/>
+        <sizehint height="var(hb-param-screen-width)" type="FIXED" width="var(hb-param-screen-width)"/>
+        <sizehint height="var(hb-param-screen-width)" type="MINIMUM" width="var(hb-param-screen-width)"/>
+        <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+    </widget>
+    
+    <layout type="linear" orientation="Vertical"  spacing="var(hb-param-margin-gene-middle-vertical)" widget="textContainer">
+    	<contentsmargins bottom="var(hb-param-margin-gene-screen)" left="var(hb-param-margin-gene-screen)" right="var(hb-param-margin-gene-screen)" top="0.0un"/>
+    	<linearitem itemname="artistText"/>
+        <linearitem itemname="songText"/>
+        <linearitem itemname="albumText"/>
+    	<linearitem itemname="progressBar"/>
+    </layout>
+    
+    <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)"  type="linear" widget="playbackWidgetContainer">
+        <contentsmargins bottom="0.0un" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0un"/>   
+        <linearitem itemname="albumArt"/>                        
+        <linearitem itemname="textContainer"/>
+    </layout>
+    
+</hbdocument>

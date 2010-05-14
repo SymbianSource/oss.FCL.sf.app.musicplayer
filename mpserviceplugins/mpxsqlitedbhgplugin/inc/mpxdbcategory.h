@@ -176,16 +176,16 @@ class CMPXDbCategory :
         */
         TInt GetSongsCountL(TInt aDriveId, TUint32 aId);
 
-		/**
-	    * Update a category item. 
-	    * @param aId: The ID of the category to update
-	    * @param aMedia: The media data
-	    * @param aDriveId: The Drive Id the name (category) belongs
-	    * @param aItemChangedMessages: if valid on return contains a updated message if the
+        /**
+        * Update a category item.
+        * @param aId: The ID of the category to update
+        * @param aMedia: The media data
+        * @param aDriveId: The Drive Id the name (category) belongs
+        * @param aItemChangedMessages: if valid on return contains a updated message if the
         * category was updated
         */
-		void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
-		
+        void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+
     protected:
 
         /**

@@ -514,6 +514,7 @@ void CMPXInMemoryPlugin::DoAddL(
     if( index != KErrNotFound )
         {
         iEmbeddedContext.Remove( index );
+        delete iTemporaryData[index];
         iTemporaryData.Remove( index );
         iEmbeddedContext.Compress();
         iTemporaryData.Compress();

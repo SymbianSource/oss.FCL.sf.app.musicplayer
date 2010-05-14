@@ -38,7 +38,6 @@ TARGET          mpxm3uplaylistplugin.rsc
 END
 
 USERINCLUDE     ../inc
-USERINCLUDE     ../../inc
 
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom

@@ -109,7 +109,7 @@ private:
     
     bool                    mActivated;
     HbMainWindow            *mWindow;
-    HbAction                *mSoftKeyBack;
+    HbAction                *mNavigationBack;
     
     HbWidget                *mContainer;
     HbLabel                 *mSongText; //owned

@@ -21,6 +21,7 @@
 #include "mpcollectionview.h"
 #include "mpcollectioncontainer.h"
 #include "mpcollectioncontainerallsongs.h"
+#include "mpcollectioncontainerartists.h"
 #include "mpcollectioncontaineralbums.h"
 #include "mpcollectioncontainerplaylists.h"
 #include "mpcollectioncontainergenres.h"
@@ -75,6 +76,16 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
         connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
         break;
+    case ECollectionContextArtists:
+            if ( ( mCurrentContext != ECollectionContextArtistAlbums ) && ( mCurrentContext != ECollectionContextAlbumSongs) )
+                {
+                deleteCurrentContainer();
+                mCurrentContainer = new MpCollectionContainerArtists(mDocumentLoader);
+                mCurrentContainer->initialize();
+                connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
+                connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            }
+            break;
     case ECollectionContextAlbums:
         if ( mCurrentContext != ECollectionContextAlbumSongs ) {
             deleteCurrentContainer();
@@ -103,6 +114,8 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         }
         break;
     case ECollectionContextAlbumSongs:
+    case ECollectionContextArtistAlbums:
+    case ECollectionContextArtistSongs:
     case ECollectionContextPlaylistSongs:
     case ECollectionContextGenreSongs:
         // For this contexts, reuse the same container.
@@ -122,6 +135,11 @@ void MpCollectionContainerFactory::deleteCurrentContainer()
     switch ( mCurrentContext ) {
     case ECollectionContextAllSongs:
         delete static_cast<MpCollectionContainerAllSongs *>(mCurrentContainer);
+        break;
+    case ECollectionContextArtists:
+    case ECollectionContextArtistAlbums:
+    case ECollectionContextArtistSongs:
+        delete static_cast<MpCollectionContainerArtists *>(mCurrentContainer);
         break;
     case ECollectionContextAlbums:
     case ECollectionContextAlbumSongs:

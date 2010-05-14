@@ -110,5 +110,7 @@ RSS_RULES += \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-wav\"; }," \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-au\"; }," \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/au\"; }, " \
-"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/vnd.nokia.ringing-tone\"; }" \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/vnd.nokia.ringing-tone\"; }, " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-mpegurl\"; }, " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/mpegurl\"; }" \
 "        };" \     

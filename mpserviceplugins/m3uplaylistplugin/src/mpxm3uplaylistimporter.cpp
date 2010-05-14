@@ -36,7 +36,7 @@ const TInt KPathStartingChars = 3;
 
 // ============================ MEMBER FUNCTIONS ==============================
 // ----------------------------------------------------------------------------
-// Constructor.
+// Constructor. 
 // ----------------------------------------------------------------------------
 EXPORT_C CMPXM3uPlaylistImporter::CMPXM3uPlaylistImporter(
             RFs* aFs,
@@ -71,19 +71,19 @@ EXPORT_C void CMPXM3uPlaylistImporter::ConstructL( const TDesC& aPlaylistUri )
     iPlaylistFilePath.Set(aPlaylistUri);
 
     iAutoEncodingPlaylistArray = CMPXMediaArray::NewL();
-
+    
     *iCallerStatus = KRequestPending;
 
     TRequestStatus* status = &iStatus;
     *status = KRequestPending;
-    User::RequestComplete(status, KErrNone);
+    User::RequestComplete(status, KErrNone);   
     SetActive();
-
+    
     MPX_DEBUG1("CMPXM3uPlaylistImporter::ConstructL() exiting");
     }
-
+    
 // ----------------------------------------------------------------------------
-// Two-phased constructor.
+// Two-phased constructor. 
 // ----------------------------------------------------------------------------
 EXPORT_C CMPXM3uPlaylistImporter* CMPXM3uPlaylistImporter::NewL(
             RFs* aFs,
@@ -91,7 +91,7 @@ EXPORT_C CMPXM3uPlaylistImporter* CMPXM3uPlaylistImporter::NewL(
             const TDesC& aPlaylistUri,
             const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>& aTopCharacterSet,
             const CArrayFix<CCnvCharacterSetConverter::SCharacterSet>& aAvailableCharacterSet,
-            TRequestStatus& aStatus )
+            TRequestStatus& aStatus )            
     {
     CMPXM3uPlaylistImporter* self =
         new(ELeave)CMPXM3uPlaylistImporter(
@@ -103,7 +103,7 @@ EXPORT_C CMPXM3uPlaylistImporter* CMPXM3uPlaylistImporter::NewL(
     }
 
 // ----------------------------------------------------------------------------
-// Destructor.
+// Destructor. 
 // ----------------------------------------------------------------------------
 //
 EXPORT_C CMPXM3uPlaylistImporter::~CMPXM3uPlaylistImporter()
@@ -119,7 +119,7 @@ EXPORT_C CMPXM3uPlaylistImporter::~CMPXM3uPlaylistImporter()
 EXPORT_C void CMPXM3uPlaylistImporter::RunL()
     {
     MPX_DEBUG1("CMPXM3uPlaylistImporter::RunL");
-
+    
     if ( iMoreToDo && iStatus.Int() == KErrNone )
         {
         DoTaskStep();
@@ -127,12 +127,12 @@ EXPORT_C void CMPXM3uPlaylistImporter::RunL()
         }
     else
         {
-        User::RequestComplete( iCallerStatus, iStatus.Int() );
-        NotifyClient(iStatus.Int());
-        Cleanup();
+        User::RequestComplete( iCallerStatus, iStatus.Int() );        
+        NotifyClient(iStatus.Int());      
+        Cleanup();                    
         }
     }
-
+    
 // ----------------------------------------------------------------------------
 // Implements cancellation of an outstanding request.
 // ----------------------------------------------------------------------------
@@ -142,12 +142,12 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoCancel()
     MPX_DEBUG1("CMPXM3uPlaylistImporter::DoCancel");
 
     TInt error( KErrCancel );
-
+    
     // notify client that the request has been cancelled
     NotifyClient(error);
 
     Cleanup();
-
+    
     if ( iCallerStatus )
         {
         User::RequestComplete( iCallerStatus, error );
@@ -161,17 +161,17 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoCancel()
 EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStep()
     {
     MPX_DEBUG1("CMPXM3uPlaylistImporter::DoTaskStep()");
-
+    
     TRequestStatus* status = &iStatus;
     *status = KRequestPending;
 
     TInt error( KErrNone );
-
+    
     MPX_TRAP( error, DoTaskStepL() );
 
     User::RequestComplete( status, error );
     }
-
+        
 // ----------------------------------------------------------------------------
 // Performs one step of the task. Leaves when an error is encountered
 // ----------------------------------------------------------------------------
@@ -179,21 +179,21 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStep()
 EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStepL()
     {
     MPX_DEBUG1("CMPXM3uPlaylistImporter::DoTaskStepL()");
-
+    
     switch( iState )
-        {
+        {        
         case EMPXM3UReadBufferWithAutoDetectEncoding:
             {
             ReadPlaylistFileToBufferL();
             iState = EMPXM3UParseWithAutoDetectEncoding;
             }
             break;
-
+            
         case EMPXM3UParseWithAutoDetectEncoding:
             {
             ParsePlaylistBufferL(
                 *iAutoEncodingPlaylistArray, iAutoEncodingInvalidItems );
-
+            
             // If at the moment, we know that there is at least one error parsing
             // with auto detect encoding, we don't need to proceed until end of
             // file anymore, this playlist file is concluded to be corrupted
@@ -201,17 +201,17 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStepL()
                 {
                 delete iAutoEncodingPlaylistArray;
                 iAutoEncodingPlaylistArray = NULL;
-
+                
                 User::Leave(KErrCorrupt);
                 }
 
             // we've finished parsing with auto detect encoding we will return
             // the playlist parsed with auto encoding
             else if ( iEndOfFile )
-                {
+                {               
                 iState = EMPXM3UComposePlaylistMedia;
                 }
-            }
+            }       
             break;
 
         case EMPXM3UComposePlaylistMedia:
@@ -220,7 +220,7 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStepL()
             iMoreToDo = EFalse;
             }
             break;
-
+            
         default:
             {
             User::Leave(KErrAbort);
@@ -235,23 +235,23 @@ EXPORT_C void CMPXM3uPlaylistImporter::DoTaskStepL()
 //
 void CMPXM3uPlaylistImporter::ReadPlaylistFileToBufferL()
     {
-    MPX_DEBUG2("Before reading playlist to buffer: heap size = %d", User::Heap().Size());
+    MPX_DEBUG2("Before reading playlist to buffer: heap size = %d", User::Heap().Size());    
 
     delete iBuffer;
     iBuffer = NULL;
-    iBufferPtr.Set(KNullDesC);
+    iBufferPtr.Set(KNullDesC);    
 
     //
     // leave with KErrNotFound if the playlist file does not exist
-    //
+    //    
     if (!BaflUtils::FileExists(*iFs, iPlaylistFilePath))
         {
         User::Leave(KErrNotFound);
         }
-
+    
     TEntry entry;
     User::LeaveIfError(iFs->Entry(iPlaylistFilePath, entry));
-
+    
     HBufC* buffer = HBufC::NewLC(entry.iSize);
     TPtr ptr = buffer->Des();
 
@@ -271,13 +271,13 @@ void CMPXM3uPlaylistImporter::ReadPlaylistFileToBufferL()
     TUint charSetId(0);
     TInt error = DetectCharacterSetL(*buf8, iTopCharacterSet, charSetId);
     MPX_DEBUG3("encoding detected using top character set is 0x%x, error %d", charSetId, error);
-
+    
     // when we fail to detect the encoding, use all available character set in the
     // system to try again. If that also fails, abandon the operation.
     if (error)
         {
         User::LeaveIfError(DetectCharacterSetL(*buf8, iAvailableCharacterSet, charSetId));
-        MPX_DEBUG2("encoding detected using available character set is 0x%x", charSetId);
+        MPX_DEBUG2("encoding detected using available character set is 0x%x", charSetId);        
         }
 
     // read the whole file if the sample taken isn't the whole file
@@ -286,7 +286,7 @@ void CMPXM3uPlaylistImporter::ReadPlaylistFileToBufferL()
         User::LeaveIfError(iFs->ReadFileSection(
                                 iPlaylistFilePath, 0, ptr8, entry.iSize));
         }
-
+   
     // perform character conversion using the selected encoding
     TInt state(CCnvCharacterSetConverter::KStateDefault);
     TInt numOfUnconvertibleChars(0);
@@ -306,14 +306,14 @@ void CMPXM3uPlaylistImporter::ReadPlaylistFileToBufferL()
         charSetConv->PrepareToConvertToOrFromL(charSetId, iAvailableCharacterSet, *iFs);
         retVal = charSetConv->ConvertToUnicode(ptr, *buf8, state, numOfUnconvertibleChars);
         }
-
+        
     if (retVal > 0 || numOfUnconvertibleChars > 0)
         {
         MPX_DEBUG3("Unable to find character encoding for the playlist file. retVal = %d, numOfUnconvertibleChars = %d",
-                    retVal, numOfUnconvertibleChars);
+                    retVal, numOfUnconvertibleChars);        
         User::Leave(KErrNotSupported);
         }
-
+    
     // remove the byte order mark (BOM) character prepended at the beginning
     // of the stream if encoded with unicode as per Unicode section 2.4
     if ((charSetId == KCharacterSetIdentifierUnicodeLittle ||
@@ -323,20 +323,20 @@ void CMPXM3uPlaylistImporter::ReadPlaylistFileToBufferL()
         {
         ptr.Delete(0,1);
         }
-
+        
     iBuffer = buffer;
     iBufferPtr.Set(*iBuffer);
-
-    CleanupStack::PopAndDestroy(2, buf8); // charSetConv & buf8
+    
+    CleanupStack::PopAndDestroy(2, buf8); // charSetConv & buf8    
     CleanupStack::Pop(buffer);
-
+        
     // brand new buffer which hasn't been read, reset iCurrentLineNumber and
     // iEndLineNumber, and iEndOfFile
     iCurrentLineNumber = 0;
     iEndLineNumber = KMPXM3UNumOfLinesToProcess;
     iEndOfFile = EFalse;
 
-    MPX_DEBUG2("After reading playlist to buffer: heap size = %d", User::Heap().Size());
+    MPX_DEBUG2("After reading playlist to buffer: heap size = %d", User::Heap().Size());        
     }
 
 // -----------------------------------------------------------------------------
@@ -354,7 +354,7 @@ TInt CMPXM3uPlaylistImporter::DetectCharacterSetL(
 	    {
 	    User::Leave(KErrNotSupported);
 	    }
-
+	    
 	TInt confidence(0);
 	TInt highestConfidence(0);
 	TUint charSetId(0);
@@ -385,7 +385,7 @@ TInt CMPXM3uPlaylistImporter::DetectCharacterSetL(
 		return KErrNone;
 		}
 	}
-
+	
 // -----------------------------------------------------------------------------
 // CMPXM3uPlaylistPlugin::ParsePlaylistBufferL
 // -----------------------------------------------------------------------------
@@ -402,7 +402,7 @@ void CMPXM3uPlaylistImporter::ParsePlaylistBufferL(
            aPlaylist.Count() < KMPXM3UPlaylistMaxItemCount &&
            ReadNextLineL())
         {
-        ProcessLineL(aPlaylist, aInvalidItemCount);
+        ProcessLineL(aPlaylist, aInvalidItemCount);  
         }
 
     if ( aPlaylist.Count() == KMPXM3UPlaylistMaxItemCount )
@@ -414,7 +414,7 @@ void CMPXM3uPlaylistImporter::ParsePlaylistBufferL(
     // haven't finished processing all lines in the file, but have processed
     // KMPXM3UNumOfLinesToProcess number of lines. Set up iEndLineNumber for
     // the next iteration
-    //
+    //        
     if ( !iEndOfFile && iCurrentLineNumber == iEndLineNumber )
         {
         iEndLineNumber += KMPXM3UNumOfLinesToProcess;
@@ -442,7 +442,7 @@ TBool CMPXM3uPlaylistImporter::ReadNextLineL()
 
     // Try to find line change
     TInt offset = iBufferPtr.FindF(KMPXM3ULineChange);
-
+  
     if (offset == KErrNotFound)
         {
         // No line change was found --> last line had no line change
@@ -454,7 +454,7 @@ TBool CMPXM3uPlaylistImporter::ReadNextLineL()
         {
         // Found line change
         TInt length(offset);
-        if ((offset > KMPXM3UNoOffset) &&
+        if ((offset > KMPXM3UNoOffset) && 
             (iBufferPtr[length - 1] == KMPXM3UCarriageReturn)) // magic
             {
             --length;
@@ -473,7 +473,7 @@ TBool CMPXM3uPlaylistImporter::ReadNextLineL()
     iCurrentLineNumber++;
     return ETrue;
     }
-
+    
 // -----------------------------------------------------------------------------
 // CMPXM3uPlaylistImporter::ProcessLineL()
 // -----------------------------------------------------------------------------
@@ -497,7 +497,7 @@ void CMPXM3uPlaylistImporter::ProcessLineL(
             // The file is in the extented format
             iExtendedFormat = ETrue;
             return;
-            }
+            }        
         }
 
     if (!iItem)
@@ -506,22 +506,22 @@ void CMPXM3uPlaylistImporter::ProcessLineL(
         iItem->SetTObjectValueL(KMPXMediaGeneralType, EMPXItem);
         iItem->SetTObjectValueL(KMPXMediaGeneralCategory, EMPXSong);
         }
-
+    
     // Parse line and then decide what to do with it
     switch (ParseLineL(iItem, aInvalidItemCount))
         {
         case EMPXM3UPlaylistLineTypeExtinf:
             // Continue to next round
             break;
-
+            
         case EMPXM3UPlaylistLineTypePath:
             {
             // Line was a path => add item to playlist
             aPlaylist.AppendL(iItem);
             iItem = NULL; // item now owned by aPlaylist
             }
-            break;
-
+            break; 
+                       
         case EMPXM3UPlaylistLineTypeNotSupported:
         case EMPXM3UPlaylistLineTypeCorrupted:
         default:
@@ -534,7 +534,7 @@ void CMPXM3uPlaylistImporter::ProcessLineL(
             break;
         }
     }
-
+    
 // -----------------------------------------------------------------------------
 // CMPXM3uPlaylistImporter::ParseLineL
 // -----------------------------------------------------------------------------
@@ -588,7 +588,7 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
                 CleanupStack::PopAndDestroy( title );
 
                 return EMPXM3UPlaylistLineTypeExtinf; // line type extinf
-                }
+                }    
             }
         }
 
@@ -599,7 +599,7 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
         case KMPXM3UNoOffset:
             // Unsupported extended info tag found from this line
             return EMPXM3UPlaylistLineTypeNotSupported;
-
+            
         case KErrNotFound:
         default:
             // Extended info not found from the beginning of line => line is
@@ -608,7 +608,7 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
             // Get absolute path
             TInt error(KErrNone);
             HBufC* uri = ParseAbsolutePathLC(*iLine, error);
-
+        
             if (error)
                 {
                 if (error == KErrPathNotFound)
@@ -622,9 +622,9 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
                         {
                         CleanupStack::PopAndDestroy( uri );
                         }
-
+                    
                     ++aInvalidItemCount;
-
+                                    
                     // All other errors are considered to mean playlist is
                     // corrupt.
                     return EMPXM3UPlaylistLineTypeCorrupted;
@@ -633,7 +633,7 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
 
             aItem->SetTextValueL(KMPXMediaGeneralUri, *uri);
             MPX_DEBUG2("    uri %S", uri);
-
+                
             // if title isn't supplied by the m3u file, extract file name from
             // URI as the title
             if (!aItem->IsSupported(KMPXMediaGeneralTitle))
@@ -645,7 +645,7 @@ TInt CMPXM3uPlaylistImporter::ParseLineL(
                 }
 
             CleanupStack::PopAndDestroy( uri );
-
+            
             return EMPXM3UPlaylistLineTypePath; // line type path
             }
         }
@@ -660,10 +660,10 @@ HBufC* CMPXM3uPlaylistImporter::ParseAbsolutePathLC(
             TInt& aError)
     {
     HBufC* path = NULL;
-
+    
     TBool isAbsolute( EFalse );
-
-    if (aPath.Length() > KPathStartingChars &&
+    
+    if (aPath.Length() > KPathStartingChars && 
         !aPath.Mid(1, 2).CompareF(KMPXM3UAbsPath)) // magic: the 2nd and 3rd chars
                                                // are always ":\"
                                                // for absolute paths
@@ -698,7 +698,7 @@ HBufC* CMPXM3uPlaylistImporter::ParseAbsolutePathLC(
 
         aError = iFs->IsValidName(*path) ? KErrNone : KErrBadName;
         }
-
+    
     // It is possible that a song exists in the filesystem but isn't added to
     // the database because it's not a supported type. If such song is included
     // in a playlist, it will be added to the database when the playlist is added.
@@ -715,7 +715,7 @@ HBufC* CMPXM3uPlaylistImporter::ParseAbsolutePathLC(
 
     return path;
     }
-
+    
 // -----------------------------------------------------------------------------
 // CMPlayerM3UPlaylistParser::ComposePlaylistL
 // -----------------------------------------------------------------------------
@@ -727,50 +727,50 @@ void CMPXM3uPlaylistImporter::ComposePlaylistL()
     // contain the CMPXMediaArray
     //
     iPlaylist = CMPXMedia::NewL();
-
+    
     // set playlist title
     TParsePtrC parser(iPlaylistFilePath);
     iPlaylist->SetTextValueL(KMPXMediaGeneralTitle, parser.Name());
-
+    
     // set playlist URI
     iPlaylist->SetTextValueL(KMPXMediaGeneralUri, iPlaylistFilePath);
-
+        
     // set type
     iPlaylist->SetTObjectValueL(KMPXMediaGeneralType, EMPXItem);
-
+        
     // set category
-    iPlaylist->SetTObjectValueL(KMPXMediaGeneralCategory, EMPXPlaylist);
+    iPlaylist->SetTObjectValueL(KMPXMediaGeneralCategory, EMPXPlaylist);        
 
     // set playlist array
     iPlaylist->SetCObjectValueL(KMPXMediaArrayContents, iAutoEncodingPlaylistArray);
-
+        
     // set array acount
     iPlaylist->SetTObjectValueL(KMPXMediaArrayCount, iAutoEncodingPlaylistArray->Count());
-
+        
     // playlist makes a copy of the array, we can now free the medias
     // array
     delete iAutoEncodingPlaylistArray;
     iAutoEncodingPlaylistArray = NULL;
     }
-
+    
 // ----------------------------------------------------------------------------
-// Cleanup.
+// Cleanup. 
 // ----------------------------------------------------------------------------
 //
 void CMPXM3uPlaylistImporter::Cleanup()
     {
     delete iBuffer;
     iBuffer = NULL;
-
+    
     delete iLine;
-    iLine = NULL;
+    iLine = NULL;   
 
     delete iItem;
     iItem = NULL;
-
+   
     delete iAutoEncodingPlaylistArray;
     iAutoEncodingPlaylistArray = NULL;
-
+    
     delete iPlaylist;
     iPlaylist = NULL;
     }
@@ -783,7 +783,7 @@ void CMPXM3uPlaylistImporter::NotifyClient( TInt aError )
     {
     MPX_DEBUG3("CMPXM3uPlaylistImporter::NotifyClient - iAutoEncodingInvalidItems=%d error=%d",
         iAutoEncodingInvalidItems, aError);
-
+        
     if ( iObserver )
         {
         if (aError)
@@ -801,11 +801,11 @@ void CMPXM3uPlaylistImporter::NotifyClient( TInt aError )
             // notify client. return the playlist media
             CMPXMedia* playlist = iPlaylist;
             iPlaylist = NULL; // client takes over the ownership
-
+            
             // to-do: change HandlePlaylistL to HandlePlaylist
             TRAP_IGNORE(iObserver->HandlePlaylistL( playlist, aError, ETrue ));
             }
-        }
+        }        
     }
-
+        
 // End of file

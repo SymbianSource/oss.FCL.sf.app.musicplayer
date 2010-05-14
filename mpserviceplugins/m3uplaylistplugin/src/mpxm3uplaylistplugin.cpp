@@ -33,10 +33,10 @@
 #include "mpxm3uplaylistdefs.h"
 #include "mpxm3uplaylistdefs.hrh"
 
-
+    
 // ============================ MEMBER FUNCTIONS ==============================
 // ----------------------------------------------------------------------------
-// Constructor.
+// Constructor. 
 // ----------------------------------------------------------------------------
 CMPXM3uPlaylistPlugin::CMPXM3uPlaylistPlugin()
     {
@@ -48,13 +48,13 @@ CMPXM3uPlaylistPlugin::CMPXM3uPlaylistPlugin()
 void CMPXM3uPlaylistPlugin::ConstructL()
     {
     iRequiredAttributes.AppendL(KMPXMediaGeneralUri);
-
+    
     iOptionalAttributes.AppendL(KMPXMediaGeneralTitle);
     iOptionalAttributes.AppendL(KMPXMediaGeneralDuration);
     }
-
+    
 // ----------------------------------------------------------------------------
-// Two-phased constructor.
+// Two-phased constructor. 
 // ----------------------------------------------------------------------------
 CMPXM3uPlaylistPlugin* CMPXM3uPlaylistPlugin::NewL(TAny* /*aInitParams*/)
     {
@@ -66,7 +66,7 @@ CMPXM3uPlaylistPlugin* CMPXM3uPlaylistPlugin::NewL(TAny* /*aInitParams*/)
     }
 
 // ----------------------------------------------------------------------------
-// Destructor.
+// Destructor. 
 // ----------------------------------------------------------------------------
 CMPXM3uPlaylistPlugin::~CMPXM3uPlaylistPlugin()
     {
@@ -90,7 +90,7 @@ void CMPXM3uPlaylistPlugin::InternalizePlaylistL(
     iImporter = NULL;
 
     // processing starts as soon as object is instantiated. When request completes,
-    // client is notified through MMPXPlaylistPlugibObserver interface
+    // client is notified through MMPXPlaylistPlugibObserver interface        
     iImporter =
         CMPXM3uPlaylistImporter::NewL(
             iFs, iObserver, aPlaylistUri, *iTopCharacterSet, *iAvailableCharacterSet, aStatus );
@@ -104,14 +104,14 @@ void CMPXM3uPlaylistPlugin::ExternalizePlaylistL(
     const CMPXMedia& aPlaylist,
     const TDesC& aFilePath)
     {
-    MPX_DEBUG1("CMPXM3uPlaylistPlugin::ExternalizePlaylistL");
+    MPX_DEBUG1("CMPXM3uPlaylistPlugin::ExternalizePlaylistL");    
 
     // instantiate a new CMPXM3uPlaylistExporter to handle this request
     delete iExporter;
     iExporter = NULL;
-
+    
     // processing starts as soon as object is instantiated. When request completes,
-    // client is notified through MMPXPlaylistPlugibObserver interface
+    // client is notified through MMPXPlaylistPlugibObserver interface        
     iExporter =
         CMPXM3uPlaylistExporter::NewL(
             iFs, iObserver, aPlaylist, aFilePath, aStatus );
@@ -123,7 +123,7 @@ void CMPXM3uPlaylistPlugin::ExternalizePlaylistL(
 // ----------------------------------------------------------------------------
 const TArray<TMPXAttribute> CMPXM3uPlaylistPlugin::RequiredAttributes() const
     {
-    return iRequiredAttributes.Array();
+    return iRequiredAttributes.Array();    
     }
 
 // ----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ const TArray<TMPXAttribute> CMPXM3uPlaylistPlugin::RequiredAttributes() const
 // ----------------------------------------------------------------------------
 const TArray<TMPXAttribute> CMPXM3uPlaylistPlugin::OptionalAttributes() const
     {
-    return iOptionalAttributes.Array();
+    return iOptionalAttributes.Array();    
     }
 
 // ----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ void CMPXM3uPlaylistPlugin::Cancel()
         {
         iImporter->Cancel();
         }
-
+        
     if ( iExporter )
         {
         iExporter->Cancel();
@@ -163,7 +163,7 @@ void CMPXM3uPlaylistPlugin::Cancel()
 // ----------------------------------------------------------------------------
 // The list of implementations
 // ----------------------------------------------------------------------------
-const TImplementationProxy ImplementationTable[] =
+const TImplementationProxy ImplementationTable[] = 
     { IMPLEMENTATION_PROXY_ENTRY(KMPXM3uPlaylistImplUid, CMPXM3uPlaylistPlugin::NewL) };
 
 // ----------------------------------------------------------------------------
@@ -174,5 +174,5 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
     aTableCount=sizeof(ImplementationTable)/sizeof(TImplementationProxy);
     return ImplementationTable;
     }
-
+    
 // End of file

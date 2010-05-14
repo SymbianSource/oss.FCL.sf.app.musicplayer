@@ -22,7 +22,6 @@
 #include <pathconfiguration.hrh>
 #include "mpxcollectiondb.hrh"
 
-
 STRUCT MENU_ITEM
     {
     LONG   id;
@@ -236,7 +235,7 @@ RESOURCE LBUF r_mc_recently_added_playlist
     {
     txt = qtn_mus_pl_recently_downloaded;
     }
-
+    
 // ---------------------------------------------------------------------------
 // r_mpx_qtn_mus_music_num_songs
 // Number of songs text

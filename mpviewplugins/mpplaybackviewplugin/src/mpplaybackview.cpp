@@ -61,7 +61,7 @@ MpPlaybackView::MpPlaybackView()
       mPlaybackData( 0 ),
       mPlaybackWidget( 0 ),
       mEqualizerWidget( new MpEqualizerWidget() ),
-      mSoftKeyBack( 0 ),
+      mNavigationBack( 0 ),
       mActivated( false ),
       mPlayIcon( 0 ),
       mPauseIcon( 0 ),
@@ -79,7 +79,7 @@ MpPlaybackView::MpPlaybackView()
 MpPlaybackView::~MpPlaybackView()
 {
     TX_ENTRY
-    delete mSoftKeyBack;
+    delete mNavigationBack;
     delete mPlayIcon;
     delete mPauseIcon;
     delete mShuffleOnIcon;
@@ -119,8 +119,8 @@ void MpPlaybackView::initializeView()
 
     mWindow = mainWindow();
 
-    mSoftKeyBack = new HbAction( Hb::BackAction, this );
-    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    mNavigationBack = new HbAction( Hb::BackNaviAction, this );
+    connect( mNavigationBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
     mMpEngine = MpEngine::instance();
     mPlaybackData = mMpEngine->playbackData();
@@ -152,7 +152,7 @@ void MpPlaybackView::activateView()
 {
     TX_ENTRY
     mActivated = true;
-    setNavigationAction( mSoftKeyBack );
+    setNavigationAction( mNavigationBack );
     TX_EXIT
 }
 
@@ -420,7 +420,7 @@ void MpPlaybackView::showEqualizerDialog()
 
     if( mEqualizerWidget )
     {
-        mEqualizerWidget->exec();
+        mEqualizerWidget->show();
     }
 
     TX_EXIT

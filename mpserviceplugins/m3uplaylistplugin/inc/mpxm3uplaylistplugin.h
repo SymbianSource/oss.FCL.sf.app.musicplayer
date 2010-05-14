@@ -33,12 +33,12 @@ class CMPXM3uPlaylistExporter;
 
 /**
 *  CMPXM3uPlaylistPlugin implements CMPXPlaylistPlugin to provide m3u
-*  playlist importing and exporting services.
+*  playlist importing and exporting services. 
 */
 NONSHARABLE_CLASS(CMPXM3uPlaylistPlugin) : public CMPXPlaylistPlugin
     {
 public: // Constructors and destructor
-
+    
     /**
     * Two-phased constructor
     *
@@ -51,10 +51,10 @@ public: // Constructors and destructor
     * Destructor
     */
     ~CMPXM3uPlaylistPlugin();
-
+    
 public: // from base clase CMPXPlaylistPlugin
 
-    /**
+    /** 
     * Internalize a playlist
     *
     * @param aStatus caller's request status
@@ -64,7 +64,7 @@ public: // from base clase CMPXPlaylistPlugin
         TRequestStatus& aStatus,
         const TDesC& aPlaylistUri);
 
-    /**
+    /** 
     * Externalize a playlist
     *
     * @param aStatus caller's request status
@@ -105,7 +105,7 @@ public: // from base clase CMPXPlaylistPlugin
     * cancel a client request
     */
     void Cancel();
-
+    
 private:
 
     /**
@@ -115,9 +115,9 @@ private:
 
     /**
     * 2nd phase constructor
-    */
+    */    
     void ConstructL();
-
+    
 private:
 
     CMPXM3uPlaylistImporter* iImporter;
@@ -127,5 +127,5 @@ private:
     };
 
 #endif   // MPXM3UPLAYLISTPLUGIN_H
-
+            
 

@@ -55,6 +55,6 @@ enum TMPXM3UPlaylistLineType
     EMPXM3UPlaylistLineTypeCorrupted = 4
     };
 
-#endif      // MPXM3UPLAYLISTDEFS_H
-
+#endif      // MPXM3UPLAYLISTDEFS_H   
+            
 // End of File

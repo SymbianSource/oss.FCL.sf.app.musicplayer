@@ -588,7 +588,10 @@ void TestMpMpxCollectionFrameworkWrapper::testDeleteSongs()
 {
     QList<int> selection;
     selection.append(1);
+    mTest->deleteSongs(selection);
+    QCOMPARE(mTestPrivate->iCollectionUiHelper->iDelete, TBool(ETrue));
     selection.append(3);
+	selection.append(4);
     selection.append(5);
     mTest->deleteSongs(selection);
     QCOMPARE(mTestPrivate->iCollectionUiHelper->iDelete, TBool(ETrue));

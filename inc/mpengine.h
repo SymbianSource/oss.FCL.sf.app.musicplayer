@@ -26,7 +26,7 @@
 
 class QStringList;
 class QTranslator;
-class HbProgressDialog;
+class HbPopup;
 class MpMpxHarvesterFrameworkWrapper;
 class MpSongScanner;
 class MpMediaKeyHandler;
@@ -67,7 +67,6 @@ public:
     void close();
 	
     // Harvester related
-    void refreshLibrary();
     bool verifyUsbBlocking( bool showMessage = false );
     void checkForSystemEvents();
     
@@ -97,8 +96,8 @@ public:
 signals:
     
     // Harvester related
-    void libraryAboutToRefresh();
-    void libraryRefreshed();
+    void libraryAboutToUpdate();
+    void libraryUpdated();
     void usbBlocked( bool blocked );
     
     // Collection related
@@ -112,11 +111,12 @@ signals:
 public slots:
 
     // Harvester related
+    void refreshLibrary();
     void handleScanStarted();
     void handleScanEnded( int count, int error );
     void handleDiskEvent( MpxDiskEvents event );
     void handleUsbEvent( MpxUsbEvents event );
-    void handleBlockingNoteClosing();
+    void handleOutstandingNoteClosing();
     
     // Collection related
     void reopenCollection();
@@ -144,6 +144,7 @@ private:
 
     void changeUsbBlockingState( UsbBlockingState state );
     void launchBlockingNote();
+    void setOutstandingPopup( HbPopup *popup );
 
 private:
 
@@ -153,7 +154,7 @@ private:
     MpMpxHarvesterFrameworkWrapper       *mMpxHarvesterWrapper;  // Own
     MpSongScanner                        *mSongScanner;          // Own
     MpMediaKeyHandler                    *mMediaKeyHandler;      // Own
-    HbProgressDialog                     *mUsbBlockingNote;      // Own
+    HbPopup                              *mUsbOutstandingNote;   // Own
     
     // Collection related
     MpMpxCollectionFrameworkWrapper      *mMpxCollectionWrapper; //Own

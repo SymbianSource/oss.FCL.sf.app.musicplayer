@@ -86,7 +86,7 @@ CMPXDbPlaylist::~CMPXDbPlaylist()
 // ----------------------------------------------------------------------------
 //
 CMPXDbPlaylist::CMPXDbPlaylist(
-    CMPXDbManager& aDbManager, 
+    CMPXDbManager& aDbManager,
     MMPXDbPlaylistObserver& aObserver) :
     CMPXDbTable(aDbManager),
 	iObserver(aObserver)
@@ -794,10 +794,10 @@ void CMPXDbPlaylist::UpdateMediaL(
                     MPXDbCommonUtil::GetColumnTextL(aRecord, EPlaylistTime)).Int64());
                 }
 			if ( attributeId & EMPXMediaGeneralDuration )
-				{		        
+				{
 				// make sure the PlaylistSongs query is executed after all fields
 				// from the current record have been processed, otherwise the recordset
-				// may point to something else				
+				// may point to something else
 
 				durationRequested = ETrue;
 				}

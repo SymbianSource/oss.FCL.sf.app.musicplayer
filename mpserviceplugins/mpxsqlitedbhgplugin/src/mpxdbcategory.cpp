@@ -189,7 +189,7 @@ void CMPXDbCategory::FindAllL(
         else if (criterion == KMPXMediaGeneralTitle)
             {
 #ifdef RD_MPX_COLLECTION_CACHE
-           
+
             if (aCriteria.ValueText(KMPXMediaGeneralTitle).Length() <= 0)
                 {
                 TUint32 itemId = MPXDbCommonUtil::GenerateUniqueIdL(
@@ -212,14 +212,19 @@ void CMPXDbCategory::FindAllL(
 #endif //RD_MPX_COLLECTION_CACHE
             }
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-          else if (criterion == KMPXMediaGeneralUri)
-                 {  
-                 TUint32 itemId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
-                       aCriteria.ValueText(KMPXMediaGeneralUri), (iCategory != EMPXGenre)));   
-                   HBufC* critStr = PreProcessStringLC(KCriterionCategoryUniqueId);
-                   MPXDbCommonUtil::AddSqlCriterionL(*criteriaArray, *critStr, itemId);
-             CleanupStack::PopAndDestroy(critStr);
-             }
+        else if (criterion == KMPXMediaGeneralUri)
+            {
+            //only Genre and  AbstractAlbum are not case sensitive
+            TBool caseSensitive = ETrue;            
+            if ((iCategory == EMPXGenre) || (iCategory == EMPXAbstractAlbum))
+                 caseSensitive = EFalse;
+                      
+            TUint32 itemId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
+                 aCriteria.ValueText(KMPXMediaGeneralUri), caseSensitive));   
+            HBufC* critStr = PreProcessStringLC(KCriterionCategoryUniqueId);
+            MPXDbCommonUtil::AddSqlCriterionL(*criteriaArray, *critStr, itemId);
+            CleanupStack::PopAndDestroy(critStr);
+            }
         else if (criterion == KMPXMediaGeneralDrive)
             {
             const TDesC& drive(aCriteria.ValueText(KMPXMediaGeneralDrive));
@@ -257,8 +262,12 @@ void CMPXDbCategory::DecrementSongsForCategoryL(
     const TUint32 aId,
     TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages,
-    TBool& aItemExist,
-    TBool /*aMTPInUse*/)
+    TBool& aItemExist
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    ,
+    TBool /*aMTPInUse*/
+#endif //ABSTRACTAUDIOALBUM_INCLUDED
+)
     {
     MPX_FUNC("CMPXDbCategory::DecrementSongsForCategoryL");
 
@@ -472,9 +481,9 @@ TInt CMPXDbCategory::GetSongsCountL(
     }
 
 void CMPXDbCategory::UpdateItemL(
-    TUint32 /*aId*/, 
-    const CMPXMedia& /*aMedia*/, 
-    TInt /*aDriveId*/, 
+    TUint32 /*aId*/,
+    const CMPXMedia& /*aMedia*/,
+    TInt /*aDriveId*/,
     CMPXMessageArray* /*aItemChangedMessages*/)
 	{
 	// nothing

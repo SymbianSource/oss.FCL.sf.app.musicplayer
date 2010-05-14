@@ -37,15 +37,15 @@ LIB : ;
 CLEANLIB : ;
 
 RESOURCE : 
-	mifconv $(ICONTARGETFILENAME) /h$(HEADERFILENAME) \
-		/Ficonlist.txt
+    mifconv $(ICONTARGETFILENAME) /h$(HEADERFILENAME) \
+        /Ficonlist.txt
 
 FREEZE : ;
 
 SAVESPACE : ;
 
 RELEASABLES :
-	@echo $(HEADERFILENAME)&& \
-	@echo $(ICONTARGETFILENAME)
+    @echo $(HEADERFILENAME)&& \
+    @echo $(ICONTARGETFILENAME)
 
 FINAL : ;

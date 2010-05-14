@@ -322,6 +322,12 @@ void TestMpMpxCollectionFrameworkWrapper::testOpenCollection()
     QCOMPARE(mTestPrivate->iCollectionUtility->iOpenCount, 1);
     cleanup();
     init();
+    mTest->openCollection(ECollectionContextArtists);
+    QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(ETrue));
+    QCOMPARE(mTestPrivate->iCollectionUtility->iCountPath, 1);
+    QCOMPARE(mTestPrivate->iCollectionUtility->iOpenCount, 1);
+    cleanup();
+    init();
     mTest->openCollection(ECollectionContextAlbums);
     QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(ETrue));
     QCOMPARE(mTestPrivate->iCollectionUtility->iCountPath, 1);
@@ -331,12 +337,6 @@ void TestMpMpxCollectionFrameworkWrapper::testOpenCollection()
     mTest->openCollection(ECollectionContextPlaylists);
     QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(ETrue));
     QCOMPARE(mTestPrivate->iCollectionUtility->iCountPath, 4);
-    QCOMPARE(mTestPrivate->iCollectionUtility->iOpenCount, 1);
-    cleanup();
-    init();
-    mTest->openCollection(ECollectionContextGenres);
-    QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(ETrue));
-    QCOMPARE(mTestPrivate->iCollectionUtility->iCountPath, 1);
     QCOMPARE(mTestPrivate->iCollectionUtility->iOpenCount, 1);
     cleanup();
     init();
@@ -591,7 +591,7 @@ void TestMpMpxCollectionFrameworkWrapper::testDeleteSongs()
     mTest->deleteSongs(selection);
     QCOMPARE(mTestPrivate->iCollectionUiHelper->iDelete, TBool(ETrue));
     selection.append(3);
-	selection.append(4);
+    selection.append(4);
     selection.append(5);
     mTest->deleteSongs(selection);
     QCOMPARE(mTestPrivate->iCollectionUiHelper->iDelete, TBool(ETrue));
@@ -621,6 +621,15 @@ void TestMpMpxCollectionFrameworkWrapper::testSetShuffle()
     QCOMPARE(mTestPrivate->iPlaybackUtility->iShuffle, 1);
 }
 
+/*!
+ Tests Cancel
+ */
+void TestMpMpxCollectionFrameworkWrapper::testCancel()
+{
+    mTest->cancel();
+    QVERIFY(mTestPrivate->iCollectionUiHelper->iCancel == ETrue);
+    
+}
 /*!
  Tests PreviewItem
  */

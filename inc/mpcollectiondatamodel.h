@@ -19,6 +19,7 @@
 #define MPCOLLECTIONDATAMODEL_H
 
 #include <QAbstractListModel>
+#include "mpmpxcollectionviewdefs.h"
 
 class MpMpxCollectionData;
 class MpCollectionAlbumArtManager;
@@ -32,7 +33,7 @@ class MpCollectionAlbumArtManager;
 class MPDATA_EXPORT MpCollectionDataModel : public QAbstractListModel
 {
     Q_OBJECT
-
+   
 public:
 
     explicit MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent=0 );
@@ -50,18 +51,23 @@ public:
     MpMpxCollectionData *collectionData();
     
 signals:
+
     void orderChanged( int containerId, int itemId, int itemOrdinal, int newOrdinal );
+    void dataReloaded();
 
 public slots:
 
+    void setContext( TCollectionContext context );
     void updateAlbumArt( int index );
     void refreshModel();
+    void reloadData();
 
 private:
 
-    MpMpxCollectionData             *mCollectionData;
-	MpCollectionAlbumArtManager     *mAlbumArtManager;  // Own
+    MpMpxCollectionData             *mCollectionData;       // Not own
+    MpCollectionAlbumArtManager     *mAlbumArtManager;      // Own
     int                             mRowCount;
+    int                             mAlbumIndexOffset;
 
 };
 

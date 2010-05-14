@@ -11,11 +11,12 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Unit test for mpdetailsviewplugin
 #
 
 TEMPLATE = app
 CONFIG += qtestlib \
+					symbian_test \
     hb
 TARGET = 
 

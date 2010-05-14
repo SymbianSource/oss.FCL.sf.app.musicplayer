@@ -29,7 +29,7 @@
 #include "mpmainwindow.h"
 #include "mpviewbase.h"
 #include "musicservices.h"
-#include "mpengine.h"
+#include "mpenginefactory.h"
 #include "mptrace.h"
 
 /*!
@@ -50,6 +50,7 @@ MpMainWindow::MpMainWindow()
       mPlaybackViewPlugin(0),
       mSettingsViewPlugin(0),
       mDetailsViewPlugin(0),
+      mMediaWallViewPlugin(0),
       mCurrentViewPlugin(0),
       mVerticalViewType( CollectionView ),
       mMusicServices(0)
@@ -83,8 +84,11 @@ MpMainWindow::~MpMainWindow()
         mDetailsViewPlugin->destroyView();
         delete mDetailsViewPlugin;
     }
-
-    MpEngine::instance()->close();
+    if (mMediaWallViewPlugin) {
+        mMediaWallViewPlugin->destroyView();
+        delete mMediaWallViewPlugin;
+    }    
+    MpEngineFactory::close();
 
 
     TX_EXIT
@@ -128,20 +132,26 @@ void MpMainWindow::initialize()
         XQServiceUtil::toBackground( false );
     }
 
-    MpEngine *engine = MpEngine::instance();
-
     if ( !mMusicServices ) {
-        engine->initialize(MpCommon::DefaultView);
-      
-        loadView(CollectionView);
-        activateView(CollectionView);
-
+        MpEngineFactory::createSharedEngine();
+        if ( orientation() == Qt::Vertical ) {
+            loadView(CollectionView);
+            activateView(CollectionView);
+            loadView(MediaWallView);
+        }
+        else {
+            loadView(MediaWallView);
+            activateView(MediaWallView);
+            loadView(CollectionView);
+        }
         connect(this, SIGNAL( orientationChanged( Qt::Orientation ) ), SLOT( switchView( Qt::Orientation ) ) );
-        connect( engine, SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
-        engine->checkForSystemEvents();
+        connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
+        MpEngineFactory::sharedEngine()->checkForSystemEvents();
         loadView( PlaybackView );
     }
-    setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
+    else {
+        setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
+    }
     TX_EXIT
 }
 
@@ -151,13 +161,16 @@ void MpMainWindow::initialize()
 void MpMainWindow::handleCommand( int commandCode )
 {
     TX_ENTRY_ARGS("commandCode=" << commandCode );
-
+    
     switch ( commandCode ) {
         case MpCommon::Exit:
             if ( mCurrentViewPlugin ) {
                 disconnectView();
             }
             qApp->quit();
+            break;
+        case MpCommon::SendToBackground:
+            lower();
             break;
         case MpCommon::ActivateCollectionView:
             activateView(CollectionView);
@@ -183,7 +196,9 @@ void MpMainWindow::switchView( Qt::Orientation orientation )
         if (orientation == Qt::Vertical) {
             activateView( mVerticalViewType );   
         }
-
+        else {
+            activateView(MediaWallView);
+        }
 }
 
 /*!
@@ -199,7 +214,10 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     if ( mCurrentViewPlugin ) {     
         disconnectView();
         mCurrentViewPlugin->deactivateView();
-        if ( viewType  == CollectionView && mCurrentViewPlugin == mPlaybackViewPlugin ||
+        if ( viewType  == MediaWallView || mCurrentViewPlugin == mMediaWallViewPlugin ) {
+            doTransition = false;
+        }
+        else if ( viewType  == CollectionView && mCurrentViewPlugin == mPlaybackViewPlugin ||
                   viewType  == PlaybackView && mCurrentViewPlugin == mDetailsViewPlugin ||
                   viewType  == PlaybackView && mCurrentViewPlugin == mSettingsViewPlugin ) {
             transitionFlags |= Hb::ViewSwitchUseBackAnim;
@@ -212,9 +230,9 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        
-        mVerticalViewType = viewType;
-        
+        if ( viewType != MediaWallView  ) {
+            mVerticalViewType = viewType;
+        }
         addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );
         setCurrentView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) , doTransition , transitionFlags);
         mCurrentViewPlugin->activateView();
@@ -275,17 +293,35 @@ void MpMainWindow::handleLibraryUpdated()
 /*!
  Reimp.
  */
+void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key()) {
+    case 16842754:
+    case Qt::Key_Hangup:
+        if (orientation () == Qt::Vertical) {
+            setOrientation(Qt::Horizontal, false);
+        }
+        else {
+            setOrientation(Qt::Vertical, false);
+        }
+        break;
+    case 16842753:
+    case Qt::Key_Call:         
+        unsetOrientation(false);
+        break;
+    default:
+        HbMainWindow::keyPressEvent (event);
+        break;          
+    }
+}
 
-
-void MpMainWindow::initializeServiceView( TUid hostUid ){
-    
-    MpEngine *engine = MpEngine::instance();
-        
+void MpMainWindow::initializeServiceView( TUid hostUid )
+{
     switch (mMusicServices->currentService()) {
  
     case MusicServices::EUriFetcher:
         {
-            engine->initialize( MpCommon::FetchView, hostUid );
+            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Fetch );
             loadView( CollectionView, MpCommon::FetchView );
             MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
             connect(collectionView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
@@ -293,22 +329,22 @@ void MpMainWindow::initializeServiceView( TUid hostUid ){
             loadView(PlaybackView, MpCommon::FetchView );
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
             connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
-            connect( engine, SIGNAL( libraryUpdated() ), this, SLOT( handleLibraryUpdated() ) );
-            engine->checkForSystemEvents();
+            connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), this, SLOT( handleLibraryUpdated() ) );
+            MpEngineFactory::sharedEngine()->checkForSystemEvents();
             break;
         }
     case MusicServices::EPlayback:
         {
-            engine->initialize( MpCommon::EmbeddedView, hostUid );
+            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Embedded );
             loadView(PlaybackView, MpCommon::EmbeddedView );   
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
-            connect(mMusicServices, SIGNAL(playReady(QString)), engine, SLOT(playEmbedded(QString)));
-            connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), engine, SLOT(playEmbedded(const XQSharableFile&)));
+            connect(mMusicServices, SIGNAL(playReady(QString)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(QString)));
+            connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(const XQSharableFile&)));
             connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
             activateView( PlaybackView );
             break;
         }
-        default:
+    default:
         Q_ASSERT_X(false, "MpMainWindow::initializeServiceView", "undefined service");
         break;
     }
@@ -338,7 +374,10 @@ MpxViewPlugin* MpMainWindow::loadView( ViewType type, MpCommon::MpViewMode viewM
         pluginUid = MpCommon::KDetailsViewUid;
         plugin = &mDetailsViewPlugin;
         break;
-
+    case MediaWallView:
+        pluginUid = MpCommon::KMediaWallViewUid;
+        plugin = &mMediaWallViewPlugin;
+        break;
     default:
         Q_ASSERT_X(false, "MpMainWindow::loadView", "undefined view type");
         break;

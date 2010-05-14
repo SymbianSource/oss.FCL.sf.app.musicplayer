@@ -11,8 +11,9 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Unit test for mpdetailsviewplugin
 #
+
 
 TEMPLATE = subdirs
 

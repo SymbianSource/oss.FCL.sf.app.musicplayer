@@ -1,0 +1,36 @@
+/* Info */
+ul.info-list {
+	/*padding-top:5px;
+	padding-bottom:5px;*/	
+}
+
+ul.info-list li {
+    line-height: 32px;
+    padding: 2px 0;	
+}
+
+.info-list .description .artist {
+    padding-top:10px;
+	color:#ccc;
+}
+
+.info-list .description .title {
+
+}
+
+
+.info-list .description {	
+	display:inline-block;
+    padding-left:20px;
+    vertical-align:top;
+	padding-top:10px;
+}
+
+
+ul.info-list li.music .icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    padding-left: 36px;
+    background: transparent url(../images/CheckButton.png) left top no-repeat;
+}

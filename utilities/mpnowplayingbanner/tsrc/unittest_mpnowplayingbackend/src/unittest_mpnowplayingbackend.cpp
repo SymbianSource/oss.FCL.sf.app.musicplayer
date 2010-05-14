@@ -17,8 +17,6 @@
 
 #include <QSignalSpy>
 #include <QMetaType>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
 
 #include "unittest_mpnowplayingbackend.h"
 #include "mpcommondefs.h"
@@ -35,19 +33,20 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
 
     TestMpNowPlayingBackEnd tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpnowplayingbackend.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpnowplayingbackend.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpNowPlayingBackEnd::TestMpNowPlayingBackEnd()

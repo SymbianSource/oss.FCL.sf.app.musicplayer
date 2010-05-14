@@ -31,6 +31,13 @@ class MMPXDbAlbumObserver
     public:
         virtual TInt HandleIsUnknownArtistL(TUint32 aId) = 0;
         virtual TUint32 HandleArtistForAlbumL( const TUint32 aId ) = 0;
+        /**
+        * HandleAlbumartForAlbumL.
+        * @param aId, The album ID.
+        * @param aArt, The albumart uri.
+        * @returns alternative albumart retrieved in the specified Album.
+        */
+        virtual HBufC* HandleAlbumartForAlbumL( const TUint32 aId, TPtrC aArt ) = 0;
     };
 /**
 * Responsible for managing all music databases
@@ -95,42 +102,51 @@ class CMPXDbAlbum :
         *                  category was deleted
         * @param aItemExist Out parameter, ETrue if the category is not deleted after the delete,
         *        EFalse otherwise
-		* @param aArtist: The ID of the artist
+        * @param aArtist: The ID of the artist
+        * @param aArt: The albumart uri
         */
         void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
-            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TUint32 aArtist);
+            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TUint32 aArtist, const TDesC& aArt );
 
-		/**
-	* Gets the details for all category items.
-	* @param aAttrs attributes to be returned
-	* @param aMediaArray returns the requested attributes for all items
-	*/
-		void GetAllCategoryItemsL(const TArray<TMPXAttribute>& aAttrs,
-			CMPXMediaArray& aMediaArray);
+        /**
+        * Gets the details for all category items.
+        * @param aAttrs attributes to be returned
+        * @param aMediaArray returns the requested attributes for all items
+        */
+        void GetAllCategoryItemsL(const TArray<TMPXAttribute>& aAttrs,
+            CMPXMediaArray& aMediaArray);
 
-		/**
-	* Update a category item.
-	* @param aId: The ID of the category to update
-	* @param aMedia: The media data
-	* @param aDriveId: The Drive Id the name (category) belongs
-	* @param aItemChangedMessages: if valid on return contains a updated message if the
-    *        category was updated
-	*/
-		void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+        /**
+        * Gets the details for all category items.
+        * @param aAttrs attributes to be returned
+        * @param aMediaArray returns the requested attributes for all items
+        */
+        void GetAllCategoryItemsMediaWallL(const TArray<TMPXAttribute>& aAttrs,
+            CMPXMediaArray& aMediaArray);
 
-	public:
-		/**
-	* Get albums count for a specified artist
-	* @param aId: The ID of the artist
-	*/
-	    TInt GetAlbumsCountForArtistL(TUint32 aArtistId);
+        /**
+        * Update a category item.
+        * @param aId: The ID of the category to update
+        * @param aMedia: The media data
+        * @param aDriveId: The Drive Id the name (category) belongs
+        * @param aItemChangedMessages: if valid on return contains a updated message if the
+        *        category was updated
+        */
+        void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
 
-		/**
-	* Get songs count for a specified album and a specified artist
-	* @param aArtistId: The ID of the artist
-	* @param aAlbumId: The ID of the album
-	*/
-		TInt GetSongsCountInAlbumMatchingArtistL(TUint32 aArtistId, TUint32 aAlbumId);
+    public:
+        /**
+        * Get albums count for a specified artist
+        * @param aId: The ID of the artist
+        */
+        TInt GetAlbumsCountForArtistL(TUint32 aArtistId);
+
+        /**
+        * Get songs count for a specified album and a specified artist
+        * @param aArtistId: The ID of the artist
+        * @param aAlbumId: The ID of the album
+        */
+        TInt GetSongsCountInAlbumMatchingArtistL(TUint32 aArtistId, TUint32 aAlbumId);
 
     private:
         /**
@@ -149,13 +165,20 @@ class CMPXDbAlbum :
         * @param aValues values of each field of Album table
         * @return a string containing the selection criteria. The ownership is passed to the caller.
         */
-		void GenerateAlbumFieldsValuesL(const CMPXMedia& aMedia,
-			CDesCArray& aFields, CDesCArray& aValues);
+        void GenerateAlbumFieldsValuesL(const CMPXMedia& aMedia,
+            CDesCArray& aFields, CDesCArray& aValues);
 
 
-		TBool IsUnknownArtistL(TUint32 aId);
+        TBool IsUnknownArtistL(TUint32 aId);
 
-		TUint32 ArtistForAlbumL(const TUint32 aId);
+        TUint32 ArtistForAlbumL(const TUint32 aId);
+        /**
+        * Get the Albumart of song which belongs to the specified Album.
+        * @param aId The ID of the album
+        * @param aArt albumart with the song is deleted.
+        * @returns alternative albumart retrieved in the specified Album.
+        */
+        HBufC* AlbumartForAlbumL(const TUint32 aId, TPtrC aArt);
 
     private:    // from MMPXTable
 

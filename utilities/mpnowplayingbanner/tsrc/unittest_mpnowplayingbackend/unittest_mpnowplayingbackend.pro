@@ -16,8 +16,10 @@
 
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-TARGET = 
+CONFIG += qtestlib
+CONFIG += symbian_test
+TARGET = unittest_mpnowplayingbackend
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \

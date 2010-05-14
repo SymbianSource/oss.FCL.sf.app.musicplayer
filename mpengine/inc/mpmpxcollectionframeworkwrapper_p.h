@@ -24,7 +24,7 @@
 
 #include "mpmpxisolatedcollectionhelper.h" //MMpMpxIsolatedCollectionHelperObserver
 #include "mpmpxcollectionviewdefs.h"
-#include "mpcommondefs.h"
+
 
 class MMPXCollectionUtility;
 class MMPXCollectionUiHelper;
@@ -37,14 +37,30 @@ class QStringList;
 
 class MpMpxCollectionFrameworkWrapperPrivate : public MMPXCollectionObserver,
                                      public MMPXCHelperObserver,
-                                     public MMpMpxIsolatedCollectionHelperObserver
+                                     public MMpMpxIsolatedCollectionHelperObserver,
+                                     public MMPXCollectionFindObserver
 {
+
+private:
+    //Keep in sync with TMCBrowseType in mpxcollectiondb.hrh
+    enum MpBrowseType{
+        BrowseAll = 0,
+        BrowsePlaylist,
+        BrowseArtist,
+        BrowseAlbum,
+        BrowsePodcasts,
+        BrowseGenre,
+        BrowseComposer,        
+        BrowseAlbumSong, 
+        BrowseAlbumMediaWall 
+    };
+    
 public:
 
     explicit MpMpxCollectionFrameworkWrapperPrivate( MpMpxCollectionFrameworkWrapper *wrapper );
     virtual ~MpMpxCollectionFrameworkWrapperPrivate();
 
-    void init( MpCommon::MpViewMode viewMode, TUid hostUid );
+    void init( TUid hostUid );
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
     void reopenCollection();
@@ -61,7 +77,12 @@ public:
     void openIsolatedCollection( TCollectionContext context );
     void releaseIsolatedCollection();
     void reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal );
-
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData );
+    void setRepeatFeatureEnabled( bool enable );
+    void setShuffleFeatureEnabled( bool enable );
+	void cancel();
+	
     MpMpxCollectionData *collectionData();
 
 private:
@@ -74,7 +95,8 @@ private:
     void HandleCollectionMediaL( const CMPXMedia& aMedia, TInt aError );
     void HandleOperationCompleteL( TCHelperOperation aOperation, TInt aErr, void* aArgument );
     void HandleIsolatedOpenL( const CMPXMedia& aEntries, TInt aError );
-    
+    void HandleFindAllL( const CMPXMedia& aResults, TBool aComplete, TInt aError );
+
     void DoInitL();
     void DoOpenCollectionL( TCollectionContext aContext );
     void DoOpenCollectionItemL( TInt aIndex );
@@ -87,17 +109,24 @@ private:
     void DoSaveToPlaylistL( int playlistIndex, QList<int> &selection );
     
     void DoDeleteSongsL( QList<int> &selection );
+    void DoDeleteAlbumSongsL( QList<int> &selection );
     void DoRenamePlaylistL( QString &newName, int index );
     void DoRenamePlaylistL( QString &newname );
     void DoRenamePlaylistL( TMPXItemId id, QString &newName );
     void DoSaveToCurrentPlaylistL( QList<int> &selection, MpMpxCollectionData *collectionData );
     void DoSetShuffleL( bool active );
-    void DoPreviewItemL( int index );
+    void DoPreviewSongL( int index );
+    void DoPreviewAlbumSongL( int index );
     void DoOpenIsolatedCollectionL( TCollectionContext context );
     void DoReorderPlaylistL( int playlistId, int songId, int originalOrdinal, int newOrdinal );
+    void DoFindAlbumSongsL( int index );
+    void DoPlayAlbumSongsL( int albumIndex, int songIndex, MpMpxCollectionData* collectionData );
+
     void DoHandleCollectionMessageL( const CMPXMessage& aMsg );
+    void DoHandleItemChangedMessageL( const CMPXMessage& aMsg );
 
     void PreparePlaylistMediaL( CMPXMedia& aMedia, QList<int> &selection, MpMpxCollectionData *collectionData );
+    void createPlaybackUtilityL();
 
 private:
 
@@ -113,8 +142,10 @@ private:
     TBool                             iFirstIncrementalOpen;
     CMPXMedia                         *iUserPlaylists;          // Owned
     TInt                              iNumItemsAdded;
-    MpCommon::MpViewMode              iViewMode;
     TUid                              mHostUid;
+    TBool                             iRepeatFeature;
+    TBool                             iShuffleFeature;
+    TBool                             iReopen;
 
 };
 

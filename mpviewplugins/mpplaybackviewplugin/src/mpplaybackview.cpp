@@ -15,12 +15,13 @@
 *
 */
 
-#include <qpainter>
-#include <qtgui>
+#include <QPainter>
+#include <QtGui>
 
 #include <hbmenu.h>
 #include <hbinstance.h>
 #include <hbtoolbar.h>
+#include <hbtoolbutton.h>
 #include <hbaction.h>
 #include <hbicon.h>
 #include <QTranslator>
@@ -28,7 +29,7 @@
 
 #include "mpplaybackview.h"
 #include "mpplaybackwidget.h"
-#include "mpengine.h"
+#include "mpenginefactory.h"
 #include "mpplaybackdata.h"
 #include "mpsettingsmanager.h"
 #include "mpcommondefs.h"
@@ -60,15 +61,18 @@ MpPlaybackView::MpPlaybackView()
     : mMpEngine( 0 ),
       mPlaybackData( 0 ),
       mPlaybackWidget( 0 ),
-      mEqualizerWidget( new MpEqualizerWidget() ),
-      mNavigationBack( 0 ),
+      mEqualizerWidget( 0 ),
+      mSoftKeyBack( 0 ),
       mActivated( false ),
       mPlayIcon( 0 ),
       mPauseIcon( 0 ),
       mShuffleOnIcon( 0 ),
       mShuffleOffIcon( 0 ),
       mMpTranslator( 0 ),
-      mCommonTranslator( 0 )
+      mCommonTranslator( 0 ),
+      mTimer(0),
+      mSeeking(false)
+
 {
     TX_LOG
 }
@@ -79,7 +83,7 @@ MpPlaybackView::MpPlaybackView()
 MpPlaybackView::~MpPlaybackView()
 {
     TX_ENTRY
-    delete mNavigationBack;
+    delete mSoftKeyBack;
     delete mPlayIcon;
     delete mPauseIcon;
     delete mShuffleOnIcon;
@@ -119,28 +123,35 @@ void MpPlaybackView::initializeView()
 
     mWindow = mainWindow();
 
-    mNavigationBack = new HbAction( Hb::BackNaviAction, this );
-    connect( mNavigationBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    mSoftKeyBack = new HbAction( Hb::BackNaviAction, this );
+    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
-    mMpEngine = MpEngine::instance();
+    mMpEngine = MpEngineFactory::sharedEngine();
     mPlaybackData = mMpEngine->playbackData();
     connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
              this, SLOT( playbackStateChanged() ) );
 
     mPlaybackWidget = new MpPlaybackWidget( mPlaybackData );
     connect( mPlaybackWidget, SIGNAL( setPlaybackPosition( int ) ), mMpEngine, SLOT( setPosition( int ) ) );
-
+    //repeat should not be displayed on fetcher or embedded.
+    mRepeat = mViewMode == MpCommon::DefaultView ? MpSettingsManager::repeat() : false;
+    mPlaybackWidget->repeatChanged( mRepeat );
     setWidget( mPlaybackWidget );
     setupMenu();
     setupToolbar();
-
-    mEqualizerWidget->prepareDialog();
-
-    // Observe changes in settings.
-    connect( MpSettingsManager::instance(), SIGNAL( shuffleChanged( bool ) ),
-             this, SLOT( shuffleChanged( bool ) ) );
-    connect( MpSettingsManager::instance(), SIGNAL( repeatChanged( bool ) ),
-             this, SLOT( repeatChanged( bool ) ) );
+    
+    //Connect FF and RW buttons when view (toolbar) is ready
+    connect ( mWindow, SIGNAL( viewReady() ), this, SLOT( connectButtons() ) );
+    
+    if ( mViewMode == MpCommon::DefaultView ) {
+        mEqualizerWidget = new MpEqualizerWidget();
+        mEqualizerWidget->prepareDialog();
+        // Observe changes in settings.
+        connect( MpSettingsManager::instance(), SIGNAL( shuffleChanged( bool ) ),
+                 this, SLOT( shuffleChanged( bool ) ) );
+        connect( MpSettingsManager::instance(), SIGNAL( repeatChanged( bool ) ),
+                 this, SLOT( repeatChanged( bool ) ) );
+    }
 
     TX_EXIT
 }
@@ -152,7 +163,7 @@ void MpPlaybackView::activateView()
 {
     TX_ENTRY
     mActivated = true;
-    setNavigationAction( mNavigationBack );
+    setNavigationAction( mSoftKeyBack );
     TX_EXIT
 }
 
@@ -162,7 +173,7 @@ void MpPlaybackView::activateView()
 void MpPlaybackView::deactivateView()
 {
     TX_ENTRY
-    if ( mEqualizerWidget->isActive() ) {
+    if ( mEqualizerWidget && mEqualizerWidget->isActive() ) {
         mEqualizerWidget->close();
     }
 
@@ -222,27 +233,9 @@ void MpPlaybackView::exit()
 void MpPlaybackView::playbackStateChanged()
 {
     TX_ENTRY
-    switch ( mPlaybackData->playbackState() ) {
-        case MpPlaybackData::Playing:
-            TX_LOG_ARGS( "MpPlaybackData::Playing" )
-            mPlayPauseAction->setIcon( *mPauseIcon );
-            break;
-        case MpPlaybackData::Paused:
-            TX_LOG_ARGS( "MpPlaybackData::Paused" )
-            mPlayPauseAction->setIcon( *mPlayIcon );
-            break;
-        case MpPlaybackData::Stopped:
-            TX_LOG_ARGS( "MpPlaybackData::Paused" )
-            if ( mViewMode == MpCommon::FetchView ) {
-                back();
-            }
-            else {
-                // Treat it like pause in default mode
-                mPlayPauseAction->setIcon( *mPlayIcon );
-            }
-            break;
-        default:
-            break;
+    updatePlayPauseIcon();
+    if ( MpPlaybackData::Stopped == mPlaybackData->playbackState() && mViewMode == MpCommon::FetchView ) {
+          back();
     }
     TX_EXIT
 }
@@ -291,6 +284,7 @@ void MpPlaybackView::repeatChanged( bool repeat )
 {
     mRepeat = repeat;
     mRepeatAction->setText( mRepeat ?  hbTrId( "txt_mus_opt_repeat_off" ) : hbTrId( "txt_mus_opt_repeat_on" ) );
+    mPlaybackWidget->repeatChanged( repeat );
 }
 
 /*!
@@ -329,9 +323,9 @@ void MpPlaybackView::setupMenu()
 void MpPlaybackView::setupToolbar()
 {
     TX_ENTRY
-    HbToolBar *toolBar = this->toolBar();
-    toolBar->setOrientation( Qt::Horizontal );
-    QActionGroup *actionsGroup = new QActionGroup( toolBar );
+    HbToolBar *myToolBar = toolBar();
+    myToolBar->setOrientation( Qt::Horizontal );
+    QActionGroup *actionsGroup = new QActionGroup( myToolBar );
 
     if ( mViewMode == MpCommon::DefaultView || mViewMode == MpCommon::EmbeddedView ) {
         mShuffleOnIcon = new HbIcon( "qtg_mono_shuffle" );
@@ -349,44 +343,38 @@ void MpPlaybackView::setupToolbar()
             mShuffleAction->setEnabled( false );
         }
         
-        toolBar->addAction( mShuffleAction );
+        myToolBar->addAction( mShuffleAction );
 
         HbAction *action = new HbAction( actionsGroup );
-        action->setIcon( HbIcon( "qtg_mono_previous" ) );
+        action->setIcon( HbIcon( "qtg_mono_seek_previous" ) );
         action->setCheckable( false );
-        connect( action, SIGNAL( triggered( bool ) ),
-                 mMpEngine, SLOT( skipBackward() ) );
-        toolBar->addAction( action );
-
+        action->setObjectName("previous");
+        myToolBar->addAction( action );
+        
         mPlayPauseAction = new HbAction( actionsGroup );
         mPlayIcon = new HbIcon( "qtg_mono_play" );
         mPauseIcon = new HbIcon( "qtg_mono_pause" );
-        mPlayPauseAction->setIcon( *mPlayIcon );
+        updatePlayPauseIcon();
         mPlayPauseAction->setCheckable( false );
         connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
                  mMpEngine, SLOT( playPause() ) );
-        toolBar->addAction( mPlayPauseAction );
+        myToolBar->addAction( mPlayPauseAction );
 
         action = new HbAction( actionsGroup );
-        action->setIcon( HbIcon( "qtg_mono_next" ) );
+        action->setIcon( HbIcon( "qtg_mono_seek_next" ) );
         action->setCheckable( false );
-        connect( action, SIGNAL( triggered( bool ) ),
-                 mMpEngine, SLOT( skipForward() ) );
-        toolBar->addAction( action );
+        action->setObjectName("next");
+        myToolBar->addAction( action );
 
         HbIcon icon( "qtg_mono_info" );
         action = new HbAction( actionsGroup );
         action->setIcon( icon );
         action->setCheckable( false );
-        //TODO: Remove once song details takes hostUid from engine
-        if ( mViewMode == MpCommon::DefaultView ) {
-            connect( action, SIGNAL( triggered( bool ) ),
-                     this, SLOT( flip() ) );
-        }
-        else {
-            action->setEnabled( false );
-        }
-        toolBar->addAction( action );
+
+        connect( action, SIGNAL( triggered( bool ) ),
+                 this, SLOT( flip() ) );
+
+        myToolBar->addAction( action );
     }
     else {
         // Fetch mode
@@ -395,22 +383,162 @@ void MpPlaybackView::setupToolbar()
         action->setCheckable( false );
         connect( action, SIGNAL( triggered( bool ) ),
                  this, SLOT( handleSongSelected() ) );
-        toolBar->addAction( action );
+        myToolBar->addAction( action );
 
         mPlayPauseAction = new HbAction( actionsGroup );
         mPlayIcon = new HbIcon( "qtg_mono_play" );
         mPauseIcon = new HbIcon( "qtg_mono_pause" );
-        mPlayPauseAction->setIcon( *mPlayIcon );
+        updatePlayPauseIcon();
         mPlayPauseAction->setCheckable( false );
         connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
                  mMpEngine, SLOT( playPause() ) );
-        toolBar->addAction( mPlayPauseAction );
+        myToolBar->addAction( mPlayPauseAction );
     }
     
     
     TX_EXIT
 }
 
+/*!
+ Updates the play pause icon on the toolbar base on playback state.
+ */
+void MpPlaybackView::updatePlayPauseIcon()
+{
+    TX_ENTRY
+    switch ( mPlaybackData->playbackState() ) {
+        case MpPlaybackData::Playing:
+        case MpPlaybackData::NotPlaying:
+            TX_LOG_ARGS( "MpPlaybackData::Playing" )
+            mPlayPauseAction->setIcon( *mPauseIcon );
+            break;
+        case MpPlaybackData::Paused:
+        case MpPlaybackData::Stopped:
+            TX_LOG_ARGS( "MpPlaybackData::Paused" )
+            mPlayPauseAction->setIcon( *mPlayIcon );
+            break;
+
+        default:
+            break;
+    }
+    TX_EXIT
+}
+
+/*!
+ start rewind long press detection
+ */
+void MpPlaybackView::startRewindTimer()
+{
+    if(mTimer){
+        delete mTimer;
+        mTimer = 0;
+    }
+    mTimer = new QTimer(this);
+    mTimer->setSingleShot(true);
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(startSeekRewind()));
+    mTimer->start(600);    
+}
+
+/*!
+ start fast forward long press detection
+ */
+void MpPlaybackView::startForwardTimer()
+{
+    if(mTimer){
+        delete mTimer;
+        mTimer = 0;
+    }
+    mTimer = new QTimer(this);
+    mTimer->setSingleShot(true);
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(startSeekForward()));
+    mTimer->start(600);      
+}
+
+/*!
+ start backward seeking
+ */
+void MpPlaybackView::startSeekRewind()
+{
+    mMpEngine->startSeekBackward();
+    mSeeking = true;
+}
+
+/*!
+ start forward seeking
+ */
+void MpPlaybackView::startSeekForward()
+{
+    mMpEngine->startSeekForward();
+    mSeeking = true;
+}
+
+/*!
+ end backward seeking or skip backward
+ */
+void MpPlaybackView::endRewind()
+{
+    if(mTimer){
+        mTimer->stop();
+        delete mTimer;
+        mTimer = 0;
+    }
+    if( mSeeking ) {
+        mMpEngine->stopSeeking();
+    }
+    else {
+        mMpEngine->skipBackward();
+    }
+    mSeeking = false;
+}
+
+/*!
+ end forward seeking or skip forward
+ */
+void MpPlaybackView::endForward()
+{
+    if(mTimer){
+        mTimer->stop();
+        delete mTimer;
+        mTimer = 0;
+    }
+    if( mSeeking ) {
+        mMpEngine->stopSeeking();
+    }
+    else {
+        mMpEngine->skipForward();
+    }
+    mSeeking = false;
+}
+
+/*!
+ Slot to connect seek forward and backward toolbar buttons
+ */
+void MpPlaybackView::connectButtons()
+{
+    
+    HbToolBar *myToolBar = toolBar();
+    QGraphicsLayout *layout = myToolBar->layout();
+    if( layout ) {
+        int count = layout->count();
+        for ( int i = 0; i < count; i++ ) {
+            HbToolButton *button = dynamic_cast<HbToolButton *>( layout->itemAt(i) );
+            QString name = button->action()->objectName();
+            
+            if ( name == "previous" ) {
+                connect( button, SIGNAL( pressed() ),
+                         this, SLOT( startRewindTimer() ) );
+                connect( button, SIGNAL( released() ),
+                         this, SLOT( endRewind() ) );
+            }
+            if ( name == "next" ) {
+                connect( button, SIGNAL( pressed() ),
+                         this, SLOT( startForwardTimer() ) );
+                connect( button, SIGNAL( released() ),
+                         this, SLOT( endForward() ) );
+                disconnect ( mWindow, SIGNAL( viewReady() ), this, SLOT( connectButtons() ) );
+            }
+        }
+    }
+}
 /*!
  Slot to be called to activate equalizer dialog.
  */

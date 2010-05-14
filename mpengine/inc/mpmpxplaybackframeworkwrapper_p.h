@@ -20,7 +20,6 @@
 
 #include <e32base.h>
 #include <mpxplaybackobserver.h>
-#include "mpmpxcollectionviewdefs.h"
 #include "mpcommondefs.h"
 
 
@@ -40,17 +39,23 @@ public:
     explicit MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *wrapper );
     virtual ~MpMpxPlaybackFrameworkWrapperPrivate();
 
-    void init( MpCommon::MpViewMode viewMode, TUid hostUid );
+    void init( TUid hostUid );
 
     void play( QString aFilename );
     void play( const XQSharableFile& file );
     void playPause();
     void stop();
     void skipForward();
+    void startSeekForward();
+    void stopSeeking();
     void skipBackward();
+    void startSeekBackward();
     void setPosition( int value );
     void setShuffle( bool mode );
     void setRepeat( bool mode );
+    void setBalance( int balance );
+    void applyAudioEffects();
+    void applyEqualizer();
 
     MpPlaybackData *playbackData();
 
@@ -79,7 +84,6 @@ private:
     MMPXPlaybackUtility                 *iPlaybackUtility;     // Own
     CMPXMedia                           *iMedia;               // Own
     MpPlaybackData                      *iPlaybackData;        // Own
-    MpCommon::MpViewMode                iViewMode;
     TUid                                mHostUid;
     
 };

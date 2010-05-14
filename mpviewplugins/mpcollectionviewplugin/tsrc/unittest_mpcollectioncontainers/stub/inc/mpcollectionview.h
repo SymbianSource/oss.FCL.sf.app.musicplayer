@@ -55,9 +55,11 @@ public:
 
 
 public slots:
-   
+
     void openIndex( int index );
     void openContextMenu( int index, const QPointF &coords );
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex );
 
 public:
 
@@ -76,8 +78,8 @@ public:
     bool                            mEffectOnGoing;
 
     HbMainWindow                    *mWindow;               // Not own
-    HbAction                        *mNavigationQuit;       // Not own
-    HbAction                        *mNavigationBack;       // Not own
+    HbAction                        *mSoftKeyQuit;          // Not own
+    HbAction                        *mSoftKeyBack;          // Not own
 
     MpCollectionDocumentLoader      *mDocumentLoader;       // Own
     HbWidget                        *mMainContainer;        // Own

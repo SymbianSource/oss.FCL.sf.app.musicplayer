@@ -22,6 +22,8 @@
 #include <QObject>
 #include <QIcon>
 
+#include "mpcommondefs.h"
+
 class MpMpxCollectionData;
 
 class MpCollectionAlbumArtManager : public QObject
@@ -41,6 +43,7 @@ public:
     const QIcon* albumArt( int index );
     void cacheFirstScreen();
     void cancel();
+    void setThumbnailSize( MpCommon::MpThumbType type );
 
 signals:
 
@@ -48,9 +51,10 @@ signals:
 
 public:
 
-    QIcon       *mIcon;
-    int         mAlbumArtCount;
-    int         mCacheAlbumArtCount;
+    QIcon                   *mIcon;
+    int                     mAlbumArtCount;
+    int                     mCacheAlbumArtCount;
+    MpCommon::MpThumbType   mThumbType;
 
 };
 

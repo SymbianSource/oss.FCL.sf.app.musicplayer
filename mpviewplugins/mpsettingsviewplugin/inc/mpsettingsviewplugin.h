@@ -18,7 +18,7 @@
 #ifndef MPSETTINGSVIEWPLUGIN_H
 #define MPSETTINGSVIEWPLUGIN_H
 
-#include <qobject>
+#include <QObject>
 #include <mpxviewpluginqt.h>
 
 //forward declartions

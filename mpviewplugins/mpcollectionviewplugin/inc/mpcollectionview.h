@@ -69,11 +69,12 @@ public slots:
     void openArtists();
     void openAlbums();
     void openPlaylists();
-    void openGenres();
     void find();
     void openMusicStore();
 
     void openIndex( int index );
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex );
 
     void back();
     void exit();
@@ -134,8 +135,8 @@ private:
     bool                            mBannerAttached;
 
     HbMainWindow                    *mWindow;               // Not own
-    HbAction                        *mNavigationQuit;       // Not own
-    HbAction                        *mNavigationBack;       // Not own
+    HbAction                        *mSoftKeyQuit;          // Not own
+    HbAction                        *mSoftKeyBack;          // Not own
 
     MpCollectionDocumentLoader      *mDocumentLoader;       // Own
     HbWidget                        *mMainContainer;        // Own

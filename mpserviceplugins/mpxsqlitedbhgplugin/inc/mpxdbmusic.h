@@ -245,10 +245,11 @@ class CMPXDbMusic :
         * @param aComposerId returns the artist ID
         * @param aAbstractAlbumId returns the AbstractAlbum ID
         * @param aDriveId returns the song drive
+        * @param aArt returns the albumart uri
         * @return song URI. The ownership is transferred.
         */
         HBufC* GetSongInfoL(TUint32 aSongId, TUint32& aArtistId, TUint32& aAlbumId,
-            TUint32& aGenreId, TUint32& aComposerId, TUint32& aAbstractAlbumId, TInt& aDriveId);
+            TUint32& aGenreId, TUint32& aComposerId, TUint32& aAbstractAlbumId, TInt& aDriveId, HBufC*& aArt);
 #else 
         /**
         * Get the drive and category IDs for a specified song
@@ -258,10 +259,11 @@ class CMPXDbMusic :
         * @param aGenreId returns the artist ID
         * @param aComposerId returns the artist ID
         * @param aDriveId returns the song drive
+        * @param aArt returns the albumart uri
         * @return song URI. The ownership is transferred.
         */
         HBufC* GetSongInfoL(TUint32 aSongId, TUint32& aArtistId, TUint32& aAlbumId,
-            TUint32& aGenreId, TUint32& aComposerId, TInt& aDriveId);
+            TUint32& aGenreId, TUint32& aComposerId, TInt& aDriveId, HBufC*& aArt);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Get the song Id, title, URI, and general flags from the given song Id and/or URI
@@ -527,6 +529,15 @@ class CMPXDbMusic :
          * @param aId, the ID of Album
          */
         TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
+            
+        /**
+        * Get the Albumart of song which belongs to the specified Album
+        * @param aId, the ID of Album
+        * @param aArt, AlbumArt uri
+		* @returns alternative albumart retrieved in the specified Album.
+        */
+        HBufC* AlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt);
+        
 
         /*
         * Check the integrity of the music basic table

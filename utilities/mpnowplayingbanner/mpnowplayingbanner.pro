@@ -18,6 +18,7 @@ symbian:TARGET.UID3 = 0x10207C67
     
 TEMPLATE = lib
 CONFIG += hb qt
+HB += hbfeedback
 TARGET = mpnowplayingbanner
 
 TARGET.CAPABILITY = All -TCB

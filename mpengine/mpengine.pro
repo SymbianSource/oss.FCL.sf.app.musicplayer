@@ -24,7 +24,9 @@ TARGET.CAPABILITY = CAP_GENERAL_DLL
 
 INCLUDEPATH += . \
     	inc \
-    	../inc
+    	../inc \
+    	../mpserviceplugins/inc
+    	
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lestor.dll \
@@ -37,35 +39,50 @@ LIBS += -lestor.dll \
     -lremconinterfacebase.dll \
     -lmpsettingsmanager \
     -lmpdata.dll \
-    -lxqserviceutil
+    -lxqserviceutil \
+    -laudioequalizerutility.dll
     
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
 
-HEADERS += ../inc/mpengine.h \
+HEADERS += ../inc/mpenginefactory.h \
+           ../inc/mpengine.h \
            inc/mpmpxharvesterframeworkwrapper.h \
            inc/mpmpxharvesterframeworkwrapper_p.h \
            inc/mpmpxplaybackframeworkwrapper.h \
            inc/mpmpxplaybackframeworkwrapper_p.h \
-           inc/mpsongscanner.h \
+           inc/mpmpxdetailsframeworkwrapper.h \
+           inc/mpmpxdetailsframeworkwrapper_p.h \
            inc/mpmediakeyhandler.h \
            inc/mpmediakeyhandler_p.h\
            inc/mpmediakeyremconresponse.h \
            inc/mpmpxcollectionframeworkwrapper.h \
            inc/mpmpxisolatedcollectionhelper.h \
-           inc/mpmpxcollectionframeworkwrapper_p.h
+           inc/mpmpxcollectionframeworkwrapper_p.h \
+           inc/mpaudioeffectsframeworkwrapper.h \
+           inc/mpaudioeffectsframeworkwrapper_p.h \
+           inc/mpequalizerframeworkwrapper.h \
+           inc/mpequalizerframeworkwrapper_p.h \
+           inc/mpprogressdialoghandler.h
 
-SOURCES += src/mpengine.cpp \
+SOURCES += src/mpenginefactory.cpp \
+           src/mpengine.cpp \
            src/mpmpxharvesterframeworkwrapper.cpp \
            src/mpmpxharvesterframeworkwrapper_p.cpp \
            src/mpmpxplaybackframeworkwrapper.cpp \
            src/mpmpxplaybackframeworkwrapper_p.cpp \
-           src/mpsongscanner.cpp \
+           src/mpmpxdetailsframeworkwrapper.cpp \
+           src/mpmpxdetailsframeworkwrapper_p.cpp \
            src/mpmediakeyhandler.cpp \
            src/mpmediakeyhandler_p.cpp \
            src/mpmediakeyremconresponse.cpp \
            src/mpmpxcollectionframeworkwrapper.cpp \
            src/mpmpxisolatedcollectionhelper.cpp \
-           src/mpmpxcollectionframeworkwrapper_p.cpp       
+           src/mpmpxcollectionframeworkwrapper_p.cpp \
+           src/mpaudioeffectsframeworkwrapper.cpp \
+           src/mpaudioeffectsframeworkwrapper_p.cpp \
+           src/mpequalizerframeworkwrapper.cpp \
+           src/mpequalizerframeworkwrapper_p.cpp \
+           src/mpprogressdialoghandler.cpp   
 
 DEFINES += BUILD_MPENGINE_LIB
 

@@ -18,7 +18,7 @@
 // INCLUDE FILES
 
 #include <cstdlib>
-#include <qtcore>
+#include <QtCore>
 
 #include "stub/inc/mpcollectionview.h"
 #include "mpcollectiondocumentloader.h"
@@ -36,7 +36,7 @@ const char*MUSIC_COLLECTION_DOCML = ":/docml/musiccollection.docml";
  */
 MpCollectionView::MpCollectionView()
     : mContainerFactory(0),
-      mDocumentLoader(0)      
+      mDocumentLoader(0)
 {
     TX_LOG
 }
@@ -84,5 +84,21 @@ void MpCollectionView::openContextMenu( int index, const QPointF &coords )
     Q_UNUSED(coords);
 }
 
+/*!
+ Stub function
+ */
+void MpCollectionView::findAlbumSongs( int index )
+{
+    Q_UNUSED(index);
+}
+
+/*!
+ Stub function
+ */
+void MpCollectionView::playAlbumSongs( int albumIndex, int songIndex )
+{
+    Q_UNUSED(albumIndex);
+    Q_UNUSED(songIndex);
+}
 
 

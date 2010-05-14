@@ -27,7 +27,8 @@ INCLUDEPATH += . \
     	../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
-LIBS += -lmpxcommon.dll \
+LIBS += -lestor.dll \
+    -lmpxcommon.dll \
     -lthumbnailmanagerqt.dll
     
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
@@ -35,14 +36,18 @@ symbian:TARGET.EPOCALLOWDLLDATA	= 1
 HEADERS += ../inc/mpmpxcollectiondata.h \
            inc/mpmpxcollectiondata_p.h \
            ../inc/mpcollectiondatamodel.h \
-    	     inc/mpcollectionalbumartmanager.h \
-    	     ../inc/mpplaybackdata.h
+           ../inc/mpcollectiontbonelistdatamodel.h \
+    	   inc/mpcollectionalbumartmanager.h \
+    	   ../inc/mpplaybackdata.h \
+    	   ../inc/mpsongdata.h
 
 SOURCES += src/mpmpxcollectiondata.cpp \
            src/mpmpxcollectiondata_p.cpp \
            src/mpcollectiondatamodel.cpp \
-    	     src/mpcollectionalbumartmanager.cpp \
-           src/mpplaybackdata.cpp
+           src/mpcollectiontbonelistdatamodel.cpp \
+    	   src/mpcollectionalbumartmanager.cpp \
+           src/mpplaybackdata.cpp \
+           src/mpsongdata.cpp
            
 DEFINES += BUILD_MPDATA_LIB
 

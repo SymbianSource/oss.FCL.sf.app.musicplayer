@@ -1,5 +1,5 @@
-/**
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: Unit test for mpnowplayingbackend
+* Description: Unit test for mpequalizerwidget
 *
 */
 
@@ -20,6 +20,7 @@
 
 #include <QtTest/QtTest>
 
+class QTranslator;
 class MpEqualizerWidget;
 
 class TestMpEqualizerWidget: public QObject
@@ -42,14 +43,15 @@ public slots:
 private slots:
     void testInitialize();
     void testPrepareDialog();
-    void testEqualizerReady();
     void testPresetSelected();
     void testCancelSelected();
     void testOkSelected();
+    void testGetLogicalName();
 
 private:
 
     MpEqualizerWidget *mTest;
+    QTranslator       *mMpTranslator; // Own
 
 };
 

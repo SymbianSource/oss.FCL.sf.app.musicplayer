@@ -28,6 +28,7 @@ namespace MpCommon
     const long int KPlaybackViewUid     = {0x10207C64};
     const long int KSettingsViewUid     = {0x10207C66};
     const long int KDetailsViewUid      = {0x2002D0AA};
+    const long int KMediaWallViewUid    = {0x10207C94};
 
     /*!
      Command code sent from the views to the application main window
@@ -35,10 +36,11 @@ namespace MpCommon
      */
     enum MpCommandCode {
         Exit,
+        SendToBackground,
         ActivateCollectionView,
         ActivatePlaybackView,
-		ActivateSettingsView,
-		ActivateDetailsView
+        ActivateSettingsView,
+        ActivateDetailsView
     };
 
     /*!
@@ -50,6 +52,15 @@ namespace MpCommon
         DefaultView,
         FetchView,
         EmbeddedView
+    };
+    
+    /*!
+    Thumbnail type, used in collection model.
+    */
+    enum MpThumbType{
+        ListThumb,
+        TBoneThumb,
+        MediaWallThumb,
     };
 }
 

@@ -64,11 +64,21 @@ public slots:
 
     void handleSongSelected();
     void showEqualizerDialog();
+    
+    void startRewindTimer();
+    void startForwardTimer();
+    void startSeekRewind();
+    void startSeekForward();
+    void endRewind();
+    void endForward();
+    
+    void connectButtons();
 
 private:
 
     void setupMenu();
     void setupToolbar();
+    void updatePlayPauseIcon();
 
 private:
 
@@ -78,7 +88,7 @@ private:
     MpEqualizerWidget       *mEqualizerWidget;  // Own
 
     HbMainWindow            *mWindow;           // Not own
-    HbAction                *mNavigationBack;   // Own
+    HbAction                *mSoftKeyBack;      // Own
     bool                    mActivated;
 
     HbIcon                  *mPlayIcon;         // Own
@@ -92,9 +102,12 @@ private:
     
     QTranslator             *mMpTranslator;     // Own
     QTranslator             *mCommonTranslator; // Own
+    
+    QTimer                  *mTimer;
 
     bool                    mShuffle;
     bool                    mRepeat;
+    bool                    mSeeking;
 
     Q_DISABLE_COPY(MpPlaybackView)
 };

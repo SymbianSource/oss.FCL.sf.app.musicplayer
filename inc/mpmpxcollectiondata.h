@@ -69,12 +69,24 @@ public:
     bool testCachedItem( int itemId );
     void insertCachedItem(int index);
 
-    void setMpxMedia( const CMPXMedia& entries );
+    bool setCurrentAlbum( int index );
+    int currentAlbumIndex() const;
+    int albumSongsCount() const;
+    QString albumSongData( int index, MpMpxCollectionData::DataType type ) const;
+
+    void setMpxMedia( const CMPXMedia& entries, bool reopen=false );
     const CMPXMedia& containerMedia();
+    void setContext( TCollectionContext context );
+    void setAlbumContent( const CMPXMedia& albumContent );
+    int itemIndex( int itemUniqueId );
 
 signals:
 
     void contextChanged( TCollectionContext context );
+    void dataChanged();
+    void albumDataChanged();
+    void refreshAlbumSongs();
+
 private:
 
     Q_DISABLE_COPY(MpMpxCollectionData)

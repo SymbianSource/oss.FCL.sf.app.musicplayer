@@ -20,6 +20,8 @@
 
 #include <hbicon.h>
 #include <hbevent.h>
+#include <hbframeitem.h>
+#include <hbinstantfeedback.h>
 
 #include "mpnowplayingwidget.h"
 #include "mpnowplayingwidget_p.h"
@@ -56,10 +58,15 @@
  */
 MpNowPlayingWidget::MpNowPlayingWidget(long int playerId, QGraphicsItem *parent )
     : HbWidget(parent),
-    d_ptr ( new MpNowPlayingWidgetPrivate( playerId, this ) )
+    d_ptr ( new MpNowPlayingWidgetPrivate( playerId, this ) ),
+    mFrameItem(0)
 {
     TX_ENTRY_ARGS( "Player ID =" << playerId << " Parent=" << (void *)parent )
     TX_EXIT
+    mFrameItem = new HbFrameItem( this );
+    mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
+    mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+    mFrameItem->setZValue(-1);
 }
 
 /*!
@@ -78,18 +85,19 @@ MpNowPlayingWidget::~MpNowPlayingWidget()
  */
 void MpNowPlayingWidget::setEnabled( bool enabled )
 {
+    TX_ENTRY
     d_ptr->setEnabled(enabled);
+    TX_EXIT
 }
 
 /*!
     \reimp
  */
-void MpNowPlayingWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void MpNowPlayingWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
 {
     TX_ENTRY
-    HbWidget::paint(painter, option, widget);
-    QColor color(105,105,105,255);
-    painter->fillRect(rect(), color);
+    mFrameItem->setGeometry( rect() );
+    HbWidget::resizeEvent( event );
     TX_EXIT
 }
 
@@ -99,6 +107,8 @@ void MpNowPlayingWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem
 void MpNowPlayingWidget::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     TX_ENTRY
+    HbInstantFeedback::play( HbFeedback::Basic );
+
     if ( event->button() == Qt::LeftButton ) {
         d_ptr->handleMousePressEvent( event, true );
         update();
@@ -119,7 +129,7 @@ void MpNowPlayingWidget::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
     if ( event->button() == Qt::LeftButton ) {
         d_ptr->handleMousePressEvent( event, false );
         update();
-        if ( !d_ptr->handleClickEvent( event ) && rect().contains( event->pos() ) ) {
+        if ( !d_ptr->handleClickEvent( event ) ) {
             emit clicked();
         }
         event->accept();
@@ -133,11 +143,13 @@ void MpNowPlayingWidget::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 /*!
     \reimp
  */
-void MpNowPlayingWidget::changeEvent(QEvent *event)
+void MpNowPlayingWidget::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    if (event->type() == HbEvent::ThemeChanged) {
-            d_ptr->handleThemeChange();
-    }
-    HbWidgetBase::changeEvent(event);
+    TX_ENTRY
+    d_ptr->handleMouseMoveEvent( event );
+    update();
+    event->ignore();
+    TX_EXIT
 }
+
 

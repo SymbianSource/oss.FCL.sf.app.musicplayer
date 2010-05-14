@@ -1,0 +1,7 @@
+<RCC>
+    
+    <qresource prefix="/mediawallviewdocml" >
+        <file alias="mediawall.docml">mediawall.docml</file>
+    </qresource>
+   
+</RCC>

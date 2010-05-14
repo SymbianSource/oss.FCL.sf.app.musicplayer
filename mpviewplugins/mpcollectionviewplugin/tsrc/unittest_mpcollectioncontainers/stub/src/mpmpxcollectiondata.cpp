@@ -23,18 +23,23 @@
 /*!
  Stub function.
  */
-MpMpxCollectionData::MpMpxCollectionData()
-    :mContainerMedia(0),
-    mMediaSet(EFalse),
-    mContext (ECollectionContextUnknown)
-{   
+MpMpxCollectionData::MpMpxCollectionData( QObject *parent )
+    : QObject(parent),
+      mContainerMedia(0),
+      mMediaSet(false),
+      mContext(ECollectionContextUnknown),
+      mCount(0),
+      mCurrentAlbumIndex(-1),
+      mCurrentAlbumAvailable(false),
+      mReturnCollectionTitle(true)
+{
 }
 
 /*!
  Stub function.
 */
 MpMpxCollectionData::~MpMpxCollectionData()
-{   
+{
 }
 
 /*!
@@ -43,38 +48,6 @@ MpMpxCollectionData::~MpMpxCollectionData()
 TCollectionContext MpMpxCollectionData::context()
 {
     return mContext;
-}
-
-/*!
- Stub function.
-*/
-QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType type ) const
-{
-    Q_UNUSED(index);
-    if ( type == MpMpxCollectionData::Uri ) {
-        return QString("Uri");
-    }
-    else {
-        return QString();
-    }
-}
-/*!
- Stub function.
-*/
-void MpMpxCollectionData::setMpxMedia( const CMPXMedia& entries )
-{
-    delete mContainerMedia;
-    mContainerMedia = 0;
-    mContainerMedia = CMPXMedia::NewL(entries);
-    mMediaSet = ETrue;
-}
-
-/*!
- Stub function.
-*/
-const CMPXMedia& MpMpxCollectionData::containerMedia()
-{
-    return *mContainerMedia;
 }
 
 /*!
@@ -90,7 +63,42 @@ int MpMpxCollectionData::count() const
  */
 QString MpMpxCollectionData::collectionTitle() const
 {
-    QString title("Title");
-    return title;
+    if ( mReturnCollectionTitle ) {
+        return QString("Title");
+    }
+    else {
+        return QString();
+    }
 }
-//end of file
+
+/*!
+ Stub function.
+*/
+QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType type ) const
+{
+    Q_UNUSED(index);
+    if ( type == MpMpxCollectionData::Uri ) {
+        return QString("Uri");
+    }
+    else {
+        return QString();
+    }
+}
+
+/*!
+ Stub function.
+*/
+bool MpMpxCollectionData::setCurrentAlbum( int index )
+{
+    mCurrentAlbumIndex = index;
+    return mCurrentAlbumAvailable;
+}
+
+/*!
+ Stub function.
+*/
+const CMPXMedia& MpMpxCollectionData::containerMedia()
+{
+    return *mContainerMedia;
+}
+

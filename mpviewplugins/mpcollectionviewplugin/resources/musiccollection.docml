@@ -59,20 +59,57 @@
         </widget>
     </section>
 
-    <section name="artistSongs">
+    <section name="artistAlbums">
         <widget name="container">
-            <widget name="artistSongsDetail" type="HbGroupBox">
+            <widget name="artistDetail" type="HbGroupBox">
                 <bool name="collapsable" value="FALSE"/>
                 <real name="z" value="1.0"/>
             </widget>
             <layout orientation="Vertical" spacing="0un" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
-                <linearitem itemname="artistSongsDetail" spacing="0.0"/>
+                <linearitem itemname="artistDetail" spacing="0.0"/>
                 <linearitem itemname="artistsList" spacing="0.0"/>
             </layout>
         </widget>
     </section>
 
+    <section name="artistAlbumTBone">
+        <widget name="container">
+            <widget name="artistAlbumWall" type="HgMediawall">
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="artistAlbumWall"/>
+                <linearitem itemname="artistsList"/>
+            </layout>
+        </widget>
+    </section>
+    
+    <section name="artistAlbumTBoneFetcher">
+        <widget name="container">
+            <widget name="artistDetail" type="HbGroupBox">
+                <bool name="collapsable" value="FALSE"/>
+                <real name="z" value="1.0"/>
+            </widget>
+            <widget name="artistAlbumWall" type="HgMediawall">
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="artistDetail" spacing="0.0"/>
+                <linearitem itemname="artistAlbumWall"/>
+                <linearitem itemname="artistsList"/>
+            </layout>
+        </widget>
+    </section>
+    
     <section name="albums">
         <widget name="container">
             <widget name="albumsList" type="HbListView">
@@ -85,16 +122,39 @@
         </widget>
     </section>
 
-    <section name="albumSongs">
+    <section name="albumTBone">
         <widget name="container">
-            <widget name="albumSongsDetail" type="HbGroupBox">
+            <widget name="albumWall" type="HgMediawall">
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
+                <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
+                <linearitem itemname="albumWall"/>
+                <linearitem itemname="albumsList"/>
+            </layout>
+        </widget>
+    </section>
+    
+    <section name="albumTBoneFetcher">
+        <widget name="container">
+            <widget name="albumTBoneDetail" type="HbGroupBox">
                 <bool name="collapsable" value="FALSE"/>
                 <real name="z" value="1.0"/>
             </widget>
-            <layout orientation="Vertical" spacing="0un" type="linear">
+            <widget name="albumWall" type="HgMediawall">
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+            </widget>
+            <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
-                <linearitem itemname="albumSongsDetail" spacing="0.0"/>
-                <linearitem itemname="albumsList" spacing="0.0"/>
+                <linearitem itemname="albumTBoneDetail" spacing="0.0"/>
+                <linearitem itemname="albumWall"/>
+                <linearitem itemname="albumsList"/>
             </layout>
         </widget>
     </section>

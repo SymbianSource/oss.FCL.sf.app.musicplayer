@@ -17,9 +17,6 @@
 
 #include <QSignalSpy>
 #include <qnamespace.h>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
 
 #include "unittest_mpplaybackviewplugin.h"
 #include "stub/inc/mpplaybackview.h"
@@ -35,18 +32,20 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
     TestMpPlaybackViewPlugin tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpplaybackviewplugin.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpplaybackviewplugin.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpPlaybackViewPlugin::TestMpPlaybackViewPlugin()

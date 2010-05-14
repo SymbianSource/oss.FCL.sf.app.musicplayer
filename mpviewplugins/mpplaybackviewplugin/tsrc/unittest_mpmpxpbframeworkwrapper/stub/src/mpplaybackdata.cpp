@@ -16,7 +16,7 @@
 */
 
 
-#include <qstring>
+#include <QString>
 
 #include "stub/inc/mpplaybackdata.h"
 #include "mptrace.h"

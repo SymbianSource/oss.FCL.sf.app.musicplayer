@@ -229,7 +229,7 @@ _LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre
 #endif
 _LIT(KQuerySongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND Artist=%u AND Album=%u");
 _LIT(KQueryMusicGetArtistForAlbum, "SELECT Artist FROM :dbname.Music,:dbname.Artist WHERE Music.Deleted=0 AND Music.Artist=Artist.UniqueId AND Music.Album=%u");
-
+_LIT(KQueryMusicGetAlbumartForAlbum, "SELECT Art FROM :dbname.Music WHERE Music.Deleted=0 AND Music.Album=%u");
 // == Category table queries ==================================================
 //
 _LIT(KCategoryTablePlaceholder, "##table##");
@@ -439,7 +439,7 @@ _LIT(KQueryAlbumUpdate, "UPDATE :dbname.Album SET %S WHERE UniqueId=%u");
 
 _LIT(KQueryAlbumItem, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId AND UniqueId=%u");
 _LIT(KQueryAlbumAll, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId ORDER BY 2");
-
+_LIT(KQueryAlbumAllMediaWall, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId ORDER BY 6");
 // == Artist table queries ==========================================
 //
 _LIT(KArtistCreateTable,"CREATE TABLE Artist("

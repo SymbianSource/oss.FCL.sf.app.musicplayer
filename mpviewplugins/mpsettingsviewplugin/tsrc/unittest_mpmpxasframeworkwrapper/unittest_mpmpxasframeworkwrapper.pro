@@ -15,30 +15,28 @@
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-TARGET = 
+CONFIG += qtestlib
+CONFIG += symbian_test
+TARGET = unittest_mpmpxasframeworkwrapper
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
     ../../inc \
     ../../../../inc \
     ../../../../mpserviceplugins/inc
-
-    
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lmpxviewframeworkqt.dll
-				
-HEADERS += inc/unittest_mpmpxasframeworkwrapper.h \        
-   		   ../../inc/mpmpxasframeworkwrapper.h \
-   		   ../../inc/mpmpxasframeworkwrapper_p.h \
+
+HEADERS += inc/unittest_mpmpxasframeworkwrapper.h \
+           ../../inc/mpmpxasframeworkwrapper.h \
+           ../../inc/mpmpxasframeworkwrapper_p.h \
            stub/inc/mpxaudioeffectproperties.h \
            stub/inc/mpxplaybackutility.h
                
 SOURCES += src/unittest_mpmpxasframeworkwrapper.cpp \
-		   ../../src/mpmpxasframeworkwrapper.cpp \
-		   stub/src/mpxaudioeffectproperties.cpp \
-		   stub/src/mpxplaybackutility.cpp
-		   
-           
-           
+           ../../src/mpmpxasframeworkwrapper.cpp \
+           stub/src/mpxaudioeffectproperties.cpp \
+           stub/src/mpxplaybackutility.cpp
+

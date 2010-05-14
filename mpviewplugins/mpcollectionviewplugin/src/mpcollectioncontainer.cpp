@@ -46,12 +46,19 @@
  */
 
 /*!
+    \fn void albumCentered( int index );
+
+    This signal is emitted only when container contains hgmediawall T-Bone when album
+    with \a index is centered following a scrolling action.
+ */
+
+/*!
  Constructs the collection container.
  */
 MpCollectionContainer::MpCollectionContainer( HbDocumentLoader *loader, QGraphicsItem *parent )
     : HbWidget(parent),
       mDocumentLoader(loader),
-      mCollectionContext(ECollectionContextUnknown)
+      mViewMode(MpCommon::DefaultView)
 {
     TX_LOG
 }
@@ -66,6 +73,9 @@ MpCollectionContainer::~MpCollectionContainer()
 
 /*!
  Sets the data model for the container.
+ Some of the containers are used for multiple contexts, i.e. Artist, Albums, Playlists. So,
+ setDataModel() is called multiple times to the same container object. We only want to connect
+ to dataReloaded() signal once or we'll receive multiple call backs.
  */
 void MpCollectionContainer::setDataModel( MpCollectionDataModel *dataModel )
 {
@@ -73,6 +83,7 @@ void MpCollectionContainer::setDataModel( MpCollectionDataModel *dataModel )
     mDataModel = dataModel;
     mCollectionData = mDataModel->collectionData();
     mCollectionContext = mCollectionData->context();
+    connect( dataModel, SIGNAL(dataReloaded()), this, SLOT(dataReloaded()), Qt::UniqueConnection );
 
     setupContainer();
     TX_EXIT

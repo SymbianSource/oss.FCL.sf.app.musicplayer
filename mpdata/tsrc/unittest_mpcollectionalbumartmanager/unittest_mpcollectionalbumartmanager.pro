@@ -14,10 +14,11 @@
 # Description: Unit test for mpcollectionalbumartmanager
 #
 
-
 TEMPLATE = app
 CONFIG += qtestlib hb
-TARGET = 
+CONFIG += symbian_test
+TARGET = unittest_mpcollectionalbumartmanager
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \

@@ -18,12 +18,12 @@
 #ifndef MPMPXCOLLECTIONDATA_H
 #define MPMPXCOLLECTIONDATA_H
 
+#include <QObject>
 #include "mpmpxcollectionviewdefs.h"
 
 class CMPXMedia;
- 
 
-class MpMpxCollectionData 
+class MpMpxCollectionData : public QObject
 {
 
 public:
@@ -41,22 +41,29 @@ public:
     };
 
     // Stub functions
-     MpMpxCollectionData();
-    ~MpMpxCollectionData();
+    explicit MpMpxCollectionData( QObject *parent=0 );
+    virtual ~MpMpxCollectionData();
 
     TCollectionContext context();
-    QString itemData( int index, MpMpxCollectionData::DataType type ) const;
 
-    void setMpxMedia( const CMPXMedia& entries );
-    const CMPXMedia& containerMedia();
     int count() const;
     QString collectionTitle() const;
+    QString itemData( int index, MpMpxCollectionData::DataType type ) const;
+
+    bool setCurrentAlbum( int index );
+
+    const CMPXMedia& containerMedia();
 
 public:
+
     CMPXMedia               *mContainerMedia;
-    TBool                   mMediaSet;
+    bool                    mMediaSet;
     TCollectionContext      mContext;
     int                     mCount;
+    int                     mCurrentAlbumIndex;
+    bool                    mCurrentAlbumAvailable;
+    bool                    mReturnCollectionTitle;
+
 };
 
 #endif // MPMPXCOLLECTIONDATA_H

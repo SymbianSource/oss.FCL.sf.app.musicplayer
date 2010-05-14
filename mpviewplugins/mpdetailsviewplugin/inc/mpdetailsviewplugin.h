@@ -18,13 +18,22 @@
 #ifndef MPDETAILSVIEWPLUGIN_H
 #define MPDETAILSVIEWPLUGIN_H
 
-#include <qobject>
+#include <QObject>
 #include <mpxviewpluginqt.h>
 
 //forward declartions
 class MpDetailsView;
 
 //class declaration
+/*!
+ MpDetailsViewPlugin is one of the four view plugins in Music Player.
+ Each view plugin is instantiated on music player startup, and
+ destructed on music player exit.
+
+ The actual view is a member variable of ViewPlugin.
+ View's visibility is controlled by using its activateView() and
+ deactivateView() methods.
+*/
 class MpDetailsViewPlugin : public MpxViewPlugin
 {
     Q_OBJECT

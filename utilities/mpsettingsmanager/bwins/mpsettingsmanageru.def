@@ -23,4 +23,10 @@ EXPORTS
 	?presetChanged@MpSettingsManager@@IAEXH@Z @ 22 NONAME ; void MpSettingsManager::presetChanged(int)
 	?setPreset@MpSettingsManager@@SAXH@Z @ 23 NONAME ; void MpSettingsManager::setPreset(int)
 	?preset@MpSettingsManager@@SAHXZ @ 24 NONAME ; int MpSettingsManager::preset(void)
+	?setInspireMe@MpSettingsManager@@SAX_N@Z @ 25 NONAME ; void MpSettingsManager::setInspireMe(bool)
+	?inspireMe@MpSettingsManager@@SA_NXZ @ 26 NONAME ; bool MpSettingsManager::inspireMe(void)
+	?InspireMeChanged@MpSettingsManager@@IAEX_N@Z @ 27 NONAME ; void MpSettingsManager::InspireMeChanged(bool)
+	?setSongDetailsGb@MpSettingsManager@@SAX_N@Z @ 28 NONAME ; void MpSettingsManager::setSongDetailsGb(bool)
+	?SongDetailsGbChanged@MpSettingsManager@@IAEX_N@Z @ 29 NONAME ; void MpSettingsManager::SongDetailsGbChanged(bool)
+	?songDetailsGb@MpSettingsManager@@SA_NXZ @ 30 NONAME ; bool MpSettingsManager::songDetailsGb(void)
 

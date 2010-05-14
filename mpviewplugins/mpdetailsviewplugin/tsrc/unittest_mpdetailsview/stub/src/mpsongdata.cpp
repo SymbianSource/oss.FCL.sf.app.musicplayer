@@ -16,8 +16,11 @@
 */
 
 
-#include <qstring>
-#include <qpixmap>
+#include <QString>
+#include <QPixmap>
+#include <QPainter>
+#include <QBuffer>
+#include <hbicon.h>
 
 #include "stub/inc/thumbnailmanager_qt.h"
 #include <thumbnaildata.h>
@@ -26,39 +29,9 @@
 #include "stub/inc/mpsongdata.h"
 #include "mptrace.h"
 
-
 const int KUndefined = -1;
 
-/*!
-    \class MpSongData
-    \brief Music Player song metadata.
 
-    Song data provide acces to current playing song metadata
-*/
-    
-/*!
-    \fn void albumArtReady()
-
-    This signal is albuma alrt is ready.
- */
-
-/*!
-    \fn void playbackInfoChanged()
-
-    This signal is emitted when basic information is available
- */
-    
-/*!
-    \fn void songDetailInfoChanged()
-
-    This signal is emitted when detail information is available
- */
-    
-       
-
-/*!
-    Constructs a new MpSongData.
- */
 MpSongData::MpSongData( QObject *parent )
     : QObject( parent ),
       mTitle( NULL ),
@@ -71,227 +44,218 @@ MpSongData::MpSongData( QObject *parent )
       mAlbumArt(),
       mReqId( KUndefined )
 {
-    //TX_ENTRY
+    TX_ENTRY_ARGS("Stub")
     mThumbnailManager = new ThumbnailManager( this );
     mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForQuality );
     mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailMedium );
     QObject::connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
             this, SLOT( thumbnailReady( QPixmap , void * , int , int  ) ) );
-    
-    mDefaultAlbumArt = QPixmap( ":/detailsviewicons/defaultalbumart.png" );
-    //TX_EXIT
+
+    TX_EXIT_ARGS("Stub")
 }
 
-/*!
- Constructs a new MpSongData.
- */
 MpSongData::~MpSongData()
 {
-    //TX_ENTRY
+    TX_ENTRY_ARGS("Stub")
     if( mThumbnailManager ) {
         delete mThumbnailManager;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
 }
 
-/*!
- Returns the song album art on \a pixmap.
-*/
-void MpSongData::albumArt( QPixmap& pixmap )
+void MpSongData::albumArt( HbIcon& icon ) const
 {
-    //TX_ENTRY
-     if ( !mAlbumArt.isNull() ) {
-        pixmap = mAlbumArt;
-     }
-     else {
-         pixmap = QPixmap();
-     }
-    //TX_EXIT
+    TX_ENTRY_ARGS("Stub")
+    TX_EXIT_ARGS("Stub")
 }
 
 
-/*!
- Returns the song title.
-*/
 QString MpSongData::title() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mTitle;
 }
 
-/*!
- Returns the song album.
-*/
 QString MpSongData::album() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mAlbum;
 }
 
-/*!
- Returns the song artist.
-*/
 QString MpSongData::artist() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mArtist;
 }
 
-/*!
- Returns comment
-*/
 QString MpSongData::comment() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mComment;
 }
 
-/*!
- Returns the song composer.
-*/
 QString MpSongData::composer() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mComposer;
 }
 
 
-/*!
- Returns the song genre.
-*/
 QString MpSongData::genre() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mGenre;
 }
 
 
-/*!
- Returns the album track.
-*/
 QString MpSongData::albumTrack() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mAlbumTrack;
 }
 
-/*!
- Returns link
-*/
 QString MpSongData::link() const
 {
-    //TX_LOG
+    TX_ENTRY_ARGS("Stub")
     return mLink;
 }
 
-/*!
- Returns the release date.
-*/
 QString MpSongData::year() const
 {
-    //TX_LOG    
+    TX_ENTRY_ARGS("Stub")
     return mYear;
 }
 
+QString MpSongData::fileName() const
+{
+    TX_LOG
+    return mFileName;
+}
 
-/*!
- Sets the song \a title, returns true if the value is new.
-*/
+QString MpSongData::mimeType() const
+{
+    TX_LOG
+    return mMimeType;
+}
+
+QString MpSongData::duration() const
+{
+    TX_LOG
+    return mDuration;
+}
+
+QString MpSongData::bitRate() const
+{
+    TX_LOG
+    return mBitRate;
+}
+
+QString MpSongData::sampleRate() const
+{
+    TX_LOG
+    return mSampleRate;
+}
+
+QString MpSongData::size() const
+{
+    TX_LOG
+    return mSize;
+}
+
+QString MpSongData::modified() const
+{
+    TX_LOG
+    return mModified;
+}
+
+QString MpSongData::copyright() const
+{
+    TX_LOG
+    return mCopyright;
+}
+
+QString MpSongData::musicURL() const
+{
+    TX_LOG
+    return mMusicURL;
+}
+
+bool MpSongData::isDrmProtected() const
+{
+    TX_LOG
+    return mDrmProtected;
+}
 bool MpSongData::setTitle( const QString &title )
 {
-    //TX_ENTRY_ARGS( "title =" << title )
+    TX_ENTRY_ARGS("Stub title =" << title )
     bool change = false;
     if ( title != mTitle ) {
         change = true;
         mTitle = title;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-/*!
- Sets the song \a album, returns true if the value is new.
-*/
 bool MpSongData::setAlbum( const QString &album )
 {
-    //TX_ENTRY_ARGS( "album =" << album )
-    bool change = false;
-    if ( album != mAlbum ) {
-        change = true;
-        mAlbum = album;
-    }
-    //TX_EXIT
-    return change;
+    TX_ENTRY_ARGS("Stub album =" << album )
+    TX_EXIT_ARGS("Stub")
+    return false;
 }
 
-/*!
- Sets the song \a artist, returns true if the value is new.
-*/
 bool MpSongData::setArtist( const QString &artist )
 {
-    //TX_ENTRY_ARGS( "artist =" << artist )
+    TX_ENTRY_ARGS("Stub artist =" << artist )
     bool change = false;
     if ( artist != mArtist ) {
         change = true;
         mArtist = artist;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-/*!
- Sets the song \a comment, returns true if the value is new.
-*/
 bool MpSongData::setComment( const QString &comment)
 {
-    //TX_ENTRY_ARGS( "comment =" << comment )
+    TX_ENTRY_ARGS("Stub comment =" << comment )
     bool change = false;
     if ( comment != mComment ) {
         change = true;
         mComment = comment;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-
-/*!
- Sets the song \a composer, returns true if the value is new.
-*/
 bool MpSongData::setComposer( const QString &composer )
 {
-    //TX_ENTRY_ARGS( "composer =" << composer )
+    TX_ENTRY_ARGS("Stub composer =" << composer )
     bool change = false;
     if ( composer != mComposer ) {
         change = true;
         mComposer = composer;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-/*!
- Sets the song \a genre, returns true if the value is new.
-*/
 bool MpSongData::setGenre( const QString &genre )
 {
-    //TX_ENTRY_ARGS( "genre =" << genre )
+    TX_ENTRY_ARGS("Stub genre =" << genre )
     bool change = false;
     if ( genre != mGenre ) {
         change = true;
         mGenre = genre;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
 
-/*!
- Sets the song \a date, returns true if the value is new.
-*/
 bool MpSongData::setYear( int year )
 {
-    //TX_ENTRY_ARGS( "year =" << year )
+    TX_ENTRY_ARGS("Stub year =" << year )
     bool change = false;
     if ( QString::number(year) != mYear ) {
         change = true;
@@ -299,41 +263,32 @@ bool MpSongData::setYear( int year )
             mYear = QString::number(year);
         }
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-/*!
- Sets the \a album track, returns true if the value is new.
-*/
 bool MpSongData::setAlbumTrack( const QString &track )
 {
-    //TX_ENTRY_ARGS( "track =" << track )
+    TX_ENTRY_ARGS("Stub track =" << track )
     bool change = false;
     if ( track != mAlbumTrack ) {
         change = true;
         mAlbumTrack = track;
     }
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
     return change;
 }
 
-/*!
- Sets the \a link
-*/
 void MpSongData::setLink( const QString &link )
 {
-    //TX_ENTRY_ARGS( "Link =" << link )
+    TX_ENTRY_ARGS("Stub Link =" << link )
     mLink = link;
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
 }
 
-/*!
- Sets the song \a albumArtUri.
-*/
 void MpSongData::setAlbumArtUri( const QString &albumArtUri)
 {
-    //TX_ENTRY_ARGS( "albumArtUri = " << albumArtUri )
+    TX_ENTRY_ARGS("Stub albumArtUri = " << albumArtUri )
     if ( !albumArtUri.isEmpty() ) {
         bool ok = true;
         if ( mReqId != KUndefined ) {
@@ -354,52 +309,191 @@ void MpSongData::setAlbumArtUri( const QString &albumArtUri)
         mAlbumArt = mDefaultAlbumArt;
         emit albumArtReady();
     }
-    //TX_EXIT
+    TX_EXIT
 }
 
+bool MpSongData::setFileName( const QString &fileName )
+{
+    TX_ENTRY_ARGS( "File name =" << fileName )
+    bool change = false;
+    if ( fileName != mFileName ) {
+        change = true;
+        mFileName = fileName;
+    }
+    TX_EXIT
+    return change;
+}
 
-/*!
- Slot to handle the album art thumb.
-*/
+bool MpSongData::setMimeType( const QString &mimeType )
+{
+    TX_ENTRY_ARGS( "Mime =" << mimeType )
+    bool change = false;
+    if ( mimeType != mMimeType ) {
+        change = true;
+        mMimeType = mimeType;
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setDuration( int duration )
+{
+    TX_ENTRY_ARGS( "Duration =" << duration )
+    bool change = false;
+    QString timeFormatOne("%1:%2:%3");
+    QString timeFormatTwo("%1:%2");
+    if ( QString::number( duration ) != mDuration ) {
+        change = true;
+        if ( duration >= 3600 ) {
+            // more than one hours
+            QString hourStr, minStr, secStr;
+            int hour = duration / 3600;
+            int min = duration % 3600 / 60;
+            int sec = duration % 3600 % 60;
+
+            hourStr = hour >= 10 ? QString::number( hour ) : QString::number( hour ).prepend( "0" );
+            minStr = min >= 10 ? QString::number( min ) : QString::number( min ).prepend( "0" );
+            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );
+            mDuration = timeFormatOne.arg( hourStr ).arg( minStr ).arg( secStr );
+        } else if ( duration >= 60 && duration < 3600 ) {
+            // more than one min && less than one hour
+            QString minStr, secStr;
+            int min = duration / 60;
+            int sec = duration % 60;
+
+            minStr = min >= 10 ? QString::number( min ) : QString::number( min ).prepend( "0" );
+            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );
+            mDuration = timeFormatTwo.arg( minStr ).arg( secStr );
+        } else if ( duration > 0 && duration < 60 ) {
+            QString secStr;
+            secStr = duration >= 10 ? QString::number( duration ) : QString::number( duration ).prepend( "0" );
+            mDuration = secStr;
+        } else {
+            mDuration = QString();
+        }
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setBitRate( int bitRate)
+{
+    TX_ENTRY_ARGS( "Bit rate =" << bitRate )
+    bool change = false;
+    if ( QString::number( bitRate ) != mBitRate ) {
+        change = true;
+        if ( bitRate > 0 ) {
+            mBitRate = QString::number( bitRate / 1000 );
+        } else {
+            mBitRate = QString();
+        }
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setSampleRate( int sampleRate )
+{
+    TX_ENTRY_ARGS( "Sample rate =" << sampleRate )
+    bool change = false;
+    if ( QString::number( sampleRate ) != mSampleRate ) {
+        change = true;
+        if ( sampleRate > 0 ) {
+            mSampleRate = QString::number( sampleRate );
+        } else {
+            mSampleRate = QString();
+        }
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setSize( int size )
+{
+    TX_ENTRY_ARGS( "Size =" << size )
+    bool change = false;
+    if ( QString::number( size ) != mSize ) {
+        change = true;
+        mSize = QString::number( size / 1000 ).append( " MB" );
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setModified( const QString &modified )
+{
+    TX_ENTRY_ARGS( "Modified =" << modified )
+    bool change = false;
+    if ( modified != mModified ) {
+        change = true;
+        mModified = modified;
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setCopyright( const QString &copyright )
+{
+    TX_ENTRY_ARGS( "Copyright =" << copyright )
+    bool change = false;
+    if ( copyright != mCopyright ) {
+        change = true;
+        mCopyright = copyright;
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setMusicURL( const QString &musicURL )
+{
+    TX_ENTRY_ARGS( "Music URL =" << musicURL )
+    bool change = false;
+    if ( musicURL != mMusicURL ) {
+        change = true;
+        mMusicURL = musicURL;
+    }
+    TX_EXIT
+    return change;
+}
+
+bool MpSongData::setDrmProtected( bool drmProtected )
+{
+    TX_ENTRY_ARGS( "DRM protected =" << drmProtected )
+    bool change = false;
+    if ( drmProtected != mDrmProtected ) {
+        change = true;
+        mDrmProtected = drmProtected;
+    }
+    TX_EXIT
+    return change;
+}
+
 void MpSongData::thumbnailReady(
         const QPixmap& pixmap,
         void *data,
         int id,
         int error  )
 {
-    //TX_ENTRY
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED( data );
-    if ( error == 0 && mReqId == id ) {
-        mReqId = 0;
-        mAlbumArt = pixmap;
-        emit albumArtReady();
-    }
-    else {
-        mReqId = 0;
-        mAlbumArt = mDefaultAlbumArt; 
-        emit albumArtReady();
-    }
-
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
 }
 
-/*!
- Emit signal when playback information changed, such as artist, track name
-*/
 void MpSongData::commitPlaybackInfo()
 {
-    //TX_ENTRY
+    TX_ENTRY_ARGS("Stub")
     emit playbackInfoChanged();
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
 }
 
-/*!
- Emit signal when song detail information changed
-*/
 void MpSongData::commitSongDetailInfo()
 {
-    //TX_ENTRY
+    TX_ENTRY_ARGS("Stub")
     emit songDetailInfoChanged();
-    //TX_EXIT
+    TX_EXIT_ARGS("Stub")
 }
 
+QString MpSongData::albumArtBase64() const
+{
+    return QString();
+}

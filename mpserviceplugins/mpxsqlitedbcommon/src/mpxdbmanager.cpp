@@ -29,7 +29,7 @@
 #include <sysutil.h>
 #ifdef __RAMDISK_PERF_ENABLE
 #include <centralrepository.h>
-#include <BAUTILS.H>  
+#include <bautils.h>  
 #endif //__RAMDISK_PERF_ENABLE
 
 #include <mpxlog.h>
@@ -271,7 +271,6 @@ EXPORT_C void CMPXDbManager::CopyDBsToRamL( TBool aIsMTPInUse )
             }
 
         TInt count(iDatabaseHandles.Count());
-        //TBool ret = EFalse;
         for ( TInt i = 0; i < count ; ++i )
             {
             if ( iDatabaseHandles[i].iUseRAMdb )

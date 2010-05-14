@@ -57,26 +57,23 @@ const int KMaxCacheSize = 50;
  Constructs the album art manager.
  */
 MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent )
-    : QObject(parent),
-      mCollectionData(data),
-      mThumbnailManager(0),
-      mCachingInProgress(false),
-      mDefaultIcon(0),
-      mPendingRequest(false)
+    : QObject( parent ),
+      mCollectionData( data ),
+      mThumbnailManager( 0 ),
+      mCachingInProgress( false ),
+      mDefaultIcon( "qtg_large_music_album" ),
+      mPendingRequest( false ),
+      mDefaultArtEnabled( true )
 {
     TX_ENTRY
     mThumbnailManager = new ThumbnailManager(this);
     mThumbnailManager->setMode(ThumbnailManager::Default);
     mThumbnailManager->setQualityPreference(ThumbnailManager::OptimizeForQuality);
     mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailSmall);
-
     connect( mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
              this, SLOT(thumbnailReady(QPixmap, void *, int, int)) );
 
     mImageCache.setMaxCost(KMaxCacheSize);
-    //TODO: Change to final resource when available
-    HbIcon albumArt( "qtg_large_music" );
-    mDefaultIcon = new QIcon( albumArt.qicon() );
     TX_EXIT
 }
 
@@ -88,7 +85,6 @@ MpCollectionAlbumArtManager::~MpCollectionAlbumArtManager()
     TX_ENTRY
     cancel();
     delete mThumbnailManager;
-    delete mDefaultIcon;
     TX_EXIT
 }
 
@@ -99,12 +95,17 @@ MpCollectionAlbumArtManager::~MpCollectionAlbumArtManager()
 
  \sa signal albumArtReady
  */
-const QIcon* MpCollectionAlbumArtManager::albumArt( int index )
+const HbIcon MpCollectionAlbumArtManager::albumArt( int index )
 {
     TX_ENTRY_ARGS("index=" << index);
-    QIcon *icon = mImageCache[index];
-    if ( !icon ) {
-        icon = mDefaultIcon;
+    HbIcon icon;
+    if ( mImageCache.contains( index ) ) {
+        icon = *mImageCache[index];
+    }
+    else {
+        if ( mDefaultArtEnabled ) {
+            icon = mDefaultIcon;
+        }
         if ( !mRequestQueue.contains(index) ) {
             // Icon was not found in cache. If the item has AlbumArtUri, request it
             // through ThumbnailManager interface.
@@ -167,17 +168,50 @@ void MpCollectionAlbumArtManager::cancel()
     TX_EXIT
 }
 
+
+/*!
+ changes the thumbnail size.
+
+ */
+void MpCollectionAlbumArtManager::setThumbnailSize(MpCommon::MpThumbType type)
+{
+    switch ( type ) {
+    case MpCommon::ListThumb:
+        mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailSmall);
+        break;
+    case MpCommon::TBoneThumb:
+        mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailMedium);
+        break;
+    case MpCommon::MediaWallThumb:
+    default:
+        mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailLarge);
+        break;
+    }
+    cancel();
+}
+
+/*!
+ sets the Default art \a enabled.
+ */
+void MpCollectionAlbumArtManager::enableDefaultArt( bool enabled )
+{
+    mDefaultArtEnabled = enabled;
+}
+
 /*!
  Slot to be called when thumbnail bitmap generation or loading is complete.
  */
 void MpCollectionAlbumArtManager::thumbnailReady( QPixmap pixmap, void *data, int id, int error )
 {
-    int index = reinterpret_cast<int>(data);
+    int index = reinterpret_cast<int>( data );
     TX_ENTRY_ARGS("index=" << index << ", id=" << id << ", error=" << error);
     if ( !error && id == mRequestId && !pixmap.isNull() ) {
         // Find the index
-        mImageCache.insert(index, new QIcon(pixmap));
-        TX_LOG_ARGS("Album art ready for index=" << index);
+        HbIcon *tmpIconPtr = new HbIcon(pixmap);
+        //TODO:Enable This optimization for WK16
+        //tmpIconPtr->setFlags( HbIcon::NonThemeable );
+        mImageCache.insert( index, tmpIconPtr );
+        TX_LOG_ARGS( "Album art ready for index=" << index );
         if ( !mCachingInProgress ) {
             emit albumArtReady(index);
         }

@@ -65,11 +65,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( MpCommon::MpViewMode viewMode, TUid hostUid, QObject *parent )
+MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( TUid hostUid, QObject *parent )
     : QObject( parent )
 {
     d_ptr = new MpMpxHarvesterFrameworkWrapperPrivate( this );
-    d_ptr->init( viewMode, hostUid );
+    d_ptr->init( hostUid );
 }
 
 /*!

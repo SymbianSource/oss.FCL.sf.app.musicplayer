@@ -14,8 +14,10 @@
 * Description: ThumbnailManager stub for testing MpSongData
 *
 */
-#include <qsize.h>
+#include <QSize>
 #include "stub/inc/thumbnailmanager_qt.h"
+#include "mptrace.h"
+#include "logger.h"
 
 int gInitCounter = 0;
 
@@ -25,6 +27,7 @@ int gInitCounter = 0;
  */
 int ThumbnailManager::getInitCounter()
 {
+    TRACE("ThumbnailManager::getInitCounter() STUB");
     return gInitCounter;
 }
 
@@ -33,63 +36,52 @@ int ThumbnailManager::getInitCounter()
  */
 void ThumbnailManager::resetInitCounter()
 {
+    TRACE("ThumbnailManager::resetInitCounter() STUB");
     gInitCounter = 0;
 }
 
-/*!
- Stub function.
- */
 ThumbnailManager::ThumbnailManager( QObject* parentPtr ) :
 QObject( parentPtr ),
 mGetThumbFails(false),
 mThumbnailReqCounter(0),
 mCancelCounter(0)
 {
+    TX_ENTRY_ARGS("Stub")
     gInitCounter++;
 }
 
-/*!
- Stub function.
- */
 ThumbnailManager::~ThumbnailManager()
 {
+    TX_ENTRY_ARGS("Stub")
     gInitCounter--;
 }
 
-/*!
- Stub function.
- */
 bool ThumbnailManager::setMode( ThumbnailMode mode )
 {
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED(mode);
     return true;
 }
 
-/*!
- Stub function.
- */
 bool ThumbnailManager::setQualityPreference( QualityPreference
     qualityPreference )
 {
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED(qualityPreference);
     return true;
 }
 
-/*!
- Stub function.
- */
 bool ThumbnailManager::setThumbnailSize( ThumbnailSize thumbnailSize )
 {
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED(thumbnailSize);
     return true;
 }
 
-/*!
- Stub function.
- */
 int ThumbnailManager::getThumbnail( const QString& fileName, void *clientData,
         int priority )
 {
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED(fileName);
     Q_UNUSED(priority);
 
@@ -109,11 +101,9 @@ int ThumbnailManager::getThumbnail( const QString& fileName, void *clientData,
     return mThumbnailReqCounter;
 }
 
-/*!
- Stub function.
- */
 bool ThumbnailManager::cancelRequest( int id )
 {
+    TX_ENTRY_ARGS("Stub")
     Q_UNUSED(id);
     mCancelCounter++;
     return true;

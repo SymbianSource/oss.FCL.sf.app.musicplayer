@@ -894,6 +894,7 @@ TBool CMPXDbPlugin::DoOpenL(
                 }
 
             case EBrowseAlbum:
+            case EBrowseAlbumMediaWall:
                 {
                 if( iAllSongsValid )
                     {
@@ -1259,8 +1260,15 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
         case 2:
             {
             MPX_PERF_START(CMPXDbPlugin_DoOpenBrowseAlbumL_All);
-
-            TRAPD(err, iDbHandler->GetAllAlbumsL(aAttrs, aArray) );
+            TInt err = 0;
+            if( aPath.Id(1).iId2 == EBrowseAlbumMediaWall ) 
+                {
+                TRAP(err, iDbHandler->GetAllAlbumsMediaWallL(aAttrs, aArray) );
+                }
+            else 
+                {
+                TRAP(err, iDbHandler->GetAllAlbumsL(aAttrs, aArray) );
+                }
             // in error case, return empty list and append empty id to path 
             // in order to increase one level 
             if ( err != KErrNone )
@@ -4339,6 +4347,7 @@ void CMPXDbPlugin::SetAttributesL(
                 break;
                 }
             case EBrowseAlbum:
+            case EBrowseAlbumMediaWall:
                 {
                 aAttrs.AppendL( TMPXAttribute(KMPXMediaIdMusic,
                     EMPXMediaMusicArtist | EMPXMediaMusicAlbum | EMPXMediaMusicAlbumArtFileName ) );

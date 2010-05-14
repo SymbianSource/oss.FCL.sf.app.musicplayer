@@ -20,7 +20,7 @@
 
 #include <QtTest/QtTest>
 
-//Forward declarations
+class QTranslator;
 class MpCollectionContainer;
 class MpCollectionContainerFactory;
 class MpCollectionDocumentLoader;
@@ -48,17 +48,42 @@ public slots:
 
 private slots:
 
-    void testConstructors();
-    void testSetupContainers();
-    void testItemActivated();
+    void testConstructorAllSongs();
+    void testConstructorArtists();
+    void testConstructorAlbums();
+    void testConstructorPlaylists();
+
+    void testSetupContainerAllSongs();
+    void testSetupContainerAllSongsFetcher();
+    void testSetupContainerAllSongsNoData();
+    void testSetupContainerArtists();
+    void testSetupContainerArtistsFetcher();
+    void testSetupContainerArtistsNoData();
+    void testSetupContainerAlbums();
+    void testSetupContainerAlbumsFetcher();
+    void testSetupContainerAlbumsNoData();
+    void testSetupContainerPlaylists();
+    void testSetupContainerPlaylistsFetcher();
+    void testSetupContainerPlaylistsNoData();
+
+    void testItemActivatedAllSongs();
+    void testItemActivatedArtists();
+    void testItemActivatedAlbums();
+    void testItemActivatedPlaylists();
+
     void testOnLongPressed();
-    
+
+    void testAlbumCenteredArtists();
+    void testAlbumCenteredAlbums();
+
 private:
 
     MpCollectionContainer           *mTest;
     MpCollectionView                *mView;
     MpCollectionDataModel           *mCollectionDataModel;
     MpMpxCollectionData             *mCollectionData;
+
+    QTranslator                     *mMpTranslator; // Own
 
 };
 

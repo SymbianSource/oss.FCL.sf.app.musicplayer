@@ -66,6 +66,7 @@ private slots:
     void testRenamePlaylist();
     void testDeleteSongs();
     void testSetShuffle();
+    void testCancel();
     void testPreviewItem();
     void testOpenIsolatedCollection();
     void testHandleCollectionMessage();

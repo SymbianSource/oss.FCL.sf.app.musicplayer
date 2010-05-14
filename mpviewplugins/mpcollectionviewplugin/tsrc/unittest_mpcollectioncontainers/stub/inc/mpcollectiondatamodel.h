@@ -11,7 +11,8 @@
 *
 * Contributors:
 *
-* Description: Music Player collection abstract data model stub for testing mpcollectioncontainers
+* Description: Music Player collection abstract data model stub for testing
+*              mpcollectioncontainers.
 *
 */
 
@@ -38,7 +39,6 @@ public:
 
     void refreshModel();
     MpMpxCollectionData *collectionData();
-
 
 public:
 

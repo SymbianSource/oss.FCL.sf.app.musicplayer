@@ -75,6 +75,7 @@ LIBRARY         efsrv.lib
 LIBRARY         bafl.lib
 LIBRARY         aknskins.lib
 LIBRARY         aknicon.lib
+LIBRARY         fbscli.lib
 LIBRARY         commonengine.lib
 LIBRARY         sendui.lib
 LIBRARY         centralrepository.lib

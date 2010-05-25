@@ -191,6 +191,11 @@ EXPORT_C CMPXMetadataEditorDialog::~CMPXMetadataEditorDialog()
     delete iParam;
     delete iIdle;
     delete iDrmInfo;
+    if ( iPlaybackUtility ) 
+        { 
+        iPlaybackUtility->CancelRequest(); 
+        iPlaybackUtility->Close(); 
+        } 
     if ( iCollectionUtility )
         {
         iCollectionUtility->Close();
@@ -1118,51 +1123,43 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL(
         PopulatePodcastFileDetailsL( aHeadingsArray, aDataArray );
         }
 
-    // Get modified
-    if ( iMedia->IsSupported( KMPXMediaGeneralDate ) )
-        {
-        TInt64 timeInt( ( TInt64 )iMedia->ValueTObjectL<TInt64>(
-            KMPXMediaGeneralDate ) );
-        TTime time( timeInt );
-        ConvertToLocalTimeL(time);
-        HBufC* modDateTime = HBufC::NewLC(
-            KMPXMaxTimeLength + KMPXDurationDisplayResvLen );
-        HBufC* format = StringLoader::LoadLC(
-            R_QTN_DATE_USUAL_WITH_ZERO );
-        TPtr modDatePtr = modDateTime->Des();
-        MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
-        CleanupStack::PopAndDestroy( format );
-        if (err != KErrNone)
-            {
-            aDataArray->AppendL( KNullDesC );
-            }
-        else
-            {
-            format = StringLoader::LoadLC(
-                R_QTN_TIME_USUAL_WITH_ZERO );
-            HBufC* modTime = HBufC::NewLC(
-                format->Length() + KMPXDurationDisplayResvLen );
-            TPtr modTimePtr = modTime->Des();
-            MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
-            if ( err != KErrNone )
-                {
-                aDataArray->AppendL( KNullDesC );
-                }
-            else
-                {
-                modDatePtr.Append( KMPXSpace );
-                modDatePtr.Append( modTimePtr );
-                aDataArray->AppendL( modDatePtr );
-                }
-            CleanupStack::PopAndDestroy( modTime );
-            CleanupStack::PopAndDestroy( format );
-            }
-        CleanupStack::PopAndDestroy( modDateTime );
-        }
-    else
-        {
-        aDataArray->AppendL( KNullDesC );
-        }
+    // Get last modified time
+    TTime time;
+    User::LeaveIfError( fs.Modified( uri, time ) );
+    ConvertToLocalTimeL( time );
+	HBufC* modDateTime = HBufC::NewLC(
+		KMPXMaxTimeLength + KMPXDurationDisplayResvLen );
+	HBufC* format = StringLoader::LoadLC(
+		R_QTN_DATE_USUAL_WITH_ZERO );
+	TPtr modDatePtr = modDateTime->Des();
+	MPX_TRAPD( error, time.FormatL( modDatePtr, *format ) );
+	CleanupStack::PopAndDestroy( format );
+	if (error != KErrNone)
+		{
+		aDataArray->AppendL( KNullDesC );
+		}
+	else
+		{
+		format = StringLoader::LoadLC(
+			R_QTN_TIME_USUAL_WITH_ZERO );
+		HBufC* modTime = HBufC::NewLC(
+			format->Length() + KMPXDurationDisplayResvLen );
+		TPtr modTimePtr = modTime->Des();
+		MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
+		if ( err != KErrNone )
+			{
+			aDataArray->AppendL( KNullDesC );
+			}
+		else
+			{
+			modDatePtr.Append( KMPXSpace );
+			modDatePtr.Append( modTimePtr );
+			aDataArray->AppendL( modDatePtr );
+			}
+		CleanupStack::PopAndDestroy( modTime );
+		CleanupStack::PopAndDestroy( format );
+		}
+	CleanupStack::PopAndDestroy( modDateTime );
 
     // Get filename
     AppendStringToArrayL( aDataArray, iMedia->ValueText(
@@ -2485,8 +2482,8 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
     else // Dialog launched from NowPlayingView
         {
         // Get the playback utility instance from engine.
-        MMPXPlaybackUtility* playbackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
-        MMPXSource* s = playbackUtility->Source();
+        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
+        MMPXSource* s = iPlaybackUtility->Source();
         if ( s )
             {
             RArray<TMPXAttribute> attrs;
@@ -2504,7 +2501,6 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
                 s->MediaL(attrs.Array(), *this);
                 CleanupStack::PopAndDestroy( &attrs );
             }  
-        playbackUtility->Close();
         }
     
 
@@ -2990,25 +2986,21 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL()
         {
           PopulatePodcastFileDetailsL();
         }
-// Get modified
-if ( iMedia->IsSupported( KMPXMediaGeneralDate ) )
-    {
-    TInt64 timeInt( ( TInt64 )iMedia->ValueTObjectL<TInt64>(
-            KMPXMediaGeneralDate ) );
-    TTime time( timeInt );
-    ConvertToLocalTimeL(time);
+    // Get last modified time
+    TTime time;
+    User::LeaveIfError( fs.Modified( uri, time ) );
+    ConvertToLocalTimeL( time );
     HBufC* modDateTime = HBufC::NewLC(
             KMPXMaxTimeLength + KMPXDurationDisplayResvLen );
     HBufC* format = StringLoader::LoadLC(
             R_QTN_DATE_USUAL_WITH_ZERO );
     TPtr modDatePtr = modDateTime->Des();
-    MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
+    MPX_TRAPD( error, time.FormatL( modDatePtr, *format ) );
     CleanupStack::PopAndDestroy( format );
-    if (err != KErrNone)
+    if ( error != KErrNone)
         {
         SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
                 KNullDesC, KNullDesC);
-
         }
     else
         {
@@ -3037,13 +3029,6 @@ if ( iMedia->IsSupported( KMPXMediaGeneralDate ) )
         CleanupStack::PopAndDestroy( format );
         }
     CleanupStack::PopAndDestroy( modDateTime );
-    }
-else
-    {
-    SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastModified,
-            KNullDesC, KNullDesC);
-
-    }
 
 // Get filename
 SetControlTextL(EMPXMetadataEditorDlgCtrlIdCopyright,

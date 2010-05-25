@@ -2504,12 +2504,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
     {
     MPX_FUNC_EX( "CMPXCommonPlaybackViewImp::DoActivateL()" );
 
-    if( aPrevViewId.iAppUid == KAppUidMusicPlayerX && iContainer )
-        {
-        // record the begin state for the transition animation.
-        iContainer->BeginTransition();
-        }
-            
     iSwitchingView = EFalse;
     iDatabaseNotReady = EFalse;
 	iUnsupportedNoteDisabled = EFalse;
@@ -2569,6 +2563,14 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DoActivateL(
 #endif // __ENABLE_MSK
             }
         }
+
+    if( aPrevViewId.iAppUid == KAppUidMusicPlayerX && iContainer )
+        {
+		iContainer->SetTransitionType(EMPXTranstionToLeft);
+        // Transition was started in collection view, we end it here.
+        iContainer->EndTransition();
+        }
+
 
     iPlaybackState = iPlaybackUtility->StateL();
     MPX_DEBUG2("CMPXCommonPlaybackViewImp::DoActivateL(): state = %d", iPlaybackState);
@@ -4076,6 +4078,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::LaunchFileDetailsDialogL()
         {
         toolbar->SetToolbarVisibility(ETrue);
         }
+    iContainer->SetRect( ClientRect());
+    iContainer->DrawDeferred();
     }
     
 //  End of File

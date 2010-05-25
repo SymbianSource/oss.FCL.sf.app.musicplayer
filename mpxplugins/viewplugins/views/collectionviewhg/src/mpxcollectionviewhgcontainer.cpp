@@ -105,6 +105,8 @@ const TInt KMPXMaxFileLength = 256;
 const TReal KIconFactor = 0.7;
 
 const TInt KThumbLoadingPauseForTransition(500000);
+const TInt KMPXInterviewTransition = 0;
+const TInt KMPXIntraviewTransition = 1;
 
 _LIT( KMPXDash, " - " );
 #ifdef HG_MP_LOC_AVAILABLE
@@ -112,14 +114,6 @@ _LIT( KMPXSpace, " ");
 #endif //HG_MP_LOC_AVAILABLE
 _LIT( KMPXZeroDurationMark, "--");
 
-_LIT( KSong, " song" );
-_LIT( KSongs, " songs" );
-_LIT( KEpisode, " episode" );
-_LIT( KEpisodes, " episodes" );
-_LIT( KAlbum, " album" );
-_LIT( KAlbums, " albums" );
-_LIT( KSongDash, " song - " );
-_LIT( KSongsDash, " songs - " );
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -217,12 +211,6 @@ CMPXCollectionViewHgContainer::~CMPXCollectionViewHgContainer()
     delete iPlaylist;
     delete iPlaylistHelper;
 
-    if( iAsyncCallBack )
-        {
-        iAsyncCallBack->Cancel();
-        }
-    delete iAsyncCallBack;
-
     iCoeEnv->RemoveForegroundObserver( *this );
     }
 
@@ -274,9 +262,7 @@ void CMPXCollectionViewHgContainer::ConstructL()
     iIsForeground = ETrue;
     iCoeEnv->AddForegroundObserverL( *this );
 
-    TCallBack callback(CMPXCollectionViewHgContainer::AsyncCallback, this);
-    iAsyncCallBack = new (ELeave) CAsyncCallBack( CActive::EPriorityStandard );
-    iAsyncCallBack->Set(callback);
+    iPreviousOrientation = Layout_Meta_Data::IsLandscapeOrientation();
 
     GfxTransEffect::Enable();
 
@@ -728,12 +714,12 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             {
             delete iIconArray;
             iIconArray = NULL;
-            CreateIconArrayL();
 
             if( iCurrentViewType == EMPXViewMediawall || iCurrentViewType == EMPXViewTBone )
                 {
             	iMediaWall->SetDefaultIconL(NULL);
-                iMediaWall->EnableScrollBufferL(*this, KMPXListBufferSize, KMPXListBufferSize/4);
+            	CreateIconArrayL();
+                iMediaWall->EnableScrollBufferL(*this, KMPXListBufferSizeWithMediaWall, KMPXListBufferSizeWithMediaWall/4);
                 }
             else
                 {
@@ -741,14 +727,45 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
                 if( list )
                     {
                     list->SetDefaultIconL(NULL);
-                    list->EnableScrollBufferL(*this, KMPXListBufferSizeWithMediaWall, KMPXListBufferSizeWithMediaWall/4);
+            		CreateIconArrayL();
+                    list->EnableScrollBufferL(*this, KMPXListBufferSize, KMPXListBufferSize/4);
                     }
                 }
-			SetDetailIconShuffleL();
+            // Reset the shuffle item for TBone view
+			if ( iCurrentViewType == EMPXViewTBone )
+				{
+				if (iMwListWidget && iMwListWidget->ItemCount() > 1)
+					{
+					SetShuffleItemToListL(iMwListWidget);
+					}
+				}
+			// Songs dialog is opened in mediawall, we need to reset its shuffle item
+			else if ( iCurrentViewType == EMPXViewMediawall && iDialog )
+				{
+				CAknIconArray* iconArray = new( ELeave ) CAknIconArray( 1 );
+				CleanupStack::PushL( iconArray );
+				// Prepare icon array.
+				CGulIcon* icon = (*iIconArray)[EMPXClvIconShuffle];
+				CGulIcon* iconCopy = CGulIcon::NewL(icon->Bitmap(), icon->Mask());
+				iconCopy->SetBitmapsOwnedExternally(ETrue);
+				iconArray->AppendL(iconCopy);
+				CAknSingleGraphicPopupMenuStyleListBox* listbox = (CAknSingleGraphicPopupMenuStyleListBox *)iDialog->ListBox();
+				listbox->ItemDrawer()->ColumnData()->SetIconArrayL( iconArray );
+				CleanupStack::Pop(); // iconArray
+				}
+			else
+				{
+            	// Reset the shuffle item for other views
+				SetDetailIconShuffleL();
+				}
             }
-        else if ( aType == KEikDynamicLayoutVariantSwitch )
+        else if ( aType == KEikDynamicLayoutVariantSwitch &&
+        		( iPreviousOrientation != landscapeOrientation ) )
             {
             iLayoutSwitch = ETrue;
+			// To prevent multiple layout change causing multiple repopulation of the list.
+			// Temporary fix until rootcause is found.
+            iPreviousOrientation = landscapeOrientation;
 
             if ( iCurrentViewType == EMPXViewMediawall )
                 {
@@ -756,9 +773,6 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
                     {
                     iDialog->CancelPopup();
                     }
-                // make cba visible so that visible screen area is calculated correctly in list view
-                if( iCbaHandler )
-                    iCbaHandler->ChangeCbaVisibility( ETrue );
                 }
             iSetEmptyTextNeeded = ETrue;
 
@@ -1227,8 +1241,13 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
             if ( pbv )
                 {
             	iPreviousViewId = TUid::Uid(0);
+            	SetupTransitionType(KMPXInterviewTransition, pbv);
                 }
-            BeginFullScreenAnimation( pbv );
+            else // intraview transitions
+				{
+            	SetupTransitionType(KMPXIntraviewTransition);
+				}
+            BeginFullScreenAnimation();
             }
 
         switch (iCurrentViewType)
@@ -1269,7 +1288,6 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
 
     DrawableWindow()->SetOrdinalPosition( -1 );
 
-    CleanPrevView();
     iPrevViewType = iCurrentViewType;
     iPrevContext = iContext;
     if ( iSetEmptyTextNeeded )
@@ -1277,11 +1295,6 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
         LoadAndSetEmptyTextL();
         iSetEmptyTextNeeded = EFalse;
         }
-    if( !iDefaultIconSet )
-        {
-        SetDefaultIconL();
-        }
-
     iLayoutSwitch = EFalse;
     }
 
@@ -1518,9 +1531,15 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
              SaveSelectedAlbumItemL( iSelectedAlbumIndex );
             }
 
+        TInt prevItemCount( iMediaWall->ItemCount() );
         iMediaWall->Reset();
         if ( aCount )
             {
+            // enable scroll buffering now as it has not been enabled when empty mediawall was constructed
+            if ( !prevItemCount )
+                {
+                iMediaWall->EnableScrollBufferL( *this, KMPXListBufferSizeWithMediaWall, KMPXListBufferSizeWithMediaWall/4 );
+                }
             iMediaWall->ResizeL( aCount );
             ProvideDataWithoutThumbnailsMwL(aMediaArray);
 
@@ -1608,13 +1627,22 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
         {
         MPX_DEBUG1("CMPXCollectionViewHgContainer::PrepareListL - EnableScrollBufferL");
         iListWidget->EnableScrollBufferL(*this, KMPXListBufferSize, KMPXListBufferSize/4);
+   		iDefaultIconSet = EFalse;
+		// Setting an empty icon to the list as default icon.
+        iListWidget->SetDefaultIconL(CGulIcon::NewL(new CFbsBitmap()));
+        CleanPrevView();
         }
     else
         {
+		// Note: Special case
+		// We need to clean previous view prior to setting default icon otherwise the
+		// icon will be set to the wrong scroller.
+		CleanPrevView();
+        SetDefaultIconL();
         EndFullScreenAnimation();
         iListWidget->RefreshScreen(0);
+    	iDefaultIconSet = ETrue;
         }
-    iDefaultIconSet = EFalse;
     }
 
 // ----------------------------------------------------------------------------
@@ -1661,7 +1689,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 				CHgVgMediaWall::EHgVgMediaWallStyleCoverflowTBonePortrait,
 				EFalse,
 				this,
-				DefaultIconL() );
+				CGulIcon::NewL( new CFbsBitmap()) );
 
 		if( !iIsForeground )
 		    iMediaWall->HandleLosingForeground();
@@ -1729,7 +1757,8 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
         OpenAlbumL(iAlbumIndex);
        }
     iMwListWidget->RefreshScreen(0);
-	iDefaultIconSet = ETrue;
+
+	CleanPrevView();
     }
 
 // ----------------------------------------------------------------------------
@@ -1754,7 +1783,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
         {
         switchBuffer = CMPXCollectionViewHgSwitchBuffer::CreateBufferLC( *iListWidget );
         }
-    else if ( iMediaWall )
+    else if ( iMediaWall && iPrevViewType == EMPXViewTBone )
         {
         switchBuffer = CMPXCollectionViewHgSwitchBuffer::CreateBufferLC( *iMediaWall );
         switchBuffer->SetIndexOffset(1);
@@ -1786,7 +1815,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
         // Check if the list is empty, Enable scroll buffer won't call requst if list is empty
         if( iMediaWall->ItemCount() != 0 )
             {
-        		iMediaWall->EnableScrollBufferL(
+        	iMediaWall->EnableScrollBufferL(
                 *this,
                 KMPXListBufferSizeWithMediaWall,
                 KMPXListBufferSizeWithMediaWall / 4);
@@ -1819,7 +1848,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
 		// Check if the list is empty, Enable scroll buffer won't call requst if list is empty
         if( iMediaWall->ItemCount() != 0 )
             {
-        		iMediaWall->EnableScrollBufferL(
+        	iMediaWall->EnableScrollBufferL(
                 *this,
                 KMPXListBufferSizeWithMediaWall,
                 KMPXListBufferSizeWithMediaWall / 4);
@@ -1840,11 +1869,11 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
         iMediaWall->SetFlags( CHgVgMediaWall::EHgVgMediaWallDrawToWindowGC );
         }
 
-	if( iPopupListRect == TRect(0,0,0,0) )
-		{
-	    ResolvePopupListSizeL();
-		}
-
+	  if( iPopupListRect == TRect(0,0,0,0) )
+		   {
+	     ResolvePopupListSizeL();
+		   }
+		
     iMediaWall->SetOpenedItemRect( iPopupListRect );
     iMediaWall->SetOpeningAnimationType( CHgVgMediaWall::EHgVgOpeningAnimationZoomToFront );
 
@@ -1855,6 +1884,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
         switchBuffer = NULL;
         }
 	iDefaultIconSet = ETrue;
+	CleanPrevView();
     }
 
 // ----------------------------------------------------------------------------
@@ -2114,6 +2144,10 @@ void CMPXCollectionViewHgContainer::HandleItemCommandL( TInt aCommand )
                     break;
                 }
             }
+        // Start animation now as next view activated is
+        // now playing view. We will end animation in now playing view.
+        SetupTransitionType(KMPXInterviewTransition);
+        BeginFullScreenAnimation();
         }
     }
 
@@ -2172,6 +2206,10 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
 		{
         SaveSelectedAlbumItemL(iSelectedAlbumIndex);
 		UpdatePathAndOpenL(index);
+        // Start animation now as next view activated is
+        // now playing view. We will end animation in now playing view.
+        SetupTransitionType(KMPXInterviewTransition);
+        BeginFullScreenAnimation();
 		}
     else if ( iContext == EContextGroupAlbum )
         {
@@ -2192,6 +2230,10 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
             // To open the selected album.
             iView->ProcessCommandL( EMPXCmdCommonEnterKey );
             }
+        // Start animation now as next view activated is
+        // now playing view. We will end animation in now playing view.
+        SetupTransitionType(KMPXInterviewTransition);
+        BeginFullScreenAnimation();
         }
     else
 		{
@@ -2238,6 +2280,10 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex, CCoeControl* aCont
            // Open the selected song of album
             UpdatePathAndOpenL(index);
             }
+        // Start animation now as next view activated is
+        // now playing view. We will end animation in now playing view.
+        SetupTransitionType(KMPXInterviewTransition);
+        BeginFullScreenAnimation();
         }
     else if ( iContext == EContextGroupAlbum  )
         {
@@ -2247,6 +2293,13 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex, CCoeControl* aCont
 			if (!ShufflePlayAllL(index))
 				{
 	            OpenAlbumL(index);
+				}
+			else
+				{
+				// Start animation now as next view activated is
+				// now playing view. We will end animation in now playing view.
+				SetupTransitionType(KMPXInterviewTransition);
+				BeginFullScreenAnimation();
 				}
             }
         }
@@ -2656,11 +2709,16 @@ void CMPXCollectionViewHgContainer::RefreshL(TInt aDisplayIndex)
 			}
         if ( canRefresh )
             {
+			if( !iDefaultIconSet )
+				{
+				SetDefaultIconL();
+				iDefaultIconSet = ETrue;
+				}
             if( iCurrentViewType == EMPXViewTBone || iCurrentViewType == EMPXViewMediawall )
                 {
                 if( iTranstionType != EMPXTranstionNotDefined )
                     {
-                    // This will tricker the transtition animation
+                    // This will trigger the transtition animation
                     EndFullScreenAnimation();
                     iMediaWall->DrawNow();
                     }
@@ -2673,7 +2731,7 @@ void CMPXCollectionViewHgContainer::RefreshL(TInt aDisplayIndex)
                 {
                 if( iTranstionType != EMPXTranstionNotDefined )
                     {
-                    // This will tricker the transtition animation
+                    // This will trigger the transtition animation
                     // Use DrawNow since RefreshScreen uses DrawDeferred and we want to start
                     // the animation immediately.
                     EndFullScreenAnimation();
@@ -2781,7 +2839,7 @@ void CMPXCollectionViewHgContainer::SetDefaultIconL()
 		case EContextItemAlbum:
             {
             defaultIcon = EMPXDefaultIconAlbum;
-            iconIndex = EMPXClvIconAlbum;
+            iconIndex = 27; // default album art in mediawall and list view
 			break;
 			}
 		case EContextGroupPodcast:
@@ -4487,8 +4545,8 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
     TInt songCount = songArray->Count();
 
     CDesC16ArrayFlat* songList = new (ELeave) CDesC16ArrayFlat(songCount);
-    CleanupStack::PushL(songList); 
-    
+    CleanupStack::PushL(songList);
+
     if ( songCount > 1 )
         {
         HBufC* shuffleText = StringLoader::LoadLC(
@@ -4557,6 +4615,10 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
         SaveSelectedAlbumItemL(iSelectedAlbumIndex);
         // Open the selected song of album
         UpdatePathAndOpenL(index);
+        // Start animation now as next view activated is
+        // now playing view. We will end animation in now playing view.
+        SetupTransitionType(KMPXInterviewTransition);
+        BeginFullScreenAnimation();
         }
     else if( !iLayoutSwitch && iMediaWall )
         {
@@ -4797,6 +4859,11 @@ void CMPXCollectionViewHgContainer::ReadFromStreamFileL( CMPXMedia* aMedia )
 void CMPXCollectionViewHgContainer::HandleGainingForeground()
     {
     iIsForeground = ETrue;
+    if ( iCurrentViewType == EMPXViewMediawall )
+        {
+        if( iCbaHandler )
+            iCbaHandler->ChangeCbaVisibility( EFalse );
+        }
     }
 
 void CMPXCollectionViewHgContainer::HandleLosingForeground()
@@ -4869,6 +4936,7 @@ void CMPXCollectionViewHgContainer::PrepareTboneViewL()
 
     if( !iLayoutSwitch  )
         {
+		SetupTransitionType(KMPXIntraviewTransition);
         BeginFullScreenAnimation();
         }
 
@@ -4877,14 +4945,8 @@ void CMPXCollectionViewHgContainer::PrepareTboneViewL()
 
     DrawableWindow()->SetOrdinalPosition( -1 );
 
-    CleanPrevView();
-
     iPrevViewType = iCurrentViewType;
 
-    if( !iDefaultIconSet )
-        {
-        SetDefaultIconL();
-        }
     // We need to adjust the CBA for this view.
 	if( iCbaHandler )
 		iCbaHandler->UpdateCba();
@@ -5012,40 +5074,10 @@ void CMPXCollectionViewHgContainer::SetPreviousViewId(TUid aViewUid)
 // Prepare and begin fullscreen animation effects
 // ---------------------------------------------------------------------------
 //
-void CMPXCollectionViewHgContainer::BeginFullScreenAnimation(TBool aPrevViewWasPlayback)
+void CMPXCollectionViewHgContainer::BeginFullScreenAnimation()
     {
-    if( iTranstionType != EMPXTranstionNotDefined )
+    if( iTranstionType == EMPXTranstionNotDefined )
         return;
-
-    iTranstionType = EMPXTranstionToLeft;
-
-    if ( (iPrevContext == EContextUnknown ||
-          iPrevContext == EContextItemAlbum ) && aPrevViewWasPlayback )
-        {
-        iTranstionType = EMPXTranstionToLeft;
-        }
-    else if( iPrevContext == EContextUnknown )
-        {
-        // We aren't coming from playback view and prev context is unknown.
-        // Musicplayer is propably started so we shouldn't use any animation.
-        iTranstionType = EMPXTranstionNotDefined;
-        return;
-        }
-    else if( iContext == EContextItemAlbum ||
-             iContext == EContextItemGenre ||
-             iContext == EContextItemPlaylist )
-        {
-        iTranstionType = EMPXTranstionToRight;
-        }
-
-    if( iPrevViewType == EMPXViewMediawall || iPrevViewType == EMPXViewTBone )
-        {
-        iMediaWall->SetFlags( CHgVgMediaWall::EHgVgMediaWallDrawToWindowGC );
-        iMediaWall->DrawNow();
-		// workaround for NGA animations: includes Media Wall into transition animation.
-		iCoeEnv->WsSession().Finish();
-		User::After(1000);
-        }
 
     const TInt flags = AknTransEffect::TParameter::EActivateExplicitCancel;
     TRect appRect = ((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect();
@@ -5067,6 +5099,48 @@ void CMPXCollectionViewHgContainer::EndFullScreenAnimation()
         // TODO: uncomment if really needed.
         //iThumbnailManager->Pause(TTimeIntervalMicroSeconds32(KThumbLoadingPauseForTransition));
         }
+    }
+
+// ---------------------------------------------------------------------------
+// Setup transition types for animation.
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgContainer::SetupTransitionType( TInt aType, TBool aPrevViewWasPlayback )
+    {
+	if ( aType == KMPXIntraviewTransition )
+		{
+		iTranstionType = EMPXTranstionToLeft;
+
+		if( iPrevContext == EContextUnknown )
+			{
+			// We aren't coming from playback view and prev context is unknown.
+			// Musicplayer is propably started so we shouldn't use any animation.
+			iTranstionType = EMPXTranstionNotDefined;
+			return;
+			}
+		else if( iContext == EContextItemAlbum ||
+				 iContext == EContextItemGenre ||
+				 iContext == EContextItemPlaylist )
+			{
+			iTranstionType = EMPXTranstionToRight;
+			}
+
+		if( iPrevViewType == EMPXViewMediawall || iPrevViewType == EMPXViewTBone )
+			{
+			iMediaWall->SetFlags( CHgVgMediaWall::EHgVgMediaWallDrawToWindowGC );
+			iMediaWall->DrawNow();
+			}
+		}
+	else // interview transition
+		{
+
+		iTranstionType = EMPXTranstionToRight;
+		if ( (iPrevContext == EContextUnknown ||
+			  iPrevContext == EContextItemAlbum ) && aPrevViewWasPlayback )
+			{
+			iTranstionType = EMPXTranstionToLeft;
+			}
+		}
     }
 
 // ---------------------------------------------------------------------------

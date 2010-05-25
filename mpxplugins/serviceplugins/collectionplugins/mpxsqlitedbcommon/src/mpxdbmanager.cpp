@@ -29,7 +29,7 @@
 #include <sysutil.h>
 #ifdef __RAMDISK_PERF_ENABLE
 #include <centralrepository.h>
-#include <BAUTILS.H>  
+#include <bautils.h>  
 #include <mpxinternalcrkeys.h>
 #endif //__RAMDISK_PERF_ENABLE
 

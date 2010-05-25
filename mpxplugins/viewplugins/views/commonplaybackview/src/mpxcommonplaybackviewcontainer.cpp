@@ -1160,7 +1160,6 @@ EXPORT_C void CMPXCommonPlaybackViewContainer::SizeChanged()
     {
     MPX_FUNC("CMPXCommonPlaybackViewContainer::SizeChanged()");
     UpdateLayout();
-    UpdateSoftkeyColors();
     UpdateBackgroundSkinControlContext( Rect() );
     }
 
@@ -1671,4 +1670,13 @@ void CMPXCommonPlaybackViewContainer::EndTransition()
         }
     }
 
+
+// -----------------------------------------------------------------------------
+// CMPXCommonPlaybackViewContainer::SetTransitionType
+// -----------------------------------------------------------------------------
+//
+void CMPXCommonPlaybackViewContainer::SetTransitionType( TTransitionType aTransitionType )
+    {
+	iTransitionType = aTransitionType;
+    }
 //  End of File

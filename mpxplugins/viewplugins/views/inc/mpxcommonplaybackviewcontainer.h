@@ -399,10 +399,19 @@ public:
 
     /**
      * Records the transition animation begin state. 
-     * Animation is started when albumart is fetched.
      */
     void BeginTransition();
-    
+
+    /**
+     * Mark the end state. Triggers the transtition.
+     */
+    void EndTransition();
+
+    /**
+     * Sets the transtition type for animation.
+     */
+    void SetTransitionType( TTransitionType aTransitionType );
+
 private:
 
     /**
@@ -410,11 +419,8 @@ private:
      */
     void DoUpdateLayoutL();
 
-    /**
-     * Trickers the transtition.
-     */
-    void EndTransition();
-    
+
+
  protected:   // data
 
     MEikCommandObserver* iCommandObserver;  // not owned

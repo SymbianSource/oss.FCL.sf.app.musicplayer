@@ -580,7 +580,7 @@ RESOURCE AVKON_LAYOUT_RECT r_mpx_screensaver_indi_layout_qhd_portrait
 //
 RESOURCE AVKON_LAYOUT_LABEL r_mpx_screensaver_title_layout_qhd_portrait
     {
-    font = EAknLogicalFontPrimaryFont; C = 0; l = 44; r = 10; B = 118; W = 298; J = ELayoutAlignLeft;
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 44; r = 10; B = 107; W = 298; J = ELayoutAlignLeft;
     }
 
 // ---------------------------------------------------------------------------

@@ -180,14 +180,16 @@ NONSHARABLE_CLASS(CMPXLocalAudioPlayback) : public CMPXPlaybackPlugin,
         /**
         * Sets the volume level in audio controller
         * @param aVolume Volume level, ranges from 0 - KPbPlaybackVolumeLevelMax
+        * @param aNotifyChange ETrue if EPVolumeChanged must be sent to observer
         */
-        void SetVolume( TInt aVolume );
+        void SetVolume( TInt aVolume, TBool aNotifyChange = ETrue );
 
         /**
         * Sets the volume level in audio controller to mute.
         * @param aMute ETrue to indicated mute
+        * @param aNotifyChange ETrue if EPMuteChanged must be sent to observer 
         */
-        void SetMute( TBool aMute );
+        void SetMute( TBool aMute, TBool aNotifyChange = ETrue );
 
         /**
         *  Consumes the rights for the current media according

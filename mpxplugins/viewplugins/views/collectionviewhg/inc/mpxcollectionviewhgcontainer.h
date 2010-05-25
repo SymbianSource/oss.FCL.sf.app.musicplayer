@@ -556,11 +556,8 @@ public:
 
 	/**
 	 * Records begin state for the transition animation.
-	 *
-	 * @param aPrevViewWasPlayback ETrue if previous view was playback.
-	 *     This information used to decide animation direction.
 	 */
-	void BeginFullScreenAnimation( TBool aPrevViewWasPlayback = EFalse );
+	void BeginFullScreenAnimation();
 
 	/**
 	 * Set the previous view Uid
@@ -876,6 +873,14 @@ private:
      */
     void ResolvePopupListSizeL();
 
+    /**
+     * Setup transition type
+	 * @param aType Type of transition to be used.
+	 * @param aPrevViewWasPlayback ETrue if previous view was playback.
+	 *     This information used to decide animation direction.
+	 */
+    void SetupTransitionType( TInt aType, TBool aPrevViewWasPlayback = EFalse );
+
 private: // data member
 
     /**
@@ -1006,6 +1011,7 @@ private: // data member
     TBool iLayoutSwitch;
     TRect iPopupListRect;
     TUid iPreviousViewId;
+    TBool iPreviousOrientation;
     };
 
 #endif  // CMPXCOLLECTIONVIEWHGCONTAINER_H

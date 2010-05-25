@@ -26,7 +26,7 @@
 
 // INCLUDES
 #include <eikclb.h>
-#include <aknwaitdialog.h>
+#include <AknWaitDialog.h>
 #include <eikprogi.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxcollectionobserver.h>

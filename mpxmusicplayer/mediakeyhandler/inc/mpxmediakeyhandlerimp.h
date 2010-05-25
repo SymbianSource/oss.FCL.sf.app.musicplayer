@@ -342,6 +342,11 @@ private:
      * @return The check result. If mpx is foreground, return true.
      */
     TBool IsAppForeground();
+    
+    static VolumePopupSynchTimerCallback( TAny* aPtr );
+    void DoVolumePopupSynch();
+    void StartVolumePopupSynchTimer();
+    
 
 private:    // Data
 
@@ -375,13 +380,12 @@ private:    // Data
     TInt iCurrentVol;
     TBool iIncreaseVol;
     TBool iMuted;
-    TInt iTouchVolEventCount;
-    TInt iVolumeEventCount;
     TInt iVolumeSteps;			// Number of volume steps in ui
     #ifdef UPNP_INCLUDED
     CUpnpCopyCommand* iUpnpCopyCommand;
     #endif
     TInt iUpnpVolume; // absolute upnp volume value
+    CPeriodic* iVolumePopupSynchTimer;
     };
 
 #endif  // C_CMPXMEDIAKEYHANDLERIMP_H

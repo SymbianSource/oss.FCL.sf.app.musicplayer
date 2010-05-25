@@ -68,7 +68,7 @@ const TInt KMPXMaxVolume(100);		// Max volume used in volume popup
 const TInt KMPXVolumeSteps(1);
 const TInt KTenStepsVolume = 10;   
 const TInt KTwentyStepsVolume = 20;
-
+const TInt KVolumePopupSynchInterval = 300000; // 300 ms
 const TRemConCoreApiOperationId KSupportedCoreFeatures[] = {
         ERemConCoreApiVolumeUp,
         ERemConCoreApiVolumeDown,
@@ -164,7 +164,10 @@ void CMPXMediaKeyHandlerImp::ConstructL(
         iVolPopup->SetObserver(this);
         iVolPopup->SetRange(KMPXMinVolume, iVolumeSteps);
         iVolPopup->SetStepSize(KMPXVolumeSteps);
-
+        // Ensure that initial value is set to popup. If not initialized, CAknVolumePopup::Value() returns 0 
+        // but the control appears unmuted and allows volume to be decreased out of range (panics also with Avkon 6 in UDEB)
+        iVolPopup->SetValue( 0 );
+        
         HBufC* popupText = StringLoader::LoadLC( R_MPX_VOLUME_POPUP_TEXT );
         iVolPopup->SetTitleTextL( *popupText );
         CleanupStack::PopAndDestroy( popupText );
@@ -207,6 +210,7 @@ void CMPXMediaKeyHandlerImp::ConstructL(
             }
         }
 #endif
+    iVolumePopupSynchTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     }
 
 // ---------------------------------------------------------------------------
@@ -232,6 +236,11 @@ MMPXMediaKeyHandler* CMPXMediaKeyHandlerImp::NewL(
 //
 CMPXMediaKeyHandlerImp::~CMPXMediaKeyHandlerImp()
     {
+    if ( iVolumePopupSynchTimer )
+        {
+        iVolumePopupSynchTimer->Cancel();
+        delete iVolumePopupSynchTimer;
+        }
     if ( iPlaybackUtility )
         {
         TRAP_IGNORE( iPlaybackUtility->RemoveObserverL( *this ) );
@@ -324,8 +333,6 @@ void CMPXMediaKeyHandlerImp::DoFilterAndSendCommandL(
 
         if ( forwardCommand )
             {
-            iVolumeEventCount++;
-        	
             TInt volume(0);
             TFileName subPlayerName;
             TMPXPlaybackPlayerType currentPlayerType = EPbLocal;
@@ -350,6 +357,7 @@ void CMPXMediaKeyHandlerImp::DoFilterAndSendCommandL(
                 volume = KMPXMaxVolume;
                 }
             
+            MPX_DEBUG3( "CMPXMediaKeyHandlerImp::DoFilterAndSendCommandL: aCommandId(%d), volume(%d)" , aCommandId, volume );
             iObserver->HandleMediaKeyCommand( aCommandId, volume );
             }
         }
@@ -461,91 +469,69 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                 }
             case EPbPropertyMute:
             	{
-                if ( iTouchVolEventCount > 0 )
-                    {
-                    --iTouchVolEventCount;
-                    }
-                if ( iVolumeEventCount > 0 )
-                	{
-                	--iVolumeEventCount;
-                	}
             	iMuted = aValue;
-            	if ( iMuted )
-            	    {
-            	    iVolPopup->SetValue( 0 );
-            	    }
-            	else
-            		{
-            		iVolPopup->SetValue( iCurrentVol );
-            		}
+            	StartVolumePopupSynchTimer();
 				break;
 				}
 			case EPbPropertyVolume:
                 {
-				if ( iVolPopup )
-					{
-	                if ( iTouchVolEventCount > 0 )
-	                    {
-	                    --iTouchVolEventCount;
-	                    }
-					// Avkon Volume has 10 steps, but the rest of the framework
-                    // has 100 steps. Need to scale it to 10 steps.
-                    if ( aValue > 0 )
+                // Avkon Volume has 10 steps, but the rest of the framework
+                // has 100 steps. Need to scale it to 10 steps.
+                if ( aValue > 0 )
+                    {
+                    aValue = aValue * iVolumeSteps;
+                    aValue = aValue / KPbPlaybackVolumeLevelMax;
+                    if ( aValue > iVolumeSteps )
                         {
-                        aValue = aValue * iVolumeSteps;
-                        aValue = aValue / KPbPlaybackVolumeLevelMax;
-                        if ( aValue > iVolumeSteps )
-                        	{
-                        	aValue = iVolumeSteps;
-                        	}
+                        aValue = iVolumeSteps;
                         }
+                    }
 
-					if( !iMuted && aValue > 0 ) // unmute
-			            {
-			            iMuted = EFalse;
-			            iCurrentVol = aValue;
-			            iVolPopup->SetValue( iCurrentVol );
-			            }
-		            else if( aValue == 0 ) // mute
-			            {
-			            if( !iMuted ) 
-				            {
-				            iMuted = ETrue;
-				            iVolPopup->SetValue( 0 );
-				            }
-			            }
-                    else if ( aValue != iCurrentVol && !iTouchVolEventCount && !iVolumeEventCount )
-					    {
-					    if ( aValue != 0 )
-					        {
-					        iCurrentVol = aValue;
-					        }
-				        iVolPopup->SetValue( iCurrentVol );
-					    }
-
-				    if ( iVolumeEventCount > 0 )
-				    	{
-				    	--iVolumeEventCount;
-					    }
-
-                    // send a command to UI to display Volume bar on device when controlling volume via UPnP  
-                    if ( IsUpnpVisibleL() && iPlayerState != EPbStateNotInitialised )
+                if( iMuted && aValue > 0  ) // unmute
+                    {
+                    iMuted = EFalse;
+                    iCurrentVol = aValue;
+                    }
+                else if( aValue == 0 ) // mute
+                    {
+                    if( !iMuted ) 
                         {
-                        TFileName subPlayerName;
-                        TMPXPlaybackPlayerType currentPlayerType = EPbLocal;
-                        GetSubPlayerInfoL( subPlayerName, currentPlayerType );
-
-                        if ( currentPlayerType != EPbLocal )
-                            {
-                            iObserver->HandleMediaKeyCommand( EPbCmdSetVolume, iUpnpVolume ); 
-                            }            
+                        iMuted = ETrue;
                         }
-							  
-					if ( iUpnpFrameworkSupport )
-						{
-						SetVolumePopupTitleL();
-						}
-					}
+                    }
+                    else if ( aValue != iCurrentVol )
+                    {
+                    if ( aValue != 0 )
+                        {
+                        iCurrentVol = aValue;
+                        }
+                    }
+                
+                if ( iCurrentVol == KErrNotFound ) // muted by some other application before launching Music Player
+                    {
+                    iCurrentVol = aValue;
+                    }
+                
+                StartVolumePopupSynchTimer();
+                
+                // send a command to UI to display Volume bar on device when controlling volume via UPnP  
+                if ( IsUpnpVisibleL() && iPlayerState != EPbStateNotInitialised )
+                    {
+                    TFileName subPlayerName;
+                    TMPXPlaybackPlayerType currentPlayerType = EPbLocal;
+                    GetSubPlayerInfoL( subPlayerName, currentPlayerType );
+
+                    if ( currentPlayerType != EPbLocal )
+                        {
+                        iObserver->HandleMediaKeyCommand( EPbCmdSetVolume, iUpnpVolume ); 
+                        }            
+                    }
+                          
+                if ( iUpnpFrameworkSupport )
+                    {
+                    SetVolumePopupTitleL();
+                    }
+					
 				break;
                 }
             default:
@@ -771,12 +757,16 @@ void CMPXMediaKeyHandlerImp::UpdateVolume()
 			{
 			iMuted = EFalse;
 			iCommandId = EPbCmdUnMuteVolume;
+            if ( iCurrentVol == 0 ) // prevent muting again when HandleControlEvent is called next time
+                {
+                iCurrentVol = 1; // "1" is the first step of 20-step volume
+                }
 			iVolPopup->SetValue( iCurrentVol );
 			}
 		else
 			{
 			iCommandId = EPbCmdSetVolume;
-			iCurrentVol = iCurrentVol < iVolumeSteps ? (iCurrentVol + 1) : iCurrentVol;	// +KMPXVolumeSteps; ?
+			iCurrentVol = iCurrentVol < iVolumeSteps ? (iCurrentVol + 1) : iCurrentVol;
 			iVolPopup->SetValue( iCurrentVol );
 			}
 		}
@@ -797,7 +787,7 @@ void CMPXMediaKeyHandlerImp::UpdateVolume()
 		else
 			{
 			iCommandId = EPbCmdSetVolume;
-			iCurrentVol = iCurrentVol - 1;	// KMPXVolumeSteps ?
+			iCurrentVol = iCurrentVol - 1;
 			iVolPopup->SetValue( iCurrentVol );
 			}
 		}
@@ -1241,6 +1231,7 @@ void CMPXMediaKeyHandlerImp::MrccatoSelectAudioInputFunction(
 //
 void CMPXMediaKeyHandlerImp::HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType )
 	{
+    MPX_FUNC("CMPXMediaKeyHandlerImp::HandleControlEventL");
 	if ( !AknLayoutUtils::PenEnabled() )
 		{
 		return;
@@ -1249,13 +1240,15 @@ void CMPXMediaKeyHandlerImp::HandleControlEventL( CCoeControl* aControl, TCoeEve
 	if( (aEventType == EEventStateChanged) && (aControl == iVolPopup) )
 		{
 		TInt vol = iVolPopup->Value();
-		if ( vol == iCurrentVol )
+		
+		MPX_DEBUG4( "CMPXMediaKeyHandlerImp::HandleControlEventL: vol(%d), iCurrentVol(%d), iMuted(%d)", vol, iCurrentVol, iMuted );
+		
+		if ( vol == iCurrentVol && vol != 0 )
 		    {
             if ( iMuted )
                 {
                 iMuted = EFalse;
                 FilterAndSendCommand( EPbCmdUnMuteVolume );
-                iTouchVolEventCount++;
                 }
             else
                 {
@@ -1273,7 +1266,6 @@ void CMPXMediaKeyHandlerImp::HandleControlEventL( CCoeControl* aControl, TCoeEve
 			    {
 			    iMuted = ETrue;
 			    FilterAndSendCommand( EPbCmdMuteVolume );
-			    iTouchVolEventCount++;
 			    }
 			}
 		else
@@ -1281,15 +1273,19 @@ void CMPXMediaKeyHandlerImp::HandleControlEventL( CCoeControl* aControl, TCoeEve
 			if ( iMuted )
 				{
 				iMuted = EFalse;
+				
+				if ( iCurrentVol == 0 ) // setting volume to 0 would reapply mute, use slider value instead
+				    {
+                    iCurrentVol = vol;
+				    }
+				
 				iVolPopup->SetValue( iCurrentVol );
 				FilterAndSendCommand( EPbCmdUnMuteVolume );
-				iTouchVolEventCount++;
 				}
 			else
 				{
 				iCurrentVol = vol;
 				FilterAndSendCommand( EPbCmdSetVolume );
-				iTouchVolEventCount++;
 				}
 			}
 		}
@@ -1318,5 +1314,61 @@ TBool CMPXMediaKeyHandlerImp::IsAppForeground()
         }
 
     return isForeground;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPXMediaKeyHandlerImp::VolumePopupSynchTimerCallback
+// ---------------------------------------------------------------------------
+//
+TInt CMPXMediaKeyHandlerImp::VolumePopupSynchTimerCallback( TAny* aPtr )
+    {
+    static_cast<CMPXMediaKeyHandlerImp*>( aPtr )->DoVolumePopupSynch();
+    return KErrNone;
+    }
+
+// ---------------------------------------------------------------------------
+// CMPXMediaKeyHandlerImp::DoVolumePopupSynch
+// ---------------------------------------------------------------------------
+//
+void CMPXMediaKeyHandlerImp::DoVolumePopupSynch()
+    {
+    MPX_FUNC("CMPXMediaKeyHandlerImp::DoVolumePopupSynch");
+    
+    iVolumePopupSynchTimer->Cancel();
+    
+    TInt popupValue = iVolPopup->Value();
+    
+    MPX_DEBUG4("CMPXMediaKeyHandlerImp::DoVolumePopupSynch: popupValue(%d), iMuted(%d), iCurrentVol(%d)",
+               popupValue, iMuted, iCurrentVol );
+    
+    if ( iMuted )
+        {
+        if ( popupValue != 0 )
+            {
+            MPX_DEBUG1("CMPXMediaKeyHandlerImp::DoVolumePopupSynch: popup out of synch (muted)" );
+            iVolPopup->SetValue( 0 );
+            }
+        }
+    else
+        {
+        if ( iCurrentVol != popupValue )
+            {
+            MPX_DEBUG1("CMPXMediaKeyHandlerImp::DoVolumePopupSynch: popup out of synch" );
+            iVolPopup->SetValue( iCurrentVol );
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CMPXMediaKeyHandlerImp::StartVolumePopupSynchTimer
+// ---------------------------------------------------------------------------
+//
+void CMPXMediaKeyHandlerImp::StartVolumePopupSynchTimer()
+    {
+    iVolumePopupSynchTimer->Cancel();
+    iVolumePopupSynchTimer->Start( KVolumePopupSynchInterval,
+                                   KVolumePopupSynchInterval,
+                                   TCallBack( VolumePopupSynchTimerCallback, this ) );
+
     }
 // End of File

@@ -1576,30 +1576,30 @@ RESOURCE TBUF r_qtn_mus_about_version
 // -----------------------------------------------------------------------------
 //
 RESOURCE DIALOG r_mpx_about_dialog
-     {
-     flags=EEikDialogFlagNoDrag |EEikDialogFlagCbaButtons |EEikDialogFlagWait;
-     buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
-     items =
-         {
-         DLG_LINE
-             {
-             type = EAknCtPopupHeadingPane;
-             id = EAknMessageQueryHeaderId;
-             control = AVKON_HEADING
-                 {
-                 headinglayout = R_AVKON_LIST_HEADING_PANE_POPUPS;
-                 };
-             },
-         DLG_LINE
-             {
-             type = EAknCtMessageQuery;
-             id = EAknMessageQueryContentId;
-             control = AVKON_MESSAGE_QUERY
-                 {
-                 };
-             }
-         };
-     }
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                headinglayout = R_AVKON_LIST_HEADING_PANE_POPUPS;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
 
 // ---------------------------------------------------------------------------
 // r_qtn_nmp_note_educating_the_user

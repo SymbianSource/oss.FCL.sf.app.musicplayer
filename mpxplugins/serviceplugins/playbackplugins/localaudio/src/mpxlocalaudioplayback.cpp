@@ -495,14 +495,14 @@ void CMPXLocalAudioPlayback::SetL(TMPXPlaybackProperty aProperty,TInt aValue)
         {
         case EPbPropertyVolume:
             {
-            SetVolume( aValue );
+            SetVolume( aValue, EFalse ); // don't notify MPX because playback engine converts EPSetComplete to EPropertyChanged
             break;
             }
         case EPbPropertyVolumeRamp:
             iPlayer->SetVolumeRamp(TTimeIntervalMicroSeconds(TInt64(aValue)));
             break;
         case EPbPropertyMute:
-            SetMute( aValue );
+            SetMute( aValue, EFalse ); // don't notify MPX because playback engine converts EPSetComplete to EPropertyChanged
             break;
         case EPbPropertyBalance:
             iPlayer->SetBalance(MMFBalance(aValue));
@@ -1110,7 +1110,7 @@ void CMPXLocalAudioPlayback::HandleSettingChange(
 // Sets the volume level in audio controller
 // ----------------------------------------------------------------------------
 //
-void CMPXLocalAudioPlayback::SetVolume( TInt aVolume )
+void CMPXLocalAudioPlayback::SetVolume( TInt aVolume, TBool aNotifyChange )
     {
     MPX_DEBUG3("-->CMPXLocalAudioPlayback::SetVolume 0x%08x vol (%d)", this, aVolume);
 
@@ -1162,9 +1162,15 @@ void CMPXLocalAudioPlayback::SetVolume( TInt aVolume )
                 }
             }
         }
+    else if ( volError == KErrNone && aVolume == currentVol && changed )
+        {
+        // volume changed only to player after it has been initialised, 
+        // no need to reflect this to upper layers as the stored setting haven't changed
+        changed = EFalse;
+        }
 
     // Notify observer if value changed
-    if ( changed )
+    if ( changed && aNotifyChange )
         {
         iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPVolumeChanged,
                                  aVolume,
@@ -1178,7 +1184,7 @@ void CMPXLocalAudioPlayback::SetVolume( TInt aVolume )
 // Sets the volume level in audio controller
 // ----------------------------------------------------------------------------
 //
-void CMPXLocalAudioPlayback::SetMute( TBool aMute )
+void CMPXLocalAudioPlayback::SetMute( TBool aMute, TBool aNotifyChange )
     {
     MPX_DEBUG3("-->CMPXLocalAudioPlayback::SetMute 0x%08x vol (%d)", this, aMute);
 
@@ -1214,10 +1220,14 @@ void CMPXLocalAudioPlayback::SetMute( TBool aMute )
             {
             MPX_TRAP( muteError, iMuteWatcher->SetValueL( aMute ) );
             }
+        else if ( changed ) // Cenrep setting hasn't changed, no need to propagate to MPX
+            {
+            changed = EFalse;
+            }
         }
 
     // Notify observer if value changed
-    if ( changed )
+    if ( changed  && aNotifyChange )
         {
         iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPMuteChanged,
                                  aMute,

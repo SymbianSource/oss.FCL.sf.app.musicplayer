@@ -159,6 +159,7 @@ const TInt KLowestMemoryNeeded = 5242880; //5 Mbytes
 const TUid KCRUidMPXMPSettings = {0x101FFCDC};
 const TUint32 KMPXMPPlaybackRandomMode = 0x0B;
 const TUint32 KMPXMPPlaybackRepeatMode = 0x0C;
+const TInt KIMMusicPluginUid  = 0x10282960;
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -3415,15 +3416,45 @@ void CMPXAppUi::HandleCommandL(
 
             MMPXPlaybackUtility* activePlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer );
 
-            MMPXPlayer* player =
-                activePlaybackUtility->PlayerManager().CurrentPlayer();
+            
+            MMPXSource* source = activePlaybackUtility->Source();
+            CMPXCollectionPlaylist* pl = NULL;
+            if( source )
+                {
+                CMPXCollectionPlaylist* pl = source->PlaylistL();
+                if (pl)
+                    {
+                    CleanupStack::PushL( pl );
+                    const CMPXCollectionPath& path = pl->Path();
+                    if(path.Levels() > 0)
+                        {
+                        //Fix for ou1cimx1#355699 Go to Now Playing view doesn’t work after application interaction
+                        //If active player is KIMMusicPluginUid i.e. embedded player, we don't want use it because
+                        //eventually plugin resolver resolves then wrong plugin. Instead of it get this instance's 
+                        //default playback utility 
+                        if ((TUid::Uid(path.Id(0)).iUid) == KIMMusicPluginUid)
+                            {
+                            source = NULL;
+                            activePlaybackUtility->Close();
+                            activePlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
+                            }
+                        }
+                    CleanupStack::PopAndDestroy( pl );
+					pl = NULL;
+                    }
+                }
+            
             TUid pluginUid( KNullUid );
             RArray<TUid> array;
             CleanupClosePushL( array );
 
+            MMPXPlayer* player =
+                activePlaybackUtility->PlayerManager().CurrentPlayer();
 
-            MMPXSource* source = activePlaybackUtility->Source();
-            CMPXCollectionPlaylist* pl = NULL;
+            if (!source)
+                {
+                source = activePlaybackUtility->Source();
+                }
             if( source )
                 {
                 pl = source->PlaylistL();

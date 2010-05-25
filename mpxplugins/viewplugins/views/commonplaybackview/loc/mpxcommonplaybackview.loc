@@ -103,8 +103,8 @@
 // d:A string in the main pane.
 // d:Shown in player view when player FM transmitter is turned on
 // d:%U is the FM frequency in MHz
-// l:mup3_progress_pane_t3
-// r:3.1
+// l:main_mup3_pane_t7/opt14
+// r:5.2
 //
 #define qtn_nmp_display_fm_freq "%U MHz"
 

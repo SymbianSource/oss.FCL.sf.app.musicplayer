@@ -472,7 +472,7 @@ void CMPXProgressDownloadSB::SetL(
         {
         case EPbPropertyVolume:
             {
-            SetVolume(aValue);
+            SetVolume( aValue, EFalse ); // don't notify MPX because playback engine converts EPSetComplete to EPropertyChanged
             }
             break;
         case EPbPropertyVolumeRamp:
@@ -489,7 +489,7 @@ void CMPXProgressDownloadSB::SetL(
             }
             break;
         case EPbPropertyMute:
-            SetMute( aValue );
+            SetMute( aValue, EFalse );  // don't notify MPX because playback engine converts EPSetComplete to EPropertyChanged
             break;
         case EPbPropertyBalance:
             break;
@@ -1372,7 +1372,7 @@ void CMPXProgressDownloadSB::HandleSettingChange(
 // Sets the volume level in audio controller
 // ----------------------------------------------------------------------------
 //
-void CMPXProgressDownloadSB::SetVolume( TInt aVolume )
+void CMPXProgressDownloadSB::SetVolume( TInt aVolume, TBool aNotifyChange )
     {
     MPX_DEBUG2("CMPXProgressDownloadSB::SetVolume(%d) entering", aVolume);
 
@@ -1430,7 +1430,7 @@ void CMPXProgressDownloadSB::SetVolume( TInt aVolume )
 
 
     // Notify observer if value changed
-    if ( changed )
+    if ( changed && aNotifyChange )
         {
         iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPVolumeChanged,
                                  aVolume,
@@ -1444,7 +1444,7 @@ void CMPXProgressDownloadSB::SetVolume( TInt aVolume )
 // Sets the volume level in audio controller
 // ----------------------------------------------------------------------------
 //
-void CMPXProgressDownloadSB::SetMute( TBool aMute )
+void CMPXProgressDownloadSB::SetMute( TBool aMute, TBool aNotifyChange )
     {
     MPX_DEBUG3("-->CMPXProgressDownloadSB::SetMute 0x%08x vol (%d)", this, aMute);
 
@@ -1483,7 +1483,7 @@ void CMPXProgressDownloadSB::SetMute( TBool aMute )
         }
 
     // Notify observer if value changed
-    if ( changed )
+    if ( changed && aNotifyChange )
         {
         iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPMuteChanged,
                                  aMute,

@@ -11,7 +11,8 @@
 *
 * Contributors:
 *
-* Description: Music Player collection data model stub for testing mpcollectioncontainers.
+* Description: Music Player collection abstract data model stub for testing
+*              mpcollectioncontainers.
 *
 */
 
@@ -28,8 +29,7 @@ MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject
     : QAbstractListModel(parent),
       mCollectionData(data)
 {
-    TX_ENTRY
-    TX_EXIT
+    TX_LOG
 }
 
 /*!
@@ -37,8 +37,7 @@ MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject
  */
 MpCollectionDataModel::~MpCollectionDataModel()
 {
-    TX_ENTRY
-    TX_EXIT
+    TX_LOG
 }
 
 /*!
@@ -65,8 +64,8 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
     Q_UNUSED(index);
     Q_UNUSED(role);
     QVariant returnValue = QVariant();
-    return returnValue;
     TX_EXIT
+    return returnValue;
 }
 
 /*!
@@ -74,8 +73,7 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
  */
 void MpCollectionDataModel::refreshModel()
 {
-    TX_ENTRY
-    TX_EXIT
+    TX_LOG
 }
 
 /*!

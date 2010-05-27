@@ -22,9 +22,10 @@
 #include <QString>
 #include <QPixmap>
 
+#include <hbicon.h>
+
 //forward declartions
 
-class HbIcon;
 class ThumbnailManager;
 
 #if defined(BUILD_MPDATA_LIB)
@@ -40,6 +41,7 @@ class MPDATA_EXPORT MpPlaybackData : public QObject
 public:
 
     enum SimplifiedState {
+        NotPlaying,
         Playing,
         Paused,
         Stopped
@@ -61,14 +63,19 @@ public:
     const QString& album() const;
     bool setUri( const QString& uri );
     const QString& uri() const;
-
     void setAlbumArtUri( const QString& albumArtUri );
     void albumArt( HbIcon& icon ) const;
-
+    bool setAlbumId( int id );
+    int albumId();
+    bool setId( int id );
+    int id();
+    bool setRealAudio( bool mode );
+    bool realAudio();
     void setPlaybackState( const SimplifiedState state );
     MpPlaybackData::SimplifiedState playbackState() const;
 
     void commitPlaybackInfo();
+    
 
 public slots:
 
@@ -81,7 +88,7 @@ signals:
     void albumArtReady();
     void playbackStateChanged();
     void playbackInfoChanged();
-
+    
 private:
 
     ThumbnailManager         *mThumbnailManager; //owned
@@ -93,9 +100,12 @@ private:
     QString                  mAlbum;
     QString                  mArtist;
     QString                  mUri;
-    HbIcon                   *mAlbumArt;
-    HbIcon                   *mDefaultAlbumArt;
+    int                      mAlbumId;
+    int                      mId;
+    HbIcon                   mAlbumArt;
+    HbIcon                   mDefaultAlbumArt;
     SimplifiedState          mPlaybackState;
+    bool                     mRealAudio;
 
     Q_DISABLE_COPY(MpPlaybackData)
 };

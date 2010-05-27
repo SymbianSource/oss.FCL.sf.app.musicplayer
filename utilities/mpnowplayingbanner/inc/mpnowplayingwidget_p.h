@@ -38,20 +38,28 @@ class MpNowPlayingWidgetPrivate : public QObject
 {
     Q_OBJECT
 
+private: 
+    enum BannerPressedState {
+        BannerNone,                // No button initially pressed
+        BannerIcon,                // Icon pressed first
+        BannerLabels               // Labels pressed first
+    };
+    
 public:
     explicit MpNowPlayingWidgetPrivate( long int playerId,
                                         MpNowPlayingWidget *qq );
     virtual ~MpNowPlayingWidgetPrivate();
 
-    void setEnabled(bool enabled );
+    void setEnabled( bool enabled );
     bool handleClickEvent( QGraphicsSceneMouseEvent *event );
-    void handleMousePressEvent(QGraphicsSceneMouseEvent *event, bool pressed);
-    void handleThemeChange();
+    void handleMousePressEvent( QGraphicsSceneMouseEvent *event, bool pressed );
+    void handleMouseMoveEvent( QGraphicsSceneMouseEvent *event );
 
 public slots:
 
-    void setState(SimplifiedPlayerState state);
-
+    void setState( SimplifiedPlayerState state );
+    void setTitle( const QString &title );
+    void setArtist( const QString &artist );
 private:
 
     MpNowPlayingWidget      *q_ptr;
@@ -60,13 +68,13 @@ private:
     SimplifiedPlayerState   mState;
     MpNowPlayingBackEnd     *mBackEnd;
 
-	HbIcon                  *mPlayIconNormal;
-    HbIcon                  *mPauseIconNormal;
-    HbIcon                  *mPlayIconPressed;
-    HbIcon                  *mPauseIconPressed;
+	HbIcon                  *mPlayIcon;
+    HbIcon                  *mPauseIcon;
     HbLabel                 *mIcon;
 
     HbDocumentLoader        *mDocumentLoader;
+
+    BannerPressedState      mCurrentPressedState;
 
 };
 

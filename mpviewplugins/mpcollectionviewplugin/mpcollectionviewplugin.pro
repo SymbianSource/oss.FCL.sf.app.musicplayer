@@ -30,8 +30,10 @@ INCLUDEPATH += . \
      inc \
      ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
 LIBS += -lmpxviewframeworkqt.dll \
+    -lganeswidgets.dll \
     -lmpnowplayingbanner.dll  \
     -lmpsettingsmanager \
     -lmpengine \
@@ -50,7 +52,6 @@ SOURCES += src/mpcollectionviewplugin.cpp \
     	   src/mpcollectioncontainerartists.cpp \
     	   src/mpcollectioncontaineralbums.cpp \
     	   src/mpcollectioncontainerplaylists.cpp \
-    	   src/mpcollectioncontainergenres.cpp \
            src/mpsnapshotwidget.cpp \
            src/mpcollectionpopuphandler.cpp
 
@@ -65,8 +66,8 @@ HEADERS = ../../inc/mpviewbase.h \
     	  inc/mpcollectioncontainerartists.h \
     	  inc/mpcollectioncontaineralbums.h \
     	  inc/mpcollectioncontainerplaylists.h  \
-    	  inc/mpcollectioncontainergenres.h  \
           inc/mpsnapshotwidget.h \
           inc/mpcollectionpopuphandler.h
        
 RESOURCES += resources/mpcollectionviewresources.qrc
+

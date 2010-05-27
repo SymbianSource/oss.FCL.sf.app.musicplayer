@@ -18,9 +18,6 @@
 #include <qnamespace.h>
 #include <QSignalSpy>
 #include <QMetaType>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
 #include <hblabel.h>
 #include <hbevent.h>
 
@@ -40,19 +37,21 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
 
     TestMpNowPlayingWidget tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpnowplayingwidget.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpnowplayingwidget.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpNowPlayingWidget::TestMpNowPlayingWidget()
@@ -108,10 +107,8 @@ void TestMpNowPlayingWidget::testConstructor()
     QVERIFY(mTestPrivate->mPrimaryText != 0);
     QVERIFY(mTestPrivate->mSecondaryText != 0);
     QVERIFY(mTestPrivate->mBackEnd != 0);
-    QVERIFY(mTestPrivate->mPlayIconNormal != 0);
-    QVERIFY(mTestPrivate->mPauseIconNormal != 0);
-    QVERIFY(mTestPrivate->mPlayIconPressed != 0);
-    QVERIFY(mTestPrivate->mPauseIconPressed != 0);
+    QVERIFY(mTestPrivate->mPlayIcon != 0);
+    QVERIFY(mTestPrivate->mPauseIcon != 0);
     QVERIFY(mTestPrivate->mIcon != 0);
     QVERIFY(mTestPrivate->mDocumentLoader != 0);
     QCOMPARE(mTestPrivate->mState, NotPlaying);
@@ -201,10 +198,10 @@ void TestMpNowPlayingWidget::testSetEnabled()
     QCOMPARE(spy.count(), 0);
 
     mTestPrivate->mBackEnd->triggerTitleChanged(QString("Title"));
-    QCOMPARE(mTestPrivate->mPrimaryText->plainText(), QString("Primary"));
+    QCOMPARE(mTestPrivate->mPrimaryText->plainText(), QString("Title"));
 
     mTestPrivate->mBackEnd->triggerArtistChanged(QString("Artist"));
-    QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Secondary"));
+    QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Artist"));
 
     // Enable the widget. It should start updating again.
     mTest->setEnabled(true);
@@ -221,41 +218,6 @@ void TestMpNowPlayingWidget::testSetEnabled()
     QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Artist"));
 }
 
-/*!
- Tests ThemeChange.
- */
-void TestMpNowPlayingWidget::testThemeChange()
-{
-    
-    HbEvent event(HbEvent::ThemeChanged);
-    HbColorTheme::global()->setCurrentTheme(1);
-    //TODO final color resources should be qtc_multimedia_trans_normal when available
-    QColor normalColor( HbColorScheme::color("foreground") );
-    //TODO final color resources should be qtc_multimedia_trans_pressed when available
-    QColor pressedColor( HbColorScheme::color("popupbackground") );
-    
-    mTest->changeEvent(&event);
-    
-    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
-    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
-    
-    HbColorTheme::global()->setCurrentTheme(0);
-    
-    mTest->changeEvent(&event);
-    
-    normalColor = HbColorScheme::color("foreground");
-    pressedColor = HbColorScheme::color("popupbackground");
-    
-    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
-    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
-}
+
 
 // End of file

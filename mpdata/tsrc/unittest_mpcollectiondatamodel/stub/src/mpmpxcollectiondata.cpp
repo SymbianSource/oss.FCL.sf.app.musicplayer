@@ -107,7 +107,8 @@ MpMpxCollectionData::MpMpxCollectionData( QObject *parent )
     : QObject(parent),
       mContext(ECollectionContextUnknown),
       mCount(0),
-      mItemDataReturn(true)
+      mItemDataReturn(true),
+      mCollectionTitleReturn(true)
 {
     gInitCounter++;
 }
@@ -139,6 +140,19 @@ int MpMpxCollectionData::count() const
 /*!
  Stub function.
  */
+QString MpMpxCollectionData::collectionTitle() const
+{
+    if ( mCollectionTitleReturn ) {
+        return QString("CollectionTitle");
+    }
+    else {
+        return QString();
+    }
+}
+
+/*!
+ Stub function.
+ */
 QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType type ) const
 {
     if ( index < 0 || index > mCount ) {
@@ -153,18 +167,23 @@ QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType 
     switch ( type ) {
         case MpMpxCollectionData::Title:
             data = QString("Title");
+            data.append( QString().setNum(index) );
             break;
         case MpMpxCollectionData::Artist:
             data = QString("Artist");
+            data.append( QString().setNum(index) );
             break;
         case MpMpxCollectionData::Album:
             data = QString("Album");
+            data.append( QString().setNum(index) );
             break;
         case MpMpxCollectionData::Count:
             data = QString("Count");
+            data.append( QString().setNum(index) );
             break;
         case MpMpxCollectionData::AlbumArtUri:
             data = QString("AlbumArtUri");
+            data.append( QString().setNum(index) );
             break;
         default:
             qFatal("MpMpxCollectionData::itemData called with unknown type");
@@ -184,7 +203,7 @@ int MpMpxCollectionData::containerId()
 /*!
  Stub function.
  */
-int MpMpxCollectionData::itemId(int index)
+int MpMpxCollectionData::itemId( int index )
 {
     return 2000+index;
 }
@@ -192,7 +211,7 @@ int MpMpxCollectionData::itemId(int index)
 /*!
  Stub function.
  */
-void MpMpxCollectionData::removeItem(int index)
+void MpMpxCollectionData::removeItem( int index )
 {
     Q_UNUSED(index);
     gRemoveItemCount++;
@@ -210,10 +229,20 @@ bool MpMpxCollectionData::testCachedItem( int itemId )
 /*!
  Stub function.
  */
-void MpMpxCollectionData::insertCachedItem(int index)
+void MpMpxCollectionData::insertCachedItem( int index )
 {
     Q_UNUSED(index);
     gInsertCachedItemCount++;
+    return ;
+}
+
+/*!
+ Stub function.
+ */
+void MpMpxCollectionData::setContext( TCollectionContext context )
+{
+    mContext = context;
+    emit contextChanged(mContext);
     return ;
 }
 

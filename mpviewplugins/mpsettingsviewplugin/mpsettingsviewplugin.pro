@@ -35,24 +35,19 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
      
 LIBS += -lmpxplaybackutility.dll \
         -lestor.dll \
-				-lmpxviewframeworkqt.dll
+	-lmpxviewframeworkqt.dll \
+	-lmpengine.dll
 	
 symbian:TARGET.EPOCALLOWDLLDATA = 1
 
 HEADERS += ../../inc/mpviewbase.h \
       inc/mpsettingsviewplugin.h \
       inc/mpsettingsview.h \
-      inc/mpsettingsaudioeffectswidget.h \
-      inc/mpmpxasframeworkwrapper.h \
-      inc/mpmpxasframeworkwrapper_p.h
-      
+      inc/mpsettingsaudioeffectswidget.h
 
 SOURCES += src/mpsettingsviewplugin.cpp \
        src/mpsettingsview.cpp \
-       src/mpsettingsaudioeffectswidget.cpp \
-       src/mpmpxasframeworkwrapper.cpp \
-       src/mpmpxasframeworkwrapper_p.cpp
-       
+       src/mpsettingsaudioeffectswidget.cpp 
        
 RESOURCES += resources/mpsettingsview.qrc
 

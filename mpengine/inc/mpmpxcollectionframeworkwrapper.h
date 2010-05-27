@@ -36,39 +36,48 @@ class MpMpxCollectionFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxCollectionFrameworkWrapper( 
-                MpCommon::MpViewMode viewMode=MpCommon::DefaultView, TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxCollectionFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
     virtual ~MpMpxCollectionFrameworkWrapper();
 
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
     void back();
     void findPlaylists( QStringList &playlists );
-    void createPlaylist( QString &playlistName, QList<int> &selection, MpMpxCollectionData* collectionData = 0  );
+    void createPlaylist( QString &playlistName, QList<int> &selection, MpMpxCollectionData* collectionData );
     void saveToPlaylist( int playlistIndex, QList<int> &selection );
     void saveToCurrentPlaylist( QList<int> &selection, MpMpxCollectionData *collectionData );    
     void renamePlaylist( QString &newName, int index );
     void renamePlaylist( QString &newName );
     void deleteSongs( QList<int> &selection );
     void setShuffle( bool active );
+    void cancelRequest();
     
     void previewItem( int index );
     void openIsolatedCollection( TCollectionContext context );
     void releaseIsolatedCollection();
-    
+
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData );
+
     MpMpxCollectionData *collectionData();
     
     void reopenCollection();
     void reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal );
+    void setRepeatFeatureEnabled( bool enable );
+    void setShuffleFeatureEnabled( bool enable );
     
 signals:
 
     void collectionPlaylistOpened();
     void playlistSaved( bool success );
+    void deleteStarted(TCollectionContext context, TInt Count);
     void songsDeleted( bool success );
     void playlistsRenamed( bool success );
+    void openAddSongsWaitDialog();
     
     void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
+    
+    void containerContentsChanged();
 
 private:
 

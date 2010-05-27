@@ -15,25 +15,25 @@
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-TARGET = 
+CONFIG += qtestlib
+CONFIG += symbian_test
+TARGET = unittest_mpsettingsviewplugin
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
     stub/inc \
     ../../inc \
     ../../../../inc
-
-
-    
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lmpxviewframeworkqt.dll
-				
-HEADERS += inc/unittest_mpsettingsviewplugin.h \        
+
+HEADERS += inc/unittest_mpsettingsviewplugin.h \
            ../../inc/mpsettingsviewplugin.h \
            stub/inc/mpsettingsview.h
                
 SOURCES += stub/src/mpsettingsview.cpp \
            ../../src/mpsettingsviewplugin.cpp \
            src/unittest_mpsettingsviewplugin.cpp
+

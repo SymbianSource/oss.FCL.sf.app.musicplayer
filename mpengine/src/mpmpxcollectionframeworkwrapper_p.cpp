@@ -78,7 +78,10 @@ MpMpxCollectionFrameworkWrapperPrivate::MpMpxCollectionFrameworkWrapperPrivate( 
       iCollectionData( 0 ),
       iIsolatedCollectionData( 0 ),
       iFirstIncrementalOpen( EFalse ),
-      iUserPlaylists( 0 )
+      iUserPlaylists( 0 ),
+      iRepeatFeature( ETrue ),
+      iShuffleFeature( ETrue ),
+      iReopen( EFalse )
 {
     TX_LOG
 }
@@ -115,10 +118,9 @@ MpMpxCollectionFrameworkWrapperPrivate::~MpMpxCollectionFrameworkWrapperPrivate(
 /*!
  \internal
  */
-void MpMpxCollectionFrameworkWrapperPrivate::init( MpCommon::MpViewMode viewMode, TUid hostUid )
+void MpMpxCollectionFrameworkWrapperPrivate::init( TUid hostUid )
 {
 
-    iViewMode = viewMode;
     mHostUid = hostUid;
     TRAPD( err, DoInitL() );
     if ( err != KErrNone ) {
@@ -154,7 +156,10 @@ void MpMpxCollectionFrameworkWrapperPrivate::openCollectionItem( int index )
 void MpMpxCollectionFrameworkWrapperPrivate::reopenCollection()
 {
     TRAPD( err, DoReopenCollectionL() );
-    if ( err != KErrNone ) {
+    if ( err == KErrNone ) {
+        iReopen = ETrue;
+    }
+    else {
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
 }
@@ -218,8 +223,20 @@ void MpMpxCollectionFrameworkWrapperPrivate::saveToCurrentPlaylist( QList<int> &
  */
 void MpMpxCollectionFrameworkWrapperPrivate::deleteSongs( QList<int> &selection )
 {
-    TRAPD( err, DoDeleteSongsL( selection ) );
-    if ( err != KErrNone ) {
+    TCollectionContext context = iCollectionData->context();
+    int err;
+    if ( context == ECollectionContextArtistAlbumsTBone
+         || context == ECollectionContextAlbumsTBone ) {
+        TRAP( err, DoDeleteAlbumSongsL( selection ) );
+    }
+    else {
+        TRAP( err, DoDeleteSongsL( selection ) );
+    }
+    if ( err == KErrNone ) {
+        // send signal that deleting has started.
+        emit q_ptr->deleteStarted(iCollectionData->context(), selection.count());
+    }
+    else{
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
 }
@@ -261,7 +278,15 @@ void MpMpxCollectionFrameworkWrapperPrivate::setShuffle( bool active )
  */
 void MpMpxCollectionFrameworkWrapperPrivate::previewItem( int index )
 {
-    TRAPD( err, DoPreviewItemL( index ) );
+    TCollectionContext context = iCollectionData->context();
+    int err;
+    if ( context == ECollectionContextArtistAlbumsTBone
+         || context == ECollectionContextAlbumsTBone ) {
+        TRAP( err, DoPreviewAlbumSongL( index ) );
+    }
+    else {
+        TRAP( err, DoPreviewSongL( index ) );
+    }
     if ( err != KErrNone ) {
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
@@ -303,6 +328,36 @@ void MpMpxCollectionFrameworkWrapperPrivate::reorderPlaylist( int playlistId, in
 /*!
  \internal
  */
+void MpMpxCollectionFrameworkWrapperPrivate::cancel()
+{
+    iCollectionUiHelper->Cancel();
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::findAlbumSongs( int index )
+{
+    TRAPD( err, DoFindAlbumSongsL( index ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData  )
+{
+    TRAPD( err, DoPlayAlbumSongsL( albumIndex, songIndex, collectionData ? collectionData : iCollectionData ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+}
+
+/*!
+ \internal
+ */
 MpMpxCollectionData *MpMpxCollectionFrameworkWrapperPrivate::collectionData()
 {
     return iCollectionData;
@@ -310,6 +365,7 @@ MpMpxCollectionData *MpMpxCollectionFrameworkWrapperPrivate::collectionData()
 
 /*!
  \internal
+ Result of open or re-open operation to the Collection Framework.
  */
 void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL( 
     const CMPXMedia& aEntries,
@@ -322,8 +378,9 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL(
     TX_ENTRY_ARGS( "aError=" << aError << "aComplete=" << aComplete );
     if ( aError == KErrNone ) {
         if ( iFirstIncrementalOpen ) {
-            iCollectionData->setMpxMedia( aEntries );
+            iCollectionData->setMpxMedia( aEntries, iReopen );
             iFirstIncrementalOpen = EFalse;
+            iReopen = EFalse;
         }
     }
     else {
@@ -342,15 +399,8 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL(
     TX_ENTRY_ARGS( "aError=" << aError );
 
     if ( aError == KErrNone ) {
-        if ( !iPlaybackUtility ) {
-
-            iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
-
-            if ( iViewMode == MpCommon::DefaultView ) {
-                iPlaybackUtility->SetL( EPbPropertyRandomMode, MpSettingsManager::shuffle() ? ETrue : EFalse );
-                iPlaybackUtility->SetL( EPbPropertyRepeatMode, MpSettingsManager::repeat() ? EPbRepeatAll : EPbRepeatOff );
-            }
-        }
+        //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
+        createPlaybackUtilityL();
         iPlaybackUtility->InitL( aPlaylist, ETrue );
         emit q_ptr->collectionPlaylistOpened();
     }
@@ -439,20 +489,25 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleIsolatedOpenL( const CMPXMedi
 /*!
  \internal
  */
+void MpMpxCollectionFrameworkWrapperPrivate::HandleFindAllL( const CMPXMedia& aResults, TBool aComplete, TInt aError )
+{
+    Q_UNUSED( aComplete );
+    TX_ENTRY_ARGS( "aError=" << aError );
+
+    if ( aError == KErrNone ) {
+        iCollectionData->setAlbumContent( aResults );
+    }
+}
+
+/*!
+ \internal
+ */
 void MpMpxCollectionFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
-    if ( iViewMode == MpCommon::FetchView ) {
-        iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
-        iCollectionUiHelper = CMPXCollectionHelperFactory:: NewCollectionUiHelperL( mHostUid );
-        iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this, mHostUid );
-    }
-    else {
-        iCollectionUtility = MMPXCollectionUtility::NewL( this, KMcModeDefault );
-        iCollectionUiHelper = CMPXCollectionHelperFactory:: NewCollectionUiHelperL();
-        iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this );
-    }
-    
+    iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
+    iCollectionUiHelper = CMPXCollectionHelperFactory:: NewCollectionUiHelperL( mHostUid );
+    iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this, mHostUid );  
     iCollectionData = new MpMpxCollectionData();
     TX_EXIT
 }
@@ -478,7 +533,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoOpenCollectionL(
         {
         CMPXCollectionPath* cpath = iCollectionUiHelper->MusicMenuPathL();
         CleanupStack::PushL( cpath );
-        cpath->AppendL( 2 );
+        cpath->AppendL( BrowseArtist );
         iCollectionUtility->Collection().OpenL( *cpath );
         CleanupStack::PopAndDestroy( cpath );
         break;
@@ -487,7 +542,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoOpenCollectionL(
         {
         CMPXCollectionPath* cpath = iCollectionUiHelper->MusicMenuPathL();
         CleanupStack::PushL( cpath );
-        cpath->AppendL( 3 );
+        cpath->AppendL( BrowseAlbum );
         iCollectionUtility->Collection().OpenL( *cpath );
         CleanupStack::PopAndDestroy( cpath );
         break;
@@ -500,12 +555,11 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoOpenCollectionL(
         CleanupStack::PopAndDestroy( cpath );
         break;
         }
-    case ECollectionContextGenres:
+    case ECollectionContextAlbumsMediaWall:
         {
         CMPXCollectionPath* cpath = iCollectionUiHelper->MusicMenuPathL();
         CleanupStack::PushL( cpath );
-        // Temp
-        cpath->AppendL( 5 );
+        cpath->AppendL( BrowseAlbumMediaWall );
         iCollectionUtility->Collection().OpenL( *cpath );
         CleanupStack::PopAndDestroy( cpath );
         break;
@@ -710,7 +764,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoDeleteSongsL( QList<int> &selecti
 
     CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
     CleanupStack::PushL( path );
-
+    
     if (count > 1) {
         for ( TInt i = 0; i < count; i++ ){
             path->SelectL( selection.at( i ) );
@@ -719,7 +773,41 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoDeleteSongsL( QList<int> &selecti
     else {
         path->Set( selection.at(0) );
     }
+        
     iCollectionUiHelper->DeleteL( *path, this );
+    CleanupStack::PopAndDestroy( path );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoDeleteAlbumSongsL( QList<int> &selection )
+{
+    int count = selection.count();
+    TX_ENTRY_ARGS( "selection count=" << count );
+
+    CMPXCollectionPath* path( iCollectionUtility->Collection().PathL() );
+    CleanupStack::PushL( path );
+    MPX_DEBUG_PATH( *path );
+
+    CMPXMediaArray *mediaArray;
+    const CMPXMedia& container = iCollectionData->containerMedia();
+    mediaArray = const_cast<CMPXMediaArray*>( container.Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
+    int currentAlbumIndex = iCollectionData->currentAlbumIndex();
+    CMPXMedia* album( mediaArray->AtL( currentAlbumIndex ) );
+    if ( album->IsSupported(KMPXMediaArrayContents) ) {
+        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+        User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+        int index = selection.at(0);
+        CMPXMedia* song = songs->AtL(index);
+
+        TMPXItemId id( song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
+        path->AppendL( id );   // Append the song ID to be deleted
+        path->Set( 0 );        // Select 1st song
+
+        iCollectionUiHelper->DeleteL( *path, this );
+    }
     CleanupStack::PopAndDestroy( path );
     TX_EXIT
 }
@@ -784,9 +872,40 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoSetShuffleL( bool active )
 /*!
  \internal
  */
-void MpMpxCollectionFrameworkWrapperPrivate::DoPreviewItemL( int index )
+void MpMpxCollectionFrameworkWrapperPrivate::DoPreviewSongL( int index )
 {
     TX_ENTRY
+    
+    // Get the current path
+    CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( cpath );
+    MPX_DEBUG_PATH( *cpath );
+    cpath->Back();
+
+    TMPXItemId id( iCollectionData->itemId(index) );
+    cpath->AppendL( id ); // Top level items of songs
+    cpath->Set( 0 ); // Select 1st song
+
+    CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+    CleanupStack::PushL( playList );
+    playList->SetToFirst();
+    //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
+    createPlaybackUtilityL();
+    iPlaybackUtility->InitL( *playList, ETrue );
+    emit q_ptr->collectionPlaylistOpened();
+
+    CleanupStack::PopAndDestroy( playList );
+    CleanupStack::PopAndDestroy( cpath );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoPreviewAlbumSongL( int index )
+{
+    TX_ENTRY
+    //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
     if ( !iPlaybackUtility ) {
         iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
     }
@@ -795,25 +914,30 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoPreviewItemL( int index )
     CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
     CleanupStack::PushL( cpath );
     MPX_DEBUG_PATH( *cpath );
-    cpath->Back();
 
     CMPXMediaArray *mediaArray;
     const CMPXMedia& container = iCollectionData->containerMedia();
     mediaArray = const_cast<CMPXMediaArray*>( container.Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
-    CMPXMedia* currentMedia( mediaArray->AtL( index ) );
-    TMPXItemId id( currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
+    int currentAlbumIndex = iCollectionData->currentAlbumIndex();
+    CMPXMedia* album( mediaArray->AtL( currentAlbumIndex ) );
+    if ( album->IsSupported(KMPXMediaArrayContents) ) {
+        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+        User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+        CMPXMedia* song = songs->AtL(index);
 
-    cpath->AppendL( id ); // Top level items of songs
-    cpath->Set( 0 ); // Select 1st song
+        TMPXItemId id( song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
+        cpath->AppendL( id );   // Top level items of songs
+        cpath->Set( 0 );        // Select 1st song
 
-    CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
-    CleanupStack::PushL( playList );
-    playList->SetToFirst();
+        CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+        CleanupStack::PushL( playList );
+        playList->SetToFirst();
+        //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
+        iPlaybackUtility->InitL( *playList, ETrue );
+        emit q_ptr->collectionPlaylistOpened();
 
-    iPlaybackUtility->InitL( *playList, ETrue );
-    emit q_ptr->collectionPlaylistOpened();
-
-    CleanupStack::PopAndDestroy( playList );
+        CleanupStack::PopAndDestroy( playList );
+    }
     CleanupStack::PopAndDestroy( cpath );
     TX_EXIT
 }
@@ -840,9 +964,126 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoOpenIsolatedCollectionL( TCollect
  */
 void MpMpxCollectionFrameworkWrapperPrivate::DoReorderPlaylistL( int playlistId, int songId, int originalOrdinal, int newOrdinal )
 {
-    iCollectionUiHelper->ReorderPlaylistL( playlistId, songId, originalOrdinal, newOrdinal, this );           
+    iCollectionUiHelper->ReorderPlaylistL( playlistId, songId, originalOrdinal, newOrdinal, this );
 }
 
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoFindAlbumSongsL( int index )
+{
+    const CMPXMedia& container = iCollectionData->containerMedia();
+    const CMPXMediaArray* mediaArray = container.Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    CMPXMedia* album( mediaArray->AtL( index ) );
+
+    // Fetch the songs for the selected album
+    TMPXItemId albumId = album->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+    CMPXMedia* findCriteria = CMPXMedia::NewL();
+    CleanupStack::PushL( findCriteria );
+    findCriteria->SetTObjectValueL<TMPXGeneralType>( KMPXMediaGeneralType, EMPXGroup );
+    findCriteria->SetTObjectValueL<TMPXGeneralCategory>( KMPXMediaGeneralCategory, EMPXSong );
+    findCriteria->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, albumId );
+    RArray<TMPXAttribute> attrs;
+    CleanupClosePushL( attrs );
+    attrs.Append( TMPXAttribute( KMPXMediaIdGeneral,
+                                 EMPXMediaGeneralTitle |
+								 EMPXMediaGeneralUri |
+                                 EMPXMediaGeneralId |
+                                 EMPXMediaGeneralType |
+                                 EMPXMediaGeneralCategory |
+                                 EMPXMediaGeneralFlags ) );
+    attrs.Append( KMPXMediaMusicAlbumTrack );
+
+    iCollectionUtility->Collection().FindAllL( *findCriteria, attrs.Array(), *this );
+    CleanupStack::PopAndDestroy( &attrs );
+    CleanupStack::PopAndDestroy( findCriteria );
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoPlayAlbumSongsL( int albumIndex, int songIndex, MpMpxCollectionData* collectionData  )
+{
+    TX_ENTRY
+
+    RArray<TMPXItemId> ids;
+    CleanupClosePushL(ids);
+
+    CMPXCollectionPath* cpath;
+    
+    //Following check is for a use case for media wall, where it is required 
+    //to play songs that are browsed by an isolated collection.
+    if ( collectionData->context() ==  ECollectionContextAlbumsMediaWall ) {
+        //Get the Media Wall path.
+        cpath = iCollectionUiHelper->MusicMenuPathL();
+        CleanupStack::PushL( cpath );
+        //TODO: change to BrowseAlbumMediaWall befor when merging with olveras changes.
+        cpath->AppendL( BrowseAlbum );
+        const TMPXItemId albumId = collectionData->itemId( albumIndex );
+        //Append the selected album.
+        RArray<TMPXItemId> items;
+        CleanupClosePushL(items);
+        items.AppendL(albumId);
+        cpath->AppendL(items.Array());
+        CleanupStack::PopAndDestroy( &items );
+        cpath->Set( 0 ); // Set the album.
+        
+    }
+    else {
+        // Get the current path
+        cpath = iCollectionUtility->Collection().PathL();
+        CleanupStack::PushL( cpath );
+        cpath->Set(albumIndex); // Set the selected album
+    }
+    MPX_DEBUG_PATH( *cpath );
+
+    CMPXMediaArray *mediaArray;
+    const CMPXMedia& container = collectionData->containerMedia();
+    mediaArray = const_cast<CMPXMediaArray*>( container.Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
+    CMPXMedia* album( mediaArray->AtL( albumIndex ) );
+    const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+    User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+
+    TInt count = songs->Count();
+    for ( TInt i = 0; i < count; ++i ) {
+        CMPXMedia* song = songs->AtL(i);
+        const TMPXItemId id = song->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+        ids.AppendL(id);
+    }
+
+    cpath->AppendL(ids.Array());    // Top level items of songs
+    cpath->Set(songIndex);          // Set the selected song
+    MPX_DEBUG_PATH(*cpath);
+
+    CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+    CleanupStack::PushL( playList );
+    
+    //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
+    createPlaybackUtilityL();
+    iPlaybackUtility->InitL( *playList, ETrue );
+    emit q_ptr->collectionPlaylistOpened();
+
+    CleanupStack::PopAndDestroy( playList );
+    CleanupStack::PopAndDestroy( cpath );
+    CleanupStack::PopAndDestroy( &ids );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::setRepeatFeatureEnabled( bool enable ) 
+{
+    iRepeatFeature = enable;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::setShuffleFeatureEnabled( bool enable )
+{
+    iShuffleFeature = enable;
+}
 
 /*!
  \internal
@@ -872,6 +1113,9 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoHandleCollectionMessageL(
             iCollectionUtility->Collection().OpenL();
         }
     }
+    else if( id == KMPXMessageIdItemChanged ) {
+        emit q_ptr->containerContentsChanged();                     
+    }  
     TX_EXIT
 }
 
@@ -887,9 +1131,27 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
     int count = selection.count();
     TX_ENTRY_ARGS( "selection count=" << count );
 
-    const CMPXMedia& container = collectionData->containerMedia();
-    const CMPXMediaArray* containerArray = container.Value<CMPXMediaArray>( KMPXMediaArrayContents );
-    User::LeaveIfNull( const_cast<CMPXMediaArray*>( containerArray ) );
+    const CMPXMediaArray* mediaArray = 0;
+    
+    if ( ( collectionData->context() == ECollectionContextArtistAlbumsTBone ) || 
+         ( collectionData->context() == ECollectionContextAlbumsTBone ) ) {
+        //There is no need to find the track information, for TBone we cash it under the media itself.
+        //Fetching song data from container media.
+        CMPXMedia* album;
+        const CMPXMediaArray* albumsArray;
+        albumsArray = collectionData->containerMedia().Value<CMPXMediaArray>( KMPXMediaArrayContents );
+        int index = collectionData->currentAlbumIndex();
+        if ( index >= 0 ) {
+            album = albumsArray->AtL( collectionData->currentAlbumIndex() );
+            mediaArray = album->Value<CMPXMediaArray>( KMPXMediaArrayContents );
+        }
+    }
+    else {
+        const CMPXMedia& container = collectionData->containerMedia();
+        mediaArray = container.Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    }
+       
+    User::LeaveIfNull( const_cast<CMPXMediaArray*>( mediaArray ) );
     CMPXMediaArray* tracksArray( CMPXMediaArray::NewL() );
     CleanupStack::PushL( tracksArray );
 
@@ -898,13 +1160,15 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
     TMPXItemId collectionId( path->Id( 0 ) );
     CleanupStack::PopAndDestroy( path );
 
-    if ( ( collectionData->context() == ECollectionContextAlbums ) || 
-            ( collectionData->context() == ECollectionContextArtistAlbums ) || 
-            ( collectionData->context() == ECollectionContextArtists ) ) {
+    if ( collectionData->context() == ECollectionContextAlbums || 
+         collectionData->context() == ECollectionContextArtistAlbums ||
+         collectionData->context() == ECollectionContextArtists ) {
+        //Container, it is possible to append multiple containers to a playlist. 
+        //Currently we are just using single selection from the ui.
         for ( TInt i = 0; i < count; i++ ) {
             CMPXMedia* results;
-            CMPXMedia* container( containerArray->AtL( selection[i] ) );
-            // Fetch the songs for the selected album
+            CMPXMedia* container( mediaArray->AtL( selection[i] ) );
+            // Fetch the songs for the selected container
             TMPXItemId containerId = container->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
             CMPXMedia* findCriteria = CMPXMedia::NewL();
             CleanupStack::PushL( findCriteria );
@@ -916,12 +1180,6 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
             attrs.Append( TMPXAttribute( KMPXMediaIdGeneral,
                                          EMPXMediaGeneralTitle |
                                          EMPXMediaGeneralId ) );
-            if ( collectionData->context() == ECollectionContextArtists ){
-                attrs.Append( KMPXMediaMusicArtist );
-            }
-            else {
-                attrs.Append( KMPXMediaMusicAlbumTrack );
-            }
             results = iCollectionUtility->Collection().FindAllL( *findCriteria, attrs.Array() );
             CleanupStack::PopAndDestroy( &attrs );
             CleanupStack::PopAndDestroy( findCriteria );
@@ -947,9 +1205,10 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
         }
         
     }
-    else {   
+    else {
+        //Tracks
         for ( TInt i = 0; i < count; i++ ) {
-            CMPXMedia* media( containerArray->AtL( selection.at( i ) ) );
+            CMPXMedia* media( mediaArray->AtL( selection.at( i ) ) );
             CMPXMedia* entry = CMPXMedia::NewL();
             CleanupStack::PushL( entry );
             entry->SetTextValueL( KMPXMediaGeneralTitle,
@@ -967,7 +1226,31 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
     aMedia.SetTObjectValueL<TMPXGeneralCategory>( KMPXMediaGeneralCategory, EMPXPlaylist );
     aMedia.SetCObjectValueL( KMPXMediaArrayContents, tracksArray );
     aMedia.SetTObjectValueL( KMPXMediaArrayCount, tracksArray->Count() );
-
+    if ( (tracksArray->Count() ) >= 100){  //Add Songs Progress Dialog for 100 songs or more
+        emit q_ptr->openAddSongsWaitDialog();
+    }
+    
     CleanupStack::PopAndDestroy( tracksArray );
     TX_EXIT
 }
+
+/*!
+ \internal
+ TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::createPlaybackUtilityL() 
+{
+    if ( !iPlaybackUtility ) {
+
+        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
+
+        if ( iShuffleFeature ) {
+            iPlaybackUtility->SetL( EPbPropertyRandomMode, MpSettingsManager::shuffle() ? ETrue : EFalse );
+        }
+        if ( iRepeatFeature ) {
+            iPlaybackUtility->SetL( EPbPropertyRepeatMode, MpSettingsManager::repeat() ? EPbRepeatAll : EPbRepeatOff );
+        }
+    }
+}
+
+//EOF

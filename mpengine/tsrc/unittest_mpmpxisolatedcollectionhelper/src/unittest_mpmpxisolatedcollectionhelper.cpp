@@ -15,9 +15,6 @@
 *
 */
 
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-
 #include <mpxmedia.h>
 #include <mpxcollectionplaylist.h>
 #include <mpxcollectionpath.h>
@@ -34,19 +31,19 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
-
     TestCMpMpxIsolatedCollectionHelper tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpmpxisolatedcollectionhelper.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpmpxisolatedcollectionhelper.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestCMpMpxIsolatedCollectionHelper::TestCMpMpxIsolatedCollectionHelper()

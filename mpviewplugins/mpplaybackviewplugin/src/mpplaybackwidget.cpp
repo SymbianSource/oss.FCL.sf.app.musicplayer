@@ -15,7 +15,7 @@
 *
 */
 
-#include <qtime>
+#include <QTime>
 
 #include <hbprogressslider.h>
 #include <hbinstance.h>
@@ -79,6 +79,12 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
         mSongTitle = qobject_cast<HbLabel*>(tmpWidgetPtr);
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("albumArt"));
         mAlbumArt = qobject_cast<HbLabel*>(tmpWidgetPtr);
+        tmpWidgetPtr = mDocumentLoader->findWidget(QString("realAudio"));
+        mRealAudioIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
+        mRealAudioIndicator->hide();
+        tmpWidgetPtr = mDocumentLoader->findWidget(QString("repeatIcon"));
+        mRepeatIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
+                
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("progressBar"));
         mProgressBar = qobject_cast<HbProgressSlider*>(tmpWidgetPtr);
 
@@ -98,9 +104,14 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     connect( mPlaybackData, SIGNAL(durationChanged()), this, SLOT(durationChanged()) );
     connect( mPlaybackData, SIGNAL(positionChanged()), this, SLOT(positionChanged()) );
     connect( mPlaybackData, SIGNAL(albumArtReady()), this, SLOT(albumArtChanged()) );
-
-
-
+    
+    //Update to set initial conditions if playback has already started.
+    if ( mPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
+        playbackInfoChanged();
+        durationChanged();
+        positionChanged();
+        albumArtChanged();
+    }
     TX_EXIT
 }
 
@@ -115,6 +126,14 @@ MpPlaybackWidget::~MpPlaybackWidget()
 }
 
 /*!
+ Handle Repeat changed.
+ */
+void MpPlaybackWidget::repeatChanged( bool value )
+{
+    mRepeatIndicator->setVisible( value );   
+}
+
+/*!
  Slot to handle playback info changed.
  */
 void MpPlaybackWidget::playbackInfoChanged( )
@@ -123,6 +142,7 @@ void MpPlaybackWidget::playbackInfoChanged( )
     mSongTitle->setPlainText( mPlaybackData->title() );
     mArtistName->setPlainText( mPlaybackData->artist() );
     mAlbumName->setPlainText( mPlaybackData->album() );
+    mRealAudioIndicator->setVisible( mPlaybackData->realAudio() );
     TX_EXIT
 }
 
@@ -173,7 +193,6 @@ void MpPlaybackWidget::albumArtChanged( )
     mAlbumArt->setIcon( icon );
     TX_EXIT
 }
-
 
 /*!
  Slot to handle slider pressed.

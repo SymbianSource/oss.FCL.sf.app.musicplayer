@@ -15,8 +15,8 @@
 *
 */
 #include <QSignalSpy>
-#include <qgraphicswebview>
-#include <qwebsettings>
+#include <QGraphicsWebView>
+#include <QWebSettings>
 #include <QGraphicsWidget>
 #include <QGraphicsLayoutItem>
 #include <QUrl>
@@ -46,7 +46,6 @@
 #include "unittest_mpdetailsview.h"
 #include "stub/inc/mpsongdata.h"
 #include "stub/inc/thumbnailmanager_qt.h"
-#include "stub/inc/mpmpxdetailsframeworkwrapper.h"
 #include "mpcommondefs.h"
 
 // Do this so we can access all member variables.
@@ -94,7 +93,7 @@ TestMpDetailsView::~TestMpDetailsView()
  */
 void TestMpDetailsView::initTestCase()
 {
-    
+
 }
 
 /*!
@@ -131,18 +130,16 @@ void TestMpDetailsView::testactivateView()
 
 void TestMpDetailsView::testdeactivateView()
     {
-    /* TODO: Fix   
     mTest->deactivateView();
     QVERIFY(mTest->mActivated==false);
-    */
      }
 
 void TestMpDetailsView::testbackSlot() {
-    connect(this, SIGNAL(back()), mTest->mNavigationBack, SIGNAL(triggered()));
+    connect(this, SIGNAL(back()), mTest->mSoftKeyBack, SIGNAL(triggered()));
     QSignalSpy spy(mTest, SIGNAL(command(int)));
     QVERIFY(spy.isValid());
     QCOMPARE(spy.count(),0);
-    
+
     emit back();
     QCOMPARE(spy.count(),1);
     }

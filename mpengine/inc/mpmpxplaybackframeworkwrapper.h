@@ -36,11 +36,13 @@ class MpMpxPlaybackFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxPlaybackFrameworkWrapper( 
-                MpCommon::MpViewMode viewMode=MpCommon::DefaultView, TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
     virtual ~MpMpxPlaybackFrameworkWrapper();
     
     MpPlaybackData *playbackData();
+    void setBalance( int balance );
+    void applyAudioEffects();
+    void applyEqualizer();
     
 public slots:
     
@@ -49,7 +51,10 @@ public slots:
     void playPause();
     void stop();
     void skipForward();
+    void startSeekForward();
+    void stopSeeking();
     void skipBackward();
+    void startSeekBackward();
     void setPosition( int position );
     void setShuffle( bool mode );
     void setRepeat( bool mode );

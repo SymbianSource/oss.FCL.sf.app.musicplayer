@@ -47,19 +47,24 @@ public:
     static void setCachedItemId (int id);
     static int getInsertCachedItemCounter();
     static void resetInsertCachedItemCounter();
-    
+
     // Stub functions
     explicit MpMpxCollectionData( QObject *parent=0 );
     virtual ~MpMpxCollectionData();
 
     TCollectionContext context() const;
+
     int count() const;
+    QString collectionTitle() const;
     QString itemData( int index, MpMpxCollectionData::DataType type ) const;
+
     int containerId();
     int itemId(int index);
     void removeItem(int index);
     bool testCachedItem( int itemId );
     void insertCachedItem(int index);
+
+    void setContext( TCollectionContext context );
 
 signals:
 
@@ -70,6 +75,7 @@ public:
     TCollectionContext      mContext;
     int                     mCount;
     bool                    mItemDataReturn;
+    bool                    mCollectionTitleReturn;
 
 };
 

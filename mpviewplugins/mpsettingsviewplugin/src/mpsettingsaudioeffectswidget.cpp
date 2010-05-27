@@ -1,5 +1,5 @@
 /*
-* Copyright ( c ) 2009 Nokia Corporation and/or its subsidiary( -ies ).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: Music Player audio effect view.
+* Description: Music Player Settings view - audio settings.
 *
 */
 
@@ -22,7 +22,7 @@
 
 // User includes
 #include "mpsettingsaudioeffectswidget.h"
-#include "mpmpxasframeworkwrapper.h"
+#include "mpenginefactory.h"
 #include "mptrace.h"
 
 
@@ -42,7 +42,7 @@
 */
 MpSettingsAudioEffectsWidget::MpSettingsAudioEffectsWidget( QGraphicsItem *parent  )
     : HbWidget( parent ),
-      mFrameworkWrapper( 0 )
+      mMpEngine( 0 )
 {
     TX_LOG
 }
@@ -52,7 +52,6 @@ MpSettingsAudioEffectsWidget::MpSettingsAudioEffectsWidget( QGraphicsItem *paren
  */
 MpSettingsAudioEffectsWidget::~MpSettingsAudioEffectsWidget()
 {
-    delete mFrameworkWrapper;
     delete mModel;
     TX_LOG
 }
@@ -64,8 +63,8 @@ void MpSettingsAudioEffectsWidget::initialize()
 {
     TX_ENTRY
 
-    mFrameworkWrapper = new MpMpxAsFrameworkWrapper();
-
+    mMpEngine = MpEngineFactory::sharedEngine();
+    
     //create data form
     HbDataForm *dataForm = new HbDataForm();
 
@@ -82,9 +81,9 @@ void MpSettingsAudioEffectsWidget::initialize()
     slider->setContentWidgetData( QString( "singleStep" ),25 );
     slider->setContentWidgetData( QString( "toolTipVisible" ), false );
     slider->setContentWidgetData( QString( "tickPosition" ), Hb::SliderTicksRight );
-    slider->setContentWidgetData( QString( "sliderPosition" ),mFrameworkWrapper->balance() );
+    slider->setContentWidgetData( QString( "sliderPosition" ),mMpEngine->balance() );
     slider->setContentWidgetData( QString( "trackFilled" ), false );
-    if ( mFrameworkWrapper->loudness() == true ) {
+    if ( mMpEngine->loudness() == true ) {
         loudnessItem->setContentWidgetData( QString( "text" ), hbTrId( "txt_mus_setlabel_loudness_val_on" ) );
         loudnessItem->setContentWidgetData( QString( "additionalText" ), hbTrId( "txt_mus_setlabel_loudness_val_off" ) );
     }
@@ -102,7 +101,7 @@ void MpSettingsAudioEffectsWidget::initialize()
     mylayout->addItem( dataForm  );
     setLayout( mylayout  );
     dataForm->addConnection( slider, SIGNAL( valueChanged( int  ) ),
-            mFrameworkWrapper, SLOT( setBalance( int  ) ) );
+            mMpEngine, SLOT( setBalance( int  ) ) );
     connect( mModel, SIGNAL( dataChanged( QModelIndex, QModelIndex ) ), this, SLOT( filterSignals( QModelIndex, QModelIndex ) ) );
 
     TX_EXIT
@@ -115,10 +114,10 @@ void  MpSettingsAudioEffectsWidget::filterSignals( QModelIndex startIn, QModelIn
     if ( itm->type() == HbDataFormModelItem::ToggleValueItem ) {
         if( itm->data( HbDataFormModelItem::LabelRole ).toString() == hbTrId( "txt_mus_setlabel_loudness" ) ) {
             if( itm->contentWidgetData( QString( "text" ) ).toString() == hbTrId( "txt_mus_setlabel_loudness_val_on" ) ) {
-                mFrameworkWrapper->setLoudness( true );
+                mMpEngine->setLoudness( true );
             }
             else if( itm->contentWidgetData( QString( "text" ) ).toString() == hbTrId( "txt_mus_setlabel_loudness_val_off" ) ) {
-                mFrameworkWrapper->setLoudness( false );
+                mMpEngine->setLoudness( false );
             }
             else {
                 TX_LOG_ARGS( "Error: should never get here." );

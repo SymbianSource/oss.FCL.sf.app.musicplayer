@@ -16,8 +16,6 @@
 */
 
 #include <QSignalSpy>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
 #include <hbicon.h>
 
 #include "unittest_mpcollectionalbumartmanager.h"
@@ -34,19 +32,21 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
 
     TestMpCollectionAlbumArtManager tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpcollectionalbumartmanager.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpcollectionalbumartmanager.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpCollectionAlbumArtManager::TestMpCollectionAlbumArtManager()
@@ -251,6 +251,24 @@ void TestMpCollectionAlbumArtManager::testCancel()
     QCOMPARE(mTest->mPendingRequest, false);
     QCOMPARE(mTest->mRequestQueue.count(), 0);
     QCOMPARE(mTest->mThumbnailManager->mCancelCounter, 1);
+}
+
+/*!
+ Tests setThumbnailSize().
+ */
+void TestMpCollectionAlbumArtManager::testSetThumbnailSize()
+{
+    mTest->mThumbnailManager->mThumbSize = ThumbnailManager::ThumbnailUndefined;
+    
+    mTest->setThumbnailSize(MpCommon::ListThumb);
+    QCOMPARE(mTest->mThumbnailManager->mThumbSize,  ThumbnailManager::ThumbnailSmall);
+    
+    mTest->setThumbnailSize(MpCommon::TBoneThumb);
+    QCOMPARE(mTest->mThumbnailManager->mThumbSize,  ThumbnailManager::ThumbnailMedium); 
+    
+    mTest->setThumbnailSize(MpCommon::MediaWallThumb);
+    QCOMPARE(mTest->mThumbnailManager->mThumbSize,  ThumbnailManager::ThumbnailLarge);
+    
 }
 
 /*!

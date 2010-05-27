@@ -21,8 +21,11 @@
 
 #include <QObject>
 #include <QCache>
-#include <QIcon>
 #include <QList>
+
+#include <hbicon.h>
+
+#include "mpcommondefs.h"
 
 class MpMpxCollectionData;
 class ThumbnailManager;
@@ -36,9 +39,11 @@ public:
     explicit MpCollectionAlbumArtManager( MpMpxCollectionData *data, QObject *parent=0 );
     virtual ~MpCollectionAlbumArtManager();
 
-    const QIcon* albumArt( int index );
+    const HbIcon albumArt( int index );
     void cacheFirstScreen();
     void cancel();
+    void setThumbnailSize( MpCommon::MpThumbType type );
+    void enableDefaultArt( bool enabled );
 
 signals:
 
@@ -52,14 +57,15 @@ private:
 
     MpMpxCollectionData             *mCollectionData;
     ThumbnailManager                *mThumbnailManager;
-    QCache<int, QIcon>              mImageCache;
+    QCache<int, HbIcon>             mImageCache;
     bool                            mCachingInProgress;
 
-    QIcon                           *mDefaultIcon;
+    HbIcon                          mDefaultIcon;
 
     QList<int>                      mRequestQueue;
     bool                            mPendingRequest;
     int                             mRequestId;
+    bool                            mDefaultArtEnabled;
 
 };
 

@@ -19,6 +19,7 @@
 #define TESTMPMPXCOLLECTIONDATA_H
 
 #include <QtTest/QtTest>
+#include "mpmpxcollectionviewdefs.h"
 
 class MpMpxCollectionData;
 class MpMpxCollectionDataPrivate;
@@ -28,17 +29,19 @@ class TestMpMpxCollectionData : public QObject
     Q_OBJECT
 
 public:
+
     TestMpMpxCollectionData();
     virtual ~TestMpMpxCollectionData();
 
-
 public slots:
+
     void initTestCase();
     void cleanupTestCase();
     void init();
     void cleanup();
 
 private slots:
+
     void testConstructor();
     void testContextRetrieval();
     void testCount();
@@ -54,8 +57,14 @@ private slots:
     void testRemoveItem();
     void testTestCachedItem();
     void testInsertCachedItemItem();
-    
+    void testSetContext();
+    void testSetContextMediaWall();
+    void testSetAlbumContent();
+    void testSetCurrentAlbum();
+    void testAlbumSongData();
+
 private:
+
     MpMpxCollectionData         *mTest;
     MpMpxCollectionDataPrivate  *mTestPrivate;
 

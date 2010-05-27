@@ -45,6 +45,7 @@ MpCollectionContainerAllSongs::MpCollectionContainerAllSongs( HbDocumentLoader *
       mInfoBar(0)
 {
     TX_LOG
+    mCollectionContext = ECollectionContextAllSongs;
 }
 
 /*!
@@ -84,7 +85,7 @@ void MpCollectionContainerAllSongs::setupContainer()
 
         QString details;
         if ( mViewMode == MpCommon::FetchView ) {
-            details = "Select a song";
+            details = hbTrId("txt_mus_subtitle_select_a_song");
         }
         else {
             int count = mCollectionData->count();

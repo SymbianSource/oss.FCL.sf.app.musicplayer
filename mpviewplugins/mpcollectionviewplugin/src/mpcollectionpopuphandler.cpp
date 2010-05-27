@@ -25,10 +25,11 @@
 #include <hblistview.h>
 #include <hbscrollbar.h>
 
-#include "mpengine.h"
+#include "mpenginefactory.h"
 #include "mpcollectionview.h"
 #include "mpmpxcollectiondata.h"
 #include "mpcollectiondatamodel.h"
+#include "mpcollectiontbonelistdatamodel.h"
 #include "mpmpxcollectionviewdefs.h"
 #include "mpcollectionpopuphandler.h"
 #include "mptrace.h"
@@ -54,7 +55,7 @@ MpCollectionPopupHandler::MpCollectionPopupHandler( MpCollectionView *parent )
       mPermanentData( 0 )
 {
     TX_ENTRY
-    mMpEngine = MpEngine::instance();
+    mMpEngine = MpEngineFactory::sharedEngine();
     mPermanentData = new MpPopupHandlerPermanentData( this );
     TX_EXIT
 }
@@ -81,8 +82,9 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
 
     switch ( mMpEngine->collectionData()->context() ) {
         case ECollectionContextAllSongs:
-        case ECollectionContextArtistSongs:
-        case ECollectionContextAlbumSongs:
+        case ECollectionContextArtistAllSongs:
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
             contextMenu = new HbMenu();
             action = contextMenu->addAction( hbTrId( "txt_common_menu_play_music" ) );
             action->setObjectName( "open" );
@@ -162,13 +164,13 @@ void MpCollectionPopupHandler::openFetchViewContextMenu( int index, const QPoint
 
     switch ( mMpEngine->collectionData()->context() ) {
         case ECollectionContextAllSongs:
-        case ECollectionContextArtistSongs:
-        case ECollectionContextAlbumSongs:
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextArtistAllSongs:
+        case ECollectionContextAlbumsTBone:
         case ECollectionContextPlaylistSongs:
-        case ECollectionContextGenreSongs:
             contextMenu = new HbMenu();
             action = contextMenu->addAction( hbTrId("txt_common_menu_play_music") );
-            action->setEnabled( mMpEngine->verifyUsbBlocking() );
+            action->setEnabled( !mMpEngine->verifyUsbBlocking() );
             break;
         default:
             break;
@@ -227,6 +229,22 @@ void MpCollectionPopupHandler::openAddSongsToPlaylist( QAbstractItemModel* model
 }
 
 /*!
+ Request to select songs to add to the playlist from TBone
+ */
+void MpCollectionPopupHandler::openAddSongsToPlaylistFromTBone( )
+{
+    TX_ENTRY
+    MpCollectionTBoneListDataModel *model;
+    model = new MpCollectionTBoneListDataModel( mMpEngine->collectionData() );
+	//this item will be deleted when clearing permanent data.
+    model->setParent(mPermanentData);
+    model->refreshModel();
+    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), model,
+                     SLOT( handleAddSongsToPlayList( HbAction* ) ) );
+    TX_EXIT
+}
+
+/*!
  Request to select songs to be deleted
  */
 void MpCollectionPopupHandler::openDeleteSongs( QAbstractItemModel* model )
@@ -275,10 +293,10 @@ void MpCollectionPopupHandler::openCreateNewPlaylist( MpMpxCollectionData* colle
 /*!
  Request to reorder songs
  */
-void MpCollectionPopupHandler::openArrangeSongs( MpMpxCollectionData* collectionData )
+void MpCollectionPopupHandler::openArrangeSongs( )
 {
     TX_ENTRY
-    launchArrangeSongsDialog( collectionData );
+    launchArrangeSongsDialog();
     TX_EXIT
 }
 
@@ -515,6 +533,9 @@ void MpCollectionPopupHandler::handleAddSongsToPlayList( HbAction *selectedActio
                 }
                 launchAddToPlaylistDialog( selection );
             }
+        }
+        else {
+            mPermanentData->clear();
         }
     }
 
@@ -872,9 +893,8 @@ void MpCollectionPopupHandler::getModelIndexes( const QString &label, QAbstractI
 /*!
  \internal
  Launches a list dialog to reorder them.
- \a collectionData Base to generate dialog's model.
  */
-void MpCollectionPopupHandler::launchArrangeSongsDialog( MpMpxCollectionData* collectionData )
+void MpCollectionPopupHandler::launchArrangeSongsDialog()
 {   
     TX_ENTRY
 
@@ -892,7 +912,7 @@ void MpCollectionPopupHandler::launchArrangeSongsDialog( MpMpxCollectionData* co
     listView->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
     MpCollectionDataModel *model;
     //Ownership of the model is passed to the listView as a child object.
-    model = new MpCollectionDataModel( collectionData, listView );
+    model = new MpCollectionDataModel( mMpEngine->collectionData() , listView );
     model->refreshModel();
     connect( model,
              SIGNAL( orderChanged( int, int, int, int ) ),
@@ -932,8 +952,9 @@ void MpCollectionPopupHandler::requestDelete( QList<int> &selection )
 
     switch ( mMpEngine->collectionData()->context() ) {
         case ECollectionContextAllSongs:
-        case ECollectionContextArtistSongs:
-        case ECollectionContextAlbumSongs:
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextArtistAllSongs:
+        case ECollectionContextAlbumsTBone:
             message = hbTrId( "txt_mus_delete_song" );
             break;
         case ECollectionContextArtists:
@@ -947,8 +968,6 @@ void MpCollectionPopupHandler::requestDelete( QList<int> &selection )
             message = hbTrId( "txt_mus_delete_playlist" );
             break;
         case ECollectionContextPlaylistSongs:
-        case ECollectionContextGenres:
-        case ECollectionContextGenreSongs:
             needsConfirmation = false;
             mMpEngine->deleteSongs( mPermanentData->mSelectedItems );
             mPermanentData->clear();
@@ -1028,12 +1047,16 @@ void MpCollectionPopupHandler::MpPopupHandlerPermanentData::clear()
     mOriginalName.clear();
     mContextMenuIndex = KNullIndex;
     if ( mIsolatedCollectionData ) {
-        MpEngine::instance()->releaseIsolatedCollection();
+        MpEngineFactory::sharedEngine()->releaseIsolatedCollection();
         mIsolatedCollectionData = 0;
     }
     if ( mAbstractItemModel ) {
         delete mAbstractItemModel;
         mAbstractItemModel = 0;
+    }
+    //clearing any child Objects.
+    foreach (QObject* child, children()) {
+        child->deleteLater();
     }
     TX_EXIT
 }

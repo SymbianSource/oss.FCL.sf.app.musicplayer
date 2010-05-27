@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+
+    <widget name="container" type="HbWidget">
+        <widget name="mediawalContainer" type="HbWidget"/>
+        <widget name="controlsContainer" type="HbWidget">
+            <contentsmargins bottom="var(hb-param-margin-gene-screen)" left="var(hb-param-margin-gene-screen)" right="var(hb-param-margin-gene-screen)" top="var(hb-param-margin-gene-screen)"/>
+                <!-- for some reason we cannot hide the hbtoolbutton, suing a container to be able to hide -->
+            <widget name="playPauseButtonContainer" type="HbWidget">
+                <widget name="playPauseButton" type="HbToolButton">
+                    <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                    <sizehint height="expr(var(hb-param-graphic-size-function)+2.0un)" type="FIXED" width="expr(var(hb-param-graphic-size-function)+2.0un)"/>
+                </widget>
+            </widget>
+            <widget name="navigationButton" type="HbToolButton">
+                <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                <sizehint height="expr(var(hb-param-graphic-size-function)+2.0un)" type="FIXED" width="expr(var(hb-param-graphic-size-function)+2.0un)"/>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="playPauseButtonContainer" dstEdge="LEFT" spacing="0.0" src="" srcEdge="LEFT"/>
+                <anchoritem dst="playPauseButtonContainer" dstEdge="TOP" spacing="0.0" src="" srcEdge="TOP"/>
+                <anchoritem dst="navigationButton" dstEdge="RIGHT" spacing="0.0" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="navigationButton" dstEdge="TOP" spacing="0.0" src="" srcEdge="TOP"/>
+            </layout>  
+        </widget>
+        <layout type="stacked" >       
+            <stackitem itemname="mediawalContainer"/>
+            <stackitem itemname="controlsContainer"/>
+        </layout>
+    </widget>
+
+    <section name="empty">
+        <widget name="mediawalContainer">
+            <widget name="noMusic" type="HbLabel">
+                <string name="plainText" locid="txt_mus_info_no_music"/>
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <fontspec name="fontSpec" role="Primary"/>
+            </widget>
+
+            <layout type="linear" orientation="Vertical" >
+                <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
+                <stretchitem stretchfactor="1"/>
+                <linearitem itemname="noMusic" spacing="0.0"/>
+                <stretchitem stretchfactor="1"/>
+            </layout>
+        </widget>
+    </section>
+
+    <section name="mediaWall">
+        <widget name="mediawalContainer">
+            <widget name="mediaWallWidget" type="HgMediawall">
+                <enums name="ItemSizePolicy" value="ItemSizeUserDefined"/>
+                <size name="itemSize" width="34.0un" height="34.0un"/>
+            </widget>
+            <layout type="linear" orientation="Vertical" >
+                <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
+                <linearitem itemname="mediaWallWidget" spacing="0.0"/>
+            </layout>
+        </widget>
+    </section>
+    
+</hbdocument>

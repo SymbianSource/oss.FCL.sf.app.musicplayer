@@ -17,7 +17,7 @@
 
 #include <QPainter>
 #include <QImage>
-#include <qgraphicsview.h>
+#include <QGraphicsView>
 
 #include "mpsnapshotwidget.h"
 #include "mptrace.h"

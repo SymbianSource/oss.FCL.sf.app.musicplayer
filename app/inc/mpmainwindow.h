@@ -40,7 +40,8 @@ public:
         CollectionView = 1,
         PlaybackView,
         SettingsView,
-        DetailsView };
+        DetailsView,
+        MediaWallView};
 
     MpMainWindow();
     ~MpMainWindow();
@@ -58,7 +59,7 @@ private:
     void activateView(ViewType);
     void connectView();
     void disconnectView();
-
+    void keyPressEvent(QKeyEvent *event);
     MpxViewPlugin*  loadView( ViewType type, MpCommon::MpViewMode viewMode= MpCommon::DefaultView );
 
 private:
@@ -67,10 +68,10 @@ private:
     MpxViewPlugin         *mPlaybackViewPlugin;   // Own
     MpxViewPlugin         *mSettingsViewPlugin;   // Own
     MpxViewPlugin         *mDetailsViewPlugin;    // Own
-
+    MpxViewPlugin         *mMediaWallViewPlugin;  // Own
     MpxViewPlugin         *mCurrentViewPlugin;    // Own
     ViewType              mVerticalViewType;
-    MusicServices         *mMusicServices;        // Own
+    MusicServices		  *mMusicServices; 		  // Own
 
 };
 

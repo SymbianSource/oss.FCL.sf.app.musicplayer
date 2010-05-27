@@ -15,7 +15,7 @@
 *
 */
 
-#include <qsize.h>
+#include <QSize>
 #include "stub/inc/thumbnailmanager_qt.h"
 
 int gInitCounter = 0;

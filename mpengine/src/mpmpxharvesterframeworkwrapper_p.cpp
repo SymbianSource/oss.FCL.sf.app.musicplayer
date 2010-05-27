@@ -77,9 +77,8 @@ MpMpxHarvesterFrameworkWrapperPrivate::~MpMpxHarvesterFrameworkWrapperPrivate()
 /*!
  \internal
  */
-void MpMpxHarvesterFrameworkWrapperPrivate::init( MpCommon::MpViewMode viewMode, TUid hostUid )
+void MpMpxHarvesterFrameworkWrapperPrivate::init( TUid hostUid )
 {
-    iViewMode = viewMode;
     mHostUid = hostUid;
     TRAPD( err, DoInitL() );
     if ( err != KErrNone ) {
@@ -177,12 +176,7 @@ void MpMpxHarvesterFrameworkWrapperPrivate::HandleCollectionMessage(
 void MpMpxHarvesterFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
-    if ( iViewMode == MpCommon::FetchView ) {
-        iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
-    }
-    else {
-        iCollectionUtility = MMPXCollectionUtility::NewL( this, KMcModeDefault );
-    }
+    iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
     iHarvesterUtility = CMPXHarvesterFactory::NewL();
     iHarvesterUtility->CheckForSystemEventsL();
     TX_EXIT

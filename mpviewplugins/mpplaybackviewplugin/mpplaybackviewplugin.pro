@@ -53,15 +53,11 @@ HEADERS = ../../inc/mpviewbase.h \
 	  inc/mpplaybackviewplugin.h \
       inc/mpplaybackview.h \
       inc/mpplaybackwidget.h \
-      inc/mpequalizerwrapper.h \
-      inc/mpequalizerwrapper_p.h \
       inc/mpequalizerwidget.h
 
 SOURCES += src/mpplaybackviewplugin.cpp \
        src/mpplaybackview.cpp \
        src/mpplaybackwidget.cpp \
-       src/mpequalizerwrapper.cpp \
-       src/mpequalizerwrapper_p.cpp \
        src/mpequalizerwidget.cpp
        
 RESOURCES += resources/mpplaybackviewpluginresources.qrc

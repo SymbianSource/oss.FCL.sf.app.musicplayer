@@ -41,10 +41,11 @@ public:
     void openRenamePlaylistContainerDialog( const QString &currentName );
     void openRenamePlaylistItemDialog( const QString &currentName );
     void openAddSongsToPlaylist( QAbstractItemModel* model );
+    void openAddSongsToPlaylistFromTBone();
     void openDeleteSongs( QAbstractItemModel* model );
     void openAddToCurrentPlaylist( MpMpxCollectionData* collectionData );
     void openCreateNewPlaylist( MpMpxCollectionData* collectionData );
-    void openArrangeSongs( MpMpxCollectionData* collectionData );
+    void openArrangeSongs();
     void cancelOngoingPopup();
 
     bool showingPopup();
@@ -76,7 +77,7 @@ private:
     void queryNewPlaylistName(const QStringList &playlists, const char *handler );
     void getText(const QString &label, const QString &text, const char *handler );
     void getModelIndexes( const QString &label, QAbstractItemModel* model, const char *handler );
-    void launchArrangeSongsDialog( MpMpxCollectionData* collectionData );
+    void launchArrangeSongsDialog();
     void requestDelete( QList<int> &selection );
 
 private:

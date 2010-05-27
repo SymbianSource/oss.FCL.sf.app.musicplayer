@@ -18,8 +18,7 @@
 #ifndef MPDETAILSVIEW_H
 #define MPDETAILSVIEW_H
 
-#include <qpixmap>
-#include <qpointer.h>
+#include <QPixmap>
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QMap>
@@ -37,15 +36,31 @@ class HbGroupBox;
 class HbPushButton;
 class HbDocumentLoader;
 class HbListWidget;
-class HbDialog;
 class ThumbnailManager;
 class QTranslator;
 class QGraphicsLinearLayout;
+class HbProgressBar;
 
+class MpEngine;
 class MpSongData;
-class MpMpxDetailsFrameworkWrapper;
+class MpQueryManager;
+
+#ifdef SHARE_FUNC_ENABLED
+class MpDetailsShareDialog;
+#endif
 
 //class declaration
+/*!
+  Details view is the "flipside view" of Music Player.
+  In addition to displaying song details, details view
+  also provides user the possibility to comment a
+  track (by initiating sharedialog), and to get
+  recommendations based on his playlist (by displaying
+  a list of favourites, fetched from OVI music server).
+
+  DetailsView's song information will not be updated
+  if the track changes while detailsview is active.
+*/
 class MpDetailsView : public MpViewBase
 {
     Q_OBJECT
@@ -65,51 +80,48 @@ signals:
 public slots:
     void back();    
     void albumArtChanged();
+    void setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName );
     
 private slots:
-    void share();
-    void webViewLoaded( bool ok );
-    void playbackInfoChanged();
+    void handlePlaybackInfoChanged();
     void songDetailInfoChanged();
     
-    // groupbox handling, one or zero groupbox is expanded
-    void toggleDetailsGroupBox( bool state );
-    void toggleInspireMeGroupBox( bool state );
-      
-    void retrieveInformationFinished( QNetworkReply* reply );
-    void retrieveInformationNetworkError( QNetworkReply::NetworkError error );
-    void retrieveInformationSslErrors( const QList<QSslError> &error );
-    
-    void DownloadFinished( QNetworkReply* reply );
+    void handleDetailsGroupBoxToggled( bool state );
+    void handleInspireMeGroupBoxToggled( bool state );
+          
+    void handleNetworkError();
     
     void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
-    
-    void addContext();
-    void close();
-    
+    void updateSharedData(const QString& url);
+
+#ifdef SHARE_FUNC_ENABLED
+    void share();
+    void closeShareDialog();
+#endif
+
 private:
+    bool canQueryRecommendations() const;
+    bool canQuerySharePlayerLink() const;
+    
     void setupMenu();
-    void loadSharePlayer();
+ 
+    void clearInspireMe();
     
-    void constructRequest( QString &uri );     
-    // retrieve URI from Ovi music server
-    void retrieveInformation( const QString &urlEncoded );
-    
-    void composeAlbumCover( QPixmap albumart );
-    QString keyValues( QStringList keys, QStringList values ) const;
-    void handleParsedXML();
-    
-    void setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName );
     void RenderInspireMeGroupBox();
     void recommendationAlbumArtReady();
+
+#ifdef SHARE_FUNC_ENABLED
+    void createShareDialog();
+#endif
+
+private:    
+    MpEngine                *mMpEngine;         // Own
     
-private:
     MpSongData              *mSongData;
-    MpMpxDetailsFrameworkWrapper   *mFrameworkWrapper;
     
     bool                    mActivated;
     HbMainWindow            *mWindow;
-    HbAction                *mNavigationBack;
+    HbAction                *mSoftKeyBack;
     
     HbWidget                *mContainer;
     HbLabel                 *mSongText; //owned
@@ -120,27 +132,17 @@ private:
     HbGroupBox              *mInspireMeGroupBox; //owned
     HbPushButton            *mShareButton; //owned
     HbDocumentLoader        *mDocumentLoader;//owned
-    QPixmap                  mCompositePixmap;
     HbListWidget            *mDetailList; // owned by mSongDetailsGroupBox
     HbListWidget            *mInspireList; // owned by mInspireMeGroupBox
-    HbWidget                *mInspireMe;
-    QGraphicsLinearLayout   *mLayout;
     HbPushButton            *mButton;
-    
-    QList<QString>          mRecommendationSongs;
-    QList<QString>          mRecommendationArtists;
-    QList<QString>          mRecommendationAlbumArtsLink;
-    QList<QString>          mRecommendationAlbumArtsName;
-    
-    QNetworkAccessManager   *mManager;
-    QNetworkAccessManager   *mDownloadManager;
+    HbProgressBar           *mInspireMeProgressBar;    
     
     int                     mDownloadedAlbumArts;
     
     ThumbnailManager        *mThumbnailManager; //owned
     QPixmap                 mDefaultRecommendationAlbumArt;
-    QMap<QString, QPixmap>    mRecommendationAlbumArtsMap;
-    int                     mAlbumArtsReadyCount;
+   
+ 
     QList<QNetworkReply *>  mReplys;
     
     QDomDocument            mDomDocument;
@@ -148,9 +150,17 @@ private:
     QTranslator             *mMpTranslator;         // Own
     QTranslator             *mCommonTranslator;     // Own
     
-    HbDialog                *mPopup;
-    QGraphicsWebView        *mWebView; // owned by popup dialog
+    MpQueryManager*         mMpQueryManager;     // Own
+	
+    bool                    mInspireMeQueryOngoing;
+    bool                    mInspireMeQueryRendered;
+    bool                    mInspireMeOpen;
+    bool                    mSongDetailsGbOpen;
     
+#ifdef SHARE_FUNC_ENABLED
+    MpDetailsShareDialog*   mSharePopup;            // Own
+#endif
+
     Q_DISABLE_COPY(MpDetailsView)
 };
 

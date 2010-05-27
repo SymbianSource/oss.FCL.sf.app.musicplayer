@@ -36,8 +36,7 @@ class MpMpxHarvesterFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxHarvesterFrameworkWrapper( 
-                MpCommon::MpViewMode viewMode=MpCommon::DefaultView, TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxHarvesterFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
     virtual ~MpMpxHarvesterFrameworkWrapper();
 
     void scan();

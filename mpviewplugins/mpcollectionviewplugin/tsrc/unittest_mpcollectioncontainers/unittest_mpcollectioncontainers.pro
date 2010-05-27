@@ -16,19 +16,21 @@
 
 TEMPLATE = app
 CONFIG += qtestlib hb
-TARGET = 
+CONFIG += symbian_test
+TARGET = unittest_mpcollectioncontainers
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
     stub/inc \
     ../../../../inc
 
-    
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
 LIBS += -lestor.dll \
-    	-lmpnowplayingbanner.dll
-
+    	-lmpnowplayingbanner.dll \
+        -lganeswidgets.dll
 
 HEADERS += inc/unittest_mpcollectioncontainers.h \
            ../../inc/mpcollectioncontainerfactory.h \
@@ -38,12 +40,13 @@ HEADERS += inc/unittest_mpcollectioncontainers.h \
            ../../inc/mpcollectioncontainerartists.h \
            ../../inc/mpcollectioncontaineralbums.h \
            ../../inc/mpcollectioncontainerplaylists.h \
-           ../../inc/mpcollectioncontainergenres.h \
            ../../inc/mpcollectiondocumentloader.h \
            stub/inc/mpcollectiondatamodel.h \
+           stub/inc/mpcollectiontbonelistdatamodel.h \
            stub/inc/mpmpxcollectiondata.h \
-           stub/inc/mpcollectionview.h
-               
+           stub/inc/mpcollectionview.h \
+           stub/inc/hgmediawall.h
+
 SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainerfactory.cpp \
            ../../src/mpcollectioncontainer.cpp \
@@ -52,10 +55,11 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainerartists.cpp \
            ../../src/mpcollectioncontaineralbums.cpp \
            ../../src/mpcollectioncontainerplaylists.cpp \
-           ../../src/mpcollectioncontainergenres.cpp \ 
            ../../src/mpcollectiondocumentloader.cpp \
            stub/src/mpcollectiondatamodel.cpp \
+           stub/src/mpcollectiontbonelistdatamodel.cpp \
            stub/src/mpmpxcollectiondata.cpp \
-           stub/src/mpcollectionview.cpp 
-           
+           stub/src/mpcollectionview.cpp \
+           stub/src/hgmediawall.cpp
+
 RESOURCES += ../../resources/mpcollectionviewresources.qrc

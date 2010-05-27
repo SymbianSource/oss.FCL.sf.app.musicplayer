@@ -18,8 +18,8 @@
 #ifndef THUMBNAILMANAGER_QT_H
 #define THUMBNAILMANAGER_QT_H
 
-#include <qobject>
-#include <QPixmap.h>
+#include <QObject>
+#include <QPixmap>
 
 
 /** default priority value */
@@ -36,9 +36,13 @@ public:
     enum ThumbnailSize
     {
         /**
+         * Undefined, only for test verification
+         */
+        ThumbnailUndefined = 0,
+        /**
          * Small thumbnail
          */
-        ThumbnailSmall = 0,
+        ThumbnailSmall,
         /**
          * Medium thumbnail
          */
@@ -120,9 +124,10 @@ signals:
 
 public:
 
-    bool    mGetThumbFails;
-    int     mThumbnailReqCounter;
-    int     mCancelCounter;
+    bool          mGetThumbFails;
+    int           mThumbnailReqCounter;
+    int           mCancelCounter;
+    ThumbnailSize mThumbSize;
 
 };
 

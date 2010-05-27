@@ -16,7 +16,7 @@
 
 SERVICEAPP = app
 TARGET = musicplayer
-ICON = resources/qgn_menu_mp_qt.svg
+ICON = resources/qtg_large_music_player.svg
 DEPENDPATH += .
 INCLUDEPATH += . \
 	 inc \

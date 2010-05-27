@@ -56,6 +56,7 @@ private slots:
     void testCacheFirstScreen();
     void testCacheFirstScreenAllCached();
     void testCancel();
+    void testSetThumbnailSize();
     void testThumbnailReadyCache();
     void testThumbnailReadyCacheError();
     void testThumbnailReadyAlbumArt();

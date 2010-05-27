@@ -37,6 +37,11 @@ int main(int argc, char *argv[])
     // Main window widget.
     // Includes decorators such as signal strength and battery life indicator.
     MpMainWindow mainWindow;
+    mainWindow.viewport()->grabGesture(Qt::SwipeGesture);
+    mainWindow.viewport()->grabGesture(Qt::PanGesture);
+    mainWindow.viewport()->grabGesture(Qt::TapGesture);
+    mainWindow.viewport()->grabGesture(Qt::TapAndHoldGesture);
+    mainWindow.setOptimizationFlag(QGraphicsView::DontSavePainterState);
     mainWindow.initialize();
     mainWindow.show();
 

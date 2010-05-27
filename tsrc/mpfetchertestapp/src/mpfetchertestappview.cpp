@@ -21,7 +21,7 @@
 #include <hbpushbutton.h>
 #include <hblineedit.h>
 #include <hblabel.h>
-#include <qdebug>
+#include <QDebug>
 #include "mpfetchertestappview.h"
 
 

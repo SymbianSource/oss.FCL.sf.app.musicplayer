@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
+        <title>Publish</title>
+
+        <link type="text/css" rel="stylesheet" href="http://hf.ci.wipsl.com/PleiXXPTsup/noheva-be/css/ovi.player.share.ui.css" />
+		<link type="text/css" rel="stylesheet" href="musiccontext.css" />		<!-- CSS for music context area -->
+		
+		<!-- Player scripts -->
+        <script type="text/javascript" src="http://hf.ci.wipsl.com/PleiXXPTsup/noheva-be/js/publishplayer.js"></script>        
+		
+		<!-- Local stuff to be implemented by user application to provide the contextual information -->
+		<script type="text/javascript" src="musiccontext.js"></script>
+    </head>
+	<!-- onfocus refreshes only the song when publishplayer is set active / deactive -->
+    <body onload="music.initPlayer(); music.updateContextArea();" 
+          onfocus="music.updateContextArea();">
+	<div id="ovi.player.share.ui">
+		<h1>Loading...</h1>
+		<input type="button" value="Close" onClick="context.owner().closeShareDialog();">
+		<input type="button" value="updateContextArea" onClick="music.updateContextArea();">
+		<input type="button" value="Clear JS Cache" onClick="window.context.owner().clearCache();">
+	</div>
+		<!-- Now we should have publishplayer loaded, check and report error if failed -->
+		<script type="text/javascript">			
+            music.playerLoaded();
+		</script>
+    </body>
+</html>

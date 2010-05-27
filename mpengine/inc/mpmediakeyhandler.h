@@ -18,7 +18,7 @@
 #ifndef MPMEDIAKEYHANDLER_H
 #define MPMEDIAKEYHANDLER_H
 
-#include <qobject>
+#include <QObject>
 
 class MpMediaKeyHandlerPrivate;
 

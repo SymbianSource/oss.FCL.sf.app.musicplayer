@@ -22,14 +22,19 @@
 #include <hbaction.h>
 #include <hbinstance.h>
 #include <xqsharablefile.h>
+#include <EqualizerConstants.h>
 
 #include "mpengine.h"
 #include "mpmpxharvesterframeworkwrapper.h"
 #include "mpmpxcollectionframeworkwrapper.h"
 #include "mpmpxplaybackframeworkwrapper.h"
-#include "mpsongscanner.h"
+#include "mpmpxdetailsframeworkwrapper.h"
+#include "mpaudioeffectsframeworkwrapper.h"
+#include "mpequalizerframeworkwrapper.h"
 #include "mpmediakeyhandler.h"
 #include "mptrace.h"
+#include "mpsettingsmanager.h"
+#include "mpprogressdialoghandler.h"
 
 /*!
     \class MpEngine
@@ -177,19 +182,30 @@
  */
 
 /*!
+    \fn void containerContentsChanged()
+
+    This signal is emitted when items are removed or inserted on the current 
+    container.
+
+ */
+
+/*!
  Constructs music player engine.
  */
 MpEngine::MpEngine()
     : mMpxHarvesterWrapper(0),
-      mSongScanner(0),
       mMediaKeyHandler(0),
       mUsbOutstandingNote(0),
       mMpxCollectionWrapper(0),
       mMpxPlaybackWrapper(0),
+      mMpxDetailsWrapper(0),
+      mAudioEffectsWrapper(0),
+      mEqualizerWrapper(0),
+      mCurrentPresetIndex(KEqualizerPresetNone),
       mMpTranslator(0),
       mUsbBlockingState(USB_NotConnected),
       mPreviousUsbState(USB_NotConnected),
-      mViewMode(MpCommon::DefaultView)
+      mProgressDialogHandler(0)
 {
     TX_LOG
 }
@@ -200,25 +216,25 @@ MpEngine::MpEngine()
 MpEngine::~MpEngine()
 {
     TX_ENTRY
+    delete mMpTranslator;
+    delete mMediaKeyHandler;
+    delete mUsbOutstandingNote;
+    delete mMpxPlaybackWrapper;
+    delete mMpxDetailsWrapper;
+    delete mMpxHarvesterWrapper;
+    delete mMpxCollectionWrapper;
+    delete mAudioEffectsWrapper;
+    delete mEqualizerWrapper;
+	delete mProgressDialogHandler;
     TX_EXIT
-}
-
-/*!
- Returns the singleton instance of music player engine.
- */
-MpEngine * MpEngine::instance()
-{
-    static MpEngine instance;
-    return &instance;
 }
 
 /*!
  Initialize engine
  */
-void MpEngine::initialize( MpCommon::MpViewMode viewMode, TUid hostUid )
+void MpEngine::initialize( TUid hostUid, EngineMode mode )
 {
     TX_ENTRY
-    mViewMode = viewMode;
     mHostUid = hostUid;
     
     //Load musicplayer translator
@@ -232,10 +248,10 @@ void MpEngine::initialize( MpCommon::MpViewMode viewMode, TUid hostUid )
     if ( translatorLoaded ) {
         qApp->installTranslator( mMpTranslator );
     }
-    
-    if( mViewMode == MpCommon::DefaultView || mViewMode == MpCommon::FetchView ){
+
+    if( mode == StandAlone || mode == Fetch ){
         // Harvesting Wrapper
-        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mViewMode, mHostUid );
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mHostUid );
         connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ), 
                  this, SLOT( handleScanStarted() ), Qt::QueuedConnection );
         connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ), 
@@ -245,12 +261,19 @@ void MpEngine::initialize( MpCommon::MpViewMode viewMode, TUid hostUid )
                  this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
         qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
         connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ), 
-                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );
-        mSongScanner = new MpSongScanner( mMpxHarvesterWrapper );
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );       
         mMediaKeyHandler = new MpMediaKeyHandler();
+    }
+        
+    if ( mode == StandAlone || mode == Fetch || mode == MediaBrowsing) {
         
         // Collection Wrapper
-        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mViewMode, mHostUid );
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid );
+        
+        //disabling these since fetch mode plays only one song at a time.
+        mMpxCollectionWrapper->setRepeatFeatureEnabled( mode != Fetch );
+        mMpxCollectionWrapper->setShuffleFeatureEnabled( mode != Fetch );
+        
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
                 this, SIGNAL( collectionPlaylistOpened() ),
                 Qt::QueuedConnection );
@@ -266,33 +289,40 @@ void MpEngine::initialize( MpCommon::MpViewMode viewMode, TUid hostUid )
         connect( mMpxCollectionWrapper, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
                 this, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
                 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( containerContentsChanged() ),
+                this, SIGNAL( containerContentsChanged() ),
+                Qt::QueuedConnection );
+        connect( mProgressDialogHandler, SIGNAL( deleteStarted() ), 
+               this, SLOT( handleDeleteStarted() ),
+               Qt::QueuedConnection );
+       connect( mProgressDialogHandler, SIGNAL( songsDeleted( bool ) ),
+               this, SLOT( handleDeleteEnded( bool ) ),
+               Qt::QueuedConnection );
+    }
+    
+    if( mode == StandAlone ){
+        // Equalizer wrapper , this needs to be created before playback wrapper.
+        mEqualizerWrapper = new MpEqualizerFrameworkWrapper();
+        connect( mEqualizerWrapper, SIGNAL( equalizerReady() ), 
+                 this, SLOT( handleEqualizerReady() ), Qt::QueuedConnection );
+    }
+    
+    if ( mode == StandAlone || mode == Fetch || mode == Embedded ) {
+        // Playback Wrapper 
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid );
+        
+        // Details Wrapper
+        mMpxDetailsWrapper = new MpMpxDetailsFrameworkWrapper( mHostUid );
     }
 
-    // Playback Wrapper 
-    mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mViewMode, mHostUid );
-
-    TX_EXIT
-}
-
-/*!
-  Deinitialize wrappers
- */
-void MpEngine::close( )
-{
-    delete mMpTranslator;
-    mMpTranslator = 0;
-    delete mSongScanner;
-    mSongScanner = 0;
-    delete mMediaKeyHandler;
-    mMediaKeyHandler = 0;   
-    delete mUsbOutstandingNote;
-    mUsbOutstandingNote = 0;
-    delete mMpxPlaybackWrapper;
-    mMpxPlaybackWrapper = 0;
-    delete mMpxHarvesterWrapper;
-    mMpxHarvesterWrapper = 0;
-    delete mMpxCollectionWrapper;
-    mMpxCollectionWrapper = 0;
+    if( mode == StandAlone ){
+        // AudioEffects wrapper
+        mAudioEffectsWrapper = new MpAudioEffectsFrameworkWrapper();
+    }
+    if (mMpxHarvesterWrapper && mMpxCollectionWrapper){
+        mProgressDialogHandler = new MpProgressDialogHandler(mMpxCollectionWrapper, mMpxHarvesterWrapper);
+    }
+	TX_EXIT
 }
 
 /*!
@@ -344,7 +374,7 @@ void MpEngine::refreshLibrary()
     TX_ENTRY
     if ( !verifyUsbBlocking( true ) ) {
         emit libraryAboutToUpdate();
-        mSongScanner->scan();
+        mProgressDialogHandler->scan();
     }
     TX_EXIT
 }
@@ -687,7 +717,7 @@ void MpEngine::renamePlaylist( QString &newName )
 void MpEngine::deleteSongs( QList<int> &selection )
 {
     if ( !verifyUsbBlocking( true ) ) {
-        mMpxCollectionWrapper->deleteSongs( selection );
+        mProgressDialogHandler->deleteSongs( selection );
     }
 }
 
@@ -719,6 +749,22 @@ void MpEngine::openIsolatedCollection( TCollectionContext context )
 void MpEngine::releaseIsolatedCollection()
 {
     mMpxCollectionWrapper->releaseIsolatedCollection();
+}
+
+/*!
+ Finds all songs beloging to the album specified by the \a index.
+ */
+void MpEngine::findAlbumSongs( int index )
+{
+    mMpxCollectionWrapper->findAlbumSongs(index);
+}
+
+/*!
+ Plays album with \a albumIndex starting with the songs with \a songIndex.
+ */
+void MpEngine::playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData  )
+{
+    mMpxCollectionWrapper->playAlbumSongs(albumIndex, songIndex, collectionData);
 }
 
 /*!
@@ -790,7 +836,7 @@ void MpEngine::stop()
 }
 
 /*!
- Slot to handle a skeep forward.
+ Slot to handle a skip forward.
  */
 void MpEngine::skipForward()
 {
@@ -798,13 +844,36 @@ void MpEngine::skipForward()
 }
 
 /*!
- Slot to handle a skeep backwards.
+ Slot to handle  seek forward.
+ */
+void MpEngine::startSeekForward()
+{
+    mMpxPlaybackWrapper->startSeekForward();
+}
+
+/*!
+ Slot to handle stop seeking.
+ */
+void MpEngine::stopSeeking()
+{
+    mMpxPlaybackWrapper->stopSeeking();
+}
+
+/*!
+ Slot to handle a skip backwards.
  */
 void MpEngine::skipBackward()
 {
     mMpxPlaybackWrapper->skipBackward();
 }
 
+/*!
+ Slot to handle seek backwards.
+ */
+void MpEngine::startSeekBackward()
+{
+    mMpxPlaybackWrapper->startSeekBackward();
+}
 /*!
  Slot to handle a request to change \a position.
  */
@@ -827,5 +896,163 @@ void MpEngine::setShuffle( bool mode )
 void MpEngine::setRepeat( bool mode )
 {
     mMpxPlaybackWrapper->setRepeat( mode );
+}
+
+/*!
+ Returns pointer to MpSongData, which is the song data for detail's view.
+ */
+MpSongData *MpEngine::songData()
+{
+    return mMpxDetailsWrapper->songData();
+}
+
+/*!
+ Retrieve song informatioin
+ */
+void MpEngine::retrieveSong()
+{
+    TX_ENTRY
+    mMpxDetailsWrapper->retrieveSong();
+    TX_EXIT
+}
+
+/*!
+ Retrieve balance informatioin from audio effects
+ */
+int MpEngine::balance()
+{
+    return mAudioEffectsWrapper->balance();
+}
+
+/*!
+ Retrieve loudness informatioin from audio effects
+ */
+bool MpEngine::loudness()
+{
+    return mAudioEffectsWrapper->loudness();
+}
+
+/*!
+ Slot to handle a request to change \a balance in audio effects.
+ */
+void MpEngine::setBalance( int balance )
+{
+    TX_ENTRY
+    
+    if ( mAudioEffectsWrapper->balance() != balance ) {
+        mAudioEffectsWrapper->setBalance( balance );
+        mMpxPlaybackWrapper->setBalance( balance );
+    }
+    
+    TX_EXIT
+}
+
+/*!
+ Slot to handle a request to change loudness \a mode in audio effects.
+ */
+void MpEngine::setLoudness( bool mode )
+{
+    TX_ENTRY
+    
+    if( mAudioEffectsWrapper->loudness() != mode ) { //do not set same value twice
+        mAudioEffectsWrapper->setLoudness( mode );
+        mMpxPlaybackWrapper->applyAudioEffects();
+    }
+    
+    TX_EXIT
+}
+
+/*!
+ Apply the preset by giving \a presetIndex. The index is subtracted by 1 because
+ index 0 represent "Off" at UI level.
+ */
+void MpEngine::applyPreset( int presetIndex )
+{
+    TX_ENTRY_ARGS( "presetIndex=" << presetIndex );
+    
+    TInt presetKey = mEqualizerWrapper->getPresetNameKey( presetIndex - 1 );
+    
+    if ( presetKey != KEqualizerPresetNone ) {
+        TX_LOG_ARGS( "Preset key in engine =" << presetKey );
+        // Store in CenRep file
+        MpSettingsManager::setPreset( presetKey );
+        // Notify playback framework of the change.
+        mMpxPlaybackWrapper->applyEqualizer();
+        mCurrentPresetIndex = presetIndex;
+    }
+    else {
+        TX_LOG_ARGS("getPresetNameKey Error  = " << KEqualizerPresetNone);
+    }
+    
+    TX_EXIT
+}
+
+/*!
+ Disabling equalizer by setting the preset to -1 and apply it to 
+ disable current preset.
+ */
+void MpEngine::disableEqualizer()
+{
+    TX_ENTRY
+
+    mCurrentPresetIndex = KEqualizerPresetNone;
+    // Store in CenRep file
+    MpSettingsManager::setPreset( mCurrentPresetIndex );
+    // Notify playback framework of the change.
+    mMpxPlaybackWrapper->applyEqualizer();
+
+    TX_EXIT
+}
+
+/*!
+ Return current preset index (UI)
+ */
+int MpEngine::activePreset()
+{
+    TX_LOG_ARGS("mCurrentPresetIndex = " << mCurrentPresetIndex );
+
+    return mCurrentPresetIndex;
+}
+
+/*!
+ Retrieve list of preset names from equalizer wrapper
+ */
+QStringList MpEngine::presetNames()
+{
+    return mEqualizerWrapper->presetNames(); 
+}
+
+/*!
+ Slot to handle equalizer ready signal from equalizer wrapper.
+ */
+void MpEngine::handleEqualizerReady()
+{
+    TX_ENTRY
+    
+    // Get preset id from cenrep
+    TInt presetKey( MpSettingsManager::preset() );
+    
+    mCurrentPresetIndex = mEqualizerWrapper->getPresetIndex( presetKey );
+    emit equalizerReady();
+    
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when song deleting starts.
+ */
+void MpEngine::handleDeleteStarted() {
+    TX_ENTRY
+    mMediaKeyHandler->setEnabled(false);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when song deleting ends.
+ */
+void MpEngine::handleDeleteEnded() {
+    TX_ENTRY
+    mMediaKeyHandler->setEnabled(true);
+    TX_EXIT
 }
 

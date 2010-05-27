@@ -16,7 +16,9 @@
 
 TEMPLATE = app
 CONFIG += qtestlib hb
-TARGET = 
+CONFIG += symbian_test
+TARGET = unittest_mpsnapshotwidget
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
@@ -26,6 +28,6 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 HEADERS += inc/unittest_mpsnapshotwidget.h \
            ../../inc/mpsnapshotwidget.h 
-               
+
 SOURCES += src/unittest_mpsnapshotwidget.cpp \
            ../../src/mpsnapshotwidget.cpp 

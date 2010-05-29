@@ -34,9 +34,9 @@ const int KUndefined = -1;
 
 MpSongData::MpSongData( QObject *parent )
     : QObject( parent ),
-      mTitle( NULL ),
-      mAlbum( NULL ),
-      mArtist( NULL ),
+      mTitle( QString( "title" ) ),
+      mAlbum( QString( "album" ) ),
+      mArtist( QString( "artist" ) ),
       mComposer( NULL),
       mGenre( NULL ),
       mYear( NULL ),
@@ -50,7 +50,7 @@ MpSongData::MpSongData( QObject *parent )
     mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailMedium );
     QObject::connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
             this, SLOT( thumbnailReady( QPixmap , void * , int , int  ) ) );
-
+    
     TX_EXIT_ARGS("Stub")
 }
 
@@ -122,67 +122,67 @@ QString MpSongData::link() const
 
 QString MpSongData::year() const
 {
-    TX_ENTRY_ARGS("Stub")
+    TX_ENTRY_ARGS("Stub")    
     return mYear;
 }
 
 QString MpSongData::fileName() const
 {
-    TX_LOG
+    TX_LOG    
     return mFileName;
 }
 
 QString MpSongData::mimeType() const
 {
-    TX_LOG
-    return mMimeType;
+    TX_LOG    
+    return mMimeType;   
 }
 
 QString MpSongData::duration() const
 {
-    TX_LOG
-    return mDuration;
+    TX_LOG    
+    return mDuration;  
 }
 
 QString MpSongData::bitRate() const
 {
-    TX_LOG
-    return mBitRate;
+    TX_LOG    
+    return mBitRate;  
 }
 
 QString MpSongData::sampleRate() const
 {
-    TX_LOG
-    return mSampleRate;
+    TX_LOG    
+    return mSampleRate;  
 }
 
 QString MpSongData::size() const
 {
-    TX_LOG
-    return mSize;
+    TX_LOG    
+    return mSize;  
 }
 
 QString MpSongData::modified() const
 {
-    TX_LOG
-    return mModified;
+    TX_LOG    
+    return mModified;  
 }
 
 QString MpSongData::copyright() const
 {
-    TX_LOG
-    return mCopyright;
+    TX_LOG    
+    return mCopyright;  
 }
 
 QString MpSongData::musicURL() const
 {
-    TX_LOG
-    return mMusicURL;
+    TX_LOG    
+    return mMusicURL;  
 }
 
 bool MpSongData::isDrmProtected() const
 {
-    TX_LOG
+    TX_LOG    
     return mDrmProtected;
 }
 bool MpSongData::setTitle( const QString &title )
@@ -325,7 +325,7 @@ bool MpSongData::setFileName( const QString &fileName )
 }
 
 bool MpSongData::setMimeType( const QString &mimeType )
-{
+{    
     TX_ENTRY_ARGS( "Mime =" << mimeType )
     bool change = false;
     if ( mimeType != mMimeType ) {
@@ -333,11 +333,11 @@ bool MpSongData::setMimeType( const QString &mimeType )
         mMimeType = mimeType;
     }
     TX_EXIT
-    return change;
+    return change;    
 }
 
 bool MpSongData::setDuration( int duration )
-{
+{   
     TX_ENTRY_ARGS( "Duration =" << duration )
     bool change = false;
     QString timeFormatOne("%1:%2:%3");
@@ -350,23 +350,23 @@ bool MpSongData::setDuration( int duration )
             int hour = duration / 3600;
             int min = duration % 3600 / 60;
             int sec = duration % 3600 % 60;
-
+            
             hourStr = hour >= 10 ? QString::number( hour ) : QString::number( hour ).prepend( "0" );
             minStr = min >= 10 ? QString::number( min ) : QString::number( min ).prepend( "0" );
-            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );
+            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );            
             mDuration = timeFormatOne.arg( hourStr ).arg( minStr ).arg( secStr );
         } else if ( duration >= 60 && duration < 3600 ) {
             // more than one min && less than one hour
             QString minStr, secStr;
             int min = duration / 60;
             int sec = duration % 60;
-
+            
             minStr = min >= 10 ? QString::number( min ) : QString::number( min ).prepend( "0" );
-            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );
+            secStr = sec >= 10 ? QString::number( sec ) : QString::number( sec ).prepend( "0" );     
             mDuration = timeFormatTwo.arg( minStr ).arg( secStr );
         } else if ( duration > 0 && duration < 60 ) {
             QString secStr;
-            secStr = duration >= 10 ? QString::number( duration ) : QString::number( duration ).prepend( "0" );
+            secStr = duration >= 10 ? QString::number( duration ) : QString::number( duration ).prepend( "0" ); 
             mDuration = secStr;
         } else {
             mDuration = QString();
@@ -409,7 +409,7 @@ bool MpSongData::setSampleRate( int sampleRate )
 }
 
 bool MpSongData::setSize( int size )
-{
+{   
     TX_ENTRY_ARGS( "Size =" << size )
     bool change = false;
     if ( QString::number( size ) != mSize ) {

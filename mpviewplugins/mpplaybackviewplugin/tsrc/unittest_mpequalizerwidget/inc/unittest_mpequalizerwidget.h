@@ -46,7 +46,7 @@ private slots:
     void testPresetSelected();
     void testCancelSelected();
     void testOkSelected();
-    void testGetLogicalName();
+    void testGetLocalizedString();
 
 private:
 

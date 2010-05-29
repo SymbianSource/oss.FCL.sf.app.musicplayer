@@ -23,7 +23,6 @@
 
 #include "mpdetailssharedialog.h"
 #include "mptrace.h"
-#include "logger.h"
 
 const int KRecommendationNum = 2;
 

@@ -22,4 +22,6 @@
 
 file=ABI_DIR\BUILD_DIR\mpengine.dll          SHARED_LIB_DIR\mpengine.dll
 
+data=ZSYSTEM\data\nullsound.mp3                system\data\nullsound.mp3
+
 #endif

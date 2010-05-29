@@ -31,6 +31,10 @@ public:
     explicit MpCollectionContainerAllSongs( HbDocumentLoader *loader, QGraphicsItem *parent=0 );
     virtual ~MpCollectionContainerAllSongs();
 
+public slots:
+
+    void dataReloaded();
+
 private:
 
     void setupContainer();

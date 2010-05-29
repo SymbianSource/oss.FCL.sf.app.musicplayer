@@ -17,7 +17,7 @@
 &EN
 
 ; SIS header: name, uid, version
-#{"unittest_mpdetailsviewplugin"},(0xE003e880),1,0,0
+#{"unittest_mpdetailsviewplugin"},(0xE003e881),1,0,0
 
 ; Localised Vendor name
 %{"Vendor"}

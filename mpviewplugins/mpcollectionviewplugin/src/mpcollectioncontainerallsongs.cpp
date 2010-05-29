@@ -60,6 +60,30 @@ MpCollectionContainerAllSongs::~MpCollectionContainerAllSongs()
 }
 
 /*!
+ Slot to be called data model has new data.
+ Two cases:
+     1) User deleted a song.
+	 2) New song found during 'Refresh' operation.
+ */
+void MpCollectionContainerAllSongs::dataReloaded()
+{
+    TX_ENTRY
+    MpCollectionListContainer::dataReloaded();
+    if ( mViewMode != MpCommon::FetchView ) {
+        int count = mCollectionData->count();
+        QString details = hbTrId("txt_mus_subhead_ln_songs", count);
+        mInfoBar->setHeading(details);
+    }
+    if ( mCollectionData->count() > 1 ) {
+        emit shuffleEnabled(true);
+    }
+    else {
+        emit shuffleEnabled(false);
+    }
+    TX_EXIT
+}
+
+/*!
  Sets up the container by organizing widgets according to its layout.
 
  \reimp

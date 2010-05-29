@@ -81,9 +81,10 @@ public:
     void playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData );
     void setRepeatFeatureEnabled( bool enable );
     void setShuffleFeatureEnabled( bool enable );
-	void cancel();
-	
+    void cancel();
+    
     MpMpxCollectionData *collectionData();
+    void openShuffleAllSongsPath();
 
 private:
 
@@ -127,6 +128,7 @@ private:
 
     void PreparePlaylistMediaL( CMPXMedia& aMedia, QList<int> &selection, MpMpxCollectionData *collectionData );
     void createPlaybackUtilityL();
+    void DoPlayAllSongsPlaylistL();
 
 private:
 
@@ -146,6 +148,7 @@ private:
     TBool                             iRepeatFeature;
     TBool                             iShuffleFeature;
     TBool                             iReopen;
+    TBool                             iShuffleAll;
 
 };
 

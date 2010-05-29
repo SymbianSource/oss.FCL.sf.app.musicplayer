@@ -65,6 +65,8 @@ public:
     void reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal );
     void setRepeatFeatureEnabled( bool enable );
     void setShuffleFeatureEnabled( bool enable );
+   
+    void openShuffleAllSongsPath();
     
 signals:
 

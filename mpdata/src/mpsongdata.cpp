@@ -21,6 +21,7 @@
 #include <QPainter>
 #include <QBuffer>
 #include <QPixmap>
+#include <QTime>
 #include <hbicon.h>
 #include <QIcon>
 #include <QFile>
@@ -89,6 +90,7 @@ MpSongData::~MpSongData()
     if( mThumbnailManager ) {
         delete mThumbnailManager;
     }
+    removeAlbumArtFile(); // TODO Remove when base64 is working
     TX_EXIT
 }
 
@@ -733,7 +735,17 @@ QString MpSongData::albumArtBase64() const
     // TODO: this is temporary solution until base64 defect in QT is fixed.
     TX_LOG
     QByteArray array;
-    QFile file( "e:\\album_art.png" );
+
+    // Remove old album art in case new one cannot be written.
+    removeAlbumArtFile();
+
+    QString sTimeStamp = QTime::currentTime().toString( "hhmmsszzz" );
+    QString sTempFileLocation = QString( "e:\\album_art_%1.png" ).arg( sTimeStamp );
+
+    ( ( MpSongData* ) this )->mTempAlbumArt = sTempFileLocation;
+    TX_LOG_ARGS( "Create album art file " << mTempAlbumArt );
+
+    QFile file( mTempAlbumArt );
     file.open( QIODevice::WriteOnly );
     if ( mAlbumArt && !mAlbumArt->isNull() && !mAlbumArt->qicon().isNull() )
     {
@@ -742,6 +754,24 @@ QString MpSongData::albumArtBase64() const
         //mAlbumArt->pixmap().save( &file, "PNG" ); // writes pixmap into bytes in PNG format
     }
     file.close();
-    return "e:\\album_art.png";
+    return mTempAlbumArt;
 }
 
+/*!
+ Delete temporary album art file.
+ */
+void MpSongData::removeAlbumArtFile() const
+{
+    TX_ENTRY
+    if ( !mTempAlbumArt.isEmpty() )
+    {
+        TX_LOG_ARGS( "Remove album art file " << mTempAlbumArt );
+        QFile::remove( mTempAlbumArt );
+        ( ( MpSongData* ) this )->mTempAlbumArt = "";
+    }
+    else
+    {
+        TX_LOG_ARGS( "Album art filename is empty" );
+    }
+    TX_EXIT
+}

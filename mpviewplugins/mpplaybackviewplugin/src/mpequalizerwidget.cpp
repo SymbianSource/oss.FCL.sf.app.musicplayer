@@ -86,9 +86,14 @@ void MpEqualizerWidget::prepareDialog()
     QStringList listItems;
     QStringList presetNames = mMpEngine->presetNames();
     for ( int i=0; i<presetNames.count(); i++ ) {
-        QString name = getLogicalName( presetNames.at(i) );
+        QString name = getLocalizedString( presetNames.at(i) );
         if ( name.size() > 0 ) {
             listItems.append( name );
+        }
+        else {
+            // Localized string not found, append original name.
+            TX_LOG_ARGS( "Localized string not found = " << name);
+            listItems.append( presetNames.at(i) );
         }
     }
     listItems.prepend(hbTrId("txt_mus_list_off"));
@@ -181,31 +186,31 @@ void MpEqualizerWidget::okSelected(bool checked)
 }
 
 /*!
-  Return the logical name base on preset name. Used for localization.
+  Return the localized string base on preset name.
  */
-QString MpEqualizerWidget::getLogicalName( QString name )
+QString MpEqualizerWidget::getLocalizedString( QString name )
 {
     TX_ENTRY_ARGS( "Name = " << name );
-    QString logicalName;
+    QString localizedString;
 
     if ( name == "Bass Booster" ) {
-        logicalName = hbTrId( "txt_mus_list_bass_booster" );
+        localizedString = hbTrId( "txt_mus_list_bass_booster" );
     }
     else if ( name == "Classic" ) {
-        logicalName = hbTrId( "txt_mus_list_classical" );
+        localizedString = hbTrId( "txt_mus_list_classical" );
     }
     else if ( name == "Pop" ) {
-        logicalName = hbTrId( "txt_mus_list_pop" );
+        localizedString = hbTrId( "txt_mus_list_pop" );
     }
     else if ( name == "Jazz" ) {
-        logicalName = hbTrId( "txt_mus_list_jazz" );
+        localizedString = hbTrId( "txt_mus_list_jazz" );
     }
     else if ( name == "Rock" ) {
-        logicalName = hbTrId( "txt_mus_list_rock" );
+        localizedString = hbTrId( "txt_mus_list_rock" );
     }
     
-    TX_EXIT_ARGS( "Logical String = " << logicalName );
-    return logicalName;
+    TX_EXIT_ARGS( "Logical String = " << localizedString );
+    return localizedString;
 }
 
 //End of File

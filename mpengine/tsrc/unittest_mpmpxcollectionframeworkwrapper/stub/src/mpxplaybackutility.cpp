@@ -17,6 +17,7 @@
 
 #include <Qt>
 #include <mpxcollectionplaylist.h>
+#include <mpxcollectionpath.h>
 #include <mptrace.h>
 
 #include "stub/inc/mpxplaybackutility.h"
@@ -27,7 +28,8 @@
 MMPXPlaybackUtility::MMPXPlaybackUtility():iShuffle(-1),
                                            iRepeat(-1),
                                            iProperty(EPbPropertyVolume),
-                                           iPlay(EFalse)
+                                           iPlay(EFalse),
+                                           iCurrentPath(0)
 {
 }
 
@@ -60,7 +62,7 @@ void MMPXPlaybackUtility::Close()
 */
 void MMPXPlaybackUtility::InitL(const CMPXCollectionPlaylist& aPlaylist, TBool aPlay)
 {
-    Q_UNUSED(aPlaylist);
+    iCurrentPath = aPlaylist.Path().ContainerPathL();
     iPlay = aPlay;
 }
 

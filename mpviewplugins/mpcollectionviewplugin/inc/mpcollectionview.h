@@ -102,6 +102,8 @@ public slots:
     void handleLibraryAboutToUpdate();
     void handleLibraryUpdated();
 
+    void setShuffleAction( bool enabled );
+
 private:
 
     void setMainToolBar();
@@ -137,6 +139,8 @@ private:
     HbMainWindow                    *mWindow;               // Not own
     HbAction                        *mSoftKeyQuit;          // Not own
     HbAction                        *mSoftKeyBack;          // Not own
+    HbAction                        *mShuffleAction;        // Not own
+    bool                            mShuffleEnabled;
 
     MpCollectionDocumentLoader      *mDocumentLoader;       // Own
     HbWidget                        *mMainContainer;        // Own

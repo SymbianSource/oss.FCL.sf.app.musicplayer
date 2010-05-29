@@ -23,12 +23,12 @@
 #include <hbwidget.h>
 
 #include "mpnowplayingwidget.h"
-#include "mpnowplayingbackend.h"
+#include "mpplaybackdata.h"
 
 //forward declartions
 class HbIconItem;
 class HbLabel;
-class MpNowPlayingBackEnd;
+class MpEngine;
 class QGraphicsSceneMouseEvent;
 class HbIcon;
 class HbDocumentLoader;
@@ -46,35 +46,36 @@ private:
     };
     
 public:
-    explicit MpNowPlayingWidgetPrivate( long int playerId,
-                                        MpNowPlayingWidget *qq );
+    explicit MpNowPlayingWidgetPrivate( MpNowPlayingWidget *qq );
     virtual ~MpNowPlayingWidgetPrivate();
 
     void setEnabled( bool enabled );
+    bool isBannerAttached();
     bool handleClickEvent( QGraphicsSceneMouseEvent *event );
     void handleMousePressEvent( QGraphicsSceneMouseEvent *event, bool pressed );
     void handleMouseMoveEvent( QGraphicsSceneMouseEvent *event );
 
 public slots:
 
-    void setState( SimplifiedPlayerState state );
-    void setTitle( const QString &title );
-    void setArtist( const QString &artist );
+    void setState();
+    void updateBannerInfo();
+    
 private:
 
-    MpNowPlayingWidget      *q_ptr;
-    HbLabel                 *mPrimaryText;
-    HbLabel                 *mSecondaryText;
-    SimplifiedPlayerState   mState;
-    MpNowPlayingBackEnd     *mBackEnd;
+    MpNowPlayingWidget                      *q_ptr;
+    HbLabel                                 *mPrimaryText;
+    HbLabel                                 *mSecondaryText;
+    MpPlaybackData::SimplifiedState         mState;
+    MpPlaybackData                          *mPlaybackData;
+    MpEngine                                *mMpEngine;
 
-	HbIcon                  *mPlayIcon;
-    HbIcon                  *mPauseIcon;
-    HbLabel                 *mIcon;
+    HbIcon                                  *mPlayIcon;
+    HbIcon                                  *mPauseIcon;
+    HbLabel                                 *mIcon;
 
-    HbDocumentLoader        *mDocumentLoader;
+    HbDocumentLoader                        *mDocumentLoader;
 
-    BannerPressedState      mCurrentPressedState;
+    BannerPressedState                      mCurrentPressedState;
 
 };
 

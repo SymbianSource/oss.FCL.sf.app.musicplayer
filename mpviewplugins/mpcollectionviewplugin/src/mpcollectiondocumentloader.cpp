@@ -41,7 +41,7 @@ QObject *MpCollectionDocumentLoader::createObject(const QString& type, const QSt
     TX_ENTRY_ARGS("type=" << type << ", name=" << name);
 
     if ( type == MpNowPlayingWidget::staticMetaObject.className() ) {
-        QObject *object = new MpNowPlayingWidget(MpCommon::KMusicPlayerUid);
+        QObject *object = new MpNowPlayingWidget();
         object->setObjectName(name);
         TX_EXIT
         return object;

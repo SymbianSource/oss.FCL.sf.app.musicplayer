@@ -33,12 +33,14 @@ LIBS += -lestor.dll \
 
 # Input
 HEADERS += inc/unittest_mpnowplayingwidget.h \
-           stub/inc/mpnowplayingbackend.h \
+           stub/inc/mpplaybackdata.h \
+           stub/inc/mpenginefactory.h \
            ../../../../inc/mpnowplayingwidget.h \
            ../../inc/mpnowplayingwidget_p.h
                
 SOURCES += src/unittest_mpnowplayingwidget.cpp \
-           stub/src/mpnowplayingbackend.cpp \
+           stub/src/mpplaybackdata.cpp \
+           stub/src/mpenginefactory.cpp \
            ../../src/mpnowplayingwidget.cpp \
            ../../src/mpnowplayingwidget_p.cpp
 

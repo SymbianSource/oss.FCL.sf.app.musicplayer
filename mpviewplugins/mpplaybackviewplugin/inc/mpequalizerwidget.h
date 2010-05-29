@@ -45,7 +45,7 @@ public slots:
     void okSelected(bool checked);
 
 private: // functions
-    QString getLogicalName( QString name );
+    QString getLocalizedString( QString name );
     
 private:
     

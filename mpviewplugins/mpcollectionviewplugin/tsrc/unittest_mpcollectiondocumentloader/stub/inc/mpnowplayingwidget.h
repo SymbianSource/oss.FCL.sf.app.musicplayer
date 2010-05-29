@@ -26,7 +26,7 @@ class MpNowPlayingWidget : public QObject
     Q_OBJECT
 
 public:
-    explicit MpNowPlayingWidget(long int playerId);
+    explicit MpNowPlayingWidget();
     virtual ~MpNowPlayingWidget();
 };
 

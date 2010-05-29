@@ -20,7 +20,7 @@
 
 #include <QtTest/QtTest>
 
-#include "stub/inc/mpnowplayingbackend.h"
+#include "stub/inc/mpplaybackdata.h"
 
 class MpNowPlayingWidget;
 class MpNowPlayingWidgetPrivate;
@@ -35,7 +35,7 @@ public:
     virtual ~TestMpNowPlayingWidget();
 
 signals:
-    void setState(SimplifiedPlayerState state);
+    void setState(MpPlaybackData::SimplifiedState state);
 
 public slots:
     void initTestCase();
@@ -46,9 +46,9 @@ public slots:
 private slots:
     void testConstructor();
     void testSetState();
-    void testTitleChange();
-    void testArtistChange();
+    void testBannerInfoChange();
     void testSetEnabled();
+    void testIsBannerAttached();
 
 private:
 

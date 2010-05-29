@@ -14,9 +14,24 @@
 @rem Description: 
 @rem
 
-Echo please copy key files to ROOT before build sis file
-del musicplayer.sis mpxservicesplugins.sis musicplayer.six mpxservicesplugins.six
-makesis mpxservicesplugins.pkg
-signsis mpxservicesplugins.sis mpxservicesplugins.six rd.cer rd-key.pem
-makesis musicplayer.pkg
-signsis musicplayer.sis musicplayer.six rd.cer rd-key.pem
+@echo off
+
+IF NOT EXIST Nokia_RnDCert_02.der (
+    echo Please copy key files to ROOT before build sis file.
+    goto end
+) ELSE (
+    IF NOT EXIST Nokia_RnDCert_02.key (
+        echo Please copy key files to ROOT before build sis file.
+        goto end
+    )
+)
+
+del musicplayer_urel.sis musicplayer_urel.sisx
+@echo.
+makesis musicplayer_urel.pkg
+@echo.
+signsis musicplayer_urel.sis musicplayer_urel.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+
+:end
+@echo.
+

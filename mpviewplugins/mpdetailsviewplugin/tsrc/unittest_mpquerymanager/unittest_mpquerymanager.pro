@@ -11,7 +11,7 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpquerymanager
+# Description: 
 #
 
 TEMPLATE = app
@@ -35,10 +35,12 @@ LIBS += -lqtbearer.dll
 
 # Input
 HEADERS += inc/unittest_mpquerymanager.h \
-		   ../../inc/mpquerymanager.h 
+		   ../../inc/mpquerymanager.h \
+           stub/inc/thumbnailmanager_qt.h
 	       
 
 SOURCES += src/unittest_mpquerymanager.cpp \
-	       ../../src/mpquerymanager.cpp
+	       ../../src/mpquerymanager.cpp \
+           stub/src/thumbnailmanager_qt.cpp	       
 
 

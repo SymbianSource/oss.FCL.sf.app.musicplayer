@@ -21,6 +21,7 @@
 
 #include "mpcollectiontbonelistdatamodel.h"
 #include "mpmpxcollectiondata.h"
+#include "mpplaybackdata.h"
 #include "mptrace.h"
 
 /*!
@@ -49,23 +50,47 @@
     \fn void albumDataChanged()
 
     This signal is specific to views with TBone. This signal is emitted when
-    a new data set is available for the list section of the TBone. Currently,
-    the only operation that can trigger this is the delete operation.
+    there's a change in album data. This is an indication that the container
+    should re-fetch the album content. Currently, the only operation that can
+    trigger this is the delete operation.
+ */
+
+/*!
+    \fn void albumDataAvailable()
+
+    This signal is specific to views with TBone. This signal is emitted when
+    a new data set is available for the list section of the TBone. This is
+    triggered as a result of container re-fetching the album content.
+
+    \sa albumDataChanged
  */
 
 /*!
  Constructs the collection data model.
  */
-MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionData *data, QObject *parent )
-    : QAbstractListModel(parent),
-      mCollectionData(data),
-      mRowCount(0)
+MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionData *collectionData, 
+        MpPlaybackData *playbackData, QObject *parent )
+    : QAbstractListModel( parent ),
+      mCollectionData( collectionData ),
+      mPlaybackData( playbackData ),
+      mRowCount(0),
+      mCurrentSongId(0)
 {
     TX_ENTRY
     connect( mCollectionData, SIGNAL(refreshAlbumSongs()),
              this, SLOT(refreshModel()) );
     connect( mCollectionData, SIGNAL(albumDataChanged()),
              this, SIGNAL(albumDataChanged()) );
+    
+    if ( mPlaybackData ) {
+        connect( mPlaybackData, SIGNAL(playbackInfoChanged()),
+                this, SLOT(updateSong()));
+        
+        connect( mPlaybackData, SIGNAL(playbackStateChanged()), 
+                this, SLOT(updatePlaybackState()));
+        mPlaybackActive = mPlaybackData->playbackState() != MpPlaybackData::NotPlaying;
+    }
+    
     TX_EXIT
 }
 
@@ -114,6 +139,17 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
             returnValue = hbTrId("txt_mus_other_unknown4");
         }
     }
+    else if ( role == Qt::DecorationRole ) {
+        if ( mPlaybackData 
+                && mPlaybackActive
+                && mPlaybackData->id() == mCollectionData->albumSongId( index.row() ) ) {
+            QList<QVariant> iconList;
+            iconList << QVariant(); //primary icon is not used.
+            //TODO: Replace for qtg_small_speaker when available.
+            iconList << HbIcon("qtg_graf_hspage_highlight");
+            returnValue = iconList;
+        }
+    }
     TX_EXIT
     return returnValue;
 }
@@ -127,6 +163,52 @@ void MpCollectionTBoneListDataModel::refreshModel()
     TX_ENTRY
     mRowCount = mCollectionData->albumSongsCount();
     reset();
+    emit albumDataAvailable();
     TX_EXIT
 }
+
+/*!
+ Slot to be called when playing song status has changed.
+ */
+void MpCollectionTBoneListDataModel::updateSong()
+{
+    TX_ENTRY
+    int newSongId = mPlaybackData->id();
+    
+    if ( mCurrentSongId && newSongId != mCurrentSongId) {
+        //Attempt to remove old song icon.
+        QModelIndex OldSongIndex;
+        OldSongIndex = index( mCollectionData->albumSongIndex( mCurrentSongId ) );
+        if ( OldSongIndex.isValid() ) {
+            emit dataChanged( OldSongIndex, OldSongIndex );
+        }       
+    }
+
+    //Attempt to update current song data and state.
+    QModelIndex songIndex;
+    songIndex = index( mCollectionData->albumSongIndex( newSongId ) );
+    if ( songIndex.isValid() ) {
+        emit dataChanged( songIndex, songIndex );
+    }
+    mCurrentSongId = newSongId;
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when playback state has changed.
+ */
+void MpCollectionTBoneListDataModel::updatePlaybackState()
+{
+    //This logic is to account for when song plays the very first time, we get
+    //media before playback is active.
+    bool playbackWasActive = mPlaybackActive;
+    mPlaybackActive = mPlaybackData->playbackState() != MpPlaybackData::NotPlaying;
+    if ( mPlaybackActive && !playbackWasActive ) {
+        updateSong();
+    }
+}    
+    
+
+//EOF
+
 

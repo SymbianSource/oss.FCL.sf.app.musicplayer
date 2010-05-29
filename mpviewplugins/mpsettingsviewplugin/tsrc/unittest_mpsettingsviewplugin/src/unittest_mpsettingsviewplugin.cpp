@@ -18,14 +18,18 @@
 #include <QSignalSpy>
 #include <qnamespace.h>
 
-#include "unittest_mpsettingsviewplugin.h"
 #include "stub/inc/mpsettingsview.h"
+#include "stub/inc/xqplugin.h"
+#include "unittest_mpsettingsviewplugin.h"
 
 
 // Do this so we can access all member variables.
 #define private public
 #include "mpsettingsviewplugin.h"
 #undef private
+
+//This so we mpsettingsviewplugin.cpp can load qt stub items
+#include "../../src/mpsettingsviewplugin.cpp"
 
 /*!
  Make our test case a stand-alone executable that runs all the test functions.

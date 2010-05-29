@@ -17,6 +17,7 @@
 
 
 #include <hbapplication.h>
+#include <hbactivitymanager.h>
 #include <hbview.h>
 #include <mpxviewpluginqt.h>
 #include <xqpluginloader.h>
@@ -30,6 +31,7 @@
 #include "mpviewbase.h"
 #include "musicservices.h"
 #include "mpenginefactory.h"
+#include "mpsettingsmanager.h"
 #include "mptrace.h"
 
 /*!
@@ -98,7 +100,7 @@ MpMainWindow::~MpMainWindow()
 /*!
 Initialize and activate the collection view
  */
-void MpMainWindow::initialize()
+void MpMainWindow::initialize( ActivityMode mode )
 {
     TX_ENTRY
 
@@ -135,19 +137,39 @@ void MpMainWindow::initialize()
     if ( !mMusicServices ) {
         MpEngineFactory::createSharedEngine();
         if ( orientation() == Qt::Vertical ) {
-            loadView(CollectionView);
-            activateView(CollectionView);
-            loadView(MediaWallView);
+            // If first startup ignore shuffleAll and send to collection view to refresh library
+            if ( mode == MusicMainView  || MpSettingsManager::firstStartup() ) {
+                loadView(CollectionView);
+                activateView(CollectionView);
+                loadView(MediaWallView);
+                loadView( PlaybackView );
+            } else if (mode == MusicNowPlayingViewShuffleAll ) {
+                MpEngineFactory::sharedEngine()->shuffleAll();
+                loadView( PlaybackView );
+                activateView(PlaybackView);
+                loadView(CollectionView);
+                loadView(MediaWallView);
+            }
         }
         else {
+            // If first startup ignore shuffleAll and send to refresh library
+            if( mode == MusicNowPlayingViewShuffleAll && !MpSettingsManager::firstStartup() ) {
+                MpEngineFactory::sharedEngine()->shuffleAll();
+                mVerticalViewType = PlaybackView;
+            }
             loadView(MediaWallView);
             activateView(MediaWallView);
             loadView(CollectionView);
+            loadView( PlaybackView );
         }
         connect(this, SIGNAL( orientationChanged( Qt::Orientation ) ), SLOT( switchView( Qt::Orientation ) ) );
         connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
         MpEngineFactory::sharedEngine()->checkForSystemEvents();
-        loadView( PlaybackView );
+        //Register to application manager to wait for activities
+        HbApplication* app = qobject_cast<HbApplication*>(qApp);
+        app->activityManager()->waitActivity();
+        connect( app, SIGNAL( activate() ), this , SLOT( handleActivity() ) );
+        
     }
     else {
         setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
@@ -296,18 +318,14 @@ void MpMainWindow::handleLibraryUpdated()
 void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key()) {
-    case 16842754:
-    case Qt::Key_Hangup:
+    case 16842753:
+    case Qt::Key_Call:
         if (orientation () == Qt::Vertical) {
             setOrientation(Qt::Horizontal, false);
         }
         else {
             setOrientation(Qt::Vertical, false);
         }
-        break;
-    case 16842753:
-    case Qt::Key_Call:         
-        unsetOrientation(false);
         break;
     default:
         HbMainWindow::keyPressEvent (event);
@@ -399,5 +417,26 @@ MpxViewPlugin* MpMainWindow::loadView( ViewType type, MpCommon::MpViewMode viewM
     }
     Q_ASSERT( plugin ? *plugin : 0 );
     return plugin ? *plugin : 0;
+}
+
+/*!
+  Slot to handle activity switching once the stand alone instance is running and registered 
+  in the activity manager to wait for activities.
+  Only running activity supported at the moment is "MusicNowPlayingView"
+ */
+void MpMainWindow::handleActivity()
+{
+    HbApplication* app = qobject_cast<HbApplication*>(qApp);
+    QString activityId = app->activateId();
+    
+    if( !activityId.compare( "MusicNowPlayingView&launchtype=standalone" ) ) {
+        if ( orientation() == Qt::Vertical ) {
+            if( mVerticalViewType != PlaybackView ) {
+                activateView( PlaybackView );
+            }
+        }
+    }
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+    activityManager->waitActivity();
 }
 

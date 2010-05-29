@@ -107,6 +107,9 @@ public:
     
     MpPlaybackData *playbackData();
     
+    void shuffleAll();
+
+    
     // Details related
     MpSongData *songData();
     void retrieveSong();

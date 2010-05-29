@@ -40,14 +40,17 @@ int main(int argc, char *argv[])
 
     TestMpShareData tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_testmpsharedata.txt";
+if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpsharedata.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }    
 }
 #endif
 
@@ -81,6 +84,7 @@ void TestMpShareData::initTestCase()
 void TestMpShareData::cleanupTestCase()
 {
     qDebug() << "unit test for mpsharedata end.";
+    QCoreApplication::processEvents();
 }
 
 /*!
@@ -89,6 +93,7 @@ void TestMpShareData::cleanupTestCase()
 void TestMpShareData::init()
 {
     mTest = new MpShareData();
+    mTest->setUnknownTr("Unknown");
 }
 
 /*!
@@ -187,8 +192,8 @@ void TestMpShareData::testObjectContentWithTitleOnly()
     song->setAlbum("TestAlbum");
     song->setAlbumArtUri("http://www.nokia.com/notexist.png");
     mTest->setSongData(song);
-    QCOMPARE(mTest->objectContent(), QString("TestTitle http://music.ovi.com"));
-    QCOMPARE(mTest->objectReservedLength(), QString("TestTitle http://music.ovi.com").length());
+    QCOMPARE(mTest->objectContent(), QString("&#9835; Unknown: TestTitle http://music.ovi.com"));
+    QCOMPARE(mTest->objectReservedLength(), QString("&#9835; Unknown: TestTitle http://music.ovi.com").length());
     delete song;
 }
 
@@ -200,8 +205,8 @@ void TestMpShareData::testObjectContentWithArtistOnly()
     song->setAlbum("TestAlbum");
     song->setAlbumArtUri("http://www.nokia.com/notexist.png");
     mTest->setSongData(song);
-    QCOMPARE(mTest->objectContent(), QString("TestArtist http://music.ovi.com"));
-    QCOMPARE(mTest->objectReservedLength(), QString("TestArtist http://music.ovi.com").length());
+    QCOMPARE(mTest->objectContent(), QString("&#9835; TestArtist: Unknown http://music.ovi.com"));
+    QCOMPARE(mTest->objectReservedLength(), QString("&#9835; TestArtist: Unknown http://music.ovi.com").length());
     delete song;
 }
 
@@ -210,8 +215,8 @@ void TestMpShareData::testObjectContentWithoutMetaInfo()
 {
     MpSongData *song = new MpSongData();
     mTest->setSongData(song);
-    QCOMPARE(mTest->objectContent(), QString("http://music.ovi.com"));
-    QCOMPARE(mTest->objectReservedLength(), QString("http://music.ovi.com").length());
+    QCOMPARE(mTest->objectContent(), QString("&#9835; Unknown: Unknown http://music.ovi.com"));
+    QCOMPARE(mTest->objectReservedLength(), QString("&#9835; Unknown: Unknown http://music.ovi.com").length());
     delete song;
 }
 
@@ -224,14 +229,14 @@ void TestMpShareData::testSongTitle()
     delete song;
 }
 
-void TestMpShareData::testSongAlbum()
-{
-    MpSongData *song = new MpSongData();
-    song->setAlbum("TestAlbum");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->album(), QString("TestAlbum"));
-    delete song;
-}
+//void TestMpShareData::testSongAlbum()
+//{
+//    MpSongData *song = new MpSongData();
+//    song->setAlbum("TestAlbum");
+//    mTest->setSongData(song);
+//    QCOMPARE(mTest->album(), QString("TestAlbum"));
+//    delete song;
+//}
 
 void TestMpShareData::testSongArtist()
 {
@@ -327,11 +332,11 @@ void TestMpShareData::testSongLink()
 
 void TestMpShareData::testSongNoInfo()
 {
-    QCOMPARE(mTest->title(), QString(""));
-    QCOMPARE(mTest->album(), QString(""));
-    QCOMPARE(mTest->artist(), QString(""));
+    QCOMPARE(mTest->title(), QString("Unknown"));
+//    QCOMPARE(mTest->album(), QString(""));
+    QCOMPARE(mTest->artist(), QString("Unknown"));
     QCOMPARE(mTest->albumArtBase64(), QString(""));
-    QCOMPARE(mTest->objectContent(), QString("http://music.ovi.com"));
+    QCOMPARE(mTest->objectContent(), QString("&#9835; Unknown: Unknown http://music.ovi.com"));
 //    QCOMPARE(mTest->comment(), QString(""));
 //    QCOMPARE(mTest->year(), QString(""));
 //    QCOMPARE(mTest->genre(), QString(""));

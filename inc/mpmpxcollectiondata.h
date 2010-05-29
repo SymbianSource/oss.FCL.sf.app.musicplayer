@@ -65,6 +65,7 @@ public:
     int itemCount( int index );
     int containerId();
     int itemId(int index);
+    int albumSongId( int index );
     void removeItem(int index);
     bool testCachedItem( int itemId );
     void insertCachedItem(int index);
@@ -79,6 +80,7 @@ public:
     void setContext( TCollectionContext context );
     void setAlbumContent( const CMPXMedia& albumContent );
     int itemIndex( int itemUniqueId );
+    int albumSongIndex( int songUniqueId );
 
 signals:
 

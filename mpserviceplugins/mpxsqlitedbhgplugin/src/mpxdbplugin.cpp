@@ -21,6 +21,7 @@
 #include <StringLoader.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
+#include <hbtextresolversymbian.h>
 
 #include <mpxcmn.h>
 #include <mpxuser.h>
@@ -145,7 +146,20 @@ void CMPXDbPlugin::ConstructL()
     iDbHandler = CMPXDbHandler::NewL(iFs, *iResource);
     iMusicLibraryMenuTitles = iResource->ReadMenuArrayL(R_MC_MENU_ITEMS_ARRAY, iMusicLibraryMenuIds);
     iMusicLibraryTitles = iResource->ReadMenuArrayL(R_MC_TITLE_ITEMS_ARRAY, iMusicLibraryMenuIds );
-    iAllSongsForArtistTitle = iResource->ReadHBufCL(R_MC_ALL_SONGS_FOR_ARTIST);
+    
+    // Localization using QT
+    TBool result = HbTextResolverSymbian::Init(KMPXMusicPlayerTsFile, KMPXMusicPlayerTsPath);
+    if ( result )
+        {
+        iAllSongsForArtistTitle = HbTextResolverSymbian::LoadL( _L("txt_mus_dblist_all_songs") );
+        }
+    else
+        {
+        // error initializing HbTextResolverSymbian, use logical string.
+        MPX_DEBUG1("CMPXDbPlugin::ConstructL - HbTextResolverSymbian::Init() Failed.");
+        TBufC<50> buf( _L("txt_mus_dblist_all_songs") );
+        iAllSongsForArtistTitle = buf.AllocL();
+        }
 
 #ifdef __ENABLE_MUSIC_TEXT_ALIGNMENT
     iMusicMenuTitle = iResource->ReadHBufCL(R_MPX_QTN_MP_TITLE_MY_MUSIC_MENU_NSERIES);

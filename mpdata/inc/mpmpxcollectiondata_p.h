@@ -46,10 +46,11 @@ public:
     bool isAutoPlaylist( int index );
     int itemCount( int index );
     int containerId();
-    int itemId(int index);
-    void removeItem(int index);
+    int itemId( int index);
+    int albumSongId( int index);
+    void removeItem( int index);
     bool testCachedItem( int itemId );
-    void insertCachedItem(int index);
+    void insertCachedItem( int index);
 
     bool setCurrentAlbum( int index );
     int currentAlbumIndex() const;
@@ -61,15 +62,18 @@ public:
     void setContext( TCollectionContext context );
     void setAlbumContent( const CMPXMedia& albumContent );
     int itemIndex( int itemUniqueId );
+    int albumSongIndex( int songUniqueId );
 
 private:
-
+    void loadAlbumsLookup();
+    void loadAlbumSongsLookup();
     void DoGetDataL( int index, MpMpxCollectionData::DataType type, QString& data ) const;
     bool DoIsAutoPlaylistL();
     bool DoIsAutoPlaylistL( int index );
     int DoGetItemCountL( int index );
     int DoGetContainerIdL();
     int DoGetItemIdL( int index );
+    int DoGetAlbumSongIdL( int index );
     void DoRemoveItemL( int index );
     bool DoTestCachedItemL( int itemId );
 
@@ -93,6 +97,7 @@ private:
     int                     iCurrentAlbumIndex;
     int                     iAlbumSongCount;
     QHash<int, int>         albumIdIndexMapping;
+    QHash<int, int>         albumSongIdIndexMapping;
 
 };
 

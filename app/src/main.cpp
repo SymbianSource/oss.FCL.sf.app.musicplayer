@@ -25,6 +25,25 @@
     \brief The Music Player main function.
 
     This function is where Music Player starts execution.
+    
+    This function can be called by starting an activity. Currently supported:
+    -MusicMainView
+    -MusicNowPlayingView
+    
+    A way to start start an activity is by using the XQApplicationManager:
+    
+    QUrl url;
+    url.setUrl("appto://10207C62?activityname=MusicMainView&launchtype=standalone");
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL) {
+        // No handlers for the URI
+        return;
+    }
+    bool res = mReq->send(); //Fire and Forget
+   if (!res) {
+       // Request failed. Handle error 
+      int error = mReq->lastError();
+   }
 */
 
 int main(int argc, char *argv[])
@@ -33,6 +52,20 @@ int main(int argc, char *argv[])
 
     // Initialization
     HbApplication app(argc, argv);
+    QVariantHash params = app.activateParams();
+    MpMainWindow::ActivityMode mode;
+    
+    if ( !params.value( "activityname" ).toString().compare( "MusicNowPlayingView" ) ) { 
+        if( params.contains( "shuffle" ) ) {
+            mode = !params.value( "shuffle" ).toString().compare( "yes" ) ? MpMainWindow::MusicNowPlayingViewShuffleAll : MpMainWindow::MusicNowPlayingView;
+        }
+        else {
+            mode = MpMainWindow::MusicNowPlayingView;
+        }
+    }
+    else {
+        mode = MpMainWindow::MusicMainView;
+    }
 
     // Main window widget.
     // Includes decorators such as signal strength and battery life indicator.
@@ -42,7 +75,7 @@ int main(int argc, char *argv[])
     mainWindow.viewport()->grabGesture(Qt::TapGesture);
     mainWindow.viewport()->grabGesture(Qt::TapAndHoldGesture);
     mainWindow.setOptimizationFlag(QGraphicsView::DontSavePainterState);
-    mainWindow.initialize();
+    mainWindow.initialize( mode );
     mainWindow.show();
 
     // Enter event loop

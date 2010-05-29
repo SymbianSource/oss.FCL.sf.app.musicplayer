@@ -23,12 +23,11 @@
 #include <hbiconitem.h>
 #include <hbdocumentloader.h>
 #include <hbinstance.h>
-#include <hbcolorscheme.h>
 #include <hbstyleloader.h>
 
+#include "mpenginefactory.h"
 #include "mpnowplayingwidget_p.h"
 #include "mpnowplayingwidget.h"
-#include "mpnowplayingbackend.h"
 #include "mptrace.h"
 
 const char *NOW_PLAYING_XML = ":/xml/nowplaying.docml";
@@ -48,16 +47,18 @@ const char *NOW_PLAYING_CSS = ":/css/banner_color.css";
  \internal
  Constructs the now playing widget private.
  */
-MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate( long int playerId, MpNowPlayingWidget *qq )
+MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate( MpNowPlayingWidget *qq )
     : q_ptr( qq ),
       mPrimaryText(0),
       mSecondaryText(0),
-      mState( NotPlaying ),
+      mState( MpPlaybackData::NotPlaying ),
+      mPlaybackData(0),
+      mMpEngine(0),
       mIcon(0),
       mDocumentLoader(0),
       mCurrentPressedState( BannerNone )
 {
-    TX_ENTRY_ARGS( "Player ID =" << playerId << " Q pointer=" << ( void * )qq )
+    TX_ENTRY_ARGS( " Q pointer=" << ( void * )qq )
     QGraphicsWidget *widget;
     bool widgetsOk = false;
     
@@ -106,7 +107,8 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate( long int playerId, MpNowPl
         Q_ASSERT_X(widgetsOk, "MpNowPlayingWidgetPrivate", "invalid xml file");
     }
 
-    mBackEnd = new MpNowPlayingBackEnd( playerId );
+    mMpEngine = MpEngineFactory::sharedEngine();
+    mPlaybackData = mMpEngine->playbackData();
     setEnabled(true);
     TX_EXIT
 }
@@ -119,7 +121,6 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate( long int playerId, MpNowPl
 MpNowPlayingWidgetPrivate::~MpNowPlayingWidgetPrivate()
 {
     TX_ENTRY
-    delete mBackEnd;
     delete mPlayIcon;
     delete mPauseIcon;
     delete mDocumentLoader;
@@ -133,26 +134,30 @@ MpNowPlayingWidgetPrivate::~MpNowPlayingWidgetPrivate()
 void MpNowPlayingWidgetPrivate::setEnabled( bool enabled )
 {
     if ( enabled ) {
-        connect( mBackEnd, SIGNAL(stateUpdate(SimplifiedPlayerState)),
-                 this, SLOT(setState(SimplifiedPlayerState)) );
+        connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
+                 this, SLOT( setState() ) );
 
-        connect( mBackEnd, SIGNAL(titleChanged(QString)),
-                 this, SLOT(setTitle(QString)) );
+        connect( mPlaybackData, SIGNAL( playbackInfoChanged() ),
+                 this, SLOT( updateBannerInfo() ) );
 
-        connect( mBackEnd, SIGNAL(artistChanged(QString)),
-                 this, SLOT(setArtist(QString)) );
-        mBackEnd->update();
+    setState();
+    updateBannerInfo();
     }
     else {
-        disconnect( mBackEnd, SIGNAL(stateUpdate(SimplifiedPlayerState)),
-                    this, SLOT(setState(SimplifiedPlayerState)) );
-
-        disconnect( mBackEnd, SIGNAL(titleChanged(QString)),
-                    mPrimaryText, SLOT(setPlainText(QString)) );
-
-        disconnect( mBackEnd, SIGNAL(artistChanged(QString)),
-                    mSecondaryText, SLOT(setPlainText(QString)) );
+        disconnect( mPlaybackData, SIGNAL( playbackStateChanged() ),
+                 this, SLOT( setState() ) );
+    
+        disconnect( mPlaybackData, SIGNAL( playbackInfoChanged() ),
+                 this, SLOT( updateBannerInfo() ) );
     }
+}
+
+/*!
+ Return if banner is attached based on current playback state
+ */
+bool MpNowPlayingWidgetPrivate::isBannerAttached()
+{
+    return mState == MpPlaybackData::NotPlaying ? false : true;
 }
 
 /*!
@@ -172,7 +177,7 @@ bool MpNowPlayingWidgetPrivate::handleClickEvent(QGraphicsSceneMouseEvent *event
         if ( iconTouchRect.contains( event->pos() ) ) {
             if ( mCurrentPressedState == BannerIcon ) {
                     // click on play/pause
-                    mBackEnd->playPause();
+                mMpEngine->playPause();
             }
         }
         else if ( mCurrentPressedState == BannerLabels && geometry.contains( event->pos() )){
@@ -257,24 +262,27 @@ void MpNowPlayingWidgetPrivate::handleMouseMoveEvent(QGraphicsSceneMouseEvent *e
  \internal
  Sets the simplified playback \a state.
  */
-void MpNowPlayingWidgetPrivate::setState( SimplifiedPlayerState state )
+void MpNowPlayingWidgetPrivate::setState( )
 {
+    MpPlaybackData::SimplifiedState state = mPlaybackData->playbackState();
     TX_ENTRY_ARGS( "State = " << state )
+            
     switch ( state ) {
-        case NotPlaying:
-            if ( mState != NotPlaying )
+        case MpPlaybackData::NotPlaying:
+            if ( mState != MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( false );
             break;
-        case Playing:
+        case MpPlaybackData::Playing:
             mIcon->setIcon( *mPauseIcon );
             mIcon->setProperty( "state", mIcon->property("state").toString() );
-            if ( mState == NotPlaying )
+            if ( mState == MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( true );
             break;
-        case Paused:
+        case MpPlaybackData::Paused:
+        case MpPlaybackData::Stopped:    
             mIcon->setIcon( *mPlayIcon );
             mIcon->setProperty( "state", mIcon->property("state").toString() );
-            if ( mState == NotPlaying )
+            if ( mState == MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( true );
             break;
         default:
@@ -288,20 +296,12 @@ void MpNowPlayingWidgetPrivate::setState( SimplifiedPlayerState state )
  \internal
  Sets the \a title 
  */
-void MpNowPlayingWidgetPrivate::setTitle( const QString &title )
+void MpNowPlayingWidgetPrivate::updateBannerInfo()
 {
-    mPrimaryText->setPlainText( title );
+    mPrimaryText->setPlainText( mPlaybackData->title() );
     mPrimaryText->setProperty( "state", mPrimaryText->property("state").toString() );
-}
-
-/*!
- \internal
- Sets the \a artist
- */
-void MpNowPlayingWidgetPrivate::setArtist( const QString &artist )
-{
-    mSecondaryText->setPlainText( artist );
+    
+    mSecondaryText->setPlainText( mPlaybackData->artist() );
     mSecondaryText->setProperty( "state", mSecondaryText->property("state").toString() );
 }
-
 

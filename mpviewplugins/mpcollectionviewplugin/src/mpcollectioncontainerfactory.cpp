@@ -74,6 +74,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         mCurrentContainer->initialize();
         connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
         connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+        connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         break;
     case ECollectionContextArtists:
         if ( ( mCurrentContext != ECollectionContextArtistAlbums )
@@ -87,6 +88,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
             connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
             connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;
     case ECollectionContextAlbums:
@@ -98,6 +100,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
             connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
             connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;
     case ECollectionContextPlaylists:
@@ -107,6 +110,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;
     case ECollectionContextArtistAlbums:

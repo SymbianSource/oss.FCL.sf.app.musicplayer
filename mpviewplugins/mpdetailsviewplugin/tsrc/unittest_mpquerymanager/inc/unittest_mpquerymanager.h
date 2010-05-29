@@ -52,9 +52,7 @@ private slots:
   void testrecommendationSongs();
   void testrecommendationArtists();
   void testrecommendationAlbumArtsLink();
-  void testalbumArtsReadyCount();
-    
-    
+   
 private:
     MpQueryManager *mTest;
     

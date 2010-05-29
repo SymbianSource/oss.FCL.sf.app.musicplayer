@@ -40,24 +40,7 @@ public:
 signals:
     void back ();    
     void albumArtChanged();
-    void share();
-    void webViewLoaded( bool ok );
-    void playbackInfoChanged();
-    void songDetailInfoChanged();
-    
-    void toggleDetailsGroupBox( bool state );
-    void toggleInspireMeGroupBox( bool state );
-      
-    void retrieveInformationFinished( QNetworkReply* reply );
-    void retrieveInformationNetworkError( QNetworkReply::NetworkError error );
-    void retrieveInformationSslErrors( const QList<QSslError> &error );
-    
-    void DownloadFinished( QNetworkReply* reply );
-    
-    void addContext();
-    void close();
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
-
+ 
 public slots:
     void initTestCase();
     void cleanupTestCase();
@@ -69,6 +52,14 @@ private slots:
     void testactivateView();
     void testdeactivateView();
     void testbackSlot();
+    void testAlbumArtChanged();
+    void testHandleNetworkError();
+    void testCanQueryRecommendations();
+    void testCanQuerySharePlayerLink();
+    void testHandlePlaybackInfoChanged();
+    void testClearInspireMe();
+    void testHandleDetailsGroupBoxToggled();
+    void testHandleInspireMeGroupBoxToggled();
     
 private:
     MpDetailsView *mTest;

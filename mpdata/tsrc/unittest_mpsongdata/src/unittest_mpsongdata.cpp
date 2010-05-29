@@ -77,7 +77,7 @@ void TestMpSongData::initTestCase()
  */
 void TestMpSongData::cleanupTestCase()
 {
-
+QCoreApplication::processEvents();
 }
 
 /*!

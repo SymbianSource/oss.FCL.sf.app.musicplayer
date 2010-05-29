@@ -30,10 +30,10 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 LIBS += -lmpxviewframeworkqt.dll
 
 HEADERS += inc/unittest_mpsettingsviewplugin.h \
-           ../../inc/mpsettingsviewplugin.h \
-           stub/inc/mpsettingsview.h
-               
-SOURCES += stub/src/mpsettingsview.cpp \
-           ../../src/mpsettingsviewplugin.cpp \
-           src/unittest_mpsettingsviewplugin.cpp
+           stub/inc/mpsettingsview.h \
+           stub/inc/xqplugin.h \
+           ../../inc/mpsettingsviewplugin.h
+
+SOURCES += src/unittest_mpsettingsviewplugin.cpp \
+           stub/src/mpsettingsview.cpp
 

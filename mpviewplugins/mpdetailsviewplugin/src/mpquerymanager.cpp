@@ -31,12 +31,20 @@
 #include <QDir>
 #include <QCoreApplication>
 
+#include <thumbnailmanager_qt.h>
+#include <thumbnaildata.h>
+#include <thumbnailobjectsource.h>
+
 #include "mpdetailssharedialog.h"
 #include "mptrace.h"
 
+const int KUndefined = -1;
 const int KRecommendationCount = 2;
 
 MpQueryManager::MpQueryManager()
+    : mManager(0),
+      mDownloadManager(0),
+      mThumbnailManager(0)        
                                
 {
     TX_ENTRY
@@ -60,6 +68,14 @@ MpQueryManager::MpQueryManager()
       
     mDownloadManager = new QNetworkAccessManager( this );
     connect( mDownloadManager, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( DownloadFinished( QNetworkReply * ) ) );
+    
+    mThumbnailManager = new ThumbnailManager( this );
+    mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForQuality );
+    mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailSmall );
+    QObject::connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
+            this, SLOT( thumbnailReady( QPixmap , void * , int , int  ) ) );
+    // TODO: Use the album art in provided by 10.1 wk16 platform. Current one is in the binary        
+    mDefaultRecommendationAlbumArt = QPixmap( ":/mpdetailsviewicons/qtg_large_music_album.svg" );    
      
     TX_EXIT
 }
@@ -73,6 +89,7 @@ MpQueryManager::~MpQueryManager()
     if ( mDownloadManager ) {
        mDownloadManager->deleteLater();
     }
+    delete mThumbnailManager;
     TX_EXIT
 }
 
@@ -185,15 +202,6 @@ QMap<QString, QPixmap>  MpQueryManager::recommendationAlbumArtsMap()
 }
 
 /*!
- Return the number of ready album arts
- */
-int &MpQueryManager::albumArtsReadyCount()
-{
-    TX_LOG  
-    return mAlbumArtsReadyCount;
-}
-
-/*!
  Insert one uri & pixmap item into map
  */
 void MpQueryManager::insertMapItem( const QString &uri, const QPixmap &pixmap )
@@ -238,7 +246,7 @@ void MpQueryManager::retrieveInformationFinished( QNetworkReply* reply )
  */
 void MpQueryManager::retrieveInformationNetworkError( QNetworkReply::NetworkError error )
 {
-    Q_UNUSED(error);
+    // TODO: agree on error handling
     TX_ENTRY_ARGS( "Network error for retrieving Information" << error);
     TX_EXIT
 }
@@ -269,12 +277,12 @@ void MpQueryManager::DownloadFinished( QNetworkReply* reply )
         // If it failed, use empty filename (since file was removed in any case)
         if ( ret )
             {
-            emit setAlbumArt( mRecommendationAlbumArtsLink.at( mDownloadedAlbumArts),
-                                 mRecommendationAlbumArtsName.at( mDownloadedAlbumArts ) );
+            setAlbumArtUri( mRecommendationAlbumArtsLink.at( mDownloadedAlbumArts), 
+                            mRecommendationAlbumArtsName.at( mDownloadedAlbumArts ) );
             }
         else
             {
-            emit setAlbumArt( mRecommendationAlbumArtsLink.at( mDownloadedAlbumArts), "" );
+            setAlbumArtUri(mRecommendationAlbumArtsLink.at( mDownloadedAlbumArts), "");
             }
         }
     else
@@ -472,3 +480,49 @@ QString MpQueryManager::keyValues( QStringList keys, QStringList values ) const
     return str.left( str.length() - 1 );
 }
 
+/*!
+ Sets recommendation album art
+*/
+void MpQueryManager::setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName )
+{
+    TX_ENTRY_ARGS( "albumArtUri = " << albumArtUri )
+    TX_LOG_ARGS( "albumArtName = " << albumArtName )
+    if ( !albumArtUri.isEmpty() && !albumArtName.isEmpty() ) {
+        int id = mThumbnailManager->getThumbnail( albumArtName, reinterpret_cast<void *>( const_cast<QString *>( &albumArtUri ) ) );
+        if ( id == KUndefined ) {
+            // Request failed. Set default album art.
+            insertMapItem( albumArtUri, mDefaultRecommendationAlbumArt );
+        }
+    }
+    else {
+        // No album art uri. Set default album art.
+        insertMapItem( albumArtUri, mDefaultRecommendationAlbumArt );
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to handle the recommendation album art 
+*/
+void MpQueryManager::thumbnailReady(
+        const QPixmap& pixmap,
+        void *data,
+        int /*id*/,
+        int error  )
+{
+    TX_ENTRY
+    // TODO: Hkn: use qobject_cast
+    QString uri = *( reinterpret_cast<QString *>( data ) );
+    TX_LOG_ARGS( "Uri: " << uri );
+    
+    if ( error == 0 ) {
+        TX_LOG_ARGS( "album art link: " << uri );
+        insertMapItem( uri, pixmap );
+    } else {
+        insertMapItem( uri, mDefaultRecommendationAlbumArt );
+    }
+    if(++mAlbumArtsReadyCount == KRecommendationCount) {
+        emit recommendationAlbumArtsReady();
+    }    
+    TX_EXIT
+}

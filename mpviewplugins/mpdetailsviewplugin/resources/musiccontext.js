@@ -1,11 +1,9 @@
 //Logging for QT
 
 // Override the default alert function.
+// TODO remove this when alert in platform is working?
 alert = function(str) {
     console.log(str);
-    if(window['context'] && context['owner']){
-        context.owner().debugJs('alert: ' + str);
-    }
     window.context.owner().errorHandler("Alert", str);
 }
 
@@ -38,34 +36,6 @@ window["music"] = window["music"] ||
 {};
 
 (function(){
-    if (typeof window.context === 'undefined') {
-        window['context'] = {
-            token: "hipsu:hipsupass",
-            song: "Queen - Bohemian Rhapsody",
-            objectReservedLength: function(){return 70;},
-            objectContent: function() { return "http://music.ovi.com/ru/ru/pc/Product/Queen/Bohemian-Rhapsody/8019069"; },
-            objectType: function(){ return "URI"; },
-            artist: function() { return "&#9835; Queen"; },
-            title: function() { return "Bohemian Rhapsody"; },
-            username: function() { return "hipsu"; },
-            password: function() { return "hipsupass"; },
-            albumArtBase64: function() { return "https://secure-profile.facebook.com/v227/1739/21/n100000756794479_1863.jpg"; },
-            owner: function() {
-                return {
-                    errorHandler: function(a,b) {},
-                    clearCache: function() {},
-                    debugJs: function(s) {}
-                }
-            }
-        }
-    }else{
-       try {
-           logme(context.objectType() + ' | ' + window.context.objectContent() + ' | ' + window.context.objectReservedLength());
-       }catch (e) {
-           logme(e);
-       }
-    }
-
 	var musicContext = null;
 	var publishingPlayer = null;
     
@@ -78,18 +48,6 @@ window["music"] = window["music"] ||
         };
     }
     	
-    // Hard code something for the browser..
-
-	/**
-	 * Check if player is loaded and call error function if not.
-	 */
-	music.playerLoaded = function() {
-        traceme();
-		if (!_playerReady()) {
-            alert("Error loading player scripts");
-		}
-	}
-
 	/**
 	 * Call this for player to show UI and initialize connection to SNC
 	 */
@@ -98,7 +56,7 @@ window["music"] = window["music"] ||
         traceme();
 	    // Initialize player    
 	    publishingPlayer = new ovi.player.publish.Player({
-	        locale : "en-US",
+	        locale : window.context.language(),
 	        credentials : {
 	            type : "",
 	            sso_base_url : "",
@@ -111,7 +69,7 @@ window["music"] = window["music"] ||
             traceme();
 			if (status != publishingPlayer.status.updateservices_ok && status != publishingPlayer.status.show_ok) {
 				// Delegate errors to native side
-                window.context.errorHandler(status, data.message);
+                window.context.owner().errorHandler(status, data.message);
 			} 		
 		});	
 		
@@ -124,7 +82,10 @@ window["music"] = window["music"] ||
 		// Update artist and title metadata.
         traceme();
 	    publishingPlayer.setContextObject(_getMusicContext());
-	}
+	    if(window['context'] && context['owner']){
+        context.owner().showWindow();
+    }
+}
 	
 	/**
 	 * Call this function to update metadata (called when music player has retrieved the link) 
@@ -166,23 +127,25 @@ window["music"] = window["music"] ||
         var sharePlayerArtBase64 = window.context.albumArtBase64();
         if ( sharePlayerArtBase64.length > 0 ) {
             // TODO: this is temporary solution until base64 defect in QT is fixed.
-            sharePlayerArtImage = "<img class='cover' src='" + sharePlayerArtBase64 + "' width='74px' height='74px' />";
+            sharePlayerArtImage = "<td valign='top' width='74px'><img src='" + sharePlayerArtBase64 + "' width='74px' height='74px' /></td>";
 //            sharePlayerArtImage = "<img class='cover' src='data:image/png;base64," + sharePlayerArtBase64 + "' width='74px' height='74px' />";
         }
         // Create context object
 	    musicContext.create({
 	        view: "none",
 	        data: { 
-	            miniview: "<ul class='list info-list'>"
+	            miniview: "<table width='100%' class='list info-list'><tr>"
 				/*
 						// TODO REMOVE, for testing only
-						+ "<p>username: " + window.context.username() + "/" + window.context.password() + "</p><BR>" 
 						+ "<input type=\"button\" value=\"Clear JS Cache\" onClick=\"window.context.owner().clearCache();\">"
                 */
                         + sharePlayerArtImage
-						+ "<span class='description'><div class='title'>" + window.context.title() + "</div>"
-						+ "<div class='artist'>" + window.context.artist() + "</div></span>"
-					    + "</ul>",
+						+ "<td align='left' valign='top'>"
+						+ "<span class='description'>"
+						+ "<div class='title'>" + window.context.title() + "</div>"
+						+ "<div class='artist'>" + window.context.artist() + "</div>"
+						+ "</span>"
+					    + "</td></tr></table>",
 	            object: attachment 
 	        }
 	    });

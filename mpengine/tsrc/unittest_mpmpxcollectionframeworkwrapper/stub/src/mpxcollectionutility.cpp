@@ -25,6 +25,7 @@
 #include <mpxmediacollectiondetaildefs.h>
 #include <mpxcollectionplugin.hrh>
 #include <mpxcollectionpath.h>
+#include <mpxcollectionobserver.h>
 #include "mptrace.h"
 #include <e32debug.h>
 
@@ -41,7 +42,8 @@ MMPXCollectionUtility::MMPXCollectionUtility():iBack(EFalse),
                                                iOpenCount(0),
                                                iCountPath(0),
                                                iPlaylists(0),
-                                               iAlbumSongs(0)
+                                               iAlbumSongs(0),
+                                               iAsynchFindResult(0)
 {
     
 }
@@ -58,6 +60,10 @@ MMPXCollectionUtility::~MMPXCollectionUtility()
     if (iPlaylists)
     {
         delete iPlaylists;
+    }
+    if (iAsynchFindResult)
+    {
+        delete iAsynchFindResult;
     }
 }
 
@@ -115,7 +121,16 @@ CMPXMedia* MMPXCollectionUtility::FindAllL(const CMPXSearchCriteria& aCriteria,
         {
         return NULL;
         }
-
+}
+/*!
+ Stub function.
+*/
+void MMPXCollectionUtility::FindAllL(const CMPXSearchCriteria& aCriteria,
+                                    const TArray<TMPXAttribute>& aAttrs,
+                                    MMPXCollectionFindObserver& aObs)
+{
+    Q_UNUSED(aObs);
+    iAsynchFindResult = FindAllL(aCriteria, aAttrs);
 }
 
 /*!

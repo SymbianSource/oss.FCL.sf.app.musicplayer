@@ -60,6 +60,7 @@ protected:
     HbLabel                 *mNoMusic;
     HbIndexFeedback         *mIndexFeedback;
     int                     mLongPressedIndex;
+    bool                    mLongPressEnabled;
 
 };
 

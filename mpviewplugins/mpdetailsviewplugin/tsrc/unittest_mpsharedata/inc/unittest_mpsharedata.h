@@ -53,7 +53,7 @@ private slots:
     void testObjectContentWithArtistOnly();
     void testObjectContentWithoutMetaInfo();
     void testSongTitle();
-    void testSongAlbum();
+//    void testSongAlbum();
     void testSongArtist();
     void testAlbumArt();
     void testLanguage();

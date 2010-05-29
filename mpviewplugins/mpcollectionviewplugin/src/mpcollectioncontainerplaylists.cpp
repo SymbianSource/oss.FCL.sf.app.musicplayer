@@ -100,6 +100,9 @@ void MpCollectionContainerPlaylists::itemActivated( const QModelIndex &index )
 
 /*!
  Slot to be called data model has new data.
+ Use cases:
+     1) User renames a playlist.
+	 2) Song added or removed from playlist.
  */
 void MpCollectionContainerPlaylists::dataReloaded()
 {
@@ -109,6 +112,12 @@ void MpCollectionContainerPlaylists::dataReloaded()
         // Playlist could have been renamed.
         QString details = mCollectionData->collectionTitle();
         mInfoBar->setHeading(details);
+        if ( mCollectionData->count() > 1 ) {
+            emit shuffleEnabled(true);
+        }
+        else {
+            emit shuffleEnabled(false);
+        }
     }
     TX_EXIT
 }

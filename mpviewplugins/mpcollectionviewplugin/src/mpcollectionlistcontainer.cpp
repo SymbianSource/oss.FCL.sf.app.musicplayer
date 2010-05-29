@@ -50,7 +50,8 @@ MpCollectionListContainer::MpCollectionListContainer( HbDocumentLoader *loader, 
       mList(0),
       mNoMusic(0),
       mIndexFeedback(0),
-      mLongPressedIndex(0)
+      mLongPressedIndex(0),
+      mLongPressEnabled(true)
 {
     TX_ENTRY
     mIndexFeedback = new HbIndexFeedback();
@@ -109,8 +110,10 @@ void MpCollectionListContainer::itemActivated( const QModelIndex &index )
 void MpCollectionListContainer::onLongPressed( HbAbstractViewItem *listViewItem, const QPointF &coords )
 {
     TX_ENTRY
-    mLongPressedIndex = listViewItem->modelIndex().row();
-    emit MpCollectionContainer::itemLongPressed(mLongPressedIndex, coords);
+    if ( mLongPressEnabled ) {
+        mLongPressedIndex = listViewItem->modelIndex().row();
+        emit MpCollectionContainer::itemLongPressed(mLongPressedIndex, coords);
+    }
     TX_EXIT
 }
 

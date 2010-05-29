@@ -18,7 +18,6 @@
 #include "mpengine.h"
 #include "mpenginefactory.h"
 #include "mptrace.h"
-#include "logger.h"
 
 /*!
     \class MpEngineFactory
@@ -49,7 +48,7 @@ MpEngineFactory::~MpEngineFactory()
  */
 MpEngineFactory * MpEngineFactory::instance()
 {
-    TRACE("MpEngineFactory::instance() Stub");
+    TX_LOG_ARGS("MpEngineFactory::instance() Stub")
     static MpEngineFactory instance;
     return &instance;
 }
@@ -60,7 +59,7 @@ MpEngineFactory * MpEngineFactory::instance()
  */
 MpEngine *MpEngineFactory::createSharedEngine( TUid hostUid , MpEngine::EngineMode mode )
 {
-    TRACE("MpEngineFactory::instance() createSharedEngine");
+    TX_LOG_ARGS("MpEngineFactory::createSharedEngine() Stub")
     if ( !instance()->mSharedEngine ) {
         instance()->mSharedEngine = new MpEngine();
     }

@@ -50,6 +50,7 @@ public:
     void commitPlaybackInfo();
     // inform details view when details information is ready
     void commitSongDetailInfo();
+    void removeAlbumArtFile() const; //TODO: Remove when base64 starts to work
 
 public slots:
     void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );

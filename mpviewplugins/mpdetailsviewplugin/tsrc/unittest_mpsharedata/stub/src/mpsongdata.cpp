@@ -31,7 +31,7 @@ const int KUndefined = -1;
 
     Song data provide acces to current playing song metadata
 */
-
+    
 /*!
     \fn void albumArtReady()
 
@@ -43,14 +43,14 @@ const int KUndefined = -1;
 
     This signal is emitted when basic information is available
  */
-
+    
 /*!
     \fn void songDetailInfoChanged()
 
     This signal is emitted when detail information is available
  */
-
-
+    
+       
 
 /*!
     Constructs a new MpSongData.
@@ -184,7 +184,7 @@ QString MpSongData::link() const
 */
 QString MpSongData::year() const
 {
-    //TX_LOG
+    //TX_LOG    
     return mYear;
 }
 

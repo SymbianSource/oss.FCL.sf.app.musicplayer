@@ -802,6 +802,15 @@ MpPlaybackData *MpEngine::playbackData()
 {
     return mMpxPlaybackWrapper->playbackData();
 }
+
+/*!
+ Requests playback of all songs with shuffle enabled
+ */
+void MpEngine::shuffleAll()
+{
+    mMpxCollectionWrapper->openShuffleAllSongsPath();
+}
+
 /*!
  Slot to be called to request embedded playback of item with Uri aFilename
  */
@@ -1032,7 +1041,9 @@ void MpEngine::handleEqualizerReady()
     // Get preset id from cenrep
     TInt presetKey( MpSettingsManager::preset() );
     
+    //Set the current preset index. 1 is added to index because index 0 represent "Off" at UI level.
     mCurrentPresetIndex = mEqualizerWrapper->getPresetIndex( presetKey );
+    mCurrentPresetIndex++;
     emit equalizerReady();
     
     TX_EXIT

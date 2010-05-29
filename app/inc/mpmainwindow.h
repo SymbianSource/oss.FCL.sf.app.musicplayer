@@ -42,11 +42,17 @@ public:
         SettingsView,
         DetailsView,
         MediaWallView};
+    
+    enum ActivityMode{
+        MusicMainView,
+        MusicNowPlayingView,
+        MusicNowPlayingViewShuffleAll
+    };
 
     MpMainWindow();
     ~MpMainWindow();
 
-    void initialize();
+    void initialize( ActivityMode mode );
 
 public slots:
     void handleCommand( int commandCode );
@@ -54,6 +60,7 @@ public slots:
 
     void switchView( Qt::Orientation orientation );
     void initializeServiceView( TUid hostUid );
+    void handleActivity();
 
 private:
     void activateView(ViewType);

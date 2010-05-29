@@ -166,7 +166,7 @@ void MpMediaWallView::initializeView()
     mAlbumCover->hide();
     
     mTrackList = new MpTrackListWidget( this );
-    mTrackList->list()->setModel( new MpCollectionTBoneListDataModel(mCollectionData, mTrackList ) );
+    mTrackList->list()->setModel( new MpCollectionTBoneListDataModel(mCollectionData, mPlaybackData, mTrackList ) );
     mTrackList->hide();
     
     connect(mAlbumCover,SIGNAL(clicked()),this, SLOT(hideTracksList()));

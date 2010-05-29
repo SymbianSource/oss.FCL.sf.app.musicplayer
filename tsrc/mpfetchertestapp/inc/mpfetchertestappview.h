@@ -40,6 +40,10 @@ private slots:
     void playSong();
     void viewSong();
     void viewSongCaged();
+    void launchHomeScreen();
+    void launchHomeScreenNowPlaying();
+    void launchHomeScreenNPShuffle();
+    
     
     
 private:

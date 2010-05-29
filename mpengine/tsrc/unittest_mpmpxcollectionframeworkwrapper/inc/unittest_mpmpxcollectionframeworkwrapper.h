@@ -35,7 +35,7 @@ public:
     //test utility functions
     void loadTestData();
     void loadPlaylists();
-    bool waitForSignal(QSignalSpy* spy, int timeoutms);  
+    void loadAlbumsTestData();
 
 public slots:
 
@@ -50,17 +50,17 @@ private slots:
     void testReleaseIsolatedCollection();
     void testCollectionData();
     void testHandleOpenEntries();
-    void testHandleOpenPlaylist();    
+    void testHandleOpenPlaylist();
     void testHandleOperationComplete();
     void testHandleIsolatedOpen();
-    void testOpenCollection();  
+    void testOpenCollection();
     void testDoIncrementalOpen();
     void testReopenCollection();
-    void testOpenCollectionItem();  
+    void testOpenCollectionItem();
     void testGoBack();
     void testFindPlaylists();
     void testCreatePlaylist();
-    void testCreatePlaylistWithProvidedCollectionData();   
+    void testCreatePlaylistWithProvidedCollectionData();
     void testSaveToPlaylist();
     void testSaveToCurrentPlaylist();
     void testRenamePlaylist();
@@ -70,9 +70,16 @@ private slots:
     void testPreviewItem();
     void testOpenIsolatedCollection();
     void testHandleCollectionMessage();
+    void testHandleCollectionMediaL();
     void testPreparePlaylistMediaSongsContext();
     void testPreparePlaylistMediaArtistAlbumsContext();
     void testReorderPlaylist();
+    void testFindAlbumSongs();
+    void testHandleFindAll();
+    void testPlayAlbumSongs();
+    void testSetRepeatFeatureEnabled();
+    void testSetShuffleFeatureEnabled();
+    void testCreatePlaybackUtilityL();
 
 private:
 
@@ -80,6 +87,7 @@ private:
     MpMpxCollectionFrameworkWrapperPrivate    *mTestPrivate;
     CMPXMedia                                 *iMediaTestData;
     CMPXMedia                                 *iPlaylistsTestData;
+    CMPXMedia                                 *iAlbumsTestData;
 
 };
 

@@ -75,6 +75,7 @@ public:
     MpPlaybackData::SimplifiedState playbackState() const;
 
     void commitPlaybackInfo();
+    void resetData();
     
 
 public slots:

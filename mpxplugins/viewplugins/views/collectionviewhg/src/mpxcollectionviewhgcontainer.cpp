@@ -506,7 +506,7 @@ TKeyResponse CMPXCollectionViewHgContainer::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
     {
-    MPX_DEBUG4( "CMPXCollectionViewHgContainer::HandleKeyEventL(iCode=%d, iScanCode=%d, aType=%d)",
+    MPX_DEBUG4( "CMPXCollectionViewHgContainer::OfferKeyEventL(iCode=%d, iScanCode=%d, aType=%d)",
         aKeyEvent.iCode, aKeyEvent.iScanCode, aType );
 
     if ( aKeyEvent.iCode == EKeyUpArrow ||
@@ -576,19 +576,36 @@ TKeyResponse CMPXCollectionViewHgContainer::HandleKeyEventL(
         aKeyEvent.iCode, aKeyEvent.iScanCode, aKeyEvent.iModifiers, aType );
 
     TKeyResponse response( EKeyWasNotConsumed );
-    if ( aKeyEvent.iCode == EKeyOK || aKeyEvent.iCode == EKeyEnter )
+
+    CHgScroller* list = CurrentListWidget();
+    if ( list )
         {
-            SaveSelectedAlbumItemL(iAlbumIndex);
+        response = list->OfferKeyEventL( aKeyEvent, aType );
+        }
+    if ( response == EKeyWasNotConsumed && iMediaWall )
+        {
+        response = iMediaWall->OfferKeyEventL( aKeyEvent, aType );
+		// Softkeys are hidden when left/right keys are used in mediawall.
+        if ( response == EKeyWasConsumed && iCurrentViewType == EMPXViewMediawall )
+        	{
+			if( iCbaHandler )
+				iCbaHandler->ChangeCbaVisibility( EFalse );
+			}
+        }
+
+	// When LSK is pressed, make the softkeys visible.
+	if ( response == EKeyWasNotConsumed && aKeyEvent.iCode == EKeyDevice0 )
+		{
+		if( iCbaHandler )
+			iCbaHandler->ChangeCbaVisibility( ETrue );
+		}
+
+    if ( response == EKeyWasNotConsumed &&
+   		 (aKeyEvent.iCode == EKeyOK ||
+   		  aKeyEvent.iCode == EKeyEnter ) )
+        {
         // Handle enter key pressed
         iView->ProcessCommandL( EMPXCmdCommonEnterKey );
-        }
-    if ( iListWidget )
-        {
-        iListWidget->OfferKeyEventL( aKeyEvent, aType );
-        }
-    else if( iMediaWall )
-        {
-        iMediaWall->OfferKeyEventL( aKeyEvent, aType );
         }
     if ( response == EKeyWasNotConsumed &&
          aType == EEventKey &&
@@ -2663,11 +2680,6 @@ void CMPXCollectionViewHgContainer::RefreshNoThumbnailL(TInt aDisplayIndex)
 //
 void CMPXCollectionViewHgContainer::RefreshL(TInt aDisplayIndex)
     {
-    if( !iIsForeground )
-        {
-        return;
-        }
-
     MPX_FUNC( "CMPXCollectionViewHgContainer::Refresh" );
 
 	TInt mediaCount = iListBoxArray->MediaArray().Count();
@@ -5158,9 +5170,8 @@ void CMPXCollectionViewHgContainer::ResolvePopupListSizeL()
 
     CleanupStack::PushL( dialog );
 
-    listBox->ConstructL( dialog,
-            EAknListBoxSelectionList | EAknListBoxScrollBarSizeExcluded  );
-
+    listBox->ConstructL( dialog, EAknListBoxViewerFlags );
+    
     // title can be hardcoded because it is not shown to user. Just for the calculations.
     dialog->SetTitleL(_L("Foo"));
     iPopupListRect = dialog->LayoutRect();

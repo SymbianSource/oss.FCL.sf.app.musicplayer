@@ -6086,6 +6086,20 @@ void CMPXCollectionViewHgImp::HandleForegroundEventL( TBool aForeground )
         CloseWaitNoteL();
         iOpeningNote = EFalse;
     	}
+
+/* This code is added to avoid CBA flicker which happens after pressing "Now playing" 
+   from artist&album view and pressing BACK from Playback view.
+   While going to playback view, reset CBA to "Back". */
+    if( !aForeground && iViewUtility->ActiveViewType().iUid == KMPXPluginTypePlaybackUid )
+        {
+        TRAP_IGNORE( CEikButtonGroupContainer* cba = Cba();
+        if ( cba )
+            {
+            cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK );
+            cba->DrawDeferred();
+            } );
+        }
+		
 #ifdef BACKSTEPPING_INCLUDED
     iActivateBackStepping = EFalse;
     MPX_DEBUG3("CMPXCollectionViewHgImp::HandleForegroundEventL - is in foreground=%d, this view=0x%x",
@@ -7061,9 +7075,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
             // it has not been saved
             aMenuPane->SetItemDimmed( EMPXCmdSavePlaylist,
                 ( !iCommonUiHelper->IsHostMessagingBrowserL() || !MPXTlsHelper::NeedSave() ) );
-            TBool isListEmpty( iContainer->TotalListItemCount() == 0 );
-            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, isListEmpty );
-
+            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
             break;
             }
         case R_MPX_PLAYBACK_COLLECTION_MUSICSHOP_SUB_MENU:

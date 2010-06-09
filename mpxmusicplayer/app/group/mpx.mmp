@@ -110,6 +110,10 @@ LIBRARY oommonitor.lib
 #endif //FF_OOM_MONITOR2_COMPONENT
 LIBRARY iaupdateapi.lib  //IAD
 
+// Transition libs
+LIBRARY         gfxtrans.lib
+LIBRARY         cdlengine.lib
+
 START RESOURCE ../data/mpx_reg.rss
 DEPENDS mpx.rsg
 // Do not change the UID below.

@@ -435,14 +435,19 @@ void CMPXLocalAudioPlayback::CommandL(TMPXPlaybackCommand aCmd, TInt aData)
             {
             // Re-init audio effects
             MPX_DEBUG1("CMPXLocalAudioPlayback::CommandL EPbApplyEffect");
-            iAudioEffects->DestroyAudioEffect();
             if( ( aData == KAudioEffectsID || aData == KEqualizerID ) &&
                 ( EStateInitialised == iState ) )
                 {
+                // Here we rely on CreateAudioEffectsL() to be safe to be called 
+                // in order to just set values again     
                 TRAPD(err, iAudioEffects->CreateAudioEffectsL() );
                 if(err)
                     {
                     MPX_DEBUG2("EPbApplyEffect err = %d", err);
+                    // Sometimes we get KErrAccessDenied, then destroying effects
+                    // and setting them again should help. This is a work-around, 
+                    // and would be good to be fixed more properly.   
+                    iAudioEffects->DestroyAudioEffect(); 
                     TRAPD(err, iAudioEffects->CreateAudioEffectsL() );
                     if(err)
                         {

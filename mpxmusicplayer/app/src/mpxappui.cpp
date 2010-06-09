@@ -73,6 +73,9 @@
 #include <mpxcollectionplugin.hrh>
 #include <mpxcommandgeneraldefs.h>
 #include <mpxcollectioncommanddefs.h>
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntranseffect.h>      
+#include <layoutmetadata.cdl.h>
 
 // Cover UI start
 //#ifdef __COVER_DISPLAY
@@ -2723,8 +2726,12 @@ void CMPXAppUi::DoHandleCollectionMessageL( const CMPXMessage& aMessage )
                 // OpenL the blank playlist
                 iCollectionUtility->Collection().OpenL();
                 }
-            // Default start up state for local playback is Playing
-            MPXTlsHelper::SetLaunchModeL( EMPXLaunchModePlaying );
+			// 	do not change launch mode if track mode, required for saving file 
+            if ( EMPXLaunchModeTrack != MPXTlsHelper::LaunchMode() )
+                {
+                // Default start up state for local playback is Playing
+                MPXTlsHelper::SetLaunchModeL( EMPXLaunchModePlaying );
+                }
             CleanupStack::PopAndDestroy( cPath );
             CleanupStack::PopAndDestroy( &attrs );
             }
@@ -3607,6 +3614,17 @@ void CMPXAppUi::HandleCommandL(
             {
             // Move Music Player to background
             // magic: -1 = force wg to background
+            if ( !Layout_Meta_Data::IsLandscapeOrientation() )
+                {
+                GfxTransEffect::BeginFullScreen( 
+                    AknTransEffect::EApplicationExit, 
+                    TRect(), 
+                    AknTransEffect::EParameterType, 
+                    AknTransEffect::GfxTransParam( KAppUidMusicPlayerX, 
+                    AknTransEffect::TParameter::EActivateExplicitCancel | 
+                    AknTransEffect::TParameter::EEndCheck ) );
+                }
+
             iEikonEnv->RootWin().SetOrdinalPosition( -1 );
             break;
             }

@@ -24,6 +24,7 @@
 #define KMPXSongDetailsTextLines            20
 #define KMPXSongDetailsTextMaxLen           255
 
+#define KMPXSongDetailsNumTextWidth         4
 #define KMPXSongDetailsTrackNumMin          0
 #define KMPXSongDetailsTrackNumMax          999
 #define KMPXSongDetailsYearMin              0

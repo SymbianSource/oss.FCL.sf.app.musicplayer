@@ -1740,7 +1740,8 @@ EXPORT_C void CMPXCommonPlaybackViewImp::SkipOnErrorL(
    if ( EPbRepeatAll == iRepeatMode )
        {
        if ( aCurrentIndex == aCount-1 &&
-                1 == iLastSkipDirection )
+                1 == iLastSkipDirection &&
+                1 != iRandomMode )
            {
            skip = EFalse;
            displayError = ETrue;
@@ -2735,7 +2736,10 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleForegroundEventL( TBool aForegrou
         iContainer->RestoreButtons( iPlaybackState );
         iPlaybackUtility->CommandL( EPbCmdStopSeeking );
         }
-
+    
+    if ( aForeground && ( iViewUtility->ActiveViewType() == TUid::Uid( KMPXPluginTypePlaybackUid )) )
+        TRAP_IGNORE(UpdateTitlePaneL()); 
+    
     MPX_DEBUG1( "<---CMPXCommonPlaybackViewImp::HandleForegroundEventL()" );
     }
 

@@ -732,21 +732,25 @@ TBool CMPXMetadataEditorDialog::SaveFormDataL()
         CCoeControl* coeControl = ControlOrNull( EMPXMetadataEditorDlgCtrlIdYear );
         if ( coeControl )
             {
-            CEikNumberEditor* control = static_cast<CEikNumberEditor*>( coeControl );
+            CEikEdwin* control = static_cast<CEikEdwin*>( coeControl );
             if ( control )
                 {
-                TInt num = control->Number();
-                if ( num != iYear )
+                TBuf<KMPXSongDetailsNumTextWidth> num;
+                control->GetText( num );
+                TLex numLex( num );
+                TInt LexToInt;
+                numLex.Val( LexToInt );
+                if ( LexToInt != iYear )
                     {
                     MPX_DEBUG3( "CMPXMetadataEditorDialog::SaveFormDataL year changed from %d to %d", iYear, num );
                     TDateTime newYear;
-                    newYear.Set( num, EJanuary, 0, 0, 0, 0, 0 );
+                    newYear.Set( LexToInt, EJanuary, 0, 0, 0, 0, 0 );
                     TTime year( newYear );
                     iMedia->SetTObjectValueL<TInt64>(
                         KMPXMediaMusicYear, year.Int64() );
                     media->SetTObjectValueL<TInt64>(
                         KMPXMediaMusicYear, year.Int64() );
-                    iYear = num;
+                    iYear = LexToInt;
                     changed = ETrue;
                     }
                 else
@@ -1083,6 +1087,7 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL(
         HBufC* stringBuf = HBufC::NewLC( KMPXFileDetailsMaxBufferLen );
         TPtr stringBufPtr = stringBuf->Des();
         stringBufPtr.AppendNum( samplingRateNum );
+        AknTextUtils::LanguageSpecificNumberConversion( stringBufPtr );
         HBufC* samplingrate = StringLoader::LoadLC(
                         R_MPX_CUI_METADATAEDITOR_SAMPLINGRATE_TXT, stringBufPtr );
         aDataArray->AppendL( samplingrate->Des() );
@@ -1123,7 +1128,7 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL(
         PopulatePodcastFileDetailsL( aHeadingsArray, aDataArray );
         }
 
-    // Get last modified time
+    // Get modified
     TTime time;
     User::LeaveIfError( fs.Modified( uri, time ) );
     ConvertToLocalTimeL( time );
@@ -2154,34 +2159,6 @@ void CMPXMetadataEditorDialog::HandleControlStateChangeL( TInt aControlId )
 void CMPXMetadataEditorDialog::PrepareForFocusTransitionL()
     {
     MPX_FUNC( "CMPXMetadataEditorDialog::PrepareForFocusTransitionL" );
-    TInt err = KErrNone;
-
-    CEikNumberEditor* myTrackNumberEditor = static_cast<CEikNumberEditor*>
-            ( ControlOrNull( EMPXMetadataEditorDlgCtrlIdTrackNumber ) );
-
-    CEikNumberEditor* myYearNumberEditor = static_cast<CEikNumberEditor*>
-            ( ControlOrNull( EMPXMetadataEditorDlgCtrlIdYear ) );
-
-    if ( myTrackNumberEditor )
-        {
-        // if length 0 trap error and set to 0.
-        MPX_TRAP( err, myTrackNumberEditor->Number() );
-        if ( err )
-            {
-            myTrackNumberEditor->SetNumber( KMPXMinNumDateTrack );
-            }
-        }
-
-    if ( myYearNumberEditor )
-        {
-        // if length 0 trap error and set to 0.
-        MPX_TRAP( err, myYearNumberEditor->Number() );
-        if ( err )
-            {
-            myYearNumberEditor->SetNumber( KMPXMinNumDateTrack );
-            }
-        }
-
     CAknForm::PrepareForFocusTransitionL();
     }
 
@@ -2443,14 +2420,6 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
     SetTitlePaneL();
     SetNaviLabelL();
 
-    _LIT( KZero, "0" );
-    
-    SetControlNumberL( EMPXMetadataEditorDlgCtrlIdTrackNumber, KZero,
-    	KMPXSongDetailsTrackNumMin, KMPXSongDetailsTrackNumMax );
-
-    SetControlNumberL ( EMPXMetadataEditorDlgCtrlIdYear, KZero,
-    	KMPXSongDetailsYearMin, KMPXSongDetailsYearMax );
-
     // Get media property for the current song
     
     if ( iParam ) // Dialog launched from CollectionView
@@ -2663,22 +2632,16 @@ void CMPXMetadataEditorDialog::SetControlNumberL( TInt aControlId,
     const TDesC& aValue, TInt aMinValue, TInt aMaxValue )
     {
     MPX_FUNC( "CMPXMetadataEditorDialog::SetControlNumberL" );
-    CEikNumberEditor* myNumberEditor = static_cast< CEikNumberEditor* >
+    CEikEdwin* myEdwin = static_cast< CEikEdwin* >
         ( ControlOrNull( aControlId ) );
-
-    TInt defaultValue( 0 );
-    if ( aMinValue > 0  )
-        {
-        defaultValue = aMinValue;
-        }
-
-    if ( myNumberEditor )
+    
+    if ( myEdwin )
         {
         if ( aValue.Length() > 0 )
             {
-            TLex trackNumLex( aValue );
+            TLex numLex( aValue );
             TInt LexToInt;
-            if ( trackNumLex.Val( LexToInt ) == KErrNone )
+            if ( numLex.Val( LexToInt ) == KErrNone )
                 {
                 if ( LexToInt > aMaxValue )
                     {
@@ -2688,16 +2651,10 @@ void CMPXMetadataEditorDialog::SetControlNumberL( TInt aControlId,
                     {
                     LexToInt = aMinValue;
                     }
-                myNumberEditor->SetNumber( LexToInt );
+                TBuf<KMPXSongDetailsNumTextWidth> num;
+                num.AppendNum( LexToInt );
+			    myEdwin->SetTextL( &num );
                 }
-            else
-                {
-                myNumberEditor->SetNumber( defaultValue );
-                }
-            }
-        else
-            {
-            myNumberEditor->SetNumber( defaultValue );
             }
         }
     }
@@ -2771,6 +2728,7 @@ TBool CMPXMetadataEditorDialog::UpdateMediaObjectWithControlL(
             case EMPXMetadataEditorDlgCtrlIdAlbum:
             case EMPXMetadataEditorDlgCtrlIdComment:
             case EMPXMetadataEditorDlgCtrlIdComposer:
+            case EMPXMetadataEditorDlgCtrlIdTrackNumber:
                 {
                 CEikEdwin* control = static_cast<CEikEdwin*>( coeControl );
                 if ( control )
@@ -2799,24 +2757,6 @@ TBool CMPXMetadataEditorDialog::UpdateMediaObjectWithControlL(
                             }
                         }
                     CleanupStack::PushL( buf );
-                    }
-                else
-                    {
-                    // should not reach here
-                    User::Leave( KErrArgument );
-                    }
-                break;
-                }
-            case EMPXMetadataEditorDlgCtrlIdTrackNumber:
-                {
-                CEikNumberEditor* control = static_cast<CEikNumberEditor*>( coeControl );
-                if ( control )
-                    {
-                    TInt num = control->Number();
-                    MPX_DEBUG2( "CMPXMetadataEditorDialog::UpdateMediaObjectWithControlL number from control %d", num );
-                    buf = HBufC::NewLC( KMPXFileDetailsMaxBufferLen );
-                    TPtr bufPtr = buf->Des();
-                    bufPtr.AppendNum( num );
                     }
                 else
                     {
@@ -2870,16 +2810,18 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL()
     ASSERT(iMedia);
     TBool drmProtected(iMedia->ValueTObjectL<TBool> (KMPXMediaDrmProtected));
     MPX_DEBUG2( "CMPXMetadataEditorDialog::PopulateFileDetailsL drm protected: %d", drmProtected );
-
+    
     if (drmProtected)
         {
         HBufC* detail = StringLoader::LoadLC( R_MPX_CUI_LICENCE_DET_LINK );
-        InsertLineL(9,R_MPX_CUI_LICENCE_INFO,ActivePageId() );
         SetControlTextL(EMPXMetadataEditorDlgCtrlIdDRMDetail, detail->Des(),
                 KNullDesC);
         CleanupStack::PopAndDestroy( detail );	
         }
-   
+    else
+        {
+        DeleteLine(EMPXMetadataEditorDlgCtrlIdDRMDetail,EFalse); 
+        } 
     // Get filename
     const TDesC& uri = iMedia->ValueText(KMPXMediaGeneralUri);
     TParsePtrC parse(uri);
@@ -2942,6 +2884,7 @@ void CMPXMetadataEditorDialog::PopulateFileDetailsL()
         HBufC* stringBuf = HBufC::NewLC(KMPXFileDetailsMaxBufferLen);
         TPtr stringBufPtr = stringBuf->Des();
         stringBufPtr.AppendNum(samplingRateNum);
+        AknTextUtils::LanguageSpecificNumberConversion( stringBufPtr );
         HBufC* samplingrate = StringLoader::LoadLC(
                 R_MPX_CUI_METADATAEDITOR_SAMPLINGRATE_TXT, stringBufPtr);
         SetControlTextL(EMPXMetadataEditorDlgCtrlIdSamplingrate,
@@ -3049,97 +2992,91 @@ CAknForm::SetInitialCurrentLine();
 //
 void CMPXMetadataEditorDialog::PopulatePodcastFileDetailsL()
     {
-      InsertLineL(13,R_MPX_CUI_LAST_PLAYBACK_POSITION,ActivePageId() );
-                    
-            TInt lastPbPosition((TInt) iMedia->ValueTObjectL<TInt> (
-                    KMPXMediaGeneralLastPlaybackPosition));
-
-            if (lastPbPosition > 0)
-                {
-                // convert milliseconds to seconds
-                lastPbPosition = lastPbPosition / KSecondInMilliseconds;
-                CMPXCommonUiHelper::TMPXDuratDisplayMode lastPbPositionMode =
-                CMPXCommonUiHelper::EMPXDuratAuto;
-                if (lastPbPosition > KOneHourInSeconds)
-                    {
-                    lastPbPositionMode = CMPXCommonUiHelper::EMPXDuratHMS;
-                    }
-                HBufC* stringBuf = iCommonUiHelper->DisplayableDurationL(
-                        lastPbPosition, lastPbPositionMode);
-                CleanupStack::PushL(stringBuf);
-                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
-                        *stringBuf, KNullDesC);
-                CleanupStack::PopAndDestroy(stringBuf);
-                }
-            else if (lastPbPosition == 0 && iMedia->IsSupported(
-                    KMPXMediaGeneralPlayCount) && iMedia->ValueTObjectL<TInt> (
-                            KMPXMediaGeneralPlayCount) > 0)
-                {
-                HBufC* stringBuf = StringLoader::LoadLC(
-                        R_MPX_CUI_METADATAEDITOR_PLAYBACK_COMPLETE);
-                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
-                        *stringBuf, KNullDesC);
-                CleanupStack::PopAndDestroy(stringBuf);
-
-                }
-            else
-                {
-                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
-                        KNullDesC, KNullDesC);
-                }
+    TInt lastPbPosition((TInt) iMedia->ValueTObjectL<TInt> ( 
+	        KMPXMediaGeneralLastPlaybackPosition ));
+    if (lastPbPosition > 0)
+        {
+        // convert milliseconds to seconds
+        lastPbPosition = lastPbPosition / KSecondInMilliseconds;
+        CMPXCommonUiHelper::TMPXDuratDisplayMode lastPbPositionMode =
+        CMPXCommonUiHelper::EMPXDuratAuto;
+        if (lastPbPosition > KOneHourInSeconds)
+            {
+            lastPbPositionMode = CMPXCommonUiHelper::EMPXDuratHMS;
+            }
+        HBufC* stringBuf = iCommonUiHelper->DisplayableDurationL(
+                lastPbPosition, lastPbPositionMode);
+        CleanupStack::PushL(stringBuf);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                *stringBuf, KNullDesC);
+        CleanupStack::PopAndDestroy(stringBuf);
+        }
+    else if (lastPbPosition == 0 && iMedia->IsSupported(
+            KMPXMediaGeneralPlayCount) && iMedia->ValueTObjectL<TInt> (
+                   KMPXMediaGeneralPlayCount) > 0)
+        {
+        HBufC* stringBuf = StringLoader::LoadLC(
+                R_MPX_CUI_METADATAEDITOR_PLAYBACK_COMPLETE);
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                *stringBuf, KNullDesC);
+        CleanupStack::PopAndDestroy(stringBuf);
+        }
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPlayedPosition,
+                KNullDesC, KNullDesC);
+        }
            
-            InsertLineL(14,R_MPX_CUI_DETAILS_PUBLISHED,ActivePageId() );
-            
-            // Get published
-            if (iMedia->IsSupported(TMPXAttribute(KMPXMediaIdPodcast,
-                    EMPXMediaPodcastPubDate)))
-                {
-                TInt64 timeInt(
-                        (TInt64) iMedia->ValueTObjectL<TInt64> (TMPXAttribute(
-                                KMPXMediaIdPodcast, EMPXMediaPodcastPubDate)));
-                TTime time(timeInt);
-                ConvertToLocalTimeL(time);
-                HBufC* modDateTime = HBufC::NewLC(KMPXMaxTimeLength
-                        + KMPXDurationDisplayResvLen);
-                HBufC* format = StringLoader::LoadLC(R_QTN_DATE_USUAL_WITH_ZERO);
-                TPtr modDatePtr = modDateTime->Des();
-                MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
-                CleanupStack::PopAndDestroy(format);
-                if (err != KErrNone || time == 0)
-                    {
-                    SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
-                            KNullDesC, KNullDesC);
-                    }
-                else
-                    {
-                    format = StringLoader::LoadLC(R_QTN_TIME_USUAL_WITH_ZERO);
-                    HBufC* modTime = HBufC::NewLC(format->Length()
-                            + KMPXDurationDisplayResvLen);
-                    TPtr modTimePtr = modTime->Des();
-                    MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
-                    if (err != KErrNone)
-                        {
-                        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
-                                KNullDesC, KNullDesC);
-                        }
-                    else
-                        {
-                        modDatePtr.Append(KMPXSpace);
-                        modDatePtr.Append(modTimePtr);
-                        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
-                                modTimePtr, KNullDesC);
-                        }
-                    CleanupStack::PopAndDestroy(modTime);
-                    CleanupStack::PopAndDestroy(format);
-                    }
-                CleanupStack::PopAndDestroy(modDateTime);
-                }
-            else
-                {
-                SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
-                        KNullDesC, KNullDesC);
-                }
-      }
+    // Get published
+    if (iMedia->IsSupported(TMPXAttribute(KMPXMediaIdPodcast,
+            EMPXMediaPodcastPubDate)))
+        {
+        TInt64 timeInt(
+                (TInt64) iMedia->ValueTObjectL<TInt64> (TMPXAttribute(
+                        KMPXMediaIdPodcast, EMPXMediaPodcastPubDate)));
+    	TTime time(timeInt);
+    	ConvertToLocalTimeL(time);
+    	HBufC* modDateTime = HBufC::NewLC(KMPXMaxTimeLength
+        	    + KMPXDurationDisplayResvLen);
+    	HBufC* format = StringLoader::LoadLC(R_QTN_DATE_USUAL_WITH_ZERO);
+    	TPtr modDatePtr = modDateTime->Des();
+    	MPX_TRAPD( err, time.FormatL( modDatePtr, *format ) );
+    	CleanupStack::PopAndDestroy(format);
+    	if (err != KErrNone || time == 0)
+        	{
+        	SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+            	    KNullDesC, KNullDesC);
+        	}
+    	else
+        	{
+        	format = StringLoader::LoadLC(R_QTN_TIME_USUAL_WITH_ZERO);
+        	HBufC* modTime = HBufC::NewLC(format->Length()
+            	    + KMPXDurationDisplayResvLen);
+        	TPtr modTimePtr = modTime->Des();
+        	MPX_TRAPD( err, time.FormatL( modTimePtr, *format ) );
+        	if (err != KErrNone)
+           		{
+            	SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                	    KNullDesC, KNullDesC);
+            	}
+        	else
+            	{
+            	modDatePtr.Append(KMPXSpace);
+            	modDatePtr.Append(modTimePtr);
+            	SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                	    modTimePtr, KNullDesC);
+            	}
+        	CleanupStack::PopAndDestroy(modTime);
+        	CleanupStack::PopAndDestroy(format);
+        	}
+        CleanupStack::PopAndDestroy(modDateTime);
+    	}
+    else
+        {
+        SetControlTextL(EMPXMetadataEditorDlgCtrlIdLastPublished,
+                KNullDesC, KNullDesC);
+        }
+    }
 
 // -----------------------------------------------------------------------------
 // CMPXMetadataEditorDialog::LaunchDrmInfoL

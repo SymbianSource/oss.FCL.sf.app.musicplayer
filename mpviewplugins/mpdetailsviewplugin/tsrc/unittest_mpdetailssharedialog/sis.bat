@@ -14,7 +14,8 @@
 @rem Description: 
 @rem
 
+@echo off
 del *.sisx
-makesis unittest_mpdetailssharedialog.pkg
-signsis unittest_mpdetailssharedialog.sis unittest_mpdetailssharedialog.sisx RNDCERTS_PATH\Nokia_RnDCert_02.der RNDCERTS_PATH\Nokia_RnDCert_02.key
-del unittest_mpdetailssharedialog.sis
+makesis UT_mpdetailssharedialog.pkg
+signsis UT_mpdetailssharedialog.sis UT_mpdetailssharedialog.sisx %RNDCERTS_PATH%\Nokia_RnDCert_02.der %RNDCERTS_PATH%\Nokia_RnDCert_02.key
+del UT_mpdetailssharedialog.sis

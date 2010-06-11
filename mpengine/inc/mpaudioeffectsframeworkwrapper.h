@@ -11,15 +11,6 @@
 *
 * Contributors:
 *
-* Description:  Framework wraper for Audio Effects
-*
-*/
-/*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
 * Description: Framework wraper for Audio Effects
 *
 */

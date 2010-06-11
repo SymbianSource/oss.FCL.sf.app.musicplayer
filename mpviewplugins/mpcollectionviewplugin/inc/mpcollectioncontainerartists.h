@@ -41,6 +41,8 @@ public slots:
     void albumCentered();
     void dataReloaded();
     void albumDataChanged();
+    void scrollingStarted();
+    void albumDataAvailable();
 
 private:
 

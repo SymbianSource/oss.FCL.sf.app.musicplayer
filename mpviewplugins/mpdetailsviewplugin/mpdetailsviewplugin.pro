@@ -17,12 +17,12 @@
 symbian:TARGET.UID3 = 0x2002D0AA
 
 TEMPLATE = lib
-CONFIG += hb qt ecomplugin mobility
+CONFIG += hb qt ecomplugin mobility SHARE_FUNC_ENABLED
 QT += webkit \
     network \
     xml
 TARGET = mpdetailsviewplugin
-MOBILITY += bearer
+MOBILITY += bearer systeminfo
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
 SERVICE.CONFIGURATION = ""

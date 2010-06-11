@@ -18,7 +18,7 @@
 #ifndef MPDETAILSVIEW_H
 #define MPDETAILSVIEW_H
 
-#include <QPixmap>
+#include <QPointer>
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QMap>
@@ -36,7 +36,7 @@ class HbGroupBox;
 class HbPushButton;
 class HbDocumentLoader;
 class HbListWidget;
-class ThumbnailManager;
+
 class QTranslator;
 class QGraphicsLinearLayout;
 class HbProgressBar;
@@ -46,6 +46,8 @@ class MpSongData;
 class MpQueryManager;
 
 #ifdef SHARE_FUNC_ENABLED
+#include <qnetworkconfigmanager.h>
+QTM_USE_NAMESPACE
 class MpDetailsShareDialog;
 #endif
 
@@ -80,7 +82,6 @@ signals:
 public slots:
     void back();    
     void albumArtChanged();
-    void setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName );
     
 private slots:
     void handlePlaybackInfoChanged();
@@ -88,10 +89,8 @@ private slots:
     
     void handleDetailsGroupBoxToggled( bool state );
     void handleInspireMeGroupBoxToggled( bool state );
-          
-    void handleNetworkError();
-    
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
+    void RenderInspireMeGroupBox();          
+    void handleNetworkError();    
     void updateSharedData(const QString& url);
 
 #ifdef SHARE_FUNC_ENABLED
@@ -101,17 +100,13 @@ private slots:
 
 private:
     bool canQueryRecommendations() const;
-    bool canQuerySharePlayerLink() const;
-    
+    bool canQuerySharePlayerLink() const;   
     void setupMenu();
- 
-    void clearInspireMe();
-    
-    void RenderInspireMeGroupBox();
-    void recommendationAlbumArtReady();
+    void clearInspireMe();    
 
 #ifdef SHARE_FUNC_ENABLED
     void createShareDialog();
+    void preloadShareDialog();
 #endif
 
 private:    
@@ -120,10 +115,8 @@ private:
     MpSongData              *mSongData;
     
     bool                    mActivated;
-    HbMainWindow            *mWindow;
     HbAction                *mSoftKeyBack;
     
-    HbWidget                *mContainer;
     HbLabel                 *mSongText; //owned
     HbLabel                 *mAlbumText; //owned
     HbLabel                 *mArtistText; //owned
@@ -135,17 +128,8 @@ private:
     HbListWidget            *mDetailList; // owned by mSongDetailsGroupBox
     HbListWidget            *mInspireList; // owned by mInspireMeGroupBox
     HbPushButton            *mButton;
-    HbProgressBar           *mInspireMeProgressBar;    
-    
-    int                     mDownloadedAlbumArts;
-    
-    ThumbnailManager        *mThumbnailManager; //owned
-    QPixmap                 mDefaultRecommendationAlbumArt;
-   
- 
-    QList<QNetworkReply *>  mReplys;
-    
-    QDomDocument            mDomDocument;
+    HbProgressBar           *mInspireMeProgressBar;
+
     
     QTranslator             *mMpTranslator;         // Own
     QTranslator             *mCommonTranslator;     // Own

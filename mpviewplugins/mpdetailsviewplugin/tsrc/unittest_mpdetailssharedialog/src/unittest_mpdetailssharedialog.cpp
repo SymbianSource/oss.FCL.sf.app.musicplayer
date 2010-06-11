@@ -21,6 +21,7 @@
 #include <hbicon.h>
 #endif
 #include"unittest_mpdetailssharedialog.h"
+#include "hbmessagebox.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -41,14 +42,17 @@ int main(int argc, char *argv[])
 
     TestMpDetailsShareDialog tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_testmpdetailssharedialog.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_testmpdetailssharedialog.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 #endif
 
@@ -82,6 +86,7 @@ void TestMpDetailsShareDialog::initTestCase()
 void TestMpDetailsShareDialog::cleanupTestCase()
 {
     qDebug() << "unit test for mpdetailssharedialog end.";
+    QCoreApplication::processEvents();
 }
 
 /*!
@@ -91,7 +96,7 @@ void TestMpDetailsShareDialog::init()
 {
     mSongData = new MpSongData();
     mTest = new MpDetailsShareDialog();
-    mTest->initialize(mSongData);
+    mTest->initialize(mSongData, "unknown");
 }
 
 /*!
@@ -108,6 +113,18 @@ void TestMpDetailsShareDialog::cleanup()
 void TestMpDetailsShareDialog::testConstruction()
 {
     mTest->updateSharedData();
+    mTest->debugJs("Test");
+    mTest->errorHandler("Test error", "Test message");
+    mTest->clearCache();
+    mTest->addContext();
+
+    mTest->mShareNetAccMan = NULL;
+    mTest->mShareWebView = NULL;
+    mTest->updateSharedData();
+    mTest->debugJs("Test");
+    mTest->errorHandler("Test error", "Test message");
+    mTest->clearCache();
+    mTest->addContext();
     //nothing to verify
     QCOMPARE(true, true);
 }

@@ -81,7 +81,8 @@ MpMpxCollectionFrameworkWrapperPrivate::MpMpxCollectionFrameworkWrapperPrivate( 
       iUserPlaylists( 0 ),
       iRepeatFeature( ETrue ),
       iShuffleFeature( ETrue ),
-      iReopen( EFalse )
+      iReopen( EFalse ),
+      iShuffleAll( EFalse )
 {
     TX_LOG
 }
@@ -365,6 +366,22 @@ MpMpxCollectionData *MpMpxCollectionFrameworkWrapperPrivate::collectionData()
 
 /*!
  \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::openShuffleAllSongsPath()
+{
+    TX_ENTRY
+    TRAPD( err, DoOpenCollectionL(ECollectionContextAllSongs) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    else {
+        iShuffleAll = ETrue; 
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
  Result of open or re-open operation to the Collection Framework.
  */
 void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL( 
@@ -378,8 +395,14 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL(
     TX_ENTRY_ARGS( "aError=" << aError << "aComplete=" << aComplete );
     if ( aError == KErrNone ) {
         if ( iFirstIncrementalOpen ) {
-            iCollectionData->setMpxMedia( aEntries, iReopen );
             iFirstIncrementalOpen = EFalse;
+            if( iShuffleAll ) {
+                iShuffleAll = EFalse;
+                TX_ENTRY_ARGS( "Path is ready" );
+                DoPlayAllSongsPlaylistL();
+                
+            }
+            iCollectionData->setMpxMedia( aEntries, iReopen );
             iReopen = EFalse;
         }
     }
@@ -1252,5 +1275,25 @@ void MpMpxCollectionFrameworkWrapperPrivate::createPlaybackUtilityL()
         }
     }
 }
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoPlayAllSongsPlaylistL()
+{
+    TX_ENTRY
+    CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( cpath );
+    CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+    CleanupStack::PushL( playList );
+    playList->SetShuffleL( true, false );
+    MpSettingsManager::setShuffle( true );
+    createPlaybackUtilityL();
+    iPlaybackUtility->InitL( *playList, ETrue );
+    CleanupStack::PopAndDestroy( playList );
+    CleanupStack::PopAndDestroy( cpath );
+    TX_EXIT
+}
+
 
 //EOF

@@ -66,6 +66,7 @@ public:
     void commitPlaybackInfo();
     // inform details view when details information is ready
     void commitSongDetailInfo();
+    void removeAlbumArtFile() const; //TODO: Remove when base64 starts to work
 
 public slots:
     void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
@@ -125,6 +126,7 @@ private:
     QString                  mModified;
     QString                  mCopyright;
     QString                  mMusicURL;
+    QString                  mTempAlbumArt; //TODO: Remove when base64 starts to work
     bool                     mDrmProtected;
     
     Q_DISABLE_COPY(MpSongData)

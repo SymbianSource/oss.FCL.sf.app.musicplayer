@@ -19,9 +19,9 @@ TARGET = musicplayer
 ICON = resources/qtg_large_music_player.svg
 DEPENDPATH += .
 INCLUDEPATH += . \
-	 inc \
-	 ../inc \
-         ../musicservices/inc
+        inc \
+        ../inc \
+        ../musicservices/inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 CONFIG += hb
@@ -32,7 +32,10 @@ symbian: {
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x1F00000
     TARGET.CAPABILITY = CAP_APPLICATION NetworkControl DRM
-    }
+
+    BLD_INF_RULES.prj_exports += \
+        "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis"
+}
 
 # Service provider specific configuration.
 # If in-process plugin specific implementation
@@ -52,12 +55,13 @@ LIBS += -lecom.dll \
     -lxqservice \
     -lxqserviceutil \
     -lmusicservices \
+    -lmpsettingsmanager \
     -lmpengine
-    
-    
+
+
 SOURCES += src/main.cpp \
            src/mpmainwindow.cpp
-           
+
 HEADERS =  inc/mpmainwindow.h
 
 MMP_RULES+=EXPORTUNFROZEN
@@ -67,7 +71,7 @@ symbian: {
                         resources/*.xml
     DEPLOYMENT += addImages
     }
-    
+
 RESOURCES += resources/musiplayerapp.qrc
 
 TRANSLATIONS = musicplayer.ts

@@ -23,6 +23,7 @@
 #include <QAbstractListModel>
 
 class MpMpxCollectionData;
+class MpPlaybackData;
 
 #if defined(BUILD_MPDATA_LIB)
 #define MPDATA_EXPORT Q_DECL_EXPORT
@@ -36,7 +37,8 @@ class MPDATA_EXPORT MpCollectionTBoneListDataModel : public QAbstractListModel
 
 public:
 
-    explicit MpCollectionTBoneListDataModel( MpMpxCollectionData *data, QObject *parent=0 );
+    explicit MpCollectionTBoneListDataModel( MpMpxCollectionData *collectionData, 
+            MpPlaybackData *playbackData = 0, QObject *parent = 0 );
     virtual ~MpCollectionTBoneListDataModel();
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -45,15 +47,21 @@ public:
 signals:
 
     void albumDataChanged();
+    void albumDataAvailable();
 
 public slots:
 
     void refreshModel();
+    void updateSong();
+    void updatePlaybackState();
 
 private:
 
-    MpMpxCollectionData             *mCollectionData;   // Not own
+    MpMpxCollectionData             *mCollectionData; // Not own
+    MpPlaybackData                  *mPlaybackData;   // Not own
     int                             mRowCount;
+    int                             mCurrentSongId;
+    bool                            mPlaybackActive;
 
 };
 

@@ -136,11 +136,20 @@ void MpCollectionContainerArtists::setDataModel( MpCollectionDataModel *dataMode
                 if ( mTBoneListModel == 0 ) {
                     mTBoneListModel = new MpCollectionTBoneListDataModel(mCollectionData);
                     connect( mTBoneListModel, SIGNAL(albumDataChanged()), this, SLOT(albumDataChanged()) );
+                    connect( mTBoneListModel, SIGNAL(albumDataAvailable()), this, SLOT(albumDataAvailable()) );
                 }
                 mList->setModel(mTBoneListModel);
-
-                if ( !mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+                if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+                    if ( mCollectionData->albumSongsCount() > 1 ) {
+                        emit shuffleEnabled(true);
+                    }
+                    else {
+                        emit shuffleEnabled(false);
+                    }
+                }
+                else {
                     emit findAlbumSongs(mCurrentAlbumIndex);
+                    emit shuffleEnabled(false);
                 }
             }
             break;
@@ -205,15 +214,30 @@ void MpCollectionContainerArtists::albumCentered()
         // and the same album re-centers.
         mCurrentAlbumIndex = index;
         TX_LOG_ARGS("mCurrentAlbumIndex=" << mCurrentAlbumIndex);
-        if ( !mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+        if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+            if ( mCollectionData->albumSongsCount() > 1 ) {
+                emit shuffleEnabled(true);
+            }
+            // Enable context menu
+            mLongPressEnabled = true;
+        }
+        else {
             emit findAlbumSongs(mCurrentAlbumIndex);
         }
+    }
+    else {
+        // Landed on the same album. Just update menu.
+        if ( mCollectionData->albumSongsCount() > 1 ) {
+            emit shuffleEnabled(true);
+        }
+        // Enable context menu
+        mLongPressEnabled = true;
     }
     TX_EXIT
 }
 
 /*!
- Slot to be called data model has new data. This occurs after a delete operation is complete.
+ Slot to be called when data model has new data. This occurs after a delete operation is complete.
  Two cases:
      1) User deleted an artist.
 	 2) User deleted last song in an album.
@@ -226,7 +250,12 @@ void MpCollectionContainerArtists::dataReloaded()
             --mCurrentAlbumIndex;
         }
         mTBone->scrollTo( mDataModel->index(mCurrentAlbumIndex - mAlbumIndexOffset, 0) );
-        if ( !mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+        if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+            if ( mCollectionData->albumSongsCount() == 1 ) {
+                emit shuffleEnabled(false);
+            }
+        }
+        else {
             emit findAlbumSongs(mCurrentAlbumIndex);
         }
     }
@@ -237,13 +266,42 @@ void MpCollectionContainerArtists::dataReloaded()
 }
 
 /*!
- Slot to be called data model has new data.
+ Slot to be called when data model has new data.
  User has deleted one of the songs from TBone list.
  */
 void MpCollectionContainerArtists::albumDataChanged()
 {
     TX_ENTRY
     emit findAlbumSongs(mCurrentAlbumIndex);
+    emit shuffleEnabled(false);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called TBone starts scrolling.
+ */
+void MpCollectionContainerArtists::scrollingStarted()
+{
+    TX_ENTRY
+    // Disable shuffle action from the menu
+    emit shuffleEnabled(false);
+    // Disable context menu
+    mLongPressEnabled = false;
+    TX_EXIT
+}
+
+/*!
+ Slot to be called album data is available. This is a result of findAlbumSongs signal.
+ */
+void MpCollectionContainerArtists::albumDataAvailable()
+{
+    TX_ENTRY
+    int count = mCollectionData->albumSongsCount();
+    if ( count > 1 ) {
+        emit shuffleEnabled(true);
+    }
+    // Enable context menu
+    mLongPressEnabled = true;
     TX_EXIT
 }
 
@@ -332,6 +390,7 @@ void MpCollectionContainerArtists::setupContainer()
                 mTBone->setDescriptionFontSpec( HbFontSpec(HbFontSpec::Secondary) );
                 mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
                 mTBone->enableReflections(true);
+                connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
                 connect( mTBone, SIGNAL(scrollingEnded()), this, SLOT(albumCentered()) );
                 }
                 break;

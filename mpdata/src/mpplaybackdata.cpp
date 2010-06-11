@@ -79,8 +79,6 @@ MpPlaybackData::MpPlaybackData( QObject *parent )
       mReqId( KUndefined ),
       mDuration(0),
       mPosition(0),
-      mAlbum( hbTrId ( "txt_mus_other_unknown4" ) ),
-      mArtist( hbTrId ( "txt_mus_other_unknown3") ),
       mAlbumId(0),
       mId(0),
       mAlbumArt( "qtg_large_music_album" ),
@@ -177,7 +175,9 @@ bool MpPlaybackData::setArtist( const QString& artist )
 {
     TX_ENTRY_ARGS( "artist = " << artist )
     bool change = false;
-    if ( artist != mArtist ) {
+    // data is different or mArtist was not set befor or it was reset.
+    // When artist is empty and mArtist is empty mArtist should be unknown text.
+    if ( artist != mArtist || mArtist.isNull()) {
         change = true;
         if ( artist.isEmpty() ){
             mArtist = hbTrId( "txt_mus_other_unknown3" );      
@@ -206,7 +206,9 @@ bool MpPlaybackData::setAlbum( const QString& album )
 {
     TX_ENTRY_ARGS( "album = " << album )
     bool change = false;
-    if ( album != mAlbum ) {
+    // data is different or mAlbum was not set befor or it was reset.
+    // when album is empty and mAlbum is empty mAlbum should be unknown text.
+    if ( album != mAlbum || mAlbum.isNull() ) {
         change = true;
         if ( album.isEmpty() ){
             mAlbum = hbTrId( "txt_mus_other_unknown4" );
@@ -387,6 +389,27 @@ void MpPlaybackData::commitPlaybackInfo()
     TX_EXIT
 }
 
+/*!
+ Resets the data, currently called when source is removed.
+*/
+void MpPlaybackData::resetData()
+{
+    mDuration = 0;
+    mPosition = 0;
+    mTitle = QString();
+    mAlbum = QString();
+    mArtist = QString();
+    mUri = QString();
+    mAlbumId = 0;
+    mId = 0;
+    mAlbumArt = HbIcon();
+    mRealAudio = false;
+    
+    emit durationChanged();
+    emit positionChanged();
+    emit albumArtReady();
+    emit playbackInfoChanged();
+}
 
 /*!
  Slot to handle the album art thumb.

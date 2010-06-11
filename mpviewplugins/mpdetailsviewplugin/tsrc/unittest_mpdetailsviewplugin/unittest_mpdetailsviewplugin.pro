@@ -11,7 +11,7 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpdetailsviewplugin
+# Description: 
 #
 
 TEMPLATE = app

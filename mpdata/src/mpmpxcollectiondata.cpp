@@ -158,9 +158,17 @@ int MpMpxCollectionData::containerId()
 /*!
  Returns id of the item specified by \a index
  */
-int MpMpxCollectionData::itemId(int index)
+int MpMpxCollectionData::itemId( int index )
 {
     return d_ptr->itemId(index);
+}
+
+/*!
+ Returns id of the album song specified by \a index
+ */
+int MpMpxCollectionData::albumSongId( int index )
+{
+    return d_ptr->albumSongId( index );
 }
 
 /*!
@@ -169,9 +177,9 @@ int MpMpxCollectionData::itemId(int index)
  
  \sa testCachedItem() insertCachedItem()
  */
-void MpMpxCollectionData::removeItem(int index)
+void MpMpxCollectionData::removeItem( int index )
 {
-    d_ptr->removeItem(index);
+    d_ptr->removeItem( index );
 }
 
 /*!
@@ -277,7 +285,7 @@ void MpMpxCollectionData::setAlbumContent( const CMPXMedia& albumContent )
 }
 
 /*!
- Returns the index of the iten with \a ItemUniqueId.
+ Returns the index of the item with \a ItemUniqueId.
  Only supported for ECollectionContextAlbumsMediaWall.
 
  \sa setContext()
@@ -286,4 +294,16 @@ int MpMpxCollectionData::itemIndex( int itemUniqueId )
 {
     return d_ptr->itemIndex( itemUniqueId );
 }
+
+/*!
+ Returns the index within the album data for the song with \a songUniqueId.
+
+ */
+int MpMpxCollectionData::albumSongIndex( int songUniqueId )
+{
+    return d_ptr->albumSongIndex( songUniqueId );
+}
+
+//EOF
+
 

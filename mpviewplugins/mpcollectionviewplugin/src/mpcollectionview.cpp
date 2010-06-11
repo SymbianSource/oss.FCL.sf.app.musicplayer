@@ -92,6 +92,8 @@ MpCollectionView::MpCollectionView()
       mBannerAttached( false ),
       mSoftKeyQuit( 0 ),
       mSoftKeyBack( 0 ),
+      mShuffleAction( 0 ),
+      mShuffleEnabled( false ),
       mDocumentLoader( 0 ),
       mMainContainer( 0 ),
       mMainToolBar( 0 ),
@@ -203,11 +205,13 @@ void MpCollectionView::initializeView()
             // Banner is not needed since playback is stopped when returning
             // from playback preview. Disable the banner from updating.
             mNowPlayingBanner->setEnabled( false );
+            attachNowPlayingBanner( false );
         }
         else {
             connect( mNowPlayingBanner, SIGNAL( clicked() ), this, SLOT( startPlaybackView() ) );
             connect( mNowPlayingBanner, SIGNAL( playbackAttachmentChanged( bool ) ),
                      this, SLOT( attachNowPlayingBanner( bool ) ) );
+            attachNowPlayingBanner( mNowPlayingBanner->isBannerAttached() );
         }
 
         widget = mDocumentLoader->findWidget( QString( "mainContainer" ) );
@@ -276,7 +280,12 @@ void MpCollectionView::activateView()
     TX_ENTRY_ARGS( "mCollectionContext=" << mCollectionContext );
     if ( mCollectionContext == ECollectionContextUnknown ) {
         // Open 'All Songs' by default
-        mMpEngine->openCollection( ECollectionContextAllSongs );
+        if ( mCollectionData->context() == ECollectionContextAllSongs ){
+            setContext( ECollectionContextAllSongs );
+        }
+        else {
+            mMpEngine->openCollection( ECollectionContextAllSongs );
+        }
     }
     else {
         // This true when returning from other views, e.g. playback view
@@ -310,9 +319,7 @@ void MpCollectionView::setDefaultView()
         mMpEngine->openCollection( ECollectionContextAllSongs );
     }
 
-    if ( mBannerAttached ) {
-        setBannerVisibility( false );
-    }
+
     TX_EXIT
 }
 
@@ -347,18 +354,20 @@ void MpCollectionView::setContext( TCollectionContext context )
     if ( mActivated ) {
         startContainerTransition( mCollectionContext, context );
     }
-    mCollectionContext = context;
-    mCollectionContainer = mContainerFactory->createContainer( context );
-    mCollectionContainer->setViewMode( mViewMode );
-    mCollectionDataModel->refreshModel();
-    mCollectionContainer->setDataModel( mCollectionDataModel );
 
+    mCollectionContext = context;
     // Reset softkey and the menu
     if ( mActivated ) {
         setSoftkey();
     }
     updateToolBar();
     updateMenu();
+
+    mCollectionContainer = mContainerFactory->createContainer( context );
+    mCollectionContainer->setViewMode( mViewMode );
+    mCollectionDataModel->refreshModel();
+    mCollectionContainer->setDataModel( mCollectionDataModel );
+
     TX_EXIT
 }
 
@@ -619,9 +628,16 @@ void MpCollectionView::shufflePlayAll()
     mMpEngine->setShuffle( true );
     MpSettingsManager::setShuffle( true );
     int index = generateShuffleIndex();
-    openIndex( index );
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            playAlbumSongs( mCollectionData->currentAlbumIndex(), index );
+            break;
+        default:
+            openIndex( index );
+            break;
+    }
 }
-
 
 /*!
  Slot to be called when 'Refresh Library' is clicked by the user from the menu.
@@ -801,6 +817,21 @@ void MpCollectionView::handleLibraryUpdated()
 }
 
 /*!
+ Slot to be called when shuffle action status changes. This is called by the
+ containers. Shuffle is only enabled when there is more than 1 song and the
+ it can change when songs are deleted or when new songs are found during refresh.
+ */
+void MpCollectionView::setShuffleAction( bool enabled )
+{
+    TX_ENTRY
+    mShuffleEnabled = enabled;
+    if ( mShuffleAction ) {
+        mShuffleAction->setEnabled(enabled);
+    }
+    TX_EXIT
+}
+
+/*!
  \internal
  Sets the main ( default ) toolbar for the view.
  */
@@ -949,46 +980,31 @@ void MpCollectionView::updateMenu()
     HbMenu *myMenu = new HbMenu();
     HbAction *menuAction;
     if ( mViewMode == MpCommon::DefaultView ) {
-        bool items = mCollectionData->count() != 0;
+        int count = mCollectionData->count();
         switch ( mCollectionContext ) {
-            case ECollectionContextAllSongs:                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_dblist_shuffle" ) ); 
-                if ( items ){
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+            case ECollectionContextAllSongs:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
                 }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) ); 
-                if ( items && !mUsbBlocked ) {
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                if ( count && !mUsbBlocked ) {
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
                 }
-                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) ); 
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );                
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
                 }
-                
                 connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
                 break;
-  
             case ECollectionContextArtists:
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) ); 
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );                
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
-                break;
             case ECollectionContextAlbums:
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
@@ -1000,8 +1016,26 @@ void MpCollectionView::updateMenu()
                 connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
                 break;
             case ECollectionContextArtistAlbumsTBone:
-            case ECollectionContextArtistAllSongs:
             case ECollectionContextAlbumsTBone:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( !mShuffleEnabled ) {
+                    mShuffleAction->setDisabled( true );
+                }
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                if ( !mUsbBlocked ) {
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
+                }
+                else {
+                    menuAction->setDisabled( true );
+                }
+                break;
+            case ECollectionContextArtistAllSongs:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
+                }
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                 if ( !mUsbBlocked ) {
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
@@ -1021,7 +1055,12 @@ void MpCollectionView::updateMenu()
                 connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
                 break;
             case ECollectionContextPlaylistSongs:
-                if ( !mCollectionData->isAutoPlaylist() ){
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
+                }
+                if ( !mCollectionData->isAutoPlaylist() ) {
                 menuAction = myMenu->addAction( hbTrId( "txt_common_menu_rename_item" ) );
                     if ( !mUsbBlocked ) {
                         connect( menuAction, SIGNAL( triggered() ), this, SLOT( renameCurrentPlaylistContainer() ) );
@@ -1146,7 +1185,16 @@ void MpCollectionView::setBannerVisibility( bool visible )
 int MpCollectionView::generateShuffleIndex()
 {
     int low = 0;
-    int high = mCollectionData->count();
+    int high = 0;
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            high = mCollectionData->albumSongsCount();
+            break;
+        default:
+            high = mCollectionData->count();
+            break;
+    }
 
     time_t seconds;
     time( &seconds );

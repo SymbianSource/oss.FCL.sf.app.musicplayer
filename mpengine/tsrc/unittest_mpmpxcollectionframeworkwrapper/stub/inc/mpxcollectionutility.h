@@ -31,6 +31,7 @@
 
 //Forward declarations
 class CMPXCollectionPath;
+class MMPXCollectionFindObserver;
 
 class MMPXCollection
 {
@@ -46,6 +47,9 @@ public:
     virtual void CancelRequest() = 0;
     virtual CMPXMedia* FindAllL(const CMPXSearchCriteria& aCriteria,
                                 const TArray<TMPXAttribute>& aAttrs) = 0;
+    virtual void FindAllL(const CMPXSearchCriteria& aCriteria,
+                          const TArray<TMPXAttribute>& aAttrs,
+                          MMPXCollectionFindObserver& aObs) = 0;
    
 };
 
@@ -73,7 +77,10 @@ public:
     void BackL();
     void CancelRequest();
     CMPXMedia* FindAllL(const CMPXSearchCriteria& aCriteria,
-                                    const TArray<TMPXAttribute>& aAttrs);
+                        const TArray<TMPXAttribute>& aAttrs);
+    void FindAllL(const CMPXSearchCriteria& aCriteria,
+                  const TArray<TMPXAttribute>& aAttrs,
+                  MMPXCollectionFindObserver& aObs);
     
 public:
  
@@ -84,6 +91,7 @@ public:
     int            iIndex;
     CMPXMedia      *iPlaylists; //Owned
     CMPXMediaArray *iAlbumSongs; //Owned
+    CMPXMedia      *iAsynchFindResult; //Owned
 };
 
 

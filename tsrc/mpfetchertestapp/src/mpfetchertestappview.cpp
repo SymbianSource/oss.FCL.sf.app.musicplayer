@@ -132,6 +132,27 @@ void MpFetcherTestAppView::createLayout()
                 connect(viewButton, SIGNAL(clicked()), SLOT(viewSongCaged()));
                 bottomLayout->addItem(viewButton);
             }
+                        
+            HbPushButton* homeScreenButton = new HbPushButton("HS Widget MainView");
+            if (homeScreenButton)
+            {
+                connect(homeScreenButton, SIGNAL(clicked()), SLOT(launchHomeScreen()));
+                bottomLayout->addItem(homeScreenButton);
+            }
+                     
+            HbPushButton* homeScreenButtonNPV = new HbPushButton("HS Widget NowPlayingView");
+            if (homeScreenButtonNPV)
+            {
+                connect(homeScreenButtonNPV, SIGNAL(clicked()), SLOT(launchHomeScreenNowPlaying()));
+                bottomLayout->addItem(homeScreenButtonNPV);
+            }
+            
+            HbPushButton* homeScreenButtonNPVS = new HbPushButton("HS Widget NPV Shuffle");
+            if (homeScreenButtonNPVS)
+            {
+                connect(homeScreenButtonNPVS, SIGNAL(clicked()), SLOT(launchHomeScreenNPShuffle()));
+                bottomLayout->addItem(homeScreenButtonNPVS);
+            }
             layout->addItem(bottomLayout);
         }
 
@@ -325,4 +346,94 @@ void MpFetcherTestAppView::viewSongCaged()
    // In this example all done.
 
 
+}
+
+void MpFetcherTestAppView::launchHomeScreen()
+{
+    QUrl url;
+    
+    url.setUrl("appto://10207C62?activityname=MusicMainView&launchtype=standalone");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::launchHomeScreenNowPlaying()
+{
+    QUrl url;
+    
+    url.setUrl("appto://10207C62?activityname=MusicNowPlayingView&launchtype=standalone");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::launchHomeScreenNPShuffle()
+{
+    QUrl url;
+
+    url.setUrl("appto://10207C62?activityname=MusicNowPlayingView&launchtype=standalone&shuffle=yes");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
 }

@@ -28,20 +28,18 @@ INCLUDEPATH += . \
 	 ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
      
-LIBS += -lmpxplaybackutility.dll \
+LIBS += -lmpengine  \
+        -lmpdata.dll \
         -lmpxcommon.dll
         
 symbian:TARGET.EPOCALLOWDLLDATA	= 1
 
 HEADERS = ../../inc/mpnowplayingwidget.h \
-    inc/mpnowplayingbackend.h \
-    inc/mpnowplayingwidget_p.h \
-    inc/mpnowplayingbackend_p.h
+    inc/mpnowplayingwidget_p.h 
 
 SOURCES += src/mpnowplayingwidget.cpp \
     src/mpnowplayingwidget_p.cpp \
-    src/mpnowplayingbackend.cpp \
-    src/mpnowplayingbackend_p.cpp
+ 
                 
 RESOURCES += resources/mpnowplayingbanner.qrc
 

@@ -34,6 +34,10 @@ _LIT(KMCCloseBracket, ")");
 _LIT(KMCAndKeyword," AND ");
 _LIT(KMCOrKeyword, " OR ");
 
+// QT localization TS file
+_LIT(KMPXMusicPlayerTsFile, "musicplayer_");
+_LIT(KMPXMusicPlayerTsPath, "z:/resource/qt/translations/");
+
 #endif // MPXDBCOMMONDEF_H
 
 //End of File

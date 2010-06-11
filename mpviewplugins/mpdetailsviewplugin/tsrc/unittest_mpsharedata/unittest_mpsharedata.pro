@@ -11,9 +11,8 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpsharedata
+# Description: 
 #
-
 TEMPLATE = app
 CONFIG += qtestlib \
           symbian_test \

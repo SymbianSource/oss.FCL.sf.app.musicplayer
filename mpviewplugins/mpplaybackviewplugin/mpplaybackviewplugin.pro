@@ -40,14 +40,7 @@ LIBS += -lmpxplaybackutility.dll \
 		-lmpengine \
 		-lmpdata.dll
 	
-symbian:
-{
-TARGET.EPOCALLOWDLLDATA = 1
-    
-BLD_INF_RULES.prj_exports += \
-    "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/nullsound.mp3" \
-    "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
-}
+symbian:TARGET.EPOCALLOWDLLDATA	= 1
 
 HEADERS = ../../inc/mpviewbase.h \
 	  inc/mpplaybackviewplugin.h \

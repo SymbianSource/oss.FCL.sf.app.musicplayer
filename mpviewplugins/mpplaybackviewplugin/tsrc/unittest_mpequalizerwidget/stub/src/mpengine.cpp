@@ -73,6 +73,6 @@ int MpEngine::activePreset()
 QStringList MpEngine::presetNames()
 {
     QStringList presets;
-    presets << "Bass Booster" << "Classic" << "Jazz" << "Pop" << "Rock" ;
+    presets << "Bass Booster" << "Classic" << "Jazz" << "Pop" << "Rock" << "New Preset";
     return presets;
 }

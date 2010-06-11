@@ -11,19 +11,25 @@
 *
 * Contributors:
 *
-* Description: 
+* Description: Header file for share player.
 *
 */
+
 #ifdef SHARE_FUNC_ENABLED
 #ifndef MPDETAILSSHAREDIALOG_H
 #define MPDETAILSSHAREDIALOG_H
 
 #include <HbDialog>
+#include <QList>
+#include <QSSLError>
 #include "mpsharedata.h"
 
 class QGraphicsWebView;
 class QNetworkAccessManager;
+class QNetworkReply;
+class MpShareWebView;
 class MpSongData;
+class HbProgressDialog;
 
 /*!
     Implements Share Player dialog for music player details view.
@@ -38,26 +44,35 @@ public:
 
     /*!
       Initializes an instance of the class with given MpSongData.
+      Translation for "unknown" string is passed so that the share
+      dialog can display "unknown" if artist or title are not set.
       MpSongData object ownership is not transferred,
       Music Player Engine retains the ownership.
     */
-    void initialize( MpSongData* aSongData );
+    void initialize( MpSongData* aSongData, const QString& aUnknownTr );
     virtual ~MpDetailsShareDialog();
+    void cachePublishingPlayerFiles();
     void logoutPlayer();
+    bool isInitialized() const;
 
 public slots:
     void addContext();
     void updateSharedData();
     void onIndexLoad( bool ok );
     void debugJs( QString s );
-    void errorHandler( QString error, QString message );
+    void errorHandler( QString aError, QString aMessage );
     void clearCache();
+    void showWindow();
+    void showProgressDialog();
+    void handleRequestSSLErrors( QNetworkReply* aReply, const QList< QSslError >& aErrors );
+    void handleRequestFinished( QNetworkReply* aReply );
 
 signals:
     void closeShareDialog();
 
 private:
-    void initShareData( MpSongData* aSongData );
+    void initShareData( MpSongData* aSongData, const QString& aUnknownTr );
+    void initLanguage();
     void initNetworkAccessManager();
     void initWebView();
     void initSignalSlots();
@@ -65,8 +80,10 @@ private:
 
 private:
     MpShareData            mShareData;
-    QGraphicsWebView*      mShareWebView;   // Owned by HbDialog
+    MpShareWebView*        mShareWebView;   // Owned by HbDialog
     QNetworkAccessManager* mShareNetAccMan; // Owned
+    HbProgressDialog*      mProgressbar; // Owned
+    bool                   mIsInitialized;
 };
 
 #endif // MPDETAILSSHAREDIALOG_H

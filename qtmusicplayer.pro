@@ -28,6 +28,7 @@ symbian {
     include(mpviewplugins/mpsettingsviewplugin/rom/rom.pri)
     include(mpviewplugins/mpdetailsviewplugin/rom/rom.pri)
     include(mpviewplugins/mpmediawallviewplugin/rom/rom.pri)
+    include(musicwidgetplugin/rom/rom.pri)
     include(mpserviceplugins/audioeffects/rom/rom.pri)
     include(mpserviceplugins/localaudio/rom/rom.pri)
     include(mpserviceplugins/mpxsqlitedbcommon/rom/rom.pri)
@@ -42,7 +43,8 @@ SUBDIRS = utilities \
           app \
           mpdata \
           mpengine \
-          mpviewplugins 
+          mpviewplugins \
+          musicwidgetplugin
 
 CONFIG += ordered
 

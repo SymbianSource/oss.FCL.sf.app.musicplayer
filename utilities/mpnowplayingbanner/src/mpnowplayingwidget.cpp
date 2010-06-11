@@ -56,12 +56,12 @@
 /*!
  Constructs the now playing widget.
  */
-MpNowPlayingWidget::MpNowPlayingWidget(long int playerId, QGraphicsItem *parent )
+MpNowPlayingWidget::MpNowPlayingWidget( QGraphicsItem *parent )
     : HbWidget(parent),
-    d_ptr ( new MpNowPlayingWidgetPrivate( playerId, this ) ),
+    d_ptr ( new MpNowPlayingWidgetPrivate( this ) ),
     mFrameItem(0)
 {
-    TX_ENTRY_ARGS( "Player ID =" << playerId << " Parent=" << (void *)parent )
+    TX_ENTRY_ARGS( " Parent=" << (void *)parent )
     TX_EXIT
     mFrameItem = new HbFrameItem( this );
     mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
@@ -101,6 +101,14 @@ void MpNowPlayingWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
     TX_EXIT
 }
 
+/*!
+ Returns if banner is attached or not
+ */
+bool MpNowPlayingWidget::isBannerAttached()
+{
+    TX_ENTRY
+    return d_ptr->isBannerAttached();
+}
 /*!
     \reimp
  */

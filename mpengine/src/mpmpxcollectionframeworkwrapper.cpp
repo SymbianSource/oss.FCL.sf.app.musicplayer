@@ -280,6 +280,13 @@ void MpMpxCollectionFrameworkWrapper::setShuffleFeatureEnabled( bool enable )
 }
 
 /*!
+ Called to open all songs path and trigger shuffle all songs play
+ */
+void MpMpxCollectionFrameworkWrapper::openShuffleAllSongsPath()
+{
+    d_ptr->openShuffleAllSongsPath();
+}
+/*!
  Cancels CollectionUiHelper request.
  */
 void MpMpxCollectionFrameworkWrapper::cancelRequest()

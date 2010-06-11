@@ -95,7 +95,7 @@ signals:
     void playbackInfoChanged();
 	void songDetailInfoChanged();	
 
-private:
+public:
     QString                  mTitle;
     QString                  mAlbum;
     QString                  mArtist;

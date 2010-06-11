@@ -14,6 +14,7 @@
 * Description: 
 *
 */
+
 #include "mpdetailssharedialog.h"
 #include "mptrace.h"
 #include <QObject>

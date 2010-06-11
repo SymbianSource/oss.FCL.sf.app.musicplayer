@@ -21,7 +21,7 @@
 #include <QNetworkDiskCache>
 #include <QNetworkProxyFactory>
 #include <qmobilityglobal.h>
-#include <qnetworksession.h>
+#include <QNetworkSession>
 #include <QDomElement>
 #include <QList>
 #include <QFile>
@@ -173,14 +173,4 @@ void TestMpQueryManager::testrecommendationAlbumArtsLink()
     QCOMPARE(recommendedAlbumArtsLink,recommendedAlbumArtsLinkRecd);
 }
 
-
-void TestMpQueryManager::testalbumArtsReadyCount()
-{
-    mTest->mAlbumArtsReadyCount = 2;
-    TInt albumArtsReadyCount;
-    
-    albumArtsReadyCount=mTest->albumArtsReadyCount();
-    
-    QCOMPARE(albumArtsReadyCount,2);
-}
 

@@ -1,7 +1,7 @@
 /*
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
-* This component and the accompanying materials are made available
+* This component and the accompanying materials are made available 
 * under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
@@ -14,16 +14,19 @@
 * Description: 
 *
 */
+
 #ifdef SHARE_FUNC_ENABLED
 
 #include "mpsharedata.h"
 #include "mpsongdata.h"
 
+
 // TODO OVI_URL needs to come from cenrep
 const QString OVI_URL = "http://music.ovi.com";
 
 // The music note symbol that we post if we do not have music store URL.
-const QString MUSIC_NOTE_SYMBOL = "&#9835; ";
+const QString MUSIC_NOTE_SYMBOL = "&#9835;";
+
 
 MpShareData::MpShareData()
     : mOwner( 0 ),
@@ -33,6 +36,7 @@ MpShareData::MpShareData()
 
 MpShareData::~MpShareData()
 {
+    // Intentionally empty.
 }
 
 void MpShareData::setOwner( QObject* aOwner )
@@ -95,17 +99,19 @@ QString MpShareData::language() const
 	return mLanguage;
 }
 
+void MpShareData::setUnknownTr( const QString& s )
+{
+    mUnknownTr = s;
+}
+
 QString MpShareData::objectType() const
 {
     if ( !mSongData || mSongData->link().isEmpty() )
     {
         return "NOTE-APPEND";
     }
-    else
-    {
-        // No link, append artist-song
-        return "URI";
-    }
+    // No link, append artist-song
+    return "URI";
 }
 
 int MpShareData::objectReservedLength() const
@@ -115,52 +121,31 @@ int MpShareData::objectReservedLength() const
 
 QString MpShareData::objectContent() const
 {
-	QString result = "";
-    if ( mSongData )
+    if ( mSongData && !mSongData->link().isEmpty() )
     {
-        if ( !mSongData->link().isEmpty() )
-        {
-            return mSongData->link();
-        }
-        else if ( !mSongData->artist().isEmpty() && !mSongData->title().isEmpty() )
-        {
-            // TODO: do we need to have right-to-left text direction here,
-            // i.e. putting the title before the artist in such a case?
-            result = MUSIC_NOTE_SYMBOL + mSongData->artist() + ": " + mSongData->title() + " " + OVI_URL;
-        }
-        else if ( !mSongData->artist().isEmpty() )
-        {
-            result = MUSIC_NOTE_SYMBOL + mSongData->artist() + " " + OVI_URL;
-        }
-        else if ( !mSongData->title().isEmpty() )
-        {
-            result = MUSIC_NOTE_SYMBOL + mSongData->title() + " " + OVI_URL;
-        }
-        else
-        {
-            result = MUSIC_NOTE_SYMBOL + OVI_URL;
-        }
+        return mSongData->link();
     }
-    else
-    {
-        result = MUSIC_NOTE_SYMBOL + OVI_URL;
-    }
-    return result;
+    // TODO: do we need to have right-to-left text direction here,
+    // i.e. putting the title before the artist in such a case?
+    return MUSIC_NOTE_SYMBOL + " " + artist() + ": " + title() + " " + OVI_URL;
 }
 
 QString MpShareData::title() const
 {
-    return mSongData ? mSongData->title() : "";
-}
-
-QString MpShareData::album() const
-{
-    return mSongData ? mSongData->album() : "";
+    if ( mSongData && !mSongData->title().isEmpty() )
+    {
+        return mSongData->title();
+    }
+    return mUnknownTr;
 }
 
 QString MpShareData::artist() const
 {
-    return mSongData ? mSongData->artist() : "";
+    if ( mSongData && !mSongData->artist().isEmpty() )
+    {
+        return mSongData->artist();
+    }
+    return mUnknownTr;
 }
 
 QString MpShareData::albumArtBase64() const

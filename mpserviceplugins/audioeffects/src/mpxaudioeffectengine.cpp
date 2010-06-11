@@ -109,9 +109,20 @@ EXPORT_C void CMPXAudioEffectEngine::SetBalanceL()
     iProp->LoadFromFileL();
     if(iMdaPlayer)
         {
-        if(iMdaPlayer->SetBalance(iProp->Balance())!=KErrNone)
+        TInt currentBalance;    
+        TInt err = iMdaPlayer->GetBalance(currentBalance);
+        if( err !=KErrNone )
+            {   
+            User::Leave(KErrNotSupported);    
+            }        
+        // don't set non-changed values:   
+        if( iProp->Balance() != currentBalance )
             {
-            User::Leave(KErrNotSupported);
+            err = iMdaPlayer->SetBalance(iProp->Balance());
+            if( err !=KErrNone )
+                {
+                User::Leave(KErrNotSupported);    
+                }            
             }
         } 
     }
@@ -219,14 +230,18 @@ EXPORT_C void CMPXAudioEffectEngine::SetStereoWideningL()
                 }
             }
 
-        iStereoEffect->EnableL();
-        TUint8 level = 30;
-        iStereoEffect->SetStereoWideningLevelL( level );
-        iStereoEffect->ApplyL();
+        if ( !iStereoEffect->IsEnabled() )
+            {
+            iStereoEffect->EnableL();
+            TUint8 level = 30;
+            iStereoEffect->SetStereoWideningLevelL( level );
+            iStereoEffect->ApplyL();                
+            }
+
         }
     else
         {
-        if (iStereoEffect)   // If audio effects was not on, then no need to disable
+        if (iStereoEffect && iStereoEffect->IsEnabled() )   // If audio effects was not on, then no need to disable
             { 
             iStereoEffect->DisableL();
             }
@@ -295,12 +310,15 @@ EXPORT_C void CMPXAudioEffectEngine::SetLoudnessL()
                 }
             } 
             
-        iLoudnessEffect->EnableL();
+        if( !iLoudnessEffect->IsEnabled() )
+            {   
+            iLoudnessEffect->EnableL();    
+            }
         }
     else
-        {
-        if( iLoudnessEffect )   // Only disable if it was constructed
-            {
+        { 
+        if( iLoudnessEffect && iLoudnessEffect->IsEnabled() )
+            {       
             iLoudnessEffect->DisableL();
             }
         }

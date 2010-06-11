@@ -39,14 +39,18 @@ int main( int argc, char *argv[] )
     HbMainWindow window;
     TestMpDetailsViewPlugin tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpdetailsviewplugin.txt";
 
-    int res = QTest::qExec( &tv, 3, pass );
+if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpdetailsviewplugin.txt";
 
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }    
 }
 
 TestMpDetailsViewPlugin::TestMpDetailsViewPlugin()
@@ -71,6 +75,7 @@ void TestMpDetailsViewPlugin::initTestCase()
  */
 void TestMpDetailsViewPlugin::cleanupTestCase()
 {
+QCoreApplication::processEvents();
 }
 
 /*!

@@ -14,6 +14,7 @@
 * Description: 
 *
 */
+
 #ifndef MPDETAILSSHAREDIALOG_H
 #define MPDETAILSSHAREDIALOG_H
 

@@ -195,16 +195,34 @@ int MpMpxCollectionDataPrivate::containerId()
 /*!
  \internal
  */
-int MpMpxCollectionDataPrivate::itemId(int index)
+int MpMpxCollectionDataPrivate::itemId( int index )
 {
-    TX_ENTRY_ARGS("index=" << index);
+    TX_ENTRY_ARGS( "index=" << index );
     int id = -1;
-    TRAPD(err, id = DoGetItemIdL(index));
+    TRAPD( err, id = DoGetItemIdL( index ) );
     if ( err == KErrNone ) {
-        TX_LOG_ARGS("id=" << id);
+        TX_LOG_ARGS( "id=" << id );
     }
     else {
-        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+    return id;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::albumSongId( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index );
+    int id = -1;
+    TRAPD( err, id = DoGetAlbumSongIdL( index ) );
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS( "id=" << id );
+    }
+    else {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
     TX_EXIT
     return id;
@@ -408,17 +426,7 @@ void MpMpxCollectionDataPrivate::setContext( TCollectionContext context )
 {
     iContext = context;
     TX_LOG_ARGS("Context changed: iContext=" << iContext);
-    
-    //Clearing all the album ids.
-    albumIdIndexMapping.clear();
-    if ( iContext == ECollectionContextAlbumsMediaWall) {
-        //Adding album ids and indixes to the hash, for itemIndex lookup.
-        //This is disabled for other containers to save resources.
-        for ( int i = count() - 1 ; i >= 0 ; i-- ) {
-            albumIdIndexMapping.insert( itemId( i ) , i );
-        }
-    }
-    
+    loadAlbumsLookup();
     emit q_ptr->contextChanged(iContext);
 }
 
@@ -431,6 +439,7 @@ void MpMpxCollectionDataPrivate::setAlbumContent( const CMPXMedia& albumContent 
     TRAPD(err, DoSetAlbumContentL(albumContent));
     if ( err == KErrNone ) {
         TX_LOG_ARGS("Album content is available.");
+        loadAlbumSongsLookup();
         emit q_ptr->refreshAlbumSongs();
     }
     else {
@@ -446,7 +455,50 @@ void MpMpxCollectionDataPrivate::setAlbumContent( const CMPXMedia& albumContent 
  */
 int MpMpxCollectionDataPrivate::itemIndex( int itemUniqueId )
 {
-    return albumIdIndexMapping.value( itemUniqueId );
+    return albumIdIndexMapping.value( itemUniqueId, -1 );
+}
+
+/*!
+ \internal
+   Currently only used to lookup playing song id to index of song in the 
+   current album on media wall.
+ */
+int MpMpxCollectionDataPrivate::albumSongIndex( int songUniqueId )
+{
+    return albumSongIdIndexMapping.value( songUniqueId, -1 );
+}
+
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::loadAlbumsLookup()
+{
+    //Clearing all the album ids.
+    albumIdIndexMapping.clear();
+    if ( iContext == ECollectionContextAlbumsMediaWall) {
+        //Adding album ids and indixes to the hash, for itemIndex lookup.
+        //This is disabled for other containers to save resources.
+        for ( int i = count() - 1 ; i >= 0 ; i-- ) {
+            albumIdIndexMapping.insert( itemId( i ) , i );
+        }
+    }
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::loadAlbumSongsLookup()
+{
+    //Clearing all the song ids.
+    albumSongIdIndexMapping.clear();
+    if ( iContext == ECollectionContextAlbumsMediaWall) {
+        //Adding album song ids and indixes to the hash, for albumSongIndex lookup.
+        //This is disabled for other containers to save resources.
+        for ( int i = albumSongsCount() - 1 ; i >= 0 ; i-- ) {
+            albumSongIdIndexMapping.insert( albumSongId( i ) , i );
+        }
+    }
 }
 
 /*!
@@ -588,6 +640,21 @@ int MpMpxCollectionDataPrivate::DoGetItemIdL( int index )
 /*!
  \internal
  */
+int MpMpxCollectionDataPrivate::DoGetAlbumSongIdL( int index )
+{
+    CMPXMedia* album( iMediaArray->AtL( iCurrentAlbumIndex ) );
+    const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+    User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+    CMPXMedia* song = songs->AtL(index);
+    if ( !song->IsSupported( KMPXMediaGeneralId ) ) {
+        User::Leave(KErrNotFound);
+    }
+    return song->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+}
+
+/*!
+ \internal
+ */
 void MpMpxCollectionDataPrivate::DoRemoveItemL( int index )
 {
     delete iCachedRemovedItem;
@@ -624,6 +691,7 @@ bool MpMpxCollectionDataPrivate::DoSetCurrentAlbumL( int index )
         iAlbumSongCount = songs->Count();
         songsAvailable = true;
         TX_LOG_ARGS("Songs available.");
+        loadAlbumSongsLookup();
         emit q_ptr->refreshAlbumSongs();
     }
     TX_EXIT

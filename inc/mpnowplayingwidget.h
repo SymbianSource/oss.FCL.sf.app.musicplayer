@@ -40,10 +40,11 @@ class MPNOWPLAYINGBANNER_EXPORT MpNowPlayingWidget : public HbWidget
     friend class MpNowPlayingWidgetPrivate;
 
 public:
-    explicit MpNowPlayingWidget(long int playerId, QGraphicsItem *parent=0 );
+    explicit MpNowPlayingWidget( QGraphicsItem *parent=0 );
     virtual ~MpNowPlayingWidget();
     void setEnabled( bool enabled );
     void resizeEvent(QGraphicsSceneResizeEvent *event);
+    bool isBannerAttached();
 
 signals:
     void clicked();

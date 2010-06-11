@@ -131,6 +131,13 @@ void TestMpEqualizerWidget::testPrepareDialog()
     QVERIFY(mTest->mPresetsList != 0);
     QCOMPARE(qobject_cast<HbRadioButtonList*>(mTest->contentWidget()), mTest->mPresetsList);
     QVERIFY(mTest->mPresetsList->selected() == 0);
+    QCOMPARE(mTest->mPresetsList->items().at(0), hbTrId("txt_mus_list_off"));
+    QCOMPARE(mTest->mPresetsList->items().at(1), hbTrId("txt_mus_list_bass_booster"));
+    QCOMPARE(mTest->mPresetsList->items().at(2), hbTrId("txt_mus_list_classical"));
+    QCOMPARE(mTest->mPresetsList->items().at(3), hbTrId("txt_mus_list_jazz"));
+    QCOMPARE(mTest->mPresetsList->items().at(4), hbTrId("txt_mus_list_pop"));
+    QCOMPARE(mTest->mPresetsList->items().at(5), hbTrId("txt_mus_list_rock"));
+    QCOMPARE(mTest->mPresetsList->items().at(6), QString("New Preset"));
 }
 
 /*!
@@ -193,29 +200,33 @@ void TestMpEqualizerWidget::testOkSelected()
 /*!
  Tests getLogicalName.
  */
-void TestMpEqualizerWidget::testGetLogicalName()
+void TestMpEqualizerWidget::testGetLocalizedString()
 {
-    QString logicalName;
+    QString localizedString;
     
     // test Bass Booster
-    logicalName = mTest->getLogicalName( QString("Bass Booster") );
-    QCOMPARE(logicalName, hbTrId("txt_mus_list_bass_booster"));
+    localizedString = mTest->getLocalizedString( QString("Bass Booster") );
+    QCOMPARE(localizedString, hbTrId("txt_mus_list_bass_booster"));
 
     // test Classic
-    logicalName = mTest->getLogicalName( QString("Classic") );
-    QCOMPARE(logicalName, hbTrId("txt_mus_list_classical"));
-
-    // test Pop
-    logicalName = mTest->getLogicalName( QString("Pop") );
-    QCOMPARE(logicalName, hbTrId("txt_mus_list_pop"));
+    localizedString = mTest->getLocalizedString( QString("Classic") );
+    QCOMPARE(localizedString, hbTrId("txt_mus_list_classical"));
 
     // test Jazz
-    logicalName = mTest->getLogicalName( QString("Jazz") );
-    QCOMPARE(logicalName, hbTrId("txt_mus_list_jazz"));
+    localizedString = mTest->getLocalizedString( QString("Jazz") );
+    QCOMPARE(localizedString, hbTrId("txt_mus_list_jazz"));
+
+    // test Pop
+    localizedString = mTest->getLocalizedString( QString("Pop") );
+    QCOMPARE(localizedString, hbTrId("txt_mus_list_pop"));
 
     // test Rock
-    logicalName = mTest->getLogicalName( QString("Rock") );
-    QCOMPARE(logicalName, hbTrId("txt_mus_list_rock"));
+    localizedString = mTest->getLocalizedString( QString("Rock") );
+    QCOMPARE(localizedString, hbTrId("txt_mus_list_rock"));
+
+    // test new preset
+    localizedString = mTest->getLocalizedString( QString("New Preset") );
+    QVERIFY(localizedString.isEmpty());
 }
 
 // End of file

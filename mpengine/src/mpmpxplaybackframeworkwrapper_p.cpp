@@ -64,8 +64,8 @@ MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
     TX_ENTRY
 
     if ( iPlaybackUtility ) {
-        ForceStopL();
-        iPlaybackUtility->RemoveObserverL(*this);
+        TRAP_IGNORE( ForceStopL() );
+        TRAP_IGNORE( iPlaybackUtility->RemoveObserverL(*this) );
         iPlaybackUtility->Close();
     }
 
@@ -379,7 +379,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                 aProperties.ValueText( KMPXMediaMusicArtist ).Length() ) );
     }
     else {
-            changed |= iPlaybackData->setArtist(hbTrId("txt_mus_other_unknown3"));
+            changed |= iPlaybackData->setArtist(QString());
     }
     if ( aProperties.IsSupported( KMPXMediaMusicAlbum ) ) {
         changed |= iPlaybackData->setAlbum(
@@ -388,7 +388,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                 aProperties.ValueText( KMPXMediaMusicAlbum ).Length() ) );
     }
     else {
-            changed |= iPlaybackData->setAlbum(hbTrId("txt_mus_other_unknown4"));
+            changed |= iPlaybackData->setAlbum(QString());
     }
     if (aProperties.IsSupported(TMPXAttribute(KMPXMediaGeneralMimeType))) {
         
@@ -480,13 +480,12 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( const XQSharableFile& file )
     if ( ok ) {
         iPlaybackUtility->InitL( xqfile );
     }
-	else {
-		TX_LOG_ARGS("Error: " << ok << "; should never get here.");
-	}
-    
-    
+    else {
+        TX_LOG_ARGS("Error: " << ok << "; should never get here.");
+    }
     TX_EXIT
 }
+
 /*!
  \internal
  */
@@ -565,8 +564,6 @@ void MpMpxPlaybackFrameworkWrapperPrivate::ForceStopL()
         cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
         iPlaybackUtility->CommandL( *cmd );
         CleanupStack::PopAndDestroy( cmd );
-
-       // iPlaybackUtility->RemoveObserverL(*this);
     }
     TX_EXIT
 }
@@ -579,7 +576,11 @@ void MpMpxPlaybackFrameworkWrapperPrivate::UpdateStateL()
     TX_ENTRY
     if ( !iPlaybackUtility->Source() ) {
         TX_LOG_ARGS("There is no source")
-        iPlaybackData->setPlaybackState( MpPlaybackData::NotPlaying );
+        //this to prevent mutiple calls to state change.
+        if ( iPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
+            iPlaybackData->setPlaybackState( MpPlaybackData::NotPlaying );
+            iPlaybackData->resetData();
+        }
     }
     else {
         switch ( iPlaybackUtility->StateL() ) {

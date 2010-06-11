@@ -29,7 +29,7 @@
 #include "mptrace.h"
 
 // CONSTANTS
-_LIT( KMPXNullSoundPath, "\\nullsound.mp3" );
+_LIT( KMPXNullSoundPath, "\\system\\data\\nullsound.mp3" );
 
 /*!
     \class MpEqualizerFrameworkWrapperPrivate

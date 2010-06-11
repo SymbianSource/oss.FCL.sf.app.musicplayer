@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description: 
+* Description: meta data used by publish player.
 *
 */
+
 #ifdef SHARE_FUNC_ENABLED
 
 #ifndef MPSHAREDATA_H
@@ -43,6 +44,7 @@ public:
     void setSongData( MpSongData* aSongData );
     void setErrorMessage( const QString& s );
 	void setLanguage( const QString& s );
+    void setUnknownTr( const QString& s );
 
 public slots:
     QObject* owner() const;
@@ -57,7 +59,6 @@ public slots:
     int objectReservedLength() const;
 	QString language() const;
     QString title() const;
-    QString album() const;
     QString artist() const;
     QString albumArtBase64() const;
 
@@ -68,6 +69,7 @@ private:
     QString     mUsername;
     QString     mPassword;
 	QString     mLanguage;
+    QString     mUnknownTr;
 };
 
 #endif // MPSHAREDATA_H

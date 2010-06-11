@@ -55,7 +55,7 @@ MpPlaybackData *MpMpxPlaybackFrameworkWrapper::playbackData()
 }
 
 /*!
- Slot to handle a play from Uri aFilename
+ Slot to handle play from Uri aFilename
  */
 void MpMpxPlaybackFrameworkWrapper::play( QString aFilename )
 {
@@ -63,7 +63,7 @@ void MpMpxPlaybackFrameworkWrapper::play( QString aFilename )
 }
 
 /*!
- Slot to handle a play from file handle
+ Slot to handle play from file handle
  */
 void MpMpxPlaybackFrameworkWrapper::play( const XQSharableFile& file)
 {

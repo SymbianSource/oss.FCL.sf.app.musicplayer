@@ -37,7 +37,7 @@ public:
     MMPXCollectionUiHelper();
     ~MMPXCollectionUiHelper();
     
-   void DeleteL( CMPXCollectionPath& aPath,
+    void DeleteL( CMPXCollectionPath& aPath,
                           MMPXCHelperObserver* aObserver );
     CMPXCollectionPath* MusicMenuPathL();
     CMPXCollectionPath* MusicAllSongsPathL();
@@ -53,11 +53,13 @@ public:
                                       TUint aOriginalOrdinal,
                                       TUint aNewOrdinal,
                                       MMPXCHelperObserver* aObserver);
+    void Cancel();
     
 public:
     
     TBool           iIncAdd;
     TBool           iDelete;
+    TBool           iCancel;
     CMPXMedia       *iMedia;
     TBool           iValidRename;
     TBool           iValidReorder;

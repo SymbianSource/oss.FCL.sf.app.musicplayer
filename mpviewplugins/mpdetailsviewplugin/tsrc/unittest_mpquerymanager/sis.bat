@@ -14,6 +14,7 @@
 @rem Description: 
 @rem
 
+@echo off
 del *.sisx
 makesis UT_mpquerymanager.pkg
 signsis UT_mpquerymanager.sis UT_mpquerymanager.sisx %RNDCERTS_PATH%\Nokia_RnDCert_02.der %RNDCERTS_PATH%\Nokia_RnDCert_02.key

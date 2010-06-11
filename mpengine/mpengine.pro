@@ -42,7 +42,14 @@ LIBS += -lestor.dll \
     -lxqserviceutil \
     -laudioequalizerutility.dll
     
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
+symbian:
+{
+    TARGET.EPOCALLOWDLLDATA = 1
+    
+    BLD_INF_RULES.prj_exports += \
+        "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/system/data/nullsound.mp3" \
+        "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
+}
 
 HEADERS += ../inc/mpenginefactory.h \
            ../inc/mpengine.h \
@@ -93,3 +100,4 @@ myDefInclude = "NOSTRICTDEF" \
 "DEFFILE  eabi/mpengineu.def "\
 "$${LITERAL_HASH}endif"
 MMP_RULES += myDefInclude
+

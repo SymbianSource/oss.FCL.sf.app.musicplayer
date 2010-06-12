@@ -21,8 +21,6 @@
 #include <QDomElement>
 #include <QList>
 #include <QFile>
-#include <QTranslator>
-#include <QLocale>
 #include <QGraphicsLinearLayout>
 #include <QSizeF>
 
@@ -78,8 +76,6 @@ MpDetailsView::MpDetailsView()
       mDetailList(0),
       mInspireList(0),
       mInspireMeProgressBar(0),
-      mMpTranslator( 0 ),
-      mCommonTranslator( 0 ),
       mMpQueryManager( 0 ),
       mInspireMeQueryOngoing( false ),
       mInspireMeQueryRendered( false ),
@@ -174,8 +170,6 @@ MpDetailsView::~MpDetailsView()
     TX_ENTRY
     delete mSoftKeyBack;
     delete mDocumentLoader;
-    delete mMpTranslator;
-    delete mCommonTranslator;
     delete mMpQueryManager;
 
 #ifdef SHARE_FUNC_ENABLED
@@ -191,25 +185,6 @@ MpDetailsView::~MpDetailsView()
 void MpDetailsView::initializeView()
 {
     TX_ENTRY
-
-    //Load musicplayer and common translators
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mCommonTranslator = new QTranslator( this );
-    translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
-    TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mCommonTranslator );
-    }
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
 
     mSoftKeyBack = new HbAction( Hb::BackNaviAction, this );
 

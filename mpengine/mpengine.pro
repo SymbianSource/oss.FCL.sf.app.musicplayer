@@ -14,45 +14,46 @@
 # Description: Project file for Music Player Engine.
 #
 
-symbian:TARGET.UID3 = 0x10207C93
-
 TEMPLATE = lib
 CONFIG += hb
 TARGET = mpengine
-
-TARGET.CAPABILITY = CAP_GENERAL_DLL
-
-INCLUDEPATH += . \
-    	inc \
-    	../inc \
-    	../mpserviceplugins/inc
-    	
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
-
-LIBS += -lestor.dll \
-    -lmpxplaybackutility.dll \
-    -lmpxcollectionutility.dll \
-    -lmpxharvesterutility.dll \
-    -lmpxcommon.dll \
-    -lmpxcollectionhelper.dll \
-    -lremconcoreapi.dll \
-    -lremconinterfacebase.dll \
-    -lmpsettingsmanager \
-    -lmpdata.dll \
-    -lxqserviceutil \
-    -laudioequalizerutility.dll
-    
-symbian:
-{
+symbian: { 
+    TARGET.UID3 = 0x10207C93
+    MMP_RULES += "DEFFILE mpengine.def"
+    defFilePath = .
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
-    
     BLD_INF_RULES.prj_exports += \
         "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/system/data/nullsound.mp3" \
         "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
 }
+DEFINES += BUILD_MPENGINE_LIB
 
+INCLUDEPATH += . \
+    	       inc \
+    	       ../inc \
+    	       ../mpserviceplugins/inc    	
+INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+
+LIBS += -lestor \
+        -lmpxplaybackutility \
+        -lmpxcollectionutility \
+        -lmpxharvesterutility \
+        -lmpxcommon \
+        -lmpxcollectionhelper \
+        -lremconcoreapi \
+        -lremconinterfacebase \
+        -lmpsettingsmanager \
+        -lmpdata \
+        -lxqserviceutil \
+        -laudioequalizerutility \
+        -lmediaclientaudio \
+        -lefsrv
+
+# Input
 HEADERS += ../inc/mpenginefactory.h \
            ../inc/mpengine.h \
+           ../inc/mpsongscanner.h \
            inc/mpmpxharvesterframeworkwrapper.h \
            inc/mpmpxharvesterframeworkwrapper_p.h \
            inc/mpmpxplaybackframeworkwrapper.h \
@@ -68,11 +69,11 @@ HEADERS += ../inc/mpenginefactory.h \
            inc/mpaudioeffectsframeworkwrapper.h \
            inc/mpaudioeffectsframeworkwrapper_p.h \
            inc/mpequalizerframeworkwrapper.h \
-           inc/mpequalizerframeworkwrapper_p.h \
-           inc/mpprogressdialoghandler.h
+           inc/mpequalizerframeworkwrapper_p.h
 
 SOURCES += src/mpenginefactory.cpp \
            src/mpengine.cpp \
+           src/mpsongscanner.cpp \
            src/mpmpxharvesterframeworkwrapper.cpp \
            src/mpmpxharvesterframeworkwrapper_p.cpp \
            src/mpmpxplaybackframeworkwrapper.cpp \
@@ -88,16 +89,5 @@ SOURCES += src/mpenginefactory.cpp \
            src/mpaudioeffectsframeworkwrapper.cpp \
            src/mpaudioeffectsframeworkwrapper_p.cpp \
            src/mpequalizerframeworkwrapper.cpp \
-           src/mpequalizerframeworkwrapper_p.cpp \
-           src/mpprogressdialoghandler.cpp   
-
-DEFINES += BUILD_MPENGINE_LIB
-
-myDefInclude = "NOSTRICTDEF" \
-"$${LITERAL_HASH}if defined(WINS)"\
-"DEFFILE  bwins/mpengineu.def "\
-"$${LITERAL_HASH}else "\
-"DEFFILE  eabi/mpengineu.def "\
-"$${LITERAL_HASH}endif"
-MMP_RULES += myDefInclude
+           src/mpequalizerframeworkwrapper_p.cpp   
 

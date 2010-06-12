@@ -93,6 +93,17 @@ MpSettingsManager::MpSettingsManager():
              KMPCenRepSettingSongDetailsGBKey);
     mSongDetailsGb = mSettingsManager->readItemValue(SongDetailsGbKey).toInt();
     mSettingsManager->startMonitoring(SongDetailsGbKey);
+
+    XQSettingsKey showMtpInfo(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerShowMtpInfoKey);
+    mShowMtpInfo = mSettingsManager->readItemValue(showMtpInfo).toInt();
+    mSettingsManager->startMonitoring(showMtpInfo);
+
+    XQSettingsKey mtpInfoUrl(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerMtpInfoUrlKey);
+    mMtpInfoUrl = mSettingsManager->readItemValue(mtpInfoUrl, XQSettingsManager::TypeString).toString();
     TX_EXIT
 }
 
@@ -161,6 +172,22 @@ bool MpSettingsManager::songDetailsGb()
     return instance()->mSongDetailsGb;
 }
 
+/*!
+ Returns wheter mtp info should be showed.
+ */
+bool MpSettingsManager::showMtpInfo()
+{
+    return instance()->mShowMtpInfo;
+}
+
+/*!
+ Returns mtp info url.
+ */
+QString MpSettingsManager::mtpInfoUrl()
+{
+    return instance()->mMtpInfoUrl;
+}
+
 
 /*!
  Slot to be called when a setting is changed.
@@ -194,6 +221,10 @@ void MpSettingsManager::valueChanged(const XQSettingsKey& key,
             mSongDetailsGb = value.toInt();
             TX_LOG_ARGS("SongDetailsGB changed to "<< mSongDetailsGb);
             emit SongDetailsGbChanged( mSongDetailsGb );
+            break;
+        case KMusicPlayerShowMtpInfoKey:
+            mShowMtpInfo = value.toInt();
+            TX_LOG_ARGS("Show MTP info changed to "<< mShowMtpInfo);
             break;
         default :
             TX_LOG_ARGS(" unhandled cenrep key: " << key.key() << 
@@ -274,6 +305,19 @@ void MpSettingsManager::setSongDetailsGb(bool songdetails)
     instance()->mSettingsManager->writeItemValue(
             songDetailsGbProfileKey, 
             songdetails ? 1 : 0);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called to stop showing mtp info.
+ */
+void MpSettingsManager::stopShowingMtpInfo()
+{
+    TX_STATIC_ENTRY_ARGS("preset=" << preset);
+    XQSettingsKey showMtpInfo(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerShowMtpInfoKey);
+    instance()->mSettingsManager->writeItemValue(showMtpInfo, 0);
     TX_EXIT
 }
 

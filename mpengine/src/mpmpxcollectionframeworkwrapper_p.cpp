@@ -1249,10 +1249,9 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
     aMedia.SetTObjectValueL<TMPXGeneralCategory>( KMPXMediaGeneralCategory, EMPXPlaylist );
     aMedia.SetCObjectValueL( KMPXMediaArrayContents, tracksArray );
     aMedia.SetTObjectValueL( KMPXMediaArrayCount, tracksArray->Count() );
-    if ( (tracksArray->Count() ) >= 100){  //Add Songs Progress Dialog for 100 songs or more
-        emit q_ptr->openAddSongsWaitDialog();
-    }
-    
+
+    emit q_ptr->aboutToAddSongs( tracksArray->Count() );
+
     CleanupStack::PopAndDestroy( tracksArray );
     TX_EXIT
 }

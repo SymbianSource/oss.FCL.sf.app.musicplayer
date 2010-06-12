@@ -21,6 +21,9 @@
 #include <hbicon.h>
 #include <hbnamespace.h>
 
+#include <hgwidgets.h>
+
+
 #include "mpcollectiondatamodel.h"
 #include "mpcollectionalbumartmanager.h"
 #include "mpmpxcollectiondata.h"
@@ -65,10 +68,11 @@
  Constructs the collection data model.
  */
 MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent )
-    : QAbstractListModel(parent),
-      mCollectionData(data),
-      mRowCount(0),
-      mAlbumIndexOffset(0)
+    : QAbstractListModel( parent ),
+      mCollectionData( data ),
+      mRowCount( 0 ),
+      mAlbumIndexOffset( 0 ),
+      mHiddenItemIndex( -1 )
 {
     TX_ENTRY
     connect( mCollectionData, SIGNAL(contextChanged(TCollectionContext)), this, SLOT(setContext(TCollectionContext)) );
@@ -242,6 +246,10 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
         }
         returnValue = feedbackIndex;
     }
+    else if ( role == HgWidget::HgVisibilityRole 
+        && context == ECollectionContextAlbumsMediaWall) {
+        returnValue = !( row == mHiddenItemIndex );
+        }
     TX_EXIT
     return returnValue;
 }
@@ -344,6 +352,18 @@ bool MpCollectionDataModel::dropMimeData(const QMimeData *data, Qt::DropAction a
     mRowCount++;
     endInsertRows();
     return true;
+}
+
+/*! 
+ Sets the item visibility, model will report \a visible value as 
+ HgWidget::HgVisibilityRole for the item at \a index. 
+ datachanged() signal is emited when calling this function.
+ Currently this is only used by Media Wall View.
+*/
+void MpCollectionDataModel::setItemVisibility(const QModelIndex &index, bool visible)
+{
+    mHiddenItemIndex = visible ? -1 : index.row();
+    emit dataChanged(index, index);
 }
 
 /*!

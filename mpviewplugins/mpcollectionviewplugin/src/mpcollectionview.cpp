@@ -27,8 +27,6 @@
 #include <hbmenu.h>
 #include <hbmessagebox.h>
 #include <hblabel.h>
-#include <QTranslator>
-#include <QLocale>
 #include <hblistview.h>
 #include <hbscrollbar.h>
 
@@ -49,8 +47,21 @@
 
 
 const char*MUSIC_COLLECTION_DOCML = ":/docml/musiccollection.docml";
-const char*EFFECT_SELECT = ":/effects/select.fxml";
-const char*EFFECT_SELECT_END = ":/effects/select_end.fxml";
+
+const char*CONTAINER_EFFECT_GROUP = "mpcontainer";
+
+const char*SHOW_EFFECT = "show";
+const char*HIDE_EFFECT = "hide";
+const char*SHOW_BACK_EFFECT = "show_back";
+const char*HIDE_BACK_EFFECT = "hide_back";
+
+const char*SHOW_EFFECT_RESOURCE_NAME = "view_show_normal";
+const char*HIDE_EFFECT_RESOURCE_NAME = "view_hide_normal";
+const char*SHOW_BACK_EFFECT_RESOURCE_NAME = "view_show_back";
+const char*HIDE_BACK_EFFECT_RESOURCE_NAME = "view_hide_back";
+
+const char*EFFECT_TARGET_SNAPSHOT = "snapshot";
+const char*EFFECT_TARGET_CONTAINER = "container";
 
 const int KMainToolBarAll = 0;
 const int KMainToolBarArtists = 1;
@@ -99,8 +110,6 @@ MpCollectionView::MpCollectionView()
       mMainToolBar( 0 ),
       mPlaylistToolBar( 0 ),
       mSnapshot( 0 ),
-      mMpTranslator( 0 ),
-      mCommonTranslator( 0 ),
       mActivationWaiting( false ),
       mMpPopupHandler( 0 ),
       mUsbBlocked( false )
@@ -133,8 +142,6 @@ MpCollectionView::~MpCollectionView()
     delete mContainerFactory;
     delete mCollectionDataModel;
     delete mDocumentLoader;
-    delete mMpTranslator;
-    delete mCommonTranslator;
     TX_EXIT
 }
 
@@ -144,25 +151,6 @@ MpCollectionView::~MpCollectionView()
 void MpCollectionView::initializeView()
 {
     TX_ENTRY
-
-    //Load musicplayer and common translators
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
-
-    mCommonTranslator = new QTranslator( this );
-    translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
-    TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mCommonTranslator );
-    }
 
     mWindow = mainWindow();
 
@@ -219,29 +207,12 @@ void MpCollectionView::initializeView()
 
         setWidget( mMainContainer );
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_left.fxml" ),
-                QString( "slide_out_to_left" ) );
+        HbEffect::add(
+            QStringList() << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP,
+            QStringList() << SHOW_EFFECT_RESOURCE_NAME <<  HIDE_EFFECT_RESOURCE_NAME << SHOW_BACK_EFFECT_RESOURCE_NAME << HIDE_BACK_EFFECT_RESOURCE_NAME,
+            QStringList() << SHOW_EFFECT << HIDE_EFFECT << SHOW_BACK_EFFECT << HIDE_BACK_EFFECT);
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_right.fxml" ),
-                QString( "slide_out_to_right" ) );
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_top.fxml" ),
-                QString( "slide_out_to_top" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_right_and_fade_in.fxml" ),
-                QString( "slide_in_to_right_and_fade_in" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_left_and_fade_in.fxml" ),
-                QString( "slide_in_to_left_and_fade_in" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_top_and_fade_in.fxml" ),
-                QString( "slide_in_to_top_and_fade_in" ) );
     }
     else {
         TX_LOG_ARGS( "Error: invalid xml file." );
@@ -262,7 +233,7 @@ void MpCollectionView::initializeView()
 
     if ( MpSettingsManager::firstStartup() ) {
         mActivationWaiting = true;
-        mMpEngine->refreshLibrary();
+        mMpEngine->refreshLibrary( true );
     }
 
     TX_EXIT
@@ -301,8 +272,8 @@ void MpCollectionView::deactivateView()
 {
     TX_ENTRY
     mActivated = false;
-	
-    cancelOngoingOperation();
+
+    closeActiveDialog( true );
 
     setNavigationAction( 0 );
     TX_EXIT
@@ -360,6 +331,10 @@ void MpCollectionView::setContext( TCollectionContext context )
     if ( mActivated ) {
         setSoftkey();
     }
+
+    // Close any possible popup already launched with previous context
+    closeActiveDialog();
+
     updateToolBar();
     updateMenu();
 
@@ -471,9 +446,8 @@ void MpCollectionView::openIndex( int index )
                 break;
         }
     }
-    // TODO: "showingPopup()" used as workaround for HbListView multiple events: longPress and activated.
-    //       Remove once HbListView get fixed (wk16)
-    if ( doOpen && !mMpPopupHandler->showingPopup() ) {
+
+    if ( doOpen ) {
         if ( mCollectionContext == ECollectionContextArtistAlbums ) {
             if ( (mCollectionData->count() > 1) && (index == 0) ) {
                 mMpEngine->openCollectionItem( index );
@@ -515,11 +489,7 @@ void MpCollectionView::findAlbumSongs( int index )
 void MpCollectionView::playAlbumSongs( int albumIndex, int songIndex )
 {
     TX_ENTRY_ARGS( "albumIndex=" << albumIndex << "songIndex=" << songIndex );
-    // TODO: "showingPopup()" used as workaround for HbListView multiple events: longPress and activated.
-    //       Remove once HbListView get fixed (wk16)
-    if ( !mMpPopupHandler->showingPopup() ) {
-        mMpEngine->playAlbumSongs(albumIndex, songIndex);
-    }
+    mMpEngine->playAlbumSongs(albumIndex, songIndex);
     TX_EXIT
 }
 
@@ -613,7 +583,7 @@ void MpCollectionView::attachNowPlayingBanner( bool active )
  */
 void MpCollectionView::containerTransitionComplete( const HbEffect::EffectStatus &status )
 {    
-    if ( status.userData == "snapshot_effect" ) {
+    if ( status.userData == EFFECT_TARGET_SNAPSHOT ) {
         qobject_cast<QGraphicsView *>( mWindow )->scene()->removeItem( mSnapshot );
         mSnapshot->deleteLater();
         mSnapshot = 0;
@@ -637,14 +607,6 @@ void MpCollectionView::shufflePlayAll()
             openIndex( index );
             break;
     }
-}
-
-/*!
- Slot to be called when 'Refresh Library' is clicked by the user from the menu.
- */
-void MpCollectionView::refreshLibrary()
-{
-    mMpEngine->refreshLibrary();
 }
 
 /*!
@@ -777,7 +739,7 @@ void MpCollectionView::handleUsbBlocked( bool blocked )
     TX_ENTRY_ARGS( "blocked=" << blocked );
     mUsbBlocked = blocked;
         
-    cancelOngoingOperation();
+    closeActiveDialog();
     
     updateMenu();
     if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
@@ -792,7 +754,7 @@ void MpCollectionView::handleUsbBlocked( bool blocked )
 void MpCollectionView::handleLibraryAboutToUpdate()
 {
     TX_ENTRY
-    cancelOngoingOperation();
+    closeActiveDialog();
     TX_EXIT
 }
 
@@ -807,7 +769,7 @@ void MpCollectionView::handleLibraryUpdated()
         activateView();
     }
     else {
-        cancelOngoingOperation();
+        closeActiveDialog();
         
         //Update cache, even if collection is in background.
         //Library refreshing could be triggered at any point due USB/MMC events.
@@ -997,7 +959,7 @@ void MpCollectionView::updateMenu()
                 }
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
@@ -1008,7 +970,7 @@ void MpCollectionView::updateMenu()
             case ECollectionContextAlbums:
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );                
                 }
                 else {
                     menuAction->setDisabled( true );
@@ -1081,7 +1043,7 @@ void MpCollectionView::updateMenu()
             case ECollectionContextAlbums:
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
@@ -1221,58 +1183,40 @@ void MpCollectionView::startContainerTransition( TCollectionContext contextFrom,
     mWindow->scene()->addItem( mSnapshot );
 
 
-    if ( ( contextFrom == ECollectionContextAlbums && contextTo == ECollectionContextAlbumsTBone ) ||
-         ( contextFrom == ECollectionContextArtists && contextTo == ECollectionContextArtistAlbums ) ||
-         ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtistAlbumsTBone ) ||
-         ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtistAllSongs ) ||
-         ( contextFrom == ECollectionContextPlaylists && contextTo == ECollectionContextPlaylistSongs ) ) {
-        HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_left" ),
-                this,
-                "containerTransitionComplete",
-                QString( "snapshot_effect") );
-
-        HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_left_and_fade_in" ),
-                this,
-                "containerTransitionComplete",
-                QString( "mainContainer_effect") );
-    }
-    else if( ( contextFrom == ECollectionContextAlbumsTBone && contextTo == ECollectionContextAlbums ) ||
+    if( ( contextFrom == ECollectionContextAlbumsTBone && contextTo == ECollectionContextAlbums ) ||
              ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtists ) ||
              ( contextFrom == ECollectionContextArtistAlbumsTBone && contextTo == ECollectionContextArtistAlbums ) ||
+             ( contextFrom == ECollectionContextArtistAlbumsTBone && contextTo == ECollectionContextArtists ) ||
              ( contextFrom == ECollectionContextArtistAllSongs && contextTo == ECollectionContextArtistAlbums ) ||
              ( contextFrom == ECollectionContextPlaylistSongs && contextTo == ECollectionContextPlaylists ) ) {
         HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_right" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( HIDE_BACK_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "snapshot_effect") );
+                QString( EFFECT_TARGET_SNAPSHOT) );
 
         HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_right_and_fade_in" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( SHOW_BACK_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "mainContainer_effect") );
+                QString( EFFECT_TARGET_CONTAINER) );
     }
     else {
         HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_top" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( HIDE_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "snapshot_effect") );
+                QString( EFFECT_TARGET_SNAPSHOT) );
 
         HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_top_and_fade_in" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( SHOW_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "mainContainer_effect") );
+                QString( EFFECT_TARGET_CONTAINER ) );
     }
 }
 
@@ -1280,11 +1224,9 @@ void MpCollectionView::startContainerTransition( TCollectionContext contextFrom,
  \internal
  Closes any active dialog or menu.
  */
-void MpCollectionView::cancelOngoingOperation()
+void MpCollectionView::closeActiveDialog( bool onlyContextMenu )
 {
-    if ( mActivated ) {
-        mMpPopupHandler->cancelOngoingPopup();
-        menu()->close();
-    }
+    mMpPopupHandler->cancelOngoingPopup( onlyContextMenu );
+    menu()->close();
 }
 

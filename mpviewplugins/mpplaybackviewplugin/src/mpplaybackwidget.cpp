@@ -143,6 +143,7 @@ void MpPlaybackWidget::playbackInfoChanged( )
     mArtistName->setPlainText( mPlaybackData->artist() );
     mAlbumName->setPlainText( mPlaybackData->album() );
     mRealAudioIndicator->setVisible( mPlaybackData->realAudio() );
+    emit signalPlaybackInfoChanged();
     TX_EXIT
 }
 

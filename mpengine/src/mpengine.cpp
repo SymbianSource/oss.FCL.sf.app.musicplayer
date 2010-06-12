@@ -15,12 +15,6 @@
 *
 */
 
-#include <QTranslator>
-#include <QLocale>
-#include <hbmessagebox.h>
-#include <hbprogressdialog.h>
-#include <hbaction.h>
-#include <hbinstance.h>
 #include <xqsharablefile.h>
 #include <EqualizerConstants.h>
 
@@ -34,7 +28,7 @@
 #include "mpmediakeyhandler.h"
 #include "mptrace.h"
 #include "mpsettingsmanager.h"
-#include "mpprogressdialoghandler.h"
+#include "mpsongscanner.h"
 
 /*!
     \class MpEngine
@@ -51,87 +45,61 @@
 */
 
 /*!
-    \fn void scanStarted()
+    \fn void libraryAboutToUpdate()
 
-    This signal is emitted when scan operation is started.
-
- */
-
-/*!
-    \fn void scanEnded()
-
-    This signal is emitted when scan operation ends.
-
- */
-
-/*!
-    \fn void scanCountChanged( int count )
-
-    This signal is emitted when scan count is updated.
+    This signal is emitted when a scan operation has been requested or
+    when MTP synchronization starts.
 
  */
 
 /*!
     \fn void libraryUpdated()
 
-    This signal is emitted when MpSongScannerHelper ends scanning,
-    or USB-MTP Synchronization finishes.
+    This signal is emitted when library has changed.
+    
+    \sa handleScanEnded()
+    \sa handleDiskEvent()
+    \sa handleUsbMtpEndEvent()
 
  */
 
 /*!
-    \fn void formatStarted()
+    \fn void usbBlocked( bool blocked )
 
-    This signal is emitted when EMcMsgFormatStart is received from MPXCollectionUtility.
-
- */
-
-/*!
-    \fn void formatEnded()
-
-    This signal is emitted when EMcMsgFormatEnd is received from MPXCollectionUtility.
+    This signal is emitted to update the usb blocking state
+    due a previous usb event received.
+    
+    \sa handleUsbEvent()
 
  */
 
 /*!
-    \fn void diskRemoved()
+    \fn void unableToCotinueDueUSB()
 
-    This signal is emitted when EMcMsgDiskRemoved is received from MPXCollectionUtility.
-
- */
-
-/*!
-    \fn void diskInserted()
-
-    This signal is emitted when EMcMsgDiskInserted is received from MPXCollectionUtility.
+    This signal is emitted if usb blocking verification returns true.
+    
+    \sa verifyUsbBlocking()
 
  */
 
 /*!
-    \fn void usbMassStorageStarted()
+    \fn void usbSynchronizationStarted()
 
-    This signal is emitted when EMcMsgUSBMassStorageStart is received from MPXCollectionUtility.
-
- */
-
-/*!
-    \fn void usbMassStorageEnded()
-
-    This signal is emitted when EMcMsgUSBMassStorageEnd is received from MPXCollectionUtility.
+    This signal is emitted when usb is connected in MassStorage mode or MTP mode and synchronizing.
 
  */
 
 /*!
-    \fn void usbMtpStarted()
+    \fn void usbSynchronizationFinished()
 
-    This signal is emitted when EMcMsgUSBMtpStart is received from MPXCollectionUtility.
+    This signal is emitted when usb in synchronizing state is disconnected.
 
  */
 
 /*!
-    \fn void usbMtpEnded()
+    \fn void libraryRefreshNeeded()
 
-    This signal is emitted when EMcMsgUSBMtpEnd is received from MPXCollectionUtility.
+    This signal is emitted when usb in MassStorage mode is disconnected.
 
  */
 
@@ -155,6 +123,24 @@
 
     This signal is emitted when playlist save operation is completed, it 
     indicates the operation \a success .
+
+ */
+
+/*!
+    \fn void aboutToAddSongs( int count )
+
+    Signal emitted up on a notification from MPX Collection wrapper, 
+    when play list is prepared and about to be added.
+    \a count Indicates number of songs to be added.
+
+ */
+
+/*!
+    \fn void deleteStarted(TCollectionContext context, int Count)
+
+    This signal is emitted when song delete operation has started.
+    \a context The context where delete operation is taking place.
+    \a Count Number of items to delete.
 
  */
 
@@ -194,18 +180,16 @@
  */
 MpEngine::MpEngine()
     : mMpxHarvesterWrapper(0),
+      mSongScanner(0),
       mMediaKeyHandler(0),
-      mUsbOutstandingNote(0),
       mMpxCollectionWrapper(0),
       mMpxPlaybackWrapper(0),
       mMpxDetailsWrapper(0),
       mAudioEffectsWrapper(0),
       mEqualizerWrapper(0),
       mCurrentPresetIndex(KEqualizerPresetNone),
-      mMpTranslator(0),
       mUsbBlockingState(USB_NotConnected),
-      mPreviousUsbState(USB_NotConnected),
-      mProgressDialogHandler(0)
+      mPreviousUsbState(USB_NotConnected)
 {
     TX_LOG
 }
@@ -216,16 +200,14 @@ MpEngine::MpEngine()
 MpEngine::~MpEngine()
 {
     TX_ENTRY
-    delete mMpTranslator;
     delete mMediaKeyHandler;
-    delete mUsbOutstandingNote;
     delete mMpxPlaybackWrapper;
     delete mMpxDetailsWrapper;
     delete mMpxHarvesterWrapper;
     delete mMpxCollectionWrapper;
     delete mAudioEffectsWrapper;
     delete mEqualizerWrapper;
-	delete mProgressDialogHandler;
+    delete mSongScanner;
     TX_EXIT
 }
 
@@ -236,18 +218,6 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 {
     TX_ENTRY
     mHostUid = hostUid;
-    
-    //Load musicplayer translator
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
 
     if( mode == StandAlone || mode == Fetch ){
         // Harvesting Wrapper
@@ -261,10 +231,10 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
                  this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
         qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
         connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ), 
-                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );       
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );
         mMediaKeyHandler = new MpMediaKeyHandler();
     }
-        
+
     if ( mode == StandAlone || mode == Fetch || mode == MediaBrowsing) {
         
         // Collection Wrapper
@@ -277,11 +247,10 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
                 this, SIGNAL( collectionPlaylistOpened() ),
                 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( aboutToAddSongs( int ) ),
+                this, SIGNAL( aboutToAddSongs( int ) ) );
         connect( mMpxCollectionWrapper, SIGNAL( playlistSaved( bool ) ),
                 this, SIGNAL( playlistSaved( bool ) ),
-                Qt::QueuedConnection );
-        connect( mMpxCollectionWrapper, SIGNAL( songsDeleted( bool ) ),
-                this, SIGNAL( songsDeleted( bool ) ),
                 Qt::QueuedConnection );
         connect( mMpxCollectionWrapper, SIGNAL( playlistsRenamed( bool ) ),
                 this, SIGNAL( playlistsRenamed( bool ) ),
@@ -292,14 +261,13 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         connect( mMpxCollectionWrapper, SIGNAL( containerContentsChanged() ),
                 this, SIGNAL( containerContentsChanged() ),
                 Qt::QueuedConnection );
-        connect( mProgressDialogHandler, SIGNAL( deleteStarted() ), 
-               this, SLOT( handleDeleteStarted() ),
-               Qt::QueuedConnection );
-       connect( mProgressDialogHandler, SIGNAL( songsDeleted( bool ) ),
-               this, SLOT( handleDeleteEnded( bool ) ),
-               Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( deleteStarted( TCollectionContext, int ) ),
+                this, SLOT( handleDeleteStarted( TCollectionContext, int ) ) );
+        connect( mMpxCollectionWrapper, SIGNAL( songsDeleted( bool ) ),
+                this, SLOT( handleDeleteEnded( bool ) ),
+                Qt::QueuedConnection );
     }
-    
+
     if( mode == StandAlone ){
         // Equalizer wrapper , this needs to be created before playback wrapper.
         mEqualizerWrapper = new MpEqualizerFrameworkWrapper();
@@ -319,10 +287,7 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         // AudioEffects wrapper
         mAudioEffectsWrapper = new MpAudioEffectsFrameworkWrapper();
     }
-    if (mMpxHarvesterWrapper && mMpxCollectionWrapper){
-        mProgressDialogHandler = new MpProgressDialogHandler(mMpxCollectionWrapper, mMpxHarvesterWrapper);
-    }
-	TX_EXIT
+    TX_EXIT
 }
 
 /*!
@@ -336,18 +301,14 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
  Used to verify if an action can be executed depending on USB blocking state.
  If not, a notification note might be displayed.
  */
-bool MpEngine::verifyUsbBlocking( bool showMessage )
+bool MpEngine::verifyUsbBlocking( bool notify )
 {
     TX_ENTRY
     bool result( false );
     if ( mUsbBlockingState == USB_Connected ) {
         result = true;
-        if ( showMessage ) {
-            HbMessageBox *dialog = new HbMessageBox( HbMessageBox::MessageTypeInformation );
-            dialog->setText( hbTrId( "txt_mus_info_usb_conn_in_progress" ) );
-            dialog->setModal( true );
-            setOutstandingPopup( dialog );
-            mUsbOutstandingNote->show();;
+        if ( notify ) {
+            emit unableToCotinueDueUSB();
         }
     }
     TX_EXIT
@@ -366,15 +327,26 @@ void MpEngine::checkForSystemEvents()
 }
 
 /*!
+ \
+ Returs the current songScanner instance
+ */
+MpSongScanner *MpEngine::songScanner()
+{
+    return mSongScanner;
+}
+/*!
  Slot to be called to start Refresh library process.
  If scanning is already ongoing, this request is ignored.
  */
-void MpEngine::refreshLibrary()
+void MpEngine::refreshLibrary( bool automaticRequest )
 {
     TX_ENTRY
     if ( !verifyUsbBlocking( true ) ) {
+        if ( !mSongScanner ) {
+            mSongScanner = new MpSongScanner( mMpxHarvesterWrapper );
+        }
         emit libraryAboutToUpdate();
-        mProgressDialogHandler->scan();
+        mSongScanner->scan( automaticRequest );
     }
     TX_EXIT
 }
@@ -420,7 +392,7 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
             break;
         case DiskInserted:
             if ( mUsbBlockingState == USB_NotConnected ) {
-                refreshLibrary();
+                refreshLibrary( true );
             }
             else if ( mUsbBlockingState == USB_Connected ) {
                 emit libraryUpdated();
@@ -460,16 +432,6 @@ void MpEngine::handleUsbEvent( MpxUsbEvents event )
 }
 
 /*!
- Slot to be called when mUsbOutstandingNote is about to close.
- */
-void MpEngine::handleOutstandingNoteClosing()
-{
-    TX_ENTRY
-    mUsbOutstandingNote = 0;
-    TX_EXIT
-}
-
-/*!
  To be called when EMcMsgUSBMassStorageStart event is received.
  */
 void MpEngine::handleUsbMassStorageStartEvent()
@@ -479,9 +441,8 @@ void MpEngine::handleUsbMassStorageStartEvent()
 
     changeUsbBlockingState( USB_Synchronizing );
     emit usbBlocked(true);
-    
-    launchBlockingNote();
-    
+    emit usbSynchronizationStarted();
+
     TX_EXIT
 }
 
@@ -491,24 +452,13 @@ void MpEngine::handleUsbMassStorageStartEvent()
 void MpEngine::handleUsbMassStorageEndEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);    
+    mMediaKeyHandler->setEnabled(true);
 
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
+    emit usbSynchronizationFinished();
+    emit libraryRefreshNeeded();
 
-    HbAction *action;
-    HbMessageBox *promptRefresh = new HbMessageBox( HbMessageBox::MessageTypeQuestion );
-    promptRefresh->setText( hbTrId( "txt_mus_info_music_may_need_to_be_refreshed" ) );
-    promptRefresh->setTimeout( HbPopup::NoTimeout );
-    promptRefresh->setModal( true );
-    promptRefresh->clearActions();
-    action = new HbAction( hbTrId( "txt_common_button_yes" ) );
-    connect( action, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
-    promptRefresh->addAction( action );
-    action = new HbAction( hbTrId( "txt_common_button_no" ) );
-    promptRefresh->addAction( action );
-    setOutstandingPopup( promptRefresh );
-    mUsbOutstandingNote->show();
     TX_EXIT
 }
 
@@ -526,7 +476,7 @@ void MpEngine::handleUsbMtpStartEvent()
     //Cancel any ongoing operation.
     emit libraryAboutToUpdate();
     
-    launchBlockingNote();
+    emit usbSynchronizationStarted();
     
     TX_EXIT
 }
@@ -537,15 +487,13 @@ void MpEngine::handleUsbMtpStartEvent()
 void MpEngine::handleUsbMtpEndEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);    
+    mMediaKeyHandler->setEnabled(true);
 
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
-    
-    if ( mUsbOutstandingNote ) {
-        mUsbOutstandingNote->close();
-    }
+
     if ( mPreviousUsbState == USB_Synchronizing ) {
+        emit usbSynchronizationFinished();
         emit libraryUpdated();
     }
     TX_EXIT
@@ -571,48 +519,6 @@ void MpEngine::changeUsbBlockingState( UsbBlockingState state )
     TX_ENTRY
     mPreviousUsbState = mUsbBlockingState;
     mUsbBlockingState = state;
-    TX_EXIT
-}
-
-/*!
- Internal
- Used to launch the usb blocking note
- */
-void MpEngine::launchBlockingNote()
-{
-    TX_ENTRY
-
-    HbProgressDialog *usbBlockingNote = new HbProgressDialog( HbProgressDialog::WaitDialog );
-    usbBlockingNote->setModal( true );
-    if ( usbBlockingNote->actions().count() ) {
-        //Hide cancel action.
-        usbBlockingNote->actions().at( 0 )->setVisible( false );
-    }
-    usbBlockingNote->setDismissPolicy( HbPopup::NoDismiss );
-    usbBlockingNote->setText( hbTrId( "txt_mus_info_usb_conn_in_progress" ) );
-    setOutstandingPopup( usbBlockingNote );
-    mUsbOutstandingNote->show();
-
-    TX_EXIT
-}
-
-/*!
- \internal
- sets \a popup as the current outstanding popup and cancels any other active popup.
- */
-void MpEngine::setOutstandingPopup( HbPopup *popup )
-{
-    TX_ENTRY
-    //Close previous popup (Normally blocking usb note)
-    if ( mUsbOutstandingNote ) {
-        disconnect( mUsbOutstandingNote, SIGNAL( aboutToClose() ), this, SLOT( handleOutstandingNoteClosing() ) );
-        mUsbOutstandingNote->close();
-    }
-
-    //Set new outstanding popup
-    popup->setAttribute( Qt::WA_DeleteOnClose );
-    connect( popup, SIGNAL( aboutToClose() ), this, SLOT( handleOutstandingNoteClosing() ) );
-    mUsbOutstandingNote = popup;
     TX_EXIT
 }
 
@@ -717,7 +623,7 @@ void MpEngine::renamePlaylist( QString &newName )
 void MpEngine::deleteSongs( QList<int> &selection )
 {
     if ( !verifyUsbBlocking( true ) ) {
-        mProgressDialogHandler->deleteSongs( selection );
+        mMpxCollectionWrapper->deleteSongs( selection );
     }
 }
 
@@ -793,6 +699,38 @@ void MpEngine::reopenCollection()
 void MpEngine::reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal )
 {
     mMpxCollectionWrapper->reorderPlaylist( playlistId, songId, originalOrdinal, newOrdinal );
+}
+
+/*!
+ Slot to be called when song deleting starts.
+ */
+void MpEngine::handleDeleteStarted( TCollectionContext context, int count )
+{
+    TX_ENTRY
+    mMediaKeyHandler->setEnabled( false );
+    emit deleteStarted( context, count );
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when song deleting ends.
+ */
+void MpEngine::handleDeleteEnded( bool success )
+{
+    TX_ENTRY
+    mMediaKeyHandler->setEnabled(true);
+    emit songsDeleted( success );
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when song deleting ends.
+ */
+void MpEngine::cancelCollectionRequest()
+{
+    TX_ENTRY
+    mMpxCollectionWrapper->cancelRequest();
+    TX_EXIT
 }
 
 /*!
@@ -1046,24 +984,6 @@ void MpEngine::handleEqualizerReady()
     mCurrentPresetIndex++;
     emit equalizerReady();
     
-    TX_EXIT
-}
-
-/*!
- Slot to be called when song deleting starts.
- */
-void MpEngine::handleDeleteStarted() {
-    TX_ENTRY
-    mMediaKeyHandler->setEnabled(false);
-    TX_EXIT
-}
-
-/*!
- Slot to be called when song deleting ends.
- */
-void MpEngine::handleDeleteEnded() {
-    TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);
     TX_EXIT
 }
 

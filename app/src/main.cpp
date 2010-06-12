@@ -17,6 +17,7 @@
 
 #include <QtGui>
 #include <hbapplication.h>
+#include <hbtranslator.h>
 
 #include "mpmainwindow.h"
 #include "mptrace.h"
@@ -53,6 +54,8 @@ int main(int argc, char *argv[])
     // Initialization
     HbApplication app(argc, argv);
     QVariantHash params = app.activateParams();
+    HbTranslator translator;
+    translator.loadCommon();
     MpMainWindow::ActivityMode mode;
     
     if ( !params.value( "activityname" ).toString().compare( "MusicNowPlayingView" ) ) { 
@@ -74,12 +77,12 @@ int main(int argc, char *argv[])
     mainWindow.viewport()->grabGesture(Qt::PanGesture);
     mainWindow.viewport()->grabGesture(Qt::TapGesture);
     mainWindow.viewport()->grabGesture(Qt::TapAndHoldGesture);
-    mainWindow.setOptimizationFlag(QGraphicsView::DontSavePainterState);
     mainWindow.initialize( mode );
     mainWindow.show();
 
     // Enter event loop
     TX_EXIT
-	return app.exec();
-    
+    return app.exec();
+
 }
+

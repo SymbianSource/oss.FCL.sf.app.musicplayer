@@ -39,7 +39,6 @@ class MpMpxCollectionData;
 class MpNowPlayingWidget;
 class MpSnapshotWidget;
 class MpCollectionPopupHandler;
-class QTranslator;
 
 class MpCollectionView : public MpViewBase
 {
@@ -84,7 +83,6 @@ public slots:
     void containerTransitionComplete( const HbEffect::EffectStatus &status );
 
     void shufflePlayAll();
-    void refreshLibrary();
     void addToPlaylist();
     void deleteSongs();
     void renameCurrentPlaylistContainer();
@@ -119,7 +117,7 @@ private:
     void setBannerVisibility( bool visible );
     int generateShuffleIndex();
     void startContainerTransition( TCollectionContext contextFrom, TCollectionContext contextTo );
-    void cancelOngoingOperation();
+    void closeActiveDialog( bool onlyContextMenu = false );
 
 private:
 
@@ -149,9 +147,6 @@ private:
     HbToolBar                       *mPlaylistToolBar;
 
     MpSnapshotWidget                *mSnapshot;
-
-    QTranslator                     *mMpTranslator;         // Own
-    QTranslator                     *mCommonTranslator;     // Own
 
     bool                            mActivationWaiting;
     MpCollectionPopupHandler        *mMpPopupHandler;       // Own

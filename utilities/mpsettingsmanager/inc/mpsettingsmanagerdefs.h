@@ -26,7 +26,9 @@
     const qint32 KMPCenRepSettingPresetIdKey         = {0x00000004};
     const qint32 KMPCenRepSettingRamdiskEnabled      = {0x00000005};
     const qint32 KMPCenRepSettingRamdiskMaxDiskSpace = {0x00000006};
-	const qint32 KMPCenRepSettingInspireMeKey        = {0x00000007};
-	const qint32 KMPCenRepSettingSongDetailsGBKey    = {0x00000008};
-	
+    const qint32 KMPCenRepSettingInspireMeKey        = {0x00000007};
+    const qint32 KMPCenRepSettingSongDetailsGBKey    = {0x00000008};
+    const qint32 KMusicPlayerShowMtpInfoKey          = {0x00000009};
+    const qint32 KMusicPlayerMtpInfoUrlKey           = {0x0000000A};
+
 #endif	// MPSETTINGSMANAGERDEFS_H

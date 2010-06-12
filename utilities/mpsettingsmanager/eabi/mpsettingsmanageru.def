@@ -29,4 +29,7 @@ EXPORTS
 	_ZN17MpSettingsManager13songDetailsGbEv @ 28 NONAME
 	_ZN17MpSettingsManager16setSongDetailsGbEb @ 29 NONAME
 	_ZN17MpSettingsManager20SongDetailsGbChangedEb @ 30 NONAME
+	_ZN17MpSettingsManager10mtpInfoUrlEv @ 31 NONAME
+	_ZN17MpSettingsManager11showMtpInfoEv @ 32 NONAME
+	_ZN17MpSettingsManager18stopShowingMtpInfoEv @ 33 NONAME
 

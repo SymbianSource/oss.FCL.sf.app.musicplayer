@@ -273,13 +273,18 @@ EXPORT_C void CMPXDbManager::CopyDBsToRamL( TBool aIsMTPInUse )
         TInt count(iDatabaseHandles.Count());
         for ( TInt i = 0; i < count ; ++i )
             {
+            if ( ! iDatabaseHandles[i].iOpen )
+                {
+                MPX_DEBUG1("CMPXDbManager::CopyDBsToRamL DB not open (assuming drive is not present)");
+                continue;
+                }
             if ( iDatabaseHandles[i].iUseRAMdb )
                 {
                 // already used
                 MPX_DEBUG1("CMPXDbManager::CopyDBsToRamL iUseRAMdb already ETrue");
                 continue;
                 }
-            CloseDatabaseAtIndexL( i ); // let leave: not much we can't do if we can't close the original DB
+            CloseDatabaseAtIndexL( i ); // let leave: not much we can do if we can't close the original DB
             DoCopyDBToRam( i, aIsMTPInUse ); // copies if it can
             TRAPD( err, OpenDatabaseAtIndexL( i ) );
             if ( err != KErrNone )
@@ -2018,12 +2023,7 @@ EXPORT_C void CMPXDbManager::CheckDiskSpaceL(
         User::Leave(KErrNotReady);
         }
     
-#ifndef __RAMDISK_PERF_ENABLE 
-    
     EnsureDiskSpaceL(aDrive);
-    
-#endif //__RAMDISK_PERF_ENABLE
-
     }
     
 // ----------------------------------------------------------------------------
@@ -2863,19 +2863,24 @@ void CMPXDbManager::EnsureDiskSpaceL(TInt aDrive)
     TInt count(iDatabaseHandles.Count());
     for (TInt i = 0; i < count; ++i)
         {
+        DatabaseHandle& database = iDatabaseHandles[i];
         if (((KDbManagerAllDrives == aDrive) ||
-            (aDrive == iDatabaseHandles[i].iDrive)) &&
-            iDatabaseHandles[i].iOpen)
+            (aDrive == database.iDrive)) &&
+            database.iOpen
+#ifdef __RAMDISK_PERF_ENABLE
+            && !database.iUseRAMdb
+#endif
+            )
             {
             if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0,
-                iDatabaseHandles[i].iDrive))
+                database.iDrive))
                 {
                 MPX_DEBUG1("CMPXDbManager::EnsureDiskSpaceL Error diskspace full");
                 User::Leave(KErrDiskFull);
                 }
             }
 
-        if (aDrive == iDatabaseHandles[i].iDrive)
+        if (aDrive == database.iDrive)
             {
             // exit if just one drive to check
             break;

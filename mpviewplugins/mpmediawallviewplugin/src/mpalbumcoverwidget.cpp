@@ -17,19 +17,42 @@
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 
-#include <hbinstantfeedback.h>
 
 #include "mpalbumcoverwidget.h"
+#include "mpreflectioneffect.h"
 
+/*!
+    \class MpAlbumCoverWidget
+    \brief Album Cover Widget.
+
+    This widget provides upscaled rendering of images and SVG rendering.
+    Also there is a reflection effect.
+*/
+
+/*!
+    \fn void clicked( )
+
+    This signal is emitted when the item is clicked.
+ */
 
 /*!
     Constructs the album cover widget
  */
 MpAlbumCoverWidget::MpAlbumCoverWidget( QGraphicsItem *parent ) : 
-    QGraphicsWidget( parent )
+    HbWidget( parent )
 {
+    setFlag( QGraphicsItem::ItemHasNoContents, false );
     grabGesture(Qt::TapGesture);
-    grabGesture(Qt::SwipeGesture);
+        
+    MpReflectionEffect *effect = new MpReflectionEffect(this);
+    setGraphicsEffect(effect);
+}
+
+/*!
+ Destructs the album cover widget.
+ */
+MpAlbumCoverWidget::~MpAlbumCoverWidget()
+{
 }
 
 /*!
@@ -58,7 +81,6 @@ void MpAlbumCoverWidget::paint( QPainter *painter, const QStyleOptionGraphicsIte
 {
     Q_UNUSED( widget )
     Q_UNUSED( option )
-    //TODO: add a function to set default album art ,and use default when qicon is NULL,
     if ( !mIcon.isNull() ) {
         if ( mPixmap.isNull() ) {
             mPixmap = mIcon.qicon().pixmap( size().toSize() );
@@ -79,7 +101,6 @@ void MpAlbumCoverWidget::paint( QPainter *painter, const QStyleOptionGraphicsIte
 void MpAlbumCoverWidget::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( event->button() == Qt::LeftButton ) {
-        HbInstantFeedback::play( HbFeedback::Basic );
         event->accept();
     }
     else {
@@ -99,6 +120,17 @@ void MpAlbumCoverWidget::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
     else {
         event->ignore();
     }
+}
+
+/*!
+    \reimp
+ */
+void MpAlbumCoverWidget::gestureEvent(QGestureEvent *event)
+{
+    QGesture* gesture = event->gesture(Qt::TapGesture);
+    if (gesture) {
+         event->accept(Qt::TapGesture);
+    }    
 }
 
 //EOF

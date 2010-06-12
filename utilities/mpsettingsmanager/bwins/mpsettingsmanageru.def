@@ -29,4 +29,7 @@ EXPORTS
 	?setSongDetailsGb@MpSettingsManager@@SAX_N@Z @ 28 NONAME ; void MpSettingsManager::setSongDetailsGb(bool)
 	?SongDetailsGbChanged@MpSettingsManager@@IAEX_N@Z @ 29 NONAME ; void MpSettingsManager::SongDetailsGbChanged(bool)
 	?songDetailsGb@MpSettingsManager@@SA_NXZ @ 30 NONAME ; bool MpSettingsManager::songDetailsGb(void)
+	?mtpInfoUrl@MpSettingsManager@@SA?AVQString@@XZ @ 31 NONAME ; class QString MpSettingsManager::mtpInfoUrl(void)
+	?showMtpInfo@MpSettingsManager@@SA_NXZ @ 32 NONAME ; bool MpSettingsManager::showMtpInfo(void)
+	?stopShowingMtpInfo@MpSettingsManager@@SAXXZ @ 33 NONAME ; void MpSettingsManager::stopShowingMtpInfo(void)
 

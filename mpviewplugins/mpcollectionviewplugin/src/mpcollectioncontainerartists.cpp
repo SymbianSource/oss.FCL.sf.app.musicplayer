@@ -383,7 +383,7 @@ void MpCollectionContainerArtists::setupContainer()
                 }
                 widget = mDocumentLoader->findWidget(QString("artistAlbumWall"));
                 mTBone = qobject_cast<HgMediawall*>(widget);
-                HbIcon defaultIcon( "qtg_large_music_album" );
+                HbIcon defaultIcon( "qtg_large_album_art" );
                 defaultIcon.setSize(mTBone->itemSize());
                 mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
                 mTBone->setTitleFontSpec( HbFontSpec(HbFontSpec::Primary) );

@@ -43,6 +43,7 @@ public:
 signals:
 
     void setPlaybackPosition( int value );
+    void signalPlaybackInfoChanged();
 
 public slots:
 

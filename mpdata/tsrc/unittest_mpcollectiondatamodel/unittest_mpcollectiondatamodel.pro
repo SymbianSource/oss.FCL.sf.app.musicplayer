@@ -25,6 +25,7 @@ INCLUDEPATH += . \
     ../../inc \
     ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
 LIBS += -lestor.dll \
         -lfbscli.dll

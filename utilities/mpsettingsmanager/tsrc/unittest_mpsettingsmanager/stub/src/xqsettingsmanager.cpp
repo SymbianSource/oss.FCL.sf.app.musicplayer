@@ -38,15 +38,24 @@ internal
 */
 QVariant XQSettingsManager::readItemValue(const XQSettingsKey& key, XQSettingsManager::Type type)
 {
-    Q_UNUSED(type);
+
     if ( mReadCount.contains( key.key() ) ) {
         mReadCount.insert(key.key(),  mReadCount.take ( key.key() ) + 1 ); 
     }
     else {
         mReadCount.insert(key.key(), 1); 
     }
-    // 1 seems compatible for int and bool keys, change it if new key types are added.
-    return QVariant(1);
+    
+    QVariant result;
+    switch ( type ) {
+        case TypeString :
+            result = QString("testText") ;
+            break;
+        default:
+            result = int(1);
+            break;
+    }
+    return result;
 }
 
 /*!

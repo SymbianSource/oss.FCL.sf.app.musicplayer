@@ -19,6 +19,7 @@
 #define MPCOLLECTIONDATAMODEL_H
 
 #include <QAbstractListModel>
+
 #include "mpmpxcollectionviewdefs.h"
 
 class MpMpxCollectionData;
@@ -47,6 +48,7 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const;
     bool dropMimeData(const QMimeData *data, Qt::DropAction action,
                               int row, int column, const QModelIndex &parent);
+    void setItemVisibility(const QModelIndex &index, bool visible);
     
     MpMpxCollectionData *collectionData();
     
@@ -68,6 +70,7 @@ private:
     MpCollectionAlbumArtManager     *mAlbumArtManager;      // Own
     int                             mRowCount;
     int                             mAlbumIndexOffset;
+    int                             mHiddenItemIndex;
 
 };
 

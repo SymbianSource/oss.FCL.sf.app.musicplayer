@@ -24,14 +24,13 @@
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
 #include <xqsharablefile.h>
-#include <QTranslator>
-#include <QLocale>
 
 #include "mpmainwindow.h"
 #include "mpviewbase.h"
 #include "musicservices.h"
 #include "mpenginefactory.h"
 #include "mpsettingsmanager.h"
+#include "mpglobalpopuphandler.h"
 #include "mptrace.h"
 
 /*!
@@ -55,7 +54,8 @@ MpMainWindow::MpMainWindow()
       mMediaWallViewPlugin(0),
       mCurrentViewPlugin(0),
       mVerticalViewType( CollectionView ),
-      mMusicServices(0)
+      mMusicServices(0),
+      mPopupHandler(0)
 {
     TX_LOG
 }
@@ -104,18 +104,6 @@ void MpMainWindow::initialize( ActivityMode mode )
 {
     TX_ENTRY
 
-    //Load musicplayer translator
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = QString("z:/resource/qt/translations/");
-
-    bool translatorLoaded = false;
-    translatorLoaded = translator.load(path + "musicplayer_" + lang);
-    TX_LOG_ARGS("Loading musicplayer translator ok=" << translatorLoaded);
-    if ( translatorLoaded ) {
-        qApp->installTranslator( &translator );
-    }
-
 #ifdef _DEBUG
     QList<XQPluginInfo> impls;
     XQPluginLoader::listImplementations("org.nokia.mmdt.MpxViewPlugin/1.0", impls);
@@ -136,6 +124,7 @@ void MpMainWindow::initialize( ActivityMode mode )
 
     if ( !mMusicServices ) {
         MpEngineFactory::createSharedEngine();
+        mPopupHandler = new MpGlobalPopupHandler( this );
         if ( orientation() == Qt::Vertical ) {
             // If first startup ignore shuffleAll and send to collection view to refresh library
             if ( mode == MusicMainView  || MpSettingsManager::firstStartup() ) {
@@ -174,6 +163,10 @@ void MpMainWindow::initialize( ActivityMode mode )
     else {
         setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
     }
+    //since we only have one landscape view, media wall, disable automatic 
+    //orientation transitions, they look like a flicker.
+    //This will make the view switch faster.
+    setAutomaticOrientationEffectEnabled( false );    
     TX_EXIT
 }
 
@@ -340,6 +333,7 @@ void MpMainWindow::initializeServiceView( TUid hostUid )
     case MusicServices::EUriFetcher:
         {
             MpEngineFactory::createSharedEngine( hostUid , MpEngine::Fetch );
+            mPopupHandler = new MpGlobalPopupHandler( this );
             loadView( CollectionView, MpCommon::FetchView );
             MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
             connect(collectionView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));

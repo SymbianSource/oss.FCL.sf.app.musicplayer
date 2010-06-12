@@ -18,8 +18,6 @@
 #include <hbmainwindow.h>
 #include <hbaction.h>
 #include <hbapplication.h>
-#include <QTranslator>
-#include <QLocale>
 
 #include "mpsettingsview.h"
 #include "mpsettingsaudioeffectswidget.h"
@@ -67,19 +65,6 @@ MpSettingsView::~MpSettingsView()
 void MpSettingsView::initializeView()
 {
     TX_ENTRY
-
-    //Load musicplayer translator
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = QString("z:/resource/qt/translations/");
-
-    bool translatorLoaded = false;
-    translatorLoaded = translator.load(path + "musicplayer_" + lang);
-    TX_LOG_ARGS("Loading musicplayer translator ok=" << translatorLoaded);
-    if ( translatorLoaded ) {
-        qApp->installTranslator( &translator );
-
-    }
 
     mWindow = mainWindow();
     mSoftKeyBack = new HbAction(Hb::BackNaviAction, this);

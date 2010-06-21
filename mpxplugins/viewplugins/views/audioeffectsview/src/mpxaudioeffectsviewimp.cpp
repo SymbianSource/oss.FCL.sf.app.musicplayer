@@ -24,7 +24,9 @@
 #include <hlplch.h>
 #include <data_caging_path_literals.hrh>
 #include <avkon.rsg>
+#include <akntitle.h>
 #include <mpxuser.h>
+#include <mpxmusicplayerviewplugin.hrh>
 
 #include <mpxplaybackutility.h>
 #include <mpxaudioeffectsview.rsg>
@@ -39,7 +41,7 @@
 
 // CONSTANTS
 _LIT( KMPXAudioEffectsRscPath, "mpxaudioeffectsview.rsc" );
-
+_LIT(KEmptyTitle, " ");
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -74,6 +76,8 @@ void CMPXAudioEffectsViewImp::ConstructL()
     iModel = CMPXAudioEffectsModel::NewL( *iPlaybackUtility );
         
     iViewUtility = MMPXViewUtility::UtilityL();
+    iViewUtility->AddObserverL(this);
+    iGoPreviousView = EFalse;
     }
 
 // ---------------------------------------------------------------------------
@@ -119,6 +123,7 @@ CMPXAudioEffectsViewImp::~CMPXAudioEffectsViewImp()
 
     if ( iViewUtility )
         {
+		iViewUtility->RemoveObserver( this );
         iViewUtility->Close();
         }
 
@@ -170,6 +175,7 @@ void CMPXAudioEffectsViewImp::HandleCommandL( TInt aCommand )
             }
         case EAknSoftkeyBack:
             {
+            iGoPreviousView = ETrue;
             iViewUtility->ActivatePreviousViewL();
             break;
             }
@@ -205,6 +211,51 @@ void CMPXAudioEffectsViewImp::DoActivateL(
     }
 
 // -----------------------------------------------------------------------------
+// CMPXAudioEffectsViewImp::HandleViewActivation
+// Handle view activation
+// -----------------------------------------------------------------------------
+//
+void CMPXAudioEffectsViewImp::HandleViewActivation(
+    const TUid& aCurrentViewType,
+    const TUid& /*aPreviousViewType*/ )
+    {
+    MPX_FUNC( "CMPXAudioEffectsViewImp::HandleViewActivation" );
+    if ( ( aCurrentViewType.iUid == KMPXPluginTypePlaybackUid ) && ( iGoPreviousView == EFalse ) )
+        {
+		// It is view switching when launched from other applications
+		// deactivate this view to avoid flickering 
+		// since this view is the current active view, it receives this event
+    
+        if ( iContainer )
+            {      
+            // set title to blank to avoid title flickering
+            CAknTitlePane* title( static_cast<CAknTitlePane*>
+                ( StatusPane()->ControlL( TUid::Uid( EEikStatusPaneUidTitle ))));
+            if ( title )
+                {
+                title->SetTextL(KEmptyTitle); 
+                title->DrawNow();
+                }
+            }
+        
+        DoDeactivate();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CMPXAudioEffectsViewImp::HandleViewUpdate
+// -----------------------------------------------------------------------------
+//
+void CMPXAudioEffectsViewImp::HandleViewUpdate(
+    TUid /* aViewUid */,
+    MMPXViewActivationObserver::TViewUpdateEvent /* aUpdateEvent */,
+    TBool /* aLoaded */,
+    TInt /* aData */)
+    {
+    // Do nothing, this should be handled by the AppUI
+    }
+
+// -----------------------------------------------------------------------------
 // CMPXAudioEffectsViewImp::DoDeactivate
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
@@ -216,6 +267,7 @@ void CMPXAudioEffectsViewImp::DoDeactivate()
         AppUi()->RemoveFromStack( iContainer );
         delete iContainer;
         iContainer = NULL;
+        iGoPreviousView = EFalse;
         }
     }
 

@@ -162,7 +162,8 @@ CMPXCollectionViewHgContainer::CMPXCollectionViewHgContainer(
 	iShuffleItem(0),
 	iSetEmptyTextNeeded(EFalse),
 	iPopupListRect(TRect(0,0,0,0)),
-	iPreviousViewId(TUid::Uid(0))
+	iPreviousViewId(TUid::Uid(0)),
+	iDrawBackGround(EFalse)
     {
     }
 
@@ -818,7 +819,7 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
 //
 void CMPXCollectionViewHgContainer::Draw(const TRect& /*aRect*/) const
     {
-    if ( iContext == EContextUnknown )
+    if ( iContext == EContextUnknown || iDrawBackGround != EFalse )
         {
         MAknsSkinInstance* skin = AknsUtils::SkinInstance();
         MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
@@ -1502,10 +1503,15 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
     if( iListWidget )
         {
         TRect clientRect = ((CAknView*)iView)->ClientRect();
-        TInt mediaIndex = MediaIndex(iListWidget->SelectedIndex());
+        TInt index = MediaIndex(iListWidget->SelectedIndex()); 
+        TInt mediaIndex (index);
         mediaIndex = ( KErrNotFound == mediaIndex ) ? iListWidget->FirstIndexOnScreen() : mediaIndex;
         mediaIndex = ( mediaIndex >= 0 && (mediaIndex < (mediaCount)) ) ? mediaIndex : (mediaCount - 1);
-
+		// No need to modify index of first item, if reorder is activated
+        if ( IsInReorderMode() && index == KErrNotFound )
+            {
+            mediaIndex = KErrNotFound;  
+            }      
         TInt prevItemCount = iListWidget->ItemCount();
 
         iListWidget->InitScreenL( clientRect );
@@ -1520,6 +1526,19 @@ void CMPXCollectionViewHgContainer::ResizeListL(const CMPXMediaArray& aMediaArra
             iListWidget->ResizeL( aCount );
             ProvideDataWithoutThumbnailsL(aMediaArray);
             iListWidget->SetSelectedIndex( mediaIndex + iShuffleItem );
+		    // Reserve mark icon for playlist in reorder mode
+			if ( IsInReorderMode() )
+                {
+                MarkGrabedItemL( CurrentLbxItemIndex() + 1 );
+                }
+				
+			// To remove flicker of default albumart in playlist track level
+			if ( iContext == EContextItemPlaylist )
+			    {  
+            	iDefaultIconSet = EFalse;
+            	// Setting an empty icon to the list as default icon.
+            	iListWidget->SetDefaultIconL(CGulIcon::NewL(new CFbsBitmap()));
+            	}	
             }
         else
             {
@@ -1890,7 +1909,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
 		   {
 	     ResolvePopupListSizeL();
 		   }
-		
+
     iMediaWall->SetOpenedItemRect( iPopupListRect );
     iMediaWall->SetOpeningAnimationType( CHgVgMediaWall::EHgVgOpeningAnimationZoomToFront );
 
@@ -2221,6 +2240,11 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
     // ganes list components still uses this version of the HandleOpen
     if ( iContext == EContextItemAlbum  )
 		{
+        if( iCurrentViewType == EMPXViewTBone )
+            {
+            iMediaWall->SetFlags( CHgVgMediaWall::EHgVgMediaWallDrawToWindowGC );
+            iMediaWall->DrawNow();
+            }
         SaveSelectedAlbumItemL(iSelectedAlbumIndex);
 		UpdatePathAndOpenL(index);
         // Start animation now as next view activated is
@@ -2242,15 +2266,28 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
     else if ( iContext == EContextGroupSong || iContext == EContextItemPlaylist || iContext == EContextItemGenre )
         {
         // Check if shuffle play all was selected.
-        if (!ShufflePlayAllL(index))
+        TBool inReorderMode ( IsInReorderMode() );
+        if ( inReorderMode && index == KErrNotFound )
+            {
+			// If Shuffle is selected in reorder mode than Grabbed item should move 
+			// to first position in the playlist, just after shuffle item.
+            SetLbxCurrentItemIndex(1);
+            iView->ProcessCommandL( EMPXCmdCommonEnterKey );
+            }
+        else if ( !ShufflePlayAllL(index) )
             {
             // To open the selected album.
             iView->ProcessCommandL( EMPXCmdCommonEnterKey );
             }
-        // Start animation now as next view activated is
-        // now playing view. We will end animation in now playing view.
-        SetupTransitionType(KMPXInterviewTransition);
-        BeginFullScreenAnimation();
+
+		// Disable transition in reorder mode
+        if( !inReorderMode )
+            {   
+			// Start animation now as next view activated is
+            // now playing view. We will end animation in now playing view.
+            SetupTransitionType(KMPXInterviewTransition);
+            BeginFullScreenAnimation();
+            }
         }
     else
 		{
@@ -5083,6 +5120,25 @@ void CMPXCollectionViewHgContainer::SetPreviousViewId(TUid aViewUid)
     }
 
 // ---------------------------------------------------------------------------
+// Hides container window controls
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgContainer::HideContainerWindow()
+    {
+    if( iMediaWall )
+        iMediaWall->MakeVisible(EFalse);
+    if( iListWidget )
+        iListWidget->MakeVisible(EFalse);
+    if( iMwListWidget )
+        iMwListWidget->MakeVisible(EFalse);
+
+	// draw background application rectangle
+    iDrawBackGround = ETrue;
+    DrawNow();
+    iDrawBackGround = EFalse;
+     }
+
+// ---------------------------------------------------------------------------
 // Prepare and begin fullscreen animation effects
 // ---------------------------------------------------------------------------
 //
@@ -5171,7 +5227,7 @@ void CMPXCollectionViewHgContainer::ResolvePopupListSizeL()
     CleanupStack::PushL( dialog );
 
     listBox->ConstructL( dialog, EAknListBoxViewerFlags );
-    
+
     // title can be hardcoded because it is not shown to user. Just for the calculations.
     dialog->SetTitleL(_L("Foo"));
     iPopupListRect = dialog->LayoutRect();
@@ -5179,4 +5235,15 @@ void CMPXCollectionViewHgContainer::ResolvePopupListSizeL()
     CleanupStack::PopAndDestroy( dialog );
     CleanupStack::PopAndDestroy( listBox );
     }
+
+// ---------------------------------------------------------------------------
+// Marked the grabbed item for reordering
+// ---------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgContainer::MarkGrabedItemL(TInt aIndex)
+    {
+	MPX_DEBUG2( "CMPXCollectionViewHgContainer::MarkGrabedItemL item %d", aIndex + iShuffleItem );
+    iListWidget->Mark( aIndex + iShuffleItem );
+    }
+
 //  End of File

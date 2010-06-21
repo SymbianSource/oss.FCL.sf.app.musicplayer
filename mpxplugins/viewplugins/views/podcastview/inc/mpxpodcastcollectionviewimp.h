@@ -681,6 +681,7 @@ private:    // Data
 #ifdef UPNP_INCLUDED
     CUpnpCopyCommand* iUpnpCopyCommand; 
 #endif
+    TBool iGoToNowPlaying;
     };
 
 #endif  // C_CMPXPODCASTCOLLECTIONVIEWIMP_H

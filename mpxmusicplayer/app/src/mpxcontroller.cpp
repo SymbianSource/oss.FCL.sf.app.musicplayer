@@ -151,6 +151,7 @@ CMPXController::~CMPXController()
         
     delete iCurPath;
     delete iIdle;
+    iCurAtts.Close();
     }
 
     
@@ -378,14 +379,7 @@ void CMPXController::HandleCollectionMediaL( const CMPXMedia& aMedia,
             //
             if( (iCurSystemEvent == KErrNotFound) && !iOutOfDisk )
                 {
-                // Fetch the extra data
-                RArray<TMPXAttribute> atts;
-                CleanupClosePushL( atts );
-                atts.Append(KMPXMediaColDetailDBCreated);
-                atts.Append(KMPXMediaColDetailDBCorrupted);
-                
-                iCollectionUtility->Collection().MediaL(*iCurPath, atts.Array() );
-                CleanupStack::PopAndDestroy( &atts );    
+                iCollectionUtility->Collection().MediaL(*iCurPath, iCurAtts.Array() );
                 }
             else
                 {
@@ -507,16 +501,14 @@ void CMPXController::DoRetrieveDetailsL(TBool aSkipAttribute)
             
             // Do a MediaL to re-retrieve details
             //
-            RArray<TMPXAttribute> atts;
-            CleanupClosePushL( atts );
+            iCurAtts.Reset();
             if(!aSkipAttribute)
                 {
-                atts.Append(KMPXMediaColDetailDBCreated);
-                atts.Append(KMPXMediaColDetailDBCorrupted);
+                iCurAtts.Append(KMPXMediaColDetailDBCreated);
+                iCurAtts.Append(KMPXMediaColDetailDBCorrupted);
                 }
 
-            iCollectionUtility->Collection().MediaL(*iCurPath, atts.Array() );
-            CleanupStack::PopAndDestroy( &atts );
+            iCollectionUtility->Collection().MediaL(*iCurPath, iCurAtts.Array() );
             }
         }
     }
@@ -549,7 +541,7 @@ void CMPXController::DoHandleCollectionMessageL(
             iInitDBNeeded = EFalse;
             iInitDBCorrupted = EFalse;
             
-            DoRetrieveDetailsL(iOutOfDisk);
+            DoRetrieveDetailsL(data != KErrNone);
             }
         else if(event == TMPXCollectionMessage::EBroadcastEvent && 
                 op == EMcMsgRefreshStart)

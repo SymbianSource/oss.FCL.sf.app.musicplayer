@@ -220,6 +220,7 @@ private: // data
     CAknQueryDialog*            iQueryDialog;  // not owned, only for dismissal
     TInt                        iCurSystemEvent;
     TInt                        iCurPlugin;
+    RArray<TMPXAttribute>       iCurAtts;
     TBool                       iOutOfDisk;
     TBool                       iDiskDismountDuringFormat;
     TBool                       iRestartWaitDialog;

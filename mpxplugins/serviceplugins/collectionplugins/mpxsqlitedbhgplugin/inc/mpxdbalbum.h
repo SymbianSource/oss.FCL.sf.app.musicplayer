@@ -30,7 +30,7 @@ class MMPXDbAlbumObserver
     {
     public:
         virtual TInt HandleIsUnknownArtistL(TUint32 aId) = 0;
-        virtual TUint32 HandleArtistForAlbumL( const TUint32 aId ) = 0;
+        virtual HBufC* HandleArtistForAlbumL( const TUint32 aId ) = 0;
         /**
         * HandleAlbumartForAlbumL.
         * @param aId, The album ID.
@@ -86,7 +86,7 @@ class CMPXDbAlbum :
         *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
-        TUint32 AddItemL(const TDesC& aName, TUint32 aArtist, const TDesC& aArt, TInt aDriveId, TBool& aNewRecord,
+        TUint32 AddItemL(const TDesC& aName, const TDesC& aArtistName, const TDesC& aArt, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
 
         /**
@@ -163,7 +163,12 @@ class CMPXDbAlbum :
 
         TBool IsUnknownArtistL(TUint32 aId);
 
-        TUint32 ArtistForAlbumL(const TUint32 aId);
+        /**
+        * Get the ArtistName of song which belongs to the specified Album.
+        * @param aId The ID of the album
+        * @returns alternative artistname retrieved in the specified Album.
+        */
+        HBufC* ArtistForAlbumL(const TUint32 aId);
         /**
         * Get the Albumart of song which belongs to the specified Album.
         * @param aId The ID of the album
@@ -206,11 +211,10 @@ class CMPXDbAlbum :
         enum TAlbumColumns
             {
             EAlbumUniqueId = KMPXTableDefaultIndex,
-            EAlbumName,
-            EAlbumSongCount,
-            EAlbumArtist,
-            EAlbumArt,
             EAlbumArtistName,
+            EAlbumName,
+            EAlbumSongCount,      
+            EAlbumArt,
             EAlbumFieldCount
             };
 

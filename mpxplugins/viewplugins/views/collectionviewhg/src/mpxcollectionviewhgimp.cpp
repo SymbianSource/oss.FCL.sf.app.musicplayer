@@ -131,7 +131,7 @@ _LIT( KMPXCollDetailsItemsFormat, "%S\t%S" );
 _LIT( KCategoryEmpty, "" );
 
 const TInt KIncrementalDelayNone = 0;
-const TInt KIncrementalDelayHalfSecond = 1000000;
+const TInt KIncrementalDelayHalfSecond = 500000;
 const TInt KIncrementalFetchBlockSize = 400;
 const TInt KIncrementalDirectionCount = 8;
 const TInt KWaitNoteImpUid = 0x101FFC6C; // refresh wait note UID
@@ -167,6 +167,7 @@ const TInt KMPXMaxHistoryLength( 255 );
 const TInt KMPXCollectionArtistAlbum( 3 );
 const TInt KMPXCollectionGenre( 5 );
 
+_LIT(KEmptyTitle, " ");
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -357,6 +358,7 @@ CMPXCollectionViewHgImp::CMPXCollectionViewHgImp() :
     // grab the current process priority
     RProcess proc;
     iPriority = proc.Priority();
+    iGoToNowPlaying = EFalse; 
     }
 
 void CMPXCollectionViewHgImp::HandleStatusPaneSizeChange()
@@ -986,15 +988,10 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
                         // check for unknown entry
                         // if it's the last entry, and it's null text
                         // load "unknown" text to display in prompt
-                        HBufC* unknownText( StringLoader::LoadLC( R_MPX_QTN_MP_UNKNOWN ) );
                         waitNoteText = StringLoader::LoadLC(
-                            R_MPX_QTN_MUS_QUERY_CONF_DELETE_ALL, *unknownText );
-                        promptTxt = StringLoader::LoadL(
-                            R_MPX_QTN_NMP_QUERY_CONF_DELETE_GROUP, *unknownText );
-                        CleanupStack::Pop( waitNoteText );
-                        CleanupStack::PopAndDestroy( unknownText );
-                        CleanupStack::PushL( waitNoteText );
-                        CleanupStack::PushL( promptTxt );
+                            R_MPX_QTN_MUS_QUERY_CONF_DELETE_ALL_UNKNOWN);
+                        promptTxt = StringLoader::LoadLC(
+                            R_MPX_QTN_NMP_QUERY_CONF_DELETE_GROUP_UNKNOWN);
                         }
                     else
                         {
@@ -1517,6 +1514,8 @@ void CMPXCollectionViewHgImp::ActivateReorderGrabbedModeL()
     TInt currentItem( iContainer->CurrentLbxItemIndex() );
     iContainer->EnableFindBox( EFalse );
     iContainer->SetReorderGrabbedMode( ETrue, currentItem );
+	// mark the grabbed item
+    iContainer->MarkGrabedItemL( currentItem );
     if ( !iContainer->IsInReorderMode() )
         {
         iContainer->UpdateReorderTitleIconL();
@@ -1541,7 +1540,7 @@ void CMPXCollectionViewHgImp::ActivateReorderGrabbedModeL()
             iDuration = NULL;
             }
         iContainer->ActivateReorderMode( ETrue );
-        SetNewCbaL( R_MPX_CUI_REORDER_DROP_CANCEL_CBA );
+        SetNewCbaL( R_MPX_CUI_REORDER_CANCEL_CBA );
         }
     iContainer->SetLbxCurrentItemIndexAndDraw( currentItem );
     UpdateReorderNaviPaneL();
@@ -1596,6 +1595,7 @@ void CMPXCollectionViewHgImp::DeactivateReorderGrabbedModeL( TBool aExit )
         iContainer->ActivateReorderMode( EFalse );
         iContainer->EnableFindBox( ETrue );
         }
+    iHandlingKeyEvent = ETrue;
     iContainer->HandleLbxItemAdditionPreserveIndexL();
     }
 
@@ -4136,7 +4136,7 @@ void CMPXCollectionViewHgImp::DoIncrementalOpenL( TBool aShowWaitDlg )
     TArray<TMPXAttribute> ary = attrs.Array();
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayNone );
     iIncrementalOpenUtil->StartL( ary, KIncrementalFetchBlockSize,
-                                  KErrNotFound, CMPXCollectionOpenUtility::EFetchNormal );
+                                  KErrNotFound, CMPXCollectionOpenUtility::EFetchDown );
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
     CleanupStack::PopAndDestroy( &attrs );
 
@@ -5240,6 +5240,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             }
         case EMPXCmdGoToNowPlaying:
             {
+            iGoToNowPlaying = ETrue;
             AppUi()->HandleCommandL( aCommand );
             break;
             }
@@ -6069,6 +6070,8 @@ void CMPXCollectionViewHgImp::DoDeactivate()
 	   delete iTitle;
        iTitle = NULL;
        }
+    // for Avkon calling Deactivate, not manually hiding window contorls, reset iGoToNowPlaying
+    iGoToNowPlaying = EFalse;
     // Cleanup view deactivation observer
     AppUi()->RemoveViewDeactivationObserver( this );
     }
@@ -6813,75 +6816,57 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
 								
             HandleInitMusicMenuPaneL(aMenuPane);
             aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, NowPlayingOptionVisibilityL() );
-			if ( isListEmpty )
+            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+            
+            if( iContainer->IsInReorderMode() )
+                break;
+            
+			if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
 				{
-				aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+				aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
 				aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-				if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-					{
-					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-					}
-                else
-					{
-					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, EFalse );
-					}
+				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
 				}
 			else
 				{
-                aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
-                aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
-				aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
-				
-
-
+				TInt selectionCount( 0 );
+				iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
+				if ( iSelectionIndexCache)
+					{
+					selectionCount = iSelectionIndexCache->Count();
+					}
+				// do not display add songs option when marking is on or USB is connected
 				if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
 					{
 					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-					aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-					aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
 					}
 				else
 					{
-					TInt selectionCount( 0 );
-					iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
-					if ( iSelectionIndexCache)
-						{
-						selectionCount = iSelectionIndexCache->Count();
-						}
-					// do not display add songs option when marking is on or USB is connected
-					if ( usbUnblockingStatus == EMPXUSBUnblockingPSStatusActive )
-						{
-						aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
-						}
-					else
-						{
-						aMenuPane->SetItemDimmed( EMPXCmdAddSongs, selectionCount > 0 );
-						}
-
-					if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
-						{
-						aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
-						aMenuPane->SetItemDimmed( EMPXCmdRemove, EFalse );
-						}
+					aMenuPane->SetItemDimmed( EMPXCmdAddSongs, selectionCount > 0 );
 					}
-				} 
 
-            CMPXCollectionViewListBoxArray* array =
+				if ( iContainer->CurrentLbxItemIndex() > KErrNotFound )
+					{
+					aMenuPane->SetItemDimmed( EMPXCmdSend, SendOptionVisibilityL() );
+					aMenuPane->SetItemDimmed( EMPXCmdRemove, EFalse );
+					if ( iContainer->CurrentListItemCount() > 1 )
+					    {
+					    aMenuPane->SetItemDimmed( EMPXCmdReorder, EFalse );
+					    }
+					}
+				}
+				
+			CMPXCollectionViewListBoxArray* array =
             static_cast<CMPXCollectionViewListBoxArray*>(
                     iContainer->ListBoxArray() );
             const CMPXMedia& containerMedia = array->ContainerMedia();
@@ -6909,7 +6894,11 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistSongsL(
             aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
-
+            aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+            
+            if( iContainer->IsInReorderMode() )
+                break;
+            
 			TInt selectionCount( 0 );
 			iSelectionIndexCache = iContainer->CurrentSelectionIndicesL(); // not owned
 			if ( iSelectionIndexCache)
@@ -7150,9 +7139,8 @@ void CMPXCollectionViewHgImp::HandleListBoxEventL(
                 {
                 ProcessCommandL( iContainer->IsInReorderMode() ?
                     EMPXCmdReorderDrop : EMPXCmdReorderGrab );
-                iIsGrabbed = !iIsGrabbed;
                 }
-            else if ( !iHandlingKeyEvent )
+		    else if ( !iHandlingKeyEvent )
                 {
                 TMPXPlaybackState pbState( iPlaybackUtility->StateL() );
                 TBool isEqual( EFalse );
@@ -7289,8 +7277,7 @@ void CMPXCollectionViewHgImp::ProcessCommandL(TInt aCommandId)
             {
             SaveCurrentPlaylistL();
             iContainer->ConfirmReorderL();
-            DeactivateReorderGrabbedModeL( EFalse );
-            SetNewCbaL( R_MPX_CUI_REORDER_GRAB_DONE_CBA );
+            DeactivateReorderGrabbedModeL( ETrue );
             break;
             }
         case EMPXCmdReorderGrab:
@@ -7946,6 +7933,26 @@ void CMPXCollectionViewHgImp::HandleViewActivation(
             {
             iInSongDetails = EFalse;
             }
+        }
+     else if ( ( aCurrentViewType.iUid == KMPXPluginTypePlaybackUid ) && ( iGoToNowPlaying == EFalse ) )        
+        {
+		// It is view switching when launched from other applications
+		// hide this view to avoid flickering 
+		// since this view is the current active view, it receives this event
+
+		if ( iContainer )
+        	{
+            iContainer->HideContainerWindow();
+   	  
+            // set title to blank to avoid title flickering
+            CAknTitlePane* title( static_cast<CAknTitlePane*>
+                ( StatusPane()->ControlL( TUid::Uid( EEikStatusPaneUidTitle ))));
+            if ( title )
+                {
+                title->SetTextL(KEmptyTitle); 
+                title->DrawNow();
+	            }
+		    }
         }
     }
 

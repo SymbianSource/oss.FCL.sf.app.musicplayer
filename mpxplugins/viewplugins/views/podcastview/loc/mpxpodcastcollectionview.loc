@@ -152,7 +152,7 @@
 
 // d:Collection details popup label.
 // d:Label for collection details popup.
-// l:list_single_heading_pane_t1_cp2
+// l:list_single_heading_pane_t2_cp2
 // r:5.0
 //
 #define qtn_nmp_details_phone_memory "Phone Memory"
@@ -198,12 +198,6 @@
 // r:5.0
 //
 #define qtn_nmp_memory_unavailable "Unavailable"
-
-// d:Unknown in listbox.
-// l:list_single_graphic_pane_t1
-// r:5.0
-//
-#define qtn_mp_list_unknown "Unknown"
 
 // d:Text for wait note for deleting one item
 // l:popup_note_wait_window

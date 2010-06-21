@@ -224,6 +224,11 @@ public:
      * @since 3.1
      */
     TInt CurrentLbxItemIndex() const;
+    
+	/*
+     * Mark the grabbed item for reordering the playlist.
+     */
+    void MarkGrabedItemL( TInt aIndex ); 
 
     /**
      * Get current selected listbox items indices (relative to the original
@@ -566,7 +571,11 @@ public:
 	 */
 	void SetPreviousViewId(TUid aViewUid);
 
-
+	/**
+	 * Hides container window controls.
+	 */
+    void HideContainerWindow(); 
+	
 private:
 
     /**
@@ -1012,6 +1021,7 @@ private: // data member
     TRect iPopupListRect;
     TUid iPreviousViewId;
     TBool iPreviousOrientation;
+    TBool iDrawBackGround;
     };
 
 #endif  // CMPXCOLLECTIONVIEWHGCONTAINER_H

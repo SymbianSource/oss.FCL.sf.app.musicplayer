@@ -125,6 +125,8 @@ const TInt KMPXLastDirectoryLevel( 2 );
 // MACROS
 _LIT(KMPXCollDetailsItemsFormat, "%S\t%S");
 
+_LIT(KEmptyTitle, " ");
+
 #ifdef __ENABLE_PODCAST_IN_MUSIC_MENU
 #define KMusicCollectionUid 0x101FFC3A
 #endif
@@ -176,6 +178,7 @@ CMPXPodcastCollectionViewImp::~CMPXPodcastCollectionViewImp()
 
     if (iViewUtility)
         {
+        iViewUtility->RemoveObserver( this );
         iViewUtility->Close();
         }
 
@@ -489,6 +492,7 @@ void CMPXPodcastCollectionViewImp::ConstructL()
     // status of listbox items before the list box is updated in HandleOpen
     iHandleOpenProcessed = EFalse;
     iSelectedItem = KMPXInvalidItemId;
+    iGoToNowPlaying = EFalse;
     }
 
 // ---------------------------------------------------------------------------
@@ -662,7 +666,7 @@ void CMPXPodcastCollectionViewImp::UpdateTitlePaneL()
                 MPX_DEBUG2("CMPXPodcastCollectionViewImp::UpdateTitlePaneL Title is %S", iTitle);
                 if (iTitle->Length() == 0)
                     {
-                    HBufC* titleText = StringLoader::LoadLC(R_MPX_QTN_NMP_UNKNOWN_TITLE);
+                    HBufC* titleText = StringLoader::LoadLC(R_MPX_TITLE_UNKNOWN_PODCAST);
                     title->SetTextL(*titleText);
                     CleanupStack::PopAndDestroy(titleText);
                     }
@@ -3089,6 +3093,7 @@ void CMPXPodcastCollectionViewImp::HandleCommandL(TInt aCommand)
             }
         case EMPXCmdGoToNowPlaying:
             {
+            iGoToNowPlaying = ETrue;
             AppUi()->HandleCommandL( aCommand );
             break;
             }
@@ -3554,6 +3559,8 @@ void CMPXPodcastCollectionViewImp::DoDeactivate()
         iNumEpisode = NULL;
         TRAP_IGNORE(UpdateNaviPaneL());
         }
+	// for Avkon calling Deactivate, not manually hiding controls, reset iGoToNowPlaying
+    iGoToNowPlaying = EFalse;
     }
 
 // ---------------------------------------------------------------------------
@@ -3938,6 +3945,11 @@ void CMPXPodcastCollectionViewImp::HandleListBoxEventL(
                 CleanupStack::PushL(cpath);
 
                 MPX_DEBUG_PATH(*cpath);
+                
+				// It is in episode list view and opens now playing view
+                if ( cpath->Levels() == 3 )
+                    iGoToNowPlaying = ETrue;
+                
                 if (cpath->Levels() == (iLastDepth + 1))
                     {
                     // navigated in one level
@@ -4239,7 +4251,23 @@ void CMPXPodcastCollectionViewImp::HandleViewActivation(
     if ( aCurrentViewType.iUid == KMPXPluginTypeCollectionUid )
         {
         TRAP_IGNORE( UpdateNaviPaneL() );
-        }
+        } 
+    else if ( ( aCurrentViewType.iUid == KMPXPluginTypePlaybackUid ) && ( iGoToNowPlaying == EFalse ) ) 
+        {
+        if ( iContainer )
+            {
+            iContainer->HideContainerWindow();
+                    
+            // set title to blank to avoid title flickering
+            CAknTitlePane* title( static_cast<CAknTitlePane*>
+                ( StatusPane()->ControlL( TUid::Uid( EEikStatusPaneUidTitle ))));
+            if ( title )
+                {
+                title->SetTextL(KEmptyTitle); 
+                title->DrawNow();
+                }
+            }
+     	}   
     }
 
 // -----------------------------------------------------------------------------

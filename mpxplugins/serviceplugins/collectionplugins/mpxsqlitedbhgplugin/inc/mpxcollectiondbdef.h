@@ -28,9 +28,11 @@
 
 // Db filename
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KMCDbFile, "mpxv2_6.db");
+_LIT(KMCDbFile, "mpxv3_0.db");
+_LIT(KMCDbFileEMMC, "mpxv3_0i.db");
 #else 
-_LIT(KMCDbFile, "mpxv2_5.db");
+_LIT(KMCDbFile, "mpxv3_0n.db");
+_LIT(KMCDbFileEMMC, "mpxv3_0in.db");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 // Collection Db resource file
 _LIT(KMPXCollectionDbResourceFile,  "mpxcollectiondbhgres.rsc");
@@ -133,6 +135,8 @@ _LIT(KMCPlaylistSongInfoTitle,      "Title");
 _LIT(KMCPlaylistSongInfoVolumeId,   "VolumeId");
 _LIT(KMCPlaylistSongInfoDbFlag,     "DbFlag");
 
+// == Album TABLE FIELDS ==============================================
+_LIT(KMCAlbumArtistName, "ArtistName");
 // == Auxiliary TABLE FIELDS ==================================================
 // Version of database
 // The version integer looks like:

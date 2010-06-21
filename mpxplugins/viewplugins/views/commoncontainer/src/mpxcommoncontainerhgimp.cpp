@@ -296,6 +296,17 @@ TInt CMPXCommonContainerHgImp::BottomLbxItemIndex() const
     return iBottomIndex;
     }
 
+// -----------------------------------------------------------------------------
+// Hides listbox
+// -----------------------------------------------------------------------------
+//
+void CMPXCommonContainerHgImp::HideListView()
+    {
+    if ( iListWidget )
+           {
+           iListWidget->MakeVisible(EFalse);
+           }
+    }
 
 // -----------------------------------------------------------------------------
 // Gets current listbox item index (relative to the original listbox).

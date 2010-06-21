@@ -32,7 +32,8 @@
 CMPXRemConKeyResponse::CMPXRemConKeyResponse( 
     CRemConCoreApiTarget& aRemConCoreApiTarget ) : 
     CActive( CActive::EPriorityStandard ),
-    iRemConCoreApiTarget( aRemConCoreApiTarget )
+    iRemConCoreApiTarget( aRemConCoreApiTarget ),
+    iCountOfVolumeCommands( 0 )
     {
     CActiveScheduler::Add( this );
     }
@@ -75,12 +76,14 @@ void CMPXRemConKeyResponse::CompleteAnyKey(
                 {
                 iRemConCoreApiTarget.VolumeUpResponse( iStatus, KErrNone );
                 SetActive();
+                iCountOfVolumeCommands--;
                 break;
                 }
             case ERemConCoreApiVolumeDown:
                 {
                 iRemConCoreApiTarget.VolumeDownResponse( iStatus, KErrNone );
                 SetActive();
+                iCountOfVolumeCommands--;
                 break;
                 }
             default:

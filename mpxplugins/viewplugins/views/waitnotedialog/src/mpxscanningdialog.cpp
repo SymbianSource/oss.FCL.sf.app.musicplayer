@@ -55,6 +55,7 @@ CMPXScanningWaitDialog::CMPXScanningWaitDialog( MMPXWaitNoteObserver* aObs,
     iInitialCount = 0;
     isCollectionDBChanged = EFalse;
     iAsyncEvent = ECmdIdle;
+    iRefreshEnd = EFalse;
 
     }
 
@@ -183,11 +184,14 @@ void CMPXScanningWaitDialog::PostNoteHandleL( TInt aButtonId )
 		    iCancelScan = ETrue;
 			}
 
-        // When stop refreshing library, prompt a process waiting dialog.
-        // Inform user to wait for the updating library.
-        HBufC* waitText = StringLoader::LoadLC( R_MPX_UPDATING_LIBRARY_TXT );  
-        DisplayProcessWaitDialogL( R_MPX_GENERIC_WAIT_NOTE, *waitText );
-        CleanupStack::PopAndDestroy( waitText );
+		if (!iRefreshEnd)
+			{
+			// When stop refreshing library, prompt a process waiting dialog.
+			// Inform user to wait for the updating library.
+			HBufC* waitText = StringLoader::LoadLC( R_MPX_UPDATING_LIBRARY_TXT );
+			DisplayProcessWaitDialogL( R_MPX_GENERIC_WAIT_NOTE, *waitText );
+			CleanupStack::PopAndDestroy( waitText );
+			}
         }
     else if( iScanningError >= KErrNone )
         {
@@ -354,6 +358,7 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
                 }
             if( op == EMcMsgRefreshStart )
                 {
+				iRefreshEnd = EFalse;
                 isCollectionDBChanged = EFalse;
                 MPX_DEBUG1("refreshStart store the initial count");
                 iInitialCount = songTotal;
@@ -396,6 +401,7 @@ void CMPXScanningWaitDialog::DoHandleCollectionMessageL(
                     }
                 };
             
+			iRefreshEnd = ETrue;
             // If cancel was pressed, iWaitDialog is NULL
             //
             if( iWaitDialog )

@@ -56,6 +56,7 @@ const TInt KColUri = 1;
 _LIT( KAbstractAlbumExt, ".alb" );
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 
+const TInt KAllSongsQueryResultGranularity = 250;
 
 // ============================ MEMBER FUNCTIONS ==============================
 
@@ -99,6 +100,7 @@ CMPXDbMusic::~CMPXDbMusic()
     {
     MPX_FUNC("CMPXDbMusic::~CMPXDbMusic");
     delete iExtensionsDrm;
+    iAllSongsQueryResult.ResetAndDestroy();
     }
 
 // ----------------------------------------------------------------------------
@@ -113,6 +115,7 @@ CMPXDbMusic::CMPXDbMusic(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     ,iArtNeedUpdated(ETrue)
 #endif
+    ,iAllSongsQueryResult(KAllSongsQueryResultGranularity)
     {
     MPX_FUNC("CMPXDbMusic::CMPXDbMusic");
     }
@@ -682,12 +685,53 @@ void CMPXDbMusic::GetAllSongsLimitedL(const TArray<TMPXAttribute>& aAttrs,
     {
     MPX_FUNC("CMPXDbMusic::GetAllSongsLimitedL");
 
-    // Gets a subset of the data from all songs ordered by title
-    HBufC* query = HBufC::NewLC( KQueryMusicGetSongsLimited().Length() + KMCIntegerLen );
-    query->Des().Format( KQueryMusicGetSongsLimited, aLimit );
-    ExecuteMediaQueryL(aAttrs, aMediaArray, *query);
-    CleanupStack::PopAndDestroy( query );    
+	// Reset and create a cache for the query results.
+	if (iAllSongsQueryResult.Count())
+		{
+        iAllSongsQueryResult.ResetAndDestroy();
+		}
+
+	ExecuteQueryAllSongsL(aAttrs);
+
+    TInt limit = aLimit > iAllSongsQueryResult.Count() ?
+    	iAllSongsQueryResult.Count() : aLimit;
+
+	for ( TInt i=0; i < limit; i++ )
+		{
+        CMPXMedia* m = iAllSongsQueryResult[i];
+		aMediaArray.AppendL(*m);
+		}
     }
+
+// ----------------------------------------------------------------------------
+// CMPXDbMusic::ExecuteQueryAllSongsL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbMusic::ExecuteQueryAllSongsL(const TArray<TMPXAttribute>& aAttrs)
+    {
+    // Run query and add result media objects to the cache array.
+    MPX_FUNC("CMPXDbMusic::ExecuteQueryAllSongsL");
+
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAllSongs));
+    CleanupClosePushL(recordset);
+
+    TInt err(KErrNone);
+    while ((err = recordset.Next()) == KSqlAtRow)
+        {
+        CMPXMedia* media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+        UpdateMediaL(recordset, aAttrs, *media);
+        iAllSongsQueryResult.AppendL(media);
+        CleanupStack::Pop(media);
+        }
+
+    CleanupStack::PopAndDestroy(&recordset);
+    if (err!= KSqlAtEnd)
+        {
+        User::Leave(KErrCorrupt);
+        }
+    }
+
 
 // ----------------------------------------------------------------------------
 // CMPXDbMusic::GetSongsInBlockL
@@ -723,12 +767,23 @@ void CMPXDbMusic::GetSongsAtOffsetL( CMPXMediaArray& aMediaArray,
                                      TInt aOffset,
                                      TInt aCount )
     {
-    MPX_DEBUG1("CMPXDbMusic::GetSongsAtOffsetL <--");   
+	MPX_DEBUG3("CMPXDbMusic::GetSongsAtOffsetL offset[%d], count[%d]", aOffset, aCount);
 
-    ExecuteMediaQueryL(aAttrs, aMediaArray, KQueryMusicGetSongsAtOffset, 
-                       aCount, aOffset, EOffSetQuery );
-    
-    MPX_DEBUG1("CMPXDbMusic::GetSongsAtOffsetL() -->"); 
+	if ( !iAllSongsQueryResult.Count() )
+		{
+		// If there's no cache, create a cache for the query results.
+		ExecuteQueryAllSongsL(aAttrs);
+		}
+
+	TInt limit = aOffset + aCount > iAllSongsQueryResult.Count() ?
+		iAllSongsQueryResult.Count() : aOffset + aCount;
+	for ( TInt i = aOffset; i < limit; i++ )
+		{
+        CMPXMedia* m = iAllSongsQueryResult[i];
+		aMediaArray.AppendL(*m);
+		}
+
+    MPX_DEBUG1("CMPXDbMusic::GetSongsAtOffsetL() -->");
     }
 
 // ----------------------------------------------------------------------------
@@ -2078,7 +2133,7 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
     TUint32 id(0);
     TUint32 artistIdForAlbum(artistId);
     if (UpdateCategoryFieldL(EMPXArtist, aMedia, KMPXMediaMusicArtist, artistId,
-        aDrive, aItemChangedMessages, id, 0))
+        aDrive, aItemChangedMessages, id))
         {
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicArtist, id);
         metaDataModified = (aMusicTable != NULL);
@@ -2088,7 +2143,7 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 
     // update the album field
     if (UpdateCategoryFieldL(EMPXAlbum, aMedia, KMPXMediaMusicAlbum, albumId,
-        aDrive, aItemChangedMessages, id, artistIdForAlbum))
+        aDrive, aItemChangedMessages, id))
         {
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAlbum, id);
         metaDataModified = (aMusicTable != NULL);
@@ -2478,6 +2533,25 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                     }
                 else
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
+                    if (aCategory == EMPXArtist || aCategory == EMPXAlbum)
+                    {
+                    TPtrC art(KNullDesC);
+                    TPtrC artistname(KNullDesC);
+
+                    if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
+                        {
+                        art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
+                        }
+                    if (aCategory == EMPXAlbum)
+                        {
+                        if (aMedia.IsSupported(KMPXMediaMusicArtist))
+                            {
+                            artistname.Set(aMedia.ValueText(KMPXMediaMusicArtist).Left(KMCMaxTextLen));
+                            }
+                        }
+                    iObserver.AddCategoryItemL(aCategory, name, artistname, art, aDriveId, aItemChangedMessages, itemAdded);
+                    }
+                else
                     {
                     // ignore the return value
                     iObserver.AddCategoryItemL(aCategory, name, aDriveId,
@@ -2513,8 +2587,27 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                     }            
                else
 #endif // ABSTRACTAUDIOALBUM_INCLUDED        
-                      {              
-                      // ignore the return value
+                    if (aCategory == EMPXArtist || aCategory == EMPXAlbum)
+                   {
+                   TPtrC art(KNullDesC);
+                   TPtrC artistname(KNullDesC);
+                   if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
+                       {
+                       art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
+                        }
+                   if (aCategory == EMPXAlbum)
+                       {
+                       if (aMedia.IsSupported(KMPXMediaMusicArtist))
+                           {
+                           artistname.Set(aMedia.ValueText(KMPXMediaMusicArtist).Left(KMCMaxTextLen));
+                           }
+                       }
+                   iObserver.AddCategoryItemL(aCategory, KNullDesC, artistname, art, aDriveId,
+                        aItemChangedMessages, itemAdded);
+                   }
+               else
+                   {
+                   // ignore the return value
                       iObserver.AddCategoryItemL(aCategory, KNullDesC, aDriveId,
                             aItemChangedMessages, itemAdded);
                       }
@@ -2585,132 +2678,7 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
     return updated;
     }
 
-TBool CMPXDbMusic::UpdateCategoryFieldL(
-    TMPXGeneralCategory aCategory,
-    const CMPXMedia& aMedia,
-    const TMPXAttribute& aAttribute,
-    TUint32 aOldId,
-    TInt aDriveId,
-    CMPXMessageArray* aItemChangedMessages,
-    TUint32& aItemId,
-    TUint32 aArtistId)
-    {
-    TBool updated(EFalse);
-    TBool itemNotRemoved( EFalse );
-    TBool itemAdded( EFalse );
 
-    // update category table and add category Id to the music table
-    if (!aOldId || aMedia.IsSupported(aAttribute))
-        {
-        TInt changeMsgCount( 0 );
-        if( aItemChangedMessages )
-            {
-            changeMsgCount = aItemChangedMessages->Count();
-            }
-
-        if (aMedia.IsSupported(aAttribute))
-            {
-            TPtrC name(aMedia.ValueText(aAttribute).Left(KMCMaxTextLen));
-
-            // construct the new ID for the category record
-            // only genre is not case sensitive
-            aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory,
-                name, (aCategory != EMPXGenre));
-            if (!aOldId || (aOldId != aItemId))
-                {
-                // only add if the ID changed,
-                // otherwise the song was updated but the artist name was not
-                TPtrC art(KNullDesC);
-                if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
-                    {
-                    art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
-                    }
-
-                iObserver.AddCategoryItemL(aCategory, name, aArtistId, art, aDriveId, aItemChangedMessages, itemAdded);
-                updated = ETrue;
-                }
-            }
-        else
-            {
-            // only genre is not case sensitive
-            aItemId = MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), aCategory, KNullDesC,
-                (aCategory != EMPXGenre));
-            if (!aOldId || (aOldId != aItemId))
-                {
-				TPtrC art(KNullDesC);
-				if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
-					{
-					art.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
-					}
-
-				iObserver.AddCategoryItemL(aCategory, KNullDesC, aArtistId, art, aDriveId,
-                    aItemChangedMessages, itemAdded);
-                updated = ETrue;
-                }
-            }
-
-        if (aOldId && (aOldId != aItemId))
-            {
-            iObserver.DeleteSongForCategoryL(aCategory, aOldId, aDriveId,
-                aItemChangedMessages, itemNotRemoved);
-            updated = ETrue;
-            }
-
-        // Special case where the item(s) has been renamed.
-        // In this case, a new category is created +1 change msg
-        //               a old category is removed +1 change msg
-        // We merge these 2 change messages into one using the deprecated ID
-        //
-        if( aItemChangedMessages )
-            {
-            TInt newChangeMsgCount( aItemChangedMessages->Count() );
-            if(  newChangeMsgCount - changeMsgCount > 0 )
-                {
-                TInt oldId = KErrNotFound;
-                TInt newId = KErrNotFound;
-                for( TInt i=0; i<newChangeMsgCount; ++i )
-                    {
-                    CMPXMessage& msg = *(*aItemChangedMessages)[i];
-
-                    TMPXItemId id = msg.ValueTObjectL<TMPXItemId>(KMPXMessageMediaGeneralId);
-                    TMPXChangeEventType changeType = msg.ValueTObjectL<TMPXChangeEventType>(KMPXMessageChangeEventType);
-
-                    // Look for the added and deleted category IDs
-                    //
-                    if( id == aOldId && changeType == EMPXItemDeleted )
-                        {
-                        oldId = i;
-                        }
-                    else if( id == aItemId && changeType == EMPXItemInserted )
-                        {
-                        newId = i;
-                        }
-                    }
-
-                if( oldId != KErrNotFound &&
-                    newId != KErrNotFound )
-                    {
-                    aItemChangedMessages->Remove(oldId);  // category removed
-                    aItemChangedMessages->Remove(newId);  // category added
-                    MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aItemId, EMPXItemModified,
-                                                            aCategory, KDBPluginUid, aOldId );
-                    }
-                else if ( oldId !=KErrNotFound && itemAdded ) // old item removed, new item already exist
-                    {
-                    MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aItemId, EMPXItemModified,
-                                                            aCategory, KDBPluginUid, aOldId );
-                    }
-                else if ( newId !=KErrNotFound && itemNotRemoved ) // new item added, old item still exist
-                    {
-                    MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aOldId, EMPXItemModified,
-                                                            aCategory, KDBPluginUid, aItemId );
-                    }
-                }
-            }
-        }
-
-    return updated;
-    }
 // ----------------------------------------------------------------------------
 // CMPXDbMusic::ExtraFieldsRequired
 // ----------------------------------------------------------------------------

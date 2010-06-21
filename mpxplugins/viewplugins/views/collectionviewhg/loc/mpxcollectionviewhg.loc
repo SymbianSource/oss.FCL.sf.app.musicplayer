@@ -74,7 +74,7 @@
 // l:list_single_pane_t1_cp2/opt1
 // r:5.0
 //
-#define qtn_nmp_options_reorder_list "Reorder list"
+#define qtn_nmp_options_reorder_list "Move song"
 
 // d:Options menu item for removing from playlist.
 // l:list_single_pane_t1_cp2/opt1
@@ -387,9 +387,8 @@
 #define qtn_nmp_prmpt_new_name "New name:"
 
 // d:Text for an item with unknown description
-// d:Part of text for wait note
-// l:popup_note_wait_window
-// r:5.0
+// l:list_double_large_graphic_pane_t1
+// r:5.2
 //
 #define qtn_mp_list_unknown "Unknown"
 
@@ -711,5 +710,18 @@
 // r:5.2
 //
 #define qtn_vmp_no_genres "(no genres)"
+
+// d:Text for wait note for deleting a unknown album
+// l:popup_note_wait_window
+// r:5.2
+//
+#define qtn_mus_query_conf_delete_all_unknown "Deleting songs from 'Unknown'"
+
+// d:Text for a confirmation query shown when user attempts to delete
+// d:all tracks belonging to a unknown album.
+// l:popup_note_window/opt1
+// r:5.2
+//
+#define qtn_nmp_query_conf_delete_group_unknown "Delete all songs from 'Unknown'?"
 
 // End of File

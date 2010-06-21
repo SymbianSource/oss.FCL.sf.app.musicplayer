@@ -156,6 +156,25 @@ class CMPXDbAbstractAlbum :
         */
         void GetAllItemsWithNoSongL(RArray<TUint32>& aItemsIds);
 
+        /**
+        * Create Thumbnail Manager session.
+        * Create Thumbnail Manager session when needed: rename/delete entries in Thumbnail table.
+        */
+        void CreateTNMSessionL();
+        
+        /**
+        * Remove all abstractalbum items with no songs associated,
+        * TN entry and .alb files also removed.
+        *
+        */
+        void RemoveAbstractAlbumsWithNoSongL();
+        
+        /**
+        /* When refresh library, Remove .alb entry from AbstractAlnum table, TN table if .alb files already deleted 
+        /* from file system via file manager.
+        */
+        void AbstractAlbumCleanUpL();
+       
     private:
 
 

@@ -383,33 +383,27 @@ RArray<TInt> CMPXCollectionViewListBoxArray::IndicatorIconIndicesL(
         flags = entry->ValueTObjectL<TUint>( KMPXMediaGeneralFlags );
         }
 
-    // reorder icon
-    if ( ( iReorder ) && ( aIndex == iMovedIndex ) )
+  
+    // All icons should also be visible even in reorder mode.
+    // playback status icon
+    if ( iIndex == index )
         {
-        iconIndices.Append( GetReorderIcon() );
-        }
-    else if ( !iReorderActivated )
-        {
-        // playback status icon
-        if ( iIndex == index )
+        switch ( iPbState )
             {
-            switch ( iPbState )
+            case EPbStatePlaying:
                 {
-                case EPbStatePlaying:
-                    {
-                    iconIndices.Append( EMPXClvIconPlay );
-                    break;
-                    }
-                case EPbStatePaused:
-                    {
-                    iconIndices.Append( EMPXClvIconPause );
-                    break;
-                    }
-                default:
-                    {
-                    // other playback states, not handled
-                    break;
-                    }
+                iconIndices.Append( EMPXClvIconPlay );
+                break;
+                }
+            case EPbStatePaused:
+                {
+                iconIndices.Append( EMPXClvIconPause );
+                break;
+                }
+            default:
+                {
+                // other playback states, not handled
+                break;
                 }
             }
         }
@@ -1056,51 +1050,40 @@ TPtrC CMPXCollectionViewListBoxArray::GetMdcaPointL( TInt aIndex ) const
         ptr.Format( KMPXCommonListboxFormatString, iconID, &title );
 
         iconID = EMPXClvIconNone;
-        // reorder icon
-        if ( ( iReorder ) && ( aIndex == iMovedIndex ) )
+        // All icons should also be visible even in reorder mode. 
+        // playback status icon
+        if ( iIndex == index )
             {
-            iconID = GetReorderIcon();
-            }
-        else if ( !iReorderActivated )
-            {
-            // playback status icon
-            if ( iIndex == index )
+            switch ( iPbState )
                 {
-                switch ( iPbState )
+                case EPbStatePlaying:
                     {
-                    case EPbStatePlaying:
-                        {
-                        iconID = EMPXClvIconPlay;
-                        break;
-                        }
-                    case EPbStatePaused:
-                        {
-                        iconID = EMPXClvIconPause;
-                        break;
-                        }
-                    case EPbStateSeekingForward:
-                        {
-                        iconID = EMPXClvIconForward;
-                        break;
-                        }
-                    case EPbStateSeekingBackward:
-                        {
-                        iconID = EMPXClvIconRewind;
-                        break;
-                        }
-                    default:
-                        {
-                        // other playback states, not handled
-                        break;
-                        }
+                    iconID = EMPXClvIconPlay;
+                    break;
+                    }
+                case EPbStatePaused:
+                    {
+                    iconID = EMPXClvIconPause;
+                    break;
+                    }
+                case EPbStateSeekingForward:
+                    {
+                    iconID = EMPXClvIconForward;
+                    break;
+                    }
+                case EPbStateSeekingBackward:
+                    {
+                    iconID = EMPXClvIconRewind;
+                    break;
+                    }
+                default:
+                    {
+                    // other playback states, not handled
+                    break;
                     }
                 }
             }
-        else
-            {
-            // Do nothing
-            }
-
+       
         if ( iconID != EMPXClvIconNone )
             {
             ptr.Append( KMPXTab );

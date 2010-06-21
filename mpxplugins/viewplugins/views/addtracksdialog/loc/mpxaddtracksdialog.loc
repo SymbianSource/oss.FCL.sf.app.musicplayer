@@ -108,11 +108,11 @@
 //
 #define qtn_nmp_addsongs_num_songs  "Songs (%N)"
 
-// d:Unknown in listbox.
+// d:Unknown in Song selection view
 // l:list_single_graphic_pane_t1
-// r:3.1
+// r:5.2
 //
-#define qtn_mp_list_unknown "Unknown"
+#define qtn_mp_single_list_unknown "Unknown"
 
 // d:Text for wait note for opening
 // l:popup_note_wait_window

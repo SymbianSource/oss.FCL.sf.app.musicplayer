@@ -288,7 +288,7 @@ RESOURCE TBUF r_mpx_cui_addsongs_song_added
 //  
 RESOURCE TBUF r_mpx_qtn_mp_unknown
     {
-    buf = qtn_mp_list_unknown;
+    buf = qtn_mp_single_list_unknown;
     }   
 
 // -----------------------------------------------------------------------------

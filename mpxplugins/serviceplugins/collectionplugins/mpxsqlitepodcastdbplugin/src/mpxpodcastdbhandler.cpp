@@ -1319,22 +1319,6 @@ void CMPXPodcastDbHandler::ProcessPodcastFoldersL(
 
         // append the drive to the drive list
         iDbDrives.AppendL(driveUnit);
-
-        // make sure the folder is created
-        TVolumeInfo info;
-        if (iFs.Volume(info, driveUnit) == KErrNone)
-           {
-            if (!BaflUtils::PathExists(iFs, folder))
-                {
-                // create music folder if necessary
-                TInt err(iFs.MkDirAll(folder));
-                MPX_DEBUG3("Try to create podcast folder %S return code %d", &folder, err);
-                if (err != KErrAlreadyExists)
-                    {
-                    User::LeaveIfError(err);
-                    }
-                }
-            }
         }
     }
 

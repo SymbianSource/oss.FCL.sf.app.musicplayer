@@ -304,6 +304,11 @@ public:
     virtual void ConstructContainerL( TMPXCommonContainerCollectionType aCollectionType ) = 0;
 
     /**
+     * Hides container list view
+     */
+    virtual void HideListView() = 0;
+    
+    /**
      * Enable/disable find box
      *
      * @since 3.1

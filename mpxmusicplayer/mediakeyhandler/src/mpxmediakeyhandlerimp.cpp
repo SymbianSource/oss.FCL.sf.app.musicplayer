@@ -501,8 +501,9 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                     }
                     else if ( aValue != iCurrentVol )
                     {
-                    if ( aValue != 0 )
+                    if ( aValue != 0 && ( iResponseHandler->iCountOfVolumeCommands == 0 ) )
                         {
+                        // if we are processing remcon events we shouldn't change the current volume value
                         iCurrentVol = aValue;
                         }
                     }
@@ -1124,6 +1125,7 @@ void CMPXMediaKeyHandlerImp::MrccatoCommand(
         case ERemConCoreApiVolumeUp:
         case ERemConCoreApiVolumeDown:
             {
+            iResponseHandler->iCountOfVolumeCommands++;
             iTimer->Cancel();
             MMPXPlaybackUtility* pbUtil( NULL );
             MPX_TRAPD( err, pbUtil = MMPXPlaybackUtility::UtilityL( KPbModeActivePlayer ));

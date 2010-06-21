@@ -23,7 +23,7 @@
 
 //INCLUDES
 #include <mpxplaybackframeworkdefs.h>
-
+#include <mpxviewactivationobserver.h>
 #include "mpxaudioeffectsview.h"
 
 
@@ -41,7 +41,7 @@ class MMPXViewUtility;
 *  @lib mpxaudioeffectsview.dll
 *  @since Series 60 3.0
 */
-NONSHARABLE_CLASS( CMPXAudioEffectsViewImp ) : public CMPXAudioEffectsView
+NONSHARABLE_CLASS( CMPXAudioEffectsViewImp ) : public CMPXAudioEffectsView, public MMPXViewActivationObserver
     {
 public:
 
@@ -116,6 +116,27 @@ private:
     * From CAknView
     */
     void DoDeactivate();
+    
+    // from MMPXViewActivationObserver
+
+    /**
+     * From MMPXViewActivationObserver
+     * Handle view activation.
+     *
+     * @param aCurrentViewType Current view type Uid.
+     * @param aPreviousViewType Previous view type Uid.
+     */
+    void HandleViewActivation(
+        const TUid& aCurrentViewType,
+        const TUid& aPreviousViewType );
+    /**
+     * @see MMPXViewActivationObserver
+     */
+    void HandleViewUpdate(
+        TUid aViewUid,
+        MMPXViewActivationObserver::TViewUpdateEvent aUpdateEvent,
+        TBool aLoaded,
+        TInt aData);
 
 private: // data
 
@@ -126,6 +147,7 @@ private: // data
     TVwsViewId iPreviousView;
     TInt iResourceOffset;
     MMPXViewUtility* iViewUtility;
+    TBool iGoPreviousView;
     };
 
 #endif    // C_CMPXAUDIOEFFECTSVIEWIMP_H

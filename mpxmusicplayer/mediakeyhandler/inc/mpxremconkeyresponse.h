@@ -97,6 +97,8 @@ private:    // Data
      * Not own.
      */
     CRemConCoreApiTarget& iRemConCoreApiTarget;
+public:    
+    TInt iCountOfVolumeCommands;
     }; 
 
 #endif  // C_CMPXREMCONKEYRESPONSE_H

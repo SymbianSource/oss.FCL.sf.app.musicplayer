@@ -126,6 +126,7 @@ private: // data
     CAsyncCallBack*        iAsyncCallBack; //owned
     TAsyncEvent            iAsyncEvent;
     TBool                  iCancelScan;
+    TBool                  iRefreshEnd;
     };
 
 

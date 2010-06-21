@@ -134,6 +134,18 @@ TInt CMPXPodcastCollectionViewContainer::PlaybackIndex()
     }
 
 // ---------------------------------------------------------------------------
+// Hides container list box
+// ---------------------------------------------------------------------------
+//
+void CMPXPodcastCollectionViewContainer::HideContainerWindow()
+    {
+        if ( iCommonContainer )
+            {
+            iCommonContainer->HideListView();
+            }
+    }
+	
+// ---------------------------------------------------------------------------
 // Sets the current view to be used to determine the correct help context
 // ---------------------------------------------------------------------------
 //

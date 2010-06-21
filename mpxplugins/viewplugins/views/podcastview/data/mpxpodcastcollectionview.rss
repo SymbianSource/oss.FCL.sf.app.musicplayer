@@ -363,17 +363,7 @@ RESOURCE TBUF r_mpx_podcast_collection_view_title
     {
     buf = qtn_mp_title_my_podcast;
     }
-
-            
-// -----------------------------------------------------------------------------
-// r_mpx_qtn_nmp_unknown_title
-// -----------------------------------------------------------------------------
-//  
-RESOURCE TBUF r_mpx_qtn_nmp_unknown_title
-    {
-    buf = qtn_mp_list_unknown;
-    }   
-
+           
 // ---------------------------------------------------------------------------
 // r_mpx_playback_collection_via_sub_menu
 // Collection view UPnP Play Via sub menu items.

@@ -121,6 +121,11 @@ public:
      * @return Indicator icon indices
      */
     RArray<TInt> IndicatorsL( TInt aIndex );
+    
+    /**
+     * Hides container controls.
+     */
+    void HideContainerWindow();
 
 private:
 

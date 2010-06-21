@@ -242,6 +242,7 @@ RESOURCE MENU_PANE r_mpx_collection_view_menu_1
             {
             command = EMPXCmdReorder;
             txt = qtn_nmp_options_reorder_list;
+            flags = EEikMenuItemSpecific;
             },
         MENU_ITEM
             {
@@ -630,6 +631,26 @@ RESOURCE DIALOG r_mpx_collection_generic_confirmation_query
         };
     }
 
+// ---------------------------------------------------------------------------
+// r_mpx_cui_reorder_cancel_cba
+// ---------------------------------------------------------------------------
+// 
+RESOURCE CBA r_mpx_cui_reorder_cancel_cba
+    {
+    buttons = 
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_empty;
+            },
+        CBA_BUTTON
+            {
+            id = EMPXCmdReorderCancel;
+            txt = text_softkey_cancel;
+            }
+        };
+    }
+    
 #ifdef __ENABLE_MSK
 // ---------------------------------------------------------------------------
 // r_mpx_cui_reorder_drop_cancel_cba
@@ -1848,6 +1869,26 @@ RESOURCE TBUF r_mpx_genre_unknown
 RESOURCE TBUF r_mpx_vmp_no_genres
     {
     buf = qtn_vmp_no_genres;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_query_conf_delete_all
+// Text for Unknown album deletion wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_mus_query_conf_delete_all_unknown
+    {
+    buf = qtn_mus_query_conf_delete_all_unknown;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_nmp_query_conf_delete_group
+// Text for Unknown album deletion confirmation query.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_nmp_query_conf_delete_group_unknown
+    {
+    buf = qtn_nmp_query_conf_delete_group_unknown;
     }
 
 // End of File

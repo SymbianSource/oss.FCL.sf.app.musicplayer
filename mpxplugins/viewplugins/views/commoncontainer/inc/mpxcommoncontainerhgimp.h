@@ -477,6 +477,11 @@ public:
      * @param aIndex Opened item index.
      */
     void HandleOpenL( TInt aIndex );
+    
+    /**
+     * Hides container list view
+     */
+    void HideListView();
 
 public: // from base class MThumbnailManagerObserver
 

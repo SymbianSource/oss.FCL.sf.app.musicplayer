@@ -1015,6 +1015,7 @@ private:    // Data
     
     TBool                       iDialogDismissed;
     HBufC*                      iTitleWait; // Owned
+    TBool                       iGoToNowPlaying;
     };
 
 #endif  // C_CMPXCOLLECTIONVIEWHGIMP_H

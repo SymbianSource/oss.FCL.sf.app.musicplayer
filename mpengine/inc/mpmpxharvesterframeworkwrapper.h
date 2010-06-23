@@ -23,10 +23,6 @@
 #include "mpcommondefs.h"
 
 class MpMpxHarvesterFrameworkWrapperPrivate;
-class MpSongScannerHelper;
-class HbNotificationDialog;
-class QStringList;
-class QTranslator;
 
 class MpMpxHarvesterFrameworkWrapper : public QObject
 {

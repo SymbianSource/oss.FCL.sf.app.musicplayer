@@ -72,10 +72,10 @@ signals:
 
     void collectionPlaylistOpened();
     void playlistSaved( bool success );
-    void deleteStarted(TCollectionContext context, TInt Count);
+    void deleteStarted(TCollectionContext context, int Count);
     void songsDeleted( bool success );
     void playlistsRenamed( bool success );
-    void openAddSongsWaitDialog();
+    void aboutToAddSongs( int count );
     
     void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
     

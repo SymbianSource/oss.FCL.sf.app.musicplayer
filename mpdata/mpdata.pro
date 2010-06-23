@@ -14,25 +14,29 @@
 # Description: Project file for Music Player Data.
 #
 
-symbian:TARGET.UID3 = 0x10207C95
-
 TEMPLATE = lib
 CONFIG += hb
 TARGET = mpdata
-
-TARGET.CAPABILITY = CAP_GENERAL_DLL
+symbian: { 
+    TARGET.UID3 = 0x10207C95
+    MMP_RULES += "DEFFILE mpdata.def"
+    defFilePath = .
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.EPOCALLOWDLLDATA = 1
+}
+DEFINES += BUILD_MPDATA_LIB
 
 INCLUDEPATH += . \
-    	inc \
-    	../inc
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+    	       inc \
+    	       ../inc
+INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
-LIBS += -lestor.dll \
-    -lmpxcommon.dll \
-    -lthumbnailmanagerqt.dll
-    
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
+LIBS += -lestor \
+        -lmpxcommon \
+        -lthumbnailmanagerqt
 
+# Input
 HEADERS += ../inc/mpmpxcollectiondata.h \
            inc/mpmpxcollectiondata_p.h \
            ../inc/mpcollectiondatamodel.h \
@@ -48,13 +52,4 @@ SOURCES += src/mpmpxcollectiondata.cpp \
     	   src/mpcollectionalbumartmanager.cpp \
            src/mpplaybackdata.cpp \
            src/mpsongdata.cpp
-           
-DEFINES += BUILD_MPDATA_LIB
 
-myDefInclude = "NOSTRICTDEF" \
-"$${LITERAL_HASH}if defined(WINS)"\
-"DEFFILE  bwins/mpdatau.def "\
-"$${LITERAL_HASH}else "\
-"DEFFILE  eabi/mpdatau.def "\
-"$${LITERAL_HASH}endif"
-MMP_RULES += myDefInclude

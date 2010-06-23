@@ -28,6 +28,7 @@
 // Forward declarations
 class MpxViewPlugin;
 class MusicServices;
+class MpGlobalPopupHandler;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
@@ -78,7 +79,8 @@ private:
     MpxViewPlugin         *mMediaWallViewPlugin;  // Own
     MpxViewPlugin         *mCurrentViewPlugin;    // Own
     ViewType              mVerticalViewType;
-    MusicServices		  *mMusicServices; 		  // Own
+    MusicServices         *mMusicServices;         // Own
+    MpGlobalPopupHandler  *mPopupHandler;          // Own
 
 };
 

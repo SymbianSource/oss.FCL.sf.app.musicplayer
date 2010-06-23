@@ -14,46 +14,45 @@
 # Description: 
 #
 
-symbian:TARGET.UID3 = 0x2002D0AA
-
 TEMPLATE = lib
 CONFIG += hb qt ecomplugin mobility SHARE_FUNC_ENABLED
 QT += webkit \
-    network \
-    xml
+      network \
+      xml
 TARGET = mpdetailsviewplugin
 MOBILITY += bearer systeminfo
+symbian: { 
+    TARGET.UID3 = 0x2002D0AA
+    TARGET.CAPABILITY = All -TCB
+    TARGET.EPOCALLOWDLLDATA = 1
+}
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
 SERVICE.CONFIGURATION = ""
 
-TARGET.CAPABILITY = All -TCB
-
 DEPENDPATH += .
 INCLUDEPATH += . \
-     inc \
-     ../../inc
+               inc \
+               ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
-LIBS += -lmpxviewframeworkqt.dll \
-        -lmpxplaybackutility.dll \
-        -lmpxcommon.dll \
-        -lthumbnailmanagerqt.dll \
-        -lmpsettingsmanager.dll \
-        -lmpengine.dll \
-		-lmpdata.dll
-
-symbian:TARGET.EPOCALLOWDLLDATA = 1
+LIBS += -lmpxviewframeworkqt \
+        -lmpxplaybackutility \
+        -lmpxcommon \
+        -lthumbnailmanagerqt \
+        -lmpsettingsmanager \
+        -lmpengine \
+        -lmpdata
 
 # Input
+HEADERS += ../../inc/mpviewbase.h \
+           inc/mpdetailsviewplugin.h \
+           inc/mpdetailsview.h \
+           inc/mpquerymanager.h
+           
 SOURCES += src/mpdetailsviewplugin.cpp \
            src/mpdetailsview.cpp \
            src/mpquerymanager.cpp
-
-HEADERS = ../../inc/mpviewbase.h \
-           inc/mpdetailsviewplugin.h \
-           inc/mpdetailsview.h \
-           inc//mpquerymanager.h
 
 # Sharing functionality
 CONFIG(SHARE_FUNC_ENABLED) {
@@ -66,3 +65,4 @@ CONFIG(SHARE_FUNC_ENABLED) {
 }
 
 RESOURCES += resources/mpdetailsviewresources.qrc
+

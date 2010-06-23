@@ -14,44 +14,45 @@
 # Description: 
 #
 
-symbian:TARGET.UID3 = 0x10207C94
-
 TEMPLATE = lib
 CONFIG += hb qt ecomplugin
 HB += hbfeedback
 TARGET = mpmediawallviewplugin
+symbian: { 
+    TARGET.UID3 = 0x10207C94
+    TARGET.CAPABILITY = All -TCB
+    TARGET.EPOCALLOWDLLDATA = 1
+}
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
 SERVICE.CONFIGURATION = "<i>EMPXViewPluginPriorityNormal</i>"
 
-TARGET.CAPABILITY = All -TCB
-
 DEPENDPATH += .
 INCLUDEPATH += . \
-     inc \
-     ../../inc \
-     ../../mpserviceplugins/inc
-     
+               inc \
+               ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
      
-LIBS += -lestor.dll \
-				-lmpxviewframeworkqt.dll \
-				-lganeswidgets.dll \
-				-lmpengine \
-				-lmpdata.dll
+LIBS += -lestor \
+        -lmpxviewframeworkqt \
+        -lganeswidgets \
+        -lmpengine \
+        -lmpdata
 	
-symbian:TARGET.EPOCALLOWDLLDATA = 1
-
+# Input
 HEADERS += ../../inc/mpviewbase.h \
-	         inc/mpmediawallviewplugin.h \
+           inc/mpmediawallviewplugin.h \
            inc/mpmediawallview.h \
-    inc/mpmediawalldocumentloader.h \
-    inc/mpalbumcoverwidget.h \
-    inc/mptracklistwidget.h
+           inc/mpmediawalldocumentloader.h \
+           inc/mpalbumcoverwidget.h \
+           inc/mptracklistwidget.h \
+           inc/mpreflectioneffect.h
 SOURCES += src/mpmediawallviewplugin.cpp \
            src/mpmediawallview.cpp \
-    src/mpmediawalldocumentloader.cpp \
-    src/mpalbumcoverwidget.cpp \
-    src/mptracklistwidget.cpp
+           src/mpmediawalldocumentloader.cpp \
+           src/mpalbumcoverwidget.cpp \
+           src/mptracklistwidget.cpp \
+           src/mpreflectioneffect.cpp
 RESOURCES += resources/mpmediawallviewresources.qrc
+

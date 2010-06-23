@@ -21,5 +21,6 @@ SUBDIRS = unittest_mpaudioeffectsframeworkwrapper \
           unittest_mpmpxcollectionframeworkwrapper \
           unittest_mpmpxharvesterframeworkwrapper \
           unittest_mpmpxisolatedcollectionhelper \
-          unittest_mpmpxplaybackframeworkwrapper
+          unittest_mpmpxplaybackframeworkwrapper \
+          unittest_mpsongscanner
 

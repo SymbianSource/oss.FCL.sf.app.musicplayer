@@ -14,41 +14,34 @@
 # Description: 
 #
 
-symbian:TARGET.UID3 = 0x10207C67
-    
 TEMPLATE = lib
 CONFIG += hb qt
 HB += hbfeedback
 TARGET = mpnowplayingbanner
-
-TARGET.CAPABILITY = All -TCB
+symbian: { 
+    TARGET.UID3 = 0x10207C67
+    MMP_RULES += "DEFFILE mpnowplayingbanner.def"
+    defFilePath = .
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.EPOCALLOWDLLDATA = 1
+}
+DEFINES += BUILD_MPNOWPLAYINGBANNER
 
 INCLUDEPATH += . \
 	 inc \
 	 ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
      
-LIBS += -lmpengine  \
-        -lmpdata.dll \
-        -lmpxcommon.dll
+LIBS += -lmpengine \
+        -lmpdata \
+        -lmpxcommon
         
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
-
-HEADERS = ../../inc/mpnowplayingwidget.h \
-    inc/mpnowplayingwidget_p.h 
+# Input
+HEADERS += ../../inc/mpnowplayingwidget.h \
+           inc/mpnowplayingwidget_p.h 
 
 SOURCES += src/mpnowplayingwidget.cpp \
-    src/mpnowplayingwidget_p.cpp \
- 
-                
+           src/mpnowplayingwidget_p.cpp
+     
 RESOURCES += resources/mpnowplayingbanner.qrc
 
-DEFINES += BUILD_MPNOWPLAYINGBANNER
-
-myDefInclude = "NOSTRICTDEF" \
-"$${LITERAL_HASH}if defined(WINS)"\
-"DEFFILE  bwins/mpnowplayingbanneru.def "\
-"$${LITERAL_HASH}else "\
-"DEFFILE  eabi/mpnowplayingbanneru.def "\
-"$${LITERAL_HASH}endif"
-MMP_RULES += myDefInclude

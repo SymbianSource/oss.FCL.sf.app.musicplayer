@@ -18,6 +18,7 @@ TEMPLATE = subdirs
 
 SUBDIRS += ..\mpdata\tsrc
 SUBDIRS += ..\mpengine\tsrc
+SUBDIRS += ..\app\tsrc
 SUBDIRS += ..\mpviewplugins\mpcollectionviewplugin\tsrc
 SUBDIRS += ..\mpviewplugins\mpmediawallviewplugin\tsrc
 SUBDIRS += ..\mpviewplugins\mpplaybackviewplugin\tsrc

@@ -66,6 +66,14 @@
  */
 
 /*!
+    \fn void aboutToAddSongs( int count )
+
+    This signal is emitted when play list is prepared and about to be added.
+    \a count Indicates number of songs to be added
+
+ */
+
+/*!
     \fn void isolatedCollectionOpened( MpMpxCollectionData* collectionData )
 
     This signal is emitted when an isolated collection is opened on \a context

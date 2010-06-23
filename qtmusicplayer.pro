@@ -38,11 +38,11 @@ symbian {
     include(mpserviceplugins/m3uplaylistplugin/rom/rom.pri)
     }
 
-SUBDIRS = utilities \
+SUBDIRS = mpdata \
+          mpengine \
+          utilities \
           musicservices \
           app \
-          mpdata \
-          mpengine \
           mpviewplugins \
           musicwidgetplugin
 

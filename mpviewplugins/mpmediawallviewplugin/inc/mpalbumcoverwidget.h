@@ -17,23 +17,26 @@
 #ifndef MPALBUMCOVERWIDGET_H
 #define MPALBUMCOVERWIDGET_H
 
-#include <QGraphicsWidget>
 #include <QPixmap>
+#include <QGesture>
 
+#include <hbwidget.h>
 #include <hbicon.h>
 
-class MpAlbumCoverWidget : public QGraphicsWidget
+class MpAlbumCoverWidget : public HbWidget
 
 {
     Q_OBJECT
 
 public:
 
-    MpAlbumCoverWidget( QGraphicsItem *parent );
+    MpAlbumCoverWidget( QGraphicsItem *parent = 0 );
+    virtual ~MpAlbumCoverWidget();
     void setIcon(const HbIcon &icon );
     void setDefaultIcon( const HbIcon &icon );
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, 
                 QWidget *widget = 0 );
+    void gestureEvent(QGestureEvent *event);
 
 signals:
 

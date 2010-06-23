@@ -1549,6 +1549,8 @@ void CMPXDbHandler::RefreshStartL()
             iOutOfDisk = ETrue;
         }
 
+    User::LeaveIfError( err );
+    	
     if(!iOutOfDisk)
     {
         MPX_TRAP(err,CheckDiskSpaceOnDrivesL());
@@ -1573,26 +1575,29 @@ void CMPXDbHandler::RefreshStartL()
 void CMPXDbHandler::RefreshEndL()
     {
     MPX_FUNC("CMPXDbHandler::RefreshEndL");
-    iRefresh = EFalse;
-    EndTransactionL(KErrNone);
-    if (!iOutOfDisk)
-        {
-        // Write last refreshed time as current time
-        // This also sets corrupt = 0
-        TTime curTime;
-        curTime.HomeTime();
-        SetLastRefreshedTimeL(curTime);
-        }
+    if ( iRefresh )
+        { 
+        iRefresh = EFalse;
+        EndTransactionL(KErrNone);
+        if (!iOutOfDisk)
+            {
+            // Write last refreshed time as current time
+            // This also sets corrupt = 0
+            TTime curTime;
+            curTime.HomeTime();
+            SetLastRefreshedTimeL(curTime);
+            }
 
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-    //for AbstractAlbum garbage collection
-    //can not leave
-    TRAP_IGNORE( AbstractAlbumCleanUpL() );
+        //for AbstractAlbum garbage collection
+        //can not leave
+        TRAP_IGNORE( AbstractAlbumCleanUpL() );
 #endif
    
 #ifdef __RAMDISK_PERF_ENABLE
-    iDbManager->CopyDBsFromRamL();
+        iDbManager->CopyDBsFromRamL();
 #endif //__RAMDISK_PERF_ENABLE
+        }
     }
 
 // ----------------------------------------------------------------------------

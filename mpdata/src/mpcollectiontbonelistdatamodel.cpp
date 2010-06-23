@@ -73,8 +73,9 @@ MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionD
     : QAbstractListModel( parent ),
       mCollectionData( collectionData ),
       mPlaybackData( playbackData ),
-      mRowCount(0),
-      mCurrentSongId(0)
+      mRowCount( 0 ),
+      mCurrentSongId( 0 ),
+      mPlaybackActive( false )
 {
     TX_ENTRY
     connect( mCollectionData, SIGNAL(refreshAlbumSongs()),
@@ -140,13 +141,12 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
         }
     }
     else if ( role == Qt::DecorationRole ) {
-        if ( mPlaybackData 
-                && mPlaybackActive
-                && mPlaybackData->id() == mCollectionData->albumSongId( index.row() ) ) {
+        if ( mPlaybackActive
+                && mPlaybackData->id() == mCollectionData->albumSongId( row ) ) {
             QList<QVariant> iconList;
             iconList << QVariant(); //primary icon is not used.
-            //TODO: Replace for qtg_small_speaker when available.
-            iconList << HbIcon("qtg_graf_hspage_highlight");
+
+            iconList << HbIcon("qtg_small_speaker");
             returnValue = iconList;
         }
     }
@@ -177,10 +177,10 @@ void MpCollectionTBoneListDataModel::updateSong()
     
     if ( mCurrentSongId && newSongId != mCurrentSongId) {
         //Attempt to remove old song icon.
-        QModelIndex OldSongIndex;
-        OldSongIndex = index( mCollectionData->albumSongIndex( mCurrentSongId ) );
-        if ( OldSongIndex.isValid() ) {
-            emit dataChanged( OldSongIndex, OldSongIndex );
+        QModelIndex oldSongIndex;
+        oldSongIndex = index( mCollectionData->albumSongIndex( mCurrentSongId ) );
+        if ( oldSongIndex.isValid() ) {
+            emit dataChanged( oldSongIndex, oldSongIndex );
         }       
     }
 

@@ -20,9 +20,9 @@
 #include <QGesture>
 
 #include <hbwidget.h>
-#include <hblistview.h>
 
 class HbFrameItem;
+class HbListView;
 
 class MpTrackListWidget : public HbWidget
 {
@@ -31,25 +31,24 @@ class MpTrackListWidget : public HbWidget
 public:
     
     MpTrackListWidget( QGraphicsItem *parent = 0 );
-    void resizeEvent(QGraphicsSceneResizeEvent *event);
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, 
-                QWidget *widget = 0 );
+    virtual ~MpTrackListWidget();
     HbListView *list(); 
 
 
 signals:
 
-    void close();
+    void closed();
 
 private:
-    void gestureEvent(QGestureEvent *event);
-    QSwipeGesture::SwipeDirection swipeAngleToDirection( int angle );
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void gestureEvent(QGestureEvent *event);
+    QSwipeGesture::SwipeDirection swipeAngleToDirection( int angle );
     
 private:
-    HbListView      *mList;
-    HbFrameItem     *mFrameItem;
+    HbListView      *mList;      // own - parented
+    HbFrameItem     *mFrameItem; // own - parented
 };
 
 #endif // MPTRACKLISTWIDGET_H

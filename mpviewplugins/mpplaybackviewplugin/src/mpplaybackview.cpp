@@ -24,8 +24,6 @@
 #include <hbtoolbutton.h>
 #include <hbaction.h>
 #include <hbicon.h>
-#include <QTranslator>
-#include <QLocale>
 
 #include "mpplaybackview.h"
 #include "mpplaybackwidget.h"
@@ -68,8 +66,6 @@ MpPlaybackView::MpPlaybackView()
       mPauseIcon( 0 ),
       mShuffleOnIcon( 0 ),
       mShuffleOffIcon( 0 ),
-      mMpTranslator( 0 ),
-      mCommonTranslator( 0 ),
       mTimer(0),
       mSeeking(false)
 
@@ -89,8 +85,6 @@ MpPlaybackView::~MpPlaybackView()
     delete mShuffleOnIcon;
     delete mShuffleOffIcon;
     delete mEqualizerWidget;
-    delete mMpTranslator;
-    delete mCommonTranslator;
     TX_EXIT
 }
 
@@ -101,25 +95,6 @@ MpPlaybackView::~MpPlaybackView()
 void MpPlaybackView::initializeView()
 {
     TX_ENTRY
-
-    //Load musicplayer and common translators
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
-
-    mCommonTranslator = new QTranslator( this );
-    translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
-    TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mCommonTranslator );
-    }
 
     mWindow = mainWindow();
 
@@ -151,6 +126,7 @@ void MpPlaybackView::initializeView()
                  this, SLOT( shuffleChanged( bool ) ) );
         connect( MpSettingsManager::instance(), SIGNAL( repeatChanged( bool ) ),
                  this, SLOT( repeatChanged( bool ) ) );
+        connect( mMpEngine, SIGNAL( libraryUpdated() ), this, SLOT( closeEqualizerDialog() ) );
     }
 
     TX_EXIT
@@ -173,15 +149,61 @@ void MpPlaybackView::activateView()
 void MpPlaybackView::deactivateView()
 {
     TX_ENTRY
-    if ( mEqualizerWidget && mEqualizerWidget->isActive() ) {
-        mEqualizerWidget->close();
-    }
-
     menu()->close();
-
     setNavigationAction( 0 );
     mActivated = false;
     TX_EXIT
+}
+
+/*!
+ Gets the current status of the view in a form of string
+ */
+QString MpPlaybackView::playbackStatus()
+{
+    TX_ENTRY
+    QString currentStatus;
+    
+        switch ( mPlaybackData->playbackState() ) {
+            case MpPlaybackData::NotPlaying:
+                TX_LOG_ARGS( "playbackStatus: NotPlaying" )
+                currentStatus = "NotPlaying";
+                break;
+			case MpPlaybackData::Playing:
+                TX_LOG_ARGS( "playbackStatus: Playing" )
+                currentStatus = "Playing";
+                break;
+            case MpPlaybackData::Paused:
+                TX_LOG_ARGS( "playbackStatus: Paused" )
+                currentStatus ="Paused";
+                break;
+            case MpPlaybackData::Stopped:
+                TX_LOG_ARGS( "playbackStatus: Stopped" )
+                currentStatus = "Stopped";
+                break;
+            default:
+                break;
+        }
+    TX_EXIT
+    return currentStatus;
+    
+}
+
+/*!
+ Gets the current Shuffle setting value
+ */
+bool MpPlaybackView::shuffleEnabled()
+{
+    TX_ENTRY
+    return mShuffle;
+}
+
+/*!
+ Gets the current Repeat setting value
+ */
+bool MpPlaybackView::repeatEnabled()
+{
+    TX_ENTRY
+    return mRepeat;
 }
 
 /*!
@@ -324,6 +346,7 @@ void MpPlaybackView::setupToolbar()
 {
     TX_ENTRY
     HbToolBar *myToolBar = toolBar();
+    myToolBar->setObjectName("PlaybackToolbar");
     myToolBar->setOrientation( Qt::Horizontal );
     QActionGroup *actionsGroup = new QActionGroup( myToolBar );
 
@@ -539,6 +562,7 @@ void MpPlaybackView::connectButtons()
         }
     }
 }
+
 /*!
  Slot to be called to activate equalizer dialog.
  */
@@ -551,5 +575,19 @@ void MpPlaybackView::showEqualizerDialog()
         mEqualizerWidget->show();
     }
 
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when library has been updated
+ */
+void MpPlaybackView::closeEqualizerDialog()
+{
+    TX_ENTRY
+    
+    if ( mEqualizerWidget ) {
+        mEqualizerWidget->close();
+    }
+    
     TX_EXIT
 }

@@ -19,6 +19,7 @@
 #define MPCOLLECTIONPOPUPHANDLER_H
 
 #include <QObject>
+#include "mpmpxcollectionviewdefs.h"
 
 class MpCollectionView;
 class HbPopup;
@@ -27,6 +28,7 @@ class MpEngine;
 class QAbstractItemModel;
 class MpMpxCollectionData;
 class QPointF;
+class MpPopupHandlerPermanentData;
 
 class MpCollectionPopupHandler : public QObject
 {
@@ -46,9 +48,7 @@ public:
     void openAddToCurrentPlaylist( MpMpxCollectionData* collectionData );
     void openCreateNewPlaylist( MpMpxCollectionData* collectionData );
     void openArrangeSongs();
-    void cancelOngoingPopup();
-
-    bool showingPopup();
+    void cancelOngoingPopup(  bool onlyContextMenu );
 
 public slots:
     //Context Menus
@@ -68,6 +68,11 @@ public slots:
     void handleArrangeSongs( HbAction *selectedAction );
     void handleRequestDelete( HbAction *selectedAction );
 
+    //External Events
+    void handleDeleteStarted( TCollectionContext context, int count );
+    void handleAddingSongs( int count );
+    void handleOperationEnded( bool success );
+
     void outstandingPopupClosing();
 
 private:
@@ -79,27 +84,15 @@ private:
     void getModelIndexes( const QString &label, QAbstractItemModel* model, const char *handler );
     void launchArrangeSongsDialog();
     void requestDelete( QList<int> &selection );
+    void launchProgressDialog( const char *id );
+    void connectExternalEvents();
 
 private:
     MpCollectionView                *mView;                          // Not own
     HbPopup                         *mOutstandingPopup;              // Own
     MpEngine                        *mMpEngine;                      // Not own
-
-    class MpPopupHandlerPermanentData : public QObject
-    {
-    public:
-        MpPopupHandlerPermanentData( QObject *parent=0 );
-        virtual ~MpPopupHandlerPermanentData();
-        void clear();
-    public:
-        MpMpxCollectionData         *mIsolatedCollectionData;        // Not own
-        QAbstractItemModel          *mAbstractItemModel;             // Own
-        QList<int>                  mSelectedItems;
-        QString                     mOriginalName;
-        int                         mContextMenuIndex;
-    };
-    
     MpPopupHandlerPermanentData     *mPermanentData;                 // Own
+    bool                            mExternalEventsConnected;
 };
 
 #endif  // MPCOLLECTIONPOPUPHANDLER_H

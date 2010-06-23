@@ -37,7 +37,6 @@ class HbPushButton;
 class HbDocumentLoader;
 class HbListWidget;
 
-class QTranslator;
 class QGraphicsLinearLayout;
 class HbProgressBar;
 
@@ -130,10 +129,6 @@ private:
     HbPushButton            *mButton;
     HbProgressBar           *mInspireMeProgressBar;
 
-    
-    QTranslator             *mMpTranslator;         // Own
-    QTranslator             *mCommonTranslator;     // Own
-    
     MpQueryManager*         mMpQueryManager;     // Own
 	
     bool                    mInspireMeQueryOngoing;

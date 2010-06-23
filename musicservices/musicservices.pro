@@ -14,38 +14,32 @@
 # Description: Project file for Music Services.
 #
 
-symbian:TARGET.UID3 = 0x10207C69
-
 TEMPLATE = lib
 CONFIG += hb
 TARGET = musicservices
-
-TARGET.CAPABILITY = CAP_GENERAL_DLL
+symbian: { 
+    TARGET.UID3 = 0x10207C69
+    MMP_RULES += "DEFFILE musicservices.def"
+    defFilePath = .
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.EPOCALLOWDLLDATA = 1
+}
+DEFINES += BUILD_MUSICSERVICES_LIB
 
 INCLUDEPATH += . \
-    	inc \
-    	../inc
+               inc \
+    	       ../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lxqservice \
         -lxqserviceutil
 
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
-
+# Input
 HEADERS += inc/musicservices.h \
-		   inc/getmusicservice.h \
-		   inc/playmusicservice.h 
+           inc/getmusicservice.h \
+           inc/playmusicservice.h 
 
 SOURCES += src/musicservices.cpp \
-		   src/getmusicservice.cpp \
-		   src/playmusicservice.cpp
-    
-DEFINES += BUILD_MUSICSERVICES_LIB
+           src/getmusicservice.cpp \
+           src/playmusicservice.cpp
 
-myDefInclude = "NOSTRICTDEF" \
-"$${LITERAL_HASH}if defined(WINS)"\
-"DEFFILE  bwins/musicservices.def "\
-"$${LITERAL_HASH}else "\
-"DEFFILE  eabi/musicservices.def "\
-"$${LITERAL_HASH}endif"
-MMP_RULES += myDefInclude

@@ -424,7 +424,6 @@ void CMPXDbPlugin::CommandL(
         case EMcRefreshEnded:
             {
             MPX_DEBUG1("CMPXDbPlugin::CommandL - EMcRefreshEnded");
-            iDbHandler->CheckDiskSpaceOnDrivesL();
             // ask the handler to finalize the transaction
             iDbHandler->RefreshEndL();
             iRefreshing=EFalse;
@@ -456,7 +455,6 @@ void CMPXDbPlugin::CommandL(
             iDbHandler->MtpStartL();
             break;
         case EMcCmdMtpEnd:
-            iDbHandler->CheckDiskSpaceOnDrivesL();
             iMtpInUse = EFalse;
             iDbHandler->MtpEndL();
             break;

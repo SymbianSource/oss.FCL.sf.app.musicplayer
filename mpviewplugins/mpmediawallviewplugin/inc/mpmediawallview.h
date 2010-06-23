@@ -64,6 +64,7 @@ public slots:
     void showTrackList();
     void dismissListClosingAnimation();
     void listItemActivated( const QModelIndex &index );
+    void fetchAlbumSongs(QModelIndex index);
 
 private:
     void setUpMediaWallWidget();

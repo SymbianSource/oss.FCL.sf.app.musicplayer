@@ -16,25 +16,18 @@
 
 SERVICEAPP = app
 TARGET = musicplayer
-ICON = resources/qtg_large_music_player.svg
-DEPENDPATH += .
-INCLUDEPATH += . \
-        inc \
-        ../inc \
-        ../musicservices/inc
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
-
 CONFIG += hb
-
 symbian: {
     TARGET.UID2 = 0x100039CE 
     TARGET.UID3 = 0x10207C62
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x1F00000
     TARGET.CAPABILITY = CAP_APPLICATION NetworkControl DRM
+    SKINICON = qtg_large_music_player
 
     BLD_INF_RULES.prj_exports += \
         "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis"
+
 }
 
 # Service provider specific configuration.
@@ -46,33 +39,34 @@ SERVICE.OPTIONS = embeddable
 CONFIG += service
 # Service provider specific configuration ends
 
-# Input
-LIBS += -lecom.dll \
-    -lestor.dll  \
-    -lfbscli.dll \
-    -lxqplugins.dll \
-    -lmpxviewframeworkqt.dll \
-    -lxqservice \
-    -lxqserviceutil \
-    -lmusicservices \
-    -lmpsettingsmanager \
-    -lmpengine
+DEPENDPATH += .
+INCLUDEPATH += . \
+               inc \
+               ../inc \
+               ../musicservices/inc
+INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
+LIBS += -lecom \
+        -lestor  \
+        -lfbscli \
+        -lxqplugins \
+        -lmpxviewframeworkqt \
+        -lxqservice \
+        -lxqserviceutil \
+        -lmusicservices \
+        -lmpsettingsmanager \
+        -lmpengine
+
+# Input
+HEADERS += inc/mpmainwindow.h \
+           inc/mpglobalpopuphandler.h \
+           inc/mpmtpinfolink.h
 
 SOURCES += src/main.cpp \
-           src/mpmainwindow.cpp
+           src/mpmainwindow.cpp \
+           src/mpglobalpopuphandler.cpp \
+           src/mpmtpinfolink.cpp
 
-HEADERS =  inc/mpmainwindow.h
-
-MMP_RULES+=EXPORTUNFROZEN
-
-symbian: {
-    addImages.sources = images/*.png \
-                        resources/*.xml
-    DEPLOYMENT += addImages
-    }
-
-RESOURCES += resources/musiplayerapp.qrc
 
 TRANSLATIONS = musicplayer.ts
 

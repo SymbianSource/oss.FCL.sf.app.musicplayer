@@ -23,8 +23,9 @@
 #include <hbapplication.h>
 #include <hbscrollbar.h>
 #include <hblabel.h>
-#include <hbpushbutton.h>
 #include <hbtoolbutton.h>
+#include <hblistview.h>
+#include <hbstyleloader.h>
 
 #include <hgmediawall.h>
 
@@ -131,7 +132,7 @@ void MpMediaWallView::initializeView()
         mPlayPauseAction = new HbAction( HbIcon() , QString(), this );  
         mPlaybackData = MpEngineFactory::sharedEngine()->playbackData();
         qobject_cast<HbToolButton*>( widget )->setAction( mPlayPauseAction );
-        //we need this widget to hide the play pause button, for soem reaosn it does not want to hide.
+        //we need this widget to hide the play pause button, for some reason it does not want to hide.
         mPlayPauseContainer = mDocumentLoader->findWidget( QString( "playPauseButtonContainer" ) );
         updatePlayPauseAction();
         connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
@@ -162,7 +163,7 @@ void MpMediaWallView::initializeView()
     }
     
     mAlbumCover = new MpAlbumCoverWidget( this );
-    mAlbumCover->setDefaultIcon( HbIcon( "qtg_large_music_album" ) );
+    mAlbumCover->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
     mAlbumCover->hide();
     
     mTrackList = new MpTrackListWidget( this );
@@ -171,9 +172,10 @@ void MpMediaWallView::initializeView()
     
     connect(mAlbumCover,SIGNAL(clicked()),this, SLOT(hideTracksList()));
     connect(mTrackList->list(), SIGNAL(activated(QModelIndex)), this, SLOT(listItemActivated(QModelIndex)));
-    connect(mTrackList,SIGNAL(close()),this, SLOT(hideTracksList()));
+    connect(mTrackList,SIGNAL(closed()),this, SLOT(hideTracksList()));
 
-
+    HbStyleLoader::registerFilePath(":/css/mpcustommediawall.css");
+    HbStyleLoader::registerFilePath(":/css/mpcustommediawall.hgmediawall.widgetml");  
     
     TX_EXIT
 }
@@ -227,8 +229,11 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
             mDocumentLoader->load( MUSIC_MEDIAWALL_DOCML, "mediaWall", &ok);
             if ( ok ) {
                 QGraphicsWidget *widget;
-                widget = mDocumentLoader->findWidget(QString("mediaWallWidget"));
+                widget = mDocumentLoader->findWidget(QString("MPmediaWallWidget"));
                 mMediaWallWidget = qobject_cast<HgMediawall*>(widget);
+                //set these items as children of the media wall so they show behind the scrollbar.
+                mTrackList->setParentItem(mMediaWallWidget);
+                mAlbumCover->setParentItem(mMediaWallWidget);
                 mModel->refreshModel();
                 setUpMediaWallWidget();
             }
@@ -241,6 +246,9 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
     }
     else {
         if ( mMediaWallWidget ) {
+            //Take ownership of these items to prevent delete from media wall widget.
+            mTrackList->setParentItem( this );
+            mAlbumCover->setParentItem( this );
             delete mMediaWallWidget;
             mMediaWallWidget = 0;
             
@@ -344,6 +352,7 @@ void MpMediaWallView::showTrackList()
     setUpListAnimation();
     mListShowAnimationGroup->setDirection(QAbstractAnimation::Forward);
     mListShowAnimationGroup->start();
+    mModel->setItemVisibility( mMediaWallWidget->currentIndex(), false );
 }
 
 /*!
@@ -367,6 +376,7 @@ void MpMediaWallView::dismissListClosingAnimation()
     mShowingSongsList = false;
     mAlbumCover->hide();
     mTrackList->hide();
+    mModel->setItemVisibility( mMediaWallWidget->currentIndex(), true );
     mListShowAnimationGroup->stop();
     disconnect(mListShowAnimationGroup, SIGNAL(finished()), this, SLOT(dismissListClosingAnimation()));
 }
@@ -383,14 +393,24 @@ void MpMediaWallView::listItemActivated( const QModelIndex &index )
 }
 
 /*!
+ Slot to be called to fetch the songs for an album.
+ */
+void MpMediaWallView::fetchAlbumSongs(QModelIndex index)
+{
+    if ( !mCollectionData->setCurrentAlbum( index.row() ) ) {
+        mEngine->findAlbumSongs( index.row() );
+    }
+}
+
+/*!
  Loads the media wall widget.
  */
 void MpMediaWallView::setUpMediaWallWidget()
 {
-    HbIcon defaultIcon( "qtg_large_music_album" );
+    HbIcon defaultIcon( "qtg_large_album_art" );
     defaultIcon.setSize(mMediaWallWidget->itemSize());
     mMediaWallWidget->setDefaultImage( defaultIcon.pixmap().toImage() );
-    mMediaWallWidget->enableReflections( false );
+    mMediaWallWidget->enableReflections( true );
     mMediaWallWidget->setModel( mModel );
     if ( mPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
         scrollToNowPlaying();
@@ -427,6 +447,7 @@ void MpMediaWallView::setUpMediaWallWidget()
     mMediaWallWidget->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOn ); //HgWidget::ScrollBarAutoHide
     mMediaWallWidget->scrollBar()->setInteractive( true );
     mMediaWallWidget->setIndexFeedbackPolicy( HgWidget::IndexFeedbackSingleCharacter );
+    connect(mMediaWallWidget, SIGNAL(animationAboutToEnd(QModelIndex)), SLOT(fetchAlbumSongs(QModelIndex)));
     connect(mMediaWallWidget, SIGNAL(activated(QModelIndex)), SLOT(showTrackList()));
     connect(mMediaWallWidget, SIGNAL(scrollingStarted()), SLOT(dismissListClosingAnimation()));
 }
@@ -458,11 +479,7 @@ void MpMediaWallView::setUpListAnimation()
         mListShowListAnimation = new QPropertyAnimation( mTrackList, "geometry", this );
         mListShowListAnimation->setDuration( 400 );
         mListShowListAnimation->setEasingCurve(QEasingCurve::InOutCubic);
-        mListShowAnimationGroup->addAnimation(mListShowListAnimation);
-        //track list goes on top of media wall.
-        mTrackList->setZValue(mMediaWallWidget->zValue()+1);
-        //album cover goes on top of track list.
-        mAlbumCover->setZValue(mMediaWallWidget->zValue()+2);
+        mListShowAnimationGroup->addAnimation(mListShowListAnimation);      
     }
     
     //Get the current album cover geometry.
@@ -472,11 +489,6 @@ void MpMediaWallView::setUpListAnimation()
         return;
     }
     QRectF itemRect = poly.boundingRect();
-
-    //Request the albums tracks, they are set to the track list model.
-    if ( !mCollectionData->setCurrentAlbum( index.row() ) ) {
-        mEngine->findAlbumSongs( index.row() );
-    }
     
     //Get the album cover icon.
     QVariant image = mModel->data(index, Qt::DecorationRole);
@@ -494,7 +506,7 @@ void MpMediaWallView::setUpListAnimation()
     endRect.moveTo( endRect.topLeft().x() - endRect.size().width() / 2.0, endRect.topLeft().y() );
     mCoverShowListAnimation->setStartValue(itemRect);
     mCoverShowListAnimation->setEndValue(endRect);
-    endRect.moveTo(endRect.topRight() - QPointF(1,0)); //adjust by one pixel to prevent a gap.
+    endRect.moveTo( endRect.topRight() );
     mListShowListAnimation->setStartValue(itemRect);
     mListShowListAnimation->setEndValue(endRect);
     

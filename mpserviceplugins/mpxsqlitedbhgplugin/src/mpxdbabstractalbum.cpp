@@ -78,7 +78,8 @@ CMPXDbAbstractAlbum::~CMPXDbAbstractAlbum()
     {
     MPX_FUNC("CMPXDbAbstractAlbum::~CMPXDbAbstractAlbum");
 #ifdef RD_MPX_TNM_INTEGRATION
-    delete iTNManager;
+    if (iTNManager)
+        delete iTNManager;
 #endif //RD_MPX_TNM_INTEGRATION
     }
 
@@ -222,6 +223,81 @@ void CMPXDbAbstractAlbum::DecrementSongsForCategoryL(
     }
 
 // ----------------------------------------------------------------------------
+// Remove abstractalbums which have no songs associated.
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAbstractAlbum::RemoveAbstractAlbumsWithNoSongL()
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::RemoveAbstractAlbumsWithNoSongL");
+    
+    RArray<TUint32> iItemsIds;
+    CleanupClosePushL(iItemsIds);
+    
+    //get all abstractalbum with no songs associated.
+    GetAllItemsWithNoSongL(iItemsIds);
+    TInt count = iItemsIds.Count();
+    TInt err = KErrNone;
+    if (count)
+        {           	
+        MPX_DEBUG2("CMPXDbAbstractAlbum::RemoveAbstractAlbumsWithNoSongL, abstractalbum count[%d] ", iItemsIds.Count());
+        CMPXMessageArray* itemChangedMessages = CMPXMediaArray::NewL();
+        CleanupStack::PushL(itemChangedMessages);
+
+        //go through each one to delete
+        for (TInt i=0; i< count; i++)
+            {
+            TRAP(err, RemoveAbstractAlbumL(iItemsIds[i], *itemChangedMessages, EFalse));
+            if (err != KErrNone)
+                {
+                MPX_DEBUG2("CMPXDbAbstractAlbum::RemoveAbstractAlbumsWithNoSongL, error happens when delete abstractalbum, err ", err);
+                }
+            }
+       CleanupStack::PopAndDestroy(itemChangedMessages);
+       }
+    CleanupStack::PopAndDestroy(&iItemsIds);
+  }
+
+// ----------------------------------------------------------------------------
+// Remove .alb entry from AbstractAlnum table, TN table if .alb files deleted 
+// from file manager when refresh library
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAbstractAlbum::AbstractAlbumCleanUpL()
+    {
+    MPX_FUNC("CMPXDbAbstractAlbum::AbstractAlbumCleanUpL");
+    RArray<TMPXAttribute> attributes;
+    CleanupClosePushL(attributes);
+    attributes.AppendL(KMPXMediaGeneralUri);
+    CMPXMediaArray* mediaArray = CMPXMediaArray::NewL();
+    CleanupStack::PushL(mediaArray);
+    
+    GetAllCategoryItemsL(attributes.Array(), *mediaArray);
+
+    TInt count(mediaArray->Count());
+    if (count)
+        {      
+        CMPXMessageArray* itemChangedMessages = CMPXMediaArray::NewL();
+        CleanupStack::PushL(itemChangedMessages);
+        for (TInt i = 0; i < count; i++)
+            {
+            CMPXMedia* element = mediaArray->AtL(i);
+            const TDesC& uri = element->ValueText(KMPXMediaGeneralUri);                                 
+
+            //check if the file exists in file system
+            if (!(BaflUtils::FileExists(iFs, uri)))
+                {
+                //generate abstractalbum UID with the Uri
+                TUint32 abstractAlbumId(MPXDbCommonUtil::GenerateUniqueIdL(iFs, EMPXAbstractAlbum, uri, EFalse));
+                RemoveAbstractAlbumL(abstractAlbumId, *itemChangedMessages, ETrue);             
+                }
+            }
+            CleanupStack::PopAndDestroy(itemChangedMessages);
+        }
+        CleanupStack::PopAndDestroy(mediaArray);       
+        CleanupStack::PopAndDestroy(&attributes);     
+    }
+
+// ----------------------------------------------------------------------------
 // CMPXDbAbstractAlbum::RemoveAbstractAlbumL
 // ----------------------------------------------------------------------------
 //
@@ -252,10 +328,13 @@ void CMPXDbAbstractAlbum::RemoveAbstractAlbumL(TUint32 aAbstractAlbumId,
 // ----------------------------------------------------------------------------
 //
 void CMPXDbAbstractAlbum::HandleTNL( const TDesC& aOldPath,
-        const TDesC& aNewPath, TInt /*aPriority*/ )
+        const TDesC& aNewPath, TInt aPriority )
   {
   MPX_FUNC("CMPXDbAbstractAlbum::HandleTNL");
-
+  if (!iTNManager)
+      {
+      CreateTNMSessionL();
+      }
   if (aNewPath.Compare(KNullDesC)==0 && aOldPath.Compare(KNullDesC)!=0)
       {         
       // remove from thumbnail database table
@@ -263,14 +342,15 @@ void CMPXDbAbstractAlbum::HandleTNL( const TDesC& aOldPath,
       CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
                aOldPath, KImageFileType );
       iTNManager->DeleteThumbnails( *source );
+          
       CleanupStack::PopAndDestroy( source );
       }
    else if (aNewPath.Compare(KNullDesC)!=0)
       {
       //rename thumbnail
-      MPX_DEBUG1("CMPXDbAbstractAlbum::HandleTNL, rename TN");
-      // TODO: uncomment when RenameThumbnailsL is supported.
-      //iTNManager->RenameThumbnailsL( aOldPath,  aNewPath, aPriority );
+      MPX_DEBUG1("CMPXDbAbstractAlbum::HandleTNL, rename Thumbnail entry in Thumbnail table");
+    
+      iTNManager->RenameThumbnailsL( aOldPath,  aNewPath, aPriority );  
       //after rename, reset flag
       iRenameTN = EFalse;
       }
@@ -532,6 +612,7 @@ CMPXDbAbstractAlbum::CMPXDbAbstractAlbum(
     CMPXDbManager& aDbManager,
     TMPXGeneralCategory aCategory, RFs& aFs) :
     CMPXDbCategory(aDbManager, aCategory),
+    iTNManager(NULL),
     iFs(aFs)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::CMPXDbAbstractAlbum");
@@ -546,11 +627,7 @@ void CMPXDbAbstractAlbum::ConstructL()
     MPX_FUNC("CMPXDbAbstractAlbum::ConstructL");
 
     BaseConstructL();
-#ifdef RD_MPX_TNM_INTEGRATION
-    // Create Thumbnail Manager instance. This object is the observer.
-    iTNManager = CThumbnailManager::NewL( *this );
     iRenameTN = EFalse;
-#endif //RD_MPX_TNM_INTEGRATION
     }
 
 
@@ -572,5 +649,17 @@ void CMPXDbAbstractAlbum::ThumbnailPreviewReady(
 void CMPXDbAbstractAlbum::ThumbnailReady( TInt /*aError*/,
         MThumbnailData& /*aThumbnail*/, TThumbnailRequestId /*aId*/ )
     {
+    }
+
+// ---------------------------------------------------------------------------
+// CMPXDbAbstractAlbum::CreateTNMSessionL
+// Create thumbnail session
+// ---------------------------------------------------------------------------    
+void CMPXDbAbstractAlbum::CreateTNMSessionL()
+    {
+    if(!iTNManager)
+        {
+        iTNManager = CThumbnailManager::NewL( *this );
+        }
     }
 // End of File

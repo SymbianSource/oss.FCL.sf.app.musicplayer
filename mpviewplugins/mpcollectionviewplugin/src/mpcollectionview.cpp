@@ -803,33 +803,34 @@ void MpCollectionView::setMainToolBar()
     if ( !mMainToolBar ) {
         //Create the toolbar.
         mMainToolBar = new HbToolBar();
+        mMainToolBar->setObjectName( "MainToolBar" );
         mMainToolBar->setOrientation( Qt::Horizontal );
         QActionGroup *actionsGroup = new QActionGroup( mMainToolBar );
         HbAction *action;
 
         // All Songs
-        action = createToolBarAction( actionsGroup, "qtg_mono_songs_all" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_songs_all", "AllSongsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openSongs() ) );
         mMainToolBar->addAction( action );
         
         // Artists
-        action = createToolBarAction( actionsGroup, "qtg_mono_artists" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_artists", "ArtistsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openArtists() ) );
         mMainToolBar->addAction( action );
 
         // Albums
-        action = createToolBarAction( actionsGroup, "qtg_mono_music_albums" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_music_albums", "AlbumsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openAlbums() ) );
         mMainToolBar->addAction( action );
 
         // Playlists
-        action = createToolBarAction( actionsGroup, "qtg_mono_playlist" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_playlist", "PlaylistsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openPlaylists() ) );
         mMainToolBar->addAction( action );
         
         if ( mViewMode != MpCommon::FetchView ) {
             // Music Store
-            action = createToolBarAction(actionsGroup, "qtg_mono_ovistore" );
+            action = createToolBarAction(actionsGroup, "qtg_mono_ovistore", "MusicStoreAction" );
             connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openMusicStore() ) );
             mMainToolBar->addAction( action );
         }
@@ -872,26 +873,26 @@ void MpCollectionView::setPlaylistToolBar()
     TX_ENTRY
     if ( !mPlaylistToolBar ) {
         mPlaylistToolBar = new HbToolBar();
+        mPlaylistToolBar->setObjectName( "PlaylistToolBar" );
         mPlaylistToolBar->setOrientation( Qt::Horizontal );
         HbAction *action;
-        HbIcon *icon;
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_plus" );
-        action->setIcon( *icon );
+        action->setIcon( HbIcon( "qtg_mono_plus" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( prepareToAddToPlaylist() ) );
+        action->setObjectName( "AddToPlaylistAction" );
         mPlaylistToolBar->addAction( action );
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_minus" );
-        action->setIcon( *icon);
+        action->setIcon( HbIcon( "qtg_mono_minus" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( deleteSongs() ) );
+        action->setObjectName( "RemoveFromPlaylistAction" );
         mPlaylistToolBar->addAction( action );
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_organize" );
-        action->setIcon( *icon );
+        action->setIcon( HbIcon( "qtg_mono_organize" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( arrangeSongs() ) );
+        action->setObjectName( "OrganizePlaylistAction" );
         mPlaylistToolBar->addAction( action );
     }
 
@@ -922,13 +923,15 @@ void MpCollectionView::setPlaylistToolBar()
  */
 HbAction *MpCollectionView::createToolBarAction(
     QActionGroup *actionsGroup,
-    const QString& icon )
+    const QString& icon,
+    const QString& objectName )
 {
     HbIcon actionIcon( icon );
 
     HbAction *action = new HbAction( actionsGroup );
     action->setIcon( actionIcon );
     action->setCheckable( true );
+    action->setObjectName( objectName );
     return action;
 }
 

@@ -82,7 +82,9 @@ MpMpxCollectionFrameworkWrapperPrivate::MpMpxCollectionFrameworkWrapperPrivate( 
       iRepeatFeature( ETrue ),
       iShuffleFeature( ETrue ),
       iReopen( EFalse ),
-      iShuffleAll( EFalse )
+      iShuffleAll( EFalse ),
+      iRestoreDefaultPath( EFalse ),
+      iRestorePathIndex(0)
 {
     TX_LOG
 }
@@ -382,6 +384,34 @@ void MpMpxCollectionFrameworkWrapperPrivate::openShuffleAllSongsPath()
 
 /*!
  \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::savePath( QByteArray &data )
+{
+    TX_ENTRY
+    TRAPD( err, DoSavePathL( data ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+    
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::restorePath( const QByteArray &data )
+{
+    TX_ENTRY
+    TRAPD( err, DoRestorePathL( data ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+}
+
+
+/*!
+ \internal
  Result of open or re-open operation to the Collection Framework.
  */
 void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL( 
@@ -504,6 +534,77 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleIsolatedOpenL( const CMPXMedi
         emit q_ptr->isolatedCollectionOpened( iIsolatedCollectionData );
     }
     else {
+        TX_LOG_ARGS( "Error: " << aError << "; should never get here." );
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath, TInt aError )
+{
+    TX_ENTRY_ARGS( "aError=" << aError );
+    if ( aError == KErrNone ) {
+        CMPXCollectionPath* cpath = CMPXCollectionPath::NewL( aPath );
+        CleanupStack::PushL( cpath );
+        if ( cpath->Count() <= 0 ) {
+            //There are no entries on the path
+            if ( !iRestoreDefaultPath ) {
+                //Try restoring default path if not already tried
+                //This is a special case where a playlist's songs where on the MMC and it was removed
+                iRestoreDefaultPath = ETrue;
+                iRestorePathIndex = 0;
+                CMPXCollectionPath* cpath = iCollectionUiHelper->MusicAllSongsPathL();
+                CleanupStack::PushL( cpath );
+                iIsolatedCollectionHelper->OpenCollectionL( *cpath, iRestorePathIndex, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+                CleanupStack::PopAndDestroy( cpath );
+            }
+            else {
+                //emit signal to go back to collection view because there is no music
+                emit q_ptr->restorePathFailed();
+            }
+        }
+        else if ( iRestorePathIndex ) {
+            //If RestorePathIndex equals zero there is no need to check with previous index
+            //just go and create playlist below
+            if ( iRestorePathIndex == cpath->IndexOfId( iRestorePathIndexId ) ) {
+                //Song is in path and maintains previous position
+                cpath->Set( iRestorePathIndex );
+                CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+                CleanupStack::PushL( playList );
+                createPlaybackUtilityL();
+                iPlaybackUtility->InitL( *playList, EFalse );
+                CleanupStack::PopAndDestroy( playList );
+            }
+            else { 
+                //Re open path starting at the beginning of the collection
+                iRestorePathIndex = 0;
+                cpath->Back(); 
+                iIsolatedCollectionHelper->OpenCollectionL( *cpath, iRestorePathIndex, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+            }
+        }
+        else {
+            //We create a playlist right away since there is no need to check the index for the first element
+            CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+            CleanupStack::PushL( playList );
+            createPlaybackUtilityL();
+            iPlaybackUtility->InitL( *playList, EFalse );
+            CleanupStack::PopAndDestroy( playList );
+        }
+        CleanupStack::PopAndDestroy( cpath );
+    }
+    else if ( aError == KErrNotFound ) {
+        //Path not found (e.g. MMC removed) try restoring default path
+        iRestoreDefaultPath = ETrue;
+        iRestorePathIndex = 0;
+        CMPXCollectionPath* cpath = iCollectionUiHelper->MusicAllSongsPathL();
+        CleanupStack::PushL( cpath );
+        iIsolatedCollectionHelper->OpenCollectionL( *cpath, iRestorePathIndex, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+        CleanupStack::PopAndDestroy( cpath );
+    }
+    else {
+        //Open path failed
         TX_LOG_ARGS( "Error: " << aError << "; should never get here." );
     }
     TX_EXIT
@@ -1294,5 +1395,77 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoPlayAllSongsPlaylistL()
     TX_EXIT
 }
 
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoSavePathL( QByteArray &data )
+{
+    TX_ENTRY
+    CBufFlat* buffer = CBufFlat::NewL( 256 );
+    CleanupStack::PushL( buffer );
+    TBufBuf bufBuf;
+    bufBuf.Set( *buffer, 0, TBufBuf::EWrite );
+    
+    RWriteStream writeStream( &bufBuf );
+    writeStream.PushL();
+    
+    if ( iPlaybackUtility ) {
+        MMPXSource* source = iPlaybackUtility->Source();
+        CMPXCollectionPlaylist* playList( NULL );
+        if( source ) {
+        playList = source->PlaylistL();
+            if ( playList ) {
+                CleanupStack::PushL( playList );
+                const CMPXCollectionPath& cpath = playList->Path();
+                writeStream << cpath;
+                writeStream.CommitL();
+                CleanupStack::PopAndDestroy( playList );
+            }
+        }
+    }
+    data.append(reinterpret_cast<const char*>(buffer->Ptr(0).Ptr()) ,buffer->Ptr(0).Length());
+    CleanupStack::PopAndDestroy( 2, buffer ); //writeStream and buffer
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoRestorePathL( const QByteArray &data )
+{
+    TX_ENTRY
+    int dataSize = data.size();
+    if ( dataSize > 0 ) {
+        TPtrC8 activityDataDescriptor( reinterpret_cast<const unsigned char*> ( data.constData() ), data.size() );
+         
+        //Take a copy of the data
+        CBufFlat* buffer = CBufFlat::NewL( dataSize );
+        CleanupStack::PushL( buffer );
+        buffer->InsertL( 0, activityDataDescriptor, dataSize );
+        
+        TBufBuf bufBuf;
+        bufBuf.Set( *buffer, 0, TBufBuf::ERead );
+        RReadStream readStream( &bufBuf );
+        readStream.PushL();
+        
+        CMPXCollectionPath* cpath( NULL );
+        cpath = CMPXCollectionPath::NewL(readStream);
+        CleanupStack::PushL(cpath);
+        iRestorePathIndex = 0;
+        if( cpath->Levels() ) {
+            iRestorePathIndexId = cpath->Id();
+            iRestorePathIndex = cpath->Index();
+            cpath->Back();
+        }
+        if ( !iIsolatedCollectionHelper ) {
+            iIsolatedCollectionHelper = CMpMpxIsolatedCollectionHelper::NewL( this );
+        }   
+        iIsolatedCollectionHelper->OpenCollectionL( *cpath, iRestorePathIndex, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+          
+        CleanupStack::PopAndDestroy( cpath );
+        CleanupStack::PopAndDestroy( 2, buffer ); //readStream and buffer
+    }
+    TX_EXIT
+}
 
 //EOF

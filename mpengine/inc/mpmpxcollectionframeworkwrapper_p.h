@@ -85,6 +85,9 @@ public:
     
     MpMpxCollectionData *collectionData();
     void openShuffleAllSongsPath();
+    
+    void savePath( QByteArray &data );
+    void restorePath( const QByteArray &data );
 
 private:
 
@@ -96,6 +99,7 @@ private:
     void HandleCollectionMediaL( const CMPXMedia& aMedia, TInt aError );
     void HandleOperationCompleteL( TCHelperOperation aOperation, TInt aErr, void* aArgument );
     void HandleIsolatedOpenL( const CMPXMedia& aEntries, TInt aError );
+    void HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath, TInt aError );
     void HandleFindAllL( const CMPXMedia& aResults, TBool aComplete, TInt aError );
 
     void DoInitL();
@@ -129,6 +133,8 @@ private:
     void PreparePlaylistMediaL( CMPXMedia& aMedia, QList<int> &selection, MpMpxCollectionData *collectionData );
     void createPlaybackUtilityL();
     void DoPlayAllSongsPlaylistL();
+    void DoSavePathL( QByteArray &data );
+    void DoRestorePathL( const QByteArray &data );
 
 private:
 
@@ -149,6 +155,9 @@ private:
     TBool                             iShuffleFeature;
     TBool                             iReopen;
     TBool                             iShuffleAll;
+    TBool                             iRestoreDefaultPath;
+    TInt                              iRestorePathIndex;
+    TMPXItemId                        iRestorePathIndexId;
 
 };
 

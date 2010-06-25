@@ -80,7 +80,26 @@ CMPXCollectionDbManager::CMPXCollectionDbManager(
 void CMPXCollectionDbManager::ConstructL()
     {
     MPX_FUNC("CMPXCollectionDbManager::ConstructL");
-    CMPXDbManager::ConstructL(TFileName(KMCDbFile));
+    //Find out if the system has an internal drive (eMMC)
+    TBool eMMC( EFalse );
+    TDriveInfo driveInfo;  
+    if( Fs().Drive( driveInfo, EDriveE ) == KErrNone )
+    	{
+        if ( driveInfo.iDriveAtt & KDriveAttInternal )
+        	eMMC = ETrue;
+    	}
+    
+    //Use different name for Dbs if the system has an internal drive vs. MMC-only.	
+    //Since hard-coded drive letters in the Thumbnail URIs
+    //So Dbs are not interchangeable between an internal drive system and MMC-only system.
+    if ( eMMC )	
+        {
+        CMPXDbManager::ConstructL(TFileName( KMCDbFileEMMC ));
+        }
+    else
+        {
+        CMPXDbManager::ConstructL(TFileName( KMCDbFile ));
+    	}
     }
 
 // End of File

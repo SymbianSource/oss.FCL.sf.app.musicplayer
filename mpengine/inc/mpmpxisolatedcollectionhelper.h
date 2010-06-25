@@ -23,6 +23,7 @@
 class CMPXCollectionOpenUtility;
 class CMPXCollectionPath;
 
+const TInt KIncrementalNullOffset = 0;
 /*!
     \class MpMpxIsolatedCollectionHelperObserver
     \brief Observer interface for class CMpMpxIsolatedCollectionHelper
@@ -35,17 +36,23 @@ public:
 
     virtual void HandleIsolatedOpenL( const CMPXMedia& aEntries, 
             TInt aError ) = 0;
+    
+    virtual void HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath,
+            TInt aError ) = 0;
 };
 
 class CMpMpxIsolatedCollectionHelper : public CBase,
                                       public MMPXCollectionObserver
 {
 public:
-
+    enum MpOpenMode{
+        DefaultMode = 0,
+        RestorePathMode 
+    };
     static CMpMpxIsolatedCollectionHelper* NewL( MMpMpxIsolatedCollectionHelperObserver* aObserver );
     static CMpMpxIsolatedCollectionHelper* NewLC( MMpMpxIsolatedCollectionHelperObserver* aObserver );
     virtual ~CMpMpxIsolatedCollectionHelper();
-    void OpenCollectionL( CMPXCollectionPath& aPath );
+    void OpenCollectionL( CMPXCollectionPath& aPath, TInt aIndex = KIncrementalNullOffset, MpOpenMode aMode = DefaultMode );
     
 private:
     CMpMpxIsolatedCollectionHelper( MMpMpxIsolatedCollectionHelperObserver* aObserver );
@@ -60,6 +67,7 @@ private:
     MMpMpxIsolatedCollectionHelperObserver* iObserver;
     CMPXCollectionOpenUtility*              iIncrementalOpenUtil; //owned
     TBool                                   iFirstIncrementalOpen;
+    MpOpenMode                              iOpenMode;
 
 };
 

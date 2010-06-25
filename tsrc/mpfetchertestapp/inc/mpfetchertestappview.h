@@ -43,6 +43,9 @@ private slots:
     void launchHomeScreen();
     void launchHomeScreenNowPlaying();
     void launchHomeScreenNPShuffle();
+    void playNPVSong();
+    void endMP();
+    void killMP();
     
     
     

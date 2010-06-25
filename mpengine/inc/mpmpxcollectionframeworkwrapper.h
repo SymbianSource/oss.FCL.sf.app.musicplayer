@@ -68,6 +68,9 @@ public:
    
     void openShuffleAllSongsPath();
     
+    void savePath( QByteArray &data );
+    void restorePath( const QByteArray &data ); 
+    
 signals:
 
     void collectionPlaylistOpened();
@@ -80,6 +83,7 @@ signals:
     void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
     
     void containerContentsChanged();
+    void restorePathFailed();
 
 private:
 

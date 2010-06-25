@@ -294,6 +294,22 @@ void MpMpxCollectionFrameworkWrapper::openShuffleAllSongsPath()
 {
     d_ptr->openShuffleAllSongsPath();
 }
+
+/*!
+ Called to save playback data used for publishing activity (i.e. restore path) 
+ */
+void  MpMpxCollectionFrameworkWrapper::savePath( QByteArray &data )
+{
+    d_ptr->savePath( data );
+}
+
+/*!
+ Called to load playback data used from returning activity (i.e. restore path) 
+ */
+void MpMpxCollectionFrameworkWrapper::restorePath( const QByteArray &data ) 
+{
+    return d_ptr->restorePath( data );
+}
 /*!
  Cancels CollectionUiHelper request.
  */

@@ -270,9 +270,9 @@ _LIT(KAuxiliaryCreateTable, "CREATE TABLE Auxiliary("
 _LIT(KAuxiliaryDropTable,"DROP TABLE Auxiliary");
 _LIT(KAuxiliaryCheckTable, "SELECT Id,Version,TimeRefreshed,TimeSynced,Corrupt,SaveDeletedRecordCount FROM AUXILIARY");
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.5.0',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.6.0',%u)");
 #else
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.4.0',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.6.1',%u)");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryAuxiliarySetTime, "UPDATE :dbname.Auxiliary SET TimeRefreshed='%S', Corrupt=0");
 _LIT(KQueryAuxiliaryGetTime, "SELECT TimeRefreshed FROM :dbname.Auxiliary");
@@ -427,19 +427,22 @@ _LIT(KCriterionPlaylistSongId, "PlaylistSongs.SongId=%u");
 //
 _LIT(KAlbumCreateTable,"CREATE TABLE Album("
     L"UniqueId INTEGER PRIMARY KEY,"
+    L"ArtistName TEXT COLLATE NOCASE,"
     L"Name TEXT COLLATE NOCASE,"
     L"SongCount INTEGER,"
-    L"Artist INTEGER,"
-    L"Art TEXT)");
+	L"Art TEXT)");
 
-_LIT(KAlbumCheckTable,"SELECT UniqueId,Name,SongCount,Artist,Art FROM Album");
+_LIT(KAlbumCheckTable,"SELECT UniqueId,ArtistName,Name,SongCount,Art FROM Album");
 
-_LIT(KQueryAlbumInsert, "INSERT INTO :dbname.Album(UniqueId,Name,SongCount,Artist,Art) VALUES(%u,'%S',%u,%u,'%S')");
+_LIT(KQueryAlbumInsert, "INSERT INTO :dbname.Album(UniqueId,ArtistName,Name,SongCount,Art) VALUES(%u,'%S','%S',%u,'%S')");
 _LIT(KQueryAlbumUpdate, "UPDATE :dbname.Album SET %S WHERE UniqueId=%u");
 
 _LIT(KQueryAlbumItem, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId AND UniqueId=%u");
-_LIT(KQueryAlbumAll, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId ORDER BY 2");
-_LIT(KQueryAlbumAllMediaWall, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId ORDER BY 6");
+_LIT(KQueryAlbumAll, "SELECT Album.* FROM :dbname.Album ORDER BY Name");
+_LIT(KQueryAlbumAllMediaWall, "SELECT Album.* FROM :dbname.Album ORDER BY ArtistName");
+_LIT(KCriterionArtistName, "ArtistName='%S'");
+_LIT(KCriterionArt, "Art='%S'");
+
 // == Artist table queries ==========================================
 //
 _LIT(KArtistCreateTable,"CREATE TABLE Artist("

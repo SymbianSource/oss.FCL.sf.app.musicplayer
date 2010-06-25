@@ -108,7 +108,7 @@ private:
     void setPlaylistToolBar();
 
     HbAction *createToolBarAction( QActionGroup *actionsGroup,
-        const QString& icon );
+        const QString& icon, const QString& objectName );
 
     void updateMenu();
     void updateToolBar();

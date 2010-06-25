@@ -27,7 +27,7 @@
 
 // Db filename
 _LIT(KMCDbFile, "pcv6_1.db");
-
+_LIT(KMCDbFileEMMC, "pcv6_1i.db");
 // Collection Db resource file
 _LIT(KMPXCollectionDbResourceFile,  "PCRes.rsc");
 

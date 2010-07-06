@@ -80,7 +80,7 @@ class MMPXDbMusicObserver
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
        // for Album and Artist table
         virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-            TUint32 aArtistId, const TDesC& aArt,
+            const TDesC& aArtistName, const TDesC& aArt,
             TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
         /**
         * Called when the ID of a category item changed for a Music record, for example when
@@ -528,7 +528,7 @@ class CMPXDbMusic :
          * Get the ID of Artist which belongs to the specified Album
          * @param aId, the ID of Album
          */
-        TUint32 CMPXDbMusic::ArtistForAlbumL(const TUint32 aId);
+        TUint32 ArtistForAlbumL(const TUint32 aId);
             
         /**
         * Get the Albumart of song which belongs to the specified Album
@@ -688,9 +688,6 @@ class CMPXDbMusic :
             const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TUint32& aItemId);
 
-        TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
-          const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
-          CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, TUint32 aArtistId);
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:
         * EMPXMediaGeneralId, EMPXMediaGeneralType, EMPXMediaGeneralCategory,
@@ -707,6 +704,12 @@ class CMPXDbMusic :
         *  otherwise EFalse.
         */
         TBool IsSupported(const CMPXMedia& aMedia);
+        
+        /**
+         * Query all songs from the database and add results to the 
+         * iAllSongsQueryResult cache array.
+         */
+        void ExecuteQueryAllSongsL(const TArray<TMPXAttribute>& aAttrs);
 
     private:    // from MMPXTable
 
@@ -809,6 +812,7 @@ class CMPXDbMusic :
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED 
         TBool iArtNeedUpdated;
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
+        RPointerArray<CMPXMedia> iAllSongsQueryResult;
     };
 
 #endif // MPXDBMUSIC_H

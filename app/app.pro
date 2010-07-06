@@ -26,7 +26,11 @@ symbian: {
     SKINICON = qtg_large_music_player
 
     BLD_INF_RULES.prj_exports += \
-        "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis"
+        "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis" \
+        "resources/musicplayer.docml          /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.docml" \
+        "resources/musicplayer.splashml       /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.splashml" \
+        "resources/musicplayer.docml          /epoc32/data/Z/resource/hb/splashml/musicplayer.docml" \
+        "resources/musicplayer.splashml       /epoc32/data/Z/resource/hb/splashml/musicplayer.splashml"
 
 }
 

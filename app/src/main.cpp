@@ -18,6 +18,8 @@
 #include <QtGui>
 #include <hbapplication.h>
 #include <hbtranslator.h>
+#include <xqserviceutil.h>
+#include <hbsplashscreen.h>
 
 #include "mpmainwindow.h"
 #include "mptrace.h"
@@ -52,19 +54,17 @@ int main(int argc, char *argv[])
     TX_STATIC_ENTRY
 
     // Initialization
-    HbApplication app(argc, argv);
+    HbApplication app(argc, argv, Hb::NoSplash);
+    if ( !XQServiceUtil::isService() ) {
+        HbSplashScreen::start( );
+    }
     QVariantHash params = app.activateParams();
     HbTranslator translator;
     translator.loadCommon();
     MpMainWindow::ActivityMode mode;
     
     if ( !params.value( "activityname" ).toString().compare( "MusicNowPlayingView" ) ) { 
-        if( params.contains( "shuffle" ) ) {
-            mode = !params.value( "shuffle" ).toString().compare( "yes" ) ? MpMainWindow::MusicNowPlayingViewShuffleAll : MpMainWindow::MusicNowPlayingView;
-        }
-        else {
-            mode = MpMainWindow::MusicNowPlayingView;
-        }
+        mode = MpMainWindow::MusicNowPlayingView;
     }
     else {
         mode = MpMainWindow::MusicMainView;

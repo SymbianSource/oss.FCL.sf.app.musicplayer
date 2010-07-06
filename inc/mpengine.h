@@ -121,6 +121,10 @@ public:
     void disableEqualizer();
     int activePreset();
     QStringList presetNames();
+    
+    //Activity related
+    void saveActivityData( QByteArray &data );
+    void loadActivityData( const QByteArray &data );
 
 signals:
 
@@ -142,6 +146,7 @@ signals:
     void playlistsRenamed( bool success );
     void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
     void containerContentsChanged();
+    void restorePathFailed();
 
     // Equalizer related
     void equalizerReady();

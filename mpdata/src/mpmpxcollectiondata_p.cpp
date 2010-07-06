@@ -668,7 +668,7 @@ void MpMpxCollectionDataPrivate::DoRemoveItemL( int index )
  */
 bool MpMpxCollectionDataPrivate::DoTestCachedItemL( int itemId )
 {
-    if ( !iCachedRemovedItem && !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
+    if ( !iCachedRemovedItem || !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
     return ( itemId == iCachedRemovedItem->ValueTObjectL<TInt>( KMPXMediaGeneralId ) );

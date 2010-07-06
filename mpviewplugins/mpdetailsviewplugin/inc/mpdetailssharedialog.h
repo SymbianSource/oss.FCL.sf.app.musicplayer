@@ -21,7 +21,7 @@
 
 #include <HbDialog>
 #include <QList>
-#include <QSsLError>
+#include <QSslError>
 #include "mpsharedata.h"
 
 class QGraphicsWebView;

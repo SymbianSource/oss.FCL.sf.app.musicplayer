@@ -625,9 +625,14 @@ void TestMpMpxCollectionData::testInsertCachedItemItem()
     int itemId = 147;
     CMPXMedia* item = CMPXMedia::NewL();
 
+    // Test error case when iCachedRemovedItem is NULL. 
+    QVERIFY( !mTest->testCachedItem( itemId ) );
+
+    // Test error case when KMPXMediaGeneralId is not supported. 
     mTestPrivate->iCachedRemovedItem = item;
     QVERIFY( !mTest->testCachedItem( itemId ) );
 
+    // Test good case.
     item->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
     QVERIFY( mTest->testCachedItem( itemId ) );
 

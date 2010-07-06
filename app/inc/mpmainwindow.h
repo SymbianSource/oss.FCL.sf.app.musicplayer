@@ -29,6 +29,7 @@
 class MpxViewPlugin;
 class MusicServices;
 class MpGlobalPopupHandler;
+class HbActivityManager;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
@@ -55,6 +56,10 @@ public:
 
     void initialize( ActivityMode mode );
 
+signals:
+    // For automation testability
+    void applicationReady();
+
 public slots:
     void handleCommand( int commandCode );
     void handleLibraryUpdated();
@@ -62,6 +67,8 @@ public slots:
     void switchView( Qt::Orientation orientation );
     void initializeServiceView( TUid hostUid );
     void handleActivity();
+    void saveActivity();
+    void handleRestorePathFailed();
 
 private:
     void activateView(ViewType);
@@ -69,6 +76,7 @@ private:
     void disconnectView();
     void keyPressEvent(QKeyEvent *event);
     MpxViewPlugin*  loadView( ViewType type, MpCommon::MpViewMode viewMode= MpCommon::DefaultView );
+    void loadActivity( QVariant data );
 
 private:
 
@@ -81,6 +89,8 @@ private:
     ViewType              mVerticalViewType;
     MusicServices         *mMusicServices;         // Own
     MpGlobalPopupHandler  *mPopupHandler;          // Own
+    bool                   mUserExit;
+    HbActivityManager     *mActivityManager;       //Not Own
 
 };
 

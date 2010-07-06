@@ -4079,12 +4079,13 @@ void CMPXDbPlugin::DoIncrementalOpenL( const CMPXCommand& aCmd )
     TInt numItems = aCmd.ValueTObjectL<TInt>( KMPXCollectionCommandIdIncOpenLNumItems );
 
     TReadDirection direction(EReadUnknown);
+/*  Ascending and Decending reads are currently not used. We optimized for offset reads.
     if( aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLAscDsc) &&
         aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLKeyItem) )
         {
         direction = aCmd.ValueTObjectL<TReadDirection>(KMPXCollectionCommandIdIncOpenLAscDsc);
         }
-
+*/
     CMPXCollectionPath* path =  aCmd.ValueCObjectL<CMPXCollectionPath>(KMPXCollectionCommandIdIncOpenLPath);
     CleanupStack::PushL( path );
     MPX_DEBUG_PATH( *path );

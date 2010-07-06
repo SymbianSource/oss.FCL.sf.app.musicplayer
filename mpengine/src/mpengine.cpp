@@ -168,6 +168,14 @@
  */
 
 /*!
+    \fn void restorePathFailed()
+
+    This signal is emitted when an the previous path cannot be restored 
+    (i.e. no music in collection).
+
+ */
+
+/*!
     \fn void containerContentsChanged()
 
     This signal is emitted when items are removed or inserted on the current 
@@ -265,6 +273,9 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
                 this, SLOT( handleDeleteStarted( TCollectionContext, int ) ) );
         connect( mMpxCollectionWrapper, SIGNAL( songsDeleted( bool ) ),
                 this, SLOT( handleDeleteEnded( bool ) ),
+                Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( restorePathFailed() ),
+                this, SIGNAL( restorePathFailed() ),
                 Qt::QueuedConnection );
     }
 
@@ -967,6 +978,22 @@ int MpEngine::activePreset()
 QStringList MpEngine::presetNames()
 {
     return mEqualizerWrapper->presetNames(); 
+}
+
+/*!
+ Save data needed to later restore state (activity)
+ */
+void MpEngine::saveActivityData( QByteArray &data )
+{
+    mMpxCollectionWrapper->savePath( data );
+}
+
+/*!
+ Restore state from activity data 
+ */
+void MpEngine::loadActivityData( const QByteArray &data ) 
+{
+    mMpxCollectionWrapper->restorePath( data );
 }
 
 /*!

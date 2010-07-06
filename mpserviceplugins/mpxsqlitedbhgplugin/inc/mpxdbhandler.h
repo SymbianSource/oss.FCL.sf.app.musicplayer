@@ -913,21 +913,7 @@ class CMPXDbHandler :
         void DoRemoveSongFromPlaylistL(TUint32 aPlaylistId, const TMPXItemId& aSongId,
             TInt aOrdinal, CMPXMessageArray& aItemChangedMessages);
 
-#ifdef ABSTRACTAUDIOALBUM_INCLUDED  
-        /**
-        * Remove all abstractalbum items with no songs associated,
-        * TN and .alb files also removed.
-        *
-        */
-        void RemoveAbstractAlbumsWithNoSongL();
-        
-          /**
-        /* When refresh library, Remove .alb entry from AbstractAlnum table, TN table if .alb files deleted 
-        /* from file manager 
-        */
-        void AbstractAlbumCleanUpL();
-       
-#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
 
         /**
         * Deletes all song records marked as deleted.
@@ -1052,7 +1038,7 @@ class CMPXDbHandler :
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 
        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-            TUint32 aArtist, const TDesC& aArt,
+           const TDesC& aArtistName, const TDesC& aArt,
             TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
 
        virtual void UpdateCategoryItemL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
@@ -1091,7 +1077,12 @@ class CMPXDbHandler :
     * @see MMPXDbAlbumObserver
     */
     virtual TBool HandleIsUnknownArtistL(TUint32 aArtistId);
-    virtual TUint32 HandleArtistForAlbumL(const TUint32 aAlbumId);
+    /**
+    * Get the Artistname of song which belongs to the specified Album.     
+    * @param aId, The Album ID.
+	* @returns alternative artistname retrieved in the specified Album.
+    */
+    virtual HBufC* HandleArtistForAlbumL(const TUint32 aAlbumId);
         
     /**
     * Get the Albumart of song which belongs to the specified Album.     

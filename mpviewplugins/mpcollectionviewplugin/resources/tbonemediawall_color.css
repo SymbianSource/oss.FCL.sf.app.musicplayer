@@ -1,0 +1,21 @@
+/*Albums TBone*/
+HgMediawall#albumWall::title
+{
+    color: #FFFFFF; /* media wall reflection is 50% darker than original image, white will work best even for white images.*/
+}
+
+HgMediawall#albumWall::description
+{
+    color: #FFFFFF; /* media wall reflection is 50% darker than original image, white will work best even for white images.*/
+}
+
+/*Artist Albums TBone*/
+HgMediawall#artistAlbumWall::title
+{
+    color: #FFFFFF; /* media wall reflection is 50% darker than original image, white will work best even for white images.*/
+}
+
+HgMediawall#artistAlbumWall::description
+{
+    color: #FFFFFF; /* media wall reflection is 50% darker than original image, white will work best even for white images.*/
+}

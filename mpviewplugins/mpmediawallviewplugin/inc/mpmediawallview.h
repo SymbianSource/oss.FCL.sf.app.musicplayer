@@ -68,6 +68,7 @@ public slots:
 
 private:
     void setUpMediaWallWidget();
+    void scrollToDefault();
     void scrollToNowPlaying();
     void setUpListAnimation();
 

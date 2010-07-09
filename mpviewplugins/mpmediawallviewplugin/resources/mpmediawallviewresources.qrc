@@ -9,6 +9,7 @@
         <file alias="mpcustomlistitem.hblistviewitem.widgetml">mpcustomlistitem.hblistviewitem.widgetml</file>
         
         <file alias="mpcustommediawall.css">mpcustommediawall.css</file>
+        <file alias="mpcustommediawall_color.css">mpcustommediawall_color.css</file>
         <file alias="mpcustommediawall.hgmediawall.widgetml">mpcustommediawall.hgmediawall.widgetml</file>
     </qresource>
    

@@ -11,20 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpcollectioncontainers unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpcollectioncontainers
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    stub/inc \
-    ../../../../inc
-
+               stub/inc \
+               ../../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
@@ -63,3 +61,4 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            stub/src/hgmediawall.cpp
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc
+

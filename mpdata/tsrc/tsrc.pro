@@ -11,12 +11,17 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpdata unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpcollectionalbumartmanager \
-          unittest_mpmpxcollectiondata \
-          unittest_mpcollectiontbonelistdatamodel
+SUBDIRS += # unittest_mpcollectionalbumartmanager \
+#           unittest_mpcollectiondatamodel \
+#           unittest_mpcollectiontbonelistdatamodel \
+           unittest_mpmpxcollectiondata \
+#           unittest_mpplaybackdata \
+#           unittest_mpsongdata
+
+CONFIG += ordered
 

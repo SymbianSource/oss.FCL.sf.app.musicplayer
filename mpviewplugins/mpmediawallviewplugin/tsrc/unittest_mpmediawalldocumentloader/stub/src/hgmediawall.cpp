@@ -19,14 +19,14 @@
 
 
 /*!
- Constructs the now playing widget stub
+ Constructs the media wall widget stub
  */
 HgMediawall::HgMediawall()
 {
 }
 
 /*!
- Destructs the now playing widget stub.
+ Destructs the media wall widget stub.
  */
 HgMediawall::~HgMediawall()
 {

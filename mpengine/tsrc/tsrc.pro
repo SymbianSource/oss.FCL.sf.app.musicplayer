@@ -11,16 +11,19 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpengine unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpaudioeffectsframeworkwrapper \
-          unittest_mpequalizerframeworkwrapper \
-          unittest_mpmpxcollectionframeworkwrapper \
-          unittest_mpmpxharvesterframeworkwrapper \
-          unittest_mpmpxisolatedcollectionhelper \
-          unittest_mpmpxplaybackframeworkwrapper \
-          unittest_mpsongscanner
+SUBDIRS += unittest_mpaudioeffectsframeworkwrapper \
+           unittest_mpequalizerframeworkwrapper \
+           # unittest_mpmediakeyhandler \
+           unittest_mpmpxcollectionframeworkwrapper \
+           unittest_mpmpxharvesterframeworkwrapper \
+           unittest_mpmpxisolatedcollectionhelper \
+           # unittest_mpmpxplaybackframeworkwrapper \
+           unittest_mpsongscanner
+
+CONFIG += ordered
 

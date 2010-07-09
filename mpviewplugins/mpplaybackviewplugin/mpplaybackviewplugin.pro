@@ -39,19 +39,22 @@ LIBS += -lmpxplaybackutility \
         -laudioequalizerutility \
         -lmpsettingsmanager \
         -lmpengine \
-        -lmpdata
+        -lmpdata \
+        -lmpalbumcoverwidget
 
 # Input
 HEADERS += ../../inc/mpviewbase.h \
            inc/mpplaybackviewplugin.h \
            inc/mpplaybackview.h \
            inc/mpplaybackwidget.h \
-           inc/mpequalizerwidget.h
+           inc/mpequalizerwidget.h \
+           inc/mpplaybackdocumentloader.h
 
 SOURCES += src/mpplaybackviewplugin.cpp \
           src/mpplaybackview.cpp \
           src/mpplaybackwidget.cpp \
-          src/mpequalizerwidget.cpp
+          src/mpequalizerwidget.cpp \
+          src/mpplaybackdocumentloader.cpp
        
 RESOURCES += resources/mpplaybackviewpluginresources.qrc
 

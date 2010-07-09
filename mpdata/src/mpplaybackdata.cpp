@@ -82,7 +82,6 @@ MpPlaybackData::MpPlaybackData( QObject *parent )
       mAlbumId(0),
       mId(0),
       mAlbumArt( "qtg_large_music_album" ),
-      mDefaultAlbumArt( "qtg_large_music_album" ),
       mPlaybackState( NotPlaying ),
       mRealAudio( false )
 {
@@ -269,15 +268,15 @@ void MpPlaybackData::setAlbumArtUri( const QString& albumArtUri )
         if ( ok ) {
             mReqId = mThumbnailManager->getThumbnail( albumArtUri );
             if ( mReqId == KUndefined ) {
-                // Request failed. Set default album art.
-                mAlbumArt = mDefaultAlbumArt;
+                // Request failed. clear the icon.
+                mAlbumArt.clear();
                 emit albumArtReady();
             }
         }
     }
     else {
-        // No album art uri. Set default album art.
-        mAlbumArt = mDefaultAlbumArt;
+        // No album art uri. clear the icon.
+        mAlbumArt.clear();
         emit albumArtReady();
     }
     TX_EXIT
@@ -402,7 +401,7 @@ void MpPlaybackData::resetData()
     mUri = QString();
     mAlbumId = 0;
     mId = 0;
-    mAlbumArt = HbIcon();
+    mAlbumArt.clear();
     mRealAudio = false;
     
     emit durationChanged();
@@ -420,35 +419,13 @@ void MpPlaybackData::thumbnailReady(
     TX_LOG_ARGS( "error = " << error << ", id = " << id )
     Q_UNUSED(data);
     if ( error == 0 && mReqId == id ) {
-        QIcon qicon;
-        QPixmap mCompositePixmap;
-        mReqId = KUndefined;
-        
-        mCompositePixmap = QPixmap( 360, 360 );
-        mCompositePixmap.fill( Qt::transparent );
-        QPainter painter(&mCompositePixmap);
-        painter.setCompositionMode(QPainter::CompositionMode_Clear);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        painter.fillRect(mCompositePixmap.rect(), Qt::transparent);
-        painter.drawPixmap(QRect(0, 0,360,360), pixmap);
-        
-        if ( !mCompositePixmap.isNull() ) {
-            qicon = QIcon( mCompositePixmap );
-        }
-        else {
-            qicon = QIcon( pixmap );
-        }
-        
-        
-        mAlbumArt = HbIcon(qicon);
-        
-        emit albumArtReady();
+        mAlbumArt = HbIcon(QIcon( pixmap ));      
     }
     else {
         mReqId = KUndefined;
-        mAlbumArt = mDefaultAlbumArt;
-        emit albumArtReady();
+        mAlbumArt.clear();
     }
+    emit albumArtReady();
     TX_EXIT
 }
 

@@ -38,20 +38,19 @@ LIBS += -lestor \
         -lmpxviewframeworkqt \
         -lganeswidgets \
         -lmpengine \
-        -lmpdata
+        -lmpdata \
+        -lmpalbumcoverwidget
 	
 # Input
 HEADERS += ../../inc/mpviewbase.h \
            inc/mpmediawallviewplugin.h \
            inc/mpmediawallview.h \
            inc/mpmediawalldocumentloader.h \
-           inc/mpalbumcoverwidget.h \
            inc/mptracklistwidget.h \
            inc/mpreflectioneffect.h
 SOURCES += src/mpmediawallviewplugin.cpp \
            src/mpmediawallview.cpp \
            src/mpmediawalldocumentloader.cpp \
-           src/mpalbumcoverwidget.cpp \
            src/mptracklistwidget.cpp \
            src/mpreflectioneffect.cpp
 RESOURCES += resources/mpmediawallviewresources.qrc

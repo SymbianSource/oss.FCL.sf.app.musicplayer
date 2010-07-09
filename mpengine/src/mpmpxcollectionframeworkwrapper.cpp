@@ -91,11 +91,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( TUid hostUid, QObject *parent )
+MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )
     : QObject( parent )
 {
     d_ptr = new MpMpxCollectionFrameworkWrapperPrivate( this );
-    d_ptr->init( hostUid );
+    d_ptr->init( hostUid, songData );
 }
 
 /*!
@@ -293,6 +293,14 @@ void MpMpxCollectionFrameworkWrapper::setShuffleFeatureEnabled( bool enable )
 void MpMpxCollectionFrameworkWrapper::openShuffleAllSongsPath()
 {
     d_ptr->openShuffleAllSongsPath();
+}
+
+/*!
+ Retrieves song details for the specified \a index.
+ */
+void MpMpxCollectionFrameworkWrapper::retrieveSongDetails( int index )
+{
+    d_ptr->retrieveSongDetails( index );
 }
 
 /*!

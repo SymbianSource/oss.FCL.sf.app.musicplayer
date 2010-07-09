@@ -30,7 +30,6 @@ class MpSongScanner;
 class MpMediaKeyHandler;
 class MpMpxCollectionFrameworkWrapper;
 class MpMpxPlaybackFrameworkWrapper;
-class MpMpxDetailsFrameworkWrapper;
 class MpMpxCollectionData;
 class MpPlaybackData;
 class MpSongData;
@@ -110,7 +109,7 @@ public:
 
     // Details related
     MpSongData *songData();
-    void retrieveSong();
+    void retrieveSongDetails( int index = -1 );
 
     // Audio Effects related
     int balance();
@@ -135,7 +134,6 @@ signals:
     void unableToCotinueDueUSB();
     void usbSynchronizationStarted();
     void usbSynchronizationFinished();
-    void libraryRefreshNeeded();
 
     // Collection related
     void collectionPlaylistOpened();
@@ -215,15 +213,14 @@ private:
     // Playback related
     MpMpxPlaybackFrameworkWrapper        *mMpxPlaybackWrapper; //Own
 
-    // Details related
-    MpMpxDetailsFrameworkWrapper         *mMpxDetailsWrapper;  // Own
-
     // Audio Effects related
     MpAudioEffectsFrameworkWrapper       *mAudioEffectsWrapper; // Own
 
     // Equalizer related
     MpEqualizerFrameworkWrapper          *mEqualizerWrapper; // Own
     int                                  mCurrentPresetIndex;
+
+    MpSongData                           *mSongData;            // Owned
 
     // General
     UsbBlockingState                     mUsbBlockingState;

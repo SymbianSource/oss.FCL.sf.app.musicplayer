@@ -19,6 +19,7 @@
 
 #include <e32debug.h>
 #include <Qt>
+#include <mpxcollectionpath.h>
 
 #include "stub/inc/mpxcollectionopenutility.h"
 
@@ -71,6 +72,13 @@ void CMPXCollectionOpenUtility::SetDelay( TInt aDelay )
     iDelay = aDelay;
 }
 
+/*!
+ Stub function.
+*/
+CMPXCollectionPath* CMPXCollectionOpenUtility::PathL()
+{
+    return CMPXCollectionPath::NewL();
+}
 /*!
  Stub function.
 */

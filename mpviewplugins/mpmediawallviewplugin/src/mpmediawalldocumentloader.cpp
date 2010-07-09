@@ -19,7 +19,6 @@
 #include <hbtoolbutton.h>
 
 #include "mpmediawalldocumentloader.h"
-#include "mpcommondefs.h"
 #include "mptrace.h"
 
 

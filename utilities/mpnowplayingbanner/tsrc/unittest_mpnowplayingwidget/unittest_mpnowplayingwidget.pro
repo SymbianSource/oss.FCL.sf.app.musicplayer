@@ -11,27 +11,25 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpnowplayingwidget unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
+CONFIG += qtestlib hb symbian_test
 HB += hbfeedback
-CONFIG += symbian_test
 TARGET = unittest_mpnowplayingwidget
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    stub/inc \
-    ../../inc \
-    ../../../../inc
+               stub/inc \
+               ../../inc \
+               ../../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lestor.dll \
         -lfbscli.dll
 
-# Input
 HEADERS += inc/unittest_mpnowplayingwidget.h \
            stub/inc/mpplaybackdata.h \
            stub/inc/mpenginefactory.h \

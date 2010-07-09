@@ -7,5 +7,11 @@
     <qresource prefix="/icons" >      
         <file alias="default_album.png">default_album.png</file>    
     </qresource>
+    
+    <qresource prefix="/css">
+        <file alias="tbonemediawall.css">tbonemediawall.css</file>
+        <file alias="tbonemediawall_color.css">tbonemediawall_color.css</file>
+        <file alias="tbonemediawall.hgmediawall.widgetml">tbonemediawall.hgmediawall.widgetml</file>
+    </qresource>
         
 </RCC>

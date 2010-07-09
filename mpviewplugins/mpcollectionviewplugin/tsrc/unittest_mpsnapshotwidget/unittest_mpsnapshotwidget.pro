@@ -11,19 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpsnapshotwidget unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpsnapshotwidget
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../../inc
+               ../../inc \
+               ../../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 HEADERS += inc/unittest_mpsnapshotwidget.h \
@@ -31,3 +30,4 @@ HEADERS += inc/unittest_mpsnapshotwidget.h \
 
 SOURCES += src/unittest_mpsnapshotwidget.cpp \
            ../../src/mpsnapshotwidget.cpp 
+

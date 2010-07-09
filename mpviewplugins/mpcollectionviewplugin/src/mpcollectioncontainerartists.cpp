@@ -21,6 +21,7 @@
 #include <hblistview.h>
 #include <hbgroupbox.h>
 #include <hbindexfeedback.h>
+#include <hbparameterlengthlimiter.h>
 
 #include <hgmediawall.h>
 
@@ -203,10 +204,10 @@ void MpCollectionContainerArtists::itemActivated( const QModelIndex &index )
 /*!
  Slot to be called when scrolling ends in media wall and an album is centered.
  */
-void MpCollectionContainerArtists::albumCentered()
+void MpCollectionContainerArtists::albumCentered( const QModelIndex &modelIndex )
 {
     TX_ENTRY
-    int index = mTBone->currentIndex().row();
+    int index = modelIndex.row();
     TX_LOG_ARGS("index=" << index);
     index += mAlbumIndexOffset;
     if ( mCurrentAlbumIndex != index ) {
@@ -386,12 +387,10 @@ void MpCollectionContainerArtists::setupContainer()
                 HbIcon defaultIcon( "qtg_large_album_art" );
                 defaultIcon.setSize(mTBone->itemSize());
                 mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
-                mTBone->setTitleFontSpec( HbFontSpec(HbFontSpec::Primary) );
-                mTBone->setDescriptionFontSpec( HbFontSpec(HbFontSpec::Secondary) );
                 mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
                 mTBone->enableReflections(true);
                 connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
-                connect( mTBone, SIGNAL(scrollingEnded()), this, SLOT(albumCentered()) );
+                connect( mTBone, SIGNAL(animationAboutToEnd(QModelIndex)), this, SLOT(albumCentered(QModelIndex)) );
                 }
                 break;
             case ECollectionContextArtistAllSongs:
@@ -406,7 +405,7 @@ void MpCollectionContainerArtists::setupContainer()
                         artist = hbTrId("txt_mus_subtitle_unknown_all");
                     }
                     else {
-                        artist = hbTrId("txt_mus_subtitle_1_all").arg(artist);
+                        artist = HbParameterLengthLimiter(hbTrId("txt_mus_subtitle_1_all")).arg(artist);
                     }
                     mInfoBar->setHeading(artist);
                 }

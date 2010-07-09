@@ -16,6 +16,11 @@
 */
 
 #include <QStringList>
+#include <QRegExp>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QTime>
+#include <QDate>
 
 #include <s32strm.h>
 #include <s32mem.h>
@@ -32,6 +37,8 @@
 #include <mpxmediacollectiondetaildefs.h>
 #include <mpxmediamusicdefs.h>
 #include <mpxmediageneraldefs.h>
+#include <mpxmediaaudiodefs.h>
+#include <mpxmediadrmdefs.h>
 #include <mpxcollectionplugin.hrh>
 #include <mpxmessagegeneraldefs.h>
 #include <mpxmediacontainerdefs.h>
@@ -50,6 +57,7 @@
 #include "mpcommondefs.h"
 #include "mptrace.h"
 #include "mpsettingsmanager.h"
+#include "mpsongdata.h"
 
 const TInt KIncrementalDelayNone = 0;
 const TInt KIncrementalDelayHalfSecond = 1000000;
@@ -84,7 +92,8 @@ MpMpxCollectionFrameworkWrapperPrivate::MpMpxCollectionFrameworkWrapperPrivate( 
       iReopen( EFalse ),
       iShuffleAll( EFalse ),
       iRestoreDefaultPath( EFalse ),
-      iRestorePathIndex(0)
+      iRestorePathIndex( 0 ),
+	  iSongData( 0 )
 {
     TX_LOG
 }
@@ -121,14 +130,16 @@ MpMpxCollectionFrameworkWrapperPrivate::~MpMpxCollectionFrameworkWrapperPrivate(
 /*!
  \internal
  */
-void MpMpxCollectionFrameworkWrapperPrivate::init( TUid hostUid )
+void MpMpxCollectionFrameworkWrapperPrivate::init( TUid hostUid, MpSongData *songData )
 {
-
-    mHostUid = hostUid;
+    TX_ENTRY
+    iHostUid = hostUid;
+    iSongData = songData;
     TRAPD( err, DoInitL() );
     if ( err != KErrNone ) {
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
+    TX_EXIT
 }
 
 /*!
@@ -385,6 +396,19 @@ void MpMpxCollectionFrameworkWrapperPrivate::openShuffleAllSongsPath()
 /*!
  \internal
  */
+void MpMpxCollectionFrameworkWrapperPrivate::retrieveSongDetails( int index )
+{
+    TX_ENTRY
+    TRAPD( err, DoRetrieveSongDetailsL(index) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
 void MpMpxCollectionFrameworkWrapperPrivate::savePath( QByteArray &data )
 {
     TX_ENTRY
@@ -485,8 +509,14 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleCollectionMediaL(
     const CMPXMedia& aMedia,
     TInt aError )
 {
-    Q_UNUSED( aMedia );
-    Q_UNUSED( aError );
+    TX_ENTRY
+    if ( KErrNone != aError ){
+        TX_LOG_ARGS( "Error: " << aError << "; should never get here." );
+        TX_EXIT
+        return;
+    }
+    iSongData->setMpxMedia( aMedia );
+    TX_EXIT
 }
 
 /*!
@@ -629,9 +659,9 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleFindAllL( const CMPXMedia& aR
 void MpMpxCollectionFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
-    iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
-    iCollectionUiHelper = CMPXCollectionHelperFactory:: NewCollectionUiHelperL( mHostUid );
-    iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this, mHostUid );  
+    iCollectionUtility = MMPXCollectionUtility::NewL( this, iHostUid );
+    iCollectionUiHelper = CMPXCollectionHelperFactory:: NewCollectionUiHelperL( iHostUid );
+    iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this, iHostUid );
     iCollectionData = new MpMpxCollectionData();
     TX_EXIT
 }
@@ -1031,7 +1061,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoPreviewAlbumSongL( int index )
     TX_ENTRY
     //TODO: all calls to playback utility should be done via the engine and trough the playback FW wrapper.
     if ( !iPlaybackUtility ) {
-        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
+        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( iHostUid );
     }
 
     // Get the current path
@@ -1238,8 +1268,12 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoHandleCollectionMessageL(
         }
     }
     else if( id == KMPXMessageIdItemChanged ) {
-        emit q_ptr->containerContentsChanged();                     
-    }  
+        TInt eventType( aMsg.ValueTObjectL<TMPXChangeEventType>( KMPXMessageChangeEventType ) );
+
+        if ( eventType == EMPXItemDeleted || eventType == EMPXItemInserted ) {
+            emit q_ptr->containerContentsChanged();
+        }
+    }
     TX_EXIT
 }
 
@@ -1365,7 +1399,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::createPlaybackUtilityL()
 {
     if ( !iPlaybackUtility ) {
 
-        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
+        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( iHostUid );
 
         if ( iShuffleFeature ) {
             iPlaybackUtility->SetL( EPbPropertyRandomMode, MpSettingsManager::shuffle() ? ETrue : EFalse );
@@ -1392,6 +1426,59 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoPlayAllSongsPlaylistL()
     iPlaybackUtility->InitL( *playList, ETrue );
     CleanupStack::PopAndDestroy( playList );
     CleanupStack::PopAndDestroy( cpath );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionFrameworkWrapperPrivate::DoRetrieveSongDetailsL( int index )
+{
+    TX_ENTRY
+    RArray<TMPXAttribute> requestedAttr;
+    CleanupClosePushL( requestedAttr );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralTitle ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicArtist ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbum ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralUri ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumArtFileName ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralMimeType ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumTrack ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicComposer ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicYear ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicGenre ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralDuration ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaAudioBitrate ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaAudioSamplerate ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralCopyright ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicURL ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaDrmProtected ) );
+
+    CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( cpath );
+    TCollectionContext context = iCollectionData->context();
+    if ( context == ECollectionContextArtistAlbumsTBone
+         || context == ECollectionContextAlbumsTBone ) {
+        CMPXMediaArray *mediaArray;
+        const CMPXMedia& container = iCollectionData->containerMedia();
+        mediaArray = const_cast<CMPXMediaArray*>( container.Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
+        int currentAlbumIndex = iCollectionData->currentAlbumIndex();
+        CMPXMedia* album( mediaArray->AtL( currentAlbumIndex ) );
+        if ( album->IsSupported(KMPXMediaArrayContents) ) {
+            const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+            User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+            CMPXMedia* song = songs->AtL(index);
+            TMPXItemId id( song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
+            cpath->AppendL( id );   // Top level items of songs
+            cpath->Set( 0 );        // Select 1st song
+        }
+    }
+    else {
+        cpath->Set( index );
+    }
+    iCollectionUtility->Collection().MediaL( *cpath, requestedAttr.Array() );
+    CleanupStack::PopAndDestroy( cpath );
+    CleanupStack::PopAndDestroy( &requestedAttr );
     TX_EXIT
 }
 

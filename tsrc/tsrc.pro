@@ -11,18 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Main Music Player unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS += ..\mpdata\tsrc
-SUBDIRS += ..\mpengine\tsrc
-SUBDIRS += ..\app\tsrc
-SUBDIRS += ..\mpviewplugins\mpcollectionviewplugin\tsrc
-SUBDIRS += ..\mpviewplugins\mpmediawallviewplugin\tsrc
-SUBDIRS += ..\mpviewplugins\mpplaybackviewplugin\tsrc
-SUBDIRS += ..\mpviewplugins\mpsettingsviewplugin\tsrc
-SUBDIRS += ..\utilities\mpnowplayingbanner\tsrc
-SUBDIRS += ..\utilities\mpsettingsmanager\tsrc
+SUBDIRS += ../app/tsrc \
+           ../mpdata/tsrc \
+           ../mpengine/tsrc \
+           ../mpviewplugins/tsrc \
+           ../musicservices/tsrc \
+           ../musicwidgetplugin/tsrc \
+           ../utilities/tsrc
+
+CONFIG += ordered
 

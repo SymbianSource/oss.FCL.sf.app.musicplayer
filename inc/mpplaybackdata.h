@@ -104,7 +104,6 @@ private:
     int                      mAlbumId;
     int                      mId;
     HbIcon                   mAlbumArt;
-    HbIcon                   mDefaultAlbumArt;
     SimplifiedState          mPlaybackState;
     bool                     mRealAudio;
 

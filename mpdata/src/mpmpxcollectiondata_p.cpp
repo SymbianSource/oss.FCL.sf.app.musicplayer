@@ -622,7 +622,7 @@ int MpMpxCollectionDataPrivate::DoGetContainerIdL()
     if ( !iContainerMedia->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
-    return iContainerMedia->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+    return iContainerMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
 }
 
 /*!
@@ -634,7 +634,7 @@ int MpMpxCollectionDataPrivate::DoGetItemIdL( int index )
     if ( !currentMedia->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
-    return currentMedia->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+    return currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
 }
 
 /*!
@@ -649,7 +649,7 @@ int MpMpxCollectionDataPrivate::DoGetAlbumSongIdL( int index )
     if ( !song->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
-    return song->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+    return song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
 }
 
 /*!
@@ -671,7 +671,7 @@ bool MpMpxCollectionDataPrivate::DoTestCachedItemL( int itemId )
     if ( !iCachedRemovedItem || !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
-    return ( itemId == iCachedRemovedItem->ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
+    return ( itemId == TInt( iCachedRemovedItem->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) ) );
 }
 
 /*!

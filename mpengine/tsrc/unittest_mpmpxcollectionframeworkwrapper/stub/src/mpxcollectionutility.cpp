@@ -38,6 +38,7 @@ const TInt KMPXPlaylistViewIndex = 1;
 */
 MMPXCollectionUtility::MMPXCollectionUtility():iBack(EFalse),
                                                iOpen(EFalse),
+                                               iMedia(EFalse),
                                                iIndex(0),
                                                iOpenCount(0),
                                                iCountPath(0),
@@ -131,6 +132,21 @@ void MMPXCollectionUtility::FindAllL(const CMPXSearchCriteria& aCriteria,
 {
     Q_UNUSED(aObs);
     iAsynchFindResult = FindAllL(aCriteria, aAttrs);
+}
+
+/*!
+ Stub function.
+*/
+void MMPXCollectionUtility::MediaL(const CMPXCollectionPath& aPath,
+                                   const TArray<TMPXAttribute>& aAttrs,
+                                   CMPXAttributeSpecs* aSpecs,
+                                   CMPXFilter* aFilter)
+{
+    Q_UNUSED(aPath);
+    Q_UNUSED(aAttrs);
+    Q_UNUSED(aSpecs);
+    Q_UNUSED(aFilter);
+    iMedia = ETrue;
 }
 
 /*!

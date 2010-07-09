@@ -11,35 +11,37 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpequalizerframeworkwrapper
+# Description: mpequalizerframeworkwrapper unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib \
-    hb \
-    symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpequalizerframeworkwrapper
 TARGET.CAPABILITY = CAP_APPLICATION
 
+symbian: { 
+    MMP_RULES += SMPSAFE
+}
+
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \
-    -lfbscli.dll
+        -lfbscli.dll
 
 HEADERS += inc/unittest_mpequalizerframeworkwrapper.h \
-    ../../inc/mpequalizerframeworkwrapper.h \
-    ../../inc/mpequalizerframeworkwrapper_p.h \
-    stub/inc/audioequalizerutility.h \
-    stub/inc/mdaaudioplayerutility.h \
-    stub/inc/mpxuser.h
+           ../../inc/mpequalizerframeworkwrapper.h \
+           ../../inc/mpequalizerframeworkwrapper_p.h \
+           stub/inc/audioequalizerutility.h \
+           stub/inc/mdaaudioplayerutility.h \
+           stub/inc/mpxuser.h
 
 SOURCES += src/unittest_mpequalizerframeworkwrapper.cpp \
-    ../../src/mpequalizerframeworkwrapper.cpp \
-    stub/src/audioequalizerutility.cpp \
-    stub/src/mdaaudioplayerutility.cpp \
-    stub/src/mpxuser.cpp
+           ../../src/mpequalizerframeworkwrapper.cpp \
+           stub/src/audioequalizerutility.cpp \
+           stub/src/mdaaudioplayerutility.cpp \
+           stub/src/mpxuser.cpp
 

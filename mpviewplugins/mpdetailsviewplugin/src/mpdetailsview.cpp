@@ -221,7 +221,6 @@ void MpDetailsView::activateView()
 {
     TX_ENTRY
     setNavigationAction( mSoftKeyBack );
-    mMpEngine->retrieveSong();
 
     mActivated = true;
     mInspireMeOpen = MpSettingsManager::inspireMe();
@@ -272,7 +271,7 @@ void MpDetailsView::setupMenu()
 void MpDetailsView::back()
 {
     TX_ENTRY
-    emit command( MpCommon::ActivatePlaybackView );
+    emit command( MpCommon::ActivatePreviousView );
     TX_EXIT
 }
 

@@ -45,6 +45,7 @@ public:
 private:
     
     void HandleIsolatedOpenL( const CMPXMedia& aEntries, TInt aError );
+    void HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath, TInt aError );
     
 public slots:
 
@@ -65,6 +66,7 @@ private:
     const CMPXMedia                 *iEntriesFromoOpenCallback; //not own
     TInt                             iErrorFromoOpenCallback;
     TInt                             iOpenCallbackCounter;
+    TInt                             iOpenRestoreCallbackCounter;   
 
 };
 

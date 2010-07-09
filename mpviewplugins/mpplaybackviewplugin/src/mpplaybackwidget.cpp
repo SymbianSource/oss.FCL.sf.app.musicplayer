@@ -21,11 +21,12 @@
 #include <hbinstance.h>
 #include <hblabel.h>
 #include <hbfontspec.h>
-#include <hbdocumentloader.h>
 #include <hbstackedlayout.h>
 
 #include "mpplaybackwidget.h"
 #include "mpplaybackdata.h"
+#include "mpalbumcoverwidget.h"
+#include "mpplaybackdocumentloader.h"
 #include "mptrace.h"
 
 const unsigned int KMicroSecToMiliSec( 1000 );
@@ -60,7 +61,7 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     mLayout->setMinimumSize( 0.0, 0.0 );
     setLayout( mLayout );
     bool widgetsOk = false;
-    mDocumentLoader = new HbDocumentLoader();
+    mDocumentLoader = new MpPlaybackDocumentLoader();
     HbMainWindow *mainWindow = hbInstance->allMainWindows()[0];
 
     if ( mDocumentLoader ) {
@@ -78,7 +79,9 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("songText"));
         mSongTitle = qobject_cast<HbLabel*>(tmpWidgetPtr);
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("albumArt"));
-        mAlbumArt = qobject_cast<HbLabel*>(tmpWidgetPtr);
+        mAlbumArt = qobject_cast<MpAlbumCoverWidget*>(tmpWidgetPtr);
+        mAlbumArt->setEnabled( false );
+        mAlbumArt->setDefaultIcon( HbIcon( "qtg_large_music_album" ) );
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("realAudio"));
         mRealAudioIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
         mRealAudioIndicator->hide();
@@ -189,9 +192,8 @@ void MpPlaybackWidget::albumArtChanged( )
     TX_ENTRY
     HbIcon icon;
     mPlaybackData->albumArt( icon );
-
-
     mAlbumArt->setIcon( icon );
+    mAlbumArt->setEnabled( true );
     TX_EXIT
 }
 

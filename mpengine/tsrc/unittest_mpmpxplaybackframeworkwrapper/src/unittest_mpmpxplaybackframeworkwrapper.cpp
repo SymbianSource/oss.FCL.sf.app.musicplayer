@@ -23,7 +23,7 @@
 #include "unittest_mpmpxplaybackframeworkwrapper.h"
 #include "stub/inc/mpplaybackdata.h"
 #include "stub/inc/mpxplaybackutility.h"
-
+#include "stub/inc/mpsongdata.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -31,9 +31,10 @@
 #include "mpmpxplaybackframeworkwrapper_p.h"
 #undef private
 
-//This so we can test private functions
+// This so we can test private functions
 #include "mpmpxplaybackframeworkwrapper_p.cpp"
-//Test data
+
+// Test data
 struct TTestAttrs
     {
     const wchar_t* GeneralTitle;
@@ -74,7 +75,8 @@ int main(int argc, char *argv[])
 
 TestMpMpxPlaybackFrameworkWrapper::TestMpMpxPlaybackFrameworkWrapper()
     : mTest(0),
-      iMediaTestData(0)
+      iMediaTestData(0),
+      mSongData(0)
 {
 }
 
@@ -82,6 +84,7 @@ TestMpMpxPlaybackFrameworkWrapper::~TestMpMpxPlaybackFrameworkWrapper()
 {
     delete mTest;
     delete iMediaTestData;
+    delete mSongData;
 }
 
 /*!
@@ -89,6 +92,7 @@ TestMpMpxPlaybackFrameworkWrapper::~TestMpMpxPlaybackFrameworkWrapper()
  */
 void TestMpMpxPlaybackFrameworkWrapper::initTestCase()
 {
+    mSongData = new MpSongData();
 }
 
 /*!
@@ -103,8 +107,7 @@ void TestMpMpxPlaybackFrameworkWrapper::cleanupTestCase()
  */
 void TestMpMpxPlaybackFrameworkWrapper::init()
 {
-
-    mTest = new MpMpxPlaybackFrameworkWrapper();
+    mTest = new MpMpxPlaybackFrameworkWrapper(TUid::Uid(MpCommon::KMusicPlayerUid), mSongData);
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -262,7 +265,7 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandlePlaybackMessage()
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralType,0);
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralData,0);
     mTestPrivate->HandlePlaybackMessage(testMessage, KErrNone);
-    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 6);
 
     CleanupStack::PopAndDestroy(testMessage);
 }
@@ -348,12 +351,36 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandleMedia()
 }
 
 /*!
+ Tests handleMedia resulting from request from details
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testHandleMediaDetails()
+{
+    mTestPrivate->iDetailsRequest = true;
+    loadTestData(0);
+    mTestPrivate->HandleMediaL(*iMediaTestData, KErrNone);
+    QCOMPARE(mTestPrivate->iSongData->iSetMedia, true);
+}
+
+/*!
  Tests retrieveSong
  */
 void TestMpMpxPlaybackFrameworkWrapper::testRetrieveSongDetails()
 {
-    mTestPrivate->RetrieveSongDetailsL();
-    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
+    // Internal requests
+    mTestPrivate->DoRetrieveSongDetailsL(false);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 6);
+
+    // Request from Details view
+    mTestPrivate->iDetailsRequest = false;
+    mTest->retrieveSongDetails();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 16);
+    QCOMPARE(mTestPrivate->iDetailsRequest, true);
+
+    // Request from Details view - no source
+    mTestPrivate->iDetailsRequest = false;
+    mTestPrivate->iPlaybackUtility->iReturnSource = false;
+    mTest->retrieveSongDetails();
+    QCOMPARE(mTestPrivate->iDetailsRequest, false);
 }
 
 /*!

@@ -226,6 +226,9 @@ void MpMainWindow::handleCommand( int commandCode )
         case MpCommon::ActivateDetailsView:
             activateView(DetailsView);
             break;
+        case MpCommon::ActivatePreviousView:
+            activateView(mVerticalViewType);
+            break;
     }
     TX_EXIT
 }
@@ -272,7 +275,7 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        if ( viewType != MediaWallView  ) {
+        if ( viewType != MediaWallView && viewType != DetailsView ) {
             mVerticalViewType = viewType;
         }
         addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );

@@ -11,30 +11,31 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpsongdata unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib \
-					symbian_test \
-							hb
+CONFIG += qtestlib hb symbian_test
+TARGET = unittest_mpsongdata
+TARGET.CAPABILITY = CAP_APPLICATION
 
-TARGET = 
 DEPENDPATH += . 
-INCLUDEPATH += ./stub/inc \   
-    		   ../../../inc
-
+INCLUDEPATH += . \
+               stub/inc \
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
-DEFINES += BUILD_MPDATA_LIB
-LIBS += -lmpxviewframeworkqt.dll 
 
-# Input
+LIBS += -lmpxcommon.dll
+
 HEADERS += inc/unittest_mpsongdata.h \
 	   ../../../inc/mpsongdata.h \
+	   ../../inc/mpsongdata_p.h \
 	   stub/inc/thumbnailmanager_qt.h 
 	   
 SOURCES += src/unittest_mpsongdata.cpp \
 	   ../../src/mpsongdata.cpp \
 	   stub/src/thumbnailmanager_qt.cpp
 
+DEFINES += BUILD_MPDATA_LIB
 

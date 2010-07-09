@@ -11,46 +11,46 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpmpxplaybackframeworkwrapper
+# Description: mpmpxplaybackframeworkwrapper unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpmpxplaybackframeworkwrapper
-TARGET.CAPABILITY = All -TCB
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 symbian:
 {
     TARGET.EPOCALLOWDLLDATA = 1
-    
     BLD_INF_RULES.prj_exports += \
-        "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/system/data/nullsound.mp3" \
-        "resources/nullsound.mp3 /epoc32/release/winscw/urel/Z/system/data/nullsound.mp3" \
-        "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
+        "resources/nullsound.mp3 z:/system/data/nullsound.mp3"
+    MMP_RULES += SMPSAFE
 }
 
 LIBS += -lestor.dll \
-    -lfbscli.dll \
-    -lmpxcommon.dll \
-    -lmpxcollectionutility.dll \
-    -lxqserviceutil
+        -lfbscli.dll \
+        -lmpxcommon.dll \
+        -lmpxcollectionutility.dll \
+        -lxqserviceutil.dll
 
 HEADERS += inc/unittest_mpmpxplaybackframeworkwrapper.h \
-    ../../inc/mpmpxplaybackframeworkwrapper.h \
-    ../../inc/mpmpxplaybackframeworkwrapper_p.h \
-    stub/inc/mpplaybackdata.h \
-    stub/inc/mpxplaybackutility.h \
-    stub/inc/hbglobal.h \
-    ../../../mpserviceplugins/inc/mpxaudioeffectengine.h
+          ../../inc/mpmpxplaybackframeworkwrapper.h \
+          ../../inc/mpmpxplaybackframeworkwrapper_p.h \
+          stub/inc/mpplaybackdata.h \
+          stub/inc/mpxplaybackutility.h \
+          stub/inc/hbglobal.h \
+          stub/inc/mpsongdata.h \
+          ../../../mpserviceplugins/inc/mpxaudioeffectengine.h
 
 SOURCES += src/unittest_mpmpxplaybackframeworkwrapper.cpp \
-    ../../src/mpmpxplaybackframeworkwrapper.cpp \
-    stub/src/mpplaybackdata.cpp \
-    stub/src/mpxplaybackutility.cpp
+          ../../src/mpmpxplaybackframeworkwrapper.cpp \
+          stub/src/mpplaybackdata.cpp \
+          stub/src/mpxplaybackutility.cpp \
+          stub/src/mpsongdata.cpp
+

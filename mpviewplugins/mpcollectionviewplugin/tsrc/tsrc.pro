@@ -11,12 +11,13 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpcollectionviewplugin unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpcollectioncontainers \
-          unittest_mpcollectiondocumentloader \
-          unittest_mpsnapshotwidget
+#SUBDIRS += unittest_mpcollectioncontainers \
+SUBDIRS += unittest_mpcollectiondocumentloader \
+           unittest_mpsnapshotwidget
 
+CONFIG += ordered

@@ -19,6 +19,8 @@
 #include <mpxmedia.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxmediamusicdefs.h>
+#include <mpxmediaaudiodefs.h>
+#include <mpxmediadrmdefs.h>
 #include <mpxcommandgeneraldefs.h>
 #include <mpxplaybackmessage.h>
 #include <mpxmessagegeneraldefs.h>
@@ -33,6 +35,7 @@
 #include "mpcommondefs.h"
 #include "mptrace.h"
 #include "mpxaudioeffectengine.h"
+#include "mpsongdata.h"
 
 _LIT(KMPXPnRealAudioMimeType, "audio/x-pn-realaudio");
 _LIT(KMPXRealAudioMimeType, "audio/x-realaudio");
@@ -48,10 +51,10 @@ _LIT(KMPXRnRealAudioMimeType, "audio/vnd.rn-realaudio");
  \internal
  */
 MpMpxPlaybackFrameworkWrapperPrivate::MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *qq)
-    : q_ptr( qq ),
-      iPlaybackUtility( 0 ),
-      iMedia( 0 ),
-      iPlaybackData( 0 )
+    : q_ptr(qq),
+      iPlaybackUtility(0),
+      iPlaybackData(0),
+      iDetailsRequest(false)
 {
     TX_LOG
 }
@@ -62,29 +65,28 @@ MpMpxPlaybackFrameworkWrapperPrivate::MpMpxPlaybackFrameworkWrapperPrivate( MpMp
 MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
 {
     TX_ENTRY
-
     if ( iPlaybackUtility ) {
         TRAP_IGNORE( ForceStopL() );
         TRAP_IGNORE( iPlaybackUtility->RemoveObserverL(*this) );
         iPlaybackUtility->Close();
     }
-
-    delete iMedia;
     delete iPlaybackData;
-
     TX_EXIT
 }
 
 /*!
  \internal
  */
-void MpMpxPlaybackFrameworkWrapperPrivate::init( TUid hostUid )
+void MpMpxPlaybackFrameworkWrapperPrivate::init( TUid hostUid, MpSongData *songData )
 {
-    mHostUid = hostUid;
+    TX_ENTRY
+    iHostUid = hostUid;
+    iSongData = songData;
     TRAPD(err, DoInitL());
     if ( err != KErrNone ) {
         TX_LOG_ARGS("Error: " << err << "; should never get here.");
     }
+    TX_EXIT
 }
 
 /*!
@@ -288,6 +290,22 @@ MpPlaybackData *MpMpxPlaybackFrameworkWrapperPrivate::playbackData()
 /*!
  \internal
  */
+void MpMpxPlaybackFrameworkWrapperPrivate::retrieveSongDetails()
+{
+    TX_ENTRY
+    TRAPD( err, DoRetrieveSongDetailsL(true) );
+    if ( err == KErrNone ) {
+        iDetailsRequest = true;
+    }
+    else {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
 void MpMpxPlaybackFrameworkWrapperPrivate::HandlePlaybackMessage( CMPXMessage *aMessage, TInt aError )
 {
     TX_ENTRY_ARGS("aError=" << aError);
@@ -343,97 +361,97 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleSubPlayerNamesL(
  \internal
  */
 void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
-    const CMPXMedia& aProperties,
+    const CMPXMedia& aMedia,
     TInt aError )
 {
-    TX_ENTRY_ARGS("aError=" << aError);
-    if ( KErrNone != aError || !iPlaybackData ) {
+    TX_ENTRY
+    if ( KErrNone != aError ){
+        TX_LOG_ARGS( "Error: " << aError << "; should never get here." );
         TX_EXIT
         return;
     }
 
-    if ( iMedia ) {
-        delete iMedia;
-        iMedia = NULL;
+    if ( iDetailsRequest ) {
+        iDetailsRequest = false;
+        iSongData->setMpxMedia( aMedia );
     }
-    iMedia = CMPXMedia::NewL( aProperties );
+    else {
+        bool changed = false;
+        if ( aMedia.IsSupported( KMPXMediaGeneralTitle ) ) {
+            changed |= iPlaybackData->setTitle(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaGeneralTitle ).Ptr(),
+                    aMedia.ValueText( KMPXMediaGeneralTitle ).Length() ) );
+        }
+        else {
+            changed |= iPlaybackData->setTitle(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Ptr(),
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Length() ) );
+        }
 
-    bool changed = false;
-    if ( aProperties.IsSupported( KMPXMediaGeneralTitle ) ) {
-        changed |= iPlaybackData->setTitle(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaGeneralTitle ).Ptr(),
-                aProperties.ValueText( KMPXMediaGeneralTitle ).Length() ) );
-    }
-    else {
-        changed |= iPlaybackData->setTitle(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaGeneralUri ).Ptr(),
-                aProperties.ValueText( KMPXMediaGeneralUri ).Length() ) );
-    }
-    
-    if ( aProperties.IsSupported( KMPXMediaMusicArtist ) ) {
-        changed |= iPlaybackData->setArtist(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaMusicArtist ).Ptr(),
-                aProperties.ValueText( KMPXMediaMusicArtist ).Length() ) );
-    }
-    else {
-            changed |= iPlaybackData->setArtist(QString());
-    }
-    if ( aProperties.IsSupported( KMPXMediaMusicAlbum ) ) {
-        changed |= iPlaybackData->setAlbum(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaMusicAlbum ).Ptr(),
-                aProperties.ValueText( KMPXMediaMusicAlbum ).Length() ) );
-    }
-    else {
-            changed |= iPlaybackData->setAlbum(QString());
-    }
-    if (aProperties.IsSupported(TMPXAttribute(KMPXMediaGeneralMimeType))) {
-        
-            const TDesC& mimeType = aProperties.ValueText ( KMPXMediaGeneralMimeType );
-            
-            bool realAudioMode =
-                    ( mimeType.Compare( KMPXPnRealAudioMimeType ) == 0 ) ||
-                    ( mimeType.Compare( KMPXRealAudioMimeType ) == 0) ||
-                    ( mimeType.Compare( KMPXRnRealAudioMimeType ) == 0 );
-            
-            changed |= iPlaybackData->setRealAudio( realAudioMode );
-    }
+        if ( aMedia.IsSupported( KMPXMediaMusicArtist ) ) {
+            changed |= iPlaybackData->setArtist(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaMusicArtist ).Ptr(),
+                    aMedia.ValueText( KMPXMediaMusicArtist ).Length() ) );
+        }
+        else {
+                changed |= iPlaybackData->setArtist(QString());
+        }
+        if ( aMedia.IsSupported( KMPXMediaMusicAlbum ) ) {
+            changed |= iPlaybackData->setAlbum(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaMusicAlbum ).Ptr(),
+                    aMedia.ValueText( KMPXMediaMusicAlbum ).Length() ) );
+        }
+        else {
+                changed |= iPlaybackData->setAlbum(QString());
+        }
+        if (aMedia.IsSupported(TMPXAttribute(KMPXMediaGeneralMimeType))) {
 
+                const TDesC& mimeType = aMedia.ValueText ( KMPXMediaGeneralMimeType );
 
-    if ( aProperties.IsSupported( KMPXMediaGeneralUri) ) {
-        iPlaybackData->setUri(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaGeneralUri ).Ptr(),
-                aProperties.ValueText( KMPXMediaGeneralUri ).Length() ) );
-    }
-    if (aProperties.IsSupported(TMPXAttribute(KMPXMediaMusicAlbumArtFileName))) {
-        iPlaybackData->setAlbumArtUri(
-            QString::fromUtf16(
-                aProperties.ValueText(KMPXMediaMusicAlbumArtFileName).Ptr(),
-                aProperties.ValueText(KMPXMediaMusicAlbumArtFileName).Length()));
-    }
-    else {
-        iPlaybackData->setAlbumArtUri(
-            QString::fromUtf16(
-                aProperties.ValueText( KMPXMediaGeneralUri ).Ptr(),
-                aProperties.ValueText( KMPXMediaGeneralUri ).Length() ) );
-    }
-    if ( aProperties.IsSupported( KMPXMediaMusicAlbumId) ) {
-    changed |= iPlaybackData->setAlbumId( 
-                aProperties.ValueTObjectL<TInt>( KMPXMediaMusicAlbumId ) );
-    }
-    
-    if ( aProperties.IsSupported( KMPXMediaGeneralId) ) {
-    changed |= iPlaybackData->setId( 
-                aProperties.ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
-    }
-    
-    if ( changed ) {
-        // This is required to propagate the playback info to UI at once.
-        iPlaybackData->commitPlaybackInfo();
+                bool realAudioMode =
+                        ( mimeType.Compare( KMPXPnRealAudioMimeType ) == 0 ) ||
+                        ( mimeType.Compare( KMPXRealAudioMimeType ) == 0) ||
+                        ( mimeType.Compare( KMPXRnRealAudioMimeType ) == 0 );
+
+                changed |= iPlaybackData->setRealAudio( realAudioMode );
+        }
+
+        if ( aMedia.IsSupported( KMPXMediaGeneralUri) ) {
+            iPlaybackData->setUri(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Ptr(),
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Length() ) );
+        }
+        if (aMedia.IsSupported(TMPXAttribute(KMPXMediaMusicAlbumArtFileName))) {
+            iPlaybackData->setAlbumArtUri(
+                QString::fromUtf16(
+                    aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Ptr(),
+                    aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Length()));
+        }
+        else {
+            iPlaybackData->setAlbumArtUri(
+                QString::fromUtf16(
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Ptr(),
+                    aMedia.ValueText( KMPXMediaGeneralUri ).Length() ) );
+        }
+        if ( aMedia.IsSupported( KMPXMediaMusicAlbumId) ) {
+        changed |= iPlaybackData->setAlbumId(
+                aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaMusicAlbumId ) );
+        }
+
+        if ( aMedia.IsSupported( KMPXMediaGeneralId ) ) {
+        changed |= iPlaybackData->setId(
+                    aMedia.ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
+        }
+
+        if ( changed ) {
+            // This is required to propagate the playback info to UI at once.
+            iPlaybackData->commitPlaybackInfo();
+        }
     }
     TX_EXIT
 }
@@ -444,13 +462,13 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
 void MpMpxPlaybackFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
-    iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
+    iPlaybackUtility = MMPXPlaybackUtility::UtilityL( iHostUid );
     iPlaybackUtility->AddObserverL( *this );
     iPlaybackData = new MpPlaybackData();
 
     UpdateStateL();
     if ( iPlaybackUtility->Source() ) {
-        RetrieveSongDetailsL();
+        DoRetrieveSongDetailsL(false);
     }
     TX_EXIT
 }
@@ -474,7 +492,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( QString aFilename )
 void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( const XQSharableFile& file )
 {
     TX_ENTRY
-        
+
     RFile xqfile;
     bool ok = file.getHandle( xqfile );
     if ( ok ) {
@@ -532,14 +550,14 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackMessageL( const CMPXM
                 break;
             case TMPXPlaybackMessage::EMediaChanged:
                 TX_LOG_ARGS("TMPXPlaybackMessage::EMediaChanged")
-                RetrieveSongDetailsL();
+                DoRetrieveSongDetailsL(false);
                 break;
             case TMPXPlaybackMessage::EPlaylistUpdated:
                 TX_LOG_ARGS( "EPlaylistUpdated" )
             case TMPXPlaybackMessage::EActivePlayerChanged:
                 TX_LOG_ARGS( "EActivePlayerChanged or fall through from EPlaylistUpdated" )
                 UpdateStateL();
-                RetrieveSongDetailsL();
+                DoRetrieveSongDetailsL(false);
                 break;
             default:
                 break;
@@ -606,23 +624,33 @@ void MpMpxPlaybackFrameworkWrapperPrivate::UpdateStateL()
 /*!
  \internal
  */
-void MpMpxPlaybackFrameworkWrapperPrivate::RetrieveSongDetailsL()
+void MpMpxPlaybackFrameworkWrapperPrivate::DoRetrieveSongDetailsL( bool detailsRequest )
 {
     TX_ENTRY
     MMPXSource *mediaSrc = iPlaybackUtility->Source();
     User::LeaveIfNull( mediaSrc );
     RArray<TMPXAttribute> requestedAttr;
     CleanupClosePushL( requestedAttr );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralId ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralTitle ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicArtist ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbum ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumId ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralUri ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumArtFileName ) );
-    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumId ) );
-	requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralMimeType ) );
-	requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralId ) );
-	
-
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralMimeType ) );
+    if ( detailsRequest ) {
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumTrack ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicComposer ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicYear ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicGenre ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralDuration ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaAudioBitrate ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaAudioSamplerate ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralCopyright ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicURL ) );
+        requestedAttr.AppendL( TMPXAttribute( KMPXMediaDrmProtected ) );
+    }
     mediaSrc->MediaL( requestedAttr.Array(), *this );
     CleanupStack::PopAndDestroy( &requestedAttr );
     TX_EXIT

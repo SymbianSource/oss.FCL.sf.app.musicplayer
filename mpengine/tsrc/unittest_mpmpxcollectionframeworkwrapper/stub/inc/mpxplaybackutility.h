@@ -29,7 +29,14 @@
 class CMPXCollectionPlaylist;
 class CMPXCollectionPath;
 
-class MMPXPlaybackUtility
+class MMPXSource
+{
+public:
+    // Stub functions
+    virtual CMPXCollectionPlaylist* PlaylistL()=0;
+
+};
+class MMPXPlaybackUtility : MMPXSource
 {
 public:
 
@@ -41,6 +48,8 @@ public:
     void InitL(const CMPXCollectionPlaylist& aPlaylist, TBool aPlay=ETrue);
     void InitL(const TDesC& aUri, const TDesC8* aType=NULL);
     void SetL(TMPXPlaybackProperty aProperty, TInt aValue);
+    CMPXCollectionPlaylist* PlaylistL();
+    MMPXSource* Source();
 
 public:
 
@@ -49,6 +58,7 @@ public:
     TMPXPlaybackProperty    iProperty;
     TBool                   iPlay;
     CMPXCollectionPath      *iCurrentPath;
+    CMPXCollectionPlaylist  *iCurrentPlaylist;
 };
 
 #endif      // MMPXPLAYBACKUTILITY_H

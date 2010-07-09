@@ -31,11 +31,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, QObject *parent )
+MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )
     : QObject(parent)
 {
     d_ptr = new MpMpxPlaybackFrameworkWrapperPrivate(this );
-    d_ptr->init( hostUid );
+    d_ptr->init( hostUid, songData );
 }
 
 /*!
@@ -174,3 +174,12 @@ void MpMpxPlaybackFrameworkWrapper::applyEqualizer()
 {
     d_ptr->applyEqualizer();
 }
+
+/*!
+ Retrieves song details for the currently playing song.
+ */
+void MpMpxPlaybackFrameworkWrapper::retrieveSongDetails()
+{
+    d_ptr->retrieveSongDetails();
+}
+

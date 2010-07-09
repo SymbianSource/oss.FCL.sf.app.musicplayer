@@ -40,7 +40,8 @@ namespace MpCommon
         ActivateCollectionView,
         ActivatePlaybackView,
         ActivateSettingsView,
-        ActivateDetailsView
+        ActivateDetailsView,
+        ActivatePreviousView
     };
 
     /*!

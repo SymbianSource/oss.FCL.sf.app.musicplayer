@@ -38,7 +38,7 @@ public:
 public slots:
 
     void itemActivated( const QModelIndex &index );
-    void albumCentered();
+    void albumCentered( const QModelIndex &modelIndex);
     void dataReloaded();
     void albumDataChanged();
     void scrollingStarted();

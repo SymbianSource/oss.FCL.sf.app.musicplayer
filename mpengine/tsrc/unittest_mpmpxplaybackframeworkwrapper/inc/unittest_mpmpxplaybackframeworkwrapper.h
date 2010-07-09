@@ -24,6 +24,7 @@ class MpMpxPlaybackFrameworkWrapper;
 class MpMpxPlaybackFrameworkWrapperPrivate;
 class CMPXMedia;
 class MpPlaybackData;
+class MpSongData;
 
 class TestMpMpxPlaybackFrameworkWrapper : public QObject
 {
@@ -57,6 +58,7 @@ private slots:
     void testHandlePlaybackMessage();
     void testHandleProperty();
     void testHandleMedia();
+    void testHandleMediaDetails();
     void testRetrieveSongDetails();
     void testUpdateState();
     void testForceStop();
@@ -74,6 +76,7 @@ private:
     MpMpxPlaybackFrameworkWrapper           *mTest;
     MpMpxPlaybackFrameworkWrapperPrivate    *mTestPrivate;
     CMPXMedia                               *iMediaTestData;
+    MpSongData                              *mSongData;
 
 };
 

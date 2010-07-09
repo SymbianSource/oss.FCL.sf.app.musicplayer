@@ -11,10 +11,12 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpsettingsmanager unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpsettingsmanager
+SUBDIRS += unittest_mpsettingsmanager
+
+CONFIG += ordered
 

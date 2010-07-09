@@ -22,13 +22,13 @@
 #include "mpmpxharvesterframeworkwrapper.h"
 #include "mpmpxcollectionframeworkwrapper.h"
 #include "mpmpxplaybackframeworkwrapper.h"
-#include "mpmpxdetailsframeworkwrapper.h"
 #include "mpaudioeffectsframeworkwrapper.h"
 #include "mpequalizerframeworkwrapper.h"
 #include "mpmediakeyhandler.h"
 #include "mptrace.h"
 #include "mpsettingsmanager.h"
 #include "mpsongscanner.h"
+#include "mpsongdata.h"
 
 /*!
     \class MpEngine
@@ -93,13 +93,6 @@
     \fn void usbSynchronizationFinished()
 
     This signal is emitted when usb in synchronizing state is disconnected.
-
- */
-
-/*!
-    \fn void libraryRefreshNeeded()
-
-    This signal is emitted when usb in MassStorage mode is disconnected.
 
  */
 
@@ -192,10 +185,10 @@ MpEngine::MpEngine()
       mMediaKeyHandler(0),
       mMpxCollectionWrapper(0),
       mMpxPlaybackWrapper(0),
-      mMpxDetailsWrapper(0),
       mAudioEffectsWrapper(0),
       mEqualizerWrapper(0),
       mCurrentPresetIndex(KEqualizerPresetNone),
+      mSongData(0),
       mUsbBlockingState(USB_NotConnected),
       mPreviousUsbState(USB_NotConnected)
 {
@@ -210,12 +203,12 @@ MpEngine::~MpEngine()
     TX_ENTRY
     delete mMediaKeyHandler;
     delete mMpxPlaybackWrapper;
-    delete mMpxDetailsWrapper;
     delete mMpxHarvesterWrapper;
     delete mMpxCollectionWrapper;
     delete mAudioEffectsWrapper;
     delete mEqualizerWrapper;
     delete mSongScanner;
+    delete mSongData;
     TX_EXIT
 }
 
@@ -224,79 +217,113 @@ MpEngine::~MpEngine()
  */
 void MpEngine::initialize( TUid hostUid, EngineMode mode )
 {
-    TX_ENTRY
+    TX_ENTRY_ARGS("hostUid=" << hostUid.iUid << ", mode=" << mode);
     mHostUid = hostUid;
+    mMediaKeyHandler = new MpMediaKeyHandler();
 
-    if( mode == StandAlone || mode == Fetch ){
+    if ( StandAlone == mode ) {
+        mSongData = new MpSongData();
+
         // Harvesting Wrapper
         mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mHostUid );
-        connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ), 
-                 this, SLOT( handleScanStarted() ), Qt::QueuedConnection );
-        connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ), 
-                 this, SLOT( handleScanEnded(int, int) ), Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
+                 this, SLOT( handleScanStarted() ), 
+				 Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ),
+                 this, SLOT( handleScanEnded(int, int) ), 
+				 Qt::QueuedConnection );
         qRegisterMetaType<MpxDiskEvents>("MpxDiskEvents");
-        connect( mMpxHarvesterWrapper, SIGNAL( diskEvent(MpxDiskEvents) ), 
-                 this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( diskEvent(MpxDiskEvents) ),
+                 this, SLOT( handleDiskEvent(MpxDiskEvents) ), 
+				 Qt::QueuedConnection );
         qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
-        connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ), 
-                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), Qt::QueuedConnection );
-        mMediaKeyHandler = new MpMediaKeyHandler();
-    }
+        connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ),
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), 
+				 Qt::QueuedConnection );
 
-    if ( mode == StandAlone || mode == Fetch || mode == MediaBrowsing) {
-        
         // Collection Wrapper
-        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid );
-        
-        //disabling these since fetch mode plays only one song at a time.
-        mMpxCollectionWrapper->setRepeatFeatureEnabled( mode != Fetch );
-        mMpxCollectionWrapper->setShuffleFeatureEnabled( mode != Fetch );
-        
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, mSongData );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
-                this, SIGNAL( collectionPlaylistOpened() ),
-                Qt::QueuedConnection );
-        connect( mMpxCollectionWrapper, SIGNAL( aboutToAddSongs( int ) ),
-                this, SIGNAL( aboutToAddSongs( int ) ) );
-        connect( mMpxCollectionWrapper, SIGNAL( playlistSaved( bool ) ),
-                this, SIGNAL( playlistSaved( bool ) ),
-                Qt::QueuedConnection );
-        connect( mMpxCollectionWrapper, SIGNAL( playlistsRenamed( bool ) ),
-                this, SIGNAL( playlistsRenamed( bool ) ),
-                Qt::QueuedConnection );
-        connect( mMpxCollectionWrapper, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
-                this, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
-                Qt::QueuedConnection );
+                 this, SIGNAL( collectionPlaylistOpened() ), 
+				 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( aboutToAddSongs(int) ),
+                 this, SIGNAL( aboutToAddSongs(int) ) );
+        connect( mMpxCollectionWrapper, SIGNAL( playlistSaved(bool) ),
+                 this, SIGNAL( playlistSaved(bool) ), 
+				 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( playlistsRenamed(bool) ),
+                 this, SIGNAL( playlistsRenamed(bool) ), 
+				 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( isolatedCollectionOpened(MpMpxCollectionData*) ),
+                 this, SIGNAL( isolatedCollectionOpened(MpMpxCollectionData*) ), 
+				 Qt::QueuedConnection );
         connect( mMpxCollectionWrapper, SIGNAL( containerContentsChanged() ),
-                this, SIGNAL( containerContentsChanged() ),
-                Qt::QueuedConnection );
-        connect( mMpxCollectionWrapper, SIGNAL( deleteStarted( TCollectionContext, int ) ),
-                this, SLOT( handleDeleteStarted( TCollectionContext, int ) ) );
-        connect( mMpxCollectionWrapper, SIGNAL( songsDeleted( bool ) ),
-                this, SLOT( handleDeleteEnded( bool ) ),
-                Qt::QueuedConnection );
+                 this, SIGNAL( containerContentsChanged() ), 
+				 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( deleteStarted(TCollectionContext, int) ),
+                 this, SLOT( handleDeleteStarted(TCollectionContext, int) ) );
+        connect( mMpxCollectionWrapper, SIGNAL( songsDeleted(bool) ),
+                 this, SLOT( handleDeleteEnded(bool) ), 
+				 Qt::QueuedConnection );
         connect( mMpxCollectionWrapper, SIGNAL( restorePathFailed() ),
-                this, SIGNAL( restorePathFailed() ),
-                Qt::QueuedConnection );
-    }
-
-    if( mode == StandAlone ){
-        // Equalizer wrapper , this needs to be created before playback wrapper.
+                 this, SIGNAL( restorePathFailed() ),
+                 Qt::QueuedConnection );
+        // Equalizer wrapper; this needs to be created before playback wrapper.
         mEqualizerWrapper = new MpEqualizerFrameworkWrapper();
-        connect( mEqualizerWrapper, SIGNAL( equalizerReady() ), 
-                 this, SLOT( handleEqualizerReady() ), Qt::QueuedConnection );
-    }
-    
-    if ( mode == StandAlone || mode == Fetch || mode == Embedded ) {
-        // Playback Wrapper 
-        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid );
-        
-        // Details Wrapper
-        mMpxDetailsWrapper = new MpMpxDetailsFrameworkWrapper( mHostUid );
-    }
+        connect( mEqualizerWrapper, SIGNAL( equalizerReady() ),
+                 this, SLOT( handleEqualizerReady() ), 
+				 Qt::QueuedConnection );
 
-    if( mode == StandAlone ){
+        // Playback Wrapper
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
+
         // AudioEffects wrapper
         mAudioEffectsWrapper = new MpAudioEffectsFrameworkWrapper();
+    }
+    else if ( Fetch == mode ) {
+        // Harvesting Wrapper
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mHostUid );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
+                 this, SLOT( handleScanStarted() ), 
+				 Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ),
+                 this, SLOT( handleScanEnded(int, int) ), 
+				 Qt::QueuedConnection );
+        qRegisterMetaType<MpxDiskEvents>("MpxDiskEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( diskEvent(MpxDiskEvents) ),
+                 this, SLOT( handleDiskEvent(MpxDiskEvents) ), 
+				 Qt::QueuedConnection );
+        qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ),
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ), 
+				 Qt::QueuedConnection );
+
+        // Collection Wrapper
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, 0 );
+        connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
+                 this, SIGNAL( collectionPlaylistOpened() ), 
+				 Qt::QueuedConnection );
+        // Disabling these since fetch mode plays only one song at a time.
+        mMpxCollectionWrapper->setRepeatFeatureEnabled( false );
+        mMpxCollectionWrapper->setShuffleFeatureEnabled( false );
+
+        // Playback Wrapper
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, 0 );
+    }
+    else if ( MediaBrowsing == mode ) {
+        // Collection Wrapper
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, 0 );
+        connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
+                 this, SIGNAL( collectionPlaylistOpened() ), 
+				 Qt::QueuedConnection );
+        connect( mMpxCollectionWrapper, SIGNAL( containerContentsChanged() ),
+                 this, SIGNAL( containerContentsChanged() ), 
+				 Qt::QueuedConnection );
+    }
+    else if ( Embedded == mode ) {
+        mSongData = new MpSongData();
+        // Playback Wrapper
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
     }
     TX_EXIT
 }
@@ -468,7 +495,7 @@ void MpEngine::handleUsbMassStorageEndEvent()
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
     emit usbSynchronizationFinished();
-    emit libraryRefreshNeeded();
+    refreshLibrary();
 
     TX_EXIT
 }
@@ -857,20 +884,26 @@ void MpEngine::setRepeat( bool mode )
 }
 
 /*!
- Returns pointer to MpSongData, which is the song data for detail's view.
+ Returns pointer to MpSongData, which is the song data for Details View.
  */
 MpSongData *MpEngine::songData()
 {
-    return mMpxDetailsWrapper->songData();
+    return mSongData;
 }
 
 /*!
- Retrieve song informatioin
+ Retrieves song details for the specified \a index.
  */
-void MpEngine::retrieveSong()
+void MpEngine::retrieveSongDetails( int index )
 {
     TX_ENTRY
-    mMpxDetailsWrapper->retrieveSong();
+    if ( index == -1 ) {
+        // Retrieve song details of currently playing song
+        mMpxPlaybackWrapper->retrieveSongDetails();
+    }
+    else {
+        mMpxCollectionWrapper->retrieveSongDetails(index);
+    }
     TX_EXIT
 }
 

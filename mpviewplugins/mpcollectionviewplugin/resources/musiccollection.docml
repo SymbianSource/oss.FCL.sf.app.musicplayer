@@ -76,10 +76,10 @@
     <section name="artistAlbumTBone">
         <widget name="container">
             <widget name="artistAlbumWall" type="HgMediawall">
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MINIMUM" width="var(hb-param-screen-width)"/>
             </widget>
             <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
@@ -96,10 +96,10 @@
                 <real name="z" value="1.0"/>
             </widget>
             <widget name="artistAlbumWall" type="HgMediawall">
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MINIMUM" width="var(hb-param-screen-width)"/>
             </widget>
             <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
@@ -125,10 +125,10 @@
     <section name="albumTBone">
         <widget name="container">
             <widget name="albumWall" type="HgMediawall">
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MINIMUM" width="var(hb-param-screen-width)"/>
             </widget>
             <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>
@@ -145,10 +145,10 @@
                 <real name="z" value="1.0"/>
             </widget>
             <widget name="albumWall" type="HgMediawall">
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MAXIMUM" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="PREFERRED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="FIXED" width="var(hb-param-screen-width)"/>
-                <sizehint height="expr(24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + var(hb-param-margin-gene-bottom))" type="MINIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="PREFERRED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="FIXED" width="var(hb-param-screen-width)"/>
+                <sizehint height="expr(var(hb-param-margin-gene-screen) + 24.5un + var(hb-param-text-height-primary) + var(hb-param-text-height-secondary) + (2*var(hb-param-margin-gene-middle-vertical)) + 1.5un)" type="MINIMUM" width="var(hb-param-screen-width)"/>
             </widget>
             <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                 <contentsmargins bottom="0.0" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="0.0"/>

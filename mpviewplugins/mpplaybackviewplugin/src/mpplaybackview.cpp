@@ -268,6 +268,7 @@ void MpPlaybackView::playbackStateChanged()
 void MpPlaybackView::flip()
 {
     TX_ENTRY
+    mMpEngine->retrieveSongDetails();
     emit command( MpCommon::ActivateDetailsView );
     TX_EXIT
 }

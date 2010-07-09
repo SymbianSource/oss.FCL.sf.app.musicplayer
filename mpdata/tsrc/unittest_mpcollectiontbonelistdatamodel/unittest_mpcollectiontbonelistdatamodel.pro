@@ -11,21 +11,19 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpcollectiontbonelistdatamodel
+# Description: mpcollectiontbonelistdatamodel unit test project file.
 #
 
-
 TEMPLATE = app
-CONFIG += qtestlib hb
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpcollectiontbonelistdatamodel
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    stub/inc \
-    ../../inc \
-    ../../../inc
+               stub/inc \
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lestor.dll \

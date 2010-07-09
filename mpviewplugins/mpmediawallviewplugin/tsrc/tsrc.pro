@@ -11,10 +11,12 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpmediawallviewplugin unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpmediawalldocumentloader
+SUBDIRS += unittest_mpmediawalldocumentloader
+
+CONFIG += ordered
 

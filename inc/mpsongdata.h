@@ -22,9 +22,10 @@
 #include <QString>
 #include <QPixmap>
 
-//forward declartions
-class ThumbnailManager;
+class MpSongDataPrivate;
+class CMPXMedia;
 class HbIcon;
+class ThumbnailManager;
 
 #if defined(BUILD_MPDATA_LIB)
 #define MPDATA_EXPORT Q_DECL_EXPORT
@@ -37,41 +38,11 @@ class MPDATA_EXPORT MpSongData : public QObject
 {
     Q_OBJECT
 
+    friend class MpSongDataPrivate;
+
 public:
     explicit MpSongData( QObject *parent=0 );
     virtual ~MpSongData();
-    
-    bool setTitle( const QString &title );
-    bool setAlbum( const QString &album );
-    bool setArtist( const QString &artist );
-    bool setComment( const QString &comment );
-    void setAlbumArtUri( const QString &albumArtUri );
-    bool setYear( int date );
-    bool setGenre( const QString &genre );
-    bool setComposer( const QString &compoer );
-    bool setAlbumTrack( const QString &albumtrack );
-    void setLink( const QString &link );
-    bool setFileName( const QString &fileName );
-    bool setMimeType( const QString &mimeType );
-    bool setDuration( int duration );
-    bool setBitRate( int bitRate);
-    bool setSampleRate( int sampleRate );
-    bool setSize( int size );
-    bool setModified( const QString &modified );
-    bool setCopyright( const QString &copyright );
-    bool setMusicURL( const QString &musicURL );
-    bool setDrmProtected( bool drmProtected );
-    
-    // inform details view when basic information is ready to accelerate UI update
-    void commitPlaybackInfo();
-    // inform details view when details information is ready
-    void commitSongDetailInfo();
-    void removeAlbumArtFile() const; //TODO: Remove when base64 starts to work
-
-public slots:
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
-    
-    int reservedLength() const { return mLink.length() + mTitle.length() + mArtist.length(); }
 
     QString title() const;
     QString album() const;
@@ -83,7 +54,6 @@ public slots:
     QString composer() const;
     QString albumTrack() const;
     QString link() const;
-    
     QString fileName() const;
     QString mimeType() const;
     QString duration() const;
@@ -94,42 +64,31 @@ public slots:
     QString copyright() const;
     QString musicURL() const;
     bool isDrmProtected() const;
-    
+
     QString albumArtBase64() const;
+    void removeAlbumArtFile() const; //TODO: Remove when base64 starts to work
+
+    void setLink( const QString &link );
+    void setMpxMedia( const CMPXMedia& aMedia );
 
 signals:
+
     void albumArtReady();
     void playbackInfoChanged();
-	void songDetailInfoChanged();	
+    void songDetailInfoChanged();
+
+public slots:
+
+    int reservedLength() const;
+    void thumbnailReady( QPixmap pixmap, void *data, int id, int error );
 
 private:
-    QString                  mTitle;
-    QString                  mAlbum;
-    QString                  mArtist;
-    QString                  mComment;
-    QString                  mComposer;
-    QString                  mGenre;
-    QString                  mYear;
-    QString                  mAlbumTrack;
-    HbIcon                   *mAlbumArt;
-    ThumbnailManager         *mThumbnailManager; //owned
-    TInt                     mReqId;
-    QString                  currentAAUri; 
-    HbIcon                   *mDefaultAlbumArt;
-    QString                  mLink;
-    QString                  mFileName;
-    QString                  mMimeType;
-    QString                  mDuration;
-    QString                  mBitRate;
-    QString                  mSampleRate;
-    QString                  mSize;
-    QString                  mModified;
-    QString                  mCopyright;
-    QString                  mMusicURL;
-    QString                  mTempAlbumArt; //TODO: Remove when base64 starts to work
-    bool                     mDrmProtected;
-    
+
     Q_DISABLE_COPY(MpSongData)
+    MpSongDataPrivate   *d_ptr;
+    ThumbnailManager    *mThumbnailManager; // Owned
+
 };
 
 #endif // MPSONGDATA_H
+

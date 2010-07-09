@@ -25,6 +25,7 @@
 
 class MpMpxPlaybackFrameworkWrapperPrivate;
 class MpPlaybackData;
+class MpSongData;
 class QStringList;
 
 
@@ -36,14 +37,17 @@ class MpMpxPlaybackFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid=TUid::Uid(MpCommon::KMusicPlayerUid),
+        MpSongData *songData=0, QObject *parent=0 );
     virtual ~MpMpxPlaybackFrameworkWrapper();
     
     MpPlaybackData *playbackData();
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
-    
+
+    void retrieveSongDetails();
+
 public slots:
     
     void play( QString aFilename );

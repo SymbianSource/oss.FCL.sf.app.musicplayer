@@ -11,10 +11,12 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpnowplayingbanner unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpnowplayingwidget
+SUBDIRS += unittest_mpnowplayingwidget
+
+CONFIG += ordered
 

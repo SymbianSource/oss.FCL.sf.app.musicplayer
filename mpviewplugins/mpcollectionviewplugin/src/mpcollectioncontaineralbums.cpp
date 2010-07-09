@@ -140,10 +140,9 @@ void MpCollectionContainerAlbums::itemActivated( const QModelIndex &index )
 /*!
  Slot to be called when scrolling ends in media wall and an album is centered.
  */
-void MpCollectionContainerAlbums::albumCentered()
+void MpCollectionContainerAlbums::albumCentered( const QModelIndex &index )
 {
     TX_ENTRY
-    QModelIndex index = mTBone->currentIndex();
     if ( mCurrentAlbumIndex != index.row() ) {
         // Prevent reloading if user just moves the center album a little
         // and the same album re-centers.
@@ -295,12 +294,10 @@ void MpCollectionContainerAlbums::setupContainer()
             HbIcon defaultIcon( "qtg_large_album_art" );
             defaultIcon.setSize(mTBone->itemSize());
             mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
-            mTBone->setTitleFontSpec( HbFontSpec(HbFontSpec::Primary) );
-            mTBone->setDescriptionFontSpec( HbFontSpec(HbFontSpec::Secondary) );
             mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
             mTBone->enableReflections(true);
             connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
-            connect( mTBone, SIGNAL(scrollingEnded()), this, SLOT(albumCentered()) );
+            connect( mTBone, SIGNAL(animationAboutToEnd(QModelIndex)), this, SLOT(albumCentered(QModelIndex)) );
         }
     }
     else {

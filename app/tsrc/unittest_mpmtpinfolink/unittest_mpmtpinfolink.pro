@@ -11,12 +11,11 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpmtpinfolink unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpmtpinfolink
 TARGET.CAPABILITY = CAP_APPLICATION
 
@@ -24,7 +23,6 @@ DEPENDPATH += .
 INCLUDEPATH += . \
                ../../inc \
                ../../../inc
-
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \

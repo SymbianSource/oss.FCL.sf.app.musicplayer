@@ -47,14 +47,13 @@ public slots:
     void launchUnableToCotinueDueUsb();
     void launchUsbBlockingNote();
     void closeUsbBlockingNote();
-    void launchRefreshLibraryRequest();
     void launchMTPInfoDialog();
     void hanldeMTPInfoDialogFinished( HbAction *selectedAction );
 
     void outstandingPopupClosing();
 
 private:
-    void launchScanFinishedDialog( bool ok, int itemsAdded );
+    void launchScanFinishedDialog( bool ok );
     void launchDiskFullDialog();
     void setOutstandingPopup( HbPopup *popup );
 

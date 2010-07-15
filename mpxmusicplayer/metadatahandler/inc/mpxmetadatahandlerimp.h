@@ -112,6 +112,15 @@ private:
 	void ConstructL(CRemConInterfaceSelector &aInterfaceSelector);
 
 	/**
+	 * Sends currently playing metadata
+	 * see MrcmitoGetCurrentlyPlayingMetadata 
+	 *
+	 * @since Symbian^3
+	 * @param aAttributeIter Attribute iterator
+	 */
+	void SendCurrentlyPlayingMetadata(TMediaAttributeIter& aAttributeIter );
+	
+	/**
 	 * Handle playback message
 	 *
      * @since S60 v5.1
@@ -334,6 +343,12 @@ private:    // Data
      */
     CEqualizerPresetChangeListener* iEqPresetListener;
 
+    /**
+     * Metadata iterator
+     * Own.
+     */
+    TMediaAttributeIter *iMetadataIter;
+    
     /**
      * Main interface to the player.
      * Not own.

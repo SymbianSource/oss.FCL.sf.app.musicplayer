@@ -120,12 +120,17 @@
 #include <iaupdateparameters.h>
 #include <iaupdateresult.h>
 
+#include <mpxparameter.h>               // CMPXParameter
+
 // CONSTANTS
 _LIT( KMPXLineChange, "\n" );
 _LIT(KMPXMusicplayerPrivateFolder, "\\private\\");
 _LIT(KMPXMusicPlayerExec, "mpx.exe" );
+_LIT8(KRemConTspControllerPlayParam, "play");
 
 const TInt KMPXMusicPlayerAlreadySaved( -5000 );
+
+const TInt KPlayerMusicPlayerParameterGranularity = 50;
 
 // Application Uid for Active Idle app
 #ifdef __ACTIVE_IDLE
@@ -4099,7 +4104,35 @@ TBool CMPXAppUi::ProcessCommandParametersL( CApaCommandLine& aCommandLine )
     const TPtrC8 command = aCommandLine.TailEnd();
         if ( command.Size() > 0 )
         {
-        HandleCommandParametersL( command );
+        // Play command from RemConTspController
+        if (command.Compare(KRemConTspControllerPlayParam) == 0) 
+            {
+            RWsSession wsSession = iEikonEnv->WsSession();
+            CAknTaskList *taskList = CAknTaskList::NewL( wsSession );
+            CleanupStack::PushL( taskList );
+            TApaTask task = taskList->FindRootApp( KAppUidMusicPlayerX );
+            CMPXParameter* param = new ( ELeave ) CMPXParameter();
+            CleanupStack::PushL( param );
+            param->iType.iUid = KMPXPluginTypeLastPlayedUid; 
+            param->iCmdForward = EMPXCmdFwdNone;
+            CBufBase* buffer = CBufFlat::NewL( KPlayerMusicPlayerParameterGranularity );
+            CleanupStack::PushL( buffer );
+            RBufWriteStream writeStream( *buffer );
+            CleanupClosePushL( writeStream );
+            param->ExternalizeL( writeStream );
+            writeStream.CommitL();
+            buffer->Compress();
+            CleanupStack::PopAndDestroy( &writeStream );
+            wsSession.SendMessageToWindowGroup( task.WgId(), KAppUidMusicPlayerX,
+                             buffer->Ptr( 0 ) );
+            CleanupStack::PopAndDestroy( buffer);
+            CleanupStack::PopAndDestroy( param );
+            CleanupStack::PopAndDestroy( taskList );
+            } 
+        else 
+            {
+            HandleCommandParametersL( command );
+            }
         }
     return ETrue;
     }

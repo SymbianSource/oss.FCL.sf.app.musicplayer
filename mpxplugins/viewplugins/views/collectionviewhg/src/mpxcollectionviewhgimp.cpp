@@ -7295,6 +7295,7 @@ void CMPXCollectionViewHgImp::ProcessCommandL(TInt aCommandId)
         case EMPXCmdReorderDone:
             {
             DeactivateReorderGrabbedModeL( ETrue );
+            iHandlingKeyEvent = EFalse;            
             break;
             }
         case EMPXCmdUpArrow:
@@ -8467,8 +8468,8 @@ TInt CMPXCollectionViewHgImp::LinkCallback(TAny* aPtr)
 TBool CMPXCollectionViewHgImp::NeedToShowEducatingDialog()
     {
     if(iEducateUserURI->Length() > 0 && iCollectionReady && //If educating user URI is in cenrep and Collection is Ready
-      (iEducatingPopupState == EMPXInitialEducatingPopup || //If Music Player is launched first time after phone flash 
-      (iEducatingPopupState == EMPXShowEducatingPopup && iPopuponRefresh))) //If user pressed yes on "Remind me later" and its manual refresh with some song added
+      //(iEducatingPopupState == EMPXInitialEducatingPopup || //If Music Player is launched first time after phone flash 
+      (iEducatingPopupState == EMPXShowEducatingPopup && iPopuponRefresh)) //If user pressed yes on "Remind me later" and its manual refresh with some song added
         {
         return ETrue;
         }

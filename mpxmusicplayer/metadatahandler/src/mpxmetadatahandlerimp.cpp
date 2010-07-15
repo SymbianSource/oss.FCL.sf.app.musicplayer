@@ -186,6 +186,7 @@ CMPXMetaDataHandlerImp::~CMPXMetaDataHandlerImp()
     delete iArtist;
     delete iAlbum;
     delete iGenre;
+    delete iMetadataIter;
     }
 
 // ---------------------------------------------------------------------------
@@ -368,6 +369,13 @@ void CMPXMetaDataHandlerImp::DoHandleMediaL(
             iColId = colId;
             iTrackNumber = lastTrackNumber;
             iPlayerEventsObserver->TrackChanged(iColId.iUid, iPlayingTime);
+            
+            if ( iMetadataIter )
+                {
+                SendCurrentlyPlayingMetadata( *iMetadataIter );
+                delete iMetadataIter;
+                iMetadataIter = NULL;
+                }
             }
         else
             {
@@ -569,17 +577,14 @@ void CMPXMetaDataHandlerImp::MpasnSetPlayerApplicationValueL(
     }
 
 // -----------------------------------------------------------------------------
-// From MRemConMediaInformationTargetObserver
-// For each element in aAttributeList the client should respond by calling 
-// CRemConMediaInformationTarget::AttributeValue(). After all attributes have 
-// been supplied the client should call CRemConMediaInformationTarget::Completed().
-// @param aAttributeList A list of TAttributeID requested by the controller
+// Sends currently playing metadata.
+// see MrcmitoGetCurrentlyPlayingMetadata
 // -----------------------------------------------------------------------------
 //
-void CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata( 
+void CMPXMetaDataHandlerImp::SendCurrentlyPlayingMetadata( 
     TMediaAttributeIter& aAttributeIter )
     {
-    MPX_FUNC( "CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata" );
+    MPX_FUNC( "CMPXMetaDataHandlerImp::SendCurrentlyPlayingMetadata" );
     const TInt KMaxMediaAttrLen = 300;  // >110 is required for AVRCP fragmentation
     TBuf8<KMaxMediaAttrLen> attrBuf;
     TMediaAttributeId attrId;
@@ -675,7 +680,31 @@ void CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata(
     iMediaInfoTarget->Completed();
     }
 
-
+// -----------------------------------------------------------------------------
+// From MRemConMediaInformationTargetObserver
+// For each element in aAttributeList the client should respond by calling 
+// CRemConMediaInformationTarget::AttributeValue(). After all attributes have 
+// been supplied the client should call CRemConMediaInformationTarget::Completed().
+// @param aAttributeList A list of TAttributeID requested by the controller
+// -----------------------------------------------------------------------------
+//
+void CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata( 
+    TMediaAttributeIter& aAttributeIter )
+    {
+    MPX_FUNC( "CMPXMetaDataHandlerImp::MrcmitoGetCurrentlyPlayingMetadata" );
+    
+    if ( iTrackTitle ) 
+        {
+        SendCurrentlyPlayingMetadata( aAttributeIter );
+        delete iMetadataIter;
+        iMetadataIter = NULL;
+        }
+    else
+        {
+        delete iMetadataIter;
+        iMetadataIter = new TMediaAttributeIter( aAttributeIter );
+        }
+    }
 
 // ---------------------------------------------------------------------------
 // From class MRemConGroupNavigationTargetObserver.

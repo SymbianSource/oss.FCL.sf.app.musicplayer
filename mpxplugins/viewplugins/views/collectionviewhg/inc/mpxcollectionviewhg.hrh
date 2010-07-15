@@ -147,7 +147,7 @@ enum TMPXPlaylistDetailsHeading
 // Different state of educating User Popup
 enum TMPXEducatingPopup 
     {
-    EMPXInitialEducatingPopup,   // Initial state
+    // EMPXInitialEducatingPopup,   // Initial state
     EMPXShowEducatingPopup,      // Show popup at manual refresh, if any new songs added
     EMPXDonotShowEducatingPopup  // User doesn't want to see popup
     };

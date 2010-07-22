@@ -17,10 +17,7 @@
 
 #include <hbmainwindow.h>
 #include <hbaction.h>
-#include <mpxaudioeffectproperties.h>
 #include <hbapplication.h>
-#include <QTranslator>
-#include <QLocale>
 
 #include "mpsettingsview.h"
 #include "mpsettingsaudioeffectswidget.h"
@@ -46,7 +43,7 @@
  */
 MpSettingsView::MpSettingsView()
     : mWindow(0),
-      mNavigationBack(0),
+      mSoftKeyBack(0),
       mAudioEffectsWidget(0)
 {
     TX_LOG
@@ -58,7 +55,7 @@ MpSettingsView::MpSettingsView()
 MpSettingsView::~MpSettingsView()
 {
     TX_ENTRY
-    delete mNavigationBack;
+    delete mSoftKeyBack;
     TX_EXIT
 }
 
@@ -69,31 +66,18 @@ void MpSettingsView::initializeView()
 {
     TX_ENTRY
 
-    //Load musicplayer translator
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = QString("z:/resource/qt/translations/");
-
-    bool translatorLoaded = false;
-    translatorLoaded = translator.load(path + "musicplayer_" + lang);
-    TX_LOG_ARGS("Loading musicplayer translator ok=" << translatorLoaded);
-    if ( translatorLoaded ) {
-        qApp->installTranslator( &translator );
-
-    }
-
     mWindow = mainWindow();
-    mNavigationBack = new HbAction(Hb::BackNaviAction, this);
+    mSoftKeyBack = new HbAction(Hb::BackNaviAction, this);
     mAudioEffectsWidget = new MpSettingsAudioEffectsWidget(this);
     mAudioEffectsWidget->initialize();
     setWidget( mAudioEffectsWidget );
 
-    connect( mNavigationBack,
+    connect( mSoftKeyBack,
                 SIGNAL(triggered()),
                 this,
                 SLOT(back()) );
 
-    connect( mNavigationBack,
+    connect( mSoftKeyBack,
                 SIGNAL(triggered()),
                 mAudioEffectsWidget,
                 SLOT(persistBalance()) );
@@ -106,7 +90,7 @@ void MpSettingsView::initializeView()
 void MpSettingsView::activateView()
 {
     TX_ENTRY
-    setNavigationAction( mNavigationBack );
+    setNavigationAction( mSoftKeyBack );
     TX_EXIT
 }
 

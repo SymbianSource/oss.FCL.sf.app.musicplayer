@@ -31,17 +31,17 @@ public:
     TestMpCollectionDocumentLoader();
     virtual ~TestMpCollectionDocumentLoader();
 
-signals:
-
-
 public slots:
+
     void initTestCase();
     void cleanupTestCase();
     void init();
     void cleanup();
 
 private slots:
+
     void testCreateMpNowPlayingWidget();
+    void testCreateHgMediawall();
     void testCreateQObject();
 
 private:

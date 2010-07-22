@@ -18,7 +18,7 @@
 // INCLUDE FILES
 #include <time.h>
 #include <cstdlib>
-#include <qtcore>
+#include <QtCore>
 
 #include <hbinstance.h>
 #include <hbapplication.h>
@@ -27,8 +27,6 @@
 #include <hbmenu.h>
 #include <hbmessagebox.h>
 #include <hblabel.h>
-#include <QTranslator>
-#include <QLocale>
 #include <hblistview.h>
 #include <hbscrollbar.h>
 
@@ -37,7 +35,7 @@
 #include "mpcollectioncontainerfactory.h"
 #include "mpcollectioncontainer.h"
 #include "mpcollectiondatamodel.h"
-#include "mpengine.h"
+#include "mpenginefactory.h"
 #include "mpmpxcollectiondata.h"
 #include "mpnowplayingwidget.h"
 #include "mpcommondefs.h"
@@ -49,8 +47,21 @@
 
 
 const char*MUSIC_COLLECTION_DOCML = ":/docml/musiccollection.docml";
-const char*EFFECT_SELECT = ":/effects/select.fxml";
-const char*EFFECT_SELECT_END = ":/effects/select_end.fxml";
+
+const char*CONTAINER_EFFECT_GROUP = "mpcontainer";
+
+const char*SHOW_EFFECT = "show";
+const char*HIDE_EFFECT = "hide";
+const char*SHOW_BACK_EFFECT = "show_back";
+const char*HIDE_BACK_EFFECT = "hide_back";
+
+const char*SHOW_EFFECT_RESOURCE_NAME = "view_show_normal";
+const char*HIDE_EFFECT_RESOURCE_NAME = "view_hide_normal";
+const char*SHOW_BACK_EFFECT_RESOURCE_NAME = "view_show_back";
+const char*HIDE_BACK_EFFECT_RESOURCE_NAME = "view_hide_back";
+
+const char*EFFECT_TARGET_SNAPSHOT = "snapshot";
+const char*EFFECT_TARGET_CONTAINER = "container";
 
 const int KMainToolBarAll = 0;
 const int KMainToolBarArtists = 1;
@@ -90,15 +101,15 @@ MpCollectionView::MpCollectionView()
       mActivated( false ),
       mNowPlayingBanner( 0 ),
       mBannerAttached( false ),
-      mNavigationQuit( 0 ),
-      mNavigationBack( 0 ),
+      mSoftKeyQuit( 0 ),
+      mSoftKeyBack( 0 ),
+      mShuffleAction( 0 ),
+      mShuffleEnabled( false ),
       mDocumentLoader( 0 ),
       mMainContainer( 0 ),
       mMainToolBar( 0 ),
       mPlaylistToolBar( 0 ),
       mSnapshot( 0 ),
-      mMpTranslator( 0 ),
-      mCommonTranslator( 0 ),
       mActivationWaiting( false ),
       mMpPopupHandler( 0 ),
       mUsbBlocked( false )
@@ -113,8 +124,8 @@ MpCollectionView::~MpCollectionView()
 {
     TX_ENTRY
     delete mSnapshot;
-    delete mNavigationQuit;
-    delete mNavigationBack;
+    delete mSoftKeyQuit;
+    delete mSoftKeyBack;
 
     HbToolBar *toolBar = takeToolBar();
     if ( mMainToolBar != toolBar && mPlaylistToolBar != toolBar ) {
@@ -127,12 +138,10 @@ MpCollectionView::~MpCollectionView()
         mPlaylistToolBar->deleteLater();
     }
 
-    delete mCollectionDataModel;
     delete mCollectionContainer;
     delete mContainerFactory;
+    delete mCollectionDataModel;
     delete mDocumentLoader;
-    delete mMpTranslator;
-    delete mCommonTranslator;
     TX_EXIT
 }
 
@@ -143,56 +152,27 @@ void MpCollectionView::initializeView()
 {
     TX_ENTRY
 
-    //Load musicplayer and common translators
-    QString lang = QLocale::system().name();
-    QString path = QString( "z:/resource/qt/translations/" );
-    bool translatorLoaded = false;
-
-    mMpTranslator = new QTranslator( this );
-    translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-    TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mMpTranslator );
-    }
-
-    mCommonTranslator = new QTranslator( this );
-    translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
-    TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
-    if ( translatorLoaded ) {
-        qApp->installTranslator( mCommonTranslator );
-    }
-
     mWindow = mainWindow();
 
     // Create softkey actions
-    mNavigationQuit = new HbAction( Hb::QuitNaviAction, this );
-    connect( mNavigationQuit, SIGNAL( triggered() ), this, SLOT( back() ) );
+    mSoftKeyQuit = new HbAction( Hb::QuitNaviAction, this );
+    connect( mSoftKeyQuit, SIGNAL( triggered() ), this, SLOT( back() ) );
 
-    mNavigationBack = new HbAction( Hb::BackNaviAction, this );
-    connect( mNavigationBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    mSoftKeyBack = new HbAction( Hb::BackNaviAction, this );
+    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
-    mMpEngine = MpEngine::instance();
-    
-    connect( mMpEngine,
-            SIGNAL( collectionPlaylistOpened() ),
-            this,
-            SLOT( startPlaybackView() ) );
-    connect( mMpEngine,
-            SIGNAL( playlistSaved( bool ) ),
-            this,
-            SLOT( playlistSaved( bool ) ) );
-    connect( mMpEngine,
-            SIGNAL( songsDeleted( bool ) ),
-            this,
-            SLOT( songsDeleted( bool ) ) );
-    connect( mMpEngine,
-            SIGNAL( playlistsRenamed( bool ) ),
-            this,
-            SLOT( playlistsRenamed( bool ) ) );
-    connect( mMpEngine,
-            SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
-            this,
-            SLOT( handleIsolatedCollectionOpened( MpMpxCollectionData* ) ) );
+    mMpEngine = MpEngineFactory::sharedEngine();
+
+    connect( mMpEngine, SIGNAL( collectionPlaylistOpened() ),
+            this, SLOT( startPlaybackView() ) );
+    connect( mMpEngine, SIGNAL( playlistSaved( bool ) ),
+            this, SLOT( playlistSaved( bool ) ) );
+    connect( mMpEngine, SIGNAL( songsDeleted( bool ) ),
+            this, SLOT( songsDeleted( bool ) ) );
+    connect( mMpEngine, SIGNAL( playlistsRenamed( bool ) ),
+            this, SLOT( playlistsRenamed( bool ) ) );
+    connect( mMpEngine, SIGNAL( isolatedCollectionOpened( MpMpxCollectionData* ) ),
+            this, SLOT( handleIsolatedCollectionOpened( MpMpxCollectionData* ) ) );
 
     mCollectionData = mMpEngine->collectionData();
     qRegisterMetaType<TCollectionContext>("TCollectionContext");
@@ -213,10 +193,13 @@ void MpCollectionView::initializeView()
             // Banner is not needed since playback is stopped when returning
             // from playback preview. Disable the banner from updating.
             mNowPlayingBanner->setEnabled( false );
+            attachNowPlayingBanner( false );
         }
         else {
             connect( mNowPlayingBanner, SIGNAL( clicked() ), this, SLOT( startPlaybackView() ) );
-            connect( mNowPlayingBanner, SIGNAL( playbackAttachmentChanged( bool ) ), this, SLOT( attachNowPlayingBanner( bool ) ) );
+            connect( mNowPlayingBanner, SIGNAL( playbackAttachmentChanged( bool ) ),
+                     this, SLOT( attachNowPlayingBanner( bool ) ) );
+            attachNowPlayingBanner( mNowPlayingBanner->isBannerAttached() );
         }
 
         widget = mDocumentLoader->findWidget( QString( "mainContainer" ) );
@@ -224,29 +207,12 @@ void MpCollectionView::initializeView()
 
         setWidget( mMainContainer );
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_left.fxml" ),
-                QString( "slide_out_to_left" ) );
+        HbEffect::add(
+            QStringList() << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP << CONTAINER_EFFECT_GROUP,
+            QStringList() << SHOW_EFFECT_RESOURCE_NAME <<  HIDE_EFFECT_RESOURCE_NAME << SHOW_BACK_EFFECT_RESOURCE_NAME << HIDE_BACK_EFFECT_RESOURCE_NAME,
+            QStringList() << SHOW_EFFECT << HIDE_EFFECT << SHOW_BACK_EFFECT << HIDE_BACK_EFFECT);
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_right.fxml" ),
-                QString( "slide_out_to_right" ) );
 
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_out_to_top.fxml" ),
-                QString( "slide_out_to_top" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_right_and_fade_in.fxml" ),
-                QString( "slide_in_to_right_and_fade_in" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_left_and_fade_in.fxml" ),
-                QString( "slide_in_to_left_and_fade_in" ) );
-
-        HbEffect::add( QString( "container" ),
-                QString( ":/effects/slide_in_to_top_and_fade_in.fxml" ),
-                QString( "slide_in_to_top_and_fade_in" ) );
     }
     else {
         TX_LOG_ARGS( "Error: invalid xml file." );
@@ -267,7 +233,7 @@ void MpCollectionView::initializeView()
 
     if ( MpSettingsManager::firstStartup() ) {
         mActivationWaiting = true;
-        mMpEngine->refreshLibrary();
+        mMpEngine->refreshLibrary( true );
     }
 
     TX_EXIT
@@ -285,7 +251,12 @@ void MpCollectionView::activateView()
     TX_ENTRY_ARGS( "mCollectionContext=" << mCollectionContext );
     if ( mCollectionContext == ECollectionContextUnknown ) {
         // Open 'All Songs' by default
-        mMpEngine->openCollection( ECollectionContextAllSongs );
+        if ( mCollectionData->context() == ECollectionContextAllSongs ){
+            setContext( ECollectionContextAllSongs );
+        }
+        else {
+            mMpEngine->openCollection( ECollectionContextAllSongs );
+        }
     }
     else {
         // This true when returning from other views, e.g. playback view
@@ -301,8 +272,8 @@ void MpCollectionView::deactivateView()
 {
     TX_ENTRY
     mActivated = false;
-	
-    cancelOngoingOperation();
+
+    closeActiveDialog( true );
 
     setNavigationAction( 0 );
     TX_EXIT
@@ -319,9 +290,7 @@ void MpCollectionView::setDefaultView()
         mMpEngine->openCollection( ECollectionContextAllSongs );
     }
 
-    if ( mBannerAttached ) {
-        setBannerVisibility( false );
-    }
+
     TX_EXIT
 }
 
@@ -356,18 +325,24 @@ void MpCollectionView::setContext( TCollectionContext context )
     if ( mActivated ) {
         startContainerTransition( mCollectionContext, context );
     }
+
     mCollectionContext = context;
+    // Reset softkey and the menu
+    if ( mActivated ) {
+        setSoftkey();
+    }
+
+    // Close any possible popup already launched with previous context
+    closeActiveDialog();
+
+    updateToolBar();
+    updateMenu();
+
     mCollectionContainer = mContainerFactory->createContainer( context );
     mCollectionContainer->setViewMode( mViewMode );
     mCollectionDataModel->refreshModel();
     mCollectionContainer->setDataModel( mCollectionDataModel );
 
-    // Reset softkey and the menu
-    if ( mActivated ) {
-        setSoftkey();
-    }
-    updateToolBar();
-    updateMenu();
     TX_EXIT
 }
 
@@ -421,18 +396,6 @@ void MpCollectionView::openPlaylists()
 }
 
 /*!
- Slot to be called when 'Genres' action is triggered from the toolbar.
- */
-void MpCollectionView::openGenres()
-{
-    TX_ENTRY
-    if ( mCollectionContext != ECollectionContextGenres ) {
-        mMpEngine->openCollection( ECollectionContextGenres );
-    }
-    TX_EXIT
-}
-
-/*!
  Slot to be called when 'Find' action is triggered from the toolbar.
  */
 void MpCollectionView::find()
@@ -467,25 +430,66 @@ void MpCollectionView::openIndex( int index )
         QString songUri;
         switch ( mCollectionContext ) {
             case ECollectionContextAllSongs:
-            case ECollectionContextArtistSongs:
-            case ECollectionContextAlbumSongs:
+            case ECollectionContextArtistAllSongs:
             case ECollectionContextPlaylistSongs:
-            case ECollectionContextGenreSongs:
                 doOpen = false;
                 songUri = mCollectionData->itemData( index, MpMpxCollectionData::Uri );
+                emit songSelected( songUri );
+                break;
+            case ECollectionContextArtistAlbumsTBone:
+            case ECollectionContextAlbumsTBone:
+                doOpen = false;
+                songUri = mCollectionData->albumSongData( index, MpMpxCollectionData::Uri );
                 emit songSelected( songUri );
                 break;
             default:
                 break;
         }
     }
+
     if ( doOpen ) {
-        // TODO: "if" used as workaround for HbListView multiple events: longPress and activated.
-        //       Remove once HbListView get fixed (wk14 or 16)
-        if ( !mMpPopupHandler->showingPopup() ) {
+        if ( mCollectionContext == ECollectionContextArtistAlbums ) {
+            if ( (mCollectionData->count() > 1) && (index == 0) ) {
+                mMpEngine->openCollectionItem( index );
+            }
+            else {
+                // Artist-Album view going into T-bone. We don't actually open the
+                // collection. Just fake an open.
+                mCollectionData->setContext( ECollectionContextArtistAlbumsTBone );
+            }
+        }
+        else if ( mCollectionContext == ECollectionContextAlbums ) {
+            // Album view going into T-bone. We don't actually open the
+            // collection. Just fake an open.
+            mCollectionData->setContext( ECollectionContextAlbumsTBone );
+        }
+        else {
+            // Real open. Forward it to the engine.
             mMpEngine->openCollectionItem( index );
         }
     }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when an album is centered in T-Bone view and we need to
+ find the songs beloging to album with \a index.
+ */
+void MpCollectionView::findAlbumSongs( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index );
+    mMpEngine->findAlbumSongs(index);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when a song is selected in T-Bone view and we need to
+ play album with \a albumIndex starting with the songs with \a songIndex.
+ */
+void MpCollectionView::playAlbumSongs( int albumIndex, int songIndex )
+{
+    TX_ENTRY_ARGS( "albumIndex=" << albumIndex << "songIndex=" << songIndex );
+    mMpEngine->playAlbumSongs(albumIndex, songIndex);
     TX_EXIT
 }
 
@@ -501,16 +505,27 @@ void MpCollectionView::back()
         case ECollectionContextArtists: 
         case ECollectionContextAlbums:
         case ECollectionContextPlaylists:
-        case ECollectionContextGenres:
             // Exit from these levels.
             doExit = true;
             break;
-        case ECollectionContextAlbumSongs:
         case ECollectionContextArtistAlbums:
-        case ECollectionContextArtistSongs:
+        case ECollectionContextArtistAllSongs:
         case ECollectionContextPlaylistSongs:
-        case ECollectionContextGenreSongs:
             mMpEngine->back();
+            break;
+        case ECollectionContextArtistAlbumsTBone:
+            if ( mCollectionData->count() > 1 ) {
+                // Going from T-Bone to Artist-Album view; Need to fake back.
+                mCollectionData->setContext(ECollectionContextArtistAlbums);
+            }
+            else {
+                // There only 1 album under this artist. Return to artist view.
+                mMpEngine->back();
+            }
+            break;
+        case ECollectionContextAlbumsTBone:
+            // Going from T-Bone to Album view; Need to fake back.
+            mCollectionData->setContext(ECollectionContextAlbums);
             break;
         default:
             doExit = true;
@@ -524,7 +539,7 @@ void MpCollectionView::back()
             emit songSelected( "" );
         }
         else {
-            emit command( MpCommon::Exit );
+            emit command( MpCommon::SendToBackground );
         }
     }
     TX_EXIT
@@ -568,7 +583,7 @@ void MpCollectionView::attachNowPlayingBanner( bool active )
  */
 void MpCollectionView::containerTransitionComplete( const HbEffect::EffectStatus &status )
 {    
-    if ( status.userData == "snapshot_effect" ) {
+    if ( status.userData == EFFECT_TARGET_SNAPSHOT ) {
         qobject_cast<QGraphicsView *>( mWindow )->scene()->removeItem( mSnapshot );
         mSnapshot->deleteLater();
         mSnapshot = 0;
@@ -583,16 +598,15 @@ void MpCollectionView::shufflePlayAll()
     mMpEngine->setShuffle( true );
     MpSettingsManager::setShuffle( true );
     int index = generateShuffleIndex();
-    openIndex( index );
-}
-
-
-/*!
- Slot to be called when 'Refresh Library' is clicked by the user from the menu.
- */
-void MpCollectionView::refreshLibrary()
-{
-    mMpEngine->refreshLibrary();
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            playAlbumSongs( mCollectionData->currentAlbumIndex(), index );
+            break;
+        default:
+            openIndex( index );
+            break;
+    }
 }
 
 /*!
@@ -600,7 +614,15 @@ void MpCollectionView::refreshLibrary()
  */
 void MpCollectionView::addToPlaylist()
 {
-    mMpPopupHandler->openAddSongsToPlaylist( mCollectionDataModel );
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            mMpPopupHandler->openAddSongsToPlaylistFromTBone();    
+            break;
+        default:
+            mMpPopupHandler->openAddSongsToPlaylist( mCollectionDataModel );
+            break;
+    }
 }
 
 /*!
@@ -627,9 +649,9 @@ void MpCollectionView::renameCurrentPlaylistContainer()
  */
 void MpCollectionView::playlistSaved( bool success )
 {
-    if ( success &&
-            ( ECollectionContextPlaylists == mCollectionContext ||
-            ECollectionContextPlaylistSongs == mCollectionContext ) ) {
+    if ( success
+         && ( ECollectionContextPlaylists == mCollectionContext
+              || ECollectionContextPlaylistSongs == mCollectionContext ) ) {
         mMpEngine->reopenCollection();
     }
 }
@@ -687,7 +709,7 @@ void MpCollectionView::handleIsolatedCollectionOpened( MpMpxCollectionData* coll
  */
 void MpCollectionView::arrangeSongs( )
 {
-    mMpPopupHandler->openArrangeSongs( mCollectionData );
+    mMpPopupHandler->openArrangeSongs();
 }
 
 /*!
@@ -717,7 +739,7 @@ void MpCollectionView::handleUsbBlocked( bool blocked )
     TX_ENTRY_ARGS( "blocked=" << blocked );
     mUsbBlocked = blocked;
         
-    cancelOngoingOperation();
+    closeActiveDialog();
     
     updateMenu();
     if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
@@ -732,7 +754,7 @@ void MpCollectionView::handleUsbBlocked( bool blocked )
 void MpCollectionView::handleLibraryAboutToUpdate()
 {
     TX_ENTRY
-    cancelOngoingOperation();
+    closeActiveDialog();
     TX_EXIT
 }
 
@@ -747,11 +769,26 @@ void MpCollectionView::handleLibraryUpdated()
         activateView();
     }
     else {
-        cancelOngoingOperation();
+        closeActiveDialog();
         
         //Update cache, even if collection is in background.
         //Library refreshing could be triggered at any point due USB/MMC events.
         mMpEngine->reopenCollection();
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when shuffle action status changes. This is called by the
+ containers. Shuffle is only enabled when there is more than 1 song and the
+ it can change when songs are deleted or when new songs are found during refresh.
+ */
+void MpCollectionView::setShuffleAction( bool enabled )
+{
+    TX_ENTRY
+    mShuffleEnabled = enabled;
+    if ( mShuffleAction ) {
+        mShuffleAction->setEnabled(enabled);
     }
     TX_EXIT
 }
@@ -766,38 +803,34 @@ void MpCollectionView::setMainToolBar()
     if ( !mMainToolBar ) {
         //Create the toolbar.
         mMainToolBar = new HbToolBar();
+        mMainToolBar->setObjectName( "MainToolBar" );
         mMainToolBar->setOrientation( Qt::Horizontal );
         QActionGroup *actionsGroup = new QActionGroup( mMainToolBar );
         HbAction *action;
 
         // All Songs
-        action = createToolBarAction( actionsGroup, "qtg_mono_songs_all" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_songs_all", "AllSongsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openSongs() ) );
         mMainToolBar->addAction( action );
         
         // Artists
-        action = createToolBarAction( actionsGroup, "qtg_mono_artists" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_artists", "ArtistsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openArtists() ) );
         mMainToolBar->addAction( action );
 
         // Albums
-        action = createToolBarAction( actionsGroup, "qtg_mono_music_albums" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_music_albums", "AlbumsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openAlbums() ) );
         mMainToolBar->addAction( action );
 
         // Playlists
-        action = createToolBarAction( actionsGroup, "qtg_mono_playlist" );
+        action = createToolBarAction( actionsGroup, "qtg_mono_playlist", "PlaylistsAction" );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openPlaylists() ) );
         mMainToolBar->addAction( action );
-
-        // Genres
-        action = createToolBarAction( actionsGroup, "qtg_mono_search" );
-        connect( action, SIGNAL( triggered( bool ) ), this, SLOT( find() ) );
-        mMainToolBar->addAction( action );
-
+        
         if ( mViewMode != MpCommon::FetchView ) {
             // Music Store
-            action = createToolBarAction(actionsGroup, "qtg_mono_ovistore" );
+            action = createToolBarAction(actionsGroup, "qtg_mono_ovistore", "MusicStoreAction" );
             connect( action, SIGNAL( triggered( bool ) ), this, SLOT( openMusicStore() ) );
             mMainToolBar->addAction( action );
         }
@@ -808,15 +841,12 @@ void MpCollectionView::setMainToolBar()
             action = qobject_cast<HbAction*>( mMainToolBar->actions()[KMainToolBarAll] );
             break;
         case ECollectionContextArtists:
-        case ECollectionContextArtistAlbums:
             action = qobject_cast<HbAction*>( mMainToolBar->actions()[KMainToolBarArtists] );
             break;
         case ECollectionContextAlbums:
-        case ECollectionContextAlbumSongs:
             action = qobject_cast<HbAction*>( mMainToolBar->actions()[KMainToolBarAlbums] );
             break;
         case ECollectionContextPlaylists:
-        case ECollectionContextPlaylistSongs:
             action = qobject_cast<HbAction*>( mMainToolBar->actions()[KMainToolBarPlaylists] );
             break;
     }
@@ -843,26 +873,26 @@ void MpCollectionView::setPlaylistToolBar()
     TX_ENTRY
     if ( !mPlaylistToolBar ) {
         mPlaylistToolBar = new HbToolBar();
+        mPlaylistToolBar->setObjectName( "PlaylistToolBar" );
         mPlaylistToolBar->setOrientation( Qt::Horizontal );
         HbAction *action;
-        HbIcon *icon;
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_plus" );
-        action->setIcon( *icon );
+        action->setIcon( HbIcon( "qtg_mono_plus" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( prepareToAddToPlaylist() ) );
+        action->setObjectName( "AddToPlaylistAction" );
         mPlaylistToolBar->addAction( action );
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_minus" );
-        action->setIcon( *icon);
+        action->setIcon( HbIcon( "qtg_mono_minus" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( deleteSongs() ) );
+        action->setObjectName( "RemoveFromPlaylistAction" );
         mPlaylistToolBar->addAction( action );
 
         action = new HbAction( this );
-        icon = new HbIcon( "qtg_mono_organize" );
-        action->setIcon( *icon );
+        action->setIcon( HbIcon( "qtg_mono_organize" ) );
         connect( action, SIGNAL( triggered( bool ) ), this, SLOT( arrangeSongs() ) );
+        action->setObjectName( "OrganizePlaylistAction" );
         mPlaylistToolBar->addAction( action );
     }
 
@@ -893,13 +923,15 @@ void MpCollectionView::setPlaylistToolBar()
  */
 HbAction *MpCollectionView::createToolBarAction(
     QActionGroup *actionsGroup,
-    const QString& icon )
+    const QString& icon,
+    const QString& objectName )
 {
     HbIcon actionIcon( icon );
 
     HbAction *action = new HbAction( actionsGroup );
     action->setIcon( actionIcon );
     action->setCheckable( true );
+    action->setObjectName( objectName );
     return action;
 }
 
@@ -913,61 +945,63 @@ void MpCollectionView::updateMenu()
     HbMenu *myMenu = new HbMenu();
     HbAction *menuAction;
     if ( mViewMode == MpCommon::DefaultView ) {
-        bool items = mCollectionData->count() != 0;
+        int count = mCollectionData->count();
         switch ( mCollectionContext ) {
-            case ECollectionContextAllSongs:                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_dblist_shuffle" ) ); 
-                if ( items ){
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+            case ECollectionContextAllSongs:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
                 }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) ); 
-                if ( items && !mUsbBlocked ) {
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                if ( count && !mUsbBlocked ) {
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
                 }
-                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) ); 
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );                
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
-                break;
-  
-            case ECollectionContextArtists:
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) ); 
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );                
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
-                break;
-            case ECollectionContextAlbums:
-                //connect( myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) ), SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
-                // Todo: View as coverflow
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
                 }
                 connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
                 break;
-            case ECollectionContextArtistSongs:
-            case ECollectionContextAlbumSongs:
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) ); 
+            case ECollectionContextArtists:
+            case ECollectionContextAlbums:
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
+                if ( !mUsbBlocked ) {
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );                
+                }
+                else {
+                    menuAction->setDisabled( true );
+                }
+                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
+                break;
+            case ECollectionContextArtistAlbumsTBone:
+            case ECollectionContextAlbumsTBone:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( !mShuffleEnabled ) {
+                    mShuffleAction->setDisabled( true );
+                }
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                if ( !mUsbBlocked ) {
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
+                }
+                else {
+                    menuAction->setDisabled( true );
+                }
+                break;
+            case ECollectionContextArtistAllSongs:
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
+                }
+                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                 if ( !mUsbBlocked ) {
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
                 }
@@ -986,7 +1020,12 @@ void MpCollectionView::updateMenu()
                 connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
                 break;
             case ECollectionContextPlaylistSongs:
-                if ( !mCollectionData->isAutoPlaylist() ){
+                mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
+                connect( mShuffleAction, SIGNAL( triggered() ), this, SLOT( shufflePlayAll() ) );
+                if ( count <= 1 ) {
+                    mShuffleAction->setDisabled( true );
+                }
+                if ( !mCollectionData->isAutoPlaylist() ) {
                 menuAction = myMenu->addAction( hbTrId( "txt_common_menu_rename_item" ) );
                     if ( !mUsbBlocked ) {
                         connect( menuAction, SIGNAL( triggered() ), this, SLOT( renameCurrentPlaylistContainer() ) );
@@ -1002,21 +1041,12 @@ void MpCollectionView::updateMenu()
     }
     else if ( mViewMode == MpCommon::FetchView ) {
         switch ( mCollectionContext ) {
-            case ECollectionContextAllSongs:                
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) ); 
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );                
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                break;
+            case ECollectionContextAllSongs:
+            case ECollectionContextArtists:
             case ECollectionContextAlbums:
-                //connect( myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) ), SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
-                // Todo: View as coverflow
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
                 if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( refreshLibrary() ) );
+                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
                 }
                 else {
                     menuAction->setDisabled( true );
@@ -1050,9 +1080,9 @@ void MpCollectionView::updateToolBar()
             }
             break;
         case ECollectionContextArtistAlbums:
-        case ECollectionContextArtistSongs:
-        case ECollectionContextAlbumSongs:
-        case ECollectionContextGenreSongs:
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextArtistAllSongs:
+        case ECollectionContextAlbumsTBone:
             if ( !toolBar()->actions().empty() ) {
                 takeToolBar();
                 setToolBar( new HbToolBar );
@@ -1074,7 +1104,7 @@ void MpCollectionView::setSoftkey()
     if ( mViewMode == MpCommon::FetchView ) {
         // 'Back' is used in all views in fetch mode because we must
         // appear as an embedded application.
-        setNavigationAction( mNavigationBack );
+        setNavigationAction( mSoftKeyBack );
     }
     else {
         switch ( mCollectionContext ) {
@@ -1082,11 +1112,10 @@ void MpCollectionView::setSoftkey()
             case ECollectionContextArtists:
             case ECollectionContextAlbums:
             case ECollectionContextPlaylists:
-            case ECollectionContextGenres:
-                setNavigationAction( mNavigationQuit );
+                setNavigationAction( mSoftKeyQuit );
                 break;
             default:
-                setNavigationAction( mNavigationBack );
+                setNavigationAction( mSoftKeyBack );
                 break;
         }
     }
@@ -1121,7 +1150,16 @@ void MpCollectionView::setBannerVisibility( bool visible )
 int MpCollectionView::generateShuffleIndex()
 {
     int low = 0;
-    int high = mCollectionData->count();
+    int high = 0;
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            high = mCollectionData->albumSongsCount();
+            break;
+        default:
+            high = mCollectionData->count();
+            break;
+    }
 
     time_t seconds;
     time( &seconds );
@@ -1148,73 +1186,50 @@ void MpCollectionView::startContainerTransition( TCollectionContext contextFrom,
     mWindow->scene()->addItem( mSnapshot );
 
 
-    if ( ( contextFrom == ECollectionContextAlbums && contextTo == ECollectionContextAlbumSongs ) ||
-            ( contextFrom == ECollectionContextArtists && contextTo == ECollectionContextArtistAlbums ) ||
-            ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextAlbumSongs ) ||
-            ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtistSongs ) ||
-            ( contextFrom == ECollectionContextPlaylists && contextTo == ECollectionContextPlaylistSongs ) ||
-            ( contextFrom == ECollectionContextGenres && contextTo == ECollectionContextGenreSongs ) ) {
+    if( ( contextFrom == ECollectionContextAlbumsTBone && contextTo == ECollectionContextAlbums ) ||
+             ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtists ) ||
+             ( contextFrom == ECollectionContextArtistAlbumsTBone && contextTo == ECollectionContextArtistAlbums ) ||
+             ( contextFrom == ECollectionContextArtistAlbumsTBone && contextTo == ECollectionContextArtists ) ||
+             ( contextFrom == ECollectionContextArtistAllSongs && contextTo == ECollectionContextArtistAlbums ) ||
+             ( contextFrom == ECollectionContextPlaylistSongs && contextTo == ECollectionContextPlaylists ) ) {
         HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_left" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( HIDE_BACK_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "snapshot_effect") );
+                QString( EFFECT_TARGET_SNAPSHOT) );
 
         HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_left_and_fade_in" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( SHOW_BACK_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "mainContainer_effect") );
-    }
-    else if( ( contextFrom == ECollectionContextAlbumSongs && contextTo == ECollectionContextAlbums ) ||
-            ( contextFrom == ECollectionContextArtistAlbums && contextTo == ECollectionContextArtists ) ||
-            ( contextFrom == ECollectionContextAlbumSongs && contextTo == ECollectionContextArtistAlbums ) ||
-            ( contextFrom == ECollectionContextArtistSongs && contextTo == ECollectionContextArtistAlbums ) ||
-            ( contextFrom == ECollectionContextPlaylistSongs && contextTo == ECollectionContextPlaylists ) ||
-            ( contextFrom == ECollectionContextGenreSongs && contextTo == ECollectionContextGenres ) ) {
-        HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_right" ),
-                this,
-                "containerTransitionComplete",
-                QString( "snapshot_effect") );
-
-        HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_right_and_fade_in" ),
-                this,
-                "containerTransitionComplete",
-                QString( "mainContainer_effect") );
+                QString( EFFECT_TARGET_CONTAINER) );
     }
     else {
         HbEffect::start( mSnapshot,
-                QString( "container" ),
-                QString( "slide_out_to_top" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( HIDE_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "snapshot_effect") );
+                QString( EFFECT_TARGET_SNAPSHOT) );
 
         HbEffect::start( mMainContainer,
-                QString( "container" ),
-                QString( "slide_in_to_top_and_fade_in" ),
+                QString( CONTAINER_EFFECT_GROUP ),
+                QString( SHOW_EFFECT ),
                 this,
                 "containerTransitionComplete",
-                QString( "mainContainer_effect") );
+                QString( EFFECT_TARGET_CONTAINER ) );
     }
-
 }
 
 /*!
  \internal
  Closes any active dialog or menu.
  */
-void MpCollectionView::cancelOngoingOperation()
+void MpCollectionView::closeActiveDialog( bool onlyContextMenu )
 {
-    if ( mActivated ) {
-        mMpPopupHandler->cancelOngoingPopup();
-        menu()->close();
-    }
+    mMpPopupHandler->cancelOngoingPopup( onlyContextMenu );
+    menu()->close();
 }
 

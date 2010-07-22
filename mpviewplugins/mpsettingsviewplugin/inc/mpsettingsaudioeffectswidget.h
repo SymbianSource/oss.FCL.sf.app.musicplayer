@@ -1,5 +1,5 @@
 /*
-* Copyright ( c ) 2009 Nokia Corporation and/or its subsidiary( -ies ).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -10,8 +10,8 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
-* 
-* Description: Music Player audio effect view.
+*
+* Description: Music Player Settings view - audio settings.
 *
 */
 
@@ -20,13 +20,13 @@
 
 
 // INCLUDES
-#include <qobject>
+#include <QObject>
 #include <hbwidget.h>
 #include <hbdataform.h>
 #include <hbdataformmodel.h>
 
 // CLASS DECLARATION
-class MpMpxAsFrameworkWrapper;
+class MpEngine;
 class HbSlider;
 
 /**
@@ -49,7 +49,7 @@ public slots:
     
 private:
 
-    MpMpxAsFrameworkWrapper *mFrameworkWrapper;
+    MpEngine                *mMpEngine;         // Own
     HbDataFormModel         *mModel;
     };
 

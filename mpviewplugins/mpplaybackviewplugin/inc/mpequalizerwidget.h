@@ -23,7 +23,7 @@
 
 //forward declartions
 class HbRadioButtonList;
-class MpEqualizerWrapper;
+class MpEngine;
 
 //class declaration
 class MpEqualizerWidget : public HbDialog
@@ -41,17 +41,17 @@ public:
     
 public slots:
     void presetSelected(int index);
-    void equalizerReady();
     void cancelSelected(bool checked);
     void okSelected(bool checked);
 
+private: // functions
+    QString getLocalizedString( QString name );
+    
 private:
     
-    MpEqualizerWrapper *mEqualizerWrapper;  //owned    
+    MpEngine           *mMpEngine;         // Own
     HbRadioButtonList  *mPresetsList;  //owned
-    
-    int  mOriginalPreset;
-    bool mEqualizerReady;
+    int                mOriginalPreset;
 
     Q_DISABLE_COPY(MpEqualizerWidget)
     

@@ -16,12 +16,10 @@
 */
 
 #include <qnamespace.h>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
 
 #include "unittest_mpcollectiondocumentloader.h"
 #include "mpnowplayingwidget.h"
+#include "hgmediawall.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -33,18 +31,20 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
     TestMpCollectionDocumentLoader tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpcollectiondocumentloader.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpcollectiondocumentloader.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpCollectionDocumentLoader::TestMpCollectionDocumentLoader()
@@ -93,30 +93,37 @@ void TestMpCollectionDocumentLoader::cleanup()
  */
 void TestMpCollectionDocumentLoader::testCreateMpNowPlayingWidget()
 {
-    cleanup();
-    init();
     QObject *theObject;
-    theObject = mTest->createObject(QString("MpNowPlayingWidget"),QString("myMpNowPlayingWidget"));
-    QCOMPARE(theObject->metaObject()->className(),"MpNowPlayingWidget");
-    QCOMPARE(theObject->objectName(),QString("myMpNowPlayingWidget"));
+    theObject = mTest->createObject(QString("MpNowPlayingWidget"), QString("myMpNowPlayingWidget"));
+    QCOMPARE(theObject->metaObject()->className(), "MpNowPlayingWidget");
+    QCOMPARE(theObject->objectName(), QString("myMpNowPlayingWidget"));
     QVERIFY(qobject_cast<MpNowPlayingWidget*>(theObject));
     delete theObject;
+}
 
+/*!
+ Tests the correct creation of HgMediawall.
+ */
+void TestMpCollectionDocumentLoader::testCreateHgMediawall()
+{
+    QObject *theObject;
+    theObject = mTest->createObject(QString("HgMediawall"), QString("HgMediawall"));
+    QCOMPARE(theObject->metaObject()->className(),"HgMediawall");
+    QCOMPARE(theObject->objectName(),QString("HgMediawall"));
+    QVERIFY(qobject_cast<HgMediawall*>(theObject));
+    delete theObject;
 }
 
 /*!
  Tests the correct creation of QObject, this should be pased to the
- base clas and base clas should return a named object.
+ base class and base class should return a named object.
  */
 void TestMpCollectionDocumentLoader::testCreateQObject()
 {
-    cleanup();
-    init();
     QObject *theObject;
-    theObject = mTest->createObject(QString("QObject"),QString("myQObject"));
-    QCOMPARE(theObject->metaObject()->className(),"QObject");
-    QCOMPARE(theObject->objectName(),QString("myQObject"));
+    theObject = mTest->createObject(QString("QObject"), QString("myQObject"));
+    QCOMPARE(theObject->metaObject()->className(), "QObject");
+    QCOMPARE(theObject->objectName(), QString("myQObject"));
     delete theObject;
 }
 
-// End of file

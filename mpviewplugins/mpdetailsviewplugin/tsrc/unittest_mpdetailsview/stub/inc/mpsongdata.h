@@ -22,10 +22,9 @@
 #include <QString>
 #include <QPixmap>
 
-
 //forward declartions
-class QIcon;
 class ThumbnailManager;
+class HbIcon;
 
 //class declaration
 class MpSongData : public QObject
@@ -46,7 +45,17 @@ public:
     bool setComposer( const QString &compoer );
     bool setAlbumTrack( const QString &albumtrack );
     void setLink( const QString &link );
-
+    bool setFileName( const QString &fileName );
+    bool setMimeType( const QString &mimeType );
+    bool setDuration( int duration );
+    bool setBitRate( int bitRate);
+    bool setSampleRate( int sampleRate );
+    bool setSize( int size );
+    bool setModified( const QString &modified );
+    bool setCopyright( const QString &copyright );
+    bool setMusicURL( const QString &musicURL );
+    bool setDrmProtected( bool drmProtected );
+    
     // inform details view when basic information is ready to accelerate UI update
     void commitPlaybackInfo();
     // inform details view when details information is ready
@@ -61,19 +70,32 @@ public slots:
     QString album() const;
     QString artist() const;
     QString comment() const;
-    void albumArt( QPixmap& pixmap );
+    void albumArt( HbIcon& icon ) const;
     QString year() const;
     QString genre() const;
     QString composer() const;
     QString albumTrack() const;
     QString link() const;
+    
+    QString fileName() const;
+    QString mimeType() const;
+    QString duration() const;
+    QString bitRate() const;
+    QString sampleRate() const;
+    QString size() const;
+    QString modified() const;
+    QString copyright() const;
+    QString musicURL() const;
+    bool isDrmProtected() const;
+    
+    QString albumArtBase64() const;
 
 signals:
     void albumArtReady();
     void playbackInfoChanged();
 	void songDetailInfoChanged();	
 
-private:
+public:
     QString                  mTitle;
     QString                  mAlbum;
     QString                  mArtist;
@@ -82,12 +104,22 @@ private:
     QString                  mGenre;
     QString                  mYear;
     QString                  mAlbumTrack;
-    QPixmap                  mAlbumArt;
+    HbIcon                   *mAlbumArt;
     ThumbnailManager         *mThumbnailManager; //owned
     TInt                     mReqId;
     QString                  currentAAUri; 
-    QPixmap                  mDefaultAlbumArt;
+    HbIcon                   *mDefaultAlbumArt;
     QString                  mLink;
+    QString                  mFileName;
+    QString                  mMimeType;
+    QString                  mDuration;
+    QString                  mBitRate;
+    QString                  mSampleRate;
+    QString                  mSize;
+    QString                  mModified;
+    QString                  mCopyright;
+    QString                  mMusicURL;
+    bool                     mDrmProtected;
     
     Q_DISABLE_COPY(MpSongData)
 };

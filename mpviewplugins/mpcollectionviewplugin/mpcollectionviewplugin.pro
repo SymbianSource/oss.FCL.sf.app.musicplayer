@@ -14,32 +14,47 @@
 # Description: 
 #
 
-symbian:TARGET.UID3 = 0x10207C63
-
 TEMPLATE = lib
 CONFIG += hb qt ecomplugin
 TARGET = mpcollectionviewplugin
+symbian: { 
+    TARGET.UID3 = 0x10207C63
+    TARGET.CAPABILITY = All -TCB
+    TARGET.EPOCALLOWDLLDATA = 1
+}
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
 SERVICE.CONFIGURATION = "<t>0x101FFCA1</t><p>0x101FFC3A;0xE419BEEE</p><i>EMPXViewPluginPriorityNormal</i><f>0x00000001</f>"
 
-TARGET.CAPABILITY = All -TCB
-
 DEPENDPATH += .
 INCLUDEPATH += . \
-     inc \
-     ../../inc
+               inc \
+               ../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
-LIBS += -lmpxviewframeworkqt.dll \
-    -lmpnowplayingbanner.dll  \
-    -lmpsettingsmanager \
-    -lmpengine \
-    -lmpdata.dll
+LIBS += -lmpxviewframeworkqt \
+        -lganeswidgets \
+        -lmpnowplayingbanner  \
+        -lmpsettingsmanager \
+        -lmpengine \
+        -lmpdata
     
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
-
 # Input
+HEADERS += ../../inc/mpviewbase.h \
+           inc/mpcollectionviewplugin.h \
+    	   inc/mpcollectionview.h \
+    	   inc/mpcollectiondocumentloader.h \
+    	   inc/mpcollectioncontainerfactory.h \
+    	   inc/mpcollectioncontainer.h \
+    	   inc/mpcollectionlistcontainer.h \
+    	   inc/mpcollectioncontainerallsongs.h \
+    	   inc/mpcollectioncontainerartists.h \
+    	   inc/mpcollectioncontaineralbums.h \
+    	   inc/mpcollectioncontainerplaylists.h  \
+           inc/mpsnapshotwidget.h \
+           inc/mpcollectionpopuphandler.h
+          
 SOURCES += src/mpcollectionviewplugin.cpp \
     	   src/mpcollectionview.cpp \
     	   src/mpcollectiondocumentloader.cpp \
@@ -50,23 +65,8 @@ SOURCES += src/mpcollectionviewplugin.cpp \
     	   src/mpcollectioncontainerartists.cpp \
     	   src/mpcollectioncontaineralbums.cpp \
     	   src/mpcollectioncontainerplaylists.cpp \
-    	   src/mpcollectioncontainergenres.cpp \
            src/mpsnapshotwidget.cpp \
            src/mpcollectionpopuphandler.cpp
-
-HEADERS = ../../inc/mpviewbase.h \
-          inc/mpcollectionviewplugin.h \
-    	  inc/mpcollectionview.h \
-    	  inc/mpcollectiondocumentloader.h \
-    	  inc/mpcollectioncontainerfactory.h \
-    	  inc/mpcollectioncontainer.h \
-    	  inc/mpcollectionlistcontainer.h \
-    	  inc/mpcollectioncontainerallsongs.h \
-    	  inc/mpcollectioncontainerartists.h \
-    	  inc/mpcollectioncontaineralbums.h \
-    	  inc/mpcollectioncontainerplaylists.h  \
-    	  inc/mpcollectioncontainergenres.h  \
-          inc/mpsnapshotwidget.h \
-          inc/mpcollectionpopuphandler.h
        
 RESOURCES += resources/mpcollectionviewresources.qrc
+

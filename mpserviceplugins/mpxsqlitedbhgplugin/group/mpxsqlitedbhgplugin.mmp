@@ -82,6 +82,7 @@ USERINCLUDE     ../../inc
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom
 SYSTEMINCLUDE   /epoc32/include/mmf/common
+SYSTEMINCLUDE   /epoc32/include/mw/hb/hbcore
 
 LIBRARY         euser.lib
 LIBRARY         ecom.lib
@@ -91,6 +92,7 @@ LIBRARY         sqldb.lib
 LIBRARY         bafl.lib
 LIBRARY         apmime.lib
 LIBRARY         sysutil.lib
+LIBRARY         hbcore.lib
 #ifdef __MTP_PROTOCOL_SUPPORT
 LIBRARY         centralrepository.lib
 #endif

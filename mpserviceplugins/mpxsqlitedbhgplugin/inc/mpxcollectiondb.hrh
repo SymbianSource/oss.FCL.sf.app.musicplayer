@@ -32,7 +32,8 @@ enum TMCBrowseType
 #endif    
     EBrowseGenre,
     EBrowseComposer,        
-    EBrowseAlbumSong //added for ganes
+    EBrowseAlbumSong, //added for ganes
+    EBrowseAlbumMediaWall //added for mediawall
     };
 
 #endif      // MPXCOLLECTIONDB_HRH

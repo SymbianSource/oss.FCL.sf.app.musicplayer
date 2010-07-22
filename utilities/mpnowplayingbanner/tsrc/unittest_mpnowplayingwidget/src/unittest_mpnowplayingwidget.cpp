@@ -18,15 +18,11 @@
 #include <qnamespace.h>
 #include <QSignalSpy>
 #include <QMetaType>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
 #include <hblabel.h>
 #include <hbevent.h>
 
 #include "unittest_mpnowplayingwidget.h"
-#include "stub/inc/mpnowplayingbackend.h"
-#include "stub/inc/hbcolorscheme.h"
+#include "stub/inc/mpplaybackdata.h"
 #include "mpcommondefs.h"
 
 // Do this so we can access all member variables.
@@ -40,19 +36,21 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
 
     TestMpNowPlayingWidget tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpnowplayingwidget.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpnowplayingwidget.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpNowPlayingWidget::TestMpNowPlayingWidget()
@@ -84,7 +82,7 @@ void TestMpNowPlayingWidget::cleanupTestCase()
  */
 void TestMpNowPlayingWidget::init()
 {
-    mTest = new MpNowPlayingWidget(MpCommon::KMusicPlayerUid);
+    mTest = new MpNowPlayingWidget();
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -103,19 +101,17 @@ void TestMpNowPlayingWidget::cleanup()
 void TestMpNowPlayingWidget::testConstructor()
 {
     cleanup();
-    MpNowPlayingBackEnd::resetUpdateCounter();
+    MpPlaybackData::resetUpdateCounter();
     init();
     QVERIFY(mTestPrivate->mPrimaryText != 0);
     QVERIFY(mTestPrivate->mSecondaryText != 0);
-    QVERIFY(mTestPrivate->mBackEnd != 0);
-    QVERIFY(mTestPrivate->mPlayIconNormal != 0);
-    QVERIFY(mTestPrivate->mPauseIconNormal != 0);
-    QVERIFY(mTestPrivate->mPlayIconPressed != 0);
-    QVERIFY(mTestPrivate->mPauseIconPressed != 0);
+    QVERIFY(mTestPrivate->mPlaybackData != 0);
+    QVERIFY(mTestPrivate->mPlayIcon != 0);
+    QVERIFY(mTestPrivate->mPauseIcon != 0);
     QVERIFY(mTestPrivate->mIcon != 0);
     QVERIFY(mTestPrivate->mDocumentLoader != 0);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
-    QCOMPARE(MpNowPlayingBackEnd::getUpdateCounter(), 1);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
+    QCOMPARE(MpPlaybackData::getUpdateCounter(), 1);
 }
 
 /*!
@@ -125,63 +121,63 @@ void TestMpNowPlayingWidget::testSetState()
 {
     QSignalSpy spy(mTest, SIGNAL(playbackAttachmentChanged(bool)));
 
-    mTestPrivate->mState = NotPlaying;
-    mTestPrivate->mBackEnd->triggerStateUpdate(NotPlaying);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::NotPlaying);
     QCOMPARE(spy.count(), 0);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
 
-    mTestPrivate->mState = Playing;
-    mTestPrivate->mBackEnd->triggerStateUpdate(NotPlaying);
+    mTestPrivate->mState = MpPlaybackData::Playing;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::NotPlaying);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0).toBool(), false);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
 
     spy.clear();
-    mTestPrivate->mState = Paused;
-    mTestPrivate->mBackEnd->triggerStateUpdate(NotPlaying);
+    mTestPrivate->mState = MpPlaybackData::Paused;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::NotPlaying);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0).toBool(), false);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
 
     spy.clear();
-    mTestPrivate->mState = NotPlaying;
-    mTestPrivate->mBackEnd->triggerStateUpdate(Playing);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Playing);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0).toBool(), true);
-    QCOMPARE(mTestPrivate->mState, Playing);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::Playing);
 
     spy.clear();
-    mTestPrivate->mState = NotPlaying;
-    mTestPrivate->mBackEnd->triggerStateUpdate(Paused);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Paused);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0).toBool(), true);
-    QCOMPARE(mTestPrivate->mState, Paused);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::Paused);
 
     spy.clear();
-    mTestPrivate->mState = Playing;
-    mTestPrivate->mBackEnd->triggerStateUpdate(Paused);
-    mTestPrivate->mState = Paused;
-    mTestPrivate->mBackEnd->triggerStateUpdate(Playing);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Stopped);
+    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.at(0).at(0).toBool(), true);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::Stopped);
+    
+    spy.clear();
+    mTestPrivate->mState = MpPlaybackData::Playing;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Paused);
+    mTestPrivate->mState = MpPlaybackData::Paused;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Playing);
     QCOMPARE(spy.count(), 0);
 }
 
 /*!
- Tests title change from the backend.
+ Tests title and artist change
  */
-void TestMpNowPlayingWidget::testTitleChange()
+void TestMpNowPlayingWidget::testBannerInfoChange()
 {
-    mTestPrivate->mBackEnd->triggerTitleChanged(QString("Title"));
+    mTestPrivate->mPlaybackData->triggerLabelsChanged(QString("Title"), QString("Artist"));
     QCOMPARE(mTestPrivate->mPrimaryText->plainText(), QString("Title"));
-}
-
-/*!
- Tests artist change from the backend.
- */
-void TestMpNowPlayingWidget::testArtistChange()
-{
-    mTestPrivate->mBackEnd->triggerArtistChanged(QString("Artist"));
     QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Artist"));
 }
+
 
 /*!
  Tests disabling/enabling the widget.
@@ -192,70 +188,51 @@ void TestMpNowPlayingWidget::testSetEnabled()
     QSignalSpy spy(mTest, SIGNAL(playbackAttachmentChanged(bool)));
     mTestPrivate->mPrimaryText->setPlainText("Primary");
     mTestPrivate->mSecondaryText->setPlainText("Secondary");
-    mTestPrivate->mState = NotPlaying;
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
 
     // Disable the widget; Nothing should update.
     mTest->setEnabled(false);
-    mTestPrivate->mBackEnd->triggerStateUpdate(Playing);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::Playing);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
     QCOMPARE(spy.count(), 0);
 
-    mTestPrivate->mBackEnd->triggerTitleChanged(QString("Title"));
+    mTestPrivate->mPlaybackData->triggerLabelsChanged(QString("Title"), QString("Artist"));
     QCOMPARE(mTestPrivate->mPrimaryText->plainText(), QString("Primary"));
-
-    mTestPrivate->mBackEnd->triggerArtistChanged(QString("Artist"));
     QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Secondary"));
 
     // Enable the widget. It should start updating again.
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::NotPlaying);
     mTest->setEnabled(true);
-    mTestPrivate->mState = Playing;
-    mTestPrivate->mBackEnd->triggerStateUpdate(NotPlaying);
+    mTestPrivate->mState = MpPlaybackData::Playing;
+    mTestPrivate->mPlaybackData->triggerStateUpdate(MpPlaybackData::NotPlaying);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0).toBool(), false);
-    QCOMPARE(mTestPrivate->mState, NotPlaying);
+    QCOMPARE(mTestPrivate->mState, MpPlaybackData::NotPlaying);
 
-    mTestPrivate->mBackEnd->triggerTitleChanged(QString("Title"));
+    mTestPrivate->mPlaybackData->triggerLabelsChanged(QString("Title"), QString("Artist"));
     QCOMPARE(mTestPrivate->mPrimaryText->plainText(), QString("Title"));
-
-    mTestPrivate->mBackEnd->triggerArtistChanged(QString("Artist"));
     QCOMPARE(mTestPrivate->mSecondaryText->plainText(), QString("Artist"));
 }
 
 /*!
- Tests ThemeChange.
+ Tests the return value based on the current playbackState
  */
-void TestMpNowPlayingWidget::testThemeChange()
+void TestMpNowPlayingWidget::testIsBannerAttached()
 {
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    QCOMPARE(mTestPrivate->isBannerAttached(), false);
+    mTestPrivate->mState = MpPlaybackData::Playing;
+    QCOMPARE(mTestPrivate->isBannerAttached(), true);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    QCOMPARE(mTestPrivate->isBannerAttached(), false);
+    mTestPrivate->mState = MpPlaybackData::Paused;
+    QCOMPARE(mTestPrivate->isBannerAttached(), true);
+    mTestPrivate->mState = MpPlaybackData::NotPlaying;
+    QCOMPARE(mTestPrivate->isBannerAttached(), false);
+    mTestPrivate->mState = MpPlaybackData::Stopped;
+    QCOMPARE(mTestPrivate->isBannerAttached(), true);
     
-    HbEvent event(HbEvent::ThemeChanged);
-    HbColorTheme::global()->setCurrentTheme(1);
-    //TODO final color resources should be qtc_multimedia_trans_normal when available
-    QColor normalColor( HbColorScheme::color("foreground") );
-    //TODO final color resources should be qtc_multimedia_trans_pressed when available
-    QColor pressedColor( HbColorScheme::color("popupbackground") );
-    
-    mTest->changeEvent(&event);
-    
-    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
-    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
-    
-    HbColorTheme::global()->setCurrentTheme(0);
-    
-    mTest->changeEvent(&event);
-    
-    normalColor = HbColorScheme::color("foreground");
-    pressedColor = HbColorScheme::color("popupbackground");
-    
-    QCOMPARE(mTestPrivate->mPrimaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mSecondaryText->textColor(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPauseIconNormal->color(),normalColor);
-    QCOMPARE(mTestPrivate->mPlayIconPressed->color(),pressedColor);
-    QCOMPARE(mTestPrivate->mPauseIconPressed->color(),pressedColor);
 }
+
 
 // End of file

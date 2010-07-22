@@ -23,4 +23,13 @@ EXPORTS
 	_ZN17MpSettingsManager13presetChangedEi @ 22 NONAME
 	_ZN17MpSettingsManager6presetEv @ 23 NONAME
 	_ZN17MpSettingsManager9setPresetEi @ 24 NONAME
+	_ZN17MpSettingsManager12setInspireMeEb @ 25 NONAME
+	_ZN17MpSettingsManager16InspireMeChangedEb @ 26 NONAME
+	_ZN17MpSettingsManager9inspireMeEv @ 27 NONAME
+	_ZN17MpSettingsManager13songDetailsGbEv @ 28 NONAME
+	_ZN17MpSettingsManager16setSongDetailsGbEb @ 29 NONAME
+	_ZN17MpSettingsManager20SongDetailsGbChangedEb @ 30 NONAME
+	_ZN17MpSettingsManager10mtpInfoUrlEv @ 31 NONAME
+	_ZN17MpSettingsManager11showMtpInfoEv @ 32 NONAME
+	_ZN17MpSettingsManager18stopShowingMtpInfoEv @ 33 NONAME
 

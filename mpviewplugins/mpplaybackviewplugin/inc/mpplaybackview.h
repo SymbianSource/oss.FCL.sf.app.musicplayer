@@ -27,12 +27,14 @@ class MpEngine;
 class MpPlaybackData;
 class MpPlaybackWidget;
 class MpEqualizerWidget;
-class QTranslator;
 
 
 class MpPlaybackView : public MpViewBase
 {
     Q_OBJECT
+    Q_PROPERTY(QString PlaybackStatus READ playbackStatus)
+    Q_PROPERTY(bool Shuffle READ shuffleEnabled)
+    Q_PROPERTY(bool Repeat READ repeatEnabled)
 
 public:
 
@@ -43,6 +45,10 @@ public:
     void activateView();
     void deactivateView();
 
+    QString playbackStatus();
+    bool shuffleEnabled();
+    bool repeatEnabled();
+    
 signals:
 
     void command( int aCommand );
@@ -64,11 +70,22 @@ public slots:
 
     void handleSongSelected();
     void showEqualizerDialog();
+    void closeEqualizerDialog();
+    
+    void startRewindTimer();
+    void startForwardTimer();
+    void startSeekRewind();
+    void startSeekForward();
+    void endRewind();
+    void endForward();
+    
+    void connectButtons();
 
 private:
 
     void setupMenu();
     void setupToolbar();
+    void updatePlayPauseIcon();
 
 private:
 
@@ -78,7 +95,7 @@ private:
     MpEqualizerWidget       *mEqualizerWidget;  // Own
 
     HbMainWindow            *mWindow;           // Not own
-    HbAction                *mNavigationBack;   // Own
+    HbAction                *mSoftKeyBack;      // Own
     bool                    mActivated;
 
     HbIcon                  *mPlayIcon;         // Own
@@ -89,12 +106,12 @@ private:
     HbAction                *mPlayPauseAction;  // Not own
     HbAction                *mRepeatAction;     // Not own
     HbAction                *mShuffleAction;    // Not own
-    
-    QTranslator             *mMpTranslator;     // Own
-    QTranslator             *mCommonTranslator; // Own
+
+    QTimer                  *mTimer;
 
     bool                    mShuffle;
     bool                    mRepeat;
+    bool                    mSeeking;
 
     Q_DISABLE_COPY(MpPlaybackView)
 };

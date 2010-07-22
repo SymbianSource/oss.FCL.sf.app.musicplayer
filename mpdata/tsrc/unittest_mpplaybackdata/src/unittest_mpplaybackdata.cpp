@@ -20,6 +20,7 @@
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbInstance.h>
+#include <hbicon.h>
 
 #include "unittest_mpplaybackdata.h"
 #include "stub/inc/thumbnailmanager_qt.h"
@@ -101,7 +102,7 @@ void TestMpPlaybackData::testConstructor()
     QCOMPARE(mTest->mThumbnailManager->getInitCounter(), 1);
     QVERIFY(mTest->mDuration == 0);
     QVERIFY(mTest->mPosition == 0);
-    QVERIFY(!mTest->mDefaultAlbumArt);
+    QVERIFY(mTest->mDefaultAlbumArt != 0);
 
 }
 
@@ -267,7 +268,7 @@ void TestMpPlaybackData::testThumbnailReady()
     temp=0;
     QSignalSpy spy(mTest, SIGNAL(albumArtReady()));
     QPixmap albumArt(100,100);
-    QPixmap albumArt2;
+    HbIcon albumArtIcon;
    
     //Error
     mTest->thumbnailReady(albumArt,temp,KUndefined,KUndefined);
@@ -289,8 +290,18 @@ void TestMpPlaybackData::testThumbnailReady()
     mTest->thumbnailReady(albumArt,temp,1,0);
     QCOMPARE(mTest->mReqId, KUndefined);
     QCOMPARE(spy.count(),1);
-    mTest->albumArt(albumArt2);
-    QCOMPARE(albumArt,albumArt2);
+    mTest->albumArt(albumArtIcon);
+    QVERIFY(!albumArtIcon.isNull());
+}
+
+/*!
+ test SeAlbumId and albumId
+ */
+void TestMpPlaybackData::testSeAlbumId()
+{
+    mTest->setAlbumId(65535);
+    QCOMPARE(mTest->mAlbumId, 65535);
+    QCOMPARE(mTest->albumId(), 65535);
 }
 
 /*!

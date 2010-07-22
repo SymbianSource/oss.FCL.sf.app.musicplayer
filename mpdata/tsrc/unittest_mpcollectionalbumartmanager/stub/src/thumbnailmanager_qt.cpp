@@ -15,7 +15,7 @@
 *
 */
 
-#include <qsize.h>
+#include <QSize>
 #include "stub/inc/thumbnailmanager_qt.h"
 
 int gInitCounter = 0;
@@ -44,7 +44,8 @@ ThumbnailManager::ThumbnailManager( QObject* parentPtr ) :
 QObject( parentPtr ),
 mGetThumbFails(false),
 mThumbnailReqCounter(0),
-mCancelCounter(0)
+mCancelCounter(0),
+mThumbSize(ThumbnailManager::ThumbnailUndefined)
 {
     gInitCounter++;
 }
@@ -81,7 +82,7 @@ bool ThumbnailManager::setQualityPreference( QualityPreference
  */
 bool ThumbnailManager::setThumbnailSize( ThumbnailSize thumbnailSize )
 {
-    Q_UNUSED(thumbnailSize);
+    mThumbSize = thumbnailSize;
     return true;
 }
 

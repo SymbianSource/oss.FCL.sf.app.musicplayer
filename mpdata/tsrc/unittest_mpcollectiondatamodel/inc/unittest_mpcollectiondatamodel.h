@@ -37,7 +37,6 @@ public:
 signals:
 
     void updateAlbumArt( int index );
-    void albumCacheReady();
 
 public slots:
 
@@ -50,7 +49,6 @@ private slots:
 
     void testMemberCleanup();
     void testRefreshModel();
-    void testRefreshModelZeroCount();
     void testCollectionData();
     void testDataAllSongs();
     void testDataAllSongsNoData();
@@ -58,12 +56,14 @@ private slots:
     void testDataArtistsNoData();
     void testDataArtistAlbums();
     void testDataArtistAlbumsNoData();
-    void testDataArtistSongs();
-    void testDataArtistSongsNoData();
+    void testDataArtistAlbumsTBone();
+    void testDataArtistAlbumsTBoneNoData();
+    void testDataArtistAllSongs();
+    void testDataArtistAllSongsNoData();
     void testDataAlbums();
     void testDataAlbumsNoData();
-    void testDataAlbumSongs();
-    void testDataAlbumSongsNoData();
+    void testDataAlbumsTBone();
+    void testDataAlbumsTBoneNoData();
     void testDataPlaylists();
     void testDataPlaylistsNoData();
     void testDataPlaylistSongs();
@@ -75,6 +75,7 @@ private slots:
     void testMimeTypes();
     void testMimeData();
     void testDropMimeData();
+    void testSetContext();
 
 private:
 

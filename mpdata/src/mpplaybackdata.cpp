@@ -15,10 +15,10 @@
 *
 */
 
-#include <qicon>
-#include <qstring>
-#include <qpixmap>
-#include <qpainter>
+#include <QIcon>
+#include <QString>
+#include <QPixmap>
+#include <QPainter>
 #include <hbicon.h>
 #include <thumbnailmanager_qt.h>
 
@@ -74,23 +74,23 @@ const int KUndefined = -1;
     Constructs a new MpPlaybackData.
  */
 MpPlaybackData::MpPlaybackData( QObject *parent )
-    : QObject(parent),
-      mThumbnailManager(0),
-      mReqId(KUndefined),
+    : QObject( parent ),
+      mThumbnailManager( new ThumbnailManager( this ) ),
+      mReqId( KUndefined ),
       mDuration(0),
       mPosition(0),
-      mAlbumArt(),
-      mPlaybackState(Stopped)
+      mAlbumId(0),
+      mId(0),
+      mAlbumArt( "qtg_large_music_album" ),
+      mDefaultAlbumArt( "qtg_large_music_album" ),
+      mPlaybackState( NotPlaying ),
+      mRealAudio( false )
 {
     TX_ENTRY
-    mThumbnailManager = new ThumbnailManager(this);
-    mThumbnailManager->setQualityPreference(ThumbnailManager::OptimizeForQuality);
-    mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailLarge);
-    connect( mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-             this, SLOT(thumbnailReady(QPixmap, void *, int, int)) );
-
-    //TODO: Change to final resource when available
-    mDefaultAlbumArt =  new HbIcon("qtg_large_music");
+    mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForQuality );
+    mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailLarge );
+    connect( mThumbnailManager, SIGNAL( thumbnailReady(QPixmap, void *, int, int ) ),
+             this, SLOT(thumbnailReady( QPixmap, void *, int, int ) ) );
     TX_EXIT
 }
 
@@ -175,9 +175,16 @@ bool MpPlaybackData::setArtist( const QString& artist )
 {
     TX_ENTRY_ARGS( "artist = " << artist )
     bool change = false;
-    if ( artist != mArtist ) {
+    // data is different or mArtist was not set befor or it was reset.
+    // When artist is empty and mArtist is empty mArtist should be unknown text.
+    if ( artist != mArtist || mArtist.isNull()) {
         change = true;
-        mArtist = artist;
+        if ( artist.isEmpty() ){
+            mArtist = hbTrId( "txt_mus_other_unknown3" );      
+        }
+        else {
+            mArtist = artist;
+        }
     }
     TX_EXIT
     return change;
@@ -199,9 +206,16 @@ bool MpPlaybackData::setAlbum( const QString& album )
 {
     TX_ENTRY_ARGS( "album = " << album )
     bool change = false;
-    if ( album != mAlbum ) {
+    // data is different or mAlbum was not set befor or it was reset.
+    // when album is empty and mAlbum is empty mAlbum should be unknown text.
+    if ( album != mAlbum || mAlbum.isNull() ) {
         change = true;
-        mAlbum = album;
+        if ( album.isEmpty() ){
+            mAlbum = hbTrId( "txt_mus_other_unknown4" );
+        }
+        else{
+            mAlbum = album;            
+        }
     }
     TX_EXIT
     return change;
@@ -275,13 +289,72 @@ void MpPlaybackData::setAlbumArtUri( const QString& albumArtUri )
 void MpPlaybackData::albumArt( HbIcon& icon ) const
 {
     TX_ENTRY
-    if ( mAlbumArt->isNull() ) {
-        icon = HbIcon();
-     }
-     else {
-        icon = *mAlbumArt ;
-     }
+    icon = mAlbumArt ;
     TX_EXIT
+}
+
+/*!
+ Sets the song's album \a id, returns true if the value is new.
+*/
+bool MpPlaybackData::setAlbumId( int id )
+{
+    bool change = false;
+    if (mAlbumId != id) {
+        mAlbumId = id;
+        change = true;
+    }
+    return change;
+}
+
+/*!
+ Returns the id of the album to which the song belongs.
+*/
+int MpPlaybackData::albumId()
+{
+    return mAlbumId;
+}
+
+/*!
+ Sets the song's \a id, returns true if the value is new.
+*/
+bool MpPlaybackData::setId( int id )
+{
+    bool change = false;
+    if (mId != id) {
+        mId = id;
+        change = true;
+    }
+    return change;
+}
+
+/*!
+ Returns the id the song.
+*/
+int MpPlaybackData::id()
+{
+    return mId;
+}
+/*!
+Set Real Audio \a mode.
+*/
+bool MpPlaybackData::setRealAudio( bool mode )
+{
+    TX_ENTRY
+    bool change = false;
+    if (mRealAudio != mode) {
+        mRealAudio = mode;
+        change = true;
+    }
+    TX_EXIT
+    return change;
+}
+
+/*!
+ Returns the mode of Real Audio.
+*/
+bool MpPlaybackData::realAudio()
+{
+    return mRealAudio;
 }
 
 /*!
@@ -317,6 +390,28 @@ void MpPlaybackData::commitPlaybackInfo()
 }
 
 /*!
+ Resets the data, currently called when source is removed.
+*/
+void MpPlaybackData::resetData()
+{
+    mDuration = 0;
+    mPosition = 0;
+    mTitle = QString();
+    mAlbum = QString();
+    mArtist = QString();
+    mUri = QString();
+    mAlbumId = 0;
+    mId = 0;
+    mAlbumArt = HbIcon();
+    mRealAudio = false;
+    
+    emit durationChanged();
+    emit positionChanged();
+    emit albumArtReady();
+    emit playbackInfoChanged();
+}
+
+/*!
  Slot to handle the album art thumb.
 */
 void MpPlaybackData::thumbnailReady(
@@ -345,7 +440,7 @@ void MpPlaybackData::thumbnailReady(
         }
         
         
-        mAlbumArt = new HbIcon(qicon);
+        mAlbumArt = HbIcon(qicon);
         
         emit albumArtReady();
     }

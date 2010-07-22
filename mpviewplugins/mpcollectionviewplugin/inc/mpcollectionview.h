@@ -39,7 +39,6 @@ class MpMpxCollectionData;
 class MpNowPlayingWidget;
 class MpSnapshotWidget;
 class MpCollectionPopupHandler;
-class QTranslator;
 
 class MpCollectionView : public MpViewBase
 {
@@ -69,11 +68,12 @@ public slots:
     void openArtists();
     void openAlbums();
     void openPlaylists();
-    void openGenres();
     void find();
     void openMusicStore();
 
     void openIndex( int index );
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex );
 
     void back();
     void exit();
@@ -83,7 +83,6 @@ public slots:
     void containerTransitionComplete( const HbEffect::EffectStatus &status );
 
     void shufflePlayAll();
-    void refreshLibrary();
     void addToPlaylist();
     void deleteSongs();
     void renameCurrentPlaylistContainer();
@@ -101,13 +100,15 @@ public slots:
     void handleLibraryAboutToUpdate();
     void handleLibraryUpdated();
 
+    void setShuffleAction( bool enabled );
+
 private:
 
     void setMainToolBar();
     void setPlaylistToolBar();
 
     HbAction *createToolBarAction( QActionGroup *actionsGroup,
-        const QString& icon );
+        const QString& icon, const QString& objectName );
 
     void updateMenu();
     void updateToolBar();
@@ -116,7 +117,7 @@ private:
     void setBannerVisibility( bool visible );
     int generateShuffleIndex();
     void startContainerTransition( TCollectionContext contextFrom, TCollectionContext contextTo );
-    void cancelOngoingOperation();
+    void closeActiveDialog( bool onlyContextMenu = false );
 
 private:
 
@@ -134,8 +135,10 @@ private:
     bool                            mBannerAttached;
 
     HbMainWindow                    *mWindow;               // Not own
-    HbAction                        *mNavigationQuit;       // Not own
-    HbAction                        *mNavigationBack;       // Not own
+    HbAction                        *mSoftKeyQuit;          // Not own
+    HbAction                        *mSoftKeyBack;          // Not own
+    HbAction                        *mShuffleAction;        // Not own
+    bool                            mShuffleEnabled;
 
     MpCollectionDocumentLoader      *mDocumentLoader;       // Own
     HbWidget                        *mMainContainer;        // Own
@@ -144,9 +147,6 @@ private:
     HbToolBar                       *mPlaylistToolBar;
 
     MpSnapshotWidget                *mSnapshot;
-
-    QTranslator                     *mMpTranslator;         // Own
-    QTranslator                     *mCommonTranslator;     // Own
 
     bool                            mActivationWaiting;
     MpCollectionPopupHandler        *mMpPopupHandler;       // Own

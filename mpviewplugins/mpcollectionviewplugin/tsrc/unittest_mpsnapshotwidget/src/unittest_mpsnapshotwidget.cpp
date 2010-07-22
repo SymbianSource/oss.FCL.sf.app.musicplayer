@@ -16,9 +16,7 @@
 */
 
 #include <qnamespace.h>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
+#include <QtGui/QtGui>
 
 #include "unittest_mpsnapshotwidget.h"
 
@@ -32,19 +30,24 @@
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
-    window.show();
+    QApplication app(argc, argv);
+    QGraphicsScene *testScene = new QGraphicsScene(QRectF(0,0,200,200));
+    QGraphicsView mainWindow(testScene);
+    mainWindow.show();
+
     TestMpSnapshotWidget tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpsnapshotwidget.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpsnapshotwidget.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpSnapshotWidget::TestMpSnapshotWidget()
@@ -112,7 +115,8 @@ void TestMpSnapshotWidget::testCapture()
 {
     cleanup();
     init();
-    HbMainWindow *mainWindow = hbInstance->allMainWindows()[0];
+    QGraphicsView *mainWindow = qobject_cast<QGraphicsView *>(qApp->activeWindow());
+    QVERIFY(mainWindow != 0);
     QGraphicsRectItem rectItem(QRectF(0,0,10,10));
     mainWindow->scene()->addItem(&rectItem);
     rectItem.show();

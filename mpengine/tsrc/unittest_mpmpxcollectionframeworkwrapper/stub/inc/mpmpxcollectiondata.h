@@ -21,6 +21,7 @@
 #include "mpmpxcollectionviewdefs.h"
 
 class CMPXMedia;
+class CMPXMediaArray;
  
 
 class MpMpxCollectionData 
@@ -45,15 +46,25 @@ public:
     ~MpMpxCollectionData();
 
     TCollectionContext context();
+    int count() const;
+    QString collectionTitle() const;
     QString itemData( int index, MpMpxCollectionData::DataType type ) const;
 
-    void setMpxMedia( const CMPXMedia& entries );
+    int itemId(int index);
+    int currentAlbumIndex() const;
+
+    void setMpxMedia( const CMPXMedia& entries, bool reopen=false );
     const CMPXMedia& containerMedia();
 
+    void setAlbumContent( const CMPXMedia& albumContent );
+
 public:
-    CMPXMedia               *mContainerMedia;
+    CMPXMedia               *mContainerMedia; //Not owned
+    CMPXMediaArray          *mMediaArray; //Not owned
     TBool                   mMediaSet;
     TCollectionContext      mContext;
+    int                     mCurrentAlbumIndex;
+    int                     mAlbumSongCount;
 
 };
 

@@ -17,12 +17,10 @@
 
 #include <QSignalSpy>
 #include <qnamespace.h>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
-#include <hbInstance.h>
 
-#include "unittest_mpsettingsviewplugin.h"
 #include "stub/inc/mpsettingsview.h"
+#include "stub/inc/xqplugin.h"
+#include "unittest_mpsettingsviewplugin.h"
 
 
 // Do this so we can access all member variables.
@@ -30,23 +28,28 @@
 #include "mpsettingsviewplugin.h"
 #undef private
 
+//This so we mpsettingsviewplugin.cpp can load qt stub items
+#include "../../src/mpsettingsviewplugin.cpp"
+
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
+    QApplication app(argc, argv);
     TestMpSettingsViewPlugin tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpsettingsviewplugin.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpsettingsviewplugin.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpSettingsViewPlugin::TestMpSettingsViewPlugin()

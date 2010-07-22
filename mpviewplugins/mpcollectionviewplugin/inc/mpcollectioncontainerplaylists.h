@@ -31,6 +31,13 @@ public:
     explicit MpCollectionContainerPlaylists( HbDocumentLoader *loader, QGraphicsItem *parent=0 );
     virtual ~MpCollectionContainerPlaylists();
 
+    void setDataModel( MpCollectionDataModel *dataModel );
+
+public slots:
+
+    void itemActivated( const QModelIndex &index );
+    void dataReloaded();
+
 private:
 
     void setupContainer();
@@ -38,7 +45,8 @@ private:
 private:
 
     HbGroupBox      *mInfoBar;              // Own
-
+    int             mCurrentPlaylistIndex;
+    
 };
 
 #endif  // MPCOLLECTIONCONTAINERPLAYLISTS_H

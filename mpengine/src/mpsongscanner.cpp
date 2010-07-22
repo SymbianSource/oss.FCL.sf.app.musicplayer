@@ -15,12 +15,6 @@
 *
 */
 
-#include <hbprogressdialog.h>
-#include <hbnotificationdialog.h>
-#include <hblabel.h>
-#include <hbfontspec.h>
-#include <hbmessagebox.h>
-
 #include "mpsongscanner.h"
 #include "mpmpxharvesterframeworkwrapper.h"
 #include "mptrace.h"
@@ -34,26 +28,44 @@
 */
 
 /*!
- \fn void scanEnd()
+ \fn void scanStarted()
 
- This signal is emitted when scanning is ended.
+ This signal is emitted when scanning has started.
 
- \sa scan()
-*/
+ */
+
+/*!
+ \fn void scanCountChanged( int count )
+
+ This signal is emitted to notify that scan count has changed.
+
+ */
+
+/*!
+ \fn void scanFinished( int error, int itemsAdded )
+
+ Emitted when scanning has finished.
+
+ */
 
 /*!
  Constructs the song scanner.
  */
 MpSongScanner::MpSongScanner( MpMpxHarvesterFrameworkWrapper *wrapper, QObject *parent )
     : QObject( parent ),
-      mMpxWrapper(wrapper),
-      mScanProgressNote(0),
-      mScanning(false)
+      mMpxHarvesterWrapper(wrapper),
+      mScanning( false ),
+      mAutomaticScan( true )
 {
     TX_ENTRY
-    connect( mMpxWrapper, SIGNAL(scanStarted()), this, SLOT(handleScanStarted()) );
-    connect( mMpxWrapper, SIGNAL(scanEnded( int, int )), this, SLOT(handleScanEnded( int, int )) );
-    connect( mMpxWrapper, SIGNAL(scanCountChanged(int)), this, SLOT(handleScanCountChanged(int)) );
+    connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
+            this, SIGNAL( scanStarted() ), Qt::QueuedConnection );
+    connect( mMpxHarvesterWrapper, SIGNAL( scanEnded( int, int ) ),
+            this, SLOT( handleScanEnded( int, int ) ), Qt::QueuedConnection );
+    connect( mMpxHarvesterWrapper, SIGNAL( scanCountChanged( int ) ), 
+            this, SIGNAL( scanCountChanged( int ) ), Qt::QueuedConnection );
+    connect( mMpxHarvesterWrapper, SIGNAL( diskEvent( MpxDiskEvents ) ),
+            this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
     TX_EXIT
 }
 
@@ -68,20 +80,23 @@ MpSongScanner::~MpSongScanner()
 /*!
  Initiates song scanning.
  */
-void MpSongScanner::scan()
+void MpSongScanner::scan( bool automaticScan )
 {
+    TX_ENTRY
     if ( !mScanning ) {
         mScanning = true;
-        mMpxWrapper->scan();
+        mAutomaticScan = automaticScan;
+        mMpxHarvesterWrapper->scan();
     }
+    TX_EXIT
 }
 
 /*!
- Returns true if scanning is ongoing.
+ Returns mAutomaticScan value.
  */
-bool MpSongScanner::isScanning()
+bool MpSongScanner::isAutomaticScan()
 {
-    return mScanning;
+    return mAutomaticScan;
 }
 
 /*!
@@ -91,31 +106,12 @@ bool MpSongScanner::isScanning()
  */
 void MpSongScanner::cancelScan()
 {
+    TX_ENTRY
     if ( mScanning ) {
         mScanning = false;
-        mMpxWrapper->cancelScan();
+        mMpxHarvesterWrapper->cancelScan();
     }
-}
-
-/*!
- Slot called upon notification from MPX Harvesting FW indicating start of
- scanning process.
- */
-void MpSongScanner::handleScanStarted()
-{
-    if ( !mScanProgressNote ) {
-        mScanProgressNote = new HbProgressDialog( HbProgressDialog::WaitDialog );
-        connect( mScanProgressNote, SIGNAL( cancelled() ), this, SLOT( cancelScan() ) );
-        connect( mScanProgressNote, SIGNAL( aboutToClose() ), this, SLOT( handleProgressNoteClosing() ) );
-    }
-    mScanProgressNote->setModal( true );
-    HbLabel *title = new HbLabel( hbTrId( "txt_mus_title_refreshing" ) );
-    title->setFontSpec(HbFontSpec(HbFontSpec::Primary));
-
-    mScanProgressNote->setHeadingWidget( title );
-    mScanProgressNote->setText( QString("") );
-    mScanProgressNote->setAttribute( Qt::WA_DeleteOnClose );
-    mScanProgressNote->show();
+    TX_EXIT
 }
 
 /*!
@@ -124,63 +120,25 @@ void MpSongScanner::handleScanStarted()
  */
 void MpSongScanner::handleScanEnded( int numItemsAdded, int error )
 {
+    TX_ENTRY
     if (error == KErrDiskFull) {
-		if ( mScanProgressNote ) {     
-                mScanProgressNote->cancel();
-        }
-        HbMessageBox *diskFullDialog = new HbMessageBox();
-        diskFullDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-        diskFullDialog->setText( hbTrId( "txt_mus_title_refresh_cancelled" ) );
-        diskFullDialog->setTimeout( HbPopup::NoTimeout);
-        diskFullDialog->setAttribute( Qt::WA_DeleteOnClose );
-        diskFullDialog->show();
+        emit scanFinished( ScanErrorDiskFull, 0 );
         mScanning = false;
-               
     }
     else{
-        QString added;
-        HbNotificationDialog *finishedDialog = new HbNotificationDialog();
-        finishedDialog->setModal(true);
-        finishedDialog->setAttribute( Qt::WA_DeleteOnClose );
-    
-        added = hbTrId( "txt_mus_dpopinfo_ln_songs_added", numItemsAdded );
-        finishedDialog->setText( added );
-              
         if( error < 0) {
-            if ( mScanProgressNote ) {     
-                mScanProgressNote->cancel();
-            }
-            finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
+            emit scanFinished( ScanGeneralError, numItemsAdded );
         }
         else if ( mScanning ) {
-            if ( mScanProgressNote ) {     
-                mScanProgressNote->cancel();
-            }
-            finishedDialog->setIcon( HbIcon( QString("qtg_large_ok") ) );
-            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_complete" ) );
+            emit scanFinished( ScanErrorNone, numItemsAdded );
         }
         else {
-            finishedDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-            finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_cancelled" ) );
+            // Scan canceled
+            emit scanFinished( ScanGeneralError, numItemsAdded );
         }
         mScanning = false;
-        finishedDialog->show();
     }
-}
-
-/*!
- Slot called upon notification from MPX Harvesting FW indicating the number of
- songs scanned so far.
- */
-void MpSongScanner::handleScanCountChanged(int count)
-{
-    QString added;
-
-    added = hbTrId( "txt_mus_info_ln_songs_added" , count );
-    if ( mScanProgressNote ) {
-        mScanProgressNote->setText( added );
-    }
+    TX_EXIT
 }
 
 /*!
@@ -188,22 +146,12 @@ void MpSongScanner::handleScanCountChanged(int count)
  */
 void MpSongScanner::handleDiskEvent( MpxDiskEvents event )
 {
+    TX_ENTRY
     Q_UNUSED( event );
     if ( mScanning ) {
-        if ( mScanProgressNote ) {
-            mScanProgressNote->cancel();
-        }
+        emit scanFinished( ScanInterrupted, 0 );
         mScanning = false;
-        // AK - Should we show a dialog?
     }
     TX_EXIT
-}
-
-/*!
- Slot used to clear mScanProgressNote when dialog is closing.
- */
-void MpSongScanner::handleProgressNoteClosing()
-{
-    mScanProgressNote = 0;
 }
 

@@ -23,6 +23,7 @@
 #include <hblabel.h>
 
 #include "mpcollectioncontainerplaylists.h"
+#include "mpcollectiondatamodel.h"
 #include "mpmpxcollectiondata.h"
 #include "mptrace.h"
 
@@ -48,9 +49,12 @@
  */
 MpCollectionContainerPlaylists::MpCollectionContainerPlaylists( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionListContainer(loader, parent),
-      mInfoBar(0)
+      mInfoBar(0),
+      mCurrentPlaylistIndex(0)
 {
     TX_LOG
+    mCollectionContext = ECollectionContextPlaylists;
+
 }
 
 /*!
@@ -61,6 +65,60 @@ MpCollectionContainerPlaylists::~MpCollectionContainerPlaylists()
     TX_ENTRY
     delete mInfoBar;
     delete mList;
+    TX_EXIT
+}
+
+/*!
+ Sets the data model for the container.
+ */
+void MpCollectionContainerPlaylists::setDataModel( MpCollectionDataModel *dataModel )
+{
+    TX_ENTRY
+    MpCollectionListContainer::setDataModel(dataModel);
+    if ( mCollectionContext == ECollectionContextPlaylists ) {
+        if ( mList ) {
+            if ( mCollectionData->count() ) {
+                mList->scrollTo( dataModel->index(mCurrentPlaylistIndex, 0) );
+            }
+        }
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when an item is selected by the user.
+*/
+void MpCollectionContainerPlaylists::itemActivated( const QModelIndex &index )
+{
+    if ( mCollectionContext == ECollectionContextPlaylists ) {
+        mCurrentPlaylistIndex = index.row();
+        TX_ENTRY_ARGS("mCurrentPlaylistIndex=" << mCurrentPlaylistIndex);
+    }
+    MpCollectionListContainer::itemActivated(index);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called data model has new data.
+ Use cases:
+     1) User renames a playlist.
+	 2) Song added or removed from playlist.
+ */
+void MpCollectionContainerPlaylists::dataReloaded()
+{
+    TX_ENTRY
+    MpCollectionListContainer::dataReloaded();
+    if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
+        // Playlist could have been renamed.
+        QString details = mCollectionData->collectionTitle();
+        mInfoBar->setHeading(details);
+        if ( mCollectionData->count() > 1 ) {
+            emit shuffleEnabled(true);
+        }
+        else {
+            emit shuffleEnabled(false);
+        }
+    }
     TX_EXIT
 }
 
@@ -103,7 +161,7 @@ void MpCollectionContainerPlaylists::setupContainer()
 
             QString details;
             if ( mViewMode == MpCommon::FetchView ) {
-                details = "Select a song";
+                details = hbTrId("txt_mus_subtitle_select_a_song");
             }
             else {
                 details = mCollectionData->collectionTitle();

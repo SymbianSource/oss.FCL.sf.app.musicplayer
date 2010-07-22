@@ -15,24 +15,24 @@
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-TARGET = 
+CONFIG += qtestlib
+CONFIG += symbian_test
+TARGET = unittest_mpplaybackviewplugin
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
     ../../inc \
     ../../../../inc
-
-
-    
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lmpxviewframeworkqt.dll
-				
-HEADERS += inc/unittest_mpplaybackviewplugin.h \        
-           ../../inc/mpplaybackviewplugin.h \
-           stub/inc/mpplaybackview.h
-               
+
+HEADERS += inc/unittest_mpplaybackviewplugin.h \
+           stub/inc/mpplaybackview.h \
+           stub/inc/xqplugin.h \
+           ../../inc/mpplaybackviewplugin.h
+
 SOURCES += src/unittest_mpplaybackviewplugin.cpp \
-		   ../../src/mpplaybackviewplugin.cpp \
            stub/src/mpplaybackview.cpp
+

@@ -19,7 +19,7 @@
 #define MPSNAPSHOTWIDGET_H
 
 
-#include <qtglobal>
+#include <QtGlobal>
 #include <hbwidget.h>
 
 

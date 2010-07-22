@@ -24,7 +24,6 @@
 #include "mpcollectioncontainerartists.h"
 #include "mpcollectioncontaineralbums.h"
 #include "mpcollectioncontainerplaylists.h"
-#include "mpcollectioncontainergenres.h"
 #include "mptrace.h"
 
 /*!
@@ -75,24 +74,33 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         mCurrentContainer->initialize();
         connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
         connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+        connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         break;
     case ECollectionContextArtists:
-            if ( ( mCurrentContext != ECollectionContextArtistAlbums ) && ( mCurrentContext != ECollectionContextAlbumSongs) )
-                {
-                deleteCurrentContainer();
-                mCurrentContainer = new MpCollectionContainerArtists(mDocumentLoader);
-                mCurrentContainer->initialize();
-                connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-                connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
-            }
-            break;
+        if ( ( mCurrentContext != ECollectionContextArtistAlbums )
+               && ( mCurrentContext != ECollectionContextArtistAlbumsTBone)
+               && ( mCurrentContext != ECollectionContextArtistAllSongs) )
+            {
+            deleteCurrentContainer();
+            mCurrentContainer = new MpCollectionContainerArtists(mDocumentLoader);
+            mCurrentContainer->initialize();
+            connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
+            connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
+            connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
+        }
+        break;
     case ECollectionContextAlbums:
-        if ( mCurrentContext != ECollectionContextAlbumSongs ) {
+        if ( mCurrentContext != ECollectionContextAlbumsTBone ) {
             deleteCurrentContainer();
             mCurrentContainer = new MpCollectionContainerAlbums(mDocumentLoader);
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
+            connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;
     case ECollectionContextPlaylists:
@@ -102,22 +110,14 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
             connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;
-    case ECollectionContextGenres:
-        if ( mCurrentContext != ECollectionContextGenreSongs ) {
-            deleteCurrentContainer();
-            mCurrentContainer = new MpCollectionContainerGenres(mDocumentLoader);
-            mCurrentContainer->initialize();
-            connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-            //connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
-        }
-        break;
-    case ECollectionContextAlbumSongs:
     case ECollectionContextArtistAlbums:
-    case ECollectionContextArtistSongs:
+    case ECollectionContextArtistAlbumsTBone:
+    case ECollectionContextArtistAllSongs:
+    case ECollectionContextAlbumsTBone:
     case ECollectionContextPlaylistSongs:
-    case ECollectionContextGenreSongs:
         // For this contexts, reuse the same container.
         break;
     }
@@ -138,20 +138,17 @@ void MpCollectionContainerFactory::deleteCurrentContainer()
         break;
     case ECollectionContextArtists:
     case ECollectionContextArtistAlbums:
-    case ECollectionContextArtistSongs:
+    case ECollectionContextArtistAlbumsTBone:
+    case ECollectionContextArtistAllSongs:
         delete static_cast<MpCollectionContainerArtists *>(mCurrentContainer);
         break;
     case ECollectionContextAlbums:
-    case ECollectionContextAlbumSongs:
+    case ECollectionContextAlbumsTBone:
         delete static_cast<MpCollectionContainerAlbums *>(mCurrentContainer);
         break;
     case ECollectionContextPlaylists:
     case ECollectionContextPlaylistSongs:
         delete static_cast<MpCollectionContainerPlaylists *>(mCurrentContainer);
-        break;
-    case ECollectionContextGenres:
-    case ECollectionContextGenreSongs:
-        delete static_cast<MpCollectionContainerGenres *>(mCurrentContainer);
         break;
     }
     TX_EXIT

@@ -28,6 +28,8 @@
 // Forward declarations
 class MpxViewPlugin;
 class MusicServices;
+class MpGlobalPopupHandler;
+class HbActivityManager;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
@@ -40,12 +42,23 @@ public:
         CollectionView = 1,
         PlaybackView,
         SettingsView,
-        DetailsView };
+        DetailsView,
+        MediaWallView};
+    
+    enum ActivityMode{
+        MusicMainView,
+        MusicNowPlayingView,
+        MusicNowPlayingViewShuffleAll
+    };
 
     MpMainWindow();
     ~MpMainWindow();
 
-    void initialize();
+    void initialize( ActivityMode mode );
+
+signals:
+    // For automation testability
+    void applicationReady();
 
 public slots:
     void handleCommand( int commandCode );
@@ -53,13 +66,17 @@ public slots:
 
     void switchView( Qt::Orientation orientation );
     void initializeServiceView( TUid hostUid );
+    void handleActivity();
+    void saveActivity();
+    void handleRestorePathFailed();
 
 private:
     void activateView(ViewType);
     void connectView();
     void disconnectView();
-
+    void keyPressEvent(QKeyEvent *event);
     MpxViewPlugin*  loadView( ViewType type, MpCommon::MpViewMode viewMode= MpCommon::DefaultView );
+    void loadActivity( QVariant data );
 
 private:
 
@@ -67,10 +84,13 @@ private:
     MpxViewPlugin         *mPlaybackViewPlugin;   // Own
     MpxViewPlugin         *mSettingsViewPlugin;   // Own
     MpxViewPlugin         *mDetailsViewPlugin;    // Own
-
+    MpxViewPlugin         *mMediaWallViewPlugin;  // Own
     MpxViewPlugin         *mCurrentViewPlugin;    // Own
     ViewType              mVerticalViewType;
-    MusicServices         *mMusicServices;        // Own
+    MusicServices         *mMusicServices;         // Own
+    MpGlobalPopupHandler  *mPopupHandler;          // Own
+    bool                   mUserExit;
+    HbActivityManager     *mActivityManager;       //Not Own
 
 };
 

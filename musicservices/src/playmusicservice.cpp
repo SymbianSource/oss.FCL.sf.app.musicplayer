@@ -16,7 +16,7 @@
 */
 
 #include <hbapplication.h>
-#include <qstringlist.h>
+#include <QStringList>
 
 #include "musicservices.h"
 #include "playmusicservice.h"

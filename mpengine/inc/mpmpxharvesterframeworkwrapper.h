@@ -23,10 +23,6 @@
 #include "mpcommondefs.h"
 
 class MpMpxHarvesterFrameworkWrapperPrivate;
-class MpSongScannerHelper;
-class HbNotificationDialog;
-class QStringList;
-class QTranslator;
 
 class MpMpxHarvesterFrameworkWrapper : public QObject
 {
@@ -36,8 +32,7 @@ class MpMpxHarvesterFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxHarvesterFrameworkWrapper( 
-                MpCommon::MpViewMode viewMode=MpCommon::DefaultView, TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxHarvesterFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
     virtual ~MpMpxHarvesterFrameworkWrapper();
 
     void scan();

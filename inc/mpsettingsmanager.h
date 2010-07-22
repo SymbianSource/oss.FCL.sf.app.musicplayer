@@ -44,25 +44,38 @@ public:
     static bool shuffle();
     static bool repeat();
     static int preset();
+    static bool inspireMe();
+    static bool songDetailsGb();
+    static bool showMtpInfo();
+    static QString mtpInfoUrl();
 
 public slots:
     void valueChanged(const XQSettingsKey& key, const QVariant& value);
     static void setShuffle(bool shuffle);
     static void setRepeat(bool repeat);
     static void setPreset(int preset);
+    static void setInspireMe(bool inspireme);
+    static void setSongDetailsGb(bool songdetails);
+    static void stopShowingMtpInfo();
         
 signals:
     void shuffleChanged(bool shuffle);
     void repeatChanged(bool repeat);
     void presetChanged(int preset);
+    void InspireMeChanged(bool inspireme);
+    void SongDetailsGbChanged(bool songdetails);
     
 private:
     Q_DISABLE_COPY(MpSettingsManager)
     XQSettingsManager* mSettingsManager;
-    bool mFirstStartup;
-    bool mShuffle;
-    bool mRepeat;
-    int  mPreset;
+    bool        mFirstStartup;
+    bool        mShuffle;
+    bool        mRepeat;
+    int         mPreset;
+    bool        mInspireMe;
+    bool        mSongDetailsGb;
+    bool        mShowMtpInfo;
+    QString     mMtpInfoUrl;
 };
 
 #endif    // MPSETTINGSMANAGER_H

@@ -32,6 +32,11 @@
 #include "mpplaybackdata.h"
 #include "mpcommondefs.h"
 #include "mptrace.h"
+#include "mpxaudioeffectengine.h"
+
+_LIT(KMPXPnRealAudioMimeType, "audio/x-pn-realaudio");
+_LIT(KMPXRealAudioMimeType, "audio/x-realaudio");
+_LIT(KMPXRnRealAudioMimeType, "audio/vnd.rn-realaudio");
 /*!
     \class MpMpxPlaybackFrameworkWrapperPrivate
     \brief Wrapper for mpx framework utilities - private implementation.
@@ -44,9 +49,9 @@
  */
 MpMpxPlaybackFrameworkWrapperPrivate::MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *qq)
     : q_ptr( qq ),
-      iPlaybackUtility(0),
-      iMedia(0),
-      iPlaybackData(0)
+      iPlaybackUtility( 0 ),
+      iMedia( 0 ),
+      iPlaybackData( 0 )
 {
     TX_LOG
 }
@@ -59,8 +64,8 @@ MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
     TX_ENTRY
 
     if ( iPlaybackUtility ) {
-        ForceStopL();
-        iPlaybackUtility->RemoveObserverL(*this);
+        TRAP_IGNORE( ForceStopL() );
+        TRAP_IGNORE( iPlaybackUtility->RemoveObserverL(*this) );
         iPlaybackUtility->Close();
     }
 
@@ -73,9 +78,8 @@ MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
 /*!
  \internal
  */
-void MpMpxPlaybackFrameworkWrapperPrivate::init( MpCommon::MpViewMode viewMode, TUid hostUid )
+void MpMpxPlaybackFrameworkWrapperPrivate::init( TUid hostUid )
 {
-    iViewMode = viewMode;
     mHostUid = hostUid;
     TRAPD(err, DoInitL());
     if ( err != KErrNone ) {
@@ -146,10 +150,49 @@ void MpMpxPlaybackFrameworkWrapperPrivate::skipForward()
 /*!
  \internal
  */
+void MpMpxPlaybackFrameworkWrapperPrivate::startSeekForward()
+{
+    TX_ENTRY
+    TRAPD(err, iPlaybackUtility->CommandL(EPbCmdStartSeekForward));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::stopSeeking()
+{
+    TX_ENTRY
+    TRAPD(err, iPlaybackUtility->CommandL(EPbCmdStopSeeking));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
 void MpMpxPlaybackFrameworkWrapperPrivate::skipBackward()
 {
     TX_ENTRY
     TRAPD(err, iPlaybackUtility->CommandL(EPbCmdPrevious));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::startSeekBackward()
+{
+    TX_ENTRY
+    TRAPD(err, iPlaybackUtility->CommandL(EPbCmdStartSeekBackward));
     if ( err != KErrNone ) {
         TX_LOG_ARGS("Error: " << err << "; should never get here.");
     }
@@ -189,6 +232,45 @@ void MpMpxPlaybackFrameworkWrapperPrivate::setRepeat( bool mode )
 {
     TX_ENTRY_ARGS("mode =" << mode);
     TRAPD(err, iPlaybackUtility->SetL(EPbPropertyRepeatMode, mode ? EPbRepeatAll : EPbRepeatOff));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::setBalance( int value )
+{
+    TX_ENTRY_ARGS("value =" << value);
+    TRAPD( err, iPlaybackUtility->SetL( EPbPropertyBalance, value ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::applyAudioEffects()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbApplyEffect, KAudioEffectsID ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::applyEqualizer()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbApplyEffect, KEqualizerID ) );
     if ( err != KErrNone ) {
         TX_LOG_ARGS("Error: " << err << "; should never get here.");
     }
@@ -297,7 +379,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                 aProperties.ValueText( KMPXMediaMusicArtist ).Length() ) );
     }
     else {
-            changed |= iPlaybackData->setArtist(hbTrId("txt_mus_other_unknown3"));
+            changed |= iPlaybackData->setArtist(QString());
     }
     if ( aProperties.IsSupported( KMPXMediaMusicAlbum ) ) {
         changed |= iPlaybackData->setAlbum(
@@ -306,12 +388,20 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                 aProperties.ValueText( KMPXMediaMusicAlbum ).Length() ) );
     }
     else {
-            changed |= iPlaybackData->setAlbum(hbTrId("txt_mus_other_unknown4"));
+            changed |= iPlaybackData->setAlbum(QString());
     }
-    if ( changed ) {
-        // This is required to propagate the playback info to UI at once.
-        iPlaybackData->commitPlaybackInfo();
+    if (aProperties.IsSupported(TMPXAttribute(KMPXMediaGeneralMimeType))) {
+        
+            const TDesC& mimeType = aProperties.ValueText ( KMPXMediaGeneralMimeType );
+            
+            bool realAudioMode =
+                    ( mimeType.Compare( KMPXPnRealAudioMimeType ) == 0 ) ||
+                    ( mimeType.Compare( KMPXRealAudioMimeType ) == 0) ||
+                    ( mimeType.Compare( KMPXRnRealAudioMimeType ) == 0 );
+            
+            changed |= iPlaybackData->setRealAudio( realAudioMode );
     }
+
 
     if ( aProperties.IsSupported( KMPXMediaGeneralUri) ) {
         iPlaybackData->setUri(
@@ -331,8 +421,20 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                 aProperties.ValueText( KMPXMediaGeneralUri ).Ptr(),
                 aProperties.ValueText( KMPXMediaGeneralUri ).Length() ) );
     }
+    if ( aProperties.IsSupported( KMPXMediaMusicAlbumId) ) {
+    changed |= iPlaybackData->setAlbumId( 
+                aProperties.ValueTObjectL<TInt>( KMPXMediaMusicAlbumId ) );
+    }
     
-  
+    if ( aProperties.IsSupported( KMPXMediaGeneralId) ) {
+    changed |= iPlaybackData->setId( 
+                aProperties.ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
+    }
+    
+    if ( changed ) {
+        // This is required to propagate the playback info to UI at once.
+        iPlaybackData->commitPlaybackInfo();
+    }
     TX_EXIT
 }
 
@@ -342,10 +444,14 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
 void MpMpxPlaybackFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
+    iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
+    iPlaybackUtility->AddObserverL( *this );
+    iPlaybackData = new MpPlaybackData();
 
-   iPlaybackUtility = MMPXPlaybackUtility::UtilityL( mHostUid );
-   iPlaybackUtility->AddObserverL( *this );
-   iPlaybackData = new MpPlaybackData();
+    UpdateStateL();
+    if ( iPlaybackUtility->Source() ) {
+        RetrieveSongDetailsL();
+    }
     TX_EXIT
 }
 
@@ -374,13 +480,12 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( const XQSharableFile& file )
     if ( ok ) {
         iPlaybackUtility->InitL( xqfile );
     }
-	else {
-		TX_LOG_ARGS("Error: " << ok << "; should never get here.");
-	}
-    
-    
+    else {
+        TX_LOG_ARGS("Error: " << ok << "; should never get here.");
+    }
     TX_EXIT
 }
+
 /*!
  \internal
  */
@@ -429,6 +534,13 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackMessageL( const CMPXM
                 TX_LOG_ARGS("TMPXPlaybackMessage::EMediaChanged")
                 RetrieveSongDetailsL();
                 break;
+            case TMPXPlaybackMessage::EPlaylistUpdated:
+                TX_LOG_ARGS( "EPlaylistUpdated" )
+            case TMPXPlaybackMessage::EActivePlayerChanged:
+                TX_LOG_ARGS( "EActivePlayerChanged or fall through from EPlaylistUpdated" )
+                UpdateStateL();
+                RetrieveSongDetailsL();
+                break;
             default:
                 break;
         }
@@ -452,8 +564,6 @@ void MpMpxPlaybackFrameworkWrapperPrivate::ForceStopL()
         cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
         iPlaybackUtility->CommandL( *cmd );
         CleanupStack::PopAndDestroy( cmd );
-
-       // iPlaybackUtility->RemoveObserverL(*this);
     }
     TX_EXIT
 }
@@ -466,7 +576,11 @@ void MpMpxPlaybackFrameworkWrapperPrivate::UpdateStateL()
     TX_ENTRY
     if ( !iPlaybackUtility->Source() ) {
         TX_LOG_ARGS("There is no source")
-        iPlaybackData->setPlaybackState( MpPlaybackData::Stopped );
+        //this to prevent mutiple calls to state change.
+        if ( iPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
+            iPlaybackData->setPlaybackState( MpPlaybackData::NotPlaying );
+            iPlaybackData->resetData();
+        }
     }
     else {
         switch ( iPlaybackUtility->StateL() ) {
@@ -504,6 +618,10 @@ void MpMpxPlaybackFrameworkWrapperPrivate::RetrieveSongDetailsL()
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbum ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralUri ) );
     requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumArtFileName ) );
+    requestedAttr.AppendL( TMPXAttribute( KMPXMediaMusicAlbumId ) );
+	requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralMimeType ) );
+	requestedAttr.AppendL( TMPXAttribute( KMPXMediaGeneralId ) );
+	
 
     mediaSrc->MediaL( requestedAttr.Array(), *this );
     CleanupStack::PopAndDestroy( &requestedAttr );

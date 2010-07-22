@@ -41,13 +41,20 @@ public slots:
 private slots:
     void testConstructor(); //don't change the order, this should be the first test.
     void testInstanceConstruction();
+    void testFirstStartupGet();
     void testShuffleGetAndSet();
     void testRepeatGetAndSet();
     void testPresetGetAndSet();
+    void testInspireMeGetAndSet();
+    void testSongDetailsGbGetAndSet();
+    void testShowMtpInfoGetAndStop();
+    void testMtpInfoUrlGet();
     void testValueChangedShuffleCase();
     void testValueChangedRepeatCase();
     void testValueChangedPresetCase();
-
+    void testValueChangedInspireMe();
+    void testValueChangedSongDetailsGb();
+    void testValueChangedShowMtpInfo();
 
 };
 

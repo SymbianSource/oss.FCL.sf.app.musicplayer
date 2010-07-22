@@ -31,6 +31,8 @@
 //forward declartions
 class QGraphicsSceneMouseEvent;
 class MpNowPlayingWidgetPrivate;
+class HbFrameItem;
+
 
 class MPNOWPLAYINGBANNER_EXPORT MpNowPlayingWidget : public HbWidget
 {
@@ -38,11 +40,11 @@ class MPNOWPLAYINGBANNER_EXPORT MpNowPlayingWidget : public HbWidget
     friend class MpNowPlayingWidgetPrivate;
 
 public:
-    explicit MpNowPlayingWidget(long int playerId, QGraphicsItem *parent=0 );
+    explicit MpNowPlayingWidget( QGraphicsItem *parent=0 );
     virtual ~MpNowPlayingWidget();
     void setEnabled( bool enabled );
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
-                QWidget *widget = 0 );
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
+    bool isBannerAttached();
 
 signals:
     void clicked();
@@ -51,12 +53,12 @@ signals:
 private:
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
-    void changeEvent(QEvent *event);
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
 
 private:
     Q_DISABLE_COPY(MpNowPlayingWidget)
     MpNowPlayingWidgetPrivate * const d_ptr; //owned
-
+    HbFrameItem     *mFrameItem;
 };
 
 #endif    // MPNOWPLAYINGWIDGET_H

@@ -16,23 +16,23 @@
 
 SERVICEAPP = app
 TARGET = musicplayer
-ICON = resources/qgn_menu_mp_qt.svg
-DEPENDPATH += .
-INCLUDEPATH += . \
-	 inc \
-	 ../inc \
-         ../musicservices/inc
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
-
 CONFIG += hb
-
 symbian: {
     TARGET.UID2 = 0x100039CE 
     TARGET.UID3 = 0x10207C62
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x1F00000
     TARGET.CAPABILITY = CAP_APPLICATION NetworkControl DRM
-    }
+    SKINICON = qtg_large_music_player
+
+    BLD_INF_RULES.prj_exports += \
+        "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis" \
+        "resources/musicplayer.docml          /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.docml" \
+        "resources/musicplayer.splashml       /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.splashml" \
+        "resources/musicplayer.docml          /epoc32/data/Z/resource/hb/splashml/musicplayer.docml" \
+        "resources/musicplayer.splashml       /epoc32/data/Z/resource/hb/splashml/musicplayer.splashml"
+
+}
 
 # Service provider specific configuration.
 # If in-process plugin specific implementation
@@ -43,32 +43,34 @@ SERVICE.OPTIONS = embeddable
 CONFIG += service
 # Service provider specific configuration ends
 
+DEPENDPATH += .
+INCLUDEPATH += . \
+               inc \
+               ../inc \
+               ../musicservices/inc
+INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
+
+LIBS += -lecom \
+        -lestor  \
+        -lfbscli \
+        -lxqplugins \
+        -lmpxviewframeworkqt \
+        -lxqservice \
+        -lxqserviceutil \
+        -lmusicservices \
+        -lmpsettingsmanager \
+        -lmpengine
+
 # Input
-LIBS += -lecom.dll \
-    -lestor.dll  \
-    -lfbscli.dll \
-    -lxqplugins.dll \
-    -lmpxviewframeworkqt.dll \
-    -lxqservice \
-    -lxqserviceutil \
-    -lmusicservices \
-    -lmpengine
-    
-    
+HEADERS += inc/mpmainwindow.h \
+           inc/mpglobalpopuphandler.h \
+           inc/mpmtpinfolink.h
+
 SOURCES += src/main.cpp \
-           src/mpmainwindow.cpp
-           
-HEADERS =  inc/mpmainwindow.h
+           src/mpmainwindow.cpp \
+           src/mpglobalpopuphandler.cpp \
+           src/mpmtpinfolink.cpp
 
-MMP_RULES+=EXPORTUNFROZEN
-
-symbian: {
-    addImages.sources = images/*.png \
-                        resources/*.xml
-    DEPLOYMENT += addImages
-    }
-    
-RESOURCES += resources/musiplayerapp.qrc
 
 TRANSLATIONS = musicplayer.ts
 

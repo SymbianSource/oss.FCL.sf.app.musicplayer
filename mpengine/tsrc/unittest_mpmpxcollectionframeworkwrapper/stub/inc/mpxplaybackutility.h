@@ -27,6 +27,7 @@
 
 //Forward declarations
 class CMPXCollectionPlaylist;
+class CMPXCollectionPath;
 
 class MMPXPlaybackUtility
 {
@@ -47,6 +48,7 @@ public:
     TInt                    iRepeat;
     TMPXPlaybackProperty    iProperty;
     TBool                   iPlay;
+    CMPXCollectionPath      *iCurrentPath;
 };
 
 #endif      // MMPXPLAYBACKUTILITY_H

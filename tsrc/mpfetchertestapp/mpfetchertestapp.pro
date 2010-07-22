@@ -26,7 +26,7 @@ SOURCES += src/mpfetchertestappview.cpp \
 
 
 symbian {
-#    include(rom/rom.pri) # to include in image
+#   include(rom/rom.pri) # to include in image
     TARGET.UID2 = 0x100039CE 
     TARGET.UID3 = 0x10207C6A
     TARGET.EPOCSTACKSIZE = 0x14000

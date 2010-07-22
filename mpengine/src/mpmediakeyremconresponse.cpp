@@ -70,6 +70,54 @@ void MpMediaKeyRemConResponse::CompleteAnyKey(
         {
         switch ( aOperationId )
             {
+            case ERemConCoreApiPausePlayFunction:
+                {
+                iRemConCoreApiTarget.PausePlayFunctionResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiPlay:
+                {
+                iRemConCoreApiTarget.PlayResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiStop:
+                {
+                iRemConCoreApiTarget.StopResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiPause:
+                {
+                iRemConCoreApiTarget.PauseResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiRewind:
+                {
+                iRemConCoreApiTarget.RewindResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiFastForward:
+                {
+                iRemConCoreApiTarget.FastForwardResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiBackward:
+                {
+                iRemConCoreApiTarget.BackwardResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
+            case ERemConCoreApiForward:
+                {
+                iRemConCoreApiTarget.ForwardResponse( iStatus, KErrNone );
+                SetActive();
+                break;
+                }
             case ERemConCoreApiVolumeUp:
                 {
                 iRemConCoreApiTarget.VolumeUpResponse( iStatus, KErrNone );

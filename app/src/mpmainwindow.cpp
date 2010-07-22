@@ -17,20 +17,24 @@
 
 
 #include <hbapplication.h>
+#include <hbactivitymanager.h>
 #include <hbview.h>
 #include <mpxviewpluginqt.h>
 #include <xqpluginloader.h>
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
 #include <xqsharablefile.h>
-#include <QTranslator>
-#include <QLocale>
 
 #include "mpmainwindow.h"
 #include "mpviewbase.h"
 #include "musicservices.h"
-#include "mpengine.h"
+#include "mpenginefactory.h"
+#include "mpsettingsmanager.h"
+#include "mpglobalpopuphandler.h"
 #include "mptrace.h"
+
+const QString MUSIC_MAIN_VIEW = "MusicMainView";
+const QString MUSIC_NOW_PLAYING_VIEW = "MusicNowPlayingView";
 
 /*!
    \class MpMainWindow
@@ -50,9 +54,13 @@ MpMainWindow::MpMainWindow()
       mPlaybackViewPlugin(0),
       mSettingsViewPlugin(0),
       mDetailsViewPlugin(0),
+      mMediaWallViewPlugin(0),
       mCurrentViewPlugin(0),
       mVerticalViewType( CollectionView ),
-      mMusicServices(0)
+      mMusicServices(0),
+      mPopupHandler(0),
+      mUserExit( false ),
+      mActivityManager(0)
 {
     TX_LOG
 }
@@ -83,8 +91,11 @@ MpMainWindow::~MpMainWindow()
         mDetailsViewPlugin->destroyView();
         delete mDetailsViewPlugin;
     }
-
-    MpEngine::instance()->close();
+    if (mMediaWallViewPlugin) {
+        mMediaWallViewPlugin->destroyView();
+        delete mMediaWallViewPlugin;
+    }    
+    MpEngineFactory::close();
 
 
     TX_EXIT
@@ -94,21 +105,9 @@ MpMainWindow::~MpMainWindow()
 /*!
 Initialize and activate the collection view
  */
-void MpMainWindow::initialize()
+void MpMainWindow::initialize( ActivityMode mode )
 {
     TX_ENTRY
-
-    //Load musicplayer translator
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = QString("z:/resource/qt/translations/");
-
-    bool translatorLoaded = false;
-    translatorLoaded = translator.load(path + "musicplayer_" + lang);
-    TX_LOG_ARGS("Loading musicplayer translator ok=" << translatorLoaded);
-    if ( translatorLoaded ) {
-        qApp->installTranslator( &translator );
-    }
 
 #ifdef _DEBUG
     QList<XQPluginInfo> impls;
@@ -128,20 +127,72 @@ void MpMainWindow::initialize()
         XQServiceUtil::toBackground( false );
     }
 
-    MpEngine *engine = MpEngine::instance();
-
     if ( !mMusicServices ) {
-        engine->initialize(MpCommon::DefaultView);
-      
-        loadView(CollectionView);
-        activateView(CollectionView);
-
+        HbApplication* app = qobject_cast<HbApplication*>(qApp);
+        QVariantHash params = app->activateParams();
+        MpEngineFactory::createSharedEngine();
+        mPopupHandler = new MpGlobalPopupHandler( this );
+        if( app->activateReason() == Hb::ActivationReasonActivity ) {
+            // Restoring an activity, not a fresh startup or a service
+            // Activities from Task switcher only have one parameter
+            if( params.count() == 1 ) {
+                 loadActivity( app->activateData() );
+            }
+        }
+        if ( orientation() == Qt::Vertical ) {
+            // If first startup ignore shuffleAll and send to collection view to refresh library
+            if ( mode == MusicMainView  || MpSettingsManager::firstStartup() ) {
+                loadView( CollectionView );
+                activateView( CollectionView );
+                loadView( MediaWallView );
+                loadView( PlaybackView );
+            } else if ( mode == MusicNowPlayingView ) {
+                if( params.contains( "shuffle" ) ) {
+                    if( !params.value( "shuffle" ).toString().compare( "yes" ) ) {
+                        MpEngineFactory::sharedEngine()->shuffleAll();
+                    }
+                }
+                loadView( PlaybackView );
+                activateView( PlaybackView );
+                loadView( CollectionView );
+                loadView( MediaWallView );
+            }
+        }
+        else {
+            // If first startup ignore shuffleAll and send to refresh library
+            if( mode == MusicNowPlayingView && !MpSettingsManager::firstStartup() ) {
+                if( params.contains( "shuffle" ) ) {
+                    if( !params.value( "shuffle" ).toString().compare( "yes" ) ) {
+                        MpEngineFactory::sharedEngine()->shuffleAll();
+                    }
+                }
+                mVerticalViewType = PlaybackView;
+            }
+            loadView( MediaWallView );
+            activateView( MediaWallView );
+            loadView( CollectionView );
+            loadView( PlaybackView );
+        }
         connect(this, SIGNAL( orientationChanged( Qt::Orientation ) ), SLOT( switchView( Qt::Orientation ) ) );
-        connect( engine, SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
-        engine->checkForSystemEvents();
-        loadView( PlaybackView );
+        connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
+        MpEngineFactory::sharedEngine()->checkForSystemEvents();
+        //Register to application manager to wait for activities and clear previous activities on the task switcher
+        mActivityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+        mActivityManager->waitActivity();
+        mActivityManager->removeActivity( MUSIC_MAIN_VIEW );
+        mActivityManager->removeActivity( MUSIC_NOW_PLAYING_VIEW );
+        connect( app, SIGNAL( activate() ), this , SLOT( handleActivity() ) );
+        connect( app, SIGNAL( aboutToQuit() ), this, SLOT( saveActivity() ) );
+        emit applicationReady();
+        
     }
-    setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
+    else {
+        setOrientation(Qt::Vertical, true);//This sould prevent media wall activation.
+    }
+    //since we only have one landscape view, media wall, disable automatic 
+    //orientation transitions, they look like a flicker.
+    //This will make the view switch faster.
+    setAutomaticOrientationEffectEnabled( false );    
     TX_EXIT
 }
 
@@ -151,13 +202,17 @@ void MpMainWindow::initialize()
 void MpMainWindow::handleCommand( int commandCode )
 {
     TX_ENTRY_ARGS("commandCode=" << commandCode );
-
+    
     switch ( commandCode ) {
         case MpCommon::Exit:
             if ( mCurrentViewPlugin ) {
                 disconnectView();
             }
+            mUserExit = true;
             qApp->quit();
+            break;
+        case MpCommon::SendToBackground:
+            lower();
             break;
         case MpCommon::ActivateCollectionView:
             activateView(CollectionView);
@@ -183,7 +238,9 @@ void MpMainWindow::switchView( Qt::Orientation orientation )
         if (orientation == Qt::Vertical) {
             activateView( mVerticalViewType );   
         }
-
+        else {
+            activateView(MediaWallView);
+        }
 }
 
 /*!
@@ -199,7 +256,10 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     if ( mCurrentViewPlugin ) {     
         disconnectView();
         mCurrentViewPlugin->deactivateView();
-        if ( viewType  == CollectionView && mCurrentViewPlugin == mPlaybackViewPlugin ||
+        if ( viewType  == MediaWallView || mCurrentViewPlugin == mMediaWallViewPlugin ) {
+            doTransition = false;
+        }
+        else if ( viewType  == CollectionView && mCurrentViewPlugin == mPlaybackViewPlugin ||
                   viewType  == PlaybackView && mCurrentViewPlugin == mDetailsViewPlugin ||
                   viewType  == PlaybackView && mCurrentViewPlugin == mSettingsViewPlugin ) {
             transitionFlags |= Hb::ViewSwitchUseBackAnim;
@@ -212,9 +272,9 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        
-        mVerticalViewType = viewType;
-        
+        if ( viewType != MediaWallView  ) {
+            mVerticalViewType = viewType;
+        }
         addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );
         setCurrentView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) , doTransition , transitionFlags);
         mCurrentViewPlugin->activateView();
@@ -275,17 +335,35 @@ void MpMainWindow::handleLibraryUpdated()
 /*!
  Reimp.
  */
+void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key()) {
+    case 16842753:
+    case Qt::Key_Call:
+        if (orientation () == Qt::Vertical) {
+            setOrientation(Qt::Horizontal, false);
+        }
+        else {
+            setOrientation(Qt::Vertical, false);
+        }
+        break;
+    default:
+        HbMainWindow::keyPressEvent (event);
+        break;          
+    }
+}
 
-
-void MpMainWindow::initializeServiceView( TUid hostUid ){
-    
-    MpEngine *engine = MpEngine::instance();
-        
+/*!
+  Slot to initialize the view that corresponds to the requested service  
+ */
+void MpMainWindow::initializeServiceView( TUid hostUid )
+{
     switch (mMusicServices->currentService()) {
  
     case MusicServices::EUriFetcher:
         {
-            engine->initialize( MpCommon::FetchView, hostUid );
+            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Fetch );
+            mPopupHandler = new MpGlobalPopupHandler( this );
             loadView( CollectionView, MpCommon::FetchView );
             MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
             connect(collectionView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
@@ -293,25 +371,93 @@ void MpMainWindow::initializeServiceView( TUid hostUid ){
             loadView(PlaybackView, MpCommon::FetchView );
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
             connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
-            connect( engine, SIGNAL( libraryUpdated() ), this, SLOT( handleLibraryUpdated() ) );
-            engine->checkForSystemEvents();
+            connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), this, SLOT( handleLibraryUpdated() ) );
+            MpEngineFactory::sharedEngine()->checkForSystemEvents();
             break;
         }
     case MusicServices::EPlayback:
         {
-            engine->initialize( MpCommon::EmbeddedView, hostUid );
+            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Embedded );
             loadView(PlaybackView, MpCommon::EmbeddedView );   
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
-            connect(mMusicServices, SIGNAL(playReady(QString)), engine, SLOT(playEmbedded(QString)));
-            connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), engine, SLOT(playEmbedded(const XQSharableFile&)));
+            connect(mMusicServices, SIGNAL(playReady(QString)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(QString)));
+            connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(const XQSharableFile&)));
             connect(playbackView, SIGNAL(songSelected(QString)), mMusicServices, SLOT(itemSelected(QString)));
             activateView( PlaybackView );
             break;
         }
-        default:
+    default:
         Q_ASSERT_X(false, "MpMainWindow::initializeServiceView", "undefined service");
         break;
     }
+    emit applicationReady();
+}
+
+/*!
+  Slot to handle activity switching once the stand alone instance is running and registered 
+  in the activity manager to wait for activities.
+  Only running activity supported at the moment is "MusicNowPlayingView"
+ */
+void MpMainWindow::handleActivity()
+{
+    TX_ENTRY
+    HbApplication* app = qobject_cast<HbApplication*>(qApp);
+    QString activityId = app->activateId();
+    
+    if( !activityId.compare( MUSIC_NOW_PLAYING_VIEW ) ) {
+        if ( orientation() == Qt::Vertical ) {
+            if( mVerticalViewType != PlaybackView ) {
+                activateView( PlaybackView );
+            }
+        }
+    }
+    
+    mActivityManager->waitActivity();
+    TX_EXIT
+}
+
+/*!
+  Slot to save activity upon exiting application
+ */
+void MpMainWindow::saveActivity()
+{
+    TX_ENTRY
+    QString activity = ( mVerticalViewType == CollectionView ) ? MUSIC_MAIN_VIEW : MUSIC_NOW_PLAYING_VIEW;
+    //Get data from engine
+    QByteArray serializedRestorePath;
+    if ( mUserExit ) {
+        //Internal exit will always return to the main view
+        activity = MUSIC_MAIN_VIEW;
+    }
+    else {
+        //Only saved data if exited via task switcher or GOOM
+        MpEngineFactory::sharedEngine()->saveActivityData( serializedRestorePath );
+    }
+    QVariantHash activityParameters;
+    activityParameters.insert( "screenshot", QPixmap::grabWidget( this, this->rect() ) );
+    QVariantHash activityData;
+    activityData.insert( "restorePath", serializedRestorePath );
+       
+    
+    bool ok = mActivityManager->addActivity( activity , activityData, activityParameters );
+    if ( !ok ){
+        TX_LOG_ARGS( "Error: Add Failed; should never get here." );
+    }
+    TX_EXIT
+}
+
+/*!
+  Slot to handle a failed path restoration. Switch to collection view if not already there.
+ */
+void MpMainWindow::handleRestorePathFailed()
+{
+    TX_ENTRY
+    if ( orientation() == Qt::Vertical ) {
+        if( mVerticalViewType != CollectionView ) {
+            activateView( CollectionView );
+        }
+    }
+    TX_EXIT
 }
 
 /*!
@@ -338,7 +484,10 @@ MpxViewPlugin* MpMainWindow::loadView( ViewType type, MpCommon::MpViewMode viewM
         pluginUid = MpCommon::KDetailsViewUid;
         plugin = &mDetailsViewPlugin;
         break;
-
+    case MediaWallView:
+        pluginUid = MpCommon::KMediaWallViewUid;
+        plugin = &mMediaWallViewPlugin;
+        break;
     default:
         Q_ASSERT_X(false, "MpMainWindow::loadView", "undefined view type");
         break;
@@ -360,5 +509,18 @@ MpxViewPlugin* MpMainWindow::loadView( ViewType type, MpCommon::MpViewMode viewM
     }
     Q_ASSERT( plugin ? *plugin : 0 );
     return plugin ? *plugin : 0;
+}
+
+/*!
+  Load activity called via task switcher
+  Restore view and playback path if applicable
+ */
+void MpMainWindow::loadActivity( QVariant data )
+{
+    TX_ENTRY
+    QVariantHash activityData = data.toHash();
+    QByteArray serializedRestorePath = activityData.value( "restorePath" ).toByteArray();
+    MpEngineFactory::sharedEngine()->loadActivityData( serializedRestorePath );
+    TX_EXIT
 }
 

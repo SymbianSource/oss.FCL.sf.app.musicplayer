@@ -49,9 +49,12 @@ MpCollectionListContainer::MpCollectionListContainer( HbDocumentLoader *loader, 
     : MpCollectionContainer(loader, parent),
       mList(0),
       mNoMusic(0),
-      mIndexFeedback( new HbIndexFeedback())
+      mIndexFeedback(0),
+      mLongPressedIndex(0),
+      mLongPressEnabled(true)
 {
     TX_ENTRY
+    mIndexFeedback = new HbIndexFeedback();
     mIndexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
     TX_EXIT
 }
@@ -91,7 +94,6 @@ void MpCollectionListContainer::setDataModel( MpCollectionDataModel *dataModel )
 
 /*!
  Slot to be called when an item is selected by the user.
- Start animation.
  */
 void MpCollectionListContainer::itemActivated( const QModelIndex &index )
 {
@@ -102,11 +104,35 @@ void MpCollectionListContainer::itemActivated( const QModelIndex &index )
 
 /*!
  Slot to be called when an item is long pressed by the user.
+ Remember the index so that we can scroll to this vicinity if the data is reloaded, for example,
+ after a delete operation is selected from the context menu.
  */
 void MpCollectionListContainer::onLongPressed( HbAbstractViewItem *listViewItem, const QPointF &coords )
 {
     TX_ENTRY
-    emit MpCollectionContainer::itemLongPressed(listViewItem->modelIndex().row(), coords);
+    if ( mLongPressEnabled ) {
+        mLongPressedIndex = listViewItem->modelIndex().row();
+        emit MpCollectionContainer::itemLongPressed(mLongPressedIndex, coords);
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called data model has new data. 
+ If the data is reloaded as a result of operation like delete, we want to scroll to the 
+ nearby area where user has performed the action.
+ 
+ \sa onLongPressed
+ */
+void MpCollectionListContainer::dataReloaded()
+{
+    TX_ENTRY
+    if ( mLongPressedIndex > 0 ) {
+        --mLongPressedIndex;
+    }
+    if ( mList ) {
+        mList->scrollTo( mDataModel->index(mLongPressedIndex, 0) );
+    }
     TX_EXIT
 }
 
@@ -117,8 +143,6 @@ void MpCollectionListContainer::initializeList()
 {
     TX_ENTRY
     mList->setItemRecycling(true);
-    mList->setScrollingStyle( HbListView::PanOrFlick );
-    mList->setClampingStyle( HbListView::BounceBackClamping );
     mList->setLongPressEnabled(true);
 
     connect(mList, SIGNAL(activated(QModelIndex)), this, SLOT(itemActivated(QModelIndex)));

@@ -35,7 +35,7 @@ public:
     explicit MpMpxHarvesterFrameworkWrapperPrivate( MpMpxHarvesterFrameworkWrapper *wrapper );
     virtual ~MpMpxHarvesterFrameworkWrapperPrivate();
 
-    void init( MpCommon::MpViewMode viewMode, TUid hostUid );
+    void init( TUid hostUid );
     void scan();
     void cancelScan();
     void checkForSystemEvents();
@@ -64,7 +64,6 @@ private:
     TInt                            iNumItemsAdded;
     TBool                           iScanning;
     TInt                            iPreviousBroadCastMsg;
-    MpCommon::MpViewMode            iViewMode;
     TUid                            mHostUid;
 
 };

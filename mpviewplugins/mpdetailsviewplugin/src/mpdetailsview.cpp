@@ -1,7 +1,7 @@
 /*
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
-* This component and the accompanying materials are made available 
+* This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
@@ -14,24 +14,17 @@
 * Description: Music Player details view.
 *
 */
-#include <qgraphicswebview>
-#include <qwebsettings>
+#include <QWebSettings>
 #include <QGraphicsWidget>
 #include <QGraphicsLayoutItem>
 #include <QUrl>
-#include <QSslError>
 #include <QDomElement>
-#include <QWebPage>
-#include <QWebFrame>
 #include <QList>
 #include <QFile>
-#include <QTranslator>
-#include <QLocale>
 #include <QGraphicsLinearLayout>
+#include <QSizeF>
 
-#include <thumbnailmanager_qt.h>
-#include <thumbnaildata.h>
-#include <thumbnailobjectsource.h>
+
 
 #include <hbinstance.h>
 #include <hbmainwindow.h>
@@ -45,76 +38,127 @@
 #include <hbdialog.h>
 #include <hblistwidget.h>
 #include <hblistwidgetitem.h>
+#include <hblistviewitem.h>
+#include <hbprogressbar.h>
 
 #include "mpdetailsview.h"
+#include "mpenginefactory.h"
 #include "mpcommondefs.h"
-#include "mpmpxdetailsframeworkwrapper.h"
 #include "mpsongdata.h"
+#include "mpsettingsmanager.h"
+#include "mpquerymanager.h"
 #include "mptrace.h"
 
-const int KUndefined = -1;
-const int KRecommendationNum = 2;
+#ifdef SHARE_FUNC_ENABLED
+#include "mpdetailssharedialog.h"
+#endif
+
+
+const int KRecommendationCount = 2;
+
 
 /*!
  Constructor
  */
 MpDetailsView::MpDetailsView()
-    : mSongData( 0 ),
-      mFrameworkWrapper( 0 ),
+    : mMpEngine( 0 ),
+      mSongData( 0 ),
       mActivated( false ),
-      mWindow( 0 ),
-      mNavigationBack( 0 ),
-      mSongText( NULL ),
-      mAlbumText( NULL ),
-      mArtistText( NULL ),
-      mAlbumArt( NULL ),
-      mDocumentLoader( NULL ),
-      mDownloadedAlbumArts( 0 ),
-      mAlbumArtsReadyCount( 0 ),
-      mMpTranslator( 0 ),
-      mCommonTranslator( 0 )
+      mSoftKeyBack( 0 ),
+      mSongText( 0 ),
+      mAlbumText( 0 ),
+      mArtistText( 0 ),
+      mAlbumArt( 0 ),
+      mSongDetailsGroupBox(0),
+      mInspireMeGroupBox(0),
+      mShareButton(0),
+      mDocumentLoader( 0 ),
+      mDetailList(0),
+      mInspireList(0),
+      mInspireMeProgressBar(0),
+      mMpQueryManager( 0 ),
+      mInspireMeQueryOngoing( false ),
+      mInspireMeQueryRendered( false ),
+      mInspireMeOpen(true),
+      mSongDetailsGbOpen(false)
+#ifdef SHARE_FUNC_ENABLED
+      , mSharePopup( 0 )
+#endif
 {
     TX_ENTRY
     bool widgetsOk = false;
     HbMainWindow *mainWindow = hbInstance->allMainWindows()[0];
     mDocumentLoader = new HbDocumentLoader();
 
-    if ( mDocumentLoader ) {
-            mDocumentLoader->load( QString(":/detailsviewdocml/detailsview.docml"), &widgetsOk );
-        }
-    if ( widgetsOk ) {
-        QGraphicsWidget *widget; 
-        
-        widget = mDocumentLoader->findWidget( QString("content") );
-        mContainer = qobject_cast<HbWidget *>(widget);
-        if ( mContainer ) {
-            setWidget( mContainer );
-        }
-        
-     widget = mDocumentLoader->findWidget( QString("shareButton") );
-     mShareButton = qobject_cast<HbPushButton *>(widget);         
-        
-     widget = mDocumentLoader->findWidget( QString("songText") );
-     mSongText = qobject_cast<HbLabel *>(widget);
-    
-     widget = mDocumentLoader->findWidget( QString("artistText") );
-     mArtistText = qobject_cast<HbLabel *>(widget);
-    
-     widget = mDocumentLoader->findWidget( QString("albumText") );
-     mAlbumText = qobject_cast<HbLabel *>(widget);
+    TX_LOG_ARGS("Document loader created")
+    if(!mDocumentLoader) {
+        TX_LOG_ARGS( "MpDetailsView() Error: HbDocumentLoader not constructed" );
+        return;
+    }
 
-     widget = mDocumentLoader->findWidget( QString("albumArt") );
-     mAlbumArt = qobject_cast<HbLabel *>(widget);
-        
-     widget = mDocumentLoader->findWidget( QString("songDetailsGroupBox") );
-     mSongDetailsGroupBox = qobject_cast<HbGroupBox *>(widget);
-        
-     widget = mDocumentLoader->findWidget( QString("inspireMeGroupBox") );
-     mInspireMeGroupBox = qobject_cast<HbGroupBox *>(widget);
+    TX_LOG_ARGS("Loading :/mpdetailsviewdocml/mpdetailsview.docml")
+    mDocumentLoader->load( QString(":/mpdetailsviewdocml/mpdetailsview.docml"), &widgetsOk );
+    if(!widgetsOk) {
+        TX_LOG_ARGS( "MpDetailsView() Error: invalid mpdetailsview.docml" );
+        return;
     }
-    else {
-        TX_LOG_ARGS( "Error: invalid detailsview.docml" );
+
+    TX_LOG_ARGS("Loaded :/mpdetailsviewdocml/mpdetailsview.docml")
+    QGraphicsWidget *widget = 0;
+
+    widget = mDocumentLoader->findWidget( QString("content") );
+    TX_LOG_ARGS( "MpDetailsView() mDocumentLoader->findWidget for <content>: " << (int)(widget) );
+    setWidget(  qobject_cast<HbWidget *>(widget) );
+
+    widget = mDocumentLoader->findWidget( QString("shareButton") );
+    mShareButton = qobject_cast<HbPushButton *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <shareButton> widget found mShareButton: " << (int)(mShareButton) );
+
+    widget = mDocumentLoader->findWidget( QString("trackTitle") );
+    mSongText = qobject_cast<HbLabel *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <trackTitle> widget found mSongText: " << (int)(mSongText) );
+
+    widget = mDocumentLoader->findWidget( QString("artist") );
+    mArtistText = qobject_cast<HbLabel *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <artist> widget found mArtistText: " << (int)(mArtistText) );
+
+    widget = mDocumentLoader->findWidget( QString("albumName") );
+    mAlbumText = qobject_cast<HbLabel *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <albumName> widget found mAlbumText: " << (int)(mAlbumText) );
+
+    widget = mDocumentLoader->findWidget( QString("albumArt") );
+    mAlbumArt = qobject_cast<HbLabel *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <albumArt> widget found mAlbumArt: " << (int)(mAlbumArt) );
+
+    widget = mDocumentLoader->findWidget( QString("songDetails") );
+    mSongDetailsGroupBox = qobject_cast<HbGroupBox *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <songDetails> widget found mSongDetailsGroupBox: " << (int)(mSongDetailsGroupBox) );
+
+    widget = mDocumentLoader->findWidget( QString("songDetailsListWidget") );
+    mDetailList = qobject_cast<HbListWidget *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <songDetailsListWidget> widget found mDetailList: " << (int)(mDetailList) );
+
+    widget = mDocumentLoader->findWidget( QString("inspireMeGroupBox") );
+    mInspireMeGroupBox = qobject_cast<HbGroupBox *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <inspireMeGroupBox> widget found mInspireMeGroupBox: " << (int)(mInspireMeGroupBox) );
+
+    widget = mDocumentLoader->findWidget( QString("inspireListWidget") );
+    mInspireList = qobject_cast<HbListWidget *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <inspireListWidget> widget found mInspireList: " << (int)(mInspireList) );
+
+    widget = mDocumentLoader->findWidget( QString("inspireMeProgressBar") );
+    mInspireMeProgressBar = qobject_cast<HbProgressBar *>(widget);
+    TX_LOG_ARGS("MpDetailsView() <inspireMeProgressBar> widget found mInspireMeProgressBar: " << (int)(mInspireMeProgressBar) );
+    
+    // load section HideInspireMe if no ovi store suport
+    bool loadingSectionOk = false;
+    mDocumentLoader->load( QString(":/mpdetailsviewdocml/mpdetailsview.docml"), QString( "ShowInspireMe" ), &loadingSectionOk );    
+    if( loadingSectionOk ) {
+        TX_LOG_ARGS( "Loading ShowInspireMe section is successful." );
+    } else {
+        TX_LOG_ARGS( "Loading ShowInspireMe section fails." );
     }
+
     TX_EXIT
 }
 
@@ -123,103 +167,50 @@ MpDetailsView::MpDetailsView()
  */
 MpDetailsView::~MpDetailsView()
 {
-    TX_ENTRY    
-    if ( mFrameworkWrapper ) {
-        delete mFrameworkWrapper;
-    }
-    if ( mNavigationBack ) {
-        delete mNavigationBack;
-    }
-    if ( mDocumentLoader ) {
-        delete mDocumentLoader;
-    }
-    if ( mManager ) {
-        mManager->deleteLater();
-    }
-    if ( mDownloadManager ) {
-        mDownloadManager->deleteLater();
-    }    
-    if( mThumbnailManager ) {
-        delete mThumbnailManager;
-    }
-    delete mMpTranslator;
-    delete mCommonTranslator;
+    TX_ENTRY
+    delete mSoftKeyBack;
+    delete mDocumentLoader;
+    delete mMpQueryManager;
+
+#ifdef SHARE_FUNC_ENABLED
+    closeShareDialog();
+#endif
     TX_EXIT
 }
+
 
 /*!
  Initializes the details view. Allocates all resources needed by the view.
  */
 void MpDetailsView::initializeView()
 {
-    TX_ENTRY    
-    
-    //Load musicplayer and common translators
-        QString lang = QLocale::system().name();
-        QString path = QString( "z:/resource/qt/translations/" );
-        bool translatorLoaded = false;
+    TX_ENTRY
 
-        mMpTranslator = new QTranslator( this );
-        translatorLoaded = mMpTranslator->load( path + "musicplayer_" + lang );
-        TX_LOG_ARGS( "Loading translator ok=" << translatorLoaded );
-        if ( translatorLoaded ) {
-            qApp->installTranslator( mMpTranslator );
-        }
+    mSoftKeyBack = new HbAction( Hb::BackNaviAction, this );
 
-        mCommonTranslator = new QTranslator( this );
-        translatorLoaded = mCommonTranslator->load( path + "common_" + lang );
-        TX_LOG_ARGS( "Loading common translator ok=" << translatorLoaded );
-        if ( translatorLoaded ) {
-            qApp->installTranslator( mCommonTranslator );
-        }
-        
-    mWindow = mainWindow();
-    mNavigationBack = new HbAction( Hb::BackNaviAction, this );
-    mFrameworkWrapper = new MpMpxDetailsFrameworkWrapper( );
-    mSongData = mFrameworkWrapper->songData();
-    
-    mCompositePixmap = QPixmap( 150, 150 );
-    
-    mDetailList = new HbListWidget( mSongDetailsGroupBox );
-    mButton = new HbPushButton( tr( "More recommendations" ) );
-    mSongDetailsGroupBox->setCollapsable( true );
-    mSongDetailsGroupBox->setHeading( tr("Song details") );
-    mSongDetailsGroupBox->setContentWidget( mDetailList );
-    mSongDetailsGroupBox->setCollapsed( true );
+    mMpEngine = MpEngineFactory::sharedEngine();
+    mSongData = mMpEngine->songData();
 
-    mLayout = new QGraphicsLinearLayout( Qt::Vertical );
-    mInspireMe = new HbWidget( mInspireMeGroupBox );
-    mInspireList = new HbListWidget();
-    mInspireMeGroupBox->setCollapsable( true );   
-    mInspireMeGroupBox->setHeading( tr("Inspire me") );
-    mInspireMeGroupBox->setContentWidget( mInspireMe ); 
-    
-
-    mManager = new QNetworkAccessManager( this );
-    connect( mManager, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( retrieveInformationFinished( QNetworkReply * ) ) );
-    
-    mDownloadManager = new QNetworkAccessManager( this );
-    connect( mDownloadManager, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( DownloadFinished( QNetworkReply * ) ) );
-    
-    mRecommendationAlbumArtsName << "C:\\Data\\albumOne.png" << "C:\\Data\\albumTwo.png"; 
-    
-    mThumbnailManager = new ThumbnailManager( this );
-    mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForQuality );
-    mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailSmall );
-    QObject::connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
-            this, SLOT( thumbnailReady( QPixmap , void * , int , int  ) ) );
-    mDefaultRecommendationAlbumArt = QPixmap( ":/detailsviewicons/defaultalbumart.png" );
-    
     // TODO: might need later
     setupMenu();
-      
-    connect( mNavigationBack, SIGNAL( triggered() ), this, SLOT( back() ) );
-    connect( mShareButton, SIGNAL( clicked() ), this, SLOT( share() ) );    
-    connect( mSongData, SIGNAL( albumArtReady() ), this, SLOT( albumArtChanged() ) ); 
-    connect( mSongData, SIGNAL( playbackInfoChanged() ), this, SLOT( playbackInfoChanged() ) );
-    connect( mSongData, SIGNAL( songDetailInfoChanged() ), this, SLOT( songDetailInfoChanged() ) ); 
-    connect( mSongDetailsGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( toggleInspireMeGroupBox( bool ) ) );
-    connect( mInspireMeGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( toggleDetailsGroupBox( bool ) ) );
+    mMpQueryManager = new MpQueryManager();
+
+    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    connect( mSongData, SIGNAL( albumArtReady() ), this, SLOT( albumArtChanged() ) );
+    connect( mSongData, SIGNAL( playbackInfoChanged() ), this, SLOT( handlePlaybackInfoChanged() ) );
+    connect( mSongData, SIGNAL( songDetailInfoChanged() ), this, SLOT( songDetailInfoChanged() ) );
+    connect( mSongDetailsGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( handleDetailsGroupBoxToggled( bool ) ) );
+    connect( mInspireMeGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( handleInspireMeGroupBoxToggled( bool ) ) );
+    connect( mMpQueryManager, SIGNAL( networkError() ), this ,SLOT( handleNetworkError() ) );
+    connect( mMpQueryManager, SIGNAL(searchUrlRetrieved(const QString&)), this, SLOT(updateSharedData(const QString&)));
+    connect( mMpQueryManager, SIGNAL(recommendationAlbumArtsReady()), this, SLOT(RenderInspireMeGroupBox()));
+
+#ifdef SHARE_FUNC_ENABLED
+    connect( mShareButton, SIGNAL( clicked() ), this, SLOT( share() ) );
+
+    // Preload the share popup
+    preloadShareDialog();
+#endif
     TX_EXIT
 }
 
@@ -228,11 +219,17 @@ void MpDetailsView::initializeView()
  */
 void MpDetailsView::activateView()
 {
-    TX_ENTRY    
-    setNavigationAction( mNavigationBack );
-    mFrameworkWrapper->retrieveSong();
-        
+    TX_ENTRY
+    setNavigationAction( mSoftKeyBack );
+    mMpEngine->retrieveSong();
+
     mActivated = true;
+    mInspireMeOpen = MpSettingsManager::inspireMe();
+    mSongDetailsGbOpen = MpSettingsManager::songDetailsGb();
+    TX_LOG_ARGS( "InspireMeVal: " << mInspireMeOpen );
+    TX_LOG_ARGS( "SongDetailsGbVal: " << mSongDetailsGbOpen );
+    mInspireMeGroupBox->setCollapsed(!mInspireMeOpen);
+    mSongDetailsGroupBox->setCollapsed(!mSongDetailsGbOpen);
     TX_EXIT
 }
 
@@ -241,9 +238,21 @@ void MpDetailsView::activateView()
  */
 void MpDetailsView::deactivateView()
 {
-    TX_ENTRY    
+    TX_ENTRY
+    if (mInspireMeGroupBox->isCollapsed() ) {
+      MpSettingsManager::setInspireMe(false);
+      } else {
+      MpSettingsManager::setInspireMe(true);
+      }
+
+    if (mSongDetailsGroupBox->isCollapsed() ) {
+      MpSettingsManager::setSongDetailsGb(false);
+      } else {
+      MpSettingsManager::setSongDetailsGb(true);
+      }
+
     setNavigationAction( 0 );
-    mActivated = false;    
+    mActivated = false;
     TX_EXIT
 }
 
@@ -259,302 +268,162 @@ void MpDetailsView::setupMenu()
 
 /*!
  Slot to handle back command from softkey.
-
- \reimp
  */
 void MpDetailsView::back()
 {
-    TX_ENTRY  
+    TX_ENTRY
     emit command( MpCommon::ActivatePlaybackView );
     TX_EXIT
-}
-
-/*!
- Slot to be called when share button is clicked
- */
-void MpDetailsView::share()
-{
-    TX_ENTRY  
-    TX_EXIT    
 }
 
 /*!
  Slot to handle Album art changed.
  */
 void MpDetailsView::albumArtChanged( )
-{    
+{
     TX_ENTRY
-    QPixmap pixmap;
-    QIcon qicon;
-    mSongData->albumArt( pixmap );
-    composeAlbumCover( pixmap );
-    if ( !mCompositePixmap.isNull() )
-        qicon = QIcon( mCompositePixmap );
-    else
-        qicon = QIcon( pixmap );
-    HbIcon icon( qicon );  
+    HbIcon icon;
+    mSongData->albumArt( icon );
     mAlbumArt->setIcon( icon );
     TX_EXIT
 }
 
-void MpDetailsView::loadSharePlayer()
-{
-    TX_ENTRY       
-    TX_EXIT    
-}
-
-
 /*!
- Slot to call when widget is loaded
+ Slot to handle network error.
  */
-void MpDetailsView::webViewLoaded( bool ok )
-{
-    TX_ENTRY    
-    if ( ok ) {
-        TX_LOG_ARGS( "Loading web page successfully." );
-
-    } else {
-        TX_LOG_ARGS( "Loading web page failed!" );
-    }
-    TX_EXIT    
-}
-
-
-/*!
- Compose the album art.
- */
-void MpDetailsView::composeAlbumCover( QPixmap albumart )
+void MpDetailsView::handleNetworkError()
 {
     TX_ENTRY
-    mCompositePixmap.fill( Qt::transparent );
-    QPainter painter( &mCompositePixmap );
-    painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.setCompositionMode( QPainter::CompositionMode_SourceOver );
-    painter.fillRect( mCompositePixmap.rect(), Qt::transparent );
-    painter.drawPixmap( QRect( 0, 0, 150, 150 ), albumart );
-    TX_EXIT
-}
-
-/*!
- Make a key & value pair string for querying
- */
-QString MpDetailsView::keyValues( QStringList keys, QStringList values ) const
-{
-    TX_ENTRY
-    QString str;
-    if ( keys.length() != values.length() ) {
-        TX_LOG_ARGS( "Error: keys length is not equal to values length" ); 
-    } else {
-        for ( int i = 0; i < keys.length(); i++ ) {
-            QString tValue = values.at( i );
-            if ( 0 != tValue.length() )
-            {
-                str += keys.at( i ) + "=" + values.at( i ) + "&";
-            }
-        }
-    }
-    TX_EXIT
-    return str.left( str.length() - 1 );
-}
-
-/*!
- Find the most suitable link based on Atom response from Ovi music server
- */
-void MpDetailsView::handleParsedXML()
-{
-    TX_ENTRY
-    QDomElement rootElement = mDomDocument.documentElement();
-    
-    if ( rootElement.attribute( "type" ) == tr( "search" ) ) {
-        TX_LOG_ARGS( "URI response" )
-        QString result;
-        QDomElement entry = rootElement.firstChildElement( "entry" );
-        while ( !entry.isNull() )
-        {
-            if ( entry.attribute( "type" ) == tr( "musictrack" ) ) {
-                QDomElement link = entry.firstChildElement( "link" );
-                while ( !link.isNull() )
-                {
-                    if ( link.attribute( "rel" ) == tr( "alternate" )
-                        && link.attribute( "type" ) == tr( "text/html" ) ) {
-                        result = link.attribute( "href" );
-                    }
-                    link = link.nextSiblingElement( "link" );
-                }
-            }
-            entry = entry.nextSiblingElement( "entry" );
-        }  
-        
-        mSongData->setLink( result );
-    } else if ( rootElement.attribute( "type" ) == tr( "recommendedTracks" ) ) {
-        TX_LOG_ARGS( "Recommendation response" )
-        QDomElement entry = rootElement.firstChildElement( "entry" );
-        QNetworkReply *reply;
-        int count = 0;
-        while ( !entry.isNull() && count < KRecommendationNum )
-        {
-            if ( entry.attribute( "type" ) == tr( "musictrack" ) ) {
-                QDomElement link = entry.firstChildElement( "link" );
-                while ( !link.isNull() )
-                {
-                    if ( link.attribute( "title" ) == tr( "albumart100" ) ) {
-                        mRecommendationAlbumArtsLink.append( link.attribute( "href" ) );
-                        break;
-                    } else {
-                        link = link.nextSiblingElement( "link" );
-                    }                    
-                }
-                QDomElement metadata = entry.firstChildElement( "metadata" );
-                mRecommendationSongs.append( metadata.firstChildElement( "name" ).text() );
-                mRecommendationArtists.append( metadata.firstChildElement( "primaryartist" ).text() );
-                count++;
-            }
-            entry = entry.nextSiblingElement( "entry" );
-        }          
-        
-        for (int i = 0; i < KRecommendationNum; i++ ) {
-            TX_LOG_ARGS( "song name: " << mRecommendationSongs.at(i) );
-            TX_LOG_ARGS( "Artist name: " << mRecommendationArtists.at(i) );
-            TX_LOG_ARGS( "Album art link: " << mRecommendationAlbumArtsLink.at(i) );
-            
-            if ( mRecommendationAlbumArtsLink.at( i ).contains( "http", Qt::CaseInsensitive ) ) {
-                reply = mDownloadManager->get( QNetworkRequest( QUrl( mRecommendationAlbumArtsLink.at(i) ) ) );
-                mReplys.append( reply );
-                connect( reply, SIGNAL( error( QNetworkReply::NetworkError ) ), this, SLOT( retrieveInformationNetworkError( QNetworkReply::NetworkError ) ) );
-                connect( reply, SIGNAL( sslErrors( QList<QSslError> ) ), this, SLOT( retrieveInformationSslErrors( QList<QSslError> ) ) );
-            }             
-        }
-    } else {
-        TX_LOG_ARGS( "Not supported response" )
-    }
-    TX_EXIT
-}
-
-/*!
- Sets recommendation album art
-*/
-void MpDetailsView::setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName )
-{
-    TX_ENTRY_ARGS( "albumArtUri = " << albumArtUri )
-    TX_LOG_ARGS( "albumArtName = " << albumArtName )
-    if ( !albumArtUri.isEmpty() ) {
-        int id = mThumbnailManager->getThumbnail( albumArtName, reinterpret_cast<void *>( const_cast<QString *>( &albumArtUri ) ) );
-        if ( id == KUndefined ) {
-            // Request failed. Set default album art.
-            mRecommendationAlbumArtsMap.insert( albumArtUri, mDefaultRecommendationAlbumArt );
-            recommendationAlbumArtReady();
-        }
-    }
-    else {
-        // No album art uri. Set default album art.
-        mRecommendationAlbumArtsMap.insert( albumArtUri, mDefaultRecommendationAlbumArt );
-        recommendationAlbumArtReady();
-    }
+    mInspireMeQueryOngoing = false;
+    mInspireMeQueryRendered = false;
+    clearInspireMe();
+    mInspireMeGroupBox->setCollapsed( true );
     TX_EXIT
 }
 
 /*!
  Render inspireme groupbox after album arts downloaded
  */
-void MpDetailsView::RenderInspireMeGroupBox() 
+void MpDetailsView::RenderInspireMeGroupBox()
 {
     TX_ENTRY
-    for ( int i = 0; i < KRecommendationNum; i++ ) {
-       HbListWidgetItem  *item = new HbListWidgetItem();       
-       HbIcon icon( QIcon( mRecommendationAlbumArtsMap.value( mRecommendationAlbumArtsLink.at( i ) ) ) );
-       item->setIcon( icon );
-       item->setText( mRecommendationSongs.at( i ) );
-       item->setSecondaryText( mRecommendationArtists.at( i ) );
-
-       mInspireList->addItem( item );       
+    mInspireMeQueryOngoing = false;
+    mInspireMeQueryRendered = true;
+    mInspireMeProgressBar->hide();
+    if( mMpQueryManager->recommendationAlbumArtsMap().count() ) {
+        TX_LOG_ARGS( "There are recommendations." )
+        // we have recommendations
+        for ( int i = 0; i < KRecommendationCount; i++ ) {
+            // configure the layout properties
+            if(!mInspireList->count()) {
+                // we havent configured the prototype before
+                HbListViewItem *prototype = mInspireList->listItemPrototype();
+                prototype->setGraphicsSize( HbListViewItem::LargeIcon );
+            }
+            // create the item
+            HbListWidgetItem  *inspireMeItem = new HbListWidgetItem();
+            HbIcon icon( QIcon( mMpQueryManager->recommendationAlbumArtsMap().value(mMpQueryManager->recommendationAlbumArtsLink().at( i ) ) ) );
+            inspireMeItem->setIcon( icon );
+            inspireMeItem->setText( mMpQueryManager->recommendationSongs().at( i ) );
+            inspireMeItem->setSecondaryText( mMpQueryManager->recommendationArtists().at( i ) );
+            mInspireList->addItem( inspireMeItem );
+        }
     }
-    
-    // TODO: HbListWidget has some problem to return the correct height, hard code to 180 for now.
-    TX_LOG_ARGS( "height = " << mInspireList->geometry().height() );
-    TX_LOG_ARGS( "height2 = " << mInspireList->size().height() );
-    mInspireList->setMinimumHeight( 180 );
-    mInspireList->setMaximumHeight( 180 );    
-    
-    mLayout->addItem( mInspireList );
-    mButton->show();
-    mLayout->addItem( mButton );
-    mInspireMe->setLayout( mLayout );
-    
+    else {
+        TX_LOG_ARGS( "There is NO recommendation." )
+        // we dont have recommendations
+        // we havent configured the prototype before
+        HbListViewItem *prototype = mInspireList->listItemPrototype();
+        const int maxTextRowCount = 20;
+        const int minTextRowCount = 1;
+        prototype->setSecondaryTextRowCount(minTextRowCount,maxTextRowCount);
+
+        HbListWidgetItem  *inspireMeItem = new HbListWidgetItem();
+        QString info(tr("There are no recommendations for this track, but you can always discover new music on Ovi"));
+        inspireMeItem->setText( QString( " " ) );
+        inspireMeItem->setSecondaryText( info );
+        mInspireList->addItem( inspireMeItem );
+    }
+
     TX_EXIT
 }
 
-void MpDetailsView::recommendationAlbumArtReady()
-{   
-    TX_ENTRY_ARGS( "mAlbumArtsReadyCount = " << mAlbumArtsReadyCount )
-    mAlbumArtsReadyCount++;
-    if ( mAlbumArtsReadyCount == KRecommendationNum ) {
+bool MpDetailsView::canQueryRecommendations() const
+{
+    bool result = ( ( !mSongData->album().isEmpty() ) ||
+                    ( !mSongData->artist().isEmpty() ) ) &&
+                  !( mInspireMeGroupBox->isCollapsed() );
+    TX_LOG_ARGS( "Can query recommendations:" << result );
+    return result;
+}
+
+bool MpDetailsView::canQuerySharePlayerLink() const
+{
+  bool result = ( !mSongData->title().isEmpty() ) &&
+                ( !mSongData->artist().isEmpty() ) ;
+  TX_LOG_ARGS( "Can query share player link:" << result );
+  return result;
+}
+
+/*!
+ Slot to handle basic song information
+ */
+void MpDetailsView::handlePlaybackInfoChanged()
+{
+    TX_ENTRY
+    mMpQueryManager->clearNetworkReplies();
+    clearInspireMe();
+    mInspireMeQueryRendered = false;
+
+    // Clear the song data link until new query has been made.
+    mSongData->setLink( "" );
+
+    if ( !mSongData->title().isEmpty () ) {
+        mSongText->setPlainText( mSongData->title() );
+    } else {
+        mSongText->setPlainText( mSongData->fileName() );
+    }
+
+    if ( !mSongData->album().isEmpty () ) {
+        mAlbumText->setPlainText( mSongData->album() );
+    } else {
+        mAlbumText->setPlainText( tr( "Unknown") );
+    }
+
+    if ( !mSongData->artist().isEmpty() ) {
+        mArtistText->setPlainText( mSongData->artist() );
+    } else {
+        mArtistText->setPlainText( tr( "Unknown") );
+    }
+
+    if (canQuerySharePlayerLink() ) {
+        mMpQueryManager->queryLocalMusicStore(mSongData->artist(),mSongData->album(),mSongData->title());
+    }
+
+    if (canQueryRecommendations()) {
+        // start inspire me area progress bar
+        // TODO: currently, till we get to this callback from MPX the bar not shown
+        // TODO: check if inspireMe is ON, if not, dont show
+        mInspireMeProgressBar->show();
+        mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
+        mInspireMeQueryOngoing = true;
+    }
+    else {
+        // metadata to query for inspire me items not available
+        // show information note
+      if (!mInspireMeGroupBox->isCollapsed())
         RenderInspireMeGroupBox();
     }
     TX_EXIT
 }
 
-
-/*!
- Slot to handle basic song information
- */
-void MpDetailsView::playbackInfoChanged()
+void MpDetailsView::clearInspireMe()
 {
     TX_ENTRY
-    mSongText->setPlainText( mSongData->title() );
-    mAlbumText->setPlainText( mSongData->album() );
-    mArtistText->setPlainText( mSongData->artist() );
-    
-    // Clear information & Remove album arts downloaded previously when song changes
-    TX_LOG_ARGS( "Reply count = " << mReplys.count() );
-    for ( int i = 0; i < mReplys.count(); i++ ) {
-        QNetworkReply *reply = mReplys.at( i );
-        if ( reply != NULL ) {
-            TX_LOG_ARGS( "Reply index : " << i );
-            reply->close();
-            delete reply;
-            reply = NULL;
-        }   
-    }
-    mReplys.clear();
-    
-    mDownloadedAlbumArts = 0;
-    mAlbumArtsReadyCount = 0;
     mInspireList->clear();
-    for ( int i = 0; i < KRecommendationNum; i++) {
-        mRecommendationSongs.clear();
-        mRecommendationArtists.clear();
-        mRecommendationAlbumArtsLink.clear();
-        mRecommendationAlbumArtsMap.clear();
-        
-        QFile file( mRecommendationAlbumArtsName.at( i ) );        
-        if ( file.exists() ) {
-            if ( file.remove() ) {
-                TX_LOG_ARGS( "File removed - " << file.fileName() );
-            }
-            else {
-                TX_LOG_ARGS( "Cannot remove file - " << file.fileName() );
-            }
-        } else {
-            TX_LOG_ARGS( "File doesn't exist - " << file.fileName() );
-        }
-    }
-    mButton->hide();
-        
-    // TODO: country information handling, MCC
-    QString queryURI("http://api.music.ovi.com/1.0/ru/?");
-    constructRequest( queryURI );
-    TX_LOG_ARGS( "queryURI : " << queryURI );
-    retrieveInformation( queryURI );
-    
-    QString queryRecommendation("http://api.music.ovi.com/1.0/gb/releases/recommend/?");
-    constructRequest( queryRecommendation );
-    TX_LOG_ARGS( "queryRecommendation : " << queryRecommendation );
-    retrieveInformation( queryRecommendation );
-    
-    loadSharePlayer();
+    mMpQueryManager->clearRecommendations();
     TX_EXIT
 }
-
 /*!
  Slot to handle detail song information
  */
@@ -562,225 +431,241 @@ void MpDetailsView::songDetailInfoChanged()
 {
     TX_ENTRY
     mDetailList->clear();
-    
-    HbListWidgetItem *item = new HbListWidgetItem();  
-    item->setText( tr( "Track" ) );
-    item->setSecondaryText( mSongData->albumTrack() );
-    mDetailList->addItem( item );
-    
-    item = new HbListWidgetItem();
-    item->setText( tr( "Composer" ) );
-    item->setSecondaryText( mSongData->composer() );
-    mDetailList->addItem( item );
 
-    item = new HbListWidgetItem();
-    item->setText( tr( "Year" ) );
-    item->setSecondaryText( mSongData->year() );
-    mDetailList->addItem( item );
-    
-    item = new HbListWidgetItem();
-    item->setText( tr( "Genre" ) );
-    item->setSecondaryText( mSongData->genre() );
-    mDetailList->addItem( item );
-
-    item = new HbListWidgetItem();
-    item->setText( tr( "Comment" ) );
-    item->setSecondaryText( mSongData->comment() );
-    mDetailList->addItem( item );    
-    TX_EXIT
-}
-
-/*!
- Slot to handle details groupbox toggling
- */
-void MpDetailsView::toggleDetailsGroupBox(bool /*state*/)
-{
-    TX_ENTRY
-    if ( !mInspireMeGroupBox->isCollapsed() ) {
-        mSongDetailsGroupBox->setCollapsed( true );
+    if ( !mSongData->albumTrack().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Song number" ) );
+        item->setSecondaryText( mSongData->albumTrack() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
     }
+
+    if ( !mSongData->year().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Year" ) );
+        item->setSecondaryText( mSongData->year() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->genre().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Genre" ) );
+        item->setSecondaryText( mSongData->genre() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->composer().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Composer" ) );
+        item->setSecondaryText( mSongData->composer() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->fileName().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "File name" ) );
+        item->setSecondaryText( mSongData->fileName() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->mimeType().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Format" ) );
+        item->setSecondaryText( mSongData->mimeType() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->duration().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Duration" ) );
+        item->setSecondaryText( mSongData->duration() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->bitRate().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Bitrate" ) );
+        item->setSecondaryText( mSongData->bitRate().append( " Kbps" ) );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->sampleRate().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Sampling rate" ) );
+        item->setSecondaryText( mSongData->sampleRate().append( " hz" ) );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->size().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Size" ) );
+        item->setSecondaryText( mSongData->size().append( " MB" ) );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->modified().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Modified" ) );
+        item->setSecondaryText( mSongData->modified() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->copyright().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Copyright" ) );
+        item->setSecondaryText( mSongData->copyright() );
+        item->setEnabled( false );
+        mDetailList->addItem( item );
+    }
+
+    if ( !mSongData->musicURL().isNull() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Web site" ) );
+        item->setSecondaryText( mSongData->musicURL() );
+        item->setEnabled( true );
+        mDetailList->addItem( item );
+    }
+
+    if ( mSongData->isDrmProtected() ) {
+        HbListWidgetItem *item = new HbListWidgetItem();
+        item->setText( tr( "Licences" ) );
+        item->setSecondaryText( tr( "Click for details" ) );
+        item->setEnabled( true );
+        mDetailList->addItem( item );
+    }
+
     TX_EXIT
 }
 
-/*!
- Slot to handle inspire me groupbox toggling
- */
-void MpDetailsView::toggleInspireMeGroupBox(bool /*state*/)
+void MpDetailsView::handleDetailsGroupBoxToggled(bool /*state*/)
 {
     TX_ENTRY
     if ( !mSongDetailsGroupBox->isCollapsed() ) {
-        mInspireMeGroupBox->setCollapsed( true );
+            mInspireMeGroupBox->setCollapsed( true );
     }
     TX_EXIT
 }
 
-/*!
- Construct the query for fetching URI & recommendations
- */
-void MpDetailsView::constructRequest( QString &uri )
-{
-    TX_ENTRY_ARGS( "uri =" << uri)
-    
-    QStringList keys;
-    keys << tr("artist") << tr("albumtitle") << tr("tracktitle") << tr("orderby");
-    
-    // TODO: need to clarify which crition to use for sort, currently hard code to "relevancy"
-    // order can be relevancy, alltimedownloads, streetreleasedate, sortname, recentdownloads
-    QStringList values;
-    values << mSongData->artist() << mSongData->album()
-            << mSongData->title() << QString(tr("relevancy"));
-    TX_LOG_ARGS( "Artist: " << mSongData->artist() ); 
-    TX_LOG_ARGS( "Album: " << mSongData->album() );
-    TX_LOG_ARGS( "Title: " << mSongData->title() );
-    
-    uri += keyValues( keys, values );
-
-    QUrl url(uri);
-    uri = url.toEncoded();
-    TX_EXIT
-}
-
-/*!
- Get Atom response from Ovi server based on query
- */
-void MpDetailsView::retrieveInformation( const QString &urlEncoded )
-{
-    TX_ENTRY_ARGS( "urlEconded = " << urlEncoded)
-    QNetworkReply *reply = mManager->get( QNetworkRequest( QUrl( urlEncoded ) ) );
-    mReplys.append( reply );
-    
-    connect( reply, SIGNAL( error( QNetworkReply::NetworkError ) ), this, SLOT( retrieveInformationNetworkError( QNetworkReply::NetworkError ) ) );
-    connect( reply, SIGNAL( sslErrors( QList<QSslError> ) ), this, SLOT( retrieveInformationSslErrors( QList<QSslError> ) ) );
-    TX_EXIT
-}
-
-
-/*!
- Slot to call when getting response
- */
-void MpDetailsView::retrieveInformationFinished( QNetworkReply* reply )
+void MpDetailsView::handleInspireMeGroupBoxToggled(bool /*state*/)
 {
     TX_ENTRY
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    bool parsingSuccess;
-    
-    if ( reply->error() == QNetworkReply::NoError )
-    {
-        parsingSuccess = mDomDocument.setContent( reply, true, &errorStr, &errorLine, &errorColumn );
-        if ( parsingSuccess ) {
-            handleParsedXML();  //CodeScanner throws a warning mis-interpreting the trailing 'L' to be a leaving function.
+    if ( !mInspireMeGroupBox->isCollapsed() ) {
+        TX_LOG_ARGS( "InspireMe is expanded." )
+        mSongDetailsGroupBox->setCollapsed( true );
+        if ( mInspireMeQueryOngoing ) {
+            TX_LOG_ARGS( "Query is ongoing " )
+            mInspireMeProgressBar->show();
         } else {
-            // TODO: agree on error handling            
-            TX_LOG_ARGS( "XML parsing error" );
-        }
-    }
-    else
-    {
-    // TODO: agree on error handling
-        TX_LOG_ARGS( "Network error in retrieving Information" );
-    }
-    TX_EXIT
-}
-
-/*!
- Slot to call when there is network error
- */
-void MpDetailsView::retrieveInformationNetworkError( QNetworkReply::NetworkError /*error*/ )
-{
-    // TODO: agree on error handling
-    TX_ENTRY_ARGS( "Network error for retrieving Information" );
-    TX_EXIT
-}
-
-/*!
- Slot to call when there is ssl error
- */
-void MpDetailsView::retrieveInformationSslErrors( const QList<QSslError> &/*error*/ )
-{   
-    // TODO: agree on error handling
-    TX_ENTRY_ARGS( "SSL error for retrieving Information" );
-    TX_EXIT
-}
-
-/*!
- Slot to call when downloading finished
- */
-void MpDetailsView::DownloadFinished( QNetworkReply* reply )
-{
-    TX_ENTRY_ARGS( "mDownloadedAlbumArts = " << mDownloadedAlbumArts );
-    if ( reply->error() == QNetworkReply::NoError )
-    {
-        QString fileName = mRecommendationAlbumArtsName.at( mDownloadedAlbumArts );
-        TX_LOG_ARGS( "File name: " << fileName );
-        QFile file(fileName);
-
-        if ( fileName.isEmpty() ) {
-            TX_LOG_ARGS( "Only store two album arts" );
-        } else {
-            if ( !file.open( QIODevice::ReadWrite ) ) {
-                TX_LOG_ARGS( "Unable to open file" );
+            TX_LOG_ARGS( "Query is NOT ongoing " )
+            if ( mInspireMeQueryRendered ) {
+                TX_LOG_ARGS( "InspireMe is rendered already. " )
+                mInspireMeProgressBar->hide();
             } else {
-                file.write( reply->readAll() );
-                file.flush();
-                file.close();
-                setAlbumArtUri( mRecommendationAlbumArtsLink.at( mDownloadedAlbumArts ), 
-                                mRecommendationAlbumArtsName.at( mDownloadedAlbumArts ) );
+                if ( canQueryRecommendations() ) {
+                    TX_LOG_ARGS( "InspireMe is NOT rendered yet but can query for recommendations. " )
+                    mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
+                    mInspireMeProgressBar->show();
+                    mInspireMeQueryOngoing = true;
+                } else {
+                    TX_LOG_ARGS( "InspireMe is NOT rendered yet and CANNOT query for recommendations either. " )
+                    RenderInspireMeGroupBox();
+                }
             }
         }
+    } else {
+        TX_LOG_ARGS( "InspireMe is collapsed." )
+        mInspireMeProgressBar->hide();
     }
-    else
+    TX_EXIT
+}
+
+#ifdef SHARE_FUNC_ENABLED
+/*!
+ Slot to be called when share button is clicked
+ */
+void MpDetailsView::share()
+{
+    TX_ENTRY
+    createShareDialog();
+    if (canQuerySharePlayerLink() )
     {
-        TX_LOG_ARGS( "Downloading album art failed!" );
+        mMpQueryManager->queryLocalMusicStore(mSongData->artist(),mSongData->album(),mSongData->title() );
     }
-    
-    mDownloadedAlbumArts++;
     TX_EXIT
 }
 
 /*!
- Slot to handle the recommendation album art 
+  Method to create the share dialog on demand.
+  This will cause the share web view to be created and start loading.
+  */
+void MpDetailsView::createShareDialog()
+{
+    TX_ENTRY
+    if ( !mSharePopup )
+    {
+        mSharePopup = new MpDetailsShareDialog();
+    }
+    if ( !mSharePopup->isInitialized() )
+    {
+        connect( mSharePopup, SIGNAL( closeShareDialog() ), this, SLOT( closeShareDialog() ) );
+        mSharePopup->initialize( mSongData, tr( "Unknown" ) );
+    }
+    TX_EXIT
+}
+
+/*!
+  Method to create the share dialog on demand and preload publishing player files.
+  This will construct the share dialog but it will still be in "uninitialized" state.
+  */
+void MpDetailsView::preloadShareDialog()
+{
+    TX_ENTRY
+    if ( !mSharePopup )
+    {
+        mSharePopup = new MpDetailsShareDialog();
+    }
+    mSharePopup->cachePublishingPlayerFiles();
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when ok/close button in share dialog is pressed.
+ */
+void MpDetailsView::closeShareDialog()
+{
+    TX_ENTRY
+    if ( mSharePopup )
+    {
+        // Dialog uses WA_DeleteOnClose so no need to delete it explicitely here, just close it.
+        mSharePopup->close();
+        mSharePopup = NULL;
+    }
+    TX_EXIT
+}
+#endif
+
+/*!
+ Slot to handle the music store URL retrieval from the query manager.
 */
-void MpDetailsView::thumbnailReady(
-        const QPixmap& pixmap,
-        void *data,
-        int /*id*/,
-        int error  )
+void MpDetailsView::updateSharedData(const QString& url)
 {
     TX_ENTRY
-    QString uri = *( reinterpret_cast<QString *>( data ) );
-    TX_LOG_ARGS( "Uri: " << uri );
-    
-    if ( error == 0 ) {
-        TX_LOG_ARGS( "album art link: " << uri );
-        mRecommendationAlbumArtsMap.insert( uri, pixmap );
-        recommendationAlbumArtReady();
-    }
-    else {
-        mRecommendationAlbumArtsMap.insert( uri, mDefaultRecommendationAlbumArt );
-        recommendationAlbumArtReady();
-    }
-
+    mSongData->setLink( url );
+#ifdef SHARE_FUNC_ENABLED
+    if ( mSharePopup )
+	{
+		mSharePopup->updateSharedData();
+	}
+#endif
     TX_EXIT
 }
-
-
-/*!
- Slot to add context to javascript
- */
-void MpDetailsView::addContext()
-{
-    TX_ENTRY
-    TX_EXIT
-}
-
-/*!
- Slot to close widget
- */
-void MpDetailsView::close()
-{
-    TX_ENTRY
-    TX_EXIT
-}
-

@@ -10,9 +10,33 @@
             <fontspec name="fontSpec" role="Secondary"/>            
         </widget>
         
-        <widget name="artistText" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <fontspec name="fontSpec" role="Secondary"/>            
+        <widget name="artistRow" type="HbWidget">
+        	<widget name="realAudio" type="HbLabel">
+        		<sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+				<sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
+            	<icon iconName="qtg_large_realplayer" name="icon"/>
+            </widget> 
+        	<widget name="artistText" type="HbLabel">
+        		<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            	<fontspec name="fontSpec" role="Secondary"/>
+            </widget>
+        	<widget name="repeatIcon" type="HbLabel">
+				<sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+				<sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
+          		<icon iconName="qtg_small_repeat" name="icon"/>
+            </widget>
+        	
+        	<layout type="anchor">       
+	            <anchoritem dst="realAudio" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="" srcEdge="LEFT"/>
+	            <anchoritem dst="realAudio" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="" srcEdge="TOP"/>
+	            
+	            <anchoritem dst="artistText" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="realAudio" srcEdge="RIGHT"/>
+	            <anchoritem dst="artistText" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-middle-horizontal)" src="repeatIcon" srcEdge="LEFT"/>
+	            <anchoritem dst="artistText" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="" srcEdge="TOP"/>
+	            
+	            <anchoritem dst="repeatIcon" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-middle-horizontal)" src="" srcEdge="RIGHT"/>
+	            <anchoritem dst="repeatIcon" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="" srcEdge="TOP"/>
+      		 </layout>
         </widget>
         
         <widget name="songText" type="HbLabel">
@@ -44,7 +68,7 @@
     
     <layout type="linear" orientation="Vertical"  spacing="var(hb-param-margin-gene-middle-vertical)" widget="textContainer">
     	<contentsmargins bottom="var(hb-param-margin-gene-screen)" left="var(hb-param-margin-gene-screen)" right="var(hb-param-margin-gene-screen)" top="0.0un"/>
-    	<linearitem itemname="artistText"/>
+    	<linearitem itemname="artistRow"/>
         <linearitem itemname="songText"/>
         <linearitem itemname="albumText"/>
     	<linearitem itemname="progressBar"/>

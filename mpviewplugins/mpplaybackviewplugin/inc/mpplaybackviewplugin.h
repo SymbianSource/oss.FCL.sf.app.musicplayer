@@ -18,7 +18,7 @@
 #ifndef MPPLAYBACKVIEWPLUGIN_H
 #define MPPLAYBACKVIEWPLUGIN_H
 
-#include <qobject>
+#include <QObject>
 #include <mpxviewpluginqt.h>
 
 //forward declartions

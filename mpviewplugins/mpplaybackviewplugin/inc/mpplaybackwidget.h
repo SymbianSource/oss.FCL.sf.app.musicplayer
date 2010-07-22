@@ -38,10 +38,12 @@ public:
 
     MpPlaybackWidget( MpPlaybackData *data, QGraphicsItem *parent=0 );
     virtual ~MpPlaybackWidget();
+    void repeatChanged( bool value );
 
 signals:
 
     void setPlaybackPosition( int value );
+    void signalPlaybackInfoChanged();
 
 public slots:
 
@@ -49,7 +51,7 @@ public slots:
     void durationChanged();
     void positionChanged();
     void albumArtChanged();
-
+  
 private slots:
 
     void handleSliderPressed();
@@ -71,8 +73,8 @@ private:
     HbLabel                 *mAlbumName;        // Not own
     HbLabel                 *mAlbumArt;         // Not own
     HbProgressSlider        *mProgressBar;      // Not own
-
-
+    HbLabel                 *mRealAudioIndicator;          // Not own
+    HbLabel                 *mRepeatIndicator;           // Not own
 
     bool                    mProgreesBarDragging;
     int                     mDuration;

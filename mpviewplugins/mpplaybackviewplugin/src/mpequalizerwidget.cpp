@@ -20,14 +20,13 @@
 #include <hblabel.h>
 #include <hbaction.h>
 #include <hbradiobuttonlist.h>
+#include <EqualizerConstants.h>
 
 // User includes
 #include "mpequalizerwidget.h"
-#include "mpequalizerwrapper.h"
+#include "mpenginefactory.h"
 #include "mptrace.h"
 
-// CONSTANTS
-const int KEqualizerPresetNone = -1;
 
 /*!
     \class MpEqualizerWidget
@@ -38,10 +37,9 @@ const int KEqualizerPresetNone = -1;
  Constructs the Equalizer widget.
  */
 MpEqualizerWidget::MpEqualizerWidget() :
-    mEqualizerWrapper(0),
+    mMpEngine(0),
     mPresetsList(0),
-    mOriginalPreset(KEqualizerPresetNone),
-    mEqualizerReady(false)
+    mOriginalPreset(KEqualizerPresetNone)
 {
     TX_ENTRY
     
@@ -55,11 +53,7 @@ MpEqualizerWidget::MpEqualizerWidget() :
  */
 MpEqualizerWidget::~MpEqualizerWidget()
 {
-    TX_ENTRY
-    
-    delete mEqualizerWrapper;
-    
-    TX_EXIT
+	TX_LOG
 }
 
 /*!
@@ -69,12 +63,7 @@ void MpEqualizerWidget::initialize()
 {
     TX_ENTRY
     
-    mEqualizerWrapper = new MpEqualizerWrapper( this );
-
-    connect( mEqualizerWrapper,
-            SIGNAL( equalizerReady() ),
-            this,
-            SLOT( equalizerReady() ) );
+    mMpEngine = MpEngineFactory::sharedEngine();
 
     TX_EXIT
 }
@@ -93,28 +82,37 @@ void MpEqualizerWidget::prepareDialog()
     setFrameType(HbPopup::Strong);
     setHeadingWidget(new HbLabel(hbTrId("txt_mus_title_select_preset")));
 
-
-    if ( mEqualizerReady ) {
-        mOriginalPreset = mEqualizerWrapper->activePreset();
-        QStringList listItems = mEqualizerWrapper->presetNames();
-        listItems.prepend(hbTrId("txt_mus_list_off"));
-
-        int presetSelected;
-        if (mOriginalPreset == KEqualizerPresetNone) {
-            presetSelected = 0;     //First list item corresponds to "OFF"
+    mOriginalPreset = mMpEngine->activePreset();
+    QStringList listItems;
+    QStringList presetNames = mMpEngine->presetNames();
+    for ( int i=0; i<presetNames.count(); i++ ) {
+        QString name = getLocalizedString( presetNames.at(i) );
+        if ( name.size() > 0 ) {
+            listItems.append( name );
         }
         else {
-            presetSelected = mOriginalPreset;
+            // Localized string not found, append original name.
+            TX_LOG_ARGS( "Localized string not found = " << name);
+            listItems.append( presetNames.at(i) );
         }
-
-        mPresetsList = new HbRadioButtonList(listItems, presetSelected, HbRadioButtonList::NoPreview, this);
-        setContentWidget( mPresetsList );  //mPresetsList now owned by HbDialog
-
-        connect( mPresetsList, 
-               SIGNAL(itemSelected(int)), 
-               this, 
-               SLOT(presetSelected(int)));
     }
+    listItems.prepend(hbTrId("txt_mus_list_off"));
+    TX_LOG_ARGS( "PresetNames=" << listItems);
+    int presetSelected;
+    if (mOriginalPreset == KEqualizerPresetNone) {
+        presetSelected = 0;     //First list item corresponds to "OFF"
+    }
+    else {
+        presetSelected = mOriginalPreset;
+    }
+
+    mPresetsList = new HbRadioButtonList(listItems, presetSelected, HbRadioButtonList::NoPreview, this);
+    setContentWidget( mPresetsList );  //mPresetsList now owned by HbDialog
+
+    connect( mPresetsList, 
+           SIGNAL(itemSelected(int)), 
+           this, 
+           SLOT(presetSelected(int)));
     
     clearActions();
     action = new HbAction( hbTrId( "txt_common_button_ok" ) );
@@ -134,12 +132,12 @@ void MpEqualizerWidget::presetSelected(int index)
 {
     TX_ENTRY
     
-    if (mEqualizerWrapper) {
+    if (mMpEngine) {
         if (index == 0) {
-            mEqualizerWrapper->disableEqualizer();
+            mMpEngine->disableEqualizer();
         }
         else{
-            mEqualizerWrapper->applyPreset( index );
+            mMpEngine->applyPreset( index );
         }
     }
     
@@ -154,15 +152,15 @@ void MpEqualizerWidget::cancelSelected(bool checked)
     TX_ENTRY
     Q_UNUSED(checked);
     
-    if (mEqualizerWrapper && mPresetsList) {
+    if (mMpEngine && mPresetsList) {
         // Return to the original Preset
-        if (mOriginalPreset != mEqualizerWrapper->activePreset()) {
+        if (mOriginalPreset != mMpEngine->activePreset()) {
             if (mOriginalPreset == KEqualizerPresetNone) {
-                mEqualizerWrapper->disableEqualizer();
+                mMpEngine->disableEqualizer();
                 mPresetsList->setSelected( 0 );     //First list item corresponds to "OFF"
             }
             else {
-                mEqualizerWrapper->applyPreset( mOriginalPreset );
+                mMpEngine->applyPreset( mOriginalPreset );
                 mPresetsList->setSelected( mOriginalPreset );
             }            
         }
@@ -180,23 +178,39 @@ void MpEqualizerWidget::okSelected(bool checked)
     Q_UNUSED(checked);    
     
     //Update original preset
-    if (mEqualizerWrapper) {
-        mOriginalPreset = mEqualizerWrapper->activePreset();
+    if (mMpEngine) {
+        mOriginalPreset = mMpEngine->activePreset();
     }
     
     TX_EXIT
 }
 
 /*!
- Equalizer utility is ready
+  Return the localized string base on preset name.
  */
-void MpEqualizerWidget::equalizerReady()
+QString MpEqualizerWidget::getLocalizedString( QString name )
 {
-    TX_ENTRY
+    TX_ENTRY_ARGS( "Name = " << name );
+    QString localizedString;
+
+    if ( name == "Bass Booster" ) {
+        localizedString = hbTrId( "txt_mus_list_bass_booster" );
+    }
+    else if ( name == "Classic" ) {
+        localizedString = hbTrId( "txt_mus_list_classical" );
+    }
+    else if ( name == "Pop" ) {
+        localizedString = hbTrId( "txt_mus_list_pop" );
+    }
+    else if ( name == "Jazz" ) {
+        localizedString = hbTrId( "txt_mus_list_jazz" );
+    }
+    else if ( name == "Rock" ) {
+        localizedString = hbTrId( "txt_mus_list_rock" );
+    }
     
-    mEqualizerReady = true;
-    
-    TX_EXIT
+    TX_EXIT_ARGS( "Logical String = " << localizedString );
+    return localizedString;
 }
 
 //End of File

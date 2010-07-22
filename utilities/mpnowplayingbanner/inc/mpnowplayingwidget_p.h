@@ -23,12 +23,12 @@
 #include <hbwidget.h>
 
 #include "mpnowplayingwidget.h"
-#include "mpnowplayingbackend.h"
+#include "mpplaybackdata.h"
 
 //forward declartions
 class HbIconItem;
 class HbLabel;
-class MpNowPlayingBackEnd;
+class MpEngine;
 class QGraphicsSceneMouseEvent;
 class HbIcon;
 class HbDocumentLoader;
@@ -38,35 +38,44 @@ class MpNowPlayingWidgetPrivate : public QObject
 {
     Q_OBJECT
 
+private: 
+    enum BannerPressedState {
+        BannerNone,                // No button initially pressed
+        BannerIcon,                // Icon pressed first
+        BannerLabels               // Labels pressed first
+    };
+    
 public:
-    explicit MpNowPlayingWidgetPrivate( long int playerId,
-                                        MpNowPlayingWidget *qq );
+    explicit MpNowPlayingWidgetPrivate( MpNowPlayingWidget *qq );
     virtual ~MpNowPlayingWidgetPrivate();
 
-    void setEnabled(bool enabled );
+    void setEnabled( bool enabled );
+    bool isBannerAttached();
     bool handleClickEvent( QGraphicsSceneMouseEvent *event );
-    void handleMousePressEvent(QGraphicsSceneMouseEvent *event, bool pressed);
-    void handleThemeChange();
+    void handleMousePressEvent( QGraphicsSceneMouseEvent *event, bool pressed );
+    void handleMouseMoveEvent( QGraphicsSceneMouseEvent *event );
 
 public slots:
 
-    void setState(SimplifiedPlayerState state);
-
+    void setState();
+    void updateBannerInfo();
+    
 private:
 
-    MpNowPlayingWidget      *q_ptr;
-    HbLabel                 *mPrimaryText;
-    HbLabel                 *mSecondaryText;
-    SimplifiedPlayerState   mState;
-    MpNowPlayingBackEnd     *mBackEnd;
+    MpNowPlayingWidget                      *q_ptr;
+    HbLabel                                 *mPrimaryText;
+    HbLabel                                 *mSecondaryText;
+    MpPlaybackData::SimplifiedState         mState;
+    MpPlaybackData                          *mPlaybackData;
+    MpEngine                                *mMpEngine;
 
-	HbIcon                  *mPlayIconNormal;
-    HbIcon                  *mPauseIconNormal;
-    HbIcon                  *mPlayIconPressed;
-    HbIcon                  *mPauseIconPressed;
-    HbLabel                 *mIcon;
+    HbIcon                                  *mPlayIcon;
+    HbIcon                                  *mPauseIcon;
+    HbLabel                                 *mIcon;
 
-    HbDocumentLoader        *mDocumentLoader;
+    HbDocumentLoader                        *mDocumentLoader;
+
+    BannerPressedState                      mCurrentPressedState;
 
 };
 

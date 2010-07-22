@@ -82,6 +82,28 @@ MpSettingsManager::MpSettingsManager():
     mPreset = mSettingsManager->readItemValue(presetProfileKey).toInt();
     mSettingsManager->startMonitoring(presetProfileKey);
 
+    XQSettingsKey InspireMeKey(XQSettingsKey::TargetCentralRepository,
+             KMPCenRepSettingsFeature,
+             KMPCenRepSettingInspireMeKey);
+    mInspireMe = mSettingsManager->readItemValue(InspireMeKey).toInt();
+    mSettingsManager->startMonitoring(InspireMeKey);
+    
+    XQSettingsKey SongDetailsGbKey(XQSettingsKey::TargetCentralRepository,
+             KMPCenRepSettingsFeature,
+             KMPCenRepSettingSongDetailsGBKey);
+    mSongDetailsGb = mSettingsManager->readItemValue(SongDetailsGbKey).toInt();
+    mSettingsManager->startMonitoring(SongDetailsGbKey);
+
+    XQSettingsKey showMtpInfo(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerShowMtpInfoKey);
+    mShowMtpInfo = mSettingsManager->readItemValue(showMtpInfo).toInt();
+    mSettingsManager->startMonitoring(showMtpInfo);
+
+    XQSettingsKey mtpInfoUrl(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerMtpInfoUrlKey);
+    mMtpInfoUrl = mSettingsManager->readItemValue(mtpInfoUrl, XQSettingsManager::TypeString).toString();
     TX_EXIT
 }
 
@@ -134,6 +156,38 @@ int MpSettingsManager::preset()
     return instance()->mPreset;
 }
 
+/*!
+ Returns the inspireMe setting.
+ */
+bool MpSettingsManager::inspireMe()
+{
+    return instance()->mInspireMe;
+}
+
+/*!
+ Returns the SongDetails group Box setting.
+ */
+bool MpSettingsManager::songDetailsGb()
+{
+    return instance()->mSongDetailsGb;
+}
+
+/*!
+ Returns wheter mtp info should be showed.
+ */
+bool MpSettingsManager::showMtpInfo()
+{
+    return instance()->mShowMtpInfo;
+}
+
+/*!
+ Returns mtp info url.
+ */
+QString MpSettingsManager::mtpInfoUrl()
+{
+    return instance()->mMtpInfoUrl;
+}
+
 
 /*!
  Slot to be called when a setting is changed.
@@ -157,6 +211,20 @@ void MpSettingsManager::valueChanged(const XQSettingsKey& key,
             mPreset = value.toInt();
             TX_LOG_ARGS("Preset changed to "<< mPreset);
             emit presetChanged( mPreset );
+            break;
+        case KMPCenRepSettingInspireMeKey:
+            mInspireMe = value.toInt();
+            TX_LOG_ARGS("Inspire Me changed to "<< mInspireMe);
+            emit InspireMeChanged( mInspireMe );
+            break;
+        case KMPCenRepSettingSongDetailsGBKey:
+            mSongDetailsGb = value.toInt();
+            TX_LOG_ARGS("SongDetailsGB changed to "<< mSongDetailsGb);
+            emit SongDetailsGbChanged( mSongDetailsGb );
+            break;
+        case KMusicPlayerShowMtpInfoKey:
+            mShowMtpInfo = value.toInt();
+            TX_LOG_ARGS("Show MTP info changed to "<< mShowMtpInfo);
             break;
         default :
             TX_LOG_ARGS(" unhandled cenrep key: " << key.key() << 
@@ -210,4 +278,46 @@ void MpSettingsManager::setPreset(int preset)
     TX_EXIT
 }
 
+/*!
+ Slot to be called to request an update on the \a InspireMe setting.
+ */
+void MpSettingsManager::setInspireMe(bool inspireme)
+{
+    TX_STATIC_ENTRY_ARGS("Inspire Me=" << inspireme);
+    XQSettingsKey inspireMeProfileKey(XQSettingsKey::TargetCentralRepository, 
+            KMPCenRepSettingsFeature, 
+            KMPCenRepSettingInspireMeKey);
+    instance()->mSettingsManager->writeItemValue(
+            inspireMeProfileKey, 
+            inspireme ? 1 : 0);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called to request an update on the \a SongDetails Group Box setting.
+ */
+void MpSettingsManager::setSongDetailsGb(bool songdetails)
+{
+    TX_STATIC_ENTRY_ARGS("SongDetailsGb=" << songdetails);
+    XQSettingsKey songDetailsGbProfileKey(XQSettingsKey::TargetCentralRepository, 
+            KMPCenRepSettingsFeature, 
+            KMPCenRepSettingSongDetailsGBKey);
+    instance()->mSettingsManager->writeItemValue(
+            songDetailsGbProfileKey, 
+            songdetails ? 1 : 0);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called to stop showing mtp info.
+ */
+void MpSettingsManager::stopShowingMtpInfo()
+{
+    TX_STATIC_ENTRY_ARGS("preset=" << preset);
+    XQSettingsKey showMtpInfo(XQSettingsKey::TargetCentralRepository,
+            KMPCenRepSettingsFeature,
+            KMusicPlayerShowMtpInfoKey);
+    instance()->mSettingsManager->writeItemValue(showMtpInfo, 0);
+    TX_EXIT
+}
 

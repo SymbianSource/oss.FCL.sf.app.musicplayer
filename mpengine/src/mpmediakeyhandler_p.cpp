@@ -405,13 +405,63 @@ void MpMediaKeyHandlerPrivate::DoSendCommandL( TMPXPlaybackCommand aCommandId )
         TMPXPlaybackState playerState( iPlaybackUtility->StateL() );
 
         switch ( aCommandId ) {
+        case EPbCmdPlayPause:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused 
+                 || playerState == EPbStateStopped ) {
+                iPlaybackUtility->CommandL( EPbCmdPlayPause );
+            }
+            break;
+        case EPbCmdPlay:
+            if ( playerState == EPbStateStopped || playerState == EPbStatePaused ) {
+                iPlaybackUtility->CommandL( EPbCmdPlay );
+            }
+            break;
+        case EPbCmdStop:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused ) {
+                iPlaybackUtility->CommandL( EPbCmdStop );
+            }
+            break;
+        case EPbCmdPause:
+            if ( playerState == EPbStatePlaying ) {
+                iPlaybackUtility->CommandL( EPbCmdPause );
+            }
+            break;
+        case EPbCmdStartSeekBackward:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused ) {
+                iPlaybackUtility->CommandL( EPbCmdStartSeekBackward );
+            }
+            break;
+        case EPbCmdStartSeekForward:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused ) {
+                iPlaybackUtility->CommandL( EPbCmdStartSeekForward );
+            }
+            break;
+        case EPbCmdStopSeeking:
+            if ( playerState == EPbStateSeekingBackward || playerState == EPbStateSeekingForward ) {
+                iPlaybackUtility->CommandL( EPbCmdStopSeeking );
+            }
+            break;
+        case EPbCmdPrevious:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused 
+                 || playerState == EPbStateStopped ) {
+                iPlaybackUtility->CommandL( EPbCmdPrevious );
+            }
+            break;
+        case EPbCmdNext:
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused 
+                 || playerState == EPbStateStopped ) {
+                iPlaybackUtility->CommandL( EPbCmdNext );
+            }
+            break;
         case EPbCmdIncreaseVolume:
-            if ( EPbStatePlaying == playerState ) {
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused 
+                 || playerState == EPbStateStopped ) {
                 iPlaybackUtility->CommandL( EPbCmdIncreaseVolume );
             }
             break;
         case EPbCmdDecreaseVolume:
-            if ( EPbStatePlaying == playerState ) {
+            if ( playerState == EPbStatePlaying || playerState == EPbStatePaused 
+                 || playerState == EPbStateStopped ) {
                 iPlaybackUtility->CommandL( EPbCmdDecreaseVolume );
             }
             break;
@@ -419,7 +469,6 @@ void MpMediaKeyHandlerPrivate::DoSendCommandL( TMPXPlaybackCommand aCommandId )
             break;
         }
     }
-
 }
 
 // ---------------------------------------------------------------------------
@@ -430,7 +479,6 @@ TInt MpMediaKeyHandlerPrivate::TimerCallback( TAny* aPtr )
 {
 
     static_cast<MpMediaKeyHandlerPrivate*>( aPtr )->HandleRepeatEvent();
-
 
     return KErrNone;
 }

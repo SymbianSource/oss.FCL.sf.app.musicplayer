@@ -29,7 +29,7 @@
 #include <sysutil.h>
 #ifdef __RAMDISK_PERF_ENABLE
 #include <centralrepository.h>
-#include <BAUTILS.H>  
+#include <bautils.h>  
 #endif //__RAMDISK_PERF_ENABLE
 
 #include <mpxlog.h>
@@ -271,16 +271,20 @@ EXPORT_C void CMPXDbManager::CopyDBsToRamL( TBool aIsMTPInUse )
             }
 
         TInt count(iDatabaseHandles.Count());
-        //TBool ret = EFalse;
         for ( TInt i = 0; i < count ; ++i )
             {
+            if ( ! iDatabaseHandles[i].iOpen )
+                {
+                MPX_DEBUG1("CMPXDbManager::CopyDBsToRamL DB not open (assuming drive is not present)");
+                continue;
+                }
             if ( iDatabaseHandles[i].iUseRAMdb )
                 {
                 // already used
                 MPX_DEBUG1("CMPXDbManager::CopyDBsToRamL iUseRAMdb already ETrue");
                 continue;
                 }
-            CloseDatabaseAtIndexL( i ); // let leave: not much we can't do if we can't close the original DB
+            CloseDatabaseAtIndexL( i ); // let leave: not much we can do if we can't close the original DB
             DoCopyDBToRam( i, aIsMTPInUse ); // copies if it can
             TRAPD( err, OpenDatabaseAtIndexL( i ) );
             if ( err != KErrNone )
@@ -863,30 +867,27 @@ EXPORT_C void CMPXDbManager::CloseAllDatabases()
     {
     MPX_FUNC("CMPXDbManager::CloseAllDatabases");
 
-    if (iInitialized)
+    // Close all prepared statements if a db is closed
+    //
+    ResetPreparedQueries();
+
+    TInt count(iDatabaseHandles.Count());
+    for (TInt i = 0; i < count; ++i)
         {
-        // Close all prepared statements if a db is closed
-        //
-        ResetPreparedQueries();
-
-        TInt count(iDatabaseHandles.Count());
-        for (TInt i = 0; i < count; ++i)
-            {
-            delete iDatabaseHandles[i].iAliasname;
-            iDatabaseHandles[i].iAliasname = 0;
+        delete iDatabaseHandles[i].iAliasname;
+        iDatabaseHandles[i].iAliasname = 0;
 #ifdef __RAMDISK_PERF_ENABLE 
-            RemoveDummyFile(i);            	
-            delete iDatabaseHandles[i].iOrigFullFilePath;
-			iDatabaseHandles[i].iOrigFullFilePath = 0;
-            delete iDatabaseHandles[i].iTargetFullFilePath;
-			iDatabaseHandles[i].iTargetFullFilePath = 0;
+        RemoveDummyFile(i);            	
+        delete iDatabaseHandles[i].iOrigFullFilePath;
+        iDatabaseHandles[i].iOrigFullFilePath = 0;
+        delete iDatabaseHandles[i].iTargetFullFilePath;
+        iDatabaseHandles[i].iTargetFullFilePath = 0;
 #endif //__RAMDISK_PERF_ENABLE 
-            }
-
-        iDatabaseHandles.Reset();
-        iDatabase.Close();
-        iInitialized = EFalse;
         }
+
+    iDatabaseHandles.Reset();
+    iDatabase.Close();
+    iInitialized = EFalse;
     }
 
 // ----------------------------------------------------------------------------
@@ -1728,6 +1729,16 @@ EXPORT_C void CMPXDbManager::CreateTablesL(
     }
 
 // ----------------------------------------------------------------------------
+// CleanupTransaction: close transaction when creating DB
+// ----------------------------------------------------------------------------
+//
+static void CleanupTransaction(TAny * aDatabase)
+    {
+    TInt err = ((RSqlDatabase*)aDatabase)->Exec(KRollbackTransaction);
+    MPX_DEBUG2("CMPXDbManager CleanupTransaction rollback, error %d", err);
+    }
+    
+// ----------------------------------------------------------------------------
 // CMPXDbManager::CreateTablesL
 // ----------------------------------------------------------------------------
 //
@@ -1735,11 +1746,26 @@ void CMPXDbManager::CreateTablesL(
 	RSqlDatabase& aDatabase,
 	TBool aCorrupt)
 	{
+	MPX_FUNC("CMPXDbManager::CreateTablesL");
+    TInt err = aDatabase.Exec(KBeginTransaction);
+    if (err < 0)
+       {
+       MPX_DEBUG2("SQL BEGIN TRANSACTION error %d", err);
+       User::Leave (err);
+       }
+    CleanupStack::PushL(TCleanupItem(&CleanupTransaction, &aDatabase));
     TInt count(iTables.Count());
     for (TInt i = 0; i < count; ++i)
         {
         iTables[i]->CreateTableL(aDatabase, aCorrupt);
         }
+    err = aDatabase.Exec(KCommitTransaction);
+    if (err < 0)
+        {
+        MPX_DEBUG2("SQL COMMIT TRANSACTION error %d", err);
+        User::Leave (err);
+        }
+    CleanupStack::Pop();
 	}
 
 // ----------------------------------------------------------------------------
@@ -2019,12 +2045,7 @@ EXPORT_C void CMPXDbManager::CheckDiskSpaceL(
         User::Leave(KErrNotReady);
         }
     
-#ifndef __RAMDISK_PERF_ENABLE 
-    
     EnsureDiskSpaceL(aDrive);
-    
-#endif //__RAMDISK_PERF_ENABLE
-
     }
     
 // ----------------------------------------------------------------------------
@@ -2864,19 +2885,24 @@ void CMPXDbManager::EnsureDiskSpaceL(TInt aDrive)
     TInt count(iDatabaseHandles.Count());
     for (TInt i = 0; i < count; ++i)
         {
+        DatabaseHandle& database = iDatabaseHandles[i];
         if (((KDbManagerAllDrives == aDrive) ||
-            (aDrive == iDatabaseHandles[i].iDrive)) &&
-            iDatabaseHandles[i].iOpen)
+            (aDrive == database.iDrive)) &&
+            database.iOpen
+#ifdef __RAMDISK_PERF_ENABLE
+            && !database.iUseRAMdb
+#endif
+            )
             {
             if (SysUtil::DiskSpaceBelowCriticalLevelL(&iFs, 0,
-                iDatabaseHandles[i].iDrive))
+                database.iDrive))
                 {
                 MPX_DEBUG1("CMPXDbManager::EnsureDiskSpaceL Error diskspace full");
                 User::Leave(KErrDiskFull);
                 }
             }
 
-        if (aDrive == iDatabaseHandles[i].iDrive)
+        if (aDrive == database.iDrive)
             {
             // exit if just one drive to check
             break;

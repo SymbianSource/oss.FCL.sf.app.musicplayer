@@ -17,7 +17,7 @@
 
 #include <QPainter>
 #include <QImage>
-#include <qgraphicsview.h>
+#include <QGraphicsView>
 
 #include "mpsnapshotwidget.h"
 #include "mptrace.h"
@@ -39,6 +39,7 @@ MpSnapshotWidget::MpSnapshotWidget( QGraphicsItem *parent )
       mSnapshot(0)
 {
     TX_ENTRY_ARGS( " Parent=" << (void *)parent )
+    setFlag( QGraphicsItem::ItemHasNoContents, false );
     TX_EXIT
 }
 

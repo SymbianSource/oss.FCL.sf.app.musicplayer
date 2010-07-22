@@ -1,32 +1,35 @@
+#
 # Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
 # Initial Contributors:
 # Nokia Corporation - initial contribution.
+#
 # Contributors:
+#
 # Description: Unit test for mpmpxframeworkwrapper
-TEMPLATE = app
-CONFIG += qtestlib \
-    hb
-TARGET = 
+#
 
+TEMPLATE = app
+CONFIG += qtestlib
+CONFIG += symbian_test
+TARGET = unittest_mpmpxcollectionframeworkwrapper
 TARGET.CAPABILITY = All -TCB
 
 DEPENDPATH += .
 INCLUDEPATH += . \
     ../../inc \
     ../../../inc
-
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \
     -lfbscli.dll \
     -lmpxcommon.dll \
-    -lmpxcollectionutility.dll \
-    -lmpsettingsmanager
+    -lmpxcollectionutility.dll
 
 HEADERS += inc/unittest_mpmpxcollectionframeworkwrapper.h \
     ../../inc/mpmpxcollectionframeworkwrapper.h \
@@ -37,7 +40,8 @@ HEADERS += inc/unittest_mpmpxcollectionframeworkwrapper.h \
     stub/inc/mpxcollectionutility.h \
     stub/inc/mpxcollectionhelperfactory.h \
     stub/inc/mpxplaybackutility.h \
-    stub/inc/mpmpxisolatedcollectionhelper.h
+    stub/inc/mpmpxisolatedcollectionhelper.h \
+    stub/inc/mpsettingsmanager.h
 
 SOURCES += src/unittest_mpmpxcollectionframeworkwrapper.cpp \
     ../../src/mpmpxcollectionframeworkwrapper.cpp \
@@ -47,6 +51,6 @@ SOURCES += src/unittest_mpmpxcollectionframeworkwrapper.cpp \
     stub/src/mpxcollectionutility.cpp \
     stub/src/mpxcollectionhelperfactory.cpp \
     stub/src/mpxplaybackutility.cpp \
-    stub/src/mpmpxisolatedcollectionhelper.cpp
+    stub/src/mpmpxisolatedcollectionhelper.cpp \
+    stub/src/mpsettingsmanager.cpp
 
-# RESOURCES += ../../resources/mpcollectionviewresources.qrc

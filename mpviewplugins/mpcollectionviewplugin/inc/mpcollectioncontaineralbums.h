@@ -21,6 +21,8 @@
 #include "mpcollectionlistcontainer.h"
 
 class HbGroupBox;
+class HgMediawall;
+class MpCollectionTBoneListDataModel;
 
 class MpCollectionContainerAlbums : public MpCollectionListContainer
 {
@@ -31,9 +33,16 @@ public:
     explicit MpCollectionContainerAlbums( HbDocumentLoader *loader, QGraphicsItem *parent=0 );
     virtual ~MpCollectionContainerAlbums();
 
+    void setDataModel( MpCollectionDataModel *dataModel );
+
 public slots:
 
     void itemActivated( const QModelIndex &index );
+    void albumCentered();
+    void dataReloaded();
+    void albumDataChanged();
+    void scrollingStarted();
+    void albumDataAvailable();
 
 private:
 
@@ -41,10 +50,10 @@ private:
 
 private:
 
-    HbGroupBox      *mInfoBar;          // Own
-
-    QString         mArtist;
-    QString         mAlbum;
+    HbGroupBox                      *mInfoBar;          // Own
+	HgMediawall                     *mTBone;            // Own
+    MpCollectionTBoneListDataModel  *mTBoneListModel;   // Own
+    int                             mCurrentAlbumIndex;
 
 };
 

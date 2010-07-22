@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<hbdocument version="0.7">
+    <widget name="content" type="HbWidget">    
+        <spaceritem name="spacer1">
+            <sizepolicy verticalPolicy="Expanding"/>
+        </spaceritem>
+        <widget name="albumArt" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <icon iconName="Album Art" name="icon"/>
+        </widget>
+        <widget name="trackTitle" type="HbLabel">
+            <fontspec name="fontSpec" role="Primary"/>
+            <enums name="alignment" value="AlignLeft"/>
+        </widget>
+        <widget name="artist" type="HbLabel">
+            <fontspec name="fontSpec" role="Secondary"/>
+            <enums name="alignment" value="AlignLeft"/>
+        </widget>
+        <widget name="albumName" type="HbLabel">
+            <fontspec name="fontSpec" role="Secondary"/>
+            <enums name="alignment" value="AlignLeft"/>
+        </widget>
+        <widget name="shareButton" type="HbPushButton">
+            <string name="text" value="Share"/>
+            <enums name="textAlignment" value="AlignCenter"/>                
+        </widget>
+        <widget name="songDetails" type="HbGroupBox">
+             <widget name="songDetailsListWidget" role="HbGroupBox:contentWidget" type="HbListWidget">
+                <string name="verticalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
+             </widget>
+             <bool name="collapsable" value="TRUE"/>
+             <string name="heading" value="Song details"/>
+        </widget>
+        <widget name="inspireMeGroupBox" type="HbGroupBox">
+            <widget name="inspireListWidget" role="HbGroupBox:contentWidget" type="HbListWidget">
+                <string name="verticalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
+            </widget>
+            <widget name="inspireMeProgressBar" type="HbProgressBar">
+            	<integer name="minimum" value="0"/>
+            	<integer name="maximum" value="0"/>
+              <enums name="orientation" value="Horizontal"/>
+              <bool name="visible" value="FALSE"/>
+            </widget>
+            <bool name="collapsable" value="TRUE"/>
+            <string name="heading" value="Inspire me"/>
+        </widget>
+    </widget>
+
+  <section name="ShowInspireMe">
+    <widget name="content" type="HbWidget">
+      <layout type="anchor">
+        <anchoritem dst="artist" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="albumArt" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
+        <anchoritem dst="albumArt" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
+        <anchoritem dst="trackTitle" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
+        <anchoritem dst="trackTitle" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="trackTitle" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="artist" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="artist" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="trackTitle" srcEdge="BOTTOM"/>
+        <anchoritem dst="albumName" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="albumName" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="artist" srcEdge="BOTTOM"/>
+        <anchoritem dst="albumName" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="shareButton" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="albumName" srcEdge="BOTTOM"/>
+        <anchoritem dst="shareButton" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
+        <anchoritem dst="shareButton" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="songDetails" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="shareButton" srcEdge="BOTTOM"/>
+        <anchoritem dst="songDetails" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+        <anchoritem dst="songDetails" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="inspireMeGroupBox" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+        <anchoritem dst="inspireMeGroupBox" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="inspireMeGroupBox" dstEdge="TOP" spacing="0un" src="songDetails" srcEdge="BOTTOM"/>
+        <anchoritem dst="inspireMeGroupBox" dstEdge="BOTTOM" spacer="spacer1" src="" srcEdge="BOTTOM"/>
+      </layout>
+    </widget>
+  </section>
+
+  <section name="HideInspireMe">
+    <widget name="content" type="HbWidget">
+      <layout type="anchor">
+        <anchoritem dst="artist" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="albumArt" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
+        <anchoritem dst="albumArt" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
+        <anchoritem dst="trackTitle" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
+        <anchoritem dst="trackTitle" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="trackTitle" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="artist" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="artist" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="trackTitle" srcEdge="BOTTOM"/>
+        <anchoritem dst="albumName" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="albumName" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="artist" srcEdge="BOTTOM"/>
+        <anchoritem dst="albumName" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)" src="albumArt" srcEdge="RIGHT"/>
+        <anchoritem dst="shareButton" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="albumName" srcEdge="BOTTOM"/>
+        <anchoritem dst="shareButton" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
+        <anchoritem dst="shareButton" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="songDetails" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="shareButton" srcEdge="BOTTOM"/>
+        <anchoritem dst="songDetails" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+        <anchoritem dst="songDetails" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+        <anchoritem dst="songDetails" dstEdge="BOTTOM" spacer="spacer1" src="" srcEdge="BOTTOM"/>
+      </layout>
+    </widget>
+  </section>
+
+
+  <metadata activeUIState="Common ui state" display="QHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>

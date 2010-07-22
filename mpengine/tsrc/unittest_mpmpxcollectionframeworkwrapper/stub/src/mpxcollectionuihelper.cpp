@@ -32,6 +32,7 @@ const TInt KMPXPlaylistViewIndex = 1;
 */
 MMPXCollectionUiHelper::MMPXCollectionUiHelper():iIncAdd(EFalse),
                                                  iDelete(EFalse),
+                                                 iCancel(EFalse),
                                                  iValidRename(EFalse),
                                                  iValidReorder(EFalse),
                                                  iMedia(0)
@@ -131,7 +132,7 @@ CMPXCollectionPath* MMPXCollectionUiHelper::MusicMenuPathL()
     }
     CleanupStack::Pop( path );
         
-    return path;    
+    return path;
 }
 
 /*!
@@ -149,7 +150,7 @@ CMPXCollectionPath* MMPXCollectionUiHelper::MusicAllSongsPathL()
     }
     CleanupStack::Pop( path );
         
-    return path;    
+    return path;
 }
 
 /*!
@@ -167,7 +168,15 @@ CMPXCollectionPath* MMPXCollectionUiHelper::MusicPlaylistPathL()
     }
     CleanupStack::Pop( path );
         
-    return path;    
+    return path;
+}
+
+/*!
+ Stub function.
+*/
+void MMPXCollectionUiHelper::Cancel()
+{
+    iCancel = ETrue;
 }
 
 //end of file

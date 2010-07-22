@@ -23,14 +23,15 @@
 #include <hbiconitem.h>
 #include <hbdocumentloader.h>
 #include <hbinstance.h>
-#include <hbcolorscheme.h>
+#include <hbstyleloader.h>
 
+#include "mpenginefactory.h"
 #include "mpnowplayingwidget_p.h"
 #include "mpnowplayingwidget.h"
-#include "mpnowplayingbackend.h"
 #include "mptrace.h"
 
 const char *NOW_PLAYING_XML = ":/xml/nowplaying.docml";
+const char *NOW_PLAYING_CSS = ":/css/banner_color.css";
 
 /*!
     \internal
@@ -46,32 +47,25 @@ const char *NOW_PLAYING_XML = ":/xml/nowplaying.docml";
  \internal
  Constructs the now playing widget private.
  */
-MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPlayingWidget *qq )
+MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate( MpNowPlayingWidget *qq )
     : q_ptr( qq ),
       mPrimaryText(0),
       mSecondaryText(0),
-      mState( NotPlaying ),
+      mState( MpPlaybackData::NotPlaying ),
+      mPlaybackData(0),
+      mMpEngine(0),
       mIcon(0),
-      mDocumentLoader(0)
+      mDocumentLoader(0),
+      mCurrentPressedState( BannerNone )
 {
-    TX_ENTRY_ARGS( "Player ID =" << playerId << " Q pointer=" << ( void * )qq )
+    TX_ENTRY_ARGS( " Q pointer=" << ( void * )qq )
     QGraphicsWidget *widget;
     bool widgetsOk = false;
-
-    //TODO final color resources should be qtc_multimedia_trans_normal when available
-    QColor normalColor( HbColorScheme::color("foreground") );
-    //TODO final color resources should be qtc_multimedia_trans_pressed when available
-    QColor pressedColor( HbColorScheme::color("popupbackground") );
     
-    mPlayIconNormal = new HbIcon( QString("qtg_mono_play"));
-    mPlayIconNormal->setColor( normalColor );
-    mPauseIconNormal = new HbIcon( QString("qtg_mono_pause"));
-    mPauseIconNormal->setColor( normalColor );
+    HbStyleLoader::registerFilePath(NOW_PLAYING_CSS);  
     
-    mPlayIconPressed = new HbIcon( QString("qtg_mono_play"));
-    mPlayIconPressed->setColor( pressedColor );
-    mPauseIconPressed = new HbIcon( QString("qtg_mono_pause"));
-    mPauseIconPressed->setColor( pressedColor );
+    mPlayIcon = new HbIcon( QString( "qtg_mono_play" ) );
+    mPauseIcon = new HbIcon( QString( "qtg_mono_pause" ) );
 
     mDocumentLoader = new HbDocumentLoader();
     if (mDocumentLoader) {
@@ -87,18 +81,21 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPla
 
         widget = mDocumentLoader->findWidget(QString("primaryText"));
         mPrimaryText = qobject_cast<HbLabel*>(widget);
-        //TODO final color resource should be qtc_multimedia_trans_normal when available
-        mPrimaryText->setTextColor( normalColor );
-       
+        mPrimaryText->setObjectName( "bannerLabel" );
+        mPrimaryText->setProperty( "state", "normal" );
+        
 
         widget = mDocumentLoader->findWidget(QString("secondaryText"));
         mSecondaryText = qobject_cast<HbLabel*>(widget);
-        //TODO final color resource should be qtc_multimedia_trans_normal when available
-        mSecondaryText->setTextColor( normalColor );
+        mSecondaryText->setObjectName( "bannerLabel" );
+        mSecondaryText->setProperty( "state", "normal" );
+        
         
         widget = mDocumentLoader->findWidget(QString("playPause"));
         mIcon = qobject_cast<HbLabel*>(widget);
-
+        mIcon->setObjectName( "bannerLabel" );
+        mIcon->setProperty( "state", "normal" );
+        
         HbStackedLayout *mylayout;
         mylayout = new HbStackedLayout(q_ptr);
         mylayout->addItem( container );
@@ -110,7 +107,8 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPla
         Q_ASSERT_X(widgetsOk, "MpNowPlayingWidgetPrivate", "invalid xml file");
     }
 
-    mBackEnd = new MpNowPlayingBackEnd( playerId );
+    mMpEngine = MpEngineFactory::sharedEngine();
+    mPlaybackData = mMpEngine->playbackData();
     setEnabled(true);
     TX_EXIT
 }
@@ -123,11 +121,8 @@ MpNowPlayingWidgetPrivate::MpNowPlayingWidgetPrivate(long int playerId, MpNowPla
 MpNowPlayingWidgetPrivate::~MpNowPlayingWidgetPrivate()
 {
     TX_ENTRY
-    delete mBackEnd;
-    delete mPlayIconNormal;
-    delete mPauseIconNormal;
-    delete mPlayIconPressed;
-    delete mPauseIconPressed;
+    delete mPlayIcon;
+    delete mPauseIcon;
     delete mDocumentLoader;
     TX_EXIT
 }
@@ -139,41 +134,62 @@ MpNowPlayingWidgetPrivate::~MpNowPlayingWidgetPrivate()
 void MpNowPlayingWidgetPrivate::setEnabled( bool enabled )
 {
     if ( enabled ) {
-        connect( mBackEnd, SIGNAL(stateUpdate(SimplifiedPlayerState)),
-                 this, SLOT(setState(SimplifiedPlayerState)) );
+        connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
+                 this, SLOT( setState() ) );
 
-        connect( mBackEnd, SIGNAL(titleChanged(QString)),
-                 mPrimaryText, SLOT(setPlainText(QString)) );
+        connect( mPlaybackData, SIGNAL( playbackInfoChanged() ),
+                 this, SLOT( updateBannerInfo() ) );
 
-        connect( mBackEnd, SIGNAL(artistChanged(QString)),
-                 mSecondaryText, SLOT(setPlainText(QString)) );
-        mBackEnd->update();
+    setState();
+    updateBannerInfo();
     }
     else {
-        disconnect( mBackEnd, SIGNAL(stateUpdate(SimplifiedPlayerState)),
-                    this, SLOT(setState(SimplifiedPlayerState)) );
-
-        disconnect( mBackEnd, SIGNAL(titleChanged(QString)),
-                    mPrimaryText, SLOT(setPlainText(QString)) );
-
-        disconnect( mBackEnd, SIGNAL(artistChanged(QString)),
-                    mSecondaryText, SLOT(setPlainText(QString)) );
+        disconnect( mPlaybackData, SIGNAL( playbackStateChanged() ),
+                 this, SLOT( setState() ) );
+    
+        disconnect( mPlaybackData, SIGNAL( playbackInfoChanged() ),
+                 this, SLOT( updateBannerInfo() ) );
     }
+}
+
+/*!
+ Return if banner is attached based on current playback state
+ */
+bool MpNowPlayingWidgetPrivate::isBannerAttached()
+{
+    return mState == MpPlaybackData::NotPlaying ? false : true;
 }
 
 /*!
  \internal
  Offers click \a event to the widget privated side, if event is consumed it returns true.
  */
+
 bool MpNowPlayingWidgetPrivate::handleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    if ( mIcon->windowFrameGeometry().contains( event->pos() ) ) {
-        mBackEnd->playPause();
-        return true;
+    bool ret = true;
+    if ( mCurrentPressedState != BannerNone ) {
+        //Widget was previosly pressed, handle the event.
+        QRectF geometry = q_ptr->rect();
+        qreal delta = mIcon->windowFrameGeometry().top() - geometry.top();
+        QRectF iconTouchRect( mIcon->windowFrameGeometry() );
+        iconTouchRect.adjust( -delta, -delta, delta, delta );
+        if ( iconTouchRect.contains( event->pos() ) ) {
+            if ( mCurrentPressedState == BannerIcon ) {
+                    // click on play/pause
+                mMpEngine->playPause();
+            }
+        }
+        else if ( mCurrentPressedState == BannerLabels && geometry.contains( event->pos() )){
+            // click somewhere else on the widget.
+            ret = false;
+        }
+        /*else {
+        // click outside the widget.
+        }*/
+        mCurrentPressedState = BannerNone;
     }
-    else {
-       return false;
-   }
+    return ret;
 }
 
 /*!
@@ -182,58 +198,63 @@ bool MpNowPlayingWidgetPrivate::handleClickEvent(QGraphicsSceneMouseEvent *event
  */
 void MpNowPlayingWidgetPrivate::handleMousePressEvent(QGraphicsSceneMouseEvent *event, bool pressed)
 {   
-    //TODO final color resources should be qtc_multimedia_trans_pressed when available
-    QColor pressedColor( HbColorScheme::color("popupbackground") );
-    //TODO final color resources should be qtc_multimedia_trans_normal when available
-    QColor normalColor( HbColorScheme::color("foreground") );
+
+    QRectF geometry = q_ptr->rect();
+    qreal delta = mIcon->windowFrameGeometry().top() - geometry.top();
+    QRectF iconTouchRect( mIcon->windowFrameGeometry() );
+    iconTouchRect.adjust( -delta, -delta, delta, delta );
     
-    if( mIcon->windowFrameGeometry().contains( event->pos() ) && pressed) {            
-        if ( mState == Playing ) {
-            mIcon->setIcon( *mPauseIconPressed );
+    if( iconTouchRect.contains( event->pos() ) &&  pressed ) {  
+        if( mCurrentPressedState == BannerNone ) {
+            mCurrentPressedState = BannerIcon;
         }
-        else {             
-            mIcon->setIcon( *mPlayIconPressed );
-        }
+        mIcon->setProperty( "state", "pressed" );
     }
-    else if( q_ptr->rect().contains( event->pos() ) && pressed ){
-        mPrimaryText->setTextColor( pressedColor );
-        mSecondaryText->setTextColor( pressedColor );
+    else if( geometry.contains( event->pos() ) && pressed ){
+        if( mCurrentPressedState == BannerNone ) {
+            mCurrentPressedState = BannerLabels;
+        }
+        mPrimaryText->setProperty( "state", "pressed" );
+        mSecondaryText->setProperty( "state", "pressed" );
     }
     else { 
-        mPrimaryText->setTextColor( normalColor );
-        mSecondaryText->setTextColor( normalColor );
-        if( mState == Playing){        
-            mIcon->setIcon( *mPauseIconNormal );
-        }
-        else{
-            mIcon->setIcon( *mPlayIconNormal );
-        }
+        mIcon->setProperty( "state", "normal" );
+        mPrimaryText->setProperty( "state", "normal" );
+        mSecondaryText->setProperty( "state", "normal" );
     }
 }
 
 /*!
  \internal
- Handles theme change
+ Changes text and icon color when moved
  */
-void MpNowPlayingWidgetPrivate::handleThemeChange()
-{
-    //TODO final color resources should be qtc_multimedia_trans_pressed when available
-    QColor pressedColor( HbColorScheme::color("popupbackground") );
-    //TODO final color resources should be qtc_multimedia_trans_normal when available
-    QColor normalColor( HbColorScheme::color("foreground") );
+void MpNowPlayingWidgetPrivate::handleMouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{   
+
+    QRectF geometry = q_ptr->rect();
+    qreal delta = mIcon->windowFrameGeometry().top() - geometry.top();
+    QRectF iconTouchRect( mIcon->windowFrameGeometry() );
+    iconTouchRect.adjust( -delta, -delta, delta, delta );
     
-    mPrimaryText->setTextColor( normalColor );
-    mSecondaryText->setTextColor( normalColor );
-    mPauseIconNormal->setColor( normalColor );
-    mPlayIconNormal->setColor( normalColor );
-    mPauseIconPressed->setColor( pressedColor );
-    mPlayIconPressed->setColor( pressedColor );
-    
-    if( mState == Playing){               
-        mIcon->setIcon( *mPauseIconNormal );
+    if( iconTouchRect.contains( event->pos() ) ) {  
+        if( mCurrentPressedState == BannerIcon ) {
+            mIcon->setProperty( "state", "pressed" );
+        }
+        else {
+            mIcon->setProperty( "state", "normal" );
+        }
+        mPrimaryText->setProperty( "state", "normal" );
+        mSecondaryText->setProperty( "state", "normal" );
     }
-    else{        
-        mIcon->setIcon( *mPlayIconNormal );
+    else if( geometry.contains( event->pos() ) &&  mCurrentPressedState == BannerLabels ){
+        mPrimaryText->setProperty( "state", "pressed" );
+        mSecondaryText->setProperty( "state", "pressed" );
+        mIcon->setProperty( "state", "normal" );
+    }
+    else { 
+        mIcon->setProperty( "state", "normal" );
+        mPrimaryText->setProperty( "state", "normal" );
+        mSecondaryText->setProperty( "state", "normal" );
     }
 }
 
@@ -241,22 +262,27 @@ void MpNowPlayingWidgetPrivate::handleThemeChange()
  \internal
  Sets the simplified playback \a state.
  */
-void MpNowPlayingWidgetPrivate::setState( SimplifiedPlayerState state )
+void MpNowPlayingWidgetPrivate::setState( )
 {
+    MpPlaybackData::SimplifiedState state = mPlaybackData->playbackState();
     TX_ENTRY_ARGS( "State = " << state )
+            
     switch ( state ) {
-        case NotPlaying:
-            if ( mState != NotPlaying )
+        case MpPlaybackData::NotPlaying:
+            if ( mState != MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( false );
             break;
-        case Playing:
-            mIcon->setIcon(*mPauseIconNormal);
-            if (mState == NotPlaying)
+        case MpPlaybackData::Playing:
+            mIcon->setIcon( *mPauseIcon );
+            mIcon->setProperty( "state", mIcon->property("state").toString() );
+            if ( mState == MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( true );
             break;
-        case Paused:
-            mIcon->setIcon(*mPlayIconNormal);
-            if (mState == NotPlaying)
+        case MpPlaybackData::Paused:
+        case MpPlaybackData::Stopped:    
+            mIcon->setIcon( *mPlayIcon );
+            mIcon->setProperty( "state", mIcon->property("state").toString() );
+            if ( mState == MpPlaybackData::NotPlaying )
                 emit q_ptr->playbackAttachmentChanged( true );
             break;
         default:
@@ -266,4 +292,16 @@ void MpNowPlayingWidgetPrivate::setState( SimplifiedPlayerState state )
     TX_EXIT
 }
 
+/*!
+ \internal
+ Sets the \a title 
+ */
+void MpNowPlayingWidgetPrivate::updateBannerInfo()
+{
+    mPrimaryText->setPlainText( mPlaybackData->title() );
+    mPrimaryText->setProperty( "state", mPrimaryText->property("state").toString() );
+    
+    mSecondaryText->setPlainText( mPlaybackData->artist() );
+    mSecondaryText->setProperty( "state", mSecondaryText->property("state").toString() );
+}
 

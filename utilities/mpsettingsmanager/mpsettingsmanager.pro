@@ -19,34 +19,28 @@ symbian:TARGET.UID3 = 0x10207C68
 TEMPLATE = lib
 CONFIG += hb qt
 TARGET = mpsettingsmanager
-
-TARGET.CAPABILITY = All -TCB
+symbian: { 
+    TARGET.UID3 = 0x10207C68
+    MMP_RULES += "DEFFILE mpsettingsmanager.def"
+    defFilePath = .
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.EPOCALLOWDLLDATA = 1
+    BLD_INF_RULES.prj_exports += \
+        "$${LITERAL_HASH}include <platform_paths.hrh>" \
+        "conf/musicplayer.confml                   APP_LAYER_CONFML(musicplayer.confml)" \
+        "conf/musicplayer_10207C92.crml        APP_LAYER_CRML(musicplayer_10207C92.crml)"
+}
+DEFINES += BUILD_MPSETTINGSMANAGER
 
 INCLUDEPATH += . \
                inc \
                ../../inc
-               
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
-LIBS+= -lxqsettingsmanager
+LIBS += -lxqsettingsmanager.dll
 
-symbian:TARGET.EPOCALLOWDLLDATA	= 1
+# Input
+HEADERS += ../../inc/mpsettingsmanager.h 
 
-HEADERS = ../../inc/mpsettingsmanager.h 
-    
 SOURCES += src/mpsettingsmanager.cpp
-DEFINES += BUILD_MPSETTINGSMANAGER
 
-
-myDefInclude = "NOSTRICTDEF" \
-"$${LITERAL_HASH}if defined(WINS)"\
-"DEFFILE  bwins/mpsettingsmanageru.def "\
-"$${LITERAL_HASH}else "\
-"DEFFILE  eabi/mpsettingsmanageru.def "\
-"$${LITERAL_HASH}endif"
-MMP_RULES += myDefInclude
-
-BLD_INF_RULES.prj_exports += \
-     "$${LITERAL_HASH}include <platform_paths.hrh>" \
-     "conf/musicplayer.confml                   APP_LAYER_CONFML(musicplayer.confml)" \
-     "conf/musicplayer_10207C92.crml        APP_LAYER_CRML(musicplayer_10207C92.crml)"

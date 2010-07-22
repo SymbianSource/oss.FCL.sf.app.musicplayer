@@ -43,6 +43,13 @@
  */
 
 /*!
+    \fn void deleteStarted();
+
+    This signal is emitted when song delete operation is started
+
+ */
+
+/*!
     \fn void songsDeleted( bool success )
 
     This signal is emitted when song delete operation is completed, it 
@@ -59,22 +66,36 @@
  */
 
 /*!
+    \fn void aboutToAddSongs( int count )
+
+    This signal is emitted when play list is prepared and about to be added.
+    \a count Indicates number of songs to be added
+
+ */
+
+/*!
     \fn void isolatedCollectionOpened( MpMpxCollectionData* collectionData )
 
     This signal is emitted when an isolated collection is opened on \a context
 
  */
  
- 
+/*!
+    \fn void containerContentsChanged()
+
+    This signal is emitted when items are removed or inserted on the current 
+    container.
+
+ */
  
 /*!
  Constructs the utility wrapper.
  */
-MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( MpCommon::MpViewMode viewMode, TUid hostUid, QObject *parent )
+MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( TUid hostUid, QObject *parent )
     : QObject( parent )
 {
     d_ptr = new MpMpxCollectionFrameworkWrapperPrivate( this );
-    d_ptr->init( viewMode, hostUid );
+    d_ptr->init( hostUid );
 }
 
 /*!
@@ -207,6 +228,22 @@ void MpMpxCollectionFrameworkWrapper::releaseIsolatedCollection()
 }
 
 /*!
+ Finds all songs beloging to the album specified by the \a index.
+ */
+void MpMpxCollectionFrameworkWrapper::findAlbumSongs( int index )
+{
+    d_ptr->findAlbumSongs(index);
+}
+
+/*!
+ Plays album with \a albumIndex starting with the songs with \a songIndex.
+*/
+void MpMpxCollectionFrameworkWrapper::playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData  )
+{
+     d_ptr->playAlbumSongs( albumIndex, songIndex, collectionData );
+}
+
+/*!
  Returns pointer to MpMpxCollectionData, which is the collection data.
  */
 MpMpxCollectionData *MpMpxCollectionFrameworkWrapper::collectionData()
@@ -234,4 +271,51 @@ void MpMpxCollectionFrameworkWrapper::reorderPlaylist( int playlistId, int songI
     d_ptr->reorderPlaylist( playlistId, songId, originalOrdinal, newOrdinal );
 }
 
+/*!
+  Called to set the repeat feature to \a enable
+ */
+void MpMpxCollectionFrameworkWrapper::setRepeatFeatureEnabled( bool enable ) 
+{
+    d_ptr->setRepeatFeatureEnabled( enable );
+}
 
+/*!
+ Called to set the shuffle feature to \a enable
+ */
+void MpMpxCollectionFrameworkWrapper::setShuffleFeatureEnabled( bool enable )
+{
+    d_ptr->setShuffleFeatureEnabled( enable );
+}
+
+/*!
+ Called to open all songs path and trigger shuffle all songs play
+ */
+void MpMpxCollectionFrameworkWrapper::openShuffleAllSongsPath()
+{
+    d_ptr->openShuffleAllSongsPath();
+}
+
+/*!
+ Called to save playback data used for publishing activity (i.e. restore path) 
+ */
+void  MpMpxCollectionFrameworkWrapper::savePath( QByteArray &data )
+{
+    d_ptr->savePath( data );
+}
+
+/*!
+ Called to load playback data used from returning activity (i.e. restore path) 
+ */
+void MpMpxCollectionFrameworkWrapper::restorePath( const QByteArray &data ) 
+{
+    return d_ptr->restorePath( data );
+}
+/*!
+ Cancels CollectionUiHelper request.
+ */
+void MpMpxCollectionFrameworkWrapper::cancelRequest()
+{
+    d_ptr->cancel();
+}
+
+//EOF

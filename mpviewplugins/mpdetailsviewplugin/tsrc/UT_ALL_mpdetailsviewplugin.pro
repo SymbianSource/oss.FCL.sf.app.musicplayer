@@ -11,16 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Unit test for mpdetailsviewplugin
 #
+
 
 TEMPLATE = subdirs
 
 ## TODO: fix this pro file, unit tests in their own root compile, but not within this pro file
-##SUBDIRS += ./unittest_mpdetailsview
-##SUBDIRS += ./unittest_mpdetailsviewplugin
-##SUBDIRS += ./unittest_mpmpxdetailsframeworkwrapper
-##SUBDIRS += ./unittest_mpsongdata
+SUBDIRS += ./unittest_mpdetailssharedialog
+SUBDIRS += ./unittest_mpdetailsview
+SUBDIRS += ./unittest_mpdetailsviewplugin
+SUBDIRS += ./unittest_mpquerymanager
+SUBDIRS += ./unittest_mpsharedata
 
 test.depends = first
 test.CONFIG += recursive

@@ -21,8 +21,13 @@
 #include <hbpushbutton.h>
 #include <hblineedit.h>
 #include <hblabel.h>
-#include <qdebug>
+#include <QDebug>
 #include "mpfetchertestappview.h"
+
+#include <apgcli.h>
+#include <apacmdln.h>
+#include <apgtask.h>
+#include <eikenv.h>
 
 
 MpFetcherTestAppView::MpFetcherTestAppView(QGraphicsItem *parent) :
@@ -120,18 +125,68 @@ void MpFetcherTestAppView::createLayout()
                 connect(button, SIGNAL(clicked()), SLOT(fetchSong()));
                 bottomLayout->addItem(button);
             }
+            
+            QGraphicsLinearLayout *playLayout = new QGraphicsLinearLayout(Qt::Horizontal);
             HbPushButton* playButton = new HbPushButton("Play song");
             if (playButton)
             {
                 connect(playButton, SIGNAL(clicked()), SLOT(viewSong()));
-                bottomLayout->addItem(playButton);
+                playLayout->addItem(playButton);
             }
             HbPushButton* viewButton = new HbPushButton("Play song caged");
             if (viewButton)
             {
                 connect(viewButton, SIGNAL(clicked()), SLOT(viewSongCaged()));
-                bottomLayout->addItem(viewButton);
+                playLayout->addItem(viewButton);
             }
+            bottomLayout->addItem(playLayout);
+            
+            QGraphicsLinearLayout *hsLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+            HbPushButton* homeScreenButton = new HbPushButton("HS Widget MainView");
+            if (homeScreenButton)
+            {
+                connect(homeScreenButton, SIGNAL(clicked()), SLOT(launchHomeScreen()));
+                hsLayout->addItem(homeScreenButton);
+            }
+                     
+            HbPushButton* homeScreenButtonNPV = new HbPushButton("HS Widget NowPlayingView");
+            if (homeScreenButtonNPV)
+            {
+                connect(homeScreenButtonNPV, SIGNAL(clicked()), SLOT(launchHomeScreenNowPlaying()));
+                hsLayout->addItem(homeScreenButtonNPV);
+            }
+            
+            HbPushButton* homeScreenButtonNPVS = new HbPushButton("HS Widget NPV Shuffle");
+            if (homeScreenButtonNPVS)
+            {
+                connect(homeScreenButtonNPVS, SIGNAL(clicked()), SLOT(launchHomeScreenNPShuffle()));
+                hsLayout->addItem(homeScreenButtonNPVS);
+            }
+            bottomLayout->addItem(hsLayout);
+            
+            HbPushButton* NowPlayingButton = new HbPushButton("NPV File Activity");
+            if (NowPlayingButton)
+            {
+                connect(NowPlayingButton, SIGNAL(clicked()), SLOT(playNPVSong()));
+                bottomLayout->addItem(NowPlayingButton);
+            }
+            QGraphicsLinearLayout *goomLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+            HbPushButton* endButton = new HbPushButton("End MP");
+            if (endButton)
+            {
+                connect(endButton, SIGNAL(clicked()), SLOT(endMP()));
+                goomLayout->addItem(endButton);
+            }
+                     
+            HbPushButton* killButton = new HbPushButton("Kill MP");
+            if (killButton)
+            {
+                connect(killButton, SIGNAL(clicked()), SLOT(killMP()));
+                goomLayout->addItem(killButton);
+            }
+            
+            bottomLayout->addItem(goomLayout);
+            
             layout->addItem(bottomLayout);
         }
 
@@ -325,4 +380,146 @@ void MpFetcherTestAppView::viewSongCaged()
    // In this example all done.
 
 
+}
+
+void MpFetcherTestAppView::launchHomeScreen()
+{
+    QUrl url;
+    
+    url.setUrl("appto://10207C62?activityname=MusicMainView&launchtype=standalone");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::launchHomeScreenNowPlaying()
+{
+    QUrl url;
+    
+    url.setUrl("appto://10207C62?activityname=MusicNowPlayingView&launchtype=standalone");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::launchHomeScreenNPShuffle()
+{
+    QUrl url;
+
+    url.setUrl("appto://10207C62?activityname=MusicNowPlayingView&launchtype=standalone&shuffle=yes");
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::playNPVSong()
+{
+    QUrl url;
+
+    url.setUrl("appto://10207C62?activityname=MusicNowPlayingView&launchtype=standalone&uri=" + mResultEdit->text() );
+    if(mReq){
+        delete mReq;
+        mReq = 0;
+    }
+    mReq = mAppMgr.create(url);    
+    if (mReq == NULL)
+    {
+        // No handlers for the URI
+        return;
+    }
+    
+    mReq->setBackground(false);
+
+    // Send the request
+   bool res = mReq->send();
+   if  (!res) 
+   {
+       // Request failed. 
+      int error = mReq->lastError();
+
+      // Handle error
+   }
+ 
+}
+
+void MpFetcherTestAppView::endMP()
+{
+    TApaTaskList taskList(CEikonEnv::Static()->WsSession());
+    TApaTask task = taskList.FindApp(TUid::Uid(270564450));
+    if (task.Exists()) {
+        task.EndTask();
+    } else {
+        qCritical("Cannot bring to forward task %08x", 270564450);
+    }
+
+}
+void MpFetcherTestAppView::killMP()
+{
+    TApaTaskList taskList(CEikonEnv::Static()->WsSession());
+    TApaTask task = taskList.FindApp(TUid::Uid(270564450));
+    if (task.Exists()) {
+        task.KillTask();
+    } else {
+        qCritical("Cannot bring to forward task %08x", 270564450);
+    }
 }

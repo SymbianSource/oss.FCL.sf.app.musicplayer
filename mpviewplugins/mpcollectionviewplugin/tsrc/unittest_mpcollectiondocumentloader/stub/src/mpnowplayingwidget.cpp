@@ -21,9 +21,8 @@
 /*!
  Constructs the now playing widget stub
  */
-MpNowPlayingWidget::MpNowPlayingWidget(long int playerId )
+MpNowPlayingWidget::MpNowPlayingWidget( )
 {
-    Q_UNUSED(playerId);
 }
 
 /*!

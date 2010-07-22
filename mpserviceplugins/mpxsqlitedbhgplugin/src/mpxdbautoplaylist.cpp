@@ -20,6 +20,7 @@
 #include <mpxlog.h>
 #include <mpxcollectiondbhgres.rsg>
 #include <sqldb.h>
+#include <hbtextresolversymbian.h>
 
 #include "mpxresource.h"
 #include "mpxdbcommonutil.h"
@@ -28,16 +29,12 @@
 #include "mpxcollectiondbdef.h"
 #include "mpxdbautoplaylist.h"
 #include "mpxdbpluginqueries.h"
+#include "mpxdbcommondef.h"
 
 const TInt KMPXTableDefaultIndex = 0;
 const TInt32 KMPXRecentlyPlayedPlaylistId = 0x20000000;
 const TInt32 KMPXMostPlayedPlaylistId = 0x20000001;
 const TInt32 KMPXRecentlyAddedPlaylistId = 0x20000002;
-
-const TInt KPlaylistTitleSize = 32;
-_LIT( KMostPlayed, "Most played" );
-_LIT( KRecentlyPlayed, "Recently played" );
-_LIT( KRecentlyAdded, "Recently added" );
 
 
 // ============================ MEMBER FUNCTIONS ==============================
@@ -107,12 +104,26 @@ void CMPXDbAutoPlaylist::ConstructL(
     CMPXResource& /*aResource*/)
     {
     MPX_FUNC("CMPXDbAutoPlaylist::ConstructL");
-    iRecentlyPlayedPlaylist = HBufC::NewL(KPlaylistTitleSize);
-    iRecentlyPlayedPlaylist->Des().Append(KMostPlayed);
-    iMostPlayedPlaylist = HBufC::NewL(KPlaylistTitleSize);
-    iMostPlayedPlaylist->Des().Append(KRecentlyPlayed);
-    iRecentlyAddedPlaylist = HBufC::NewL(KPlaylistTitleSize);
-    iRecentlyAddedPlaylist->Des().Append(KRecentlyAdded);
+
+    // Localization using QT
+    TBool result = HbTextResolverSymbian::Init(KMPXMusicPlayerTsFile, KMPXMusicPlayerTsPath);
+    if ( result )
+        {
+        iMostPlayedPlaylist = HbTextResolverSymbian::LoadL( _L("txt_mus_list_most_played") );
+        iRecentlyAddedPlaylist = HbTextResolverSymbian::LoadL( _L("txt_mus_list_recently_added") );
+        iRecentlyPlayedPlaylist = HbTextResolverSymbian::LoadL( _L("txt_mus_list_recently_played") );
+        }
+    else
+        {
+        // error initializing HbTextResolverSymbian, use logical string.
+        MPX_DEBUG1("CMPXDbAutoPlaylist::ConstructL - HbTextResolverSymbian::Init() Failed.");
+        TBufC<50> buf( _L("txt_mus_list_most_played") );
+        iMostPlayedPlaylist = buf.AllocL();
+        buf = _L("txt_mus_list_recently_added");
+        iRecentlyAddedPlaylist = buf.AllocL();
+        buf = _L("txt_mus_list_recently_played");
+        iRecentlyPlayedPlaylist = buf.AllocL();
+        }
 
     iRecentlyPlayedPlaylistId = KMPXRecentlyPlayedPlaylistId;
     iMostPlayedPlaylistId = KMPXMostPlayedPlaylistId;

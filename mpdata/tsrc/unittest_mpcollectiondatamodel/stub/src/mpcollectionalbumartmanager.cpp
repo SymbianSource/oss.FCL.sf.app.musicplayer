@@ -86,3 +86,12 @@ void MpCollectionAlbumArtManager::cacheFirstScreen()
 void MpCollectionAlbumArtManager::cancel()
 {
 }
+
+/*!
+ Stub function.
+ */
+void MpCollectionAlbumArtManager::setThumbnailSize( MpCommon::MpThumbType type )
+{
+    mThumbType = type;
+}
+

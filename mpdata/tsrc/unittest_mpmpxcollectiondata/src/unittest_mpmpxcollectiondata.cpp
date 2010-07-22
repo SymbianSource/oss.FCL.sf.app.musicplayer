@@ -17,8 +17,6 @@
 
 #include <QSignalSpy>
 #include <QMetaType>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
 
 #include <apacmdln.h>
 #include <mpxmediamusicdefs.h>
@@ -46,45 +44,46 @@
 
 struct TTestAttrs
     {
+    const TInt GeneralId;
     const wchar_t* GeneralTitle;
     const wchar_t* MusicArtist;
     const TInt GeneralCount;
     const wchar_t* MusicAlbumArtFileName;
     };
-    
+
 const TTestAttrs KAllSongsTestData[] =
     {
-     { L"Title 1", L"Artist 1", 1, L"e:\\data\\images\\art1.jpg" }
-    ,{ L"Title 2", L"Artist 2", 1, L"e:\\data\\images\\art2.jpg" }
-    ,{ L"Title 3", L"Artist 3", 1, L"e:\\data\\images\\art3.jpg" }
-    ,{ L"Title 4", L"Artist 4", 1, L"e:\\data\\images\\art4.jpg" }
-    ,{ L"Title 5", L"Artist 5", 1, L"e:\\data\\images\\art5.jpg" }
-    ,{ L"Title 6", L"Artist 6", 1, L"e:\\data\\images\\art6.jpg" }
-    ,{ L"Title 7", L"Artist 7", 1, L"e:\\data\\images\\art7.jpg" }
-    ,{ L"Title 8", L"Artist 8", 1, L"e:\\data\\images\\art8.jpg" }
-    ,{ L"Title 9", L"Artist 9", 1, L"e:\\data\\images\\art9.jpg" }
-    ,{ L"Title 10", L"Artist 10", 1, L"e:\\data\\images\\art10.jpg" }
+     { 1001, L"Title 1", L"Artist 1", 1, L"e:\\data\\images\\art1.jpg" }
+    ,{ 1002, L"Title 2", L"Artist 2", 1, L"e:\\data\\images\\art2.jpg" }
+    ,{ 1003, L"Title 3", L"Artist 3", 1, L"e:\\data\\images\\art3.jpg" }
+    ,{ 1004, L"Title 4", L"Artist 4", 1, L"e:\\data\\images\\art4.jpg" }
+    ,{ 1005, L"Title 5", L"Artist 5", 1, L"e:\\data\\images\\art5.jpg" }
+    ,{ 1006, L"Title 6", L"Artist 6", 1, L"e:\\data\\images\\art6.jpg" }
+    ,{ 1007, L"Title 7", L"Artist 7", 1, L"e:\\data\\images\\art7.jpg" }
+    ,{ 1008, L"Title 8", L"Artist 8", 1, L"e:\\data\\images\\art8.jpg" }
+    ,{ 1009, L"Title 9", L"Artist 9", 1, L"e:\\data\\images\\art9.jpg" }
+    ,{ 1010, L"Title 10", L"Artist 10", 1, L"e:\\data\\images\\art10.jpg" }
     };
-    
-    
+
+
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
  */
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
-    HbMainWindow window;
-
     TestMpMpxCollectionData tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpmpxcollectiondata.txt";
+    if ( argc > 1 ) {
+            return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpmpxcollectiondata.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpMpxCollectionData::TestMpMpxCollectionData()
@@ -147,7 +146,6 @@ void TestMpMpxCollectionData::testContextRetrieval()
     QCOMPARE(mTest->context(), ECollectionContextPlaylistSongs);
 }
 
-
 /*!
  Tests count().
  */
@@ -155,9 +153,9 @@ void TestMpMpxCollectionData::testCount()
 {
     mTestPrivate->iMediaArray = NULL;
     QCOMPARE(mTest->count(), 0);
-    
+
     CMPXMediaArray* array = CMPXMediaArray::NewL();
-    CleanupStack::PushL(array);   
+    CleanupStack::PushL(array);
     TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
     for (TInt i =0; i < count; i++) {
         mTestPrivate->iMediaArray = array;
@@ -182,7 +180,7 @@ void TestMpMpxCollectionData::testCount()
 void TestMpMpxCollectionData::testCollectionTitle()
 {
     mTestPrivate->iContainerMedia = NULL;
-    QCOMPARE(mTest->collectionTitle(), QString());   
+    QCOMPARE(mTest->collectionTitle(), QString());
     RArray<TInt> supportedIds;
     CleanupClosePushL( supportedIds );
     supportedIds.AppendL( KMPXMediaIdMusic );
@@ -190,10 +188,10 @@ void TestMpMpxCollectionData::testCollectionTitle()
     CMPXMedia* entries = CMPXMedia::NewL(supportedIds.Array());
     CleanupStack::PopAndDestroy(&supportedIds);
     CleanupStack::PushL(entries);
-        
+
     mTestPrivate->iContainerMedia = entries;
     QCOMPARE(mTest->collectionTitle(), QString());
-    
+
     entries->SetTextValueL(KMPXMediaGeneralTitle, _L("All songs"));
 
     mTestPrivate->iContainerMedia = entries;
@@ -208,9 +206,9 @@ void TestMpMpxCollectionData::testCollectionTitle()
 void TestMpMpxCollectionData::testItemData()
 {
     CMPXMediaArray* array = CMPXMediaArray::NewL();
-    CleanupStack::PushL(array);   
+    CleanupStack::PushL(array);
     mTestPrivate->iMediaArray = array;
-        
+
     TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
     for (TInt i =0; i < count; i++) {
 
@@ -230,8 +228,7 @@ void TestMpMpxCollectionData::testItemData()
         const TDesC& artist = TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].MusicArtist));
         QCOMPARE(mTest->itemData( i, MpMpxCollectionData::Artist), QString::fromUtf16( artist.Ptr(), artist.Length()));
 
-        //verification depends on language, just exercising the item.
-        QVERIFY(!mTest->itemData( i, MpMpxCollectionData::Count).isNull());
+        QCOMPARE(mTest->itemData( i, MpMpxCollectionData::Count), QString().setNum(1));
 
         const TDesC& albumArtUri = TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].MusicAlbumArtFileName));
         QCOMPARE(mTest->itemData( i, MpMpxCollectionData::AlbumArtUri), QString::fromUtf16( albumArtUri.Ptr(), albumArtUri.Length()));
@@ -250,28 +247,21 @@ void TestMpMpxCollectionData::testItemData()
     array->AppendL(*media);
     CleanupStack::PopAndDestroy(media);
     mTestPrivate->iMediaArray = array;
-    
+
     //Media without attributes.
     QVERIFY(mTest->itemData( count, MpMpxCollectionData::Title).isNull());
     QVERIFY(mTest->itemData( count, MpMpxCollectionData::Artist).isNull());
-    //verification depends on language, just exercising the item.
-    QVERIFY(!mTest->itemData( count, MpMpxCollectionData::Count).isNull());
+    QCOMPARE(mTest->itemData( count, MpMpxCollectionData::Count), QString().setNum(0));
     QVERIFY(mTest->itemData( count, MpMpxCollectionData::AlbumArtUri).isNull());
-    
+
     //Media with empty attributes.
     QVERIFY(mTest->itemData( count + 1, MpMpxCollectionData::Title).isNull());
     QVERIFY(mTest->itemData( count + 1, MpMpxCollectionData::Artist).isNull());
-    //verification depends on language, just exercising the item.
-    QVERIFY(!mTest->itemData( count + 1, MpMpxCollectionData::Count).isNull());
+    QCOMPARE(mTest->itemData( count + 1, MpMpxCollectionData::Count), QString().setNum(0));
     QVERIFY(mTest->itemData( count + 1, MpMpxCollectionData::AlbumArtUri).isNull());
 
-    /*Test Attributes that are not implemented yet.
-        Uri,
-        Duration,
-        Album,
-        Genre,
-        Rating,
-    */
+    // Test Attributes that are not implemented yet:
+    //     Uri, Duration, Album, Genre, Rating
     QVERIFY(mTest->itemData( 0, MpMpxCollectionData::Uri).isNull());
     QVERIFY(mTest->itemData( 0, MpMpxCollectionData::Duration).isNull());
     QVERIFY(mTest->itemData( 0, MpMpxCollectionData::Album).isNull());
@@ -283,11 +273,11 @@ void TestMpMpxCollectionData::testItemData()
 }
 
 /*!
- Tests isAutoPlaylis().
+ Tests isAutoPlaylist().
  */
 void TestMpMpxCollectionData::testIsAutoPlaylist()
 {
-    //if cotext is different than playlistsongs value returned should be false
+    //if context is different than playlistsongs value returned should be false
     QVERIFY(!mTest->isAutoPlaylist());
     RArray<TInt> supportedIds;
     CleanupClosePushL( supportedIds );
@@ -298,7 +288,7 @@ void TestMpMpxCollectionData::testIsAutoPlaylist()
     CleanupStack::PushL(entries);
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     CleanupStack::PushL(array);
-    
+
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXPlaylist);
     entries->SetTextValueL(KMPXMediaGeneralTitle, _L("My Test Playlist Songs"));
@@ -311,17 +301,16 @@ void TestMpMpxCollectionData::testIsAutoPlaylist()
     QCOMPARE(spy.count(), 1);
     TCollectionContext context = qvariant_cast<TCollectionContext>(spy.at(0).at(0));
     QCOMPARE(context, ECollectionContextPlaylistSongs);
-    QVERIFY(!mTest->isAutoPlaylist());  
-    
+    QVERIFY(!mTest->isAutoPlaylist());
+
     entries->SetTObjectValueL<TMPXGeneralNonPermissibleActions>(
                     KMPXMediaGeneralNonPermissibleActions, EMPXWrite);
     mTest->setMpxMedia(*entries);
     QCOMPARE(spy.count(), 2);
     context = qvariant_cast<TCollectionContext>(spy.at(1).at(0));
     QCOMPARE(context, ECollectionContextPlaylistSongs);
-    QVERIFY(mTest->isAutoPlaylist());  
+    QVERIFY(mTest->isAutoPlaylist());
     CleanupStack::PopAndDestroy(entries);
-
 }
 
 /*!
@@ -329,9 +318,9 @@ void TestMpMpxCollectionData::testIsAutoPlaylist()
  */
 void TestMpMpxCollectionData::testIsAutoPlaylistWithIndex()
 {
-    //if cotext is different than playlists value returned should be false
+    // If context is different than playlists value returned should be false
     QVERIFY(!mTest->isAutoPlaylist(0));
-    
+
     RArray<TInt> supportedIds;
     CleanupClosePushL( supportedIds );
     supportedIds.AppendL( KMPXMediaIdMusic );
@@ -363,7 +352,7 @@ void TestMpMpxCollectionData::testIsAutoPlaylistWithIndex()
     entries->SetCObjectValueL(KMPXMediaArrayContents, array);
     entries->SetTObjectValueL<TInt>(KMPXMediaArrayCount, array->Count());
     CleanupStack::PopAndDestroy(array);
-        
+
     qRegisterMetaType<TCollectionContext>();
     QSignalSpy spy(mTest, SIGNAL(contextChanged(TCollectionContext)));
     mTest->setMpxMedia(*entries);
@@ -372,6 +361,7 @@ void TestMpMpxCollectionData::testIsAutoPlaylistWithIndex()
     QCOMPARE(context, ECollectionContextPlaylists);
     QVERIFY(!mTest->isAutoPlaylist( 0 ));
     QVERIFY(mTest->isAutoPlaylist( 1 ));
+    CleanupStack::PopAndDestroy(entries);
 }
 
 /*!
@@ -379,11 +369,9 @@ void TestMpMpxCollectionData::testIsAutoPlaylistWithIndex()
  */
 void TestMpMpxCollectionData::TestItemCountWithIndex()
 {
-
-
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     CleanupStack::PushL(array);
-    
+
     CMPXMedia* media = CMPXMedia::NewL();
     CleanupStack::PushL(media);
     //no attributes
@@ -401,8 +389,7 @@ void TestMpMpxCollectionData::TestItemCountWithIndex()
     media3->SetTObjectValueL<TInt>(KMPXMediaGeneralCount,20);
     array->AppendL(*media3);
     CleanupStack::PopAndDestroy(media3);
-    
-    
+
     mTestPrivate->iMediaArray=array;
     QCOMPARE(mTest->itemCount(0),0);
     QCOMPARE(mTest->itemCount(1),0);
@@ -417,7 +404,6 @@ void TestMpMpxCollectionData::TestItemCountWithIndex()
  */
 void TestMpMpxCollectionData::testSetCollectionContextL()
 {
-    
     RArray<TInt> supportedIds;
     CleanupClosePushL( supportedIds );
     supportedIds.AppendL( KMPXMediaIdMusic );
@@ -426,141 +412,84 @@ void TestMpMpxCollectionData::testSetCollectionContextL()
     CleanupStack::PopAndDestroy(&supportedIds);
     CleanupStack::PushL(entries);
 
+    // All Songs
+    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
+    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXSong);
+    mTestPrivate->iContainerMedia = entries;
+    mTestPrivate->SetCollectionContextL();
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextAllSongs);
 
-    
-    /* FROM MPXDBPLUGIN.CPP
-    // All Songs
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXSong ...
-    ...
-    // All artists  
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXArtist ...
-    ...            
-    // All albums of an artist
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXArtist ...
-    ...
-    // all songs for an artist
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXSong ...
-    ...        
-    // all songs of an album for an artist
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXAlbum ...
-    ...        
-    // All Albums
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXAlbum ...
-    ...
-    // All songs in one or multiple albums
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXAlbum ...
-    ...       
-    // All playlists
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXPlaylist ...
-    ...
-    // All songs in a playlist
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXPlaylist ...
-    ...     
-    // All genres
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXGenre ...
-    ...            
-    // All songs of a genre
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXGenre ...
-    ...                    
-    // All composers
-    SetMediaGeneralAttributesL(aEntries, EMPXGroup, EMPXComposer ...
-    ...
-    // All songs of a composer
-    SetMediaGeneralAttributesL(aEntries, EMPXItem, EMPXComposer ...
-    */
-    
-    // All Songs
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXSong);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextAllSongs);
-    
-    // All artists  
+    // All artists
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXArtist);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextUnknown);//not implemented because is not in use.
-    
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextArtists);
+
     // All albums of an artist
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXArtist);
     mTestPrivate->iContainerMedia = entries;
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* media = CMPXMedia::NewL();
+    CleanupStack::PushL(media);
+    array->AppendL(*media);
+    CleanupStack::PopAndDestroy(media);
+    CMPXMedia* media2 = CMPXMedia::NewL();
+    CleanupStack::PushL(media2);
+    array->AppendL(*media2);
+    CleanupStack::PopAndDestroy(media2);
+    mTestPrivate->iMediaArray = array;
     mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextUnknown);//not implemented because is not in use.
-    
-    // all songs for an artist
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextArtistAlbums);
+    mTestPrivate->iMediaArray = NULL;
+    CleanupStack::PopAndDestroy(array);
+
+    // All albums of an artist - Artist has only 1 album
+    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
+    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXArtist);
+    mTestPrivate->iContainerMedia = entries;
+    array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* media3 = CMPXMedia::NewL();
+    CleanupStack::PushL(media3);
+    array->AppendL(*media3);
+    CleanupStack::PopAndDestroy(media3);
+    mTestPrivate->iMediaArray = array;
+    mTestPrivate->SetCollectionContextL();
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextArtistAlbumsTBone);
+    mTestPrivate->iMediaArray=NULL;
+    CleanupStack::PopAndDestroy(array);
+
+    // All songs for an artist
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXSong);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextUnknown);//not implemented because is not in use.
-    
-    // all songs of an album for an artist
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAlbum);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextAlbumSongs);
-    
-    // All Albums
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextArtistAllSongs);
+
+    // All albums
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAlbum);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
     QCOMPARE(mTestPrivate->iContext,ECollectionContextAlbums);
 
-    // All songs in one or multiple albums
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXAlbum);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextAlbumSongs);
-    
     // All playlists
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXPlaylist);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
     QCOMPARE(mTestPrivate->iContext,ECollectionContextPlaylists);
-    
+
     // All songs in a playlist
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXPlaylist);
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
     QCOMPARE(mTestPrivate->iContext,ECollectionContextPlaylistSongs);
-    
-    // All genres
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXGenre);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextGenres);//not in use and implementation could go away.
-    
-    // All songs of a genre
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXGenre);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextGenreSongs);///not in use and implementation could go away.
-    
-    // All composers
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXComposer);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextUnknown);//not implemented because is not in use.
-    
-    // All songs of a composer
-    entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem);
-    entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXComposer);
-    mTestPrivate->iContainerMedia = entries;
-    mTestPrivate->SetCollectionContextL();
-    QCOMPARE(mTestPrivate->iContext,ECollectionContextUnknown);//not implemented because is not in use.
-    
-    
+
     mTestPrivate->iContainerMedia = NULL;
     CleanupStack::PopAndDestroy(entries);
 }
@@ -570,8 +499,6 @@ void TestMpMpxCollectionData::testSetCollectionContextL()
  */
 void TestMpMpxCollectionData::testSetMpxMediaAllSongs()
 {
-
-
     RArray<TInt> supportedIds;
     CleanupClosePushL( supportedIds );
     supportedIds.AppendL( KMPXMediaIdMusic );
@@ -592,15 +519,15 @@ void TestMpMpxCollectionData::testSetMpxMediaAllSongs()
         array->AppendL(*media);
         CleanupStack::PopAndDestroy(media);
     }
-    
+
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
     entries->SetTObjectValueL<TMPXGeneralCategory>(KMPXMediaGeneralCategory, EMPXSong);
     entries->SetTextValueL(KMPXMediaGeneralTitle, _L("All songs"));
-   
+
     entries->SetCObjectValueL(KMPXMediaArrayContents, array);
     entries->SetTObjectValueL<TInt>(KMPXMediaArrayCount, array->Count());
     CleanupStack::PopAndDestroy(array);
- 
+
     qRegisterMetaType<TCollectionContext>();
     QSignalSpy spy(mTest, SIGNAL(contextChanged(TCollectionContext)));
     mTest->setMpxMedia(*entries);
@@ -624,7 +551,7 @@ void TestMpMpxCollectionData::testContainerId()
     QCOMPARE( mTest->containerId(), containerId);
     delete container;
     mTestPrivate->iContainerMedia = 0;
-    
+
 }
 
 /*!
@@ -642,10 +569,10 @@ void TestMpMpxCollectionData::testItemId()
 
     item->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
     QCOMPARE( mTest->itemId(0), itemId);
-    
+
     delete array;
     mTestPrivate->iMediaArray = 0;
-    
+
 }
 
 /*!
@@ -659,12 +586,12 @@ void TestMpMpxCollectionData::testRemoveItem()
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     array->AppendL(item);
     mTestPrivate->iMediaArray = array;
-    
+
     mTest->removeItem(0);
     QVERIFY( mTestPrivate->iCachedRemovedItem );
     QCOMPARE( int(mTestPrivate->iCachedRemovedItem->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )), itemId );
     QCOMPARE( mTestPrivate->iMediaArray->Count(), 0 );
-    
+
     delete array;
     mTestPrivate->iMediaArray = 0;
 }
@@ -680,12 +607,12 @@ void TestMpMpxCollectionData::testTestCachedItem()
     mTestPrivate->iCachedRemovedItem = item;
     CMPXMediaArray* array = CMPXMediaArray::NewL();
     mTestPrivate->iMediaArray = array;
-    
+
     mTest->insertCachedItem(0);
     QCOMPARE( mTestPrivate->iMediaArray->Count(), 1 );
     QCOMPARE( int(mTestPrivate->iMediaArray->AtL( 0 )->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )), itemId );
     QVERIFY( !mTestPrivate->iCachedRemovedItem );
-    
+
     delete array;
     mTestPrivate->iMediaArray = 0;
 }
@@ -697,15 +624,239 @@ void TestMpMpxCollectionData::testInsertCachedItemItem()
 {
     int itemId = 147;
     CMPXMedia* item = CMPXMedia::NewL();
-    
+
+    // Test error case when iCachedRemovedItem is NULL. 
+    QVERIFY( !mTest->testCachedItem( itemId ) );
+
+    // Test error case when KMPXMediaGeneralId is not supported. 
     mTestPrivate->iCachedRemovedItem = item;
     QVERIFY( !mTest->testCachedItem( itemId ) );
-        
+
+    // Test good case.
     item->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
     QVERIFY( mTest->testCachedItem( itemId ) );
-        
+
     delete mTestPrivate->iCachedRemovedItem;
     mTestPrivate->iCachedRemovedItem = 0;
 }
 
-//EOF
+/*!
+ Tests setContext().
+ */
+void TestMpMpxCollectionData::testSetContext()
+{
+    qRegisterMetaType<TCollectionContext>();
+    QSignalSpy spy(mTest, SIGNAL(contextChanged(TCollectionContext)));
+    mTest->setContext(ECollectionContextPlaylistSongs);
+    // Verify that:
+    // - contextChanged() signal is emitted
+    // - Context is changed
+    // - album index mapping is not cashed.
+    QCOMPARE(spy.count(), 1);
+    TCollectionContext context = qvariant_cast<TCollectionContext>(spy.at(0).at(0));
+    QCOMPARE(context, ECollectionContextPlaylistSongs);
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextPlaylistSongs);
+    QVERIFY(mTestPrivate->albumIdIndexMapping.isEmpty());
+}
+
+/*!
+ Tests setContext() for media wall use case.
+ Tests setContext() for media wall use case.
+*/ 
+void TestMpMpxCollectionData::testSetContextMediaWall()
+{
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
+    for (TInt i =0; i < count; i++) {
+        mTestPrivate->iMediaArray = array;
+        QCOMPARE(mTest->count(), i);
+        CMPXMedia* media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+        media->SetTObjectValueL<TInt>(KMPXMediaGeneralId, KAllSongsTestData[i].GeneralId);
+        array->AppendL(*media);
+        CleanupStack::PopAndDestroy(media);
+    }
+    mTestPrivate->iMediaArray = array;
+    
+    qRegisterMetaType<TCollectionContext>();
+    QSignalSpy spy(mTest, SIGNAL(contextChanged(TCollectionContext)));
+    
+    mTest->setContext(ECollectionContextAlbumsMediaWall);
+    // Verify that:
+    // - contextChanged() signal is emitted
+    // - Context is changed
+    // - album index mapping is cashed.
+    // - album index mapping is cleared when changing context again.
+    QCOMPARE(spy.count(), 1);
+    TCollectionContext context = qvariant_cast<TCollectionContext>(spy.at(0).at(0));
+    QCOMPARE(context, ECollectionContextAlbumsMediaWall);
+    QCOMPARE(mTestPrivate->iContext, ECollectionContextAlbumsMediaWall);
+    QVERIFY(!mTestPrivate->albumIdIndexMapping.isEmpty());
+    for (TInt i =0; i < count; i++) {
+        QCOMPARE(mTest->itemIndex(KAllSongsTestData[i].GeneralId),i);
+    }
+    mTest->setContext(ECollectionContextPlaylistSongs);
+    QVERIFY(mTestPrivate->albumIdIndexMapping.isEmpty());
+    CleanupStack::PopAndDestroy(array);
+}
+
+
+/*!
+ Tests setAlbumContent().
+ */
+void TestMpMpxCollectionData::testSetAlbumContent()
+{
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* media = CMPXMedia::NewL();
+    CleanupStack::PushL(media);
+    array->AppendL(*media);
+    CleanupStack::PopAndDestroy(media);
+
+    mTestPrivate->iMediaArray = array;
+    mTestPrivate->iCurrentAlbumIndex = 0;
+
+    CMPXMedia* albumContent = CMPXMedia::NewL();
+    CleanupStack::PushL(albumContent);
+    CMPXMediaArray* songArray = CMPXMediaArray::NewL();
+    CleanupStack::PushL(songArray);
+    TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
+    for (TInt i =0; i < count; i++) {
+        CMPXMedia* song = CMPXMedia::NewL();
+        CleanupStack::PushL(song);
+        songArray->AppendL(*song);
+        CleanupStack::PopAndDestroy(song);
+    }
+    albumContent->SetCObjectValueL(KMPXMediaArrayContents, songArray);
+    CleanupStack::PopAndDestroy(songArray);
+
+    // Verify that:
+    // - refreshAlbumSongs() signal is emitted
+    // - Album song count is updated correctly
+    QSignalSpy spy(mTest, SIGNAL(refreshAlbumSongs()));
+    mTest->setAlbumContent(*albumContent);
+    QCOMPARE(spy.count(), 1);
+    QCOMPARE(mTest->albumSongsCount(), count);
+    QCOMPARE(mTestPrivate->iMediaArray->AtL(0)->ValueTObjectL<TInt>(KMPXMediaArrayCount), count);
+
+    CleanupStack::PopAndDestroy(albumContent);
+    mTestPrivate->iMediaArray = NULL;
+    CleanupStack::PopAndDestroy(array);
+}
+
+/*!
+ Tests setCurrentAlbum().
+ */
+void TestMpMpxCollectionData::testSetCurrentAlbum()
+{
+    QSignalSpy spy(mTest, SIGNAL(refreshAlbumSongs()));
+
+    // Create media array that doesn't have the album songs yet.
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* media = CMPXMedia::NewL();
+    CleanupStack::PushL(media);
+    array->AppendL(*media);
+    CleanupStack::PopAndDestroy(media);
+    mTestPrivate->iMediaArray = array;
+    mTestPrivate->iCurrentAlbumIndex = -1;
+
+    // Verify that:
+    // - refreshAlbumSongs() signal is NOT emitted
+    // - album index is set
+    // - availability is returned as false (this means that client
+    //   should initiate a find)
+    bool available = mTest->setCurrentAlbum(0);
+    QCOMPARE(available, false);
+    QCOMPARE(mTest->currentAlbumIndex(), 0);
+    QCOMPARE(spy.count(), 0);
+
+    // Now populate the media (album) with songs. This is basically
+    // simulating setAlbumContent().
+    CMPXMediaArray* songArray = CMPXMediaArray::NewL();
+    CleanupStack::PushL(songArray);
+    TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
+    for (TInt i =0; i < count; i++) {
+        CMPXMedia* media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+        songArray->AppendL(*media);
+        CleanupStack::PopAndDestroy(media);
+    }
+    media = CMPXMedia::NewL();
+    CleanupStack::PushL(media);
+    media->SetCObjectValueL(KMPXMediaArrayContents, songArray);
+    array->AppendL(*media);
+    CleanupStack::PopAndDestroy(media);
+    CleanupStack::PopAndDestroy(songArray);
+    mTestPrivate->iAlbumSongCount = 0;
+
+    // Verify that:
+    // - refreshAlbumSongs() signal is emitted
+    // - album index is set
+    // - availability is returned as true
+    // - album song count is set
+    available = mTest->setCurrentAlbum(1);
+    QCOMPARE(available, true);
+    QCOMPARE(mTest->currentAlbumIndex(), 1);
+    QCOMPARE(mTest->albumSongsCount(), count);
+    QCOMPARE(spy.count(), 1);
+
+    mTestPrivate->iMediaArray = NULL;
+    CleanupStack::PopAndDestroy(array);
+}
+
+/*!
+ Tests albumSongData().
+ */
+void TestMpMpxCollectionData::testAlbumSongData()
+{
+    // Populate the media (album) with songs. This is basically
+    // simulating setAlbumContent().
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* media = CMPXMedia::NewL();
+    CleanupStack::PushL(media);
+    CMPXMediaArray* songArray = CMPXMediaArray::NewL();
+    CleanupStack::PushL(songArray);
+    TInt count = sizeof(KAllSongsTestData)/sizeof(TTestAttrs);
+    for (TInt i = 0; i < count; i++) {
+        CMPXMedia* song = CMPXMedia::NewL();
+        CleanupStack::PushL(song);
+        song->SetTextValueL(KMPXMediaGeneralTitle, TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].GeneralTitle)));
+        song->SetTextValueL(KMPXMediaGeneralUri, TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].MusicAlbumArtFileName)));
+        songArray->AppendL(*song);
+        CleanupStack::PopAndDestroy(song);
+    }
+    media->SetCObjectValueL(KMPXMediaArrayContents, songArray);
+    array->AppendL(*media);
+
+    mTestPrivate->iMediaArray = array;
+    mTestPrivate->iCurrentAlbumIndex = 0;
+
+    // Loop through all items to verify the album song data
+    for (TInt i =0; i < count; i++) {
+        const TDesC& title = TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].GeneralTitle));
+        QCOMPARE(mTest->albumSongData( i, MpMpxCollectionData::Title), QString::fromUtf16( title.Ptr(), title.Length()));
+
+        const TDesC& uri = TPtrC(reinterpret_cast<const TUint16*>(KAllSongsTestData[i].MusicAlbumArtFileName));
+        QCOMPARE(mTest->albumSongData( i, MpMpxCollectionData::Uri), QString::fromUtf16( uri.Ptr(), uri.Length()));
+    }
+
+    // Create a song entry that doesn't have Title or Uri.
+    CMPXMedia* song = CMPXMedia::NewL();
+    CleanupStack::PushL(song);
+    song->SetTextValueL(KMPXMediaGeneralTitle, KNullDesC );
+    song->SetTextValueL(KMPXMediaMusicArtist, KNullDesC);
+    songArray->AppendL(*song);
+    CleanupStack::PopAndDestroy(song);
+
+    // Verify that it returned empty string.
+    QVERIFY(mTest->albumSongData( count, MpMpxCollectionData::Title).isNull());
+    QVERIFY(mTest->albumSongData( count, MpMpxCollectionData::Uri).isNull());
+
+    CleanupStack::PopAndDestroy(songArray);
+    CleanupStack::PopAndDestroy(media);
+    mTestPrivate->iMediaArray = NULL;
+    CleanupStack::PopAndDestroy(array);
+}

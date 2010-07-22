@@ -31,11 +31,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( MpCommon::MpViewMode viewMode, TUid hostUid, QObject *parent )
+MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, QObject *parent )
     : QObject(parent)
 {
     d_ptr = new MpMpxPlaybackFrameworkWrapperPrivate(this );
-    d_ptr->init( viewMode, hostUid );
+    d_ptr->init( hostUid );
 }
 
 /*!
@@ -55,7 +55,7 @@ MpPlaybackData *MpMpxPlaybackFrameworkWrapper::playbackData()
 }
 
 /*!
- Slot to handle a play from Uri aFilename
+ Slot to handle play from Uri aFilename
  */
 void MpMpxPlaybackFrameworkWrapper::play( QString aFilename )
 {
@@ -63,7 +63,7 @@ void MpMpxPlaybackFrameworkWrapper::play( QString aFilename )
 }
 
 /*!
- Slot to handle a play from file handle
+ Slot to handle play from file handle
  */
 void MpMpxPlaybackFrameworkWrapper::play( const XQSharableFile& file)
 {
@@ -87,7 +87,7 @@ void MpMpxPlaybackFrameworkWrapper::stop()
 }
 
 /*!
- Slot to handle a skeep forward.
+ Slot to handle a skip forward.
  */
 void MpMpxPlaybackFrameworkWrapper::skipForward()
 {
@@ -95,11 +95,36 @@ void MpMpxPlaybackFrameworkWrapper::skipForward()
 }
 
 /*!
- Slot to handle a skeep backwards.
+ Slot to handle seek forward.
+ */
+void MpMpxPlaybackFrameworkWrapper::startSeekForward()
+{
+    d_ptr->startSeekForward();
+}
+
+/*!
+ Slot to handle stop seeking.
+ */
+void MpMpxPlaybackFrameworkWrapper::stopSeeking()
+{
+    d_ptr->stopSeeking();
+}
+
+/*!
+ Slot to handle a skip backwards.
  */
 void MpMpxPlaybackFrameworkWrapper::skipBackward()
 {
     d_ptr->skipBackward();
+}
+
+/*!
+ Slot to handle seek backwards.
+ */
+
+void MpMpxPlaybackFrameworkWrapper::startSeekBackward()
+{
+    d_ptr->startSeekBackward();
 }
 
 /*!
@@ -124,4 +149,28 @@ void MpMpxPlaybackFrameworkWrapper::setShuffle( bool mode )
 void MpMpxPlaybackFrameworkWrapper::setRepeat( bool mode )
 {
     d_ptr->setRepeat( mode );
+}
+
+/*!
+ Change \a balance.
+ */
+void MpMpxPlaybackFrameworkWrapper::setBalance( int balance )
+{
+    d_ptr->setBalance( balance );
+}
+
+/*!
+ Send command to apply audio effects.
+ */
+void MpMpxPlaybackFrameworkWrapper::applyAudioEffects()
+{
+    d_ptr->applyAudioEffects();
+}
+
+/*!
+ Send command to apply equalizer.
+ */
+void MpMpxPlaybackFrameworkWrapper::applyEqualizer()
+{
+    d_ptr->applyEqualizer();
 }

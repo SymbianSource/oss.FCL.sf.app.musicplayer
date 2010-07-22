@@ -22,8 +22,12 @@
 #include <hbgroupbox.h>
 #include <hbindexfeedback.h>
 
+#include <hgmediawall.h>
+
 #include "mpcollectioncontaineralbums.h"
 #include "mpmpxcollectiondata.h"
+#include "mpcollectiondatamodel.h"
+#include "mpcollectiontbonelistdatamodel.h"
 #include "mptrace.h"
 
 /*!
@@ -36,7 +40,7 @@
 
     This container handles the following contexts:
     \li ECollectionContextAlbums
-    \li ECollectionContextAlbumSongs
+    \li ECollectionContextAlbumsTBone
 
     \sa MpCollectionContainer
 */
@@ -46,9 +50,13 @@
  */
 MpCollectionContainerAlbums::MpCollectionContainerAlbums( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionListContainer(loader, parent),
-      mInfoBar(0)
+      mInfoBar(0),
+      mTBone(0),
+      mTBoneListModel(0),
+      mCurrentAlbumIndex(0)
 {
     TX_LOG
+    mCollectionContext = ECollectionContextAlbums;
 }
 
 /*!
@@ -57,30 +65,178 @@ MpCollectionContainerAlbums::MpCollectionContainerAlbums( HbDocumentLoader *load
 MpCollectionContainerAlbums::~MpCollectionContainerAlbums()
 {
     TX_ENTRY
-    delete mInfoBar;
+	delete mInfoBar;
+    delete mTBone;
     delete mList;
+    delete mTBoneListModel;
+    TX_EXIT
+}
+
+/*!
+ Sets the data model for the container.
+ */
+void MpCollectionContainerAlbums::setDataModel( MpCollectionDataModel *dataModel )
+{
+    TX_ENTRY
+    MpCollectionContainer::setDataModel(dataModel);
+    if ( mCollectionContext == ECollectionContextAlbums ) {
+        if ( mList ) {
+            mList->setModel(dataModel);
+            if ( mCollectionData->count() ) {
+                mList->scrollTo( dataModel->index(mCurrentAlbumIndex, 0) );
+            }
+        }
+    }
+    else if ( mCollectionContext == ECollectionContextAlbumsTBone ) {
+        if ( mTBone ) {
+            mTBone->setModel(dataModel);
+            mTBone->scrollTo( dataModel->index(mCurrentAlbumIndex, 0) );
+            if ( mTBoneListModel == 0 ) {
+                mTBoneListModel = new MpCollectionTBoneListDataModel(mCollectionData);
+                connect( mTBoneListModel, SIGNAL(albumDataChanged()), this, SLOT(albumDataChanged()) );
+                connect( mTBoneListModel, SIGNAL(albumDataAvailable()), this, SLOT(albumDataAvailable()) );
+            }
+            mList->setModel(mTBoneListModel);
+            if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+                if ( mCollectionData->albumSongsCount() > 1 ) {
+                    emit shuffleEnabled(true);
+                }
+                else {
+                    emit shuffleEnabled(false);
+                }
+            }
+            else {
+                emit findAlbumSongs(mCurrentAlbumIndex);
+                emit shuffleEnabled(false);
+            }
+        }
+    }
     TX_EXIT
 }
 
 /*!
  Slot to be called when an item is selected by the user.
- */
+*/
 void MpCollectionContainerAlbums::itemActivated( const QModelIndex &index )
 {
-    int row = index.row();
-    TX_ENTRY_ARGS("index=" << row);
-
-    mAlbum = mCollectionData->itemData(row, MpMpxCollectionData::Title);
-    if ( mAlbum.isEmpty() ) {
-        mAlbum = hbTrId("txt_mus_dblist_val_unknown3");
+    if ( mCollectionContext == ECollectionContextAlbums ) {
+        mCurrentAlbumIndex = index.row();
+        TX_ENTRY_ARGS("mCurrentAlbumIndex=" << mCurrentAlbumIndex);
+        MpCollectionListContainer::itemActivated(index);
     }
-
-    mArtist = mCollectionData->itemData(row, MpMpxCollectionData::Artist);
-    if ( mArtist.isEmpty() ) {
-        mArtist = hbTrId("txt_mus_subtitle_unknown");
+    else if ( mCollectionContext == ECollectionContextAlbumsTBone ) {
+        int row = index.row();
+        TX_ENTRY_ARGS("index=" << row);
+        if ( mViewMode == MpCommon::FetchView ) {
+            MpCollectionListContainer::itemActivated(index);
+        }
+        else {
+            emit playAlbumSongs(mCurrentAlbumIndex, row);
+        }
     }
+    TX_EXIT
+}
 
-    MpCollectionListContainer::itemActivated(index);
+/*!
+ Slot to be called when scrolling ends in media wall and an album is centered.
+ */
+void MpCollectionContainerAlbums::albumCentered()
+{
+    TX_ENTRY
+    QModelIndex index = mTBone->currentIndex();
+    if ( mCurrentAlbumIndex != index.row() ) {
+        // Prevent reloading if user just moves the center album a little
+        // and the same album re-centers.
+        mCurrentAlbumIndex = index.row();
+        TX_LOG_ARGS("mCurrentAlbumIndex=" << mCurrentAlbumIndex);
+        if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+            if ( mCollectionData->albumSongsCount() > 1 ) {
+                emit shuffleEnabled(true);
+            }
+            // Enable context menu
+            mLongPressEnabled = true;
+        }
+        else {
+            emit findAlbumSongs(mCurrentAlbumIndex);
+        }
+    }
+    else {
+        // Landed on the same album. Just update menu.
+        if ( mCollectionData->albumSongsCount() > 1 ) {
+            emit shuffleEnabled(true);
+        }
+        // Enable context menu
+        mLongPressEnabled = true;
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called data model has new data.
+ Two cases:
+     1) User deleted an album.
+	 2) User deleted last song in an album.
+ */
+void MpCollectionContainerAlbums::dataReloaded()
+{
+    TX_ENTRY
+    if ( mCollectionContext == ECollectionContextAlbumsTBone ) {
+        if ( mCurrentAlbumIndex > 0 ) {
+            --mCurrentAlbumIndex;
+        }
+        mTBone->scrollTo( mDataModel->index(mCurrentAlbumIndex, 0) );
+        if ( mCollectionData->setCurrentAlbum(mCurrentAlbumIndex) ) {
+            if ( mCollectionData->albumSongsCount() == 1 ) {
+                emit shuffleEnabled(false);
+            }
+        }
+        else {
+            emit findAlbumSongs(mCurrentAlbumIndex);
+        }
+    }
+    else {
+        MpCollectionListContainer::dataReloaded();
+    }
+    TX_EXIT
+}
+
+/*!
+ Slot to be called data model has new data.
+ User has deleted one of the songs from TBone list.
+ */
+void MpCollectionContainerAlbums::albumDataChanged()
+{
+    TX_ENTRY
+    emit findAlbumSongs(mCurrentAlbumIndex);
+    emit shuffleEnabled(false);
+    TX_EXIT
+}
+
+/*!
+ Slot to be called TBone starts scrolling.
+ */
+void MpCollectionContainerAlbums::scrollingStarted()
+{
+    TX_ENTRY
+    // Disable shuffle action from the menu
+    emit shuffleEnabled(false);
+    // Disable context menu
+    mLongPressEnabled = false;
+    TX_EXIT
+}
+
+/*!
+ Slot to be called album data is available. This is a result of findAlbumSongs signal.
+ */
+void MpCollectionContainerAlbums::albumDataAvailable()
+{
+    TX_ENTRY
+    int count = mCollectionData->albumSongsCount();
+    if ( count > 1 ) {
+        emit shuffleEnabled(true);
+    }
+    // Enable context menu
+    mLongPressEnabled = true;
     TX_EXIT
 }
 
@@ -111,34 +267,51 @@ void MpCollectionContainerAlbums::setupContainer()
                 delete mInfoBar;
                 mInfoBar = 0;
             }
-        }
-        else if ( mCollectionContext == ECollectionContextAlbumSongs ) {
-            mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "albumSongs", &ok);
-            if ( !ok ) {
-                TX_LOG_ARGS("Error: invalid xml file.");
-                Q_ASSERT_X(ok, "MpCollectionContainerAlbums::setupContainer", "invalid xml file");
+            if ( mTBone ) {
+                delete mTBone;
+                mTBone = 0;
             }
-
-            widget = mDocumentLoader->findWidget(QString("albumSongsDetail"));
-            mInfoBar = qobject_cast<HbGroupBox*>(widget);
-
-            QString details;
+        }
+        else if ( mCollectionContext == ECollectionContextAlbumsTBone ) {
             if ( mViewMode == MpCommon::FetchView ) {
-                details = "Select a song";
+                mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "albumTBoneFetcher", &ok);
+                if ( !ok ) {
+                    TX_LOG_ARGS("Error: invalid xml file.");
+                    Q_ASSERT_X(ok, "MpCollectionContainerAlbums::setupContainer", "invalid xml file");
+                }
+                widget = mDocumentLoader->findWidget(QString("albumTBoneDetail"));
+                mInfoBar = qobject_cast<HbGroupBox*>(widget);
+                mInfoBar->setHeading( hbTrId("txt_mus_subtitle_select_a_song") );
             }
             else {
-                details = mArtist;
-                details.append(" : ");
-                details.append(mAlbum);
+                mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "albumTBone", &ok);
+                if ( !ok ) {
+                    TX_LOG_ARGS("Error: invalid xml file.");
+                    Q_ASSERT_X(ok, "MpCollectionContainerAlbums::setupContainer", "invalid xml file");
+                }
             }
-            mInfoBar->setHeading(details);
+            widget = mDocumentLoader->findWidget(QString("albumWall"));
+            mTBone = qobject_cast<HgMediawall*>(widget);
+            HbIcon defaultIcon( "qtg_large_album_art" );
+            defaultIcon.setSize(mTBone->itemSize());
+            mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
+            mTBone->setTitleFontSpec( HbFontSpec(HbFontSpec::Primary) );
+            mTBone->setDescriptionFontSpec( HbFontSpec(HbFontSpec::Secondary) );
+            mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
+            mTBone->enableReflections(true);
+            connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
+            connect( mTBone, SIGNAL(scrollingEnded()), this, SLOT(albumCentered()) );
         }
     }
     else {
+        // Must delete widgets when last song is deleted and view is reloaded.
         if ( mInfoBar ) {
-            // When last song in an album is deleted and album list is reloaded
             delete mInfoBar;
             mInfoBar = 0;
+        }
+        if ( mTBone ) {
+            delete mTBone;
+            mTBone = 0;
         }
         // Call empty list from base class
         setupEmptyListContainer();

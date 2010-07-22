@@ -25,16 +25,19 @@
 
 
 class QStringList;
-class QTranslator;
-class HbPopup;
 class MpMpxHarvesterFrameworkWrapper;
 class MpSongScanner;
 class MpMediaKeyHandler;
 class MpMpxCollectionFrameworkWrapper;
 class MpMpxPlaybackFrameworkWrapper;
+class MpMpxDetailsFrameworkWrapper;
 class MpMpxCollectionData;
 class MpPlaybackData;
+class MpSongData;
 class XQSharableFile;
+class MpEngineFactory;
+class MpAudioEffectsFrameworkWrapper;
+class MpEqualizerFrameworkWrapper;
 
 #if defined(BUILD_MPENGINE_LIB)
 #define MPENGINE_EXPORT Q_DECL_EXPORT
@@ -46,9 +49,19 @@ class XQSharableFile;
 class MPENGINE_EXPORT MpEngine : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int activePreset READ activePreset)
+
+    friend class MpEngineFactory;
+
+public:
+    enum EngineMode{
+        StandAlone,
+        Fetch,
+        Embedded,
+        MediaBrowsing
+    };
 
 private:
-
     enum UsbBlockingState {
         USB_NotConnected,          // Not connected
         USB_Connected,             // Connected in MTP mode but not synchronizing
@@ -61,15 +74,12 @@ private:
 public:
 
     virtual ~MpEngine();
-    static MpEngine *instance();
 
-    void initialize(MpCommon::MpViewMode viewMode, TUid uid = TUid::Uid( MpCommon::KMusicPlayerUid ) );
-    void close();
-	
     // Harvester related
-    bool verifyUsbBlocking( bool showMessage = false );
+    bool verifyUsbBlocking( bool notify = false );
     void checkForSystemEvents();
-    
+    MpSongScanner *songScanner();
+
     // Collection related
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
@@ -82,58 +92,105 @@ public:
     void renamePlaylist( QString &newName );
     void deleteSongs( QList<int> &selection );
 
-    
     void previewItem( int index );
     void openIsolatedCollection( TCollectionContext context );
     void releaseIsolatedCollection();
-    
+
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionData* collectionData = 0 );
+
     MpMpxCollectionData *collectionData();
-    
+
     // Playback related
-    
+
     MpPlaybackData *playbackData();
 
-signals:
+    void shuffleAll();
+
+
+    // Details related
+    MpSongData *songData();
+    void retrieveSong();
+
+    // Audio Effects related
+    int balance();
+    bool loudness();
+
+    // Equalizer related
+    void applyPreset( int presetIndex );
+    void disableEqualizer();
+    int activePreset();
+    QStringList presetNames();
     
+    //Activity related
+    void saveActivityData( QByteArray &data );
+    void loadActivityData( const QByteArray &data );
+
+signals:
+
     // Harvester related
     void libraryAboutToUpdate();
     void libraryUpdated();
     void usbBlocked( bool blocked );
-    
+    void unableToCotinueDueUSB();
+    void usbSynchronizationStarted();
+    void usbSynchronizationFinished();
+    void libraryRefreshNeeded();
+
     // Collection related
     void collectionPlaylistOpened();
+    void aboutToAddSongs( int count );
     void playlistSaved( bool success );
+    void deleteStarted(TCollectionContext context, int Count);
     void songsDeleted( bool success );
     void playlistsRenamed( bool success );
-    
     void isolatedCollectionOpened( MpMpxCollectionData* collectionData );
+    void containerContentsChanged();
+    void restorePathFailed();
+
+    // Equalizer related
+    void equalizerReady();
 
 public slots:
 
     // Harvester related
-    void refreshLibrary();
+    void refreshLibrary( bool automaticRequest = false );
     void handleScanStarted();
     void handleScanEnded( int count, int error );
     void handleDiskEvent( MpxDiskEvents event );
     void handleUsbEvent( MpxUsbEvents event );
-    void handleOutstandingNoteClosing();
-    
+
     // Collection related
     void reopenCollection();
     void reorderPlaylist( int playlistId, int songId, int originalOrdinal, int newOrdinal );
+    void handleDeleteStarted( TCollectionContext context, int count );
+    void handleDeleteEnded( bool success );
+    void cancelCollectionRequest();
 
-	// Playback related
-	void playEmbedded( QString aFilename );
-	void playEmbedded( const XQSharableFile&  file );
+    // Playback related
+    void playEmbedded( QString aFilename );
+    void playEmbedded( const XQSharableFile&  file );
     void playPause();
     void stop();
     void skipForward();
+    void startSeekForward();
+    void stopSeeking();
     void skipBackward();
+    void startSeekBackward();
     void setPosition( int position );
     void setShuffle( bool mode );
     void setRepeat( bool mode );
-	
+
+    // Audio Effects related
+    void setBalance( int balance );
+    void setLoudness( bool mode );
+
+    // Equalizer related
+    void handleEqualizerReady();
+
 private:
+    
+    void initialize( TUid hostUid, EngineMode mode);
 
     // Harvester related
     void handleUsbMassStorageStartEvent();
@@ -141,10 +198,7 @@ private:
     void handleUsbMtpStartEvent();
     void handleUsbMtpEndEvent();
     void handleUsbMtpNotActive();
-
     void changeUsbBlockingState( UsbBlockingState state );
-    void launchBlockingNote();
-    void setOutstandingPopup( HbPopup *popup );
 
 private:
 
@@ -154,21 +208,27 @@ private:
     MpMpxHarvesterFrameworkWrapper       *mMpxHarvesterWrapper;  // Own
     MpSongScanner                        *mSongScanner;          // Own
     MpMediaKeyHandler                    *mMediaKeyHandler;      // Own
-    HbPopup                              *mUsbOutstandingNote;   // Own
-    
+
     // Collection related
     MpMpxCollectionFrameworkWrapper      *mMpxCollectionWrapper; //Own
 
     // Playback related
     MpMpxPlaybackFrameworkWrapper        *mMpxPlaybackWrapper; //Own
-        
+
+    // Details related
+    MpMpxDetailsFrameworkWrapper         *mMpxDetailsWrapper;  // Own
+
+    // Audio Effects related
+    MpAudioEffectsFrameworkWrapper       *mAudioEffectsWrapper; // Own
+
+    // Equalizer related
+    MpEqualizerFrameworkWrapper          *mEqualizerWrapper; // Own
+    int                                  mCurrentPresetIndex;
+
     // General
-    QTranslator                          *mMpTranslator;         // Own
     UsbBlockingState                     mUsbBlockingState;
     UsbBlockingState                     mPreviousUsbState;    
-    MpCommon::MpViewMode                 mViewMode;
     TUid                                 mHostUid;
-
 };
 
 #endif // MPENGINE_H

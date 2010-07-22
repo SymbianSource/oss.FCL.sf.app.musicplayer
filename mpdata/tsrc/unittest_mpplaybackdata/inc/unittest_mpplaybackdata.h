@@ -50,6 +50,7 @@ private slots:
     void testSetUri();
     void testSetAlbumArtUri();
     void testThumbnailReady();
+    void testSeAlbumId();
     void testSetPlaybackState();
     void testCommitPlaybackInfo();
     

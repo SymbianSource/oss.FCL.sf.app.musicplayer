@@ -15,7 +15,8 @@
 *
 */
 
-// INCLUDE FILES
+#include <hgmediawall.h>
+
 #include "mpcollectiondocumentloader.h"
 #include "mpnowplayingwidget.h"
 #include "mpcommondefs.h"
@@ -39,8 +40,14 @@ QObject *MpCollectionDocumentLoader::createObject(const QString& type, const QSt
 {
     TX_ENTRY_ARGS("type=" << type << ", name=" << name);
 
-    if (type == MpNowPlayingWidget::staticMetaObject.className()) {
-        QObject *object = new MpNowPlayingWidget(MpCommon::KMusicPlayerUid);
+    if ( type == MpNowPlayingWidget::staticMetaObject.className() ) {
+        QObject *object = new MpNowPlayingWidget();
+        object->setObjectName(name);
+        TX_EXIT
+        return object;
+    }
+    else if ( type == HgMediawall::staticMetaObject.className() ) {
+        QObject *object = new HgMediawall();
         object->setObjectName(name);
         TX_EXIT
         return object;

@@ -27,9 +27,6 @@
 #include "mpmpxcollectiondata_p.h"
 #include "mptrace.h"
 
-_LIT( KSong, " song" );
-_LIT( KSongs, " songs" );
-
 /*!
     \class MpMpxCollectionDataPrivate
     \brief Music Player collection data - private implementation.
@@ -42,10 +39,12 @@ _LIT( KSongs, " songs" );
  */
 MpMpxCollectionDataPrivate::MpMpxCollectionDataPrivate( MpMpxCollectionData *wrapper )
     : q_ptr( wrapper ),
+      iContext( ECollectionContextUnknown ),
       iContainerMedia(0),
       iMediaArray(0),
-      iContext( ECollectionContextUnknown ),
-      iCachedRemovedItem ( 0 )
+      iCachedRemovedItem(0),
+      iCurrentAlbumIndex(-1),
+      iAlbumSongCount(0)
 {
     TX_LOG
 }
@@ -196,16 +195,34 @@ int MpMpxCollectionDataPrivate::containerId()
 /*!
  \internal
  */
-int MpMpxCollectionDataPrivate::itemId(int index)
+int MpMpxCollectionDataPrivate::itemId( int index )
 {
-    TX_ENTRY_ARGS("index=" << index);
+    TX_ENTRY_ARGS( "index=" << index );
     int id = -1;
-    TRAPD(err, id = DoGetItemIdL(index));
+    TRAPD( err, id = DoGetItemIdL( index ) );
     if ( err == KErrNone ) {
-        TX_LOG_ARGS("id=" << id);
+        TX_LOG_ARGS( "id=" << id );
     }
     else {
-        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+    return id;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::albumSongId( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index );
+    int id = -1;
+    TRAPD( err, id = DoGetAlbumSongIdL( index ) );
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS( "id=" << id );
+    }
+    else {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
     TX_EXIT
     return id;
@@ -256,13 +273,137 @@ void MpMpxCollectionDataPrivate::insertCachedItem(int index)
 /*!
  \internal
  */
-void MpMpxCollectionDataPrivate::setMpxMedia( const CMPXMedia& entries )
+bool MpMpxCollectionDataPrivate::setCurrentAlbum( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index);
+    bool available = false;
+    TRAPD( err, available = DoSetCurrentAlbumL( index ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return available;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::currentAlbumIndex() const
+{
+    return iCurrentAlbumIndex;
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::albumSongsCount() const
+{
+    return iAlbumSongCount;
+}
+
+/*!
+ \internal
+ */
+QString MpMpxCollectionDataPrivate::albumSongData( int index, MpMpxCollectionData::DataType type ) const
+{
+    TX_ENTRY_ARGS("index=" << index << ", type=" << type);
+    QString data;
+    TRAPD(err, DoGetAlbumSongDataL(index, type, data));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return data;
+}
+
+/*!
+ \internal
+ New data from MPX collection. This could be due to Open operation, in which case
+ context would have changed. This could also be due to Re-open after operations
+ such as delete, playlist renaming, playlist rearraging, etc., in which case the
+ context would remain the same, but the internal data may have changed.
+ */
+void MpMpxCollectionDataPrivate::setMpxMedia( const CMPXMedia& entries, bool reopen )
 {
     TX_ENTRY
+    TCollectionContext prevContext = iContext;
+    int prevCount = count();
+
     TRAPD(err, DoSetMpxMediaL(entries));
     if ( err == KErrNone ) {
-        TX_LOG_ARGS("Context changed: iContext=" << iContext);
-        emit q_ptr->contextChanged(iContext);
+        int newCount = count();
+        if ( (newCount == 0) || (prevCount == 0) ) {
+            TX_LOG_ARGS("Empty container");
+            // Two cases:
+            //     1) newCount is zero: Last item in the model was deleted.
+            //     2) prevCount is zero: Refresh operation found new data.
+            // In these cases, independent of context change, we must emit the
+            // contextChanged() signal so that the container can properly reload
+            // the layout.
+            emit q_ptr->contextChanged(iContext);
+        }
+        else if ( iContext != prevContext ) {
+            TX_LOG_ARGS("Context changed: iContext=" << iContext);
+            if ( prevContext == ECollectionContextArtistAlbumsTBone
+                 && iContext == ECollectionContextArtistAlbums
+                 && reopen ) {
+                // Special case 1: This occurs when a song was deleted from TBone list
+                // within artist container. And the fact that the new context is ArtistAlbums
+                // indicates that the artist has more than 1 album.
+                // Restore context to ArtistAlbumsTBone.
+                iContext = ECollectionContextArtistAlbumsTBone;
+                if ( newCount != prevCount ) {
+                    // Change in count indicates that the deleted song was the last song
+                    // in the TBone list. As a result, the album was deleted also, therefore
+                    // we must emit dataChanged() indicating changes to the album section
+                    // of the TBone.
+                    emit q_ptr->dataChanged();
+                }
+                else {
+                    // Same count indicates that one of the songs in the TBone's list
+                    // section was deleted. We only want to reload the list section of the
+                    // TBone in this case.
+                    emit q_ptr->albumDataChanged();
+                }
+            }
+            else if ( prevContext == ECollectionContextAlbumsTBone && reopen ) {
+                // Special case 2: This occurs when a song was deleted from TBone list
+                // within album container. Restore context to AlbumsTBone.
+                iContext = ECollectionContextAlbumsTBone;
+                if ( newCount != prevCount ) {
+                    // Change in count indicates that the deleted song was the last song
+                    // in the TBone list. As a result, the album was deleted also, therefore
+                    // we must emit dataChanged() indicating changes to the album section
+                    // of the TBone.
+                    emit q_ptr->dataChanged();
+                }
+                else {
+                    // Same count indicates that one of the songs in the TBone's list
+                    // section was deleted. We only want to reload the list section of the
+                    // TBone in this case.
+                    emit q_ptr->albumDataChanged();
+                }
+            }
+            else {
+                // Simple case where the context has really changed and it didn't
+                // involve TBone.
+                emit q_ptr->contextChanged(iContext);
+            }
+        }
+        else if ( prevContext == ECollectionContextArtistAlbumsTBone
+                  && iContext == ECollectionContextArtistAlbumsTBone
+                  && reopen ) {
+            // Special case 3: This occurs when a song was deleted from TBone list
+            // within artist container. This is similar to special case 1, however, the
+            // fact that the new context is also ArtistAlbumsTBone indicates that the
+            // artist has only 1 album. We only want to reload the list section of the
+            // TBone in this case.
+            emit q_ptr->albumDataChanged();
+        }
+        else {
+            // Same context, but the data has changed.
+            emit q_ptr->dataChanged();
+        }
     }
     else {
         TX_LOG_ARGS("Error: " << err << "; should never get here.");
@@ -273,13 +414,102 @@ void MpMpxCollectionDataPrivate::setMpxMedia( const CMPXMedia& entries )
 /*!
  \internal
  */
+const CMPXMedia& MpMpxCollectionDataPrivate::containerMedia()
+{
+    return *iContainerMedia;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::setContext( TCollectionContext context )
+{
+    iContext = context;
+    TX_LOG_ARGS("Context changed: iContext=" << iContext);
+    loadAlbumsLookup();
+    emit q_ptr->contextChanged(iContext);
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::setAlbumContent( const CMPXMedia& albumContent )
+{
+    TX_ENTRY
+    TRAPD(err, DoSetAlbumContentL(albumContent));
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS("Album content is available.");
+        loadAlbumSongsLookup();
+        emit q_ptr->refreshAlbumSongs();
+    }
+    else {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+   Currently only used to lookup playing song album id to index of albums on 
+   media wall.
+ */
+int MpMpxCollectionDataPrivate::itemIndex( int itemUniqueId )
+{
+    return albumIdIndexMapping.value( itemUniqueId, -1 );
+}
+
+/*!
+ \internal
+   Currently only used to lookup playing song id to index of song in the 
+   current album on media wall.
+ */
+int MpMpxCollectionDataPrivate::albumSongIndex( int songUniqueId )
+{
+    return albumSongIdIndexMapping.value( songUniqueId, -1 );
+}
+
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::loadAlbumsLookup()
+{
+    //Clearing all the album ids.
+    albumIdIndexMapping.clear();
+    if ( iContext == ECollectionContextAlbumsMediaWall) {
+        //Adding album ids and indixes to the hash, for itemIndex lookup.
+        //This is disabled for other containers to save resources.
+        for ( int i = count() - 1 ; i >= 0 ; i-- ) {
+            albumIdIndexMapping.insert( itemId( i ) , i );
+        }
+    }
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::loadAlbumSongsLookup()
+{
+    //Clearing all the song ids.
+    albumSongIdIndexMapping.clear();
+    if ( iContext == ECollectionContextAlbumsMediaWall) {
+        //Adding album song ids and indixes to the hash, for albumSongIndex lookup.
+        //This is disabled for other containers to save resources.
+        for ( int i = albumSongsCount() - 1 ; i >= 0 ; i-- ) {
+            albumSongIdIndexMapping.insert( albumSongId( i ) , i );
+        }
+    }
+}
+
+/*!
+ \internal
+ */
 void MpMpxCollectionDataPrivate::DoGetDataL( int index, MpMpxCollectionData::DataType type, QString& data ) const
 {
     TX_ENTRY
     CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
 
-    TBuf<256> countBuf;
-    TBuf<20> temp;
+    TBuf<10> countBuf;
     TInt count = 0;
     switch ( type ) {
         case MpMpxCollectionData::Title:
@@ -310,10 +540,7 @@ void MpMpxCollectionDataPrivate::DoGetDataL( int index, MpMpxCollectionData::Dat
             if ( currentMedia->IsSupported( KMPXMediaGeneralCount ) ) {
                 count = currentMedia->ValueTObjectL<TInt>( KMPXMediaGeneralCount );
             }
-            temp.AppendNum( count );
-            //AknTextUtils::LanguageSpecificNumberConversion( temp );
-            countBuf.Append( temp );
-            countBuf.Append( (count > 1 ) ? KSongs() : KSong() );
+            countBuf.AppendNum( count );
             data = QString::fromUtf16( countBuf.Ptr(), countBuf.Length() );
             break;
         case MpMpxCollectionData::AlbumArtUri:
@@ -413,6 +640,21 @@ int MpMpxCollectionDataPrivate::DoGetItemIdL( int index )
 /*!
  \internal
  */
+int MpMpxCollectionDataPrivate::DoGetAlbumSongIdL( int index )
+{
+    CMPXMedia* album( iMediaArray->AtL( iCurrentAlbumIndex ) );
+    const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+    User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+    CMPXMedia* song = songs->AtL(index);
+    if ( !song->IsSupported( KMPXMediaGeneralId ) ) {
+        User::Leave(KErrNotFound);
+    }
+    return song->ValueTObjectL<TInt>( KMPXMediaGeneralId );
+}
+
+/*!
+ \internal
+ */
 void MpMpxCollectionDataPrivate::DoRemoveItemL( int index )
 {
     delete iCachedRemovedItem;
@@ -426,12 +668,71 @@ void MpMpxCollectionDataPrivate::DoRemoveItemL( int index )
  */
 bool MpMpxCollectionDataPrivate::DoTestCachedItemL( int itemId )
 {
-    if ( !iCachedRemovedItem && !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
+    if ( !iCachedRemovedItem || !iCachedRemovedItem->IsSupported( KMPXMediaGeneralId ) ) {
         User::Leave(KErrNotFound);
     }
     return ( itemId == iCachedRemovedItem->ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
 }
 
+/*!
+ \internal
+ */
+bool MpMpxCollectionDataPrivate::DoSetCurrentAlbumL( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index);
+    iCurrentAlbumIndex = index;
+
+    bool songsAvailable = false;
+    CMPXMedia* album( iMediaArray->AtL( index ) );
+    if ( album->IsSupported(KMPXMediaArrayContents) ) {
+        // We've previously fetched the songs for this album so
+        // all we do now is populate the list with the song titles.
+        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+        iAlbumSongCount = songs->Count();
+        songsAvailable = true;
+        TX_LOG_ARGS("Songs available.");
+        loadAlbumSongsLookup();
+        emit q_ptr->refreshAlbumSongs();
+    }
+    TX_EXIT
+    return songsAvailable;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::DoGetAlbumSongDataL( int index, MpMpxCollectionData::DataType type, QString& data ) const
+{
+    TX_ENTRY
+    CMPXMedia* album( iMediaArray->AtL( iCurrentAlbumIndex ) );
+    if ( album->IsSupported(KMPXMediaArrayContents) ) {
+        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+        User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+        CMPXMedia* song = songs->AtL(index);
+
+        switch ( type ) {
+            case MpMpxCollectionData::Title:
+                if ( song->IsSupported( KMPXMediaGeneralTitle ) ) {
+                    const TDesC& title = song->ValueText( KMPXMediaGeneralTitle );
+                    if ( title.Compare( KNullDesC ) != 0 ) {
+                        data = QString::fromUtf16( title.Ptr(), title.Length() );
+                    }
+                }
+                break;
+            case MpMpxCollectionData::Uri:
+                if ( song->IsSupported( KMPXMediaGeneralUri ) ) {
+                    const TDesC& uri = song->ValueText( KMPXMediaGeneralUri );
+                    if ( uri.Compare( KNullDesC ) != 0 ) {
+                        data = QString::fromUtf16( uri.Ptr(), uri.Length() );
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    TX_EXIT
+}
 
 /*!
  \internal
@@ -465,27 +766,25 @@ void MpMpxCollectionDataPrivate::SetCollectionContextL()
             case EMPXPlaylist:
                 iContext = ECollectionContextPlaylists;
                 break;
-            case EMPXGenre:
-                iContext = ECollectionContextGenres;
-                break;
         }
     }
     else if ( containerType == EMPXItem ) {
         switch (containerCategory) {
             case EMPXArtist:
-                iContext = ECollectionContextArtistAlbums;
-                break;
-            case EMPXAlbum:
-                iContext = ECollectionContextAlbumSongs;
+                if ( iMediaArray->Count() > 1 ) {
+                    iContext = ECollectionContextArtistAlbums;
+                }
+                else {
+                    // Single album. Go directly to TBone.
+                    iContext = ECollectionContextArtistAlbumsTBone;
+                }
                 break;
             case EMPXSong:
-                iContext = ECollectionContextArtistSongs;
+                // All songs for an artist
+                iContext = ECollectionContextArtistAllSongs;
                 break;
             case EMPXPlaylist:
                 iContext = ECollectionContextPlaylistSongs;
-                break;
-            case EMPXGenre:
-                iContext = ECollectionContextGenreSongs;
                 break;
         }
     }
@@ -511,8 +810,23 @@ void MpMpxCollectionDataPrivate::DoSetMpxMediaL( const CMPXMedia& entries )
 /*!
  \internal
  */
-const CMPXMedia& MpMpxCollectionDataPrivate::containerMedia()
+void MpMpxCollectionDataPrivate::DoSetAlbumContentL( const CMPXMedia& albumContent )
 {
-    return *iContainerMedia;
+    TX_ENTRY
+    CMPXMediaArray* songArray(const_cast<CMPXMediaArray*>( albumContent.Value<CMPXMediaArray>(
+                    KMPXMediaArrayContents ) ) );
+    User::LeaveIfNull( songArray );
+
+    // Save the songs to the album so that we don't need to find them again
+    // if the same album is selected again.
+    iAlbumSongCount = songArray->Count();
+
+    if ( iAlbumSongCount ) {
+        CMPXMedia* albumMedia( iMediaArray->AtL( iCurrentAlbumIndex ) );
+        albumMedia->SetCObjectValueL(KMPXMediaArrayContents, songArray);
+        albumMedia->SetTObjectValueL<TInt>(KMPXMediaArrayCount, iAlbumSongCount);
+    }
+    TX_EXIT
 }
+
 

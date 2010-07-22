@@ -19,7 +19,7 @@
 #define MPCOLLECTIONVIEWPLUGIN_H
 
 
-#include <qobject>
+#include <QObject>
 #include <mpxviewpluginqt.h>
 
 class MpCollectionView;

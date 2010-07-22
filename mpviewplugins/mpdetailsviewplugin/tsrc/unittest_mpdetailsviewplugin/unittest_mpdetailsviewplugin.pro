@@ -16,6 +16,7 @@
 
 TEMPLATE = app
 CONFIG += qtestlib \
+					symbian_test \
     hb
 TARGET = 
 

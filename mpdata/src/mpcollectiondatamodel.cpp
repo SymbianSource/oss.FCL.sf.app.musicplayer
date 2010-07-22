@@ -17,9 +17,12 @@
 
 #include <QIcon>
 #include <QList>
-#include <qmimedata.h>
+#include <QMimeData>
 #include <hbicon.h>
 #include <hbnamespace.h>
+
+#include <hgwidgets.h>
+
 
 #include "mpcollectiondatamodel.h"
 #include "mpcollectionalbumartmanager.h"
@@ -53,14 +56,27 @@
  */
 
 /*!
+    \fn void dataReloaded()
+
+    This signal is emitted when there has been a changed in the data represented
+    by this model. This signal is emitted so that the view owning this model can
+    refresh the view. This can happen after operations like delete and several
+    playlist related operations (save, rearrange, remove).
+ */
+
+/*!
  Constructs the collection data model.
  */
 MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent )
-    : QAbstractListModel(parent),
-      mCollectionData(data),
-      mRowCount(0)
+    : QAbstractListModel( parent ),
+      mCollectionData( data ),
+      mRowCount( 0 ),
+      mAlbumIndexOffset( 0 ),
+      mHiddenItemIndex( -1 )
 {
     TX_ENTRY
+    connect( mCollectionData, SIGNAL(contextChanged(TCollectionContext)), this, SLOT(setContext(TCollectionContext)) );
+    connect( mCollectionData, SIGNAL(dataChanged()), this, SLOT(reloadData()) );
     mAlbumArtManager = new MpCollectionAlbumArtManager(mCollectionData);
     connect( mAlbumArtManager, SIGNAL(albumArtReady(int)), this, SLOT(updateAlbumArt(int)) );
     TX_EXIT
@@ -89,7 +105,7 @@ int MpCollectionDataModel::rowCount( const QModelIndex &parent ) const
 {
     TX_LOG
     Q_UNUSED(parent);
-    return mRowCount;
+    return mRowCount - mAlbumIndexOffset;
 }
 
 /*!
@@ -105,27 +121,51 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
         return returnValue;
     }
 
-    int row = index.row();
+    int row = index.row() + mAlbumIndexOffset;
     TX_LOG_ARGS("index=" << row << ", role=" << role);
     TCollectionContext context = mCollectionData->context();
     if ( role == Qt::DisplayRole ) {
         QStringList display;
         // Fetch the primary text, which is the title, if available.
         QString primaryText;
-        primaryText = mCollectionData->itemData(row, MpMpxCollectionData::Title);
-        if ( !primaryText.isEmpty() ) {
-            display << primaryText;
+        switch ( context ) {
+            case ECollectionContextAllSongs:
+            case ECollectionContextArtists:
+            case ECollectionContextAlbums:
+            case ECollectionContextArtistAlbums:
+            case ECollectionContextPlaylists:
+            case ECollectionContextPlaylistSongs:
+            case ECollectionContextAlbumsTBone:
+            case ECollectionContextArtistAlbumsTBone:
+            case ECollectionContextArtistAllSongs:
+                primaryText = mCollectionData->itemData(row, MpMpxCollectionData::Title);
+                if ( !primaryText.isEmpty() ) {
+                    display << primaryText;
+                }
+                else {
+                    display << hbTrId("txt_mus_other_unknown4");
+                }
+                break;
+            case ECollectionContextAlbumsMediaWall:
+                primaryText = mCollectionData->itemData(row, MpMpxCollectionData::Artist);
+                if ( !primaryText.isEmpty() ) {
+                    display << primaryText;
+                }
+                else {
+                    display << hbTrId("txt_mus_other_unknown4");
+                }    
+                break;
+            default:
+                break;
         }
-        else {
-            display << hbTrId("txt_mus_other_unknown4");
-        }
-
+        
         // Fetch the secondary text, which depends on the current context, if available.
         QString secondaryText;
         switch ( context ) {
             case ECollectionContextAllSongs:
             case ECollectionContextAlbums:
             case ECollectionContextPlaylistSongs:
+            case ECollectionContextAlbumsTBone:
                 secondaryText = mCollectionData->itemData(row, MpMpxCollectionData::Artist);
                 if ( !secondaryText.isEmpty() ) {
                     display << secondaryText;
@@ -134,13 +174,31 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << hbTrId("txt_mus_other_unknown3");
                 }
                 break;
-            case ECollectionContextArtistSongs: 
+            case ECollectionContextArtistAlbumsTBone:
+                secondaryText = mCollectionData->collectionTitle();
+                if ( !secondaryText.isEmpty() ) {
+                    display << secondaryText;
+                }
+                else {
+                    display << hbTrId("txt_mus_other_unknown3");
+                }
+                break;
+            case ECollectionContextArtistAllSongs:
                 secondaryText = mCollectionData->itemData(row, MpMpxCollectionData::Album);
                 if ( !secondaryText.isEmpty() ) {
                     display << secondaryText;
                 }
                 else {
                     display << hbTrId("txt_mus_other_unknown4");
+                }
+                break;
+            case ECollectionContextAlbumsMediaWall:
+                secondaryText = mCollectionData->itemData(row, MpMpxCollectionData::Title);
+                if ( !secondaryText.isEmpty() ) {
+                    display << secondaryText;
+                }
+                else {
+                    display << hbTrId("txt_mus_other_unknown3");
                 }
                 break;
             default:
@@ -151,18 +209,47 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
     else if ( role == Qt::DecorationRole ) {
         switch ( context ) {
             case ECollectionContextAlbums:
+            case ECollectionContextAlbumsMediaWall:
+            case ECollectionContextArtistAlbumsTBone:
+            case ECollectionContextAlbumsTBone:
+                    returnValue = mAlbumArtManager->albumArt( row ) ;
+                break;
             case ECollectionContextArtistAlbums:
-                const QIcon *icon = mAlbumArtManager->albumArt(row);
-                QVariant iconVariant(QVariant::Icon, icon);
-                returnValue = iconVariant;
+                if ( row == 0 ) {
+                    returnValue = HbIcon( "qtg_small_sound" );
+                }
+                else {
+                    returnValue = mAlbumArtManager->albumArt( row );
+                }
                 break;
         }
     }
     else if ( role == Hb::IndexFeedbackRole ) {
         QString feedbackIndex;
-        feedbackIndex = mCollectionData->itemData(row, MpMpxCollectionData::Title);
+        switch ( context ) {
+            case ECollectionContextAllSongs:
+            case ECollectionContextArtists:
+            case ECollectionContextAlbums:
+            case ECollectionContextArtistAlbums:
+            case ECollectionContextPlaylists:
+            case ECollectionContextPlaylistSongs:
+            case ECollectionContextAlbumsTBone:
+            case ECollectionContextArtistAlbumsTBone:
+            case ECollectionContextArtistAllSongs:
+                feedbackIndex = mCollectionData->itemData(row, MpMpxCollectionData::Title);
+                break;
+            case ECollectionContextAlbumsMediaWall:
+                feedbackIndex = mCollectionData->itemData(row, MpMpxCollectionData::Artist);
+                break;
+            default:
+                break;
+        }
         returnValue = feedbackIndex;
     }
+    else if ( role == HgWidget::HgVisibilityRole 
+        && context == ECollectionContextAlbumsMediaWall) {
+        returnValue = !( row == mHiddenItemIndex );
+        }
     TX_EXIT
     return returnValue;
 }
@@ -267,6 +354,18 @@ bool MpCollectionDataModel::dropMimeData(const QMimeData *data, Qt::DropAction a
     return true;
 }
 
+/*! 
+ Sets the item visibility, model will report \a visible value as 
+ HgWidget::HgVisibilityRole for the item at \a index. 
+ datachanged() signal is emited when calling this function.
+ Currently this is only used by Media Wall View.
+*/
+void MpCollectionDataModel::setItemVisibility(const QModelIndex &index, bool visible)
+{
+    mHiddenItemIndex = visible ? -1 : index.row();
+    emit dataChanged(index, index);
+}
+
 /*!
  Returns pointer to MpMpxCollectionData, which is the collection data.
  */
@@ -276,11 +375,49 @@ MpMpxCollectionData *MpCollectionDataModel::collectionData()
 }
 
 /*!
+ Slot to be called when collection context is changed.
+ */
+void MpCollectionDataModel::setContext( TCollectionContext context )
+{
+    TX_ENTRY_ARGS( "context=" << context );
+    // Reset the album index offset for navigation
+    mAlbumIndexOffset = 0;
+    switch ( context ) {
+        case ECollectionContextArtistAlbums:
+        case ECollectionContextAlbums:
+            mAlbumArtManager->setThumbnailSize( MpCommon::ListThumb );
+            mAlbumArtManager->enableDefaultArt( true );
+            break;
+        case ECollectionContextArtistAlbumsTBone:
+            if ( mCollectionData->count() > 1 ) {
+                // Selected artist has more than 1 album and therefore the
+                // artist's "All songs" exist. Since we don't show artist's
+                // "All songs" in TBone, we need to set an offset.
+                mAlbumIndexOffset = 1;
+            }
+            //intentional fallthrough
+       case ECollectionContextAlbumsTBone:
+            mAlbumArtManager->setThumbnailSize( MpCommon::TBoneThumb );
+            mAlbumArtManager->enableDefaultArt( false );
+            break;
+        case ECollectionContextAlbumsMediaWall:
+            mAlbumArtManager->setThumbnailSize( MpCommon::MediaWallThumb );
+            mAlbumArtManager->enableDefaultArt( false );
+            break;
+        default:
+            break;
+    }
+    TX_EXIT
+}
+
+/*!
  Slot to be called when album art for the \a index needs to be updated.
  */
 void MpCollectionDataModel::updateAlbumArt( int index )
 {
     TX_ENTRY_ARGS("index=" << index);
+
+    index -= mAlbumIndexOffset;
     if ( index >= 0 && index < mRowCount ) {
         QModelIndex modelIndex = QAbstractItemModel::createIndex(index, 0);
         emit dataChanged(modelIndex, modelIndex);
@@ -300,12 +437,28 @@ void MpCollectionDataModel::refreshModel()
     mRowCount = mCollectionData->count();
 
     TCollectionContext context = mCollectionData->context();
-    if ( context == ECollectionContextAlbums || ECollectionContextArtistAlbums ) {
+    if ( context == ECollectionContextAlbums || 
+         context == ECollectionContextArtistAlbums ||
+         context == ECollectionContextAlbumsMediaWall ) {
         // Before providing the new data to the view (list, grid, etc.), we want
         // to make sure that we have enough album arts for the first screen.
         mAlbumArtManager->cacheFirstScreen();
     }
     reset();
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when data has changed (same context) and model needs to reload
+ the data.
+ */
+void MpCollectionDataModel::reloadData()
+{
+    TX_ENTRY
+    mAlbumArtManager->cancel();
+    mRowCount = mCollectionData->count();
+    reset();
+    emit dataReloaded();
     TX_EXIT
 }
 

@@ -28,7 +28,7 @@
 const TInt KIncrementalDelayNone = 0;
 const TInt KIncrementalDelayHalfSecond = 1000000;
 const TInt KIncrementalFetchBlockSize = 20;
-const TInt KIncrementalNullOffset = 0;
+
 
 
 /*!
@@ -78,10 +78,10 @@ CMpMpxIsolatedCollectionHelper::~CMpMpxIsolatedCollectionHelper()
  \internal
  Opens an isolated collection with the /a path.
  */
-void CMpMpxIsolatedCollectionHelper::OpenCollectionL( CMPXCollectionPath& aPath )
+void CMpMpxIsolatedCollectionHelper::OpenCollectionL( CMPXCollectionPath& aPath, TInt aIndex, MpOpenMode aMode )
     {
     //Using incremental open to open the collection.
-    
+    iOpenMode = aMode;
     // Cancel any reads
     iIncrementalOpenUtil->Stop();
 
@@ -92,7 +92,7 @@ void CMpMpxIsolatedCollectionHelper::OpenCollectionL( CMPXCollectionPath& aPath 
     TArray<TMPXAttribute> ary = attrs.Array();
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayNone );
     iIncrementalOpenUtil->StartL( aPath, ary, KIncrementalFetchBlockSize,
-                                  KIncrementalNullOffset, CMPXCollectionOpenUtility::EFetchNormal );
+                                  aIndex, CMPXCollectionOpenUtility::EFetchNormal );
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
     CleanupStack::PopAndDestroy( &attrs );
     }
@@ -131,8 +131,22 @@ void CMpMpxIsolatedCollectionHelper::HandleOpenL(
     {
     if ( iFirstIncrementalOpen )
         {
-        iObserver->HandleIsolatedOpenL( aEntries, aError );
+        CMPXCollectionPath* cPath = NULL;
         iFirstIncrementalOpen = EFalse;
+        switch( iOpenMode ) {
+        case RestorePathMode:
+            cPath = iIncrementalOpenUtil->PathL();
+            CleanupStack::PushL( cPath );
+            iObserver->HandleIsolatedOpenRestorePathL( *cPath, aError );
+            CleanupStack::PopAndDestroy( cPath );
+
+            break;
+        case DefaultMode:
+        default:
+            iObserver->HandleIsolatedOpenL( aEntries, aError );
+            break;
+        }
+        
         }
     }
 

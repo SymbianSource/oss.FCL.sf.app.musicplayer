@@ -21,6 +21,7 @@
 #include <StringLoader.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
+#include <hbtextresolversymbian.h>
 
 #include <mpxcmn.h>
 #include <mpxuser.h>
@@ -145,7 +146,20 @@ void CMPXDbPlugin::ConstructL()
     iDbHandler = CMPXDbHandler::NewL(iFs, *iResource);
     iMusicLibraryMenuTitles = iResource->ReadMenuArrayL(R_MC_MENU_ITEMS_ARRAY, iMusicLibraryMenuIds);
     iMusicLibraryTitles = iResource->ReadMenuArrayL(R_MC_TITLE_ITEMS_ARRAY, iMusicLibraryMenuIds );
-    iAllSongsForArtistTitle = iResource->ReadHBufCL(R_MC_ALL_SONGS_FOR_ARTIST);
+    
+    // Localization using QT
+    TBool result = HbTextResolverSymbian::Init(KMPXMusicPlayerTsFile, KMPXMusicPlayerTsPath);
+    if ( result )
+        {
+        iAllSongsForArtistTitle = HbTextResolverSymbian::LoadL( _L("txt_mus_dblist_all_songs") );
+        }
+    else
+        {
+        // error initializing HbTextResolverSymbian, use logical string.
+        MPX_DEBUG1("CMPXDbPlugin::ConstructL - HbTextResolverSymbian::Init() Failed.");
+        TBufC<50> buf( _L("txt_mus_dblist_all_songs") );
+        iAllSongsForArtistTitle = buf.AllocL();
+        }
 
 #ifdef __ENABLE_MUSIC_TEXT_ALIGNMENT
     iMusicMenuTitle = iResource->ReadHBufCL(R_MPX_QTN_MP_TITLE_MY_MUSIC_MENU_NSERIES);
@@ -410,7 +424,6 @@ void CMPXDbPlugin::CommandL(
         case EMcRefreshEnded:
             {
             MPX_DEBUG1("CMPXDbPlugin::CommandL - EMcRefreshEnded");
-            iDbHandler->CheckDiskSpaceOnDrivesL();
             // ask the handler to finalize the transaction
             iDbHandler->RefreshEndL();
             iRefreshing=EFalse;
@@ -442,7 +455,6 @@ void CMPXDbPlugin::CommandL(
             iDbHandler->MtpStartL();
             break;
         case EMcCmdMtpEnd:
-            iDbHandler->CheckDiskSpaceOnDrivesL();
             iMtpInUse = EFalse;
             iDbHandler->MtpEndL();
             break;
@@ -894,6 +906,7 @@ TBool CMPXDbPlugin::DoOpenL(
                 }
 
             case EBrowseAlbum:
+            case EBrowseAlbumMediaWall:
                 {
                 if( iAllSongsValid )
                     {
@@ -1259,8 +1272,15 @@ TBool CMPXDbPlugin::DoOpenBrowseAlbumL(
         case 2:
             {
             MPX_PERF_START(CMPXDbPlugin_DoOpenBrowseAlbumL_All);
-
-            TRAPD(err, iDbHandler->GetAllAlbumsL(aAttrs, aArray) );
+            TInt err = 0;
+            if( aPath.Id(1).iId2 == EBrowseAlbumMediaWall ) 
+                {
+                TRAP(err, iDbHandler->GetAllAlbumsMediaWallL(aAttrs, aArray) );
+                }
+            else 
+                {
+                TRAP(err, iDbHandler->GetAllAlbumsL(aAttrs, aArray) );
+                }
             // in error case, return empty list and append empty id to path 
             // in order to increase one level 
             if ( err != KErrNone )
@@ -4059,12 +4079,13 @@ void CMPXDbPlugin::DoIncrementalOpenL( const CMPXCommand& aCmd )
     TInt numItems = aCmd.ValueTObjectL<TInt>( KMPXCollectionCommandIdIncOpenLNumItems );
 
     TReadDirection direction(EReadUnknown);
+/*  Ascending and Decending reads are currently not used. We optimized for offset reads.
     if( aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLAscDsc) &&
         aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLKeyItem) )
         {
         direction = aCmd.ValueTObjectL<TReadDirection>(KMPXCollectionCommandIdIncOpenLAscDsc);
         }
-
+*/
     CMPXCollectionPath* path =  aCmd.ValueCObjectL<CMPXCollectionPath>(KMPXCollectionCommandIdIncOpenLPath);
     CleanupStack::PushL( path );
     MPX_DEBUG_PATH( *path );
@@ -4339,6 +4360,7 @@ void CMPXDbPlugin::SetAttributesL(
                 break;
                 }
             case EBrowseAlbum:
+            case EBrowseAlbumMediaWall:
                 {
                 aAttrs.AppendL( TMPXAttribute(KMPXMediaIdMusic,
                     EMPXMediaMusicArtist | EMPXMediaMusicAlbum | EMPXMediaMusicAlbumArtFileName ) );

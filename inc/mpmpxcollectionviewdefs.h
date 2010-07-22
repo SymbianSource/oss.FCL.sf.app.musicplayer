@@ -25,15 +25,15 @@
 enum TCollectionContext {
     ECollectionContextUnknown = 0,
     ECollectionContextAllSongs,
-	ECollectionContextArtists,
-	ECollectionContextArtistAlbums,
-	ECollectionContextArtistSongs,
+    ECollectionContextArtists,
+    ECollectionContextArtistAlbums,
+    ECollectionContextArtistAlbumsTBone,
+    ECollectionContextArtistAllSongs,
     ECollectionContextAlbums,
-    ECollectionContextAlbumSongs,
+    ECollectionContextAlbumsTBone,
     ECollectionContextPlaylists,
     ECollectionContextPlaylistSongs,
-    ECollectionContextGenres,
-    ECollectionContextGenreSongs
+    ECollectionContextAlbumsMediaWall
 };
 // Register so type can be used in signal and slot connection
 Q_DECLARE_METATYPE(TCollectionContext)

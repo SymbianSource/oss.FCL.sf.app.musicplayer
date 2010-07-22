@@ -40,14 +40,13 @@ public:
     virtual ~MpCollectionListContainer();
 
     void initialize();
-    void setDataModel( MpCollectionDataModel *dataModel );
-
+    virtual void setDataModel( MpCollectionDataModel *dataModel );
 
 public slots:
 
     virtual void itemActivated( const QModelIndex &index );
     virtual void onLongPressed(HbAbstractViewItem *listViewItem, const QPointF &coords);
-
+    virtual void dataReloaded();
 
 protected:
 
@@ -60,6 +59,8 @@ protected:
     HbListView              *mList;
     HbLabel                 *mNoMusic;
     HbIndexFeedback         *mIndexFeedback;
+    int                     mLongPressedIndex;
+    bool                    mLongPressEnabled;
 
 };
 

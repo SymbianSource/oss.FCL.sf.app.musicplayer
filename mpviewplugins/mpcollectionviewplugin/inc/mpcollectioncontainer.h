@@ -47,6 +47,13 @@ signals:
 
     void itemActivated( int index );
     void itemLongPressed( int index, const QPointF &coords );
+    void findAlbumSongs( int index );
+    void playAlbumSongs( int albumIndex, int songIndex );
+    void shuffleEnabled( bool enabled );
+
+public slots:
+
+    virtual void dataReloaded() = 0;
 
 protected:
 

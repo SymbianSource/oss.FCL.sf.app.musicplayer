@@ -79,4 +79,6 @@ LIBRARY         PlatformEnv.lib
 LIBRARY         mpxsqlitedbcommon.lib
 LIBRARY         mpxcommon.lib
 
+SMPSAFE
+
 // End of File

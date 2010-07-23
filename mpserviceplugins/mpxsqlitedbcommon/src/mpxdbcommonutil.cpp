@@ -427,6 +427,7 @@ EXPORT_C void MPXDbCommonUtil::FillInSupportedUIDsL(
     const TArray<TMPXAttribute>& aAttrs,
     RArray<TInt>& aSupportedIds)
     {
+    CleanupClosePushL(aSupportedIds);
     MPX_FUNC("MPXDbCommonUtil::FillInSupportedUIDs");
 
     TInt attrCount(aAttrs.Count());
@@ -457,6 +458,7 @@ EXPORT_C void MPXDbCommonUtil::FillInSupportedUIDsL(
             // ignore attribute
             }
         }
+    CleanupStack::Pop();
     }
 
 // ----------------------------------------------------------------------------

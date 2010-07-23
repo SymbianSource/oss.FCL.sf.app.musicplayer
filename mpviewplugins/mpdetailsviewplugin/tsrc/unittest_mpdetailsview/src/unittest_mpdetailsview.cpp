@@ -55,7 +55,10 @@
 #include "mpdetailsview.h"
 #undef private
 
+// This so we can test private functions
+#include "../../src/mpdetailsview.cpp"
 
+#include "../moc_mpdetailsview.cpp"
 
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
@@ -250,8 +253,8 @@ void TestMpDetailsView::testHandlePlaybackInfoChanged()
     mTest->handlePlaybackInfoChanged();
     QVERIFY( mTest->mInspireMeQueryRendered == true );
     QVERIFY( mTest->mSongData->link().isEmpty() == true );
-    QCOMPARE( mTest->mAlbumText->plainText(), QString( "Unknown" ) );
-    QCOMPARE( mTest->mArtistText->plainText(), QString( "Unknown" ) );
+    QCOMPARE( mTest->mAlbumText->plainText(), QString( "txt_mus_other_unknown7" ) );
+    QCOMPARE( mTest->mArtistText->plainText(), QString( "txt_mus_other_unknown6" ) );
 }
 
 void TestMpDetailsView::testClearInspireMe()

@@ -152,7 +152,7 @@ void MpGlobalPopupHandler::scanCountChanged(int count)
 void MpGlobalPopupHandler::handleScanFinished( int error, int itemsAdded )
 {
     TX_ENTRY_ARGS("error: " << error << " Items added: " << itemsAdded )
-    Q_UNUSED( itemsAdded );
+
     if ( mOutstandingPopup && ( mOutstandingPopup->objectName() == KScanProgressDialog ) ) {
         HbProgressDialog *dialog = qobject_cast<HbProgressDialog *>( mOutstandingPopup );
         disconnect( dialog, SIGNAL( aboutToClose() ), this, SLOT( outstandingPopupClosing() ) );
@@ -162,10 +162,10 @@ void MpGlobalPopupHandler::handleScanFinished( int error, int itemsAdded )
 
     switch( error ) {
         case MpSongScanner::ScanErrorNone :
-            launchScanFinishedDialog( true );
+            launchScanFinishedDialog( true , itemsAdded );
             break;
         case MpSongScanner::ScanGeneralError :
-            launchScanFinishedDialog( false );
+            launchScanFinishedDialog( false, itemsAdded );
             break;
         case MpSongScanner::ScanErrorDiskFull :
             launchDiskFullDialog();
@@ -280,7 +280,7 @@ void MpGlobalPopupHandler::outstandingPopupClosing()
  \internal
  Launches Scan Finished Notification.
  */
-void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok )
+void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok , int itemsAdded )
 {
     HbNotificationDialog *finishedDialog = new HbNotificationDialog();
     finishedDialog->setModal(true);
@@ -290,10 +290,15 @@ void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok )
     // in order to get finishDialog cleared before MtpInfoDialog is launched.
     setOutstandingPopup( finishedDialog );
 
+    // Educating user (of MTP information) dialog is displayed
+    // only when the following conditions are met:
+    // 1. A "manual" refresh operation completes successfully
+    // 2. Refresh operation finds at least one new item
+
     if( ok ) {
         finishedDialog->setIcon( HbIcon( QString("qtg_large_ok") ) );
         finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_complete" ) );
-        if ( MpSettingsManager::showMtpInfo() && !mMpSongScanner->isAutomaticScan() ) {
+        if ( MpSettingsManager::showMtpInfo() && !mMpSongScanner->isAutomaticScan() && itemsAdded ) {
             connect( finishedDialog, SIGNAL( aboutToClose() ), this, SLOT( launchMTPInfoDialog() ) );
         }
     }

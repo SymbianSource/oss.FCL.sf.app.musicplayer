@@ -999,18 +999,18 @@ void CMPXDbHandler::GetAlbumsMatchingArtistL(
             {
             MPX_DEBUG1("    EMPXMediaGeneralCount");
 
-            attributes.Append(TMPXAttribute(KMPXMediaIdGeneral, attributeId & ~EMPXMediaGeneralCount));
+            attributes.AppendL(TMPXAttribute(KMPXMediaIdGeneral, attributeId & ~EMPXMediaGeneralCount));
 
             tryGetSongCount = ETrue;
             break;
             }
 
-        attributes.Append(aAttrs[i]);
+        attributes.AppendL(aAttrs[i]);
         }
 
     for (TInt j = i+1; j < attrCount; j++)
         {
-        attributes.Append(aAttrs[j]);
+        attributes.AppendL(aAttrs[j]);
         }
     iDbAlbum->GetSubCategoryItemsL(EMPXArtist, aArtistId, attributes.Array(), aMediaArray);
     CleanupStack::PopAndDestroy(&attributes);

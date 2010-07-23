@@ -16,10 +16,10 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += # unittest_mpcollectionalbumartmanager \
+#SUBDIRS += unittest_mpcollectionalbumartmanager \
 #           unittest_mpcollectiondatamodel \
 #           unittest_mpcollectiontbonelistdatamodel \
-           unittest_mpmpxcollectiondata \
+SUBDIRS += unittest_mpmpxcollectiondata
 #           unittest_mpplaybackdata \
 #           unittest_mpsongdata
 

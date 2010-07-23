@@ -16,5 +16,5 @@
 
 del *.sisx
 makesis UT_mpsongdata.pkg
-signsis UT_mpsongdata.sis UT_mpsongdata.sisx RNDCERTS_PATH\Nokia_RnDCert_02.der RNDCERTS_PATH\Nokia_RnDCert_02.key
+signsis UT_mpsongdata.sis UT_mpsongdata.sisx %RNDCERTS_PATH%\Nokia_RnDCert_02.der %RNDCERTS_PATH%\Nokia_RnDCert_02.key
 del     UT_mpsongdata.sis

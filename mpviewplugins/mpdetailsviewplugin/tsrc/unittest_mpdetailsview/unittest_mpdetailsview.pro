@@ -22,6 +22,7 @@ QT += webkit \
     network \
     xml
 
+TARGET.CAPABILITY = All -TCB
 TARGET = 
 DEPENDPATH += . 
 INCLUDEPATH += ./stub/inc \
@@ -33,6 +34,8 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lmpxviewframeworkqt.dll \
         -lmpsettingsmanager.dll
+
+MOC_DIR = ./
 
 # Input
 HEADERS += inc/unittest_mpdetailsview.h \
@@ -47,7 +50,7 @@ HEADERS += inc/unittest_mpdetailsview.h \
            
 
 SOURCES += src/unittest_mpdetailsview.cpp \
-	       ../../src/mpdetailsview.cpp \
+               #../../src/mpdetailsview.cpp \
 		   stub/src/mpquerymanager.cpp \	       
 		   stub/src/mpengine.cpp \
 		   stub/src/mpenginefactory.cpp \		       

@@ -35,6 +35,7 @@ symbian:
 
 LIBS += -lestor.dll \
         -lfbscli.dll \
+        -lefsrv.dll \
         -lmpxcommon.dll \
         -lmpxcollectionutility.dll \
         -lxqserviceutil.dll

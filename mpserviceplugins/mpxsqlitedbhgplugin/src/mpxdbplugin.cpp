@@ -1004,7 +1004,7 @@ TBool CMPXDbPlugin::DoOpenIncrementalL( const CMPXCollectionPath& aPath,  const 
         for( TInt i=0; i<c; ++i )
             {
             TMPXItemId id = aArray->AtL(i)->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
-            ids.Append( id );
+            ids.AppendL( id );
             }
 
         // Rest are all blank items
@@ -1019,7 +1019,7 @@ TBool CMPXDbPlugin::DoOpenIncrementalL( const CMPXCollectionPath& aPath,  const 
         for( TInt i=0; i<count; ++i )
             {
             aArray->AppendL( *entry );
-            ids.Append( KMPXInvalidItemId );
+            ids.AppendL( KMPXInvalidItemId );
             }
         CleanupStack::PopAndDestroy( entry );
 
@@ -1688,7 +1688,7 @@ CMPXCollectionPath* CMPXDbPlugin::DoOpenPlaylistL(
                     // return all songs of a particular artist (currently highlighted)
                     path->Set(EMPXOpenGroupOrPlaylist);
                     ids.Reset();
-                    ids.Append(aPath.Id(2));
+                    ids.AppendL(aPath.Id(2));
                     path->AppendL(ids.Array());
                     path->SelectL(aPath.Id(2));
                     path->Set(EMPXOpenPlaylistOnly);
@@ -4332,6 +4332,9 @@ void CMPXDbPlugin::SetAttributesL(
     RArray<TMPXAttribute>& aAttrs,
     RArray<TInt>& aSupportedIds )
     {
+    CleanupClosePushL(aAttrs);
+    CleanupClosePushL(aSupportedIds);
+       
     aAttrs.AppendL( TMPXAttribute(KMPXMediaIdGeneral,
         EMPXMediaGeneralId | EMPXMediaGeneralType | EMPXMediaGeneralCategory |
         EMPXMediaGeneralTitle | EMPXMediaGeneralFlags | EMPXMediaGeneralUri) );
@@ -4428,6 +4431,8 @@ void CMPXDbPlugin::SetAttributesL(
             EMPXMediaMusicArtist | EMPXMediaMusicAlbum | EMPXMediaMusicAlbumArtFileName ) );
         aSupportedIds.AppendL( KMPXMediaIdMusic );
         }
+    CleanupStack::Pop();
+    CleanupStack::Pop();
     }
 
 #ifdef _DEBUG

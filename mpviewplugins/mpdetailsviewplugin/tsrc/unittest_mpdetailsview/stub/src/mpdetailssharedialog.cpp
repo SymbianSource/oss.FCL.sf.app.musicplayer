@@ -37,7 +37,7 @@ public:
 private:
     QNetworkReply *createRequest( Operation /*op*/,
                                  const QNetworkRequest &/*request*/,
-                                 QIODevice *outgoingData = 0 ) { return 0; }
+                                 QIODevice */*outgoingData = 0*/ ) { return 0; }
 };
 
 
@@ -58,6 +58,7 @@ MpDetailsShareDialog::~MpDetailsShareDialog()
 
 void MpDetailsShareDialog::initialize( MpSongData* aSongData )
 {
+    Q_UNUSED(aSongData)
     TX_ENTRY_ARGS("STUB")
     TX_EXIT_ARGS("STUB")
 }
@@ -76,6 +77,7 @@ void MpDetailsShareDialog::reload()
 
 void MpDetailsShareDialog::onIndexLoad( bool aOk )
 {
+    Q_UNUSED(aOk)
     TX_ENTRY_ARGS("STUB")
     TX_EXIT_ARGS("STUB")
 }

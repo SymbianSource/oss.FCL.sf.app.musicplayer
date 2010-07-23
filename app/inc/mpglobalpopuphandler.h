@@ -53,7 +53,7 @@ public slots:
     void outstandingPopupClosing();
 
 private:
-    void launchScanFinishedDialog( bool ok );
+    void launchScanFinishedDialog( bool ok, int itemsAdded );
     void launchDiskFullDialog();
     void setOutstandingPopup( HbPopup *popup );
 

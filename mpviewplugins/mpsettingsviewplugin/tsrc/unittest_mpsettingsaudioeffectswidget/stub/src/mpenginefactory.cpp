@@ -40,7 +40,6 @@ MpEngineFactory::MpEngineFactory()
  */
 MpEngineFactory::~MpEngineFactory()
 {
-    TX_ENTRY_ARGS("Stub")
 }
 
 /*!
@@ -48,7 +47,6 @@ MpEngineFactory::~MpEngineFactory()
  */
 MpEngineFactory * MpEngineFactory::instance()
 {
-    TX_LOG_ARGS("MpEngineFactory::instance() Stub")
     static MpEngineFactory instance;
     return &instance;
 }
@@ -57,9 +55,10 @@ MpEngineFactory * MpEngineFactory::instance()
  Returns an instance to an engine with \a hostUid, and \a mode, if the shared engine is 
  already created parameters are ignored.
  */
-MpEngine *MpEngineFactory::createSharedEngine( TUid /*hostUid*/ , MpEngine::EngineMode /*mode*/ )
+MpEngine *MpEngineFactory::createSharedEngine( TUid hostUid , MpEngine::EngineMode mode )
 {
-    TX_LOG_ARGS("MpEngineFactory::createSharedEngine() Stub")
+    Q_UNUSED( hostUid );
+    Q_UNUSED( mode );
     if ( !instance()->mSharedEngine ) {
         instance()->mSharedEngine = new MpEngine();
     }

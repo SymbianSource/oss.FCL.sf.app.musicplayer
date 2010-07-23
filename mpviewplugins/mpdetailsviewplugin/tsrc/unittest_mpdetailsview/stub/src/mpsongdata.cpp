@@ -63,7 +63,7 @@ MpSongData::~MpSongData()
     TX_EXIT_ARGS("Stub")
 }
 
-void MpSongData::albumArt( HbIcon& icon ) const
+void MpSongData::albumArt( HbIcon& /*icon*/ ) const
 {
     TX_ENTRY_ARGS("Stub")
     TX_EXIT_ARGS("Stub")
@@ -197,9 +197,9 @@ bool MpSongData::setTitle( const QString &title )
     return change;
 }
 
-bool MpSongData::setAlbum( const QString &album )
+bool MpSongData::setAlbum( const QString &/*album*/ )
 {
-    TX_ENTRY_ARGS("Stub album =" << album )
+
     TX_EXIT_ARGS("Stub")
     return false;
 }
@@ -474,8 +474,11 @@ void MpSongData::thumbnailReady(
         int id,
         int error  )
 {
-    TX_ENTRY_ARGS("Stub")
+    Q_UNUSED( pixmap );
     Q_UNUSED( data );
+    Q_UNUSED( id );
+    Q_UNUSED( error );
+    TX_ENTRY_ARGS("Stub")
     TX_EXIT_ARGS("Stub")
 }
 

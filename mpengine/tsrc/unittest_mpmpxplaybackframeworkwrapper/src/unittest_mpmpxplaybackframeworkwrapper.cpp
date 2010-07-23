@@ -265,7 +265,7 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandlePlaybackMessage()
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralType,0);
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralData,0);
     mTestPrivate->HandlePlaybackMessage(testMessage, KErrNone);
-    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 6);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
 
     CleanupStack::PopAndDestroy(testMessage);
 }
@@ -368,12 +368,12 @@ void TestMpMpxPlaybackFrameworkWrapper::testRetrieveSongDetails()
 {
     // Internal requests
     mTestPrivate->DoRetrieveSongDetailsL(false);
-    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 6);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
 
     // Request from Details view
     mTestPrivate->iDetailsRequest = false;
     mTest->retrieveSongDetails();
-    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 16);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 18);
     QCOMPARE(mTestPrivate->iDetailsRequest, true);
 
     // Request from Details view - no source
@@ -534,6 +534,25 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandleSubPlayerNamesL()
     MDesCArray* stubArray = NULL;
     mTestPrivate->HandleSubPlayerNamesL(stubUid, stubArray, false, KErrNone);
     QVERIFY(mTestPrivate);
+}
+
+/*!
+ Tests closeCurrentPlayback() / DoCloseCurrentPlaybackL()
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testCloseCurrentPlayback()
+{
+    TMPXPlaybackCommand dummyCmd = EPbCmdPlay;
+    mTestPrivate->iPlaybackUtility->iCmd = dummyCmd;
+
+    //Simulate none file opened.
+    mTestPrivate->iPlaybackUtility->iReturnSource = false;
+    mTest->closeCurrentPlayback();
+    QVERIFY(mTestPrivate->iPlaybackUtility->iCmd != EPbCmdClose);
+
+    //Simulate some file already opened.
+    mTestPrivate->iPlaybackUtility->iReturnSource = true;
+    mTest->closeCurrentPlayback();
+    QVERIFY(mTestPrivate->iPlaybackUtility->iCmd == EPbCmdClose);
 }
 
 /*!

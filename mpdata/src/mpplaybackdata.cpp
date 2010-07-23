@@ -81,7 +81,7 @@ MpPlaybackData::MpPlaybackData( QObject *parent )
       mPosition(0),
       mAlbumId(0),
       mId(0),
-      mAlbumArt( "qtg_large_music_album" ),
+      mAlbumArt( "qtg_large_album_art" ),
       mPlaybackState( NotPlaying ),
       mRealAudio( false )
 {

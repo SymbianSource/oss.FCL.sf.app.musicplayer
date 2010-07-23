@@ -59,7 +59,7 @@ const QLatin1String ICON_PAUSE ("qtg_mono_pause");
 const QLatin1String ICON_LARGE_MUSIC_PLAYER ("qtg_large_music_player");
 /**  Music Player shortcut icon */
 const QLatin1String ICON_FIRST_TIME_USE ("qtg_large_music_empty");
-const QLatin1String ICON_DEFAULT_ART ("qtg_large_music_album");
+const QLatin1String ICON_DEFAULT_ART ("qtg_large_album_art");
 
 /**  HsWidget normal background */
 const QLatin1String WIDGET_BG_NORMAL ("qtg_fr_hswidget_normal");

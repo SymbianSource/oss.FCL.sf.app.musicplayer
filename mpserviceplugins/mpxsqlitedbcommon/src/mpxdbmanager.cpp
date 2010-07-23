@@ -2299,6 +2299,7 @@ void CMPXDbManager::FindAllTablesL(
     const TDesC& aAlias,
     RArray<HBufC*>& aTableName)
     {
+    CleanupClosePushL(aTableName);
     RSqlStatement statement;
     CleanupClosePushL(statement);
 
@@ -2329,6 +2330,7 @@ void CMPXDbManager::FindAllTablesL(
         }
 
     CleanupStack::PopAndDestroy(&statement);
+    CleanupStack::Pop();
     }
 
 // ----------------------------------------------------------------------------

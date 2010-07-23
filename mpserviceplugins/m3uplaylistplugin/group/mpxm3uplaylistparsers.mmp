@@ -47,4 +47,6 @@ LIBRARY         mpxcommon.lib
 LIBRARY         PlatformEnv.lib
 #endif //RD_MULTIPLE_DRIVE
 
+SMPSAFE
+
 // End of File

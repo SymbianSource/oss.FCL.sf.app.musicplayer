@@ -19,7 +19,7 @@ CONFIG += hb
 TARGET = musicservices
 symbian: { 
     TARGET.UID3 = 0x10207C69
-    MMP_RULES += "DEFFILE musicservices.def"
+    MMP_RULES += "DEFFILE musicservices.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1

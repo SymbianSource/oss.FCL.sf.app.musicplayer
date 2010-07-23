@@ -81,7 +81,7 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("albumArt"));
         mAlbumArt = qobject_cast<MpAlbumCoverWidget*>(tmpWidgetPtr);
         mAlbumArt->setEnabled( false );
-        mAlbumArt->setDefaultIcon( HbIcon( "qtg_large_music_album" ) );
+        mAlbumArt->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("realAudio"));
         mRealAudioIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
         mRealAudioIndicator->hide();
@@ -228,6 +228,7 @@ void MpPlaybackWidget::handleSliderMoved( int value )
     mProgressBar->setSliderValue(value);
     mProgressBar->setMinText( formatDuration(value) );
     mProgressBar->setMaxText( formatDuration(mDuration  - value) );
+    mProgressBar->setSliderToolTip( formatDuration(value) );
     if ( !mProgreesBarDragging ) {
         // Click on the progress bar, not a drag.
         emit setPlaybackPosition( KMicroSecToMiliSec * value );

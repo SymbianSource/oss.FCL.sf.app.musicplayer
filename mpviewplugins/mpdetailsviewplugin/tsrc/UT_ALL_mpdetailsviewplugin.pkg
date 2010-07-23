@@ -17,7 +17,7 @@
 &EN
 
 ; SIS header: name, uid, version
-#{"UT_ALL_mpdetailsviewplugin"},(0xE003e880),1,0,0
+#{"UT_ALL_mpdetailsviewplugin"},(0xEab0059a),1,0,0
 
 ; Localised Vendor name
 %{"Vendor"}
@@ -26,18 +26,22 @@
 :"Vendor"
 
 ; Executable and default resource files
-"/epoc32/release/armv5/udeb/unittest_mpmpxdetailsframeworkwrapper.exe"    - "!:\sys\bin\unittest_mpmpxdetailsframeworkwrapper.exe"
-"/epoc32/data/z/private/10003a3f/import/apps/unittest_mpmpxdetailsframeworkwrapper_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpmpxdetailsframeworkwrapper_reg.rsc"
+
+"/epoc32/release/armv5/udeb/unittest_mpdetailssharedialog.exe"    - "!:\sys\bin\unittest_mpdetailssharedialog.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/unittest_mpdetailssharedialog_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpdetailssharedialog_reg.rsc"
 
 "/epoc32/release/armv5/udeb/unittest_mpdetailsview.exe"    - "!:\sys\bin\unittest_mpdetailsview.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/unittest_mpdetailsview_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpdetailsview_reg.rsc"
 
-"/epoc32/release/armv5/udeb/unittest_mpsongdata.exe"    - "!:\sys\bin\unittest_mpsongdata.exe"
-"/epoc32/data/z/private/10003a3f/import/apps/unittest_mpsongdata_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpsongdata_reg.rsc"
 
 "/epoc32/release/armv5/udeb/unittest_mpdetailsviewplugin.exe"    - "!:\sys\bin\unittest_mpdetailsviewplugin.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/unittest_mpdetailsviewplugin_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpdetailsviewplugin_reg.rsc"
 
 "/epoc32/release/armv5/udeb/unittest_mpquerymanager.exe"    - "!:\sys\bin\unittest_mpquerymanager.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/unittest_mpquerymanager_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpquerymanager_reg.rsc"
+
+"/epoc32/release/armv5/udeb/unittest_mpsharedata.exe"    - "!:\sys\bin\unittest_mpsharedata.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/unittest_mpsharedata_reg.rsc"    - "!:\private\10003a3f\import\apps\unittest_mpsharedata_reg.rsc"
+
+
 

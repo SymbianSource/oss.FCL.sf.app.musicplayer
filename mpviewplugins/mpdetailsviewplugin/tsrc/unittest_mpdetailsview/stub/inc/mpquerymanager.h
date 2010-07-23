@@ -27,7 +27,6 @@ class MpSongData;
 class MpDetailsShareDialog;
 class MpEngine;
 
-QTM_USE_NAMESPACE
 
 class MpQueryManager : public QObject
 {

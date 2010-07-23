@@ -55,7 +55,9 @@
 
 
 const int KRecommendationCount = 2;
-
+const int KOneKiloByteInBytes = 1024;
+const int KOneMegabyteInBytes = 1048576;        
+const int KOneGigaByteInBytes = 134217728;        
 
 /*!
  Constructor
@@ -338,9 +340,7 @@ void MpDetailsView::RenderInspireMeGroupBox()
         prototype->setSecondaryTextRowCount(minTextRowCount,maxTextRowCount);
 
         HbListWidgetItem  *inspireMeItem = new HbListWidgetItem();
-        QString info(tr("There are no recommendations for this track, but you can always discover new music on Ovi"));
-        inspireMeItem->setText( QString( " " ) );
-        inspireMeItem->setSecondaryText( info );
+        inspireMeItem->setSecondaryText( hbTrId( "txt_mus_dblist_val_there_are_no_recommendations" ) );
         mInspireList->addItem( inspireMeItem );
     }
 
@@ -386,13 +386,13 @@ void MpDetailsView::handlePlaybackInfoChanged()
     if ( !mSongData->album().isEmpty () ) {
         mAlbumText->setPlainText( mSongData->album() );
     } else {
-        mAlbumText->setPlainText( tr( "Unknown") );
+        mAlbumText->setPlainText( hbTrId( "txt_mus_other_unknown7") );
     }
 
     if ( !mSongData->artist().isEmpty() ) {
         mArtistText->setPlainText( mSongData->artist() );
     } else {
-        mArtistText->setPlainText( tr( "Unknown") );
+        mArtistText->setPlainText( hbTrId( "txt_mus_other_unknown6") );
     }
 
     if (canQuerySharePlayerLink() ) {
@@ -433,7 +433,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->albumTrack().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Song number" ) );
+        item->setText( hbTrId( "txt_mus_dblist_song_number" ) );
         item->setSecondaryText( mSongData->albumTrack() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -441,7 +441,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->year().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Year" ) );
+        item->setText( hbTrId( "txt_mus_dblist_year" ) );
         item->setSecondaryText( mSongData->year() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -449,7 +449,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->genre().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Genre" ) );
+        item->setText( hbTrId( "txt_mus_dblist_genre" ) );
         item->setSecondaryText( mSongData->genre() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -457,7 +457,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->composer().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Composer" ) );
+        item->setText( hbTrId( "txt_mus_dblist_composer" ) );
         item->setSecondaryText( mSongData->composer() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -465,7 +465,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->fileName().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "File name" ) );
+        item->setText( hbTrId( "txt_mus_dblist_file_name" ) );
         item->setSecondaryText( mSongData->fileName() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -473,7 +473,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->mimeType().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Format" ) );
+        item->setText( hbTrId( "txt_mus_dblist_format" ) );
         item->setSecondaryText( mSongData->mimeType() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -481,7 +481,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->duration().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Duration" ) );
+        item->setText( hbTrId( "txt_mus_dblist_duration" ) );
         item->setSecondaryText( mSongData->duration() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -489,31 +489,59 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->bitRate().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Bitrate" ) );
-        item->setSecondaryText( mSongData->bitRate().append( " Kbps" ) );
+        item->setText( hbTrId( "txt_mus_dblist_bitrate" ) );
+        bool ok = false;
+        int bitRate = mSongData->bitRate().toInt(&ok);
+        TX_LOG_ARGS("Warning: If zero, bitrate is not read correctly. It wont show up in details" << ok);
+        if(ok) {
+            item->setSecondaryText( hbTrId("txt_mus_dblist_bitrate_val_ln_kbps", bitRate) );
+        }    
         item->setEnabled( false );
         mDetailList->addItem( item );
     }
 
     if ( !mSongData->sampleRate().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Sampling rate" ) );
-        item->setSecondaryText( mSongData->sampleRate().append( " hz" ) );
+        item->setText( hbTrId( "txt_mus_dblist_sampling_rate" ) );
+        bool ok = false;
+        int samplingRate = mSongData->sampleRate().toInt(&ok);
+        TX_LOG_ARGS("Warning: If zero, sampling rate is not read correctly. It wont show up in details" << ok);
+        if(ok) {
+            item->setSecondaryText(	hbTrId("txt_mus_dblist_sampling_rate_val_ln_hz", samplingRate) );
+        }            
         item->setEnabled( false );
         mDetailList->addItem( item );
     }
 
     if ( !mSongData->size().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Size" ) );
-        item->setSecondaryText( mSongData->size().append( " MB" ) );
+        item->setText( hbTrId( "txt_mus_dblist_size" ) );
+        bool ok = false;
+        long size = mSongData->size().toLong(&ok); // in bytes
+        TX_LOG_ARGS("WARNING: If zero, Cant get song data size right. You wont see the size in details groupbox correctly" << ok );
+        if( size < KOneKiloByteInBytes) {
+            // under 1 KB
+            item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_b", size) );
+        } else if( size < KOneMegabyteInBytes ) {
+            // under 1 MB
+            size /= KOneKiloByteInBytes; // turn size into KB
+            item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_kb", size) );
+        } else if( size < KOneGigaByteInBytes ) {
+            // under 1 GB
+            size /= KOneMegabyteInBytes; // turn size to MB
+            item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_mb", size) );
+        } else {
+            // 1 GB or higher
+            size /= KOneGigaByteInBytes; // turn size to GB
+            item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_gb", size) );            
+        }
         item->setEnabled( false );
         mDetailList->addItem( item );
     }
 
     if ( !mSongData->modified().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Modified" ) );
+        item->setText( hbTrId( "txt_mus_dblist_modified" ) );
         item->setSecondaryText( mSongData->modified() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -521,7 +549,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->copyright().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Copyright" ) );
+        item->setText( hbTrId( "txt_mus_dblist_copyright" ) );
         item->setSecondaryText( mSongData->copyright() );
         item->setEnabled( false );
         mDetailList->addItem( item );
@@ -529,7 +557,7 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( !mSongData->musicURL().isNull() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Web site" ) );
+        item->setText( hbTrId( "txt_mus_dblist_web_site" ) );
         item->setSecondaryText( mSongData->musicURL() );
         item->setEnabled( true );
         mDetailList->addItem( item );
@@ -537,8 +565,8 @@ void MpDetailsView::songDetailInfoChanged()
 
     if ( mSongData->isDrmProtected() ) {
         HbListWidgetItem *item = new HbListWidgetItem();
-        item->setText( tr( "Licences" ) );
-        item->setSecondaryText( tr( "Click for details" ) );
+        item->setText( hbTrId( "txt_mus_dblist_licences" ) );
+        item->setSecondaryText( hbTrId( "txt_mus_dblist_licences_val_click_for_details" ) );
         item->setEnabled( true );
         mDetailList->addItem( item );
     }
@@ -617,6 +645,7 @@ void MpDetailsView::createShareDialog()
     if ( !mSharePopup->isInitialized() )
     {
         connect( mSharePopup, SIGNAL( closeShareDialog() ), this, SLOT( closeShareDialog() ) );
+		// TODO: Ask for a localization string for this, there is none in text map
         mSharePopup->initialize( mSongData, tr( "Unknown" ) );
     }
     TX_EXIT

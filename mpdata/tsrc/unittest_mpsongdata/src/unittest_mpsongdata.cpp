@@ -933,14 +933,14 @@ void TestMpSongData::testSetSize()
     mTestPrivate->mSize = QString();
     result = mTestPrivate->setSize( size );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->size(), QString::number( size / 1000 ) );
+    QCOMPARE( mTest->size(), QString::number( size ) );
 
     result = false;
     size = 4300;
     mTestPrivate->mSize = QString( "5" );
     result = mTestPrivate->setSize( size );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->size(), QString::number( size / 1000 ) );
+    QCOMPARE( mTest->size(), QString::number( size ) );
 }
 
 /*!

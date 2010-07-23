@@ -462,7 +462,8 @@ void MpDetailsShareDialog::onIndexLoad( bool aOk )
 void MpDetailsShareDialog::debugJs( QString s )
 {
     TX_ENTRY
-    TX_LOG_ARGS( "share: debugJs: " << s )
+    Q_UNUSED(s);
+
     TX_EXIT
 }
 

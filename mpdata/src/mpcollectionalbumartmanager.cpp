@@ -61,7 +61,7 @@ MpCollectionAlbumArtManager::MpCollectionAlbumArtManager( MpMpxCollectionData *d
       mCollectionData( data ),
       mThumbnailManager( 0 ),
       mCachingInProgress( false ),
-      mDefaultIcon( "qtg_large_music_album" ),
+      mDefaultIcon( "qtg_large_album_art" ),
       mPendingRequest( false ),
       mDefaultArtEnabled( true )
 {

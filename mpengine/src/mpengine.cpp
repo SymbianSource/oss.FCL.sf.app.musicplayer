@@ -276,6 +276,8 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 
         // Playback Wrapper
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
+        connect( this, SIGNAL( libraryAboutToUpdate() ),
+                 mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
 
         // AudioEffects wrapper
         mAudioEffectsWrapper = new MpAudioEffectsFrameworkWrapper();
@@ -309,6 +311,8 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 
         // Playback Wrapper
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, 0 );
+        connect( this, SIGNAL( libraryAboutToUpdate() ),
+                 mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
     }
     else if ( MediaBrowsing == mode ) {
         // Collection Wrapper

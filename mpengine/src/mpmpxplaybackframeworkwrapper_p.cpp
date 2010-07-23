@@ -280,6 +280,19 @@ void MpMpxPlaybackFrameworkWrapperPrivate::applyEqualizer()
 }
 
 /*!
+ \ Closes current playback source.
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::closeCurrentPlayback()
+{
+    TX_ENTRY
+    TRAPD( err, DoCloseCurrentPlaybackL() );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
  \internal
  */
 MpPlaybackData *MpMpxPlaybackFrameworkWrapperPrivate::playbackData()
@@ -653,6 +666,18 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoRetrieveSongDetailsL( bool detailsR
     }
     mediaSrc->MediaL( requestedAttr.Array(), *this );
     CleanupStack::PopAndDestroy( &requestedAttr );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::DoCloseCurrentPlaybackL()
+{
+    TX_ENTRY
+    if( iPlaybackUtility->Source() ) {
+        iPlaybackUtility->CommandL( EPbCmdClose );
+    }
     TX_EXIT
 }
 

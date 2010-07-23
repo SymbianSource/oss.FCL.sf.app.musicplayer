@@ -54,4 +54,6 @@ LIBRARY         bafl.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         mpxmetadataextractor.lib
 
+SMPSAFE
+
 // End of File

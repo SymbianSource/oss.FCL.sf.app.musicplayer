@@ -24,13 +24,13 @@
 /*!
  Stub function.
 */
-MMPXPlaybackUtility::MMPXPlaybackUtility():iProperty(EPbPropertyVolume),
-                                           iObs(0),
-                                           iValue(0),
+MMPXPlaybackUtility::MMPXPlaybackUtility():iValue(0),
                                            iComandData(0),
+                                           iProperty(EPbPropertyVolume),
+                                           iObs(0),
+                                           iCMPXCmd(0),
                                            iState(EPbStateNotInitialised),
                                            iAttrs(0),
-                                           iCMPXCmd(0),
                                            iInitialized(false),
                                            iReturnSource(true)
 {

@@ -152,6 +152,14 @@ void MpMpxPlaybackFrameworkWrapper::setRepeat( bool mode )
 }
 
 /*!
+ Slot to close current playback.
+ */
+void MpMpxPlaybackFrameworkWrapper::closeCurrentPlayback()
+{
+    d_ptr->closeCurrentPlayback();
+}
+
+/*!
  Change \a balance.
  */
 void MpMpxPlaybackFrameworkWrapper::setBalance( int balance )

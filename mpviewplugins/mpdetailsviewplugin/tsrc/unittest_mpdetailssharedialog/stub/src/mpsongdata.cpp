@@ -67,8 +67,7 @@ MpSongData::MpSongData( QObject *parent )
       mAlbumArt(),
       mReqId( KUndefined )
 {
-    //TX_ENTRY
-    //TX_EXIT
+    TX_ENTRY_ARGS("Stub")
 }
 
 /*!
@@ -76,8 +75,7 @@ MpSongData::MpSongData( QObject *parent )
  */
 MpSongData::~MpSongData()
 {
-    //TX_ENTRY
-    //TX_EXIT
+    TX_ENTRY_ARGS("Stub")
 }
 
 /*!
@@ -85,14 +83,12 @@ MpSongData::~MpSongData()
 */
 void MpSongData::albumArt( QPixmap& pixmap )
 {
-    //TX_ENTRY
      if ( !mAlbumArt.isNull() ) {
         pixmap = mAlbumArt;
      }
      else {
          pixmap = QPixmap();
      }
-    //TX_EXIT
 }
 
 
@@ -101,7 +97,6 @@ void MpSongData::albumArt( QPixmap& pixmap )
 */
 QString MpSongData::title() const
 {
-    //TX_LOG
     return mTitle;
 }
 
@@ -110,7 +105,6 @@ QString MpSongData::title() const
 */
 QString MpSongData::album() const
 {
-    //TX_LOG
     return mAlbum;
 }
 
@@ -119,7 +113,6 @@ QString MpSongData::album() const
 */
 QString MpSongData::artist() const
 {
-    //TX_LOG
     return mArtist;
 }
 
@@ -128,7 +121,6 @@ QString MpSongData::artist() const
 */
 QString MpSongData::comment() const
 {
-    //TX_LOG
     return mComment;
 }
 
@@ -137,7 +129,6 @@ QString MpSongData::comment() const
 */
 QString MpSongData::composer() const
 {
-    //TX_LOG
     return mComposer;
 }
 
@@ -147,7 +138,6 @@ QString MpSongData::composer() const
 */
 QString MpSongData::genre() const
 {
-    //TX_LOG
     return mGenre;
 }
 
@@ -157,7 +147,6 @@ QString MpSongData::genre() const
 */
 QString MpSongData::albumTrack() const
 {
-    //TX_LOG
     return mAlbumTrack;
 }
 
@@ -166,7 +155,6 @@ QString MpSongData::albumTrack() const
 */
 QString MpSongData::link() const
 {
-    //TX_LOG
     return mLink;
 }
 
@@ -175,7 +163,6 @@ QString MpSongData::link() const
 */
 QString MpSongData::year() const
 {
-    //TX_LOG    
     return mYear;
 }
 
@@ -185,13 +172,11 @@ QString MpSongData::year() const
 */
 bool MpSongData::setTitle( const QString &title )
 {
-    //TX_ENTRY_ARGS( "title =" << title )
     bool change = false;
     if ( title != mTitle ) {
         change = true;
         mTitle = title;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -200,13 +185,11 @@ bool MpSongData::setTitle( const QString &title )
 */
 bool MpSongData::setAlbum( const QString &album )
 {
-    //TX_ENTRY_ARGS( "album =" << album )
     bool change = false;
     if ( album != mAlbum ) {
         change = true;
         mAlbum = album;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -215,13 +198,11 @@ bool MpSongData::setAlbum( const QString &album )
 */
 bool MpSongData::setArtist( const QString &artist )
 {
-    //TX_ENTRY_ARGS( "artist =" << artist )
     bool change = false;
     if ( artist != mArtist ) {
         change = true;
         mArtist = artist;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -230,13 +211,11 @@ bool MpSongData::setArtist( const QString &artist )
 */
 bool MpSongData::setComment( const QString &comment)
 {
-    //TX_ENTRY_ARGS( "comment =" << comment )
     bool change = false;
     if ( comment != mComment ) {
         change = true;
         mComment = comment;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -246,13 +225,11 @@ bool MpSongData::setComment( const QString &comment)
 */
 bool MpSongData::setComposer( const QString &composer )
 {
-    //TX_ENTRY_ARGS( "composer =" << composer )
     bool change = false;
     if ( composer != mComposer ) {
         change = true;
         mComposer = composer;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -261,13 +238,11 @@ bool MpSongData::setComposer( const QString &composer )
 */
 bool MpSongData::setGenre( const QString &genre )
 {
-    //TX_ENTRY_ARGS( "genre =" << genre )
     bool change = false;
     if ( genre != mGenre ) {
         change = true;
         mGenre = genre;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -277,7 +252,6 @@ bool MpSongData::setGenre( const QString &genre )
 */
 bool MpSongData::setYear( int year )
 {
-    //TX_ENTRY_ARGS( "year =" << year )
     bool change = false;
     if ( QString::number(year) != mYear ) {
         change = true;
@@ -285,7 +259,6 @@ bool MpSongData::setYear( int year )
             mYear = QString::number(year);
         }
     }
-    //TX_EXIT
     return change;
 }
 
@@ -294,13 +267,11 @@ bool MpSongData::setYear( int year )
 */
 bool MpSongData::setAlbumTrack( const QString &track )
 {
-    //TX_ENTRY_ARGS( "track =" << track )
     bool change = false;
     if ( track != mAlbumTrack ) {
         change = true;
         mAlbumTrack = track;
     }
-    //TX_EXIT
     return change;
 }
 
@@ -309,9 +280,7 @@ bool MpSongData::setAlbumTrack( const QString &track )
 */
 void MpSongData::setLink( const QString &link )
 {
-    //TX_ENTRY_ARGS( "Link =" << link )
     mLink = link;
-    //TX_EXIT
 }
 
 /*!
@@ -319,10 +288,9 @@ void MpSongData::setLink( const QString &link )
 */
 void MpSongData::setAlbumArtUri( const QString &albumArtUri)
 {
-    //TX_ENTRY
+    Q_UNUSED(albumArtUri);
     mAlbumArt = mDefaultAlbumArt;
     emit albumArtReady();
-    //TX_EXIT
 }
 
 
@@ -335,10 +303,10 @@ void MpSongData::thumbnailReady(
         int id,
         int error  )
 {
-    //TX_ENTRY
+    Q_UNUSED( pixmap );
     Q_UNUSED( data );
-
-    //TX_EXIT
+    Q_UNUSED( id );
+    Q_UNUSED( error );
 }
 
 /*!
@@ -346,9 +314,7 @@ void MpSongData::thumbnailReady(
 */
 void MpSongData::commitPlaybackInfo()
 {
-    //TX_ENTRY
     emit playbackInfoChanged();
-    //TX_EXIT
 }
 
 /*!
@@ -356,23 +322,12 @@ void MpSongData::commitPlaybackInfo()
 */
 void MpSongData::commitSongDetailInfo()
 {
-    //TX_ENTRY
     emit songDetailInfoChanged();
-    //TX_EXIT
 }
 
 QString MpSongData::albumArtBase64() const
 {
-    // Converts the current album art pixmap to a base64 string, and return the string.
-//    TX_ENTRY
-//    QByteArray array;
-//    QBuffer buffer(&array);
-//    buffer.open(QIODevice::WriteOnly);
-//    mAlbumArt.save(&buffer, "PNG"); // writes pixmap into bytes in PNG format
-//    buffer.close();
-//    QByteArray base64 = array.toBase64();
-//    TX_EXIT
-//    return base64.constData();
+
     return QString("");
 }
 

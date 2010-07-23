@@ -56,6 +56,7 @@ public:
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
+    void closeCurrentPlayback();
 
     MpPlaybackData *playbackData();
 
@@ -79,6 +80,7 @@ private:
     void ForceStopL();
     void UpdateStateL();
     void DoRetrieveSongDetailsL( bool detailsRequest );
+    void DoCloseCurrentPlaybackL();
 
 private:
 

@@ -19,7 +19,7 @@ CONFIG += hb
 TARGET = mpdata
 symbian: { 
     TARGET.UID3 = 0x10207C95
-    MMP_RULES += "DEFFILE mpdata.def"
+    MMP_RULES += "DEFFILE mpdata.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1

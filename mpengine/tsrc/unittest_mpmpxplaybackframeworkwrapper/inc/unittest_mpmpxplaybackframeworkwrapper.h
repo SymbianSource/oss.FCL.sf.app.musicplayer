@@ -70,6 +70,7 @@ private slots:
     void testStopSeeking();
     void testStartSeekBackward();
     void testHandleSubPlayerNamesL();
+    void testCloseCurrentPlayback();
 
 private:
 

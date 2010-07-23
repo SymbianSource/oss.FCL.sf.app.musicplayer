@@ -22,6 +22,7 @@ symbian: {
     TARGET.UID3 = 0x10207C94
     TARGET.CAPABILITY = All -TCB
     TARGET.EPOCALLOWDLLDATA = 1
+    MMP_RULES += SMPSAFE
 }
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0

@@ -62,7 +62,7 @@ MpSongDataPrivate::MpSongDataPrivate( MpSongData *wrapper, ThumbnailManager *thu
       mAlbumArt()
 {
     TX_ENTRY
-    mDefaultAlbumArt = new HbIcon( "qtg_large_music_album" );
+    mDefaultAlbumArt = new HbIcon( "qtg_large_album_art" );
     TX_EXIT
 }
 
@@ -143,7 +143,79 @@ QString MpSongDataPrivate::year() const
 QString MpSongDataPrivate::genre() const
 {
     TX_LOG
-    return mGenre;
+	QString localizedString(mGenre);
+
+	if ( mGenre == "Acoustic" ) {
+		localizedString = hbTrId( "txt_mus_dblist_genre_val_acoustic" );
+	}
+    else if ( mGenre == "Alternative" ) {
+		localizedString = hbTrId( "txt_mus_dblist_genre_val_alternative" );
+    }
+    else if ( mGenre == "Blues" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_blues" );
+    }
+    else if ( mGenre == "Classical" ) {
+		localizedString = hbTrId( "txt_mus_dblist_genre_val_classical" );
+    }
+    else if ( mGenre == "Country" ) {
+		localizedString = hbTrId( "txt_mus_dblist_genre_val_country" );
+    }
+    else if ( mGenre == "Dance" ) {
+    	localizedString = hbTrId( "txt_mus_dblist_genre_val_dance" );
+    }
+    else if ( mGenre == "Easy Listening" ) {
+		localizedString = hbTrId( "txt_mus_dblist_genre_val_easy_listening" );
+    }
+    else if ( mGenre == "Electronic" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_electronic" );
+    }
+    else if ( mGenre == "Folk" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_folk" );
+    }
+	else if ( mGenre == "Hip-Hop" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_hiphop" );
+    }
+    else if ( mGenre == "Jazz" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_jazz" );
+    }
+    else if ( mGenre == "Latin" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_latin" );
+    }
+    else if ( mGenre == "Metal" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_metal" );
+    }
+    else if ( mGenre == "New Age" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_new_age" );
+    }
+    else if ( mGenre == "Other" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_other" );
+    }
+    else if ( mGenre == "Pop" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_pop" );
+    }
+    else if ( mGenre == "R&B" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_rb" );
+    }
+    else if ( mGenre == "Rap" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_rap" );
+    }
+    else if ( mGenre == "Reggae" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_reggae" );
+    }
+    else if ( mGenre == "Rock" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_rock" );
+    }
+    else if ( mGenre == "Soundtrack" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_soundtrack" );
+    }
+    else if ( mGenre == "Spoken" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_spoken" );
+    }
+    else if ( mGenre == "World" ) {
+        localizedString = hbTrId( "txt_mus_dblist_genre_val_world" );
+    }
+    TX_EXIT_ARGS( "Logical String = " << localizedString );
+    return localizedString;
 }
 
 /*!
@@ -392,7 +464,7 @@ void MpSongDataPrivate::thumbnailReady( QPixmap pixmap, void *data, int id, int 
             TX_LOG_ARGS( "Album art is default album art." )
             delete mAlbumArt;
             mAlbumArt = new HbIcon(qicon);
-            mDefaultAlbumArt = new HbIcon( "qtg_large_music_album" );
+            mDefaultAlbumArt = new HbIcon( "qtg_large_album_art" );
         } else {
             TX_LOG_ARGS( "Album art is NOT default album art." )
             delete mAlbumArt;
@@ -887,7 +959,7 @@ bool MpSongDataPrivate::setSize( int size )
     bool change = false;
     if ( QString::number( size ) != mSize ) {
         change = true;
-        mSize = QString::number( size / 1000 );
+        mSize = QString::number( size ); // in bytes
     }
     TX_EXIT
     return change;

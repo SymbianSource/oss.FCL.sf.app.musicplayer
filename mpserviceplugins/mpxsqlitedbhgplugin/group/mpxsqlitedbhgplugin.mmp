@@ -108,4 +108,6 @@ LIBRARY         thumbnailmanager.lib
 ALWAYS_BUILD_AS_ARM
 OPTION ARMCC -O3 -Otime
 
+SMPSAFE
+
 // End of File

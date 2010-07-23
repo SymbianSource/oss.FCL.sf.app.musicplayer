@@ -108,7 +108,7 @@ void TestMpShareData::cleanup()
 void TestMpShareData::testOwner()
 {
     mTest->setOwner(this);
-    QCOMPARE(mTest->owner(), this);
+    QCOMPARE(mTest->owner(), (QObject*) this);
 }
 
 void TestMpShareData::testSongData()
@@ -229,14 +229,6 @@ void TestMpShareData::testSongTitle()
     delete song;
 }
 
-//void TestMpShareData::testSongAlbum()
-//{
-//    MpSongData *song = new MpSongData();
-//    song->setAlbum("TestAlbum");
-//    mTest->setSongData(song);
-//    QCOMPARE(mTest->album(), QString("TestAlbum"));
-//    delete song;
-//}
 
 void TestMpShareData::testSongArtist()
 {
@@ -263,72 +255,6 @@ void TestMpShareData::testLanguage()
     QCOMPARE(mTest->language(), QString("fi"));
     delete song;
 }
-
-/*
-void TestMpShareData::testSongComment()
-{
-    MpSongData *song = new MpSongData();
-    song->setComment("TestComment");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->comment(), QString("TestComment"));
-    delete song;
-}
-
-void TestMpShareData::testSongAlbumArt()
-{
-    MpSongData *song = new MpSongData();
-    song->setAlbumArtUri("TestAlbum");
-    mTest->setSongData(song);
-    QPixmap pic;
-    mTest->albumArt(pic);
-    delete song;
-}
-
-void TestMpShareData::testSongYear()
-{
-    MpSongData *song = new MpSongData();
-    song->setYear(1999);
-    mTest->setSongData(song);
-    QCOMPARE(mTest->year(), QString("1999"));
-    delete song;
-}
-
-void TestMpShareData::testSongGenre()
-{
-    MpSongData *song = new MpSongData();
-    song->setGenre("TestGenre");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->genre(), QString("TestGenre"));
-    delete song;
-}
-
-void TestMpShareData::testSongComposer()
-{
-    MpSongData *song = new MpSongData();
-    song->setComposer("TestComposer");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->composer(), QString("TestComposer"));
-    delete song;
-}
-
-void TestMpShareData::testSongAlbumTrack()
-{
-    MpSongData *song = new MpSongData();
-    song->setAlbumTrack("TestAlbumTrack");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->albumTrack(), QString("TestAlbumTrack"));
-    delete song;
-}
-
-void TestMpShareData::testSongLink()
-{
-    MpSongData *song = new MpSongData();
-    song->setLink("TestLink");
-    mTest->setSongData(song);
-    QCOMPARE(mTest->link(), QString("TestLink"));
-    delete song;
-}
-*/
 
 void TestMpShareData::testSongNoInfo()
 {

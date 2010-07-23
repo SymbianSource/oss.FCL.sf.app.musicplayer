@@ -62,7 +62,8 @@ public slots:
     void setPosition( int position );
     void setShuffle( bool mode );
     void setRepeat( bool mode );
-    
+    void closeCurrentPlayback();
+
 private:
 
     Q_DISABLE_COPY(MpMpxPlaybackFrameworkWrapper)

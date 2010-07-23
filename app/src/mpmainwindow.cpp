@@ -322,11 +322,13 @@ void MpMainWindow::handleLibraryUpdated()
 {
     TX_ENTRY
 
-    // If library changed while playing back, always return to AllSongs collection view.
-    if ( mPlaybackViewPlugin &&
-         mCurrentViewPlugin == mPlaybackViewPlugin &&
-         mCollectionViewPlugin ) {
-
+    // Data might have changed, so other views than Collection or MediaWall are not valid any more.
+    if ( mCurrentViewPlugin == mMediaWallViewPlugin ) {
+        if ( mVerticalViewType != CollectionView ) {
+            mVerticalViewType = CollectionView;
+        }
+    }
+    else if ( mCollectionViewPlugin && mCurrentViewPlugin != mCollectionViewPlugin ) {
         activateView( CollectionView );
         MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
         collectionView->setDefaultView();
@@ -523,6 +525,7 @@ void MpMainWindow::loadActivity( QVariant data )
     TX_ENTRY
     QVariantHash activityData = data.toHash();
     QByteArray serializedRestorePath = activityData.value( "restorePath" ).toByteArray();
+    connect( MpEngineFactory::sharedEngine(), SIGNAL( restorePathFailed() ), this, SLOT( handleRestorePathFailed() ) );
     MpEngineFactory::sharedEngine()->loadActivityData( serializedRestorePath );
     TX_EXIT
 }

@@ -21,7 +21,7 @@ CONFIG += hb qt
 TARGET = mpsettingsmanager
 symbian: { 
     TARGET.UID3 = 0x10207C68
-    MMP_RULES += "DEFFILE mpsettingsmanager.def"
+    MMP_RULES += "DEFFILE mpsettingsmanager.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1

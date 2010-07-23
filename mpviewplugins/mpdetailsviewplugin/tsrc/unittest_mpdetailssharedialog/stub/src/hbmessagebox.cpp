@@ -29,10 +29,10 @@ HbMessageBox::~HbMessageBox()
 
 void HbMessageBox::information(const QString &warningText)
 {
-
+    Q_UNUSED(warningText);
 }
 
 void HbMessageBox::warning(const QString &warningText)
 {
-
+    Q_UNUSED(warningText);
 }

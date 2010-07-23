@@ -48,4 +48,6 @@ LIBRARY         ecom.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         mpxm3uplaylistparsers.lib
 
+SMPSAFE
+
 // End of File

@@ -342,6 +342,7 @@ bool MpSongData::setMusicURL( const QString &link )
 void MpSongData::setAlbumArtUri( const QString &albumArtUri)
 {
     //TX_ENTRY
+    Q_UNUSED(albumArtUri)
     mAlbumArt = mDefaultAlbumArt;
     emit albumArtReady();
     //TX_EXIT
@@ -358,8 +359,10 @@ void MpSongData::thumbnailReady(
         int error  )
 {
     //TX_ENTRY
+    Q_UNUSED( pixmap );
     Q_UNUSED( data );
-
+    Q_UNUSED( id );
+    Q_UNUSED( error );
     //TX_EXIT
 }
 

@@ -792,8 +792,8 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoFindPlaylistsL( QStringList &play
 
     RArray<TMPXAttribute> attrs;
     CleanupClosePushL( attrs );
-    attrs.Append( KMPXMediaGeneralId );
-    attrs.Append( KMPXMediaGeneralTitle );
+    attrs.AppendL( KMPXMediaGeneralId );
+    attrs.AppendL( KMPXMediaGeneralTitle );
 
     CMPXMedia* criteria = CMPXMedia::NewL();
     CleanupStack::PushL( criteria );
@@ -1130,23 +1130,28 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoFindAlbumSongsL( int index )
     const CMPXMediaArray* mediaArray = container.Value<CMPXMediaArray>( KMPXMediaArrayContents );
     CMPXMedia* album( mediaArray->AtL( index ) );
 
-    // Fetch the songs for the selected album
+	// Obtain the artistId from the container
+    TMPXItemId artistId = container.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
+	
+    // Fetch the songs for the selected album and the artist
+	// Specifying artistId is necessary to search for songs in the artist’s unknown album.
     TMPXItemId albumId = album->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);
     CMPXMedia* findCriteria = CMPXMedia::NewL();
     CleanupStack::PushL( findCriteria );
     findCriteria->SetTObjectValueL<TMPXGeneralType>( KMPXMediaGeneralType, EMPXGroup );
     findCriteria->SetTObjectValueL<TMPXGeneralCategory>( KMPXMediaGeneralCategory, EMPXSong );
     findCriteria->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, albumId );
+    findCriteria->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralContainerId, artistId );
     RArray<TMPXAttribute> attrs;
     CleanupClosePushL( attrs );
-    attrs.Append( TMPXAttribute( KMPXMediaIdGeneral,
+    attrs.AppendL( TMPXAttribute( KMPXMediaIdGeneral,
                                  EMPXMediaGeneralTitle |
 								 EMPXMediaGeneralUri |
                                  EMPXMediaGeneralId |
                                  EMPXMediaGeneralType |
                                  EMPXMediaGeneralCategory |
                                  EMPXMediaGeneralFlags ) );
-    attrs.Append( KMPXMediaMusicAlbumTrack );
+    attrs.AppendL( KMPXMediaMusicAlbumTrack );
 
     iCollectionUtility->Collection().FindAllL( *findCriteria, attrs.Array(), *this );
     CleanupStack::PopAndDestroy( &attrs );
@@ -1335,7 +1340,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::PreparePlaylistMediaL(
             findCriteria->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, containerId );
             RArray<TMPXAttribute> attrs;
             CleanupClosePushL( attrs );
-            attrs.Append( TMPXAttribute( KMPXMediaIdGeneral,
+            attrs.AppendL( TMPXAttribute( KMPXMediaIdGeneral,
                                          EMPXMediaGeneralTitle |
                                          EMPXMediaGeneralId ) );
             results = iCollectionUtility->Collection().FindAllL( *findCriteria, attrs.Array() );

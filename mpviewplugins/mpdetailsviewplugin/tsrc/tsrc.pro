@@ -17,10 +17,10 @@
 TEMPLATE = subdirs
 
 SUBDIRS += unittest_mpdetailssharedialog \
-           # unittest_mpdetailsview \
+           unittest_mpdetailsview \
            unittest_mpdetailsviewplugin \
-           # unittest_mpquerymanager \
-           # unittest_mpsharedata
+           unittest_mpquerymanager \
+           unittest_mpsharedata
 
 CONFIG += ordered
 

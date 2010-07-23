@@ -19,7 +19,7 @@ CONFIG += hb qt
 TARGET = mpalbumcoverwidget
 symbian: { 
     TARGET.UID3 = 0x10207C96
-    MMP_RULES += "DEFFILE mpalbumcoverwidget.def"
+    MMP_RULES += "DEFFILE mpalbumcoverwidget.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1

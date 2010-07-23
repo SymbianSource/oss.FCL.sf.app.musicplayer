@@ -16,7 +16,8 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += unittest_mpsettingsviewplugin
+SUBDIRS += unittest_mpsettingsviewplugin \
+           unittest_mpsettingsaudioeffectswidget
 
 CONFIG += ordered
 

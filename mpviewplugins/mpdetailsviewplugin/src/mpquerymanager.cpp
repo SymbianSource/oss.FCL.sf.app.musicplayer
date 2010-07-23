@@ -247,6 +247,7 @@ void MpQueryManager::retrieveInformationFinished( QNetworkReply* reply )
 void MpQueryManager::retrieveInformationNetworkError( QNetworkReply::NetworkError error )
 {
     // TODO: agree on error handling
+	Q_UNUSED(error)
     TX_ENTRY_ARGS( "Network error for retrieving Information" << error);
     TX_EXIT
 }

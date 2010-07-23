@@ -31,8 +31,8 @@ MpPlaybackData::MpPlaybackData()
       mTitle(""),
       mAlbum(""),
       mArtist("Unknown"),
-      mMediaReady(EFalse),
       mPlaybackState(MpPlaybackData::Stopped),
+      mMediaReady(EFalse),
       mRealAudio( false ),
       mAlbumId( 0 ),
       mId( 0 )

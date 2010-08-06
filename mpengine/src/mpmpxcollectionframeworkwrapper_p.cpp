@@ -60,8 +60,8 @@
 #include "mpsongdata.h"
 
 const TInt KIncrementalDelayNone = 0;
-const TInt KIncrementalDelayHalfSecond = 1000000;
-const TInt KIncrementalFetchBlockSize = 40;
+const TInt KIncrementalDelayHalfSecond = 500000;
+const TInt KIncrementalFetchBlockSize = 400;
 
 const TInt KMPXChunkSize = 100;  // number of songs added in each chunk, IncAddL
 _LIT( KPlaylistPath, "C:\\Data\\Playlists\\" ); // Todo
@@ -751,7 +751,7 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoIncrementalOpenL()
     TArray<TMPXAttribute> ary = attrs.Array();
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayNone );
     iIncrementalOpenUtil->StartL( ary, KIncrementalFetchBlockSize,
-                                  KErrNotFound, CMPXCollectionOpenUtility::EFetchNormal );
+                                  KErrNotFound, CMPXCollectionOpenUtility::EFetchDown );
     iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
     CleanupStack::PopAndDestroy( &attrs );
     TX_EXIT

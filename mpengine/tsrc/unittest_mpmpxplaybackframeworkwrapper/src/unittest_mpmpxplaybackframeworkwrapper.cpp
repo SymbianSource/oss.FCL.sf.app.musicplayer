@@ -495,6 +495,12 @@ void TestMpMpxPlaybackFrameworkWrapper::testPlay()
     else {
         QWARN("Not able to create RF Session");
     }
+
+    //Play command
+    cleanup();
+    init();
+    mTest->play();
+    QCOMPARE( mTestPrivate->iPlaybackUtility->iCmd, EPbCmdPlay);
 }
 
 /*!
@@ -553,6 +559,89 @@ void TestMpMpxPlaybackFrameworkWrapper::testCloseCurrentPlayback()
     mTestPrivate->iPlaybackUtility->iReturnSource = true;
     mTest->closeCurrentPlayback();
     QVERIFY(mTestPrivate->iPlaybackUtility->iCmd == EPbCmdClose);
+}
+
+/*!
+ Tests pause.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testPause()
+{
+    mTest->pause();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdPause);
+}
+
+/*!
+ Tests getMaxVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetMaxVolume()
+{
+    mTest->getMaxVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyMaxVolume);
+}
+
+/*!
+ Tests getVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetVolume()
+{
+    mTest->getVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyVolume);
+}
+
+/*!
+ Tests increaseVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testIncreaseVolume()
+{
+    mTest->increaseVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdIncreaseVolume);
+}
+
+/*!
+ Tests decreaseVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testDecreaseVolume()
+{
+    mTest->decreaseVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdDecreaseVolume);
+}
+
+/*!
+ Tests setVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testSetVolume()
+{
+    int value = 30;
+    mTest->setVolume( value );
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdSetVolume);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iComandData, value);
+}
+
+/*!
+ Tests getMuteState.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetMuteState()
+{
+    mTest->getMuteState();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyMute);
+}
+
+/*!
+ Tests mute.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testMute()
+{
+    mTest->mute();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdMuteVolume);
+}
+
+/*!
+ Tests unmute.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testUnmute()
+{
+    mTest->unmute();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdUnMuteVolume);
 }
 
 /*!

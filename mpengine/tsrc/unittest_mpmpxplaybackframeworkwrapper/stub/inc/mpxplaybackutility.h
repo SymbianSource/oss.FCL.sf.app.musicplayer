@@ -54,6 +54,7 @@ public:
     void Close();
     void CommandL(TMPXPlaybackCommand aCmd,TInt aData=0);
     void CommandL(CMPXCommand& aCmd, MMPXPlaybackCallback* aCallback=NULL);
+    void PropertyL(MMPXPlaybackCallback& aCallback, TMPXPlaybackProperty aProperty);
     MMPXSource* Source();
      void SetL(TMPXPlaybackProperty aProperty, TInt aValue);
     TMPXPlaybackState StateL() const;

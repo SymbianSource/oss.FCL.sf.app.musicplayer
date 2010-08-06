@@ -29,11 +29,6 @@
 #include "MpSettingsAudioEffectsWidget.h"
 #undef private
 
-//This so we can test private functions
-//#include "../../src/mpsettingsaudioeffectswidget.cpp"
-
-
-
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
  */
@@ -110,10 +105,11 @@ void TestMpSettingsAudioEffectsWidget::cleanup()
 }
 
 /*!
- Tests constructor.
+ Tests InitializeSlider.
  */
 void TestMpSettingsAudioEffectsWidget::testInitializeSlider()
 {
+    //test slider widget is set up correctly in initialize()
     mTest->initialize();
     QVERIFY(mTest->mMpEngine != 0 );
 
@@ -121,7 +117,6 @@ void TestMpSettingsAudioEffectsWidget::testInitializeSlider()
 
     QCOMPARE(mTest->mModel->rowCount(),2 );
     QCOMPARE(mTest->mModel->columnCount(),1 );
-
 
     QCOMPARE(  mTest->mModel->item( 0 )->type(), HbDataFormModelItem::SliderItem );
     QCOMPARE(  mTest->mModel->item( 1 )->type(), HbDataFormModelItem::ToggleValueItem );
@@ -140,8 +135,12 @@ void TestMpSettingsAudioEffectsWidget::testInitializeSlider()
 
 }
 
+/*!
+ Tests InitializeLoudnessOff.
+ */
 void TestMpSettingsAudioEffectsWidget::testInitializeLoudnessOff()
 {
+    //test loudness HbDataFormModelItem is set up correctly in initialize()
     MpEngineFactory::sharedEngine()->setLoudness( false );
     mTest->initialize();
     QVERIFY(  mTest->mModel->item( 1 )->type() == HbDataFormModelItem::ToggleValueItem );
@@ -149,8 +148,12 @@ void TestMpSettingsAudioEffectsWidget::testInitializeLoudnessOff()
     QCOMPARE(  mTest->mModel->item( 1 )->contentWidgetData("additionalText"), QVariant(hbTrId( "txt_mus_setlabel_loudness_val_on" )) );
 }
 
+/*!
+ Tests InitializeLoudnessOn.
+ */
 void TestMpSettingsAudioEffectsWidget::testInitializeLoudnessOn()
 {
+    //test loudness HbDataFormModelItem is set up correctly in initialize()
     MpEngineFactory::sharedEngine()->setLoudness( true );
     mTest->initialize();
     QVERIFY(  mTest->mModel->item( 1 )->type() == HbDataFormModelItem::ToggleValueItem );
@@ -159,16 +162,20 @@ void TestMpSettingsAudioEffectsWidget::testInitializeLoudnessOn()
 
 }
 
-
+/*!
+ Tests FilterSignals.
+ */
 void TestMpSettingsAudioEffectsWidget::testFilterSignals()
-{
+{   
+    //filtersignals should not change loudness value
     MpEngineFactory::sharedEngine()->setLoudness( false );
-    mTest->initialize();
-    QCOMPARE(MpEngineFactory::sharedEngine()->loudness(), false);
+    mTest->initialize();    
     QModelIndex index1 = mTest->mModel->indexFromItem((mTest->mModel->item(1)));
     mTest->filterSignals(index1,index1);
-    QCOMPARE(MpEngineFactory::sharedEngine()->loudness(), true);
+    QCOMPARE(MpEngineFactory::sharedEngine()->loudness(), false);
+   
 }
+
 
 
 

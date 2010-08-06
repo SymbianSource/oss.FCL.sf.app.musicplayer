@@ -18,7 +18,6 @@ TEMPLATE = subdirs
 
 SUBDIRS += unittest_mpaudioeffectsframeworkwrapper \
            unittest_mpequalizerframeworkwrapper \
-           # unittest_mpmediakeyhandler \
            unittest_mpmpxcollectionframeworkwrapper \
            unittest_mpmpxharvesterframeworkwrapper \
            unittest_mpmpxisolatedcollectionhelper \

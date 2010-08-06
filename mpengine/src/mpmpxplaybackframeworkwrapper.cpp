@@ -29,6 +29,13 @@
 */
 
 /*!
+    \fn void volumePropertyChanged( MpCommon::MpVolumeProperty, int value );
+
+    This signal is emitted when MPXPlaybackUtility sends a volume related property notification,
+    such as EPbPropertyVolume, EPbPropertyMaxVolume, EPbPropertyMute.
+ */
+
+/*!
  Constructs the utility wrapper.
  */
 MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )
@@ -68,6 +75,22 @@ void MpMpxPlaybackFrameworkWrapper::play( QString aFilename )
 void MpMpxPlaybackFrameworkWrapper::play( const XQSharableFile& file)
 {
     d_ptr->play( file );
+}
+
+/*!
+ Slot to handle play command
+ */
+void MpMpxPlaybackFrameworkWrapper::play()
+{
+    d_ptr->play();
+}
+
+/*!
+ Slot to handle pause command
+ */
+void MpMpxPlaybackFrameworkWrapper::pause()
+{
+    d_ptr->pause();
 }
 
 /*!
@@ -149,6 +172,73 @@ void MpMpxPlaybackFrameworkWrapper::setShuffle( bool mode )
 void MpMpxPlaybackFrameworkWrapper::setRepeat( bool mode )
 {
     d_ptr->setRepeat( mode );
+}
+
+/*!
+ Slot to handle a request to get the volume level Max.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpMpxPlaybackFrameworkWrapper::getMaxVolume()
+{
+    d_ptr->getMaxVolume();
+}
+
+/*!
+ Slot to handle a request to get the current volume level.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpMpxPlaybackFrameworkWrapper::getVolume()
+{
+    d_ptr->getVolume();
+}
+
+/*!
+ Slot to handle a request to increase volume.
+ */
+void MpMpxPlaybackFrameworkWrapper::increaseVolume()
+{
+    d_ptr->increaseVolume();
+}
+
+/*!
+ Slot to handle a request to decrease volume.
+ */
+void MpMpxPlaybackFrameworkWrapper::decreaseVolume()
+{
+    d_ptr->decreaseVolume();
+}
+
+/*!
+ Slot to handle a request to set the volume level.
+ */
+void MpMpxPlaybackFrameworkWrapper::setVolume( int value )
+{
+    d_ptr->setVolume( value );
+}
+
+/*!
+ Slot to handle a request to get the current mute state.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpMpxPlaybackFrameworkWrapper::getMuteState()
+{
+    d_ptr->getMuteState();
+}
+
+/*!
+ Slot to handle a request to mute.
+ */
+void MpMpxPlaybackFrameworkWrapper::mute()
+{
+    d_ptr->mute();
+}
+
+/*!
+ Slot to handle a request to unmute.
+ */
+void MpMpxPlaybackFrameworkWrapper::unmute()
+{
+    d_ptr->unmute();
 }
 
 /*!

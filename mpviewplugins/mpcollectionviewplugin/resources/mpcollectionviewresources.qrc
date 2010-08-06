@@ -1,7 +1,7 @@
 <RCC>
     
     <qresource prefix="/docml" >
-        <file alias="musiccollection.docml">musiccollection.docml</file>
+        <file alias="musiccollection.docml">musiccollection.docml.bin</file>
     </qresource>
     
     <qresource prefix="/icons" >      

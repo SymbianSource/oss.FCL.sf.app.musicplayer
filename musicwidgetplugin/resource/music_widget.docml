@@ -10,7 +10,7 @@
         </widget>
         <widget name="shortcut_icon" type="HbPushButton">
             <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <!--  <icon iconName="qtg_large_music_player" name="icon" width="11un" height="11un"/>  -->
+            <!--  <icon iconName="qtg_large_music" name="icon" width="11un" height="11un"/>  -->
             <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
             <real name="z" value="4"/>
             <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>

@@ -18,7 +18,12 @@
 
 #include <QGraphicsSceneMouseEvent>
 
+#ifndef UNIT_TESTING
 #include <hbinstance.h>
+#else
+#include "hbinstancestub.h"
+#endif
+
 #include <hblistview.h>
 #include <hbframeitem.h>
 #include <hbmainwindow.h>

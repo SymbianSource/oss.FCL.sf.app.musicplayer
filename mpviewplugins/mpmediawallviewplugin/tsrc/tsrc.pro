@@ -17,6 +17,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += unittest_mpmediawalldocumentloader
+SUBDIRS += unittest_mpmediawallview
+SUBDIRS += unittest_mpmediawallviewplugin
 
 CONFIG += ordered
 

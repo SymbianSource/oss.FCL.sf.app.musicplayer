@@ -36,6 +36,7 @@ class HbGroupBox;
 class HbPushButton;
 class HbDocumentLoader;
 class HbListWidget;
+class HbListWidgetItem;
 
 class QGraphicsLinearLayout;
 class HbProgressBar;
@@ -44,18 +45,11 @@ class MpEngine;
 class MpSongData;
 class MpQueryManager;
 
-#ifdef SHARE_FUNC_ENABLED
-#include <qnetworkconfigmanager.h>
-QTM_USE_NAMESPACE
-class MpDetailsShareDialog;
-#endif
-
 //class declaration
 /*!
   Details view is the "flipside view" of Music Player.
   In addition to displaying song details, details view
-  also provides user the possibility to comment a
-  track (by initiating sharedialog), and to get
+  also provides user the possibility to get
   recommendations based on his playlist (by displaying
   a list of favourites, fetched from OVI music server).
 
@@ -83,33 +77,26 @@ public slots:
     void albumArtChanged();
     
 private slots:
+    void queryInspireMe(bool storeUpdated = true);
+    void queryLocalMusicStore();
     void handlePlaybackInfoChanged();
     void songDetailInfoChanged();
     
+    void handleListItemSelected( HbListWidgetItem  *item);
     void handleDetailsGroupBoxToggled( bool state );
     void handleInspireMeGroupBoxToggled( bool state );
-    void RenderInspireMeGroupBox();          
-    void handleNetworkError();    
-    void updateSharedData(const QString& url);
-
-#ifdef SHARE_FUNC_ENABLED
-    void share();
-    void closeShareDialog();
-#endif
+    void renderInspireMeMetadata();
+    void renderInspireMeAlbumArts();
+    void abortInspireMeProcess();    
 
 private:
-    bool canQueryRecommendations() const;
-    bool canQuerySharePlayerLink() const;   
+    void startInspireMe();
+    bool isMetadata() const;
     void setupMenu();
-    void clearInspireMe();    
-
-#ifdef SHARE_FUNC_ENABLED
-    void createShareDialog();
-    void preloadShareDialog();
-#endif
+    void saveGroupBoxStates();
 
 private:    
-    MpEngine                *mMpEngine;         // Own
+    MpEngine                *mMpEngine;         // Owned by the factory
     
     MpSongData              *mSongData;
     
@@ -122,7 +109,6 @@ private:
     HbLabel                 *mAlbumArt; //owned
     HbGroupBox              *mSongDetailsGroupBox; //owned
     HbGroupBox              *mInspireMeGroupBox; //owned
-    HbPushButton            *mShareButton; //owned
     HbDocumentLoader        *mDocumentLoader;//owned
     HbListWidget            *mDetailList; // owned by mSongDetailsGroupBox
     HbListWidget            *mInspireList; // owned by mInspireMeGroupBox
@@ -133,13 +119,7 @@ private:
 	
     bool                    mInspireMeQueryOngoing;
     bool                    mInspireMeQueryRendered;
-    bool                    mInspireMeOpen;
-    bool                    mSongDetailsGbOpen;
     
-#ifdef SHARE_FUNC_ENABLED
-    MpDetailsShareDialog*   mSharePopup;            // Own
-#endif
-
     Q_DISABLE_COPY(MpDetailsView)
 };
 

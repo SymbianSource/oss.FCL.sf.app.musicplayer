@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: mp engine factory.
+* Description: mp engine factory stub for testing mpsettingsaudioeffectswidget
 *
 */
 
@@ -20,10 +20,7 @@
 #include "mptrace.h"
 
 /*!
-    \class MpEngineFactory
-    \brief Music Player engine factory.
-
-    MP Engine factory is responsible to create and mantain ownership of MP engines.
+Stub
 */
 
 /*!

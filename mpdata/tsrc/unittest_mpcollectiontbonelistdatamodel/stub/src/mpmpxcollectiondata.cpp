@@ -69,6 +69,15 @@ int MpMpxCollectionData::albumSongsCount() const
 /*!
  Stub function.
  */
+int MpMpxCollectionData::albumSongId( int index )
+{
+    Q_UNUSED(index);
+    return 0;
+}
+
+/*!
+ Stub function.
+ */
 QString MpMpxCollectionData::albumSongData( int index, MpMpxCollectionData::DataType type ) const
 {
     QString data;
@@ -87,3 +96,11 @@ QString MpMpxCollectionData::albumSongData( int index, MpMpxCollectionData::Data
     return data;
 }
 
+/*!
+ Stub function.
+ */
+int MpMpxCollectionData::albumSongIndex( int songUniqueId )
+{
+    Q_UNUSED(songUniqueId);
+    return 0;
+}

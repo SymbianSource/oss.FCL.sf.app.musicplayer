@@ -50,3 +50,4 @@ SOURCES += src/mpsettingsviewplugin.cpp \
        
 RESOURCES += resources/mpsettingsview.qrc
 
+DOCML += resources/settingsview.docml

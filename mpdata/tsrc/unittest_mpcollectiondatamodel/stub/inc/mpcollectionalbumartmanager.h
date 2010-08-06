@@ -44,6 +44,7 @@ public:
     void cacheFirstScreen();
     void cancel();
     void setThumbnailSize( MpCommon::MpThumbType type );
+    void enableDefaultArt( bool enabled );
 
 signals:
 

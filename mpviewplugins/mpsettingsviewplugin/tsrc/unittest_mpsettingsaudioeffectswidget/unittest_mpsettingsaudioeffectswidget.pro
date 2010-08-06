@@ -28,8 +28,6 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 LIBS += -lestor.dll \
         -lfbscli.dll
 
-symbian: TARGET.EPOCALLOWDLLDATA = 1
-
 HEADERS += stub/inc/mpengine.h \
            stub/inc/mpenginefactory.h \
            inc/unittest_mpsettingsaudioeffectswidget.h \

@@ -43,7 +43,8 @@ HEADERS += inc/unittest_mpcollectioncontainers.h \
            stub/inc/mpcollectiontbonelistdatamodel.h \
            stub/inc/mpmpxcollectiondata.h \
            stub/inc/mpcollectionview.h \
-           stub/inc/hgmediawall.h
+    	   stub/inc/hgmediawall.h \
+	   stub/inc/mpnowplayingwidget.h
 
 SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainerfactory.cpp \
@@ -58,7 +59,8 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            stub/src/mpcollectiontbonelistdatamodel.cpp \
            stub/src/mpmpxcollectiondata.cpp \
            stub/src/mpcollectionview.cpp \
-           stub/src/hgmediawall.cpp
+	   stub/src/hgmediawall.cpp \
+	   stub/src/mpnowplayingwidget.cpp 
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc
 

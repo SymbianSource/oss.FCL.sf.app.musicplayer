@@ -110,6 +110,33 @@ void MpMpxPlaybackFrameworkWrapperPrivate::play( const XQSharableFile& file )
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
     }
 }
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::play()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL(EPbCmdPlay) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::pause()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL(EPbCmdPause) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+}
+
 /*!
  \internal
  */
@@ -280,6 +307,110 @@ void MpMpxPlaybackFrameworkWrapperPrivate::applyEqualizer()
 }
 
 /*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::getMaxVolume()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->PropertyL( *this, EPbPropertyMaxVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::getVolume()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->PropertyL( *this, EPbPropertyVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::increaseVolume()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbCmdIncreaseVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::decreaseVolume()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbCmdDecreaseVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::setVolume( int value )
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbCmdSetVolume, value ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::getMuteState()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->PropertyL( *this, EPbPropertyMute ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::mute()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbCmdMuteVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::unmute()
+{
+    TX_ENTRY
+    TRAPD( err, iPlaybackUtility->CommandL( EPbCmdUnMuteVolume ) );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
  \ Closes current playback source.
  */
 void MpMpxPlaybackFrameworkWrapperPrivate::closeCurrentPlayback()
@@ -346,6 +477,18 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandlePropertyL(
             case EPbPropertyDuration:
                 TX_LOG_ARGS("EPbPropertyDuration")
                 iPlaybackData->setDuration(aValue);
+                break;
+            case EPbPropertyVolume:
+                TX_LOG_ARGS("EPbPropertyVolume")
+                q_ptr->emit volumePropertyChanged( MpCommon::Volume, aValue );
+                break;
+            case EPbPropertyMaxVolume:
+                TX_LOG_ARGS("EPbPropertyMaxVolume")
+                q_ptr->emit volumePropertyChanged( MpCommon::MaxVolume, aValue );
+                break;
+            case EPbPropertyMute:
+                TX_LOG_ARGS("EPbPropertyMute")
+                q_ptr->emit volumePropertyChanged( MpCommon::MuteState, aValue );
                 break;
             default:
                 break;
@@ -567,6 +710,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackMessageL( const CMPXM
                 break;
             case TMPXPlaybackMessage::EPlaylistUpdated:
                 TX_LOG_ARGS( "EPlaylistUpdated" )
+                // coverity[fallthrough]
             case TMPXPlaybackMessage::EActivePlayerChanged:
                 TX_LOG_ARGS( "EActivePlayerChanged or fall through from EPlaylistUpdated" )
                 UpdateStateL();

@@ -103,6 +103,15 @@ void MMPXPlaybackUtility::CommandL(CMPXCommand& aCmd, MMPXPlaybackCallback* aCal
 /*!
  Stub function.
 */
+void MMPXPlaybackUtility::PropertyL(MMPXPlaybackCallback& aCallback, TMPXPlaybackProperty aProperty)
+{
+    Q_UNUSED(aCallback);
+    iProperty = aProperty;
+}
+
+/*!
+ Stub function.
+*/
 MMPXSource* MMPXPlaybackUtility::Source()
 {
     if (iReturnSource) {

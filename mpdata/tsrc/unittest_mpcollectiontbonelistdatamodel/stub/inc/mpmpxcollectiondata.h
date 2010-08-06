@@ -50,7 +50,9 @@ public:
     virtual ~MpMpxCollectionData();
 
     int albumSongsCount() const;
+    int albumSongId( int index );
     QString albumSongData( int index, MpMpxCollectionData::DataType type ) const;
+    int albumSongIndex( int songUniqueId );
 
 signals:
 

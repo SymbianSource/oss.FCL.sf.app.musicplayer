@@ -32,11 +32,13 @@ LIBS += -lestor.dll \
 HEADERS += inc/unittest_mpcollectiontbonelistdatamodel.h \
            inc/unittest_helper.h \
            stub/inc/mpmpxcollectiondata.h \
-           ../../../inc/mpcollectiontbonelistdatamodel.h \
+           stub/inc/mpplaybackdata.h \
+           ../../../inc/mpcollectiontbonelistdatamodel.h 
                
 SOURCES += src/unittest_mpcollectiontbonelistdatamodel.cpp \
            src/unittest_helper.cpp \
            stub/src/mpmpxcollectiondata.cpp \
+           stub/src/mpplaybackdata.cpp \
            ../../src/mpcollectiontbonelistdatamodel.cpp
 
 DEFINES += BUILD_MPDATA_LIB

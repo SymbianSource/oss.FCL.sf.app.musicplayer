@@ -245,7 +245,8 @@ HR, ET, FA, CF, EL, HE, IN, KO, LV, LT, MS, BP, RO, SR, LS, UK, UR, VI, BA, GL, 
 ; DLLs
 "\epoc32\release\armv5\udeb\mpnowplayingbanner.dll"   - "!:\sys\bin\mpnowplayingbanner.dll"
 "\epoc32\release\armv5\udeb\mpsettingsmanager.dll"    - "!:\sys\bin\mpsettingsmanager.dll"
-"\epoc32\release\armv5\udeb\mpalbumcoverwidget.dll"    - "!:\sys\bin\mpalbumcoverwidget.dll"
+"\epoc32\release\armv5\udeb\mpalbumcoverwidget.dll"   - "!:\sys\bin\mpalbumcoverwidget.dll"
+"\epoc32\release\armv5\udeb\mpmediacontroller.dll"    - "!:\sys\bin\mpmediacontroller.dll"
 "\epoc32\release\armv5\udeb\mpdata.dll"               - "!:\sys\bin\mpdata.dll"
 "\epoc32\release\armv5\udeb\mpengine.dll"             - "!:\sys\bin\mpengine.dll"
 "\epoc32\release\armv5\udeb\musicservices.dll"        - "!:\sys\bin\musicservices.dll"

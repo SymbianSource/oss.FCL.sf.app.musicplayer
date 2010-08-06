@@ -31,7 +31,8 @@ INCLUDEPATH += ./stub/inc \
 
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
-LIBS += -lqtbearer.dll
+LIBS += -lqtbearer.dll \
+        -lxqsysinfo
 
 # Input
 HEADERS += inc/unittest_mpquerymanager.h \

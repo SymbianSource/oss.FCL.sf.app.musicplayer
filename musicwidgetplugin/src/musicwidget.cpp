@@ -56,7 +56,7 @@ const QLatin1String ICON_COLOR_DISABLED ("qtc_button_disabled");
 const QLatin1String ICON_PLAY ("qtg_mono_play");
 const QLatin1String ICON_PAUSE ("qtg_mono_pause");
 /**  Music Player shortcut icon */
-const QLatin1String ICON_LARGE_MUSIC_PLAYER ("qtg_large_music_player");
+const QLatin1String ICON_LARGE_MUSIC_PLAYER ("qtg_large_music");
 /**  Music Player shortcut icon */
 const QLatin1String ICON_FIRST_TIME_USE ("qtg_large_music_empty");
 const QLatin1String ICON_DEFAULT_ART ("qtg_large_album_art");
@@ -664,7 +664,7 @@ void MusicWidget::albumArtReady()
     TX_ENTRY
     HbIcon icon;
     
-    if ( mMusicPlayerNoSongData )
+    if ( mMpPlaybackData->playbackState() == MpPlaybackData::NotPlaying )
         {
         TX_LOG_ARGS("1st time album art")
         icon = HbIcon(ICON_FIRST_TIME_USE);    

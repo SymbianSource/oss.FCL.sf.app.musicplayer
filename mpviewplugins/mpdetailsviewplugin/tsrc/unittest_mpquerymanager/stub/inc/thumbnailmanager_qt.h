@@ -112,6 +112,7 @@ public:
     int getThumbnail( const QString& fileName, void * clientData = NULL,
             int priority = tnmWrapperPriorityIdle );
     bool cancelRequest( int id );
+    void deleteThumbnails( const QString& fileName );
 
 signals:
 

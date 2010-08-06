@@ -27,7 +27,6 @@
 class QStringList;
 class MpMpxHarvesterFrameworkWrapper;
 class MpSongScanner;
-class MpMediaKeyHandler;
 class MpMpxCollectionFrameworkWrapper;
 class MpMpxPlaybackFrameworkWrapper;
 class MpMpxCollectionData;
@@ -146,6 +145,9 @@ signals:
     void containerContentsChanged();
     void restorePathFailed();
 
+    // Playback related
+    void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
+
     // Equalizer related
     void equalizerReady();
 
@@ -168,6 +170,8 @@ public slots:
     // Playback related
     void playEmbedded( QString aFilename );
     void playEmbedded( const XQSharableFile&  file );
+    void play();
+    void pause();
     void playPause();
     void stop();
     void skipForward();
@@ -178,6 +182,14 @@ public slots:
     void setPosition( int position );
     void setShuffle( bool mode );
     void setRepeat( bool mode );
+    void getMaxVolume();
+    void getVolume();
+    void increaseVolume();
+    void decreaseVolume();
+    void setVolume( int value );
+    void getMuteState();
+    void mute();
+    void unmute();
 
     // Audio Effects related
     void setBalance( int balance );
@@ -205,7 +217,6 @@ private:
     // Harvesting related
     MpMpxHarvesterFrameworkWrapper       *mMpxHarvesterWrapper;  // Own
     MpSongScanner                        *mSongScanner;          // Own
-    MpMediaKeyHandler                    *mMediaKeyHandler;      // Own
 
     // Collection related
     MpMpxCollectionFrameworkWrapper      *mMpxCollectionWrapper; //Own
@@ -224,7 +235,8 @@ private:
 
     // General
     UsbBlockingState                     mUsbBlockingState;
-    UsbBlockingState                     mPreviousUsbState;    
+    UsbBlockingState                     mPreviousUsbState;
+    bool                                 mHandleMediaCommands;
     TUid                                 mHostUid;
 };
 

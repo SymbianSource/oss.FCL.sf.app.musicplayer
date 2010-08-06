@@ -23,7 +23,7 @@
 #include <QFile>
 #include <QGraphicsLinearLayout>
 #include <QSizeF>
-
+#include <QDesktopServices>
 
 
 #include <hbinstance.h>
@@ -49,12 +49,7 @@
 #include "mpquerymanager.h"
 #include "mptrace.h"
 
-#ifdef SHARE_FUNC_ENABLED
-#include "mpdetailssharedialog.h"
-#endif
 
-
-const int KRecommendationCount = 2;
 const int KOneKiloByteInBytes = 1024;
 const int KOneMegabyteInBytes = 1048576;        
 const int KOneGigaByteInBytes = 134217728;        
@@ -73,19 +68,13 @@ MpDetailsView::MpDetailsView()
       mAlbumArt( 0 ),
       mSongDetailsGroupBox(0),
       mInspireMeGroupBox(0),
-      mShareButton(0),
       mDocumentLoader( 0 ),
       mDetailList(0),
       mInspireList(0),
       mInspireMeProgressBar(0),
       mMpQueryManager( 0 ),
       mInspireMeQueryOngoing( false ),
-      mInspireMeQueryRendered( false ),
-      mInspireMeOpen(true),
-      mSongDetailsGbOpen(false)
-#ifdef SHARE_FUNC_ENABLED
-      , mSharePopup( 0 )
-#endif
+      mInspireMeQueryRendered( false )
 {
     TX_ENTRY
     bool widgetsOk = false;
@@ -111,10 +100,6 @@ MpDetailsView::MpDetailsView()
     widget = mDocumentLoader->findWidget( QString("content") );
     TX_LOG_ARGS( "MpDetailsView() mDocumentLoader->findWidget for <content>: " << (int)(widget) );
     setWidget(  qobject_cast<HbWidget *>(widget) );
-
-    widget = mDocumentLoader->findWidget( QString("shareButton") );
-    mShareButton = qobject_cast<HbPushButton *>(widget);
-    TX_LOG_ARGS("MpDetailsView() <shareButton> widget found mShareButton: " << (int)(mShareButton) );
 
     widget = mDocumentLoader->findWidget( QString("trackTitle") );
     mSongText = qobject_cast<HbLabel *>(widget);
@@ -157,7 +142,8 @@ MpDetailsView::MpDetailsView()
     mDocumentLoader->load( QString(":/mpdetailsviewdocml/mpdetailsview.docml"), QString( "ShowInspireMe" ), &loadingSectionOk );    
     if( loadingSectionOk ) {
         TX_LOG_ARGS( "Loading ShowInspireMe section is successful." );
-    } else {
+    }
+    else {
         TX_LOG_ARGS( "Loading ShowInspireMe section fails." );
     }
 
@@ -170,13 +156,11 @@ MpDetailsView::MpDetailsView()
 MpDetailsView::~MpDetailsView()
 {
     TX_ENTRY
+    saveGroupBoxStates();
     delete mSoftKeyBack;
     delete mDocumentLoader;
     delete mMpQueryManager;
 
-#ifdef SHARE_FUNC_ENABLED
-    closeShareDialog();
-#endif
     TX_EXIT
 }
 
@@ -201,19 +185,24 @@ void MpDetailsView::initializeView()
     connect( mSongData, SIGNAL( albumArtReady() ), this, SLOT( albumArtChanged() ) );
     connect( mSongData, SIGNAL( playbackInfoChanged() ), this, SLOT( handlePlaybackInfoChanged() ) );
     connect( mSongData, SIGNAL( songDetailInfoChanged() ), this, SLOT( songDetailInfoChanged() ) );
+    connect( mDetailList, SIGNAL( pressed( HbListWidgetItem  * ) ), this, SLOT( handleListItemSelected( HbListWidgetItem  * ) ) );
     connect( mSongDetailsGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( handleDetailsGroupBoxToggled( bool ) ) );
     connect( mInspireMeGroupBox, SIGNAL( toggled( bool ) ), this, SLOT( handleInspireMeGroupBoxToggled( bool ) ) );
-    connect( mMpQueryManager, SIGNAL( networkError() ), this ,SLOT( handleNetworkError() ) );
-    connect( mMpQueryManager, SIGNAL(searchUrlRetrieved(const QString&)), this, SLOT(updateSharedData(const QString&)));
-    connect( mMpQueryManager, SIGNAL(recommendationAlbumArtsReady()), this, SLOT(RenderInspireMeGroupBox()));
+    connect( mMpQueryManager, SIGNAL(inspireMeItemsMetadataRetrieved()), this, SLOT(renderInspireMeMetadata()));
+    connect( mMpQueryManager, SIGNAL(inspireMeItemAlbumArtReady()), this, SLOT(renderInspireMeAlbumArts()));    
+    connect( mMpQueryManager, SIGNAL(localMusicStoreRetrieved(bool)), this, SLOT(queryInspireMe(bool)), Qt::QueuedConnection);
+    connect( mMpQueryManager, SIGNAL(localMusicStoreRetrievalError()), this, SLOT(abortInspireMeProcess()));
+    connect( mMpQueryManager, SIGNAL(inspireMeItemsRetrievalError()), this, SLOT(queryLocalMusicStore()), Qt::QueuedConnection);
 
-#ifdef SHARE_FUNC_ENABLED
-    connect( mShareButton, SIGNAL( clicked() ), this, SLOT( share() ) );
-
-    // Preload the share popup
-    preloadShareDialog();
-#endif
     TX_EXIT
+}
+
+void MpDetailsView::queryLocalMusicStore()
+{
+    TX_ENTRY
+    mMpQueryManager->reset();
+    mMpQueryManager->queryLocalMusicStore(); 
+    TX_EXIT        
 }
 
 /*!
@@ -225,12 +214,10 @@ void MpDetailsView::activateView()
     setNavigationAction( mSoftKeyBack );
 
     mActivated = true;
-    mInspireMeOpen = MpSettingsManager::inspireMe();
-    mSongDetailsGbOpen = MpSettingsManager::songDetailsGb();
-    TX_LOG_ARGS( "InspireMeVal: " << mInspireMeOpen );
-    TX_LOG_ARGS( "SongDetailsGbVal: " << mSongDetailsGbOpen );
-    mInspireMeGroupBox->setCollapsed(!mInspireMeOpen);
-    mSongDetailsGroupBox->setCollapsed(!mSongDetailsGbOpen);
+    TX_LOG_ARGS( "InspireMeVal: " << MpSettingsManager::inspireMe() );
+    TX_LOG_ARGS( "SongDetailsGbVal: " << MpSettingsManager::songDetailsGb() );
+    mInspireMeGroupBox->setCollapsed(!MpSettingsManager::inspireMe());
+    mSongDetailsGroupBox->setCollapsed(!MpSettingsManager::songDetailsGb());
     TX_EXIT
 }
 
@@ -240,23 +227,31 @@ void MpDetailsView::activateView()
 void MpDetailsView::deactivateView()
 {
     TX_ENTRY
-    if (mInspireMeGroupBox->isCollapsed() ) {
-      MpSettingsManager::setInspireMe(false);
-      } else {
-      MpSettingsManager::setInspireMe(true);
-      }
-
-    if (mSongDetailsGroupBox->isCollapsed() ) {
-      MpSettingsManager::setSongDetailsGb(false);
-      } else {
-      MpSettingsManager::setSongDetailsGb(true);
-      }
-
+    saveGroupBoxStates();
     setNavigationAction( 0 );
     mActivated = false;
     TX_EXIT
 }
 
+void MpDetailsView::saveGroupBoxStates()
+{
+    TX_ENTRY
+    if (mInspireMeGroupBox->isCollapsed() ) {
+        MpSettingsManager::setInspireMe(false);
+    }
+    else {
+        MpSettingsManager::setInspireMe(true);
+    }
+
+    if (mSongDetailsGroupBox->isCollapsed() ) {
+        MpSettingsManager::setSongDetailsGb(false);
+    }
+    else {
+        MpSettingsManager::setSongDetailsGb(true);
+    }
+    TX_EXIT      
+}
+ 
 /*!
  Setup the menu.
  */
@@ -292,29 +287,33 @@ void MpDetailsView::albumArtChanged( )
 /*!
  Slot to handle network error.
  */
-void MpDetailsView::handleNetworkError()
+void MpDetailsView::abortInspireMeProcess()
 {
     TX_ENTRY
+    mInspireMeProgressBar->hide();    
+    mInspireMeGroupBox->setCollapsed( true );    
     mInspireMeQueryOngoing = false;
     mInspireMeQueryRendered = false;
-    clearInspireMe();
-    mInspireMeGroupBox->setCollapsed( true );
+    // ensure that we dont get callbacks from previous queries. Especially true,
+    // if details view is actived with a quick song change again
+    mMpQueryManager->reset();
+    mInspireList->clear();
     TX_EXIT
 }
 
 /*!
  Render inspireme groupbox after album arts downloaded
  */
-void MpDetailsView::RenderInspireMeGroupBox()
+void MpDetailsView::renderInspireMeMetadata()
 {
     TX_ENTRY
     mInspireMeQueryOngoing = false;
     mInspireMeQueryRendered = true;
     mInspireMeProgressBar->hide();
-    if( mMpQueryManager->recommendationAlbumArtsMap().count() ) {
+    if( mMpQueryManager->recommendationsCount() ) {
         TX_LOG_ARGS( "There are recommendations." )
         // we have recommendations
-        for ( int i = 0; i < KRecommendationCount; i++ ) {
+        for ( int i = 0; i < mMpQueryManager->recommendationsCount(); ++i ) {
             // configure the layout properties
             if(!mInspireList->count()) {
                 // we havent configured the prototype before
@@ -323,15 +322,14 @@ void MpDetailsView::RenderInspireMeGroupBox()
             }
             // create the item
             HbListWidgetItem  *inspireMeItem = new HbListWidgetItem();
-            HbIcon icon( QIcon( mMpQueryManager->recommendationAlbumArtsMap().value(mMpQueryManager->recommendationAlbumArtsLink().at( i ) ) ) );
-            inspireMeItem->setIcon( icon );
-            inspireMeItem->setText( mMpQueryManager->recommendationSongs().at( i ) );
-            inspireMeItem->setSecondaryText( mMpQueryManager->recommendationArtists().at( i ) );
+            inspireMeItem->setIcon( mMpQueryManager->recommendedAlbumArt( i ));
+            inspireMeItem->setText( mMpQueryManager->recommendedSong( i ) );
+            inspireMeItem->setSecondaryText( mMpQueryManager->recommendedArtist( i ) );
             mInspireList->addItem( inspireMeItem );
         }
     }
     else {
-        TX_LOG_ARGS( "There is NO recommendation." )
+        TX_LOG_ARGS( "There are NO recommendations" )
         // we dont have recommendations
         // we havent configured the prototype before
         HbListViewItem *prototype = mInspireList->listItemPrototype();
@@ -347,21 +345,21 @@ void MpDetailsView::RenderInspireMeGroupBox()
     TX_EXIT
 }
 
-bool MpDetailsView::canQueryRecommendations() const
+void MpDetailsView::renderInspireMeAlbumArts()
+{
+    TX_ENTRY    
+    for( int i = 0; i < mInspireList->count(); ++i) {
+        mInspireList->item(i)->setIcon( mMpQueryManager->recommendedAlbumArt( i ) );
+    }
+    TX_EXIT    
+}
+   
+bool MpDetailsView::isMetadata() const
 {
     bool result = ( ( !mSongData->album().isEmpty() ) ||
-                    ( !mSongData->artist().isEmpty() ) ) &&
-                  !( mInspireMeGroupBox->isCollapsed() );
-    TX_LOG_ARGS( "Can query recommendations:" << result );
+                    ( !mSongData->artist().isEmpty() ) );
+    TX_LOG_ARGS( "Inspire Me Query metadata available:" << result );
     return result;
-}
-
-bool MpDetailsView::canQuerySharePlayerLink() const
-{
-  bool result = ( !mSongData->title().isEmpty() ) &&
-                ( !mSongData->artist().isEmpty() ) ;
-  TX_LOG_ARGS( "Can query share player link:" << result );
-  return result;
 }
 
 /*!
@@ -370,8 +368,10 @@ bool MpDetailsView::canQuerySharePlayerLink() const
 void MpDetailsView::handlePlaybackInfoChanged()
 {
     TX_ENTRY
-    mMpQueryManager->clearNetworkReplies();
-    clearInspireMe();
+    // ensure that we dont get callbacks from previous queries. Especially true,
+    // if details view is actived with a quick song change again
+    mMpQueryManager->reset();
+    mInspireList->clear();
     mInspireMeQueryRendered = false;
 
     // Clear the song data link until new query has been made.
@@ -379,50 +379,53 @@ void MpDetailsView::handlePlaybackInfoChanged()
 
     if ( !mSongData->title().isEmpty () ) {
         mSongText->setPlainText( mSongData->title() );
-    } else {
+    }
+    else {
         mSongText->setPlainText( mSongData->fileName() );
     }
 
     if ( !mSongData->album().isEmpty () ) {
         mAlbumText->setPlainText( mSongData->album() );
-    } else {
+    }
+    else {
         mAlbumText->setPlainText( hbTrId( "txt_mus_other_unknown7") );
     }
 
     if ( !mSongData->artist().isEmpty() ) {
         mArtistText->setPlainText( mSongData->artist() );
-    } else {
+    }
+    else {
         mArtistText->setPlainText( hbTrId( "txt_mus_other_unknown6") );
     }
 
-    if (canQuerySharePlayerLink() ) {
-        mMpQueryManager->queryLocalMusicStore(mSongData->artist(),mSongData->album(),mSongData->title());
+    if(!mInspireMeGroupBox->isCollapsed()) {
+        startInspireMe();
     }
+    TX_EXIT
+}
 
-    if (canQueryRecommendations()) {
-        // start inspire me area progress bar
-        // TODO: currently, till we get to this callback from MPX the bar not shown
-        // TODO: check if inspireMe is ON, if not, dont show
+void MpDetailsView::startInspireMe()
+{
+    TX_ENTRY    
+    if(isMetadata()) {
+        // show progress bar, start store query or inspire me query process
         mInspireMeProgressBar->show();
-        mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
         mInspireMeQueryOngoing = true;
+        if( mMpQueryManager->isLocalMusicStore() ) {
+            mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
+        }
+        else {
+            // no local store information present
+            mMpQueryManager->queryLocalMusicStore();
+        }
     }
     else {
-        // metadata to query for inspire me items not available
-        // show information note
-      if (!mInspireMeGroupBox->isCollapsed())
-        RenderInspireMeGroupBox();
+        // no metadata. show no recommendations
+        renderInspireMeMetadata();
     }
-    TX_EXIT
+    TX_EXIT    
 }
-
-void MpDetailsView::clearInspireMe()
-{
-    TX_ENTRY
-    mInspireList->clear();
-    mMpQueryManager->clearRecommendations();
-    TX_EXIT
-}
+    
 /*!
  Slot to handle detail song information
  */
@@ -495,7 +498,7 @@ void MpDetailsView::songDetailInfoChanged()
         TX_LOG_ARGS("Warning: If zero, bitrate is not read correctly. It wont show up in details" << ok);
         if(ok) {
             item->setSecondaryText( hbTrId("txt_mus_dblist_bitrate_val_ln_kbps", bitRate) );
-        }    
+        }
         item->setEnabled( false );
         mDetailList->addItem( item );
     }
@@ -508,7 +511,7 @@ void MpDetailsView::songDetailInfoChanged()
         TX_LOG_ARGS("Warning: If zero, sampling rate is not read correctly. It wont show up in details" << ok);
         if(ok) {
             item->setSecondaryText(	hbTrId("txt_mus_dblist_sampling_rate_val_ln_hz", samplingRate) );
-        }            
+        }
         item->setEnabled( false );
         mDetailList->addItem( item );
     }
@@ -522,15 +525,18 @@ void MpDetailsView::songDetailInfoChanged()
         if( size < KOneKiloByteInBytes) {
             // under 1 KB
             item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_b", size) );
-        } else if( size < KOneMegabyteInBytes ) {
+        }
+        else if( size < KOneMegabyteInBytes ) {
             // under 1 MB
             size /= KOneKiloByteInBytes; // turn size into KB
             item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_kb", size) );
-        } else if( size < KOneGigaByteInBytes ) {
+        }
+        else if( size < KOneGigaByteInBytes ) {
             // under 1 GB
             size /= KOneMegabyteInBytes; // turn size to MB
             item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_mb", size) );
-        } else {
+        }
+        else {
             // 1 GB or higher
             size /= KOneGigaByteInBytes; // turn size to GB
             item->setSecondaryText( hbTrId("txt_mus_dblist_size_val_ln_gb", size) );            
@@ -592,108 +598,52 @@ void MpDetailsView::handleInspireMeGroupBoxToggled(bool /*state*/)
         if ( mInspireMeQueryOngoing ) {
             TX_LOG_ARGS( "Query is ongoing " )
             mInspireMeProgressBar->show();
-        } else {
+        }
+        else {
             TX_LOG_ARGS( "Query is NOT ongoing " )
             if ( mInspireMeQueryRendered ) {
                 TX_LOG_ARGS( "InspireMe is rendered already. " )
                 mInspireMeProgressBar->hide();
-            } else {
-                if ( canQueryRecommendations() ) {
-                    TX_LOG_ARGS( "InspireMe is NOT rendered yet but can query for recommendations. " )
-                    mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
-                    mInspireMeProgressBar->show();
-                    mInspireMeQueryOngoing = true;
-                } else {
-                    TX_LOG_ARGS( "InspireMe is NOT rendered yet and CANNOT query for recommendations either. " )
-                    RenderInspireMeGroupBox();
-                }
+            }
+            else {
+                startInspireMe();
             }
         }
-    } else {
+    }
+    else {
         TX_LOG_ARGS( "InspireMe is collapsed." )
         mInspireMeProgressBar->hide();
     }
     TX_EXIT
 }
 
-#ifdef SHARE_FUNC_ENABLED
 /*!
- Slot to be called when share button is clicked
- */
-void MpDetailsView::share()
-{
-    TX_ENTRY
-    createShareDialog();
-    if (canQuerySharePlayerLink() )
-    {
-        mMpQueryManager->queryLocalMusicStore(mSongData->artist(),mSongData->album(),mSongData->title() );
-    }
-    TX_EXIT
-}
-
-/*!
-  Method to create the share dialog on demand.
-  This will cause the share web view to be created and start loading.
-  */
-void MpDetailsView::createShareDialog()
-{
-    TX_ENTRY
-    if ( !mSharePopup )
-    {
-        mSharePopup = new MpDetailsShareDialog();
-    }
-    if ( !mSharePopup->isInitialized() )
-    {
-        connect( mSharePopup, SIGNAL( closeShareDialog() ), this, SLOT( closeShareDialog() ) );
-		// TODO: Ask for a localization string for this, there is none in text map
-        mSharePopup->initialize( mSongData, tr( "Unknown" ) );
-    }
-    TX_EXIT
-}
-
-/*!
-  Method to create the share dialog on demand and preload publishing player files.
-  This will construct the share dialog but it will still be in "uninitialized" state.
-  */
-void MpDetailsView::preloadShareDialog()
-{
-    TX_ENTRY
-    if ( !mSharePopup )
-    {
-        mSharePopup = new MpDetailsShareDialog();
-    }
-    mSharePopup->cachePublishingPlayerFiles();
-    TX_EXIT
-}
-
-/*!
- Slot to be called when ok/close button in share dialog is pressed.
- */
-void MpDetailsView::closeShareDialog()
-{
-    TX_ENTRY
-    if ( mSharePopup )
-    {
-        // Dialog uses WA_DeleteOnClose so no need to delete it explicitely here, just close it.
-        mSharePopup->close();
-        mSharePopup = NULL;
-    }
-    TX_EXIT
-}
-#endif
-
-/*!
- Slot to handle the music store URL retrieval from the query manager.
+ Slot to call when URL item in song details is pressed
 */
-void MpDetailsView::updateSharedData(const QString& url)
+void MpDetailsView::handleListItemSelected( HbListWidgetItem  *item)
 {
-    TX_ENTRY
-    mSongData->setLink( url );
-#ifdef SHARE_FUNC_ENABLED
-    if ( mSharePopup )
-	{
-		mSharePopup->updateSharedData();
-	}
-#endif
+    TX_ENTRY_ARGS( "URL: " << item->secondaryText() );
+    QDesktopServices::openUrl( item->secondaryText() );
     TX_EXIT
 }
+
+/*!
+ Slot to call when MusicStore Info is Received
+*/
+void MpDetailsView::queryInspireMe(bool storeUpdated)
+{
+    TX_ENTRY
+    // we asked query manager to update its local store information
+    // if that store info didnt change (i.e. from empty string to "fi" or
+    // from "bad old store" to "good new store") then we dont need to pursue a query    
+    if( storeUpdated ) {
+        mMpQueryManager->queryInspireMeItems(mSongData->artist(),mSongData->album(),mSongData->title());
+        mInspireMeQueryOngoing = true;
+    }
+    else {
+        mInspireMeQueryOngoing = false;
+        mInspireMeProgressBar->hide();
+    }
+    TX_EXIT
+}
+

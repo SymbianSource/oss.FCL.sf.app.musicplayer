@@ -107,3 +107,8 @@ bool ThumbnailManager::cancelRequest( int id )
     mCancelCounter++;
     return true;
 }
+
+void ThumbnailManager::deleteThumbnails( const QString& fileName )
+{
+    TX_ENTRY_ARGS("Stub (NOP)")
+}

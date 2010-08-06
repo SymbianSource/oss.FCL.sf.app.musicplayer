@@ -134,9 +134,6 @@ void TestMpDetailsView::testactivateView()
 {
     mTest->activateView();
     QCOMPARE( mTest->mActivated, true );
-
-    QCOMPARE( mTest->mInspireMeOpen, MpSettingsManager::inspireMe() );
-    QCOMPARE( mTest->mSongDetailsGbOpen, MpSettingsManager::songDetailsGb() );
 }
 
 void TestMpDetailsView::testdeactivateView()
@@ -164,77 +161,6 @@ void TestMpDetailsView::testAlbumArtChanged()
     QVERIFY( mTest->mAlbumArt->icon().isNull() == false );
 }
 
-void TestMpDetailsView::testHandleNetworkError()
-{
-    mTest->handleNetworkError();
-    QVERIFY( mTest->mInspireMeQueryOngoing == false );
-    QVERIFY( mTest->mInspireMeQueryRendered == false );
-}
-
-void TestMpDetailsView::testCanQueryRecommendations()
-{
-    mTest->mSongData = new MpSongData();
-    mTest->mSongData->mAlbum = QString( "album" );
-    mTest->mSongData->mArtist = QString( "artist" );
-    mTest->mInspireMeGroupBox->setCollapsed( true );
-    QVERIFY( mTest->canQueryRecommendations() == false );
-
-    mTest->mSongData->mAlbum = QString( "album" );
-    mTest->mSongData->mArtist = QString();
-    mTest->mInspireMeGroupBox->setCollapsed( true );
-    QVERIFY( mTest->canQueryRecommendations() == false );
-
-    mTest->mSongData->mAlbum = QString();
-    mTest->mSongData->mArtist = QString( "artist" );
-    mTest->mInspireMeGroupBox->setCollapsed( true );
-    QVERIFY( mTest->canQueryRecommendations() == false );
-
-    mTest->mSongData->mAlbum = QString();
-    mTest->mSongData->mArtist = QString();
-    mTest->mInspireMeGroupBox->setCollapsed( true );
-    QVERIFY( mTest->canQueryRecommendations() == false );
-
-    mTest->mSongData->mAlbum = QString( "album" );
-    mTest->mSongData->mArtist = QString( "artist" );
-    mTest->mInspireMeGroupBox->setCollapsed( false );
-    QVERIFY( mTest->canQueryRecommendations() == true );
-
-    mTest->mSongData->mAlbum = QString( "album" );
-    mTest->mSongData->mArtist = QString();
-    mTest->mInspireMeGroupBox->setCollapsed( false );
-    QVERIFY( mTest->canQueryRecommendations() == true );
-
-    mTest->mSongData->mAlbum = QString();
-    mTest->mSongData->mArtist = QString( "artist" );
-    mTest->mInspireMeGroupBox->setCollapsed( false );
-    QVERIFY( mTest->canQueryRecommendations() == true );
-
-    mTest->mSongData->mAlbum = QString();
-    mTest->mSongData->mArtist = QString();
-    mTest->mInspireMeGroupBox->setCollapsed( false );
-    QVERIFY( mTest->canQueryRecommendations() == false );
-}
-
-void TestMpDetailsView::testCanQuerySharePlayerLink()
-{
-    mTest->mSongData = new MpSongData();
-    mTest->mSongData->mTitle = QString( "title" );
-    mTest->mSongData->mArtist = QString( "artist" );
-    QVERIFY( mTest->canQuerySharePlayerLink() == true );
-
-    mTest->mSongData->mTitle = QString();
-    mTest->mSongData->mArtist = QString( "artist" );
-    QVERIFY( mTest->canQuerySharePlayerLink() == false );
-
-    mTest->mSongData->mTitle = QString( "title" );
-    mTest->mSongData->mArtist = QString();
-    QVERIFY( mTest->canQuerySharePlayerLink() == false );
-
-    mTest->mSongData->mTitle = QString();
-    mTest->mSongData->mArtist = QString();
-    QVERIFY( mTest->canQuerySharePlayerLink() == false );
-}
-
 void TestMpDetailsView::testHandlePlaybackInfoChanged()
 {
     mTest->mSongData = new MpSongData();
@@ -255,12 +181,6 @@ void TestMpDetailsView::testHandlePlaybackInfoChanged()
     QVERIFY( mTest->mSongData->link().isEmpty() == true );
     QCOMPARE( mTest->mAlbumText->plainText(), QString( "txt_mus_other_unknown7" ) );
     QCOMPARE( mTest->mArtistText->plainText(), QString( "txt_mus_other_unknown6" ) );
-}
-
-void TestMpDetailsView::testClearInspireMe()
-{
-    mTest->clearInspireMe();
-    QVERIFY( mTest->mInspireList->count() == 0 );
 }
 
 void TestMpDetailsView::testHandleDetailsGroupBoxToggled()

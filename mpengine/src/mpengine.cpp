@@ -24,7 +24,6 @@
 #include "mpmpxplaybackframeworkwrapper.h"
 #include "mpaudioeffectsframeworkwrapper.h"
 #include "mpequalizerframeworkwrapper.h"
-#include "mpmediakeyhandler.h"
 #include "mptrace.h"
 #include "mpsettingsmanager.h"
 #include "mpsongscanner.h"
@@ -177,12 +176,25 @@
  */
 
 /*!
+-------------------------------------------------------------------------------
+    Playback related signals
+-------------------------------------------------------------------------------
+*/
+
+/*!
+    \fn void volumePropertyChanged( MpCommon::MpVolumeProperty, int value );
+
+    This signal is emitted when framework receives a volume related property notification,
+    such as EPbPropertyVolume, EPbPropertyMaxVolume, EPbPropertyMute.
+ */
+
+
+/*!
  Constructs music player engine.
  */
 MpEngine::MpEngine()
     : mMpxHarvesterWrapper(0),
       mSongScanner(0),
-      mMediaKeyHandler(0),
       mMpxCollectionWrapper(0),
       mMpxPlaybackWrapper(0),
       mAudioEffectsWrapper(0),
@@ -190,7 +202,8 @@ MpEngine::MpEngine()
       mCurrentPresetIndex(KEqualizerPresetNone),
       mSongData(0),
       mUsbBlockingState(USB_NotConnected),
-      mPreviousUsbState(USB_NotConnected)
+      mPreviousUsbState(USB_NotConnected),
+      mHandleMediaCommands(true)
 {
     TX_LOG
 }
@@ -201,7 +214,6 @@ MpEngine::MpEngine()
 MpEngine::~MpEngine()
 {
     TX_ENTRY
-    delete mMediaKeyHandler;
     delete mMpxPlaybackWrapper;
     delete mMpxHarvesterWrapper;
     delete mMpxCollectionWrapper;
@@ -219,7 +231,6 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 {
     TX_ENTRY_ARGS("hostUid=" << hostUid.iUid << ", mode=" << mode);
     mHostUid = hostUid;
-    mMediaKeyHandler = new MpMediaKeyHandler();
 
     if ( StandAlone == mode ) {
         mSongData = new MpSongData();
@@ -276,8 +287,10 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 
         // Playback Wrapper
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
-        connect( this, SIGNAL( libraryAboutToUpdate() ),
+        connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
+        connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
+                 this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
 
         // AudioEffects wrapper
         mAudioEffectsWrapper = new MpAudioEffectsFrameworkWrapper();
@@ -311,8 +324,11 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 
         // Playback Wrapper
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, 0 );
-        connect( this, SIGNAL( libraryAboutToUpdate() ),
+        connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
+        connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
+                 this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
+
     }
     else if ( MediaBrowsing == mode ) {
         // Collection Wrapper
@@ -328,6 +344,9 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         mSongData = new MpSongData();
         // Playback Wrapper
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
+        connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
+                 this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
+
     }
     TX_EXIT
 }
@@ -398,7 +417,7 @@ void MpEngine::refreshLibrary( bool automaticRequest )
  */
 void MpEngine::handleScanStarted() {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(false);
+    mHandleMediaCommands = false;
     TX_EXIT
 }
 
@@ -409,7 +428,7 @@ void MpEngine::handleScanEnded( int count, int error ) {
     TX_ENTRY
     Q_UNUSED( count );
     Q_UNUSED( error );
-    mMediaKeyHandler->setEnabled(true);
+    mHandleMediaCommands = true;
     emit libraryUpdated();
     TX_EXIT
 }
@@ -422,10 +441,10 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
     TX_ENTRY_ARGS("event=" << event);
     switch ( event ) {
         case DiskFormatStarted:
-            mMediaKeyHandler->setEnabled(false);
+            mHandleMediaCommands = false;
             break;
         case DiskFormatEnded:
-            mMediaKeyHandler->setEnabled(true);
+            mHandleMediaCommands = true;
             break;
         case DiskRemoved:
             if ( mUsbBlockingState != USB_Synchronizing ) {
@@ -479,7 +498,7 @@ void MpEngine::handleUsbEvent( MpxUsbEvents event )
 void MpEngine::handleUsbMassStorageStartEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(false);
+    mHandleMediaCommands = false;
 
     changeUsbBlockingState( USB_Synchronizing );
     emit usbBlocked(true);
@@ -494,7 +513,7 @@ void MpEngine::handleUsbMassStorageStartEvent()
 void MpEngine::handleUsbMassStorageEndEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);
+    mHandleMediaCommands = true;
 
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
@@ -510,7 +529,7 @@ void MpEngine::handleUsbMassStorageEndEvent()
 void MpEngine::handleUsbMtpStartEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(false);
+    mHandleMediaCommands = false;
     
     changeUsbBlockingState( USB_Synchronizing );
     emit usbBlocked(true);
@@ -529,7 +548,7 @@ void MpEngine::handleUsbMtpStartEvent()
 void MpEngine::handleUsbMtpEndEvent()
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);
+    mHandleMediaCommands = true;
 
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
@@ -749,7 +768,7 @@ void MpEngine::reorderPlaylist( int playlistId, int songId, int originalOrdinal,
 void MpEngine::handleDeleteStarted( TCollectionContext context, int count )
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled( false );
+    mHandleMediaCommands = false;
     emit deleteStarted( context, count );
     TX_EXIT
 }
@@ -760,7 +779,7 @@ void MpEngine::handleDeleteStarted( TCollectionContext context, int count )
 void MpEngine::handleDeleteEnded( bool success )
 {
     TX_ENTRY
-    mMediaKeyHandler->setEnabled(true);
+    mHandleMediaCommands = true;
     emit songsDeleted( success );
     TX_EXIT
 }
@@ -808,12 +827,36 @@ void MpEngine::playEmbedded(const XQSharableFile& file )
 {
     mMpxPlaybackWrapper->play( file );
 }
+
+/*!
+ Slot to handle a play command
+ */
+
+void MpEngine::play()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->play();
+    }
+}
+
+/*!
+ Slot to handle a pause command.
+ */
+void MpEngine::pause()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->pause();
+    }
+}
+
 /*!
  Slot to handle a play pause.
  */
 void MpEngine::playPause()
 {
-    mMpxPlaybackWrapper->playPause();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->playPause();
+    }
 }
 
 /*!
@@ -821,7 +864,9 @@ void MpEngine::playPause()
  */
 void MpEngine::stop()
 {
-    mMpxPlaybackWrapper->stop();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->stop();
+    }
 }
 
 /*!
@@ -829,7 +874,9 @@ void MpEngine::stop()
  */
 void MpEngine::skipForward()
 {
-    mMpxPlaybackWrapper->skipForward();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->skipForward();
+    }
 }
 
 /*!
@@ -837,7 +884,9 @@ void MpEngine::skipForward()
  */
 void MpEngine::startSeekForward()
 {
-    mMpxPlaybackWrapper->startSeekForward();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->startSeekForward();
+    }
 }
 
 /*!
@@ -845,7 +894,9 @@ void MpEngine::startSeekForward()
  */
 void MpEngine::stopSeeking()
 {
-    mMpxPlaybackWrapper->stopSeeking();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->stopSeeking();
+    }
 }
 
 /*!
@@ -853,7 +904,9 @@ void MpEngine::stopSeeking()
  */
 void MpEngine::skipBackward()
 {
-    mMpxPlaybackWrapper->skipBackward();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->skipBackward();
+    }
 }
 
 /*!
@@ -861,7 +914,9 @@ void MpEngine::skipBackward()
  */
 void MpEngine::startSeekBackward()
 {
-    mMpxPlaybackWrapper->startSeekBackward();
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->startSeekBackward();
+    }
 }
 /*!
  Slot to handle a request to change \a position.
@@ -885,6 +940,83 @@ void MpEngine::setShuffle( bool mode )
 void MpEngine::setRepeat( bool mode )
 {
     mMpxPlaybackWrapper->setRepeat( mode );
+}
+
+/*!
+ Slot to handle a request to get the volume level Max.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpEngine::getMaxVolume( )
+{
+    mMpxPlaybackWrapper->getMaxVolume();
+}
+
+/*!
+ Slot to handle a request to get the current volume level.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpEngine::getVolume( )
+{
+    mMpxPlaybackWrapper->getVolume();
+}
+
+/*!
+ Slot to handle a request to increase volume.
+ */
+void MpEngine::increaseVolume()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->increaseVolume();
+    }
+}
+
+/*!
+ Slot to handle a request to decrease volume.
+ */
+void MpEngine::decreaseVolume()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->decreaseVolume();
+    }
+}
+
+/*!
+ Slot to handle a request to set the volume level.
+ */
+void MpEngine::setVolume( int value )
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->setVolume( value );
+    }
+}
+
+/*!
+ Slot to handle a request to get the current mute state.
+ Response will be asynchronously sent through volumePropertyChanged() signal.
+ */
+void MpEngine::getMuteState( )
+{
+    mMpxPlaybackWrapper->getMuteState();
+}
+
+/*!
+ Slot to handle a request to mute.
+ */
+void MpEngine::mute()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->mute();
+    }
+}
+
+/*!
+ Slot to handle a request to unmute.
+ */
+void MpEngine::unmute()
+{
+    if ( mHandleMediaCommands ) {
+        mMpxPlaybackWrapper->unmute();
+    }
 }
 
 /*!

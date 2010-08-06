@@ -505,7 +505,7 @@ void CMPXDbManager::ReplaceFileL( const TDesC& aSrcName, const TDesC& aDstName )
     CleanupClosePushL( dstFile );
     
     // resize destination file
-    TInt remainingBytes;
+    TInt remainingBytes = 0;
     User::LeaveIfError( srcFile.Size(remainingBytes) );
     User::LeaveIfError( dstFile.SetSize(remainingBytes) );
 
@@ -1854,6 +1854,8 @@ void CMPXDbManager::AttachDatabaseL( TInt aIndex )
             {
             delete database.iAliasname;
             database.iAliasname = HBufC::NewL(KAliasName().Length());
+            // coverity[size_error]
+            // coverity[buffer_alloc]
             HBufC* temp = HBufC::NewLC(2); // form of DE, DF, DX,...
             temp->Des().Append(iRAMDrive); // length == 2
             TDriveUnit pdrive( database.iDrive );
@@ -2208,6 +2210,8 @@ void CMPXDbManager::PrintTableValuesL(
     {
     TInt columnCount(GetColumnCountL(aStatement));
     TInt err(KErrNone);
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* tableRow = HBufC::NewLC(255 * columnCount);
     TPtr tableRowPtr = tableRow->Des();
 

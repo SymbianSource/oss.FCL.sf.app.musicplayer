@@ -23,7 +23,7 @@ symbian: {
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x1F00000
     TARGET.CAPABILITY = CAP_APPLICATION NetworkControl DRM
-    SKINICON = qtg_large_music_player
+    SKINICON = qtg_large_music
 
     BLD_INF_RULES.prj_exports += \
         "../sis/musicplayer_stub.sis          z:/system/install/musicplayer_stub.sis" \
@@ -57,7 +57,8 @@ LIBS += -lecom \
         -lxqserviceutil \
         -lmusicservices \
         -lmpsettingsmanager \
-        -lmpengine
+        -lmpengine \
+        -lmpmediacontroller
 
 # Input
 HEADERS += inc/mpmainwindow.h \

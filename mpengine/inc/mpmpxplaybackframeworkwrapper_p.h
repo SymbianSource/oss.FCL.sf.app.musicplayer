@@ -43,6 +43,8 @@ public:
 
     void play( QString aFilename );
     void play( const XQSharableFile& file );
+    void play();
+    void pause();
     void playPause();
     void stop();
     void skipForward();
@@ -56,6 +58,14 @@ public:
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
+    void getMaxVolume();
+    void getVolume();
+    void increaseVolume();
+    void decreaseVolume();
+    void setVolume( int value );
+    void getMuteState();
+    void mute();
+    void unmute();
     void closeCurrentPlayback();
 
     MpPlaybackData *playbackData();

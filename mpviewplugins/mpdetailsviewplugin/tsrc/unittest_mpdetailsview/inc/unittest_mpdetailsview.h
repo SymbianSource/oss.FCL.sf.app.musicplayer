@@ -53,11 +53,7 @@ private slots:
     void testdeactivateView();
     void testbackSlot();
     void testAlbumArtChanged();
-    void testHandleNetworkError();
-    void testCanQueryRecommendations();
-    void testCanQuerySharePlayerLink();
     void testHandlePlaybackInfoChanged();
-    void testClearInspireMe();
     void testHandleDetailsGroupBoxToggled();
     void testHandleInspireMeGroupBoxToggled();
     

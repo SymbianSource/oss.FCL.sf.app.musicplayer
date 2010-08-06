@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: Wrapper for mpx framework utilities.
+* Description: Stub for MpEngine for testing mpsettingsaudioeffecswidget
 *
 */
 
@@ -19,6 +19,9 @@
 #include "mptrace.h"
 
 
+/*!
+ Stub
+ */
 MpEngine::MpEngine()
     : mBalance(0),
     mLoudness(0)
@@ -27,7 +30,7 @@ MpEngine::MpEngine()
 }
 
 /*!
- Destructs music player engine.
+ Stub
  */
 MpEngine::~MpEngine()
 {
@@ -36,7 +39,7 @@ MpEngine::~MpEngine()
 
 // Audio Effects related
 /*!
- Destructs music player engine.
+ Stub
  */
 int MpEngine::balance()
 {
@@ -44,7 +47,7 @@ int MpEngine::balance()
 }
 
 /*!
- Destructs music player engine.
+Stub
  */
 bool MpEngine::loudness()
 {
@@ -52,9 +55,8 @@ bool MpEngine::loudness()
 }
 
 
-//slots:
 /*!
- Destructs music player engine.
+Stub
  */
 void MpEngine::setBalance( int balance )
 {
@@ -62,7 +64,7 @@ void MpEngine::setBalance( int balance )
 }
 
 /*!
- Destructs music player engine.
+Stub
  */
 void MpEngine::setLoudness( bool mode )
 {

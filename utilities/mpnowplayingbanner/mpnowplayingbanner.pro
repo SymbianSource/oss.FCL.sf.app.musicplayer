@@ -45,3 +45,4 @@ SOURCES += src/mpnowplayingwidget.cpp \
      
 RESOURCES += resources/mpnowplayingbanner.qrc
 
+DOCML += resources/nowplaying.docml

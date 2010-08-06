@@ -29,9 +29,11 @@ MpMpxCollectionData::MpMpxCollectionData( QObject *parent )
       mMediaSet(false),
       mContext(ECollectionContextUnknown),
       mCount(0),
+      mAlbumSongsCount(0),
       mCurrentAlbumIndex(-1),
       mCurrentAlbumAvailable(false),
       mReturnCollectionTitle(true)
+
 {
 }
 
@@ -100,5 +102,13 @@ bool MpMpxCollectionData::setCurrentAlbum( int index )
 const CMPXMedia& MpMpxCollectionData::containerMedia()
 {
     return *mContainerMedia;
+}
+
+/*!
+ Stub function.
+*/
+int MpMpxCollectionData::albumSongsCount() const
+{
+    return 0;
 }
 

@@ -144,6 +144,13 @@ _LIT(KQueryMusicGetRecentlyPlayed, "SELECT Music.*,Artist.Name,Album.Name,Genre.
 _LIT(KQueryMusicGetMostPlayed, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.PlayCount<>0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY PlayCount DESC, TimePlayed DESC LIMIT %u");
 _LIT(KQueryMusicGetRecentlyAdded, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND (julianday(Music.TimeAdded)>julianday('now','-7 days')) AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY Music.TimeAdded DESC");
 */
+
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+_LIT(KQueryMusicGetAllSongsMinimum, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,'',0,0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title");
+#else
+_LIT(KQueryMusicGetAllSongsMinimum, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title");
+#endif
+
 _LIT(KQueryMusicGetAllSongs, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY 4");
 _LIT(KQueryMusicGetSongsForArtist, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.Artist=%u AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY 4");
 _LIT(KQueryMusicGetSongsForAlbum, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.Album=%u AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY 9, 4");
@@ -270,9 +277,9 @@ _LIT(KAuxiliaryCreateTable, "CREATE TABLE Auxiliary("
 _LIT(KAuxiliaryDropTable,"DROP TABLE Auxiliary");
 _LIT(KAuxiliaryCheckTable, "SELECT Id,Version,TimeRefreshed,TimeSynced,Corrupt,SaveDeletedRecordCount FROM AUXILIARY");
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.6.0',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.7.0',%u)");
 #else
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.6.1',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.7.1',%u)");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryAuxiliarySetTime, "UPDATE :dbname.Auxiliary SET TimeRefreshed='%S', Corrupt=0");
 _LIT(KQueryAuxiliaryGetTime, "SELECT TimeRefreshed FROM :dbname.Auxiliary");

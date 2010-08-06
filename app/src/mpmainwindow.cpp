@@ -31,6 +31,7 @@
 #include "mpenginefactory.h"
 #include "mpsettingsmanager.h"
 #include "mpglobalpopuphandler.h"
+#include "mpmediacontroller.h"
 #include "mptrace.h"
 
 const QString MUSIC_MAIN_VIEW = "MusicMainView";
@@ -60,7 +61,8 @@ MpMainWindow::MpMainWindow()
       mMusicServices(0),
       mPopupHandler(0),
       mUserExit( false ),
-      mActivityManager(0)
+      mActivityManager(0),
+      mMpMediaController(0)
 {
     TX_LOG
 }
@@ -94,7 +96,10 @@ MpMainWindow::~MpMainWindow()
     if (mMediaWallViewPlugin) {
         mMediaWallViewPlugin->destroyView();
         delete mMediaWallViewPlugin;
-    }    
+    }
+
+    delete mMpMediaController;
+
     MpEngineFactory::close();
 
 
@@ -183,6 +188,7 @@ void MpMainWindow::initialize( ActivityMode mode )
         mActivityManager->removeActivity( MUSIC_NOW_PLAYING_VIEW );
         connect( app, SIGNAL( activate() ), this , SLOT( handleActivity() ) );
         connect( app, SIGNAL( aboutToQuit() ), this, SLOT( saveActivity() ) );
+        mMpMediaController = new MpMediaController();
         emit applicationReady();
         
     }
@@ -395,6 +401,7 @@ void MpMainWindow::initializeServiceView( TUid hostUid )
         Q_ASSERT_X(false, "MpMainWindow::initializeServiceView", "undefined service");
         break;
     }
+    mMpMediaController = new MpMediaController();
     emit applicationReady();
 }
 

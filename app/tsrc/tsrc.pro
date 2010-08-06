@@ -17,6 +17,7 @@
 TEMPLATE = subdirs
 
 # SUBDIRS += unittest_mpmtpinfolink
+# SUBDIRS += unittest_mpglobalpopuphandler
 
 CONFIG += ordered
 

@@ -25,6 +25,7 @@
 	    </widget>
         <widget name="songDetails" type="HbGroupBox">
              <widget name="songDetailsListWidget" role="HbGroupBox:contentWidget" type="HbListWidget">
+                <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 <string name="verticalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
              </widget>
              <bool name="collapsable" value="TRUE"/>

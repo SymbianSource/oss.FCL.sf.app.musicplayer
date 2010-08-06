@@ -56,3 +56,4 @@ SOURCES += src/mpmediawallviewplugin.cpp \
            src/mpreflectioneffect.cpp
 RESOURCES += resources/mpmediawallviewresources.qrc
 
+DOCML += resources/mediawall.docml

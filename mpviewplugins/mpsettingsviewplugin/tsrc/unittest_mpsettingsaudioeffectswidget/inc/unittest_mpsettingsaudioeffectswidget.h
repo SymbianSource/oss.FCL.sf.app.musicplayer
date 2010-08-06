@@ -15,8 +15,8 @@
 *
 */
 
-#ifndef TestMpSettingsAudioEffectsWidget_H
-#define TestMpSettingsAudioEffectsWidget_H
+#ifndef TESTMPSETTINGSAUDIOEFFECTSWIDGET_H
+#define TESTMPSETTINGSAUDIOEFFECTSWIDGET_H
 
 #include <QtTest/QtTest>
 
@@ -53,7 +53,7 @@ private:
 
 };
 
-#endif  // MpSettingsAudioEffectsWidget_H
+#endif  // TESTMPSETTINGSAUDIOEFFECTSWIDGET_H
 
 
 

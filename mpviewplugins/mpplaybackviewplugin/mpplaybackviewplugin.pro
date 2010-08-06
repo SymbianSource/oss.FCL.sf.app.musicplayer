@@ -59,3 +59,4 @@ SOURCES += src/mpplaybackviewplugin.cpp \
        
 RESOURCES += resources/mpplaybackviewpluginresources.qrc
 
+DOCML += resources/playbackwidget.docml

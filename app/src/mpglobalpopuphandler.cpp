@@ -116,7 +116,7 @@ void MpGlobalPopupHandler::launchScanDialog()
     HbProgressDialog* scanProgressDialog = new HbProgressDialog( HbProgressDialog::WaitDialog );
     connect( scanProgressDialog, SIGNAL( cancelled() ), mMpSongScanner, SLOT( cancelScan() ) );
     scanProgressDialog->setModal( true );
-    HbLabel *title = new HbLabel( hbTrId( "txt_mus_info_refreshingnln_songs_added" ) );
+    HbLabel *title = new HbLabel( hbTrId( "txt_mus_title_refreshing" ) );
     title->setFontSpec(HbFontSpec(HbFontSpec::Primary));
 
     scanProgressDialog->setHeadingWidget( title );

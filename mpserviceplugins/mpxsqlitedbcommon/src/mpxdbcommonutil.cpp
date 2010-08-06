@@ -603,6 +603,8 @@ EXPORT_C HBufC* MPXDbCommonUtil::ProcessSingleQuotesLC(
     MPX_FUNC("MPXDbCommonUtil::ProcessSingleQuotesLC");
 
     // reserve space for all single quotes (double the size)
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value = HBufC::NewLC(aString.Length() * 2);
     TPtr valuePtr(value->Des());
 
@@ -629,6 +631,8 @@ EXPORT_C HBufC* MPXDbCommonUtil::ProcessPatternCharsLC(
     // reserve space for all percentage signs (triple the size because % should
     // be replaced by %%)
     TInt srcLen(aString.Length());
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* targetString = HBufC::NewLC(aString.Length() * 3);
     TPtr targetStringPtr(targetString->Des());
 

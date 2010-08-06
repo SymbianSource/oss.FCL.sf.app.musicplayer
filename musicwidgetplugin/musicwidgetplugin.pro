@@ -58,3 +58,5 @@ symbian: {
     DEPLOYMENT += plugins \
                   widgetResources
 }
+
+DOCML += resource/music_widget.docml

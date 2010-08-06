@@ -71,6 +71,15 @@ private slots:
     void testStartSeekBackward();
     void testHandleSubPlayerNamesL();
     void testCloseCurrentPlayback();
+    void testPause();
+    void testGetMaxVolume();
+    void testGetVolume();
+    void testIncreaseVolume();
+    void testDecreaseVolume();
+    void testSetVolume();
+    void testGetMuteState();
+    void testMute();
+    void testUnmute();
 
 private:
 

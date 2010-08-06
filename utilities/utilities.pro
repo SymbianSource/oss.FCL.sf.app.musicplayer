@@ -17,7 +17,7 @@
 TEMPLATE = subdirs
 SUBDIRS  = mpnowplayingbanner \
            mpsettingsmanager \
-           mpalbumcoverwidget
-           
+           mpalbumcoverwidget \
+           mpmediacontroller
 
 CONFIG += ordered

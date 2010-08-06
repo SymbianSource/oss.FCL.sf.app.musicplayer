@@ -45,7 +45,6 @@ HEADERS += inc/unittest_mpdetailsview.h \
 		   stub/inc/mpenginefactory.h \
            stub/inc/mpsongdata.h \
            stub/inc/thumbnailmanager_qt.h \
-           stub/inc/mpdetailssharedialog.h \
            ../../../../inc/mpviewbase.h
            
 
@@ -56,6 +55,5 @@ SOURCES += src/unittest_mpdetailsview.cpp \
 		   stub/src/mpenginefactory.cpp \		       
            stub/src/mpsongdata.cpp \
            stub/src/thumbnailmanager_qt.cpp \
-           stub/src/mpdetailssharedialog.cpp
 
 RESOURCES += ../../resources/mpdetailsviewresources.qrc

@@ -71,7 +71,7 @@ void MpCollectionContainerAllSongs::dataReloaded()
     MpCollectionListContainer::dataReloaded();
     if ( mViewMode != MpCommon::FetchView ) {
         int count = mCollectionData->count();
-        QString details = hbTrId("txt_mus_subhead_ln_songs", count);
+        QString details = hbTrId("txt_mus_subhead_songs_l1").arg( count );
         mInfoBar->setHeading(details);
     }
     if ( mCollectionData->count() > 1 ) {
@@ -113,7 +113,7 @@ void MpCollectionContainerAllSongs::setupContainer()
         }
         else {
             int count = mCollectionData->count();
-            details = hbTrId("txt_mus_subhead_ln_songs", count);
+            details = hbTrId("txt_mus_subhead_songs_l1").arg( count );
         }
         mInfoBar->setHeading(details);
     }

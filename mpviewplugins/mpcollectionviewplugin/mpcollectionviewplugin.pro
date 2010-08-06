@@ -71,3 +71,4 @@ SOURCES += src/mpcollectionviewplugin.cpp \
        
 RESOURCES += resources/mpcollectionviewresources.qrc
 
+DOCML += resources/musiccollection.docml

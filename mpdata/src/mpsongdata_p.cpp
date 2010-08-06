@@ -28,6 +28,9 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDate>
+#include <HbExtendedLocale>
+#include <hbi18ndef.h>
+#include <HbStringUtil>
 
 #include <hbicon.h>
 
@@ -371,7 +374,9 @@ QString MpSongDataPrivate::albumArtBase64() const
     TX_LOG_ARGS( "Create album art file " << mTempAlbumArt );
 
     QFile file( mTempAlbumArt );
-    file.open( QIODevice::WriteOnly );
+    if ( !file.open( QIODevice::WriteOnly ) ) {
+        return QString("");
+    }
     if ( mAlbumArt && !mAlbumArt->isNull() && !mAlbumArt->qicon().isNull() )
     {
         QPixmap p = mAlbumArt->qicon().pixmap( QSize( 74, 74 ), QIcon::Normal, QIcon::Off );
@@ -541,19 +546,25 @@ void MpSongDataPrivate::DoSetMpxMediaL( const CMPXMedia& aMedia )
         QFileInfo info( fullName );
         changed |= setSize( info.size() );
 
+        // Localization of timestamp is somewhat complex operation:
+        // 1. Localize the date and time parts separately
+        // 2. Concatenate the resulting localized strings
+        // 3. Finally, convert all of the digits in resulting single string
+        //    to their localized versions (not all scripts have same numerals
+        //    as latin/arabic)
         QDateTime lastModified = info.lastModified();
-        QDate date = lastModified.date();
-        int day = date.day();
-        int month = date.month();
-        int year = date.year();
-        QTime time = lastModified.time();
-        int sec = time.second();
-        int min = time.minute();
-        int hr = time.hour();
+        QDate date( lastModified.date() );
+        QTime time( lastModified.time() );
 
-        QString lastModifiedStr("%1.%2.%3 %4:%5:%6");
-        lastModifiedStr = lastModifiedStr.arg( day ).arg( month ).arg( year ).arg( hr ).arg( min ).arg( sec );
-        changed |= setModified( lastModifiedStr );
+        HbExtendedLocale locale = HbExtendedLocale::system();
+
+        QString dateStr = locale.format( date, r_qtn_date_usual_with_zero );
+        QString timeStr = locale.format( time, r_qtn_time_long_with_zero );
+        QString timestampStr( dateStr + " " + timeStr );
+        TX_LOG_ARGS( "Timestamp before corrections: " << timestampStr );
+        QString convertedTimestampStr( HbStringUtil::convertDigits(timestampStr) );
+
+        changed |= setModified( convertedTimestampStr );
 
 
         // get file name without suffix
@@ -1004,7 +1015,17 @@ bool MpSongDataPrivate::setMusicURL( const QString &musicURL )
     bool change = false;
     if ( musicURL != mMusicURL ) {
         change = true;
-        mMusicURL = musicURL;
+
+        // Make sure URL contains the correct protocol definition (HTTP).
+        if ( (musicURL.length() > 0) &&
+             (musicURL.indexOf( "://", 0, Qt::CaseInsensitive ) == -1) ) {
+            mMusicURL = "http://" + musicURL;
+            TX_LOG_ARGS("Changed music url to " << mMusicURL);
+        }
+		else {
+            mMusicURL = musicURL;
+            TX_LOG_ARGS("Music url unchanged: " << mMusicURL);
+        }
     }
     TX_EXIT
     return change;

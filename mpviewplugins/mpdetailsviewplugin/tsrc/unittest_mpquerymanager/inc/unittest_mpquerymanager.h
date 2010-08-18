@@ -49,9 +49,9 @@ public slots:
     
 private slots:
   //Test Cases  
-  void testrecommendationSongs();
+  //void testrecommendationSongs();
   void testrecommendationArtists();
-  void testrecommendationAlbumArtsLink();
+  //void testrecommendationAlbumArtsLink();
    
 private:
     MpQueryManager *mTest;

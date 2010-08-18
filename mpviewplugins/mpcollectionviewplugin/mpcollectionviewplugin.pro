@@ -21,6 +21,7 @@ symbian: {
     TARGET.UID3 = 0x10207C63
     TARGET.CAPABILITY = All -TCB
     TARGET.EPOCALLOWDLLDATA = 1
+    MMP_RULES += SMPSAFE
 }
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
@@ -70,3 +71,4 @@ SOURCES += src/mpcollectionviewplugin.cpp \
        
 RESOURCES += resources/mpcollectionviewresources.qrc
 
+DOCML += resources/musiccollection.docml

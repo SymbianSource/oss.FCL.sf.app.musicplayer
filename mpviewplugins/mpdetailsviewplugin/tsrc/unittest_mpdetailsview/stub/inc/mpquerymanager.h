@@ -19,15 +19,13 @@
 
 #include <qnetworkconfigmanager.h>
 #include <qnetworksession.h>
-#include <QPixmap>
+#include <HbIcon>
 #include <QPointer>
 #include "mpviewbase.h"
 
 class MpSongData;
-class MpDetailsShareDialog;
 class MpEngine;
 
-QTM_USE_NAMESPACE
 
 class MpQueryManager : public QObject
 {
@@ -38,18 +36,21 @@ public:
     ~MpQueryManager();
     
 public:
+    void reset();
+    bool isLocalMusicStore() const;
     void clearNetworkReplies();
     void queryLocalMusicStore( QString mArtist,QString mAlbum,QString mTitle );
+    void queryLocalMusicStore();
     void queryInspireMeItems( QString mArtist,QString mAlbum,QString mTitle );
     void clearRecommendations();
     
-    QStringList recommendationSongs();
-    QStringList recommendationArtists();
+    int recommendationsCount() const;
+    QString recommendedSong(int index) const;
+    QString recommendedArtist(int index) const;
     QStringList recommendationAlbumArtsLink();
-    QMap<QString, QPixmap>  recommendationAlbumArtsMap();
+    HbIcon recommendedAlbumArt(int index) const;
     int &albumArtsReadyCount();
-    
-    void insertMapItem( const QString &uri, const QPixmap &pixmap );    
+       
 
 signals:
     void onlineStatusChanged( bool state );
@@ -58,7 +59,6 @@ signals:
 private:    
    
     int                     mDownloadedAlbumArts;  
-    MpDetailsShareDialog*   mSharePopup;
     
     QString                 mArtist;
     QString                 mAlbum;
@@ -69,7 +69,7 @@ private:
     QStringList          mRecommendationSongs;
     QStringList          mRecommendationArtists;
     QStringList          mRecommendationAlbumArtsLink;
-    QMap<QString, QPixmap>  mRecommendationAlbumArtsMap;
+    QMap<QString, HbIcon>  mRecommendationAlbumArtsMap;
     int                     mAlbumArtsReadyCount;
        
 };

@@ -18,11 +18,11 @@ TEMPLATE = lib
 CONFIG += plugin mobility hb
 MOBILITY = serviceframework
 
-LIBS += -lhswidgetmodel
 LIBS += -lxqservice
 LIBS += -lxqserviceutil
 LIBS += -lmpengine
 LIBS += -lmpdata
+LIBS += -lmpalbumcoverwidget
 
 INCLUDEPATH += ./inc
 INCLUDEPATH += ../inc
@@ -58,3 +58,5 @@ symbian: {
     DEPLOYMENT += plugins \
                   widgetResources
 }
+
+DOCML += resource/music_widget.docml

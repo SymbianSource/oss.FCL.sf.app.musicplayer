@@ -5,7 +5,7 @@
     </qresource>
     
     <qresource prefix="/playbackviewdocml" >
-        <file alias="playbackwidget.docml">playbackwidget.docml</file>
+        <file alias="playbackwidget.docml">playbackwidget.docml.bin</file>
     </qresource>
 
 </RCC>

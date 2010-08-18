@@ -64,8 +64,9 @@ MpSongScanner::MpSongScanner( MpMpxHarvesterFrameworkWrapper *wrapper, QObject *
             this, SLOT( handleScanEnded( int, int ) ), Qt::QueuedConnection );
     connect( mMpxHarvesterWrapper, SIGNAL( scanCountChanged( int ) ), 
             this, SIGNAL( scanCountChanged( int ) ), Qt::QueuedConnection );
+    // Disk events should be handled asap in order to stop the scan on time
     connect( mMpxHarvesterWrapper, SIGNAL( diskEvent( MpxDiskEvents ) ),
-            this, SLOT( handleDiskEvent(MpxDiskEvents) ), Qt::QueuedConnection );
+            this, SLOT( handleDiskEvent(MpxDiskEvents) ) );
     TX_EXIT
 }
 

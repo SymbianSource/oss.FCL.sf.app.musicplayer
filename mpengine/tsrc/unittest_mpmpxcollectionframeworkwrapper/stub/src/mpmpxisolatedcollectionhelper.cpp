@@ -17,7 +17,7 @@
 
 
 #include <mpxcollectionpath.h>
-
+#include <QtGlobal>
 #include "stub/inc/mpmpxisolatedcollectionhelper.h"
 
 
@@ -57,8 +57,10 @@ CMpMpxIsolatedCollectionHelper::~CMpMpxIsolatedCollectionHelper()
 /*!
  \internal
  */
-void CMpMpxIsolatedCollectionHelper::OpenCollectionL( CMPXCollectionPath& aPath )
+void CMpMpxIsolatedCollectionHelper::OpenCollectionL( CMPXCollectionPath& aPath, TInt aIndex, MpOpenMode aMode )
     {
+    Q_UNUSED( aIndex );
+    iMode = aMode;
     iCountPath = aPath.Count();
     iOpen = ETrue;
     iOpenCount++;
@@ -71,7 +73,8 @@ CMpMpxIsolatedCollectionHelper::CMpMpxIsolatedCollectionHelper( MMpMpxIsolatedCo
     : iObserver( aObserver ),
       iOpen(EFalse),
       iOpenCount(0),
-      iCountPath(0)
+      iCountPath(0),
+      iMode( DefaultMode )
     {
     }
 

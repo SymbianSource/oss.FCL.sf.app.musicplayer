@@ -712,7 +712,7 @@ void CMPXDbMusic::ExecuteQueryAllSongsL(const TArray<TMPXAttribute>& aAttrs)
     // Run query and add result media objects to the cache array.
     MPX_FUNC("CMPXDbMusic::ExecuteQueryAllSongsL");
 
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAllSongs));
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAllSongsMinimum));
     CleanupClosePushL(recordset);
 
     TInt err(KErrNone);
@@ -2436,6 +2436,7 @@ void CMPXDbMusic::CreateTableL(
 
     // Do not create any other indexes than the one on UniqueId
     // as they only slow down the database overall
+    User::LeaveIfError(aDatabase.Exec(KMusicDeletedTitleIndex));
     }
 
 // ----------------------------------------------------------------------------

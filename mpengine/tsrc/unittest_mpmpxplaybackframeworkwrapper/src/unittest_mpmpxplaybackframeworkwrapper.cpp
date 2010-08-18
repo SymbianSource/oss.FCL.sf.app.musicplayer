@@ -23,7 +23,7 @@
 #include "unittest_mpmpxplaybackframeworkwrapper.h"
 #include "stub/inc/mpplaybackdata.h"
 #include "stub/inc/mpxplaybackutility.h"
-
+#include "stub/inc/mpsongdata.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -31,9 +31,10 @@
 #include "mpmpxplaybackframeworkwrapper_p.h"
 #undef private
 
-//This so we can test private functions
+// This so we can test private functions
 #include "mpmpxplaybackframeworkwrapper_p.cpp"
-//Test data
+
+// Test data
 struct TTestAttrs
     {
     const wchar_t* GeneralTitle;
@@ -74,7 +75,8 @@ int main(int argc, char *argv[])
 
 TestMpMpxPlaybackFrameworkWrapper::TestMpMpxPlaybackFrameworkWrapper()
     : mTest(0),
-      iMediaTestData(0)
+      iMediaTestData(0),
+      mSongData(0)
 {
 }
 
@@ -82,6 +84,7 @@ TestMpMpxPlaybackFrameworkWrapper::~TestMpMpxPlaybackFrameworkWrapper()
 {
     delete mTest;
     delete iMediaTestData;
+    delete mSongData;
 }
 
 /*!
@@ -89,6 +92,7 @@ TestMpMpxPlaybackFrameworkWrapper::~TestMpMpxPlaybackFrameworkWrapper()
  */
 void TestMpMpxPlaybackFrameworkWrapper::initTestCase()
 {
+    mSongData = new MpSongData();
 }
 
 /*!
@@ -103,8 +107,7 @@ void TestMpMpxPlaybackFrameworkWrapper::cleanupTestCase()
  */
 void TestMpMpxPlaybackFrameworkWrapper::init()
 {
-
-    mTest = new MpMpxPlaybackFrameworkWrapper();
+    mTest = new MpMpxPlaybackFrameworkWrapper(TUid::Uid(MpCommon::KMusicPlayerUid), mSongData);
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -348,12 +351,36 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandleMedia()
 }
 
 /*!
+ Tests handleMedia resulting from request from details
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testHandleMediaDetails()
+{
+    mTestPrivate->iDetailsRequest = true;
+    loadTestData(0);
+    mTestPrivate->HandleMediaL(*iMediaTestData, KErrNone);
+    QCOMPARE(mTestPrivate->iSongData->iSetMedia, true);
+}
+
+/*!
  Tests retrieveSong
  */
 void TestMpMpxPlaybackFrameworkWrapper::testRetrieveSongDetails()
 {
-    mTestPrivate->RetrieveSongDetailsL();
+    // Internal requests
+    mTestPrivate->DoRetrieveSongDetailsL(false);
     QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
+
+    // Request from Details view
+    mTestPrivate->iDetailsRequest = false;
+    mTest->retrieveSongDetails();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 18);
+    QCOMPARE(mTestPrivate->iDetailsRequest, true);
+
+    // Request from Details view - no source
+    mTestPrivate->iDetailsRequest = false;
+    mTestPrivate->iPlaybackUtility->iReturnSource = false;
+    mTest->retrieveSongDetails();
+    QCOMPARE(mTestPrivate->iDetailsRequest, false);
 }
 
 /*!
@@ -468,6 +495,12 @@ void TestMpMpxPlaybackFrameworkWrapper::testPlay()
     else {
         QWARN("Not able to create RF Session");
     }
+
+    //Play command
+    cleanup();
+    init();
+    mTest->play();
+    QCOMPARE( mTestPrivate->iPlaybackUtility->iCmd, EPbCmdPlay);
 }
 
 /*!
@@ -507,6 +540,108 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandleSubPlayerNamesL()
     MDesCArray* stubArray = NULL;
     mTestPrivate->HandleSubPlayerNamesL(stubUid, stubArray, false, KErrNone);
     QVERIFY(mTestPrivate);
+}
+
+/*!
+ Tests closeCurrentPlayback() / DoCloseCurrentPlaybackL()
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testCloseCurrentPlayback()
+{
+    TMPXPlaybackCommand dummyCmd = EPbCmdPlay;
+    mTestPrivate->iPlaybackUtility->iCmd = dummyCmd;
+
+    //Simulate none file opened.
+    mTestPrivate->iPlaybackUtility->iReturnSource = false;
+    mTest->closeCurrentPlayback();
+    QVERIFY(mTestPrivate->iPlaybackUtility->iCmd != EPbCmdClose);
+
+    //Simulate some file already opened.
+    mTestPrivate->iPlaybackUtility->iReturnSource = true;
+    mTest->closeCurrentPlayback();
+    QVERIFY(mTestPrivate->iPlaybackUtility->iCmd == EPbCmdClose);
+}
+
+/*!
+ Tests pause.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testPause()
+{
+    mTest->pause();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdPause);
+}
+
+/*!
+ Tests getMaxVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetMaxVolume()
+{
+    mTest->getMaxVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyMaxVolume);
+}
+
+/*!
+ Tests getVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetVolume()
+{
+    mTest->getVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyVolume);
+}
+
+/*!
+ Tests increaseVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testIncreaseVolume()
+{
+    mTest->increaseVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdIncreaseVolume);
+}
+
+/*!
+ Tests decreaseVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testDecreaseVolume()
+{
+    mTest->decreaseVolume();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdDecreaseVolume);
+}
+
+/*!
+ Tests setVolume.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testSetVolume()
+{
+    int value = 30;
+    mTest->setVolume( value );
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdSetVolume);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iComandData, value);
+}
+
+/*!
+ Tests getMuteState.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testGetMuteState()
+{
+    mTest->getMuteState();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iProperty, EPbPropertyMute);
+}
+
+/*!
+ Tests mute.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testMute()
+{
+    mTest->mute();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdMuteVolume);
+}
+
+/*!
+ Tests unmute.
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testUnmute()
+{
+    mTest->unmute();
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdUnMuteVolume);
 }
 
 /*!

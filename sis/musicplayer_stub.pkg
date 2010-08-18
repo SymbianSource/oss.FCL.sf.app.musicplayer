@@ -35,6 +35,8 @@
 ; DLLs
 ""-"z:\sys\bin\mpnowplayingbanner.dll"
 ""-"z:\sys\bin\mpsettingsmanager.dll"
+""-"z:\sys\bin\mpalbumcoverwidget.dll"
+""-"z:\sys\bin\mpmediacontroller.dll"
 ""-"z:\sys\bin\mpdata.dll"
 ""-"z:\sys\bin\mpengine.dll"
 ""-"z:\sys\bin\musicservices.dll"

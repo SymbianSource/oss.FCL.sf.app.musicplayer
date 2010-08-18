@@ -419,10 +419,10 @@ EXPORT_C TUint32 CMPXDbTable::ExecuteIntQueryL(
         User::Leave(KErrNotFound);
         }
 
-    TUint32 value(recordset.ColumnInt64(KMPXTableDefaultIndex));
+    TInt64 value( recordset.ColumnInt64( KMPXTableDefaultIndex ) );
     CleanupStack::PopAndDestroy(&recordset);
 
-    return value;
+    return value < 0 ? 0: I64LOW( value );
     }
 
 // ----------------------------------------------------------------------------
@@ -456,6 +456,8 @@ EXPORT_C TUint32 CMPXDbTable::ExecuteIntQueryL(
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value1 = HBufC::NewLC(aValue1.Length() * 2);
     TPtr value1Ptr(value1->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue1, value1Ptr);
@@ -484,6 +486,8 @@ EXPORT_C TUint32 CMPXDbTable::ExecuteIntQueryL(
     MPX_FUNC("CMPXDbTable::ExecuteIntQueryL");
 
     // replace single quotes
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value = HBufC::NewLC(aValue.Length() * 2);
     TPtr valuePtr(value->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue, valuePtr);
@@ -640,6 +644,8 @@ EXPORT_C TUint32 CMPXDbTable::ExecuteSumQueryL(
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value1 = HBufC::NewLC(aValue1.Length() * 2);
     TPtr value1Ptr(value1->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue1, value1Ptr);
@@ -670,10 +676,14 @@ EXPORT_C TInt CMPXDbTable::ExecuteSumQueryL(
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value1 = HBufC::NewLC(aValue1.Length() * 2);
     TPtr value1Ptr(value1->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue1, value1Ptr);
 
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value2 = HBufC::NewLC(aValue2.Length() * 2);
     TPtr value2Ptr(value2->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue2, value2Ptr);
@@ -704,6 +714,8 @@ EXPORT_C TInt CMPXDbTable::ExecuteSumQueryL(
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value = HBufC::NewLC(aValue.Length() * 2);
     TPtr valuePtr(value->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue, valuePtr);
@@ -736,12 +748,16 @@ EXPORT_C TInt CMPXDbTable::ExecuteSumQueryL(
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value1 = HBufC::NewLC(aValue1.Length() * 2);
     TPtr value1Ptr(value1->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue1, value1Ptr);
 
     // replace single quotes
     // reserve double the value length for single quote duplicates
+    // coverity[incorrect_multiplication]
+    // coverity[buffer_alloc]
     HBufC* value3 = HBufC::NewLC(aValue3.Length() * 2);
     TPtr value3Ptr(value3->Des());
     MPXDbCommonUtil::FindAndReplaceSingleQuote(aValue3, value3Ptr);

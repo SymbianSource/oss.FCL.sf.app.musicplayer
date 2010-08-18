@@ -95,3 +95,10 @@ void MpCollectionAlbumArtManager::setThumbnailSize( MpCommon::MpThumbType type )
     mThumbType = type;
 }
 
+/*!
+ Stub function.
+ */
+void MpCollectionAlbumArtManager::enableDefaultArt( bool enabled )
+{
+    Q_UNUSED(enabled);
+}

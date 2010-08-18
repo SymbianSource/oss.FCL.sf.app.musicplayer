@@ -21,6 +21,7 @@
 #include <QtTest/QtTest>
 
 class MpSongData;
+class MpSongDataPrivate;
 
 class TestMpSongData : public QObject
 {
@@ -40,7 +41,7 @@ public slots:
     void cleanupTestCase();
     void init();
     void cleanup();
-    
+
 private slots:
     void testMemberCleanup();
     void testTitle();
@@ -53,7 +54,7 @@ private slots:
     void testComposer();
     void testAlbumtrack();
     void testLink();
-    
+
     void testFileName();
     void testMimeType();
     void testDuration();
@@ -65,16 +66,17 @@ private slots:
     void testMusicURL();
     void testIsDrmProtected();
 
-    void testSetTitle();    
+    void testSetMpxMedia();
+    void testSetTitle();
     void testSetAlbum();
     void testSetArtist();
     void testSetComment();
     void testSetYear();
     void testSetGenre();
-    void testSetComposer();    
+    void testSetComposer();
     void testSetAlbumTrack();
     void testSetLink();
-    
+
     void testSetFileName();
     void testSetMimeType();
     void testSetDuration();
@@ -85,14 +87,15 @@ private slots:
     void testSetCopyright();
     void testSetMusicURL();
     void testSetDrmProtected();
-          
+
     void testSetAlbumArtUri();
     void testThumbnailReady();
-    void testCommitPlaybackInfo();
-    void testCommitSongDetailInfo();
+
 private:
-    MpSongData *mTest;
-    
+
+    MpSongData          *mTest;
+    MpSongDataPrivate   *mTestPrivate;
+
 };
 
 

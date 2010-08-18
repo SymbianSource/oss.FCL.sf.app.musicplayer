@@ -20,7 +20,7 @@ HB += hbfeedback
 TARGET = mpnowplayingbanner
 symbian: { 
     TARGET.UID3 = 0x10207C67
-    MMP_RULES += "DEFFILE mpnowplayingbanner.def"
+    MMP_RULES += "DEFFILE mpnowplayingbanner.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
@@ -45,3 +45,4 @@ SOURCES += src/mpnowplayingwidget.cpp \
      
 RESOURCES += resources/mpnowplayingbanner.qrc
 
+DOCML += resources/nowplaying.docml

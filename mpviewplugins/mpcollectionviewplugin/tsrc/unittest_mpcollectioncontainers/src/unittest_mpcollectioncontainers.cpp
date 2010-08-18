@@ -245,7 +245,7 @@ void TestMpCollectionContainers::testSetupContainerAllSongs()
     QVERIFY(allSongs->mIndexFeedback->itemView() == allSongs->mList);
 
     // Normal mode. Should see count.
-    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subhead_ln_songs", 5));
+    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subhead_songs_l1").arg( 5 ) );
 }
 
 /*!
@@ -802,7 +802,7 @@ void TestMpCollectionContainers::testAlbumCenteredArtists()
     mCollectionData->mCurrentAlbumAvailable = false;
     artists->mAlbumIndexOffset = 0;
     artists->mCurrentAlbumIndex = 0;
-    artists->albumCentered();
+    artists->albumCentered( QModelIndex() );
     QCOMPARE(artists->mCurrentAlbumIndex, -1);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(qvariant_cast<int>(spy.at(0).at(0)), -1);
@@ -810,14 +810,14 @@ void TestMpCollectionContainers::testAlbumCenteredArtists()
     mCollectionData->mCurrentAlbumAvailable = true;
     artists->mAlbumIndexOffset = 0;
     artists->mCurrentAlbumIndex = 0;
-    artists->albumCentered();
+    artists->albumCentered( QModelIndex() );
     QCOMPARE(artists->mCurrentAlbumIndex, -1);
     QCOMPARE(spy.count(), 1);
 
     // Re-centered on same item
     artists->mAlbumIndexOffset = 1;
     artists->mCurrentAlbumIndex = 0;
-    artists->albumCentered();
+    artists->albumCentered( QModelIndex() );
     QCOMPARE(spy.count(), 1);
 }
 
@@ -833,20 +833,20 @@ void TestMpCollectionContainers::testAlbumCenteredAlbums()
 
     mCollectionData->mCurrentAlbumAvailable = false;
     albums->mCurrentAlbumIndex = 0;
-    albums->albumCentered();
+    albums->albumCentered( QModelIndex() );
     QCOMPARE(albums->mCurrentAlbumIndex, -1);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(qvariant_cast<int>(spy.at(0).at(0)), -1);
 
     mCollectionData->mCurrentAlbumAvailable = true;
     albums->mCurrentAlbumIndex = 0;
-    albums->albumCentered();
+    albums->albumCentered( QModelIndex() );
     QCOMPARE(albums->mCurrentAlbumIndex, -1);
     QCOMPARE(spy.count(), 1);
 
     // Re-centered on same item
     albums->mCurrentAlbumIndex = -1;
-    albums->albumCentered();
+    albums->albumCentered( QModelIndex() );
     QCOMPARE(spy.count(), 1);
 }
 

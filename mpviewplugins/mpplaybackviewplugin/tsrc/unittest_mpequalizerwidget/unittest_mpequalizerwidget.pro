@@ -11,31 +11,31 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpequalizerwidget unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpequalizerwidget
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += ./stub/inc \
-    ../../inc \
-    ../../../../inc
+               ../../inc \
+               ../../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
-LIBS += lestor.dll \
-    -lfbscli.dll \
+
+LIBS += -lestor.dll \
+        -lfbscli.dll
 
 symbian: TARGET.EPOCALLOWDLLDATA = 1
 
 HEADERS += stub/inc/mpengine.h \
-    stub/inc/mpenginefactory.h \
-    inc/unittest_mpequalizerwidget.h \
-    ../../inc/mpequalizerwidget.h
+           stub/inc/mpenginefactory.h \
+           inc/unittest_mpequalizerwidget.h \
+           ../../inc/mpequalizerwidget.h
 
 SOURCES += stub/src/mpengine.cpp \
-    stub/src/mpenginefactory.cpp \
-    src/unittest_mpequalizerwidget.cpp
+           stub/src/mpenginefactory.cpp \
+           src/unittest_mpequalizerwidget.cpp
 

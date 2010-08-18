@@ -22,16 +22,16 @@
 #include <hblabel.h>
 #include <hbicon.h>
 #include <hbmarqueeitem.h>
-#include <hbdocumentloader.h>
 #include <hbanchorlayout.h>
 #include <hbwidget.h>
 #include <hbframeitem.h>
 #include <hbframedrawer.h>
-#include <hbstyleloader.h>
 #include <hbcolorscheme.h>
 
+#include "musicwidgetdocumentloader.h"
 #include "mptrace.h"
 #include "mpenginefactory.h"
+#include "mpalbumcoverwidget.h"
 
 // Constants
 /** Docml */
@@ -56,9 +56,10 @@ const QLatin1String ICON_COLOR_DISABLED ("qtc_button_disabled");
 const QLatin1String ICON_PLAY ("qtg_mono_play");
 const QLatin1String ICON_PAUSE ("qtg_mono_pause");
 /**  Music Player shortcut icon */
-const QLatin1String ICON_LARGE_MUSIC_PLAYER ("qtg_large_music_player");
+const QLatin1String ICON_LARGE_MUSIC_PLAYER ("qtg_large_music");
 /**  Music Player shortcut icon */
 const QLatin1String ICON_FIRST_TIME_USE ("qtg_large_music_empty");
+const QLatin1String ICON_DEFAULT_ART ("qtg_large_album_art");
 
 /**  HsWidget normal background */
 const QLatin1String WIDGET_BG_NORMAL ("qtg_fr_hswidget_normal");
@@ -119,9 +120,7 @@ MusicWidget::MusicWidget(QGraphicsItem* parent, Qt::WindowFlags flags):
     mMusicPlayerNoSongData(1),
     mMusicPlayerUpdating(0),
     mMusicPlayerBlocked(0),
-    mAlbumArtLabel(0),
-    mAlbumArtWidth(0),
-    mAlbumArtHeight(0),
+    mAlbumArt(0),
     mArtist(0),
     mTitle(0),    
     mMpEngine(0),
@@ -205,7 +204,7 @@ void MusicWidget::setupUi()
     TX_ENTRY
     
     // Use document loader to load the contents
-    HbDocumentLoader loader;
+    MusicWidgetDocumentLoader loader;
     bool ok = false;
     loader.load( MUSIC_WIDGET_DOCML, &ok);
     Q_ASSERT_X(ok, "music_widget", "invalid title docml file");
@@ -233,13 +232,9 @@ void MusicWidget::setupUi()
     // Setup album art area
     QGraphicsWidget *tmpWidgetPtr;
     tmpWidgetPtr = loader.findWidget(DOCML_ALBUM_ART);
-    mAlbumArtLabel = qobject_cast<HbLabel*>(tmpWidgetPtr);
-    HbWidget *albumArtLayout = mAlbumArtLabel;
-    albumArtLayout->setZValue(2);
-    
-    // Store album art area size
-    mAlbumArtWidth = albumArtLayout->preferredWidth();
-    mAlbumArtHeight = albumArtLayout->preferredHeight();    
+    mAlbumArt = qobject_cast<MpAlbumCoverWidget*>(tmpWidgetPtr);
+    mAlbumArt->setEnabled( false );
+    mAlbumArt->setDefaultIcon( HbIcon( ICON_DEFAULT_ART ) );
         
     // Load shortcut background
     HbWidget *shortcutAreaLayout = qobject_cast<HbWidget*> (loader.findWidget(DOCML_SHORTCUT_ICON_BG));
@@ -669,7 +664,7 @@ void MusicWidget::albumArtReady()
     TX_ENTRY
     HbIcon icon;
     
-    if ( mMusicPlayerNoSongData )
+    if ( mMpPlaybackData->playbackState() == MpPlaybackData::NotPlaying )
         {
         TX_LOG_ARGS("1st time album art")
         icon = HbIcon(ICON_FIRST_TIME_USE);    
@@ -680,10 +675,8 @@ void MusicWidget::albumArtReady()
         mMpPlaybackData->albumArt( icon );
         }
     
-    // Resize here manually to avoid resizing when showing album art
-    icon.setHeight(mAlbumArtHeight);
-    icon.setWidth(mAlbumArtWidth);
-    mAlbumArtLabel->setIcon( icon );
+    mAlbumArt->setIcon( icon );
+    mAlbumArt->setEnabled( true );
     
     TX_EXIT
 }

@@ -17,6 +17,17 @@
 				<unit unitID="musicplayer_group" mrp="" bldFile="&layer_real_source_path;" name="musicplayer_group" proFile="qtmusicplayer.pro" qmakeArgs="-r -config rom"/>
 			</module>
     </layer>
-
+ 
+    <layer name="qt_unit_test_layer">
+			<module name="musicplayer_tsrc">
+				<unit unitID="musicplayer_tsrc" bldFile="&layer_real_source_path;/tsrc" name="musicplayer_tsrc" proFile="tsrc.pro" mrp="" filter=""/>
+			</module>
+	</layer>
+	
+    <layer name="pref_test_layer">
+		<module name="musicplayer_tsrc_group">
+			<unit unitID="musicplayer_tsrc_group" bldFile="&layer_real_source_path;/tsrc" name="musicplayer_tsrc_group" proFile="tsrc.pro" mrp="" filter="TA_MUSICPLAYER"/>
+		</module> 
+    </layer>  
   </systemModel>
 </SystemDefinition>

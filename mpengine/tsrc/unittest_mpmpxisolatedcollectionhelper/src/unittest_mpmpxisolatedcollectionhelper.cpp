@@ -50,7 +50,8 @@ TestCMpMpxIsolatedCollectionHelper::TestCMpMpxIsolatedCollectionHelper()
     : mTest( 0 ),
       iEntriesFromoOpenCallback ( 0 ),
       iErrorFromoOpenCallback( KErrNone ),
-      iOpenCallbackCounter( 0 )
+      iOpenCallbackCounter( 0 ),
+      iOpenRestoreCallbackCounter( 0 )
 {
 }
 
@@ -114,6 +115,18 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
     QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
     QCOMPARE(mTest->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
     QCOMPARE((int)mTest->iIncrementalOpenUtil->iPath, (int)path);
+    QCOMPARE(mTest->iOpenMode, CMpMpxIsolatedCollectionHelper::DefaultMode );
+    
+    mTest->OpenCollectionL(*path,0,CMpMpxIsolatedCollectionHelper::RestorePathMode);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDelay, KIncrementalDelayHalfSecond);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iStop,TBool(ETrue));
+    QCOMPARE(mTest->iIncrementalOpenUtil->iStart,TBool(ETrue));
+    QCOMPARE(mTest->iFirstIncrementalOpen,TBool(ETrue));
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
+    QCOMPARE((int)mTest->iIncrementalOpenUtil->iPath, (int)path);
+    QCOMPARE(mTest->iOpenMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    
     delete path;
 }
 
@@ -122,6 +135,7 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
  */
 void TestCMpMpxIsolatedCollectionHelper::testHandleOpen()
 {
+     //Default Mode
      iEntriesFromoOpenCallback = 0;
      iErrorFromoOpenCallback = KErrArgument;
      iOpenCallbackCounter = 0;
@@ -131,10 +145,22 @@ void TestCMpMpxIsolatedCollectionHelper::testHandleOpen()
      QCOMPARE((int)iEntriesFromoOpenCallback,(int)media);
      QCOMPARE(iErrorFromoOpenCallback,KErrNone);
      QCOMPARE(iOpenCallbackCounter,1);
+     QCOMPARE(iOpenRestoreCallbackCounter,0);
+     
+     //RestorePath mode
+     CMPXCollectionPath* path = CMPXCollectionPath::NewL();
+     mTest->iFirstIncrementalOpen = ETrue;
+     mTest->iOpenMode = CMpMpxIsolatedCollectionHelper::RestorePathMode;
+     mTest->HandleOpenL(*media, 0, false, KErrNotFound);
+     
+     QCOMPARE(iErrorFromoOpenCallback,KErrNotFound);
+     QCOMPARE(iOpenCallbackCounter,1);
+     QCOMPARE(iOpenRestoreCallbackCounter,1);
+     
 }
  
 /*!
- Used to keep track of the callback from teh isolated collection helper.
+ Used to keep track of the callback from the isolated collection helper.
  */
 void TestCMpMpxIsolatedCollectionHelper::HandleIsolatedOpenL( const CMPXMedia& aEntries, TInt aError )
 {
@@ -143,4 +169,13 @@ void TestCMpMpxIsolatedCollectionHelper::HandleIsolatedOpenL( const CMPXMedia& a
      iOpenCallbackCounter++;
 }
 
+/*!
+ Used to keep track of the callback from the isolated collection helper.
+ */
+void TestCMpMpxIsolatedCollectionHelper::HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath, TInt aError )
+{
+    Q_UNUSED( aPath );
+    iErrorFromoOpenCallback = aError;
+    iOpenRestoreCallbackCounter++;
+}
 //end of file

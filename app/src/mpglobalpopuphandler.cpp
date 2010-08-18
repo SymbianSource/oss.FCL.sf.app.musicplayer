@@ -65,7 +65,6 @@ MpGlobalPopupHandler::MpGlobalPopupHandler( QObject *parent )
     connect( mMpEngine, SIGNAL( unableToCotinueDueUSB() ), this, SLOT( launchUnableToCotinueDueUsb() ) );
     connect( mMpEngine, SIGNAL( usbSynchronizationStarted() ), this, SLOT( launchUsbBlockingNote() ) );
     connect( mMpEngine, SIGNAL( usbSynchronizationFinished() ), this, SLOT( closeUsbBlockingNote() ) );
-    connect( mMpEngine, SIGNAL( libraryRefreshNeeded() ), this, SLOT( launchRefreshLibraryRequest() ) );
     TX_EXIT
 }
 
@@ -139,7 +138,7 @@ void MpGlobalPopupHandler::scanCountChanged(int count)
     if ( mOutstandingPopup && ( mOutstandingPopup->objectName() == KScanProgressDialog ) ) {
         HbProgressDialog *dialog = qobject_cast<HbProgressDialog *>( mOutstandingPopup );
         QString added;
-        added = hbTrId( "txt_mus_info_ln_songs_added" , count );
+        added = hbTrId( "txt_mus_info_ln_songs_found" , count );
         dialog->setText( added );
     }
     TX_EXIT
@@ -153,6 +152,7 @@ void MpGlobalPopupHandler::scanCountChanged(int count)
 void MpGlobalPopupHandler::handleScanFinished( int error, int itemsAdded )
 {
     TX_ENTRY_ARGS("error: " << error << " Items added: " << itemsAdded )
+
     if ( mOutstandingPopup && ( mOutstandingPopup->objectName() == KScanProgressDialog ) ) {
         HbProgressDialog *dialog = qobject_cast<HbProgressDialog *>( mOutstandingPopup );
         disconnect( dialog, SIGNAL( aboutToClose() ), this, SLOT( outstandingPopupClosing() ) );
@@ -162,7 +162,7 @@ void MpGlobalPopupHandler::handleScanFinished( int error, int itemsAdded )
 
     switch( error ) {
         case MpSongScanner::ScanErrorNone :
-            launchScanFinishedDialog( true, itemsAdded );
+            launchScanFinishedDialog( true , itemsAdded );
             break;
         case MpSongScanner::ScanGeneralError :
             launchScanFinishedDialog( false, itemsAdded );
@@ -223,31 +223,9 @@ void MpGlobalPopupHandler::closeUsbBlockingNote()
 }
 
 /*!
- Slot called when MpEngine emits libraryRefreshNeeded() signal
- */
-void MpGlobalPopupHandler::launchRefreshLibraryRequest()
-{
-    HbAction *action;
-    HbMessageBox *promptRefresh = new HbMessageBox( HbMessageBox::MessageTypeQuestion );
-    promptRefresh->setText( hbTrId( "txt_mus_info_music_may_need_to_be_refreshed" ) );
-    promptRefresh->setTimeout( HbPopup::NoTimeout );
-    promptRefresh->setModal( true );
-    promptRefresh->clearActions();
-    action = new HbAction( hbTrId( "txt_common_button_yes" ) );
-    action->setObjectName( KYes );
-    connect( action, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
-    promptRefresh->addAction( action );
-    action = new HbAction( hbTrId( "txt_common_button_no" ) );
-    action->setObjectName( KNo );
-    promptRefresh->addAction( action );
-    promptRefresh->setAttribute( Qt::WA_DeleteOnClose );
-    promptRefresh->setObjectName( KPromptRefresh );
-    setOutstandingPopup( promptRefresh );
-    promptRefresh->show();
-}
-
-/*!
   Slot to launch the MTP educating info dialog
+  This dialog would be displayed after any manual refresh (from options menu),
+  or after a refreshing originated by USBMassStorage disconnection.
  */
 void MpGlobalPopupHandler::launchMTPInfoDialog()
 {
@@ -302,23 +280,25 @@ void MpGlobalPopupHandler::outstandingPopupClosing()
  \internal
  Launches Scan Finished Notification.
  */
-void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok, int itemsAdded )
+void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok , int itemsAdded )
 {
-    QString added;
     HbNotificationDialog *finishedDialog = new HbNotificationDialog();
     finishedDialog->setModal(true);
-    added = hbTrId( "txt_mus_dpopinfo_ln_songs_added", itemsAdded );
-    finishedDialog->setText( added );
     finishedDialog->setAttribute( Qt::WA_DeleteOnClose );
     finishedDialog->setObjectName( KScanFinished );
     // Connect aboutToClose with outstandingPopupClosing() first, and then with launchMTPInfoDialog
     // in order to get finishDialog cleared before MtpInfoDialog is launched.
     setOutstandingPopup( finishedDialog );
 
+    // Educating user (of MTP information) dialog is displayed
+    // only when the following conditions are met:
+    // 1. A "manual" refresh operation completes successfully
+    // 2. Refresh operation finds at least one new item
+
     if( ok ) {
         finishedDialog->setIcon( HbIcon( QString("qtg_large_ok") ) );
         finishedDialog->setTitle( hbTrId( "txt_mus_dpophead_refresh_complete" ) );
-        if ( MpSettingsManager::showMtpInfo() && !mMpSongScanner->isAutomaticScan() ) {
+        if ( MpSettingsManager::showMtpInfo() && !mMpSongScanner->isAutomaticScan() && itemsAdded ) {
             connect( finishedDialog, SIGNAL( aboutToClose() ), this, SLOT( launchMTPInfoDialog() ) );
         }
     }

@@ -25,15 +25,14 @@
 #include "mpmpxisolatedcollectionhelper.h" //MMpMpxIsolatedCollectionHelperObserver
 #include "mpmpxcollectionviewdefs.h"
 
-
+class QStringList;
 class MMPXCollectionUtility;
 class MMPXCollectionUiHelper;
 class CMPXCollectionOpenUtility;
 class MMPXPlaybackUtility;
 class MpMpxCollectionData;
 class MpMpxCollectionFrameworkWrapper;
-class QStringList;
-
+class MpSongData;
 
 class MpMpxCollectionFrameworkWrapperPrivate : public MMPXCollectionObserver,
                                      public MMPXCHelperObserver,
@@ -60,7 +59,7 @@ public:
     explicit MpMpxCollectionFrameworkWrapperPrivate( MpMpxCollectionFrameworkWrapper *wrapper );
     virtual ~MpMpxCollectionFrameworkWrapperPrivate();
 
-    void init( TUid hostUid );
+    void init( TUid hostUid, MpSongData *songData );
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
     void reopenCollection();
@@ -85,6 +84,8 @@ public:
     
     MpMpxCollectionData *collectionData();
     void openShuffleAllSongsPath();
+
+    void retrieveSongDetails( int index );
     
     void savePath( QByteArray &data );
     void restorePath( const QByteArray &data );
@@ -133,6 +134,9 @@ private:
     void PreparePlaylistMediaL( CMPXMedia& aMedia, QList<int> &selection, MpMpxCollectionData *collectionData );
     void createPlaybackUtilityL();
     void DoPlayAllSongsPlaylistL();
+
+    void DoRetrieveSongDetailsL( int index );
+
     void DoSavePathL( QByteArray &data );
     void DoRestorePathL( const QByteArray &data );
 
@@ -150,7 +154,7 @@ private:
     TBool                             iFirstIncrementalOpen;
     CMPXMedia                         *iUserPlaylists;          // Owned
     TInt                              iNumItemsAdded;
-    TUid                              mHostUid;
+    TUid                              iHostUid;
     TBool                             iRepeatFeature;
     TBool                             iShuffleFeature;
     TBool                             iReopen;
@@ -158,6 +162,8 @@ private:
     TBool                             iRestoreDefaultPath;
     TInt                              iRestorePathIndex;
     TMPXItemId                        iRestorePathIndexId;
+	
+    MpSongData                        *iSongData;               // Not owned
 
 };
 

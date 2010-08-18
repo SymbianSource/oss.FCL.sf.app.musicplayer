@@ -3088,6 +3088,9 @@ void CMPXPodcastDbPlugin::SetAttributesL(
     RArray<TMPXAttribute>& aAttrs,
     RArray<TInt>& aSupportedIds )
     {
+    CleanupClosePushL(aAttrs);
+    CleanupClosePushL(aSupportedIds);
+    
     aAttrs.AppendL(TMPXAttribute(KMPXMediaIdGeneral, EMPXMediaGeneralTitle |
         EMPXMediaGeneralDuration | EMPXMediaGeneralSize |
         EMPXMediaGeneralType | EMPXMediaGeneralCategory | EMPXMediaGeneralId |
@@ -3109,6 +3112,8 @@ void CMPXPodcastDbPlugin::SetAttributesL(
         aAttrs.AppendL( TMPXAttribute(KMPXMediaIdMusic, EMPXMediaMusicAlbumArtFileName ) );
         aSupportedIds.AppendL( KMPXMediaIdMusic );
         }
+    CleanupStack::Pop();
+    CleanupStack::Pop();
     }
 
 #ifdef _DEBUG

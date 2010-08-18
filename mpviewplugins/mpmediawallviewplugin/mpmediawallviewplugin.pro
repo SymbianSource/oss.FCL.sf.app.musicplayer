@@ -22,6 +22,7 @@ symbian: {
     TARGET.UID3 = 0x10207C94
     TARGET.CAPABILITY = All -TCB
     TARGET.EPOCALLOWDLLDATA = 1
+    MMP_RULES += SMPSAFE
 }
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.MpxViewPlugin/1.0
@@ -38,21 +39,21 @@ LIBS += -lestor \
         -lmpxviewframeworkqt \
         -lganeswidgets \
         -lmpengine \
-        -lmpdata
+        -lmpdata \
+        -lmpalbumcoverwidget
 	
 # Input
 HEADERS += ../../inc/mpviewbase.h \
            inc/mpmediawallviewplugin.h \
            inc/mpmediawallview.h \
            inc/mpmediawalldocumentloader.h \
-           inc/mpalbumcoverwidget.h \
            inc/mptracklistwidget.h \
            inc/mpreflectioneffect.h
 SOURCES += src/mpmediawallviewplugin.cpp \
            src/mpmediawallview.cpp \
            src/mpmediawalldocumentloader.cpp \
-           src/mpalbumcoverwidget.cpp \
            src/mptracklistwidget.cpp \
            src/mpreflectioneffect.cpp
 RESOURCES += resources/mpmediawallviewresources.qrc
 
+DOCML += resources/mediawall.docml

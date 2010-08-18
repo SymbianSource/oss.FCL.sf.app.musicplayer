@@ -19,7 +19,7 @@ CONFIG += hb
 TARGET = mpdata
 symbian: { 
     TARGET.UID3 = 0x10207C95
-    MMP_RULES += "DEFFILE mpdata.def"
+    MMP_RULES += "DEFFILE mpdata.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
@@ -43,7 +43,8 @@ HEADERS += ../inc/mpmpxcollectiondata.h \
            ../inc/mpcollectiontbonelistdatamodel.h \
     	   inc/mpcollectionalbumartmanager.h \
     	   ../inc/mpplaybackdata.h \
-    	   ../inc/mpsongdata.h
+    	   ../inc/mpsongdata.h \
+    	   inc/mpsongdata_p.h
 
 SOURCES += src/mpmpxcollectiondata.cpp \
            src/mpmpxcollectiondata_p.cpp \
@@ -51,5 +52,6 @@ SOURCES += src/mpmpxcollectiondata.cpp \
            src/mpcollectiontbonelistdatamodel.cpp \
     	   src/mpcollectionalbumartmanager.cpp \
            src/mpplaybackdata.cpp \
-           src/mpsongdata.cpp
+           src/mpsongdata.cpp \
+           src/mpsongdata_p.cpp
 

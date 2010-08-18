@@ -15,12 +15,12 @@
 #
 
 TEMPLATE = lib
-CONFIG += hb qt ecomplugin mobility SHARE_FUNC_ENABLED
+CONFIG += hb qt ecomplugin
 QT += webkit \
       network \
       xml
 TARGET = mpdetailsviewplugin
-MOBILITY += bearer systeminfo
+MOBILITY += systeminfo
 symbian: { 
     TARGET.UID3 = 0x2002D0AA
     TARGET.CAPABILITY = All -TCB
@@ -42,7 +42,8 @@ LIBS += -lmpxviewframeworkqt \
         -lthumbnailmanagerqt \
         -lmpsettingsmanager \
         -lmpengine \
-        -lmpdata
+        -lmpdata \
+        -lxqsysinfo
 
 # Input
 HEADERS += ../../inc/mpviewbase.h \
@@ -54,15 +55,6 @@ SOURCES += src/mpdetailsviewplugin.cpp \
            src/mpdetailsview.cpp \
            src/mpquerymanager.cpp
 
-# Sharing functionality
-CONFIG(SHARE_FUNC_ENABLED) {
-    SOURCES += src/mpdetailssharedialog.cpp src/mpsharedata.cpp
-    HEADERS += inc/mpdetailssharedialog.h inc/mpsharedata.h
-    DEFINES += SHARE_FUNC_ENABLED
-    debug {
-        DEFINES += SHARE_PLAYER_RND
-    }
-}
-
 RESOURCES += resources/mpdetailsviewresources.qrc
 
+DOCML += resources/mpdetailsview.docml

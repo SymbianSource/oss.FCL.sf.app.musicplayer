@@ -11,20 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpcollectioncontainers unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib hb
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpcollectioncontainers
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    stub/inc \
-    ../../../../inc
-
+               stub/inc \
+               ../../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
@@ -45,7 +43,8 @@ HEADERS += inc/unittest_mpcollectioncontainers.h \
            stub/inc/mpcollectiontbonelistdatamodel.h \
            stub/inc/mpmpxcollectiondata.h \
            stub/inc/mpcollectionview.h \
-           stub/inc/hgmediawall.h
+    	   stub/inc/hgmediawall.h \
+	   stub/inc/mpnowplayingwidget.h
 
 SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainerfactory.cpp \
@@ -60,6 +59,8 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            stub/src/mpcollectiontbonelistdatamodel.cpp \
            stub/src/mpmpxcollectiondata.cpp \
            stub/src/mpcollectionview.cpp \
-           stub/src/hgmediawall.cpp
+	   stub/src/hgmediawall.cpp \
+	   stub/src/mpnowplayingwidget.cpp 
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc
+

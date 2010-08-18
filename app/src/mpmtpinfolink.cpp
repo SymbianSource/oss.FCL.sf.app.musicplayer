@@ -88,7 +88,7 @@ void MpMtpInfoLink::setMtpInfoText()
 {
     TX_ENTRY
     QString url = MpSettingsManager::instance()->mtpInfoUrl();
-    QString text = HbParameterLengthLimiter( "txt_mus_info_please_note_that_using_media_transfer" ).arg( url );
+    QString text = HbParameterLengthLimiter( hbTrId("txt_mus_info_note_that_using_nokia_ovi_suite_mode") ).arg( url );
     QString htmlLink = "<a href=\"" + url + "\">" + url + "</a>" ;
     text.replace( url, htmlLink );
     text = "<p>" + text + "</p>" ;

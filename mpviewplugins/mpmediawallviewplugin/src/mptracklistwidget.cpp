@@ -18,7 +18,12 @@
 
 #include <QGraphicsSceneMouseEvent>
 
+#ifndef UNIT_TESTING
 #include <hbinstance.h>
+#else
+#include "hbinstancestub.h"
+#endif
+
 #include <hblistview.h>
 #include <hbframeitem.h>
 #include <hbmainwindow.h>
@@ -26,7 +31,7 @@
 
 
 #include "mptracklistwidget.h"
-#include "mpreflectioneffect.h"
+
 
 const int swipeAngleTolerance = 30; // angle is from 0 to 360
 
@@ -65,9 +70,6 @@ MpTrackListWidget::MpTrackListWidget( QGraphicsItem *parent ) : HbWidget( parent
     mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
     mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );  
     mFrameItem->setZValue(-1);
-    
-    MpReflectionEffect *effect = new MpReflectionEffect(this);
-    setGraphicsEffect(effect);
 }
 
 /*!

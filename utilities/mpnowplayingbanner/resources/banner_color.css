@@ -2,7 +2,7 @@
 
 HbLabel#bannerLabel[state = "normal"]::text
 {
-    color:var(qtc_multimedia_trans);
+    color:var(qtc_multimedia_trans_normal);
 }
 
 HbLabel#bannerLabel[state = "pressed"]::text
@@ -15,7 +15,7 @@ HbLabel#bannerLabel[state = "pressed"]::text
 
 HbLabel#bannerLabel[state = "normal"]::icon
 {
-    color:var(qtc_multimedia_trans);
+    color:var(qtc_multimedia_trans_normal);
 }
 
 HbLabel#bannerLabel[state = "pressed"]::icon

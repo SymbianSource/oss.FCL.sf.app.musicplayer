@@ -23,15 +23,13 @@ symbian: {
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x1F00000
     TARGET.CAPABILITY = CAP_APPLICATION NetworkControl DRM
-    SKINICON = qtg_large_music_player
+    SKINICON = qtg_large_music
 
     BLD_INF_RULES.prj_exports += \
-        "../sis/musicplayer_stub.sis          /epoc32/data/z/system/install/musicplayer_stub.sis" \
-        "resources/musicplayer.docml          /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.docml" \
-        "resources/musicplayer.splashml       /epoc32/release/winscw/udeb/Z/resource/hb/splashml/musicplayer.splashml" \
-        "resources/musicplayer.docml          /epoc32/data/Z/resource/hb/splashml/musicplayer.docml" \
-        "resources/musicplayer.splashml       /epoc32/data/Z/resource/hb/splashml/musicplayer.splashml"
-
+        "../sis/musicplayer_stub.sis          z:/system/install/musicplayer_stub.sis" \
+        "resources/musicplayer.docml          z:/resource/hb/splashml/musicplayer.docml" \
+        "resources/musicplayer.splashml       z:/resource/hb/splashml/musicplayer.splashml"
+    MMP_RULES += SMPSAFE
 }
 
 # Service provider specific configuration.
@@ -59,7 +57,8 @@ LIBS += -lecom \
         -lxqserviceutil \
         -lmusicservices \
         -lmpsettingsmanager \
-        -lmpengine
+        -lmpengine \
+        -lmpmediacontroller
 
 # Input
 HEADERS += inc/mpmainwindow.h \

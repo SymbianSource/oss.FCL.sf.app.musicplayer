@@ -20,6 +20,7 @@
 
 #include <QtTest/QtTest>
 
+class QTranslator;
 class MpMtpInfoLink;
 
 class TestMpMtpInfoLink : public QObject
@@ -45,7 +46,9 @@ private slots:
     void testSetMtpInfoText();
 
 private:
+
     MpMtpInfoLink  *mTest;
+    QTranslator    *mMpTranslator; // Own
 
 };
 

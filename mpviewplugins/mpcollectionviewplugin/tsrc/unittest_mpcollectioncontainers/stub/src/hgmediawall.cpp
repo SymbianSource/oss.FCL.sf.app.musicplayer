@@ -65,6 +65,22 @@ QModelIndex HgWidget::currentIndex() const
     return QModelIndex();
 }
 
+/*!
+ Stub function
+ */
+QSizeF HgWidget::itemSize() const
+{
+    return QSizeF();
+}
+
+/*!
+ Stub function
+ */
+void HgWidget::setDefaultImage(QImage defaultImage)
+{
+    Q_UNUSED(defaultImage);
+}
+
 
 //===========================================================================
 //===========================================================================

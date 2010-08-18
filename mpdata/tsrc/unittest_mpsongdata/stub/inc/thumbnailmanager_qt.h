@@ -15,8 +15,9 @@
 *
 */
 
-#ifndef THUMBNAILMANAGER_QT_H_
-#define THUMBNAILMANAGER_QT_H_
+#ifndef THUMBNAILMANAGER_QT_H
+#define THUMBNAILMANAGER_QT_H
+
 #include <QObject>
 #include <QPixmap>
 
@@ -125,4 +126,4 @@ public:
 
 };
 
-#endif /* THUMBNAILMANAGER_QT_H_ */
+#endif // THUMBNAILMANAGER_QT

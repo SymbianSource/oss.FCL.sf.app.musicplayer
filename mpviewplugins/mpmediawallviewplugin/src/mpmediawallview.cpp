@@ -40,6 +40,7 @@
 #include "mptracklistwidget.h"
 #include "mpcollectiontbonelistdatamodel.h"
 #include "mptrace.h"
+#include "mpreflectioneffect.h"
 
 const char*MUSIC_MEDIAWALL_DOCML = ":/mediawallviewdocml/mediawall.docml";
 
@@ -163,10 +164,12 @@ void MpMediaWallView::initializeView()
     }
     
     mAlbumCover = new MpAlbumCoverWidget( this );
+    mAlbumCover->setGraphicsEffect( new MpReflectionEffect(mAlbumCover) );
     mAlbumCover->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
     mAlbumCover->hide();
     
     mTrackList = new MpTrackListWidget( this );
+    mTrackList->setGraphicsEffect( new MpReflectionEffect(mTrackList) );
     mTrackList->list()->setModel( new MpCollectionTBoneListDataModel(mCollectionData, mPlaybackData, mTrackList ) );
     mTrackList->hide();
     
@@ -175,6 +178,7 @@ void MpMediaWallView::initializeView()
     connect(mTrackList,SIGNAL(closed()),this, SLOT(hideTracksList()));
 
     HbStyleLoader::registerFilePath(":/css/mpcustommediawall.css");
+    HbStyleLoader::registerFilePath(":/css/mpcustommediawall_color.css");
     HbStyleLoader::registerFilePath(":/css/mpcustommediawall.hgmediawall.widgetml");  
     
     TX_EXIT
@@ -224,6 +228,7 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
         }
         if ( mMediaWallWidget ) {
             mModel->refreshModel();
+            scrollToDefault();
         } else {
             bool ok = false;
             mDocumentLoader->load( MUSIC_MEDIAWALL_DOCML, "mediaWall", &ok);
@@ -276,6 +281,7 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
 void MpMediaWallView::containerContentsChanged() 
 {
     if ( !mLibraryUpdating && mEngine ) {
+        dismissListClosingAnimation();
         mEngine->openCollection( ECollectionContextAlbumsMediaWall );
     }
 }
@@ -412,17 +418,34 @@ void MpMediaWallView::setUpMediaWallWidget()
     mMediaWallWidget->setDefaultImage( defaultIcon.pixmap().toImage() );
     mMediaWallWidget->enableReflections( true );
     mMediaWallWidget->setModel( mModel );
+    scrollToDefault();
+    mMediaWallWidget->setTitleFontSpec( HbFontSpec( HbFontSpec::Primary ) );
+    mMediaWallWidget->setDescriptionFontSpec( HbFontSpec( HbFontSpec::Secondary ) );
+    mMediaWallWidget->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOn ); //HgWidget::ScrollBarAutoHide
+    mMediaWallWidget->scrollBar()->setInteractive( true );
+    mMediaWallWidget->setIndexFeedbackPolicy( HgWidget::IndexFeedbackSingleCharacter );
+    connect(mMediaWallWidget, SIGNAL(animationAboutToEnd(QModelIndex)), SLOT(fetchAlbumSongs(QModelIndex)));
+    connect(mMediaWallWidget, SIGNAL(activated(QModelIndex)), SLOT(showTrackList()));
+    connect(mMediaWallWidget, SIGNAL(scrollingStarted()), SLOT(dismissListClosingAnimation()));
+}
+/*!
+ Scrolls the media wall to a default position.
+ */
+void MpMediaWallView::scrollToDefault()
+{
+    //if something is playing go there, if not go to a balanced position.
     if ( mPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
         scrollToNowPlaying();
     }
-    //The rest of the cases are attepting to balance the items on screen.
-    else if ( mModel->rowCount() >= 5 ) {
+    else  if ( mModel->rowCount() >= 5 ) {
         /* 5 and more
         [0] [1] [X] [3] [4]...
         */
         QModelIndex index;
         index = mModel->index( 2 );
         mMediaWallWidget->scrollTo( index );
+        fetchAlbumSongs( index );
+        
     }
     else if ( mModel->rowCount() >=3  ) {
         /* 4 and 3
@@ -432,6 +455,7 @@ void MpMediaWallView::setUpMediaWallWidget()
         QModelIndex index;
         index = mModel->index( 1 );
         mMediaWallWidget->scrollTo( index );
+        fetchAlbumSongs( index );
     }
     else {
         /* 2 and 1
@@ -441,15 +465,8 @@ void MpMediaWallView::setUpMediaWallWidget()
         QModelIndex index;
         index = mModel->index( 0 );
         mMediaWallWidget->scrollTo( index );
+        fetchAlbumSongs( index );
     }
-    mMediaWallWidget->setTitleFontSpec( HbFontSpec( HbFontSpec::Primary ) );
-    mMediaWallWidget->setDescriptionFontSpec( HbFontSpec( HbFontSpec::Secondary ) );
-    mMediaWallWidget->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOn ); //HgWidget::ScrollBarAutoHide
-    mMediaWallWidget->scrollBar()->setInteractive( true );
-    mMediaWallWidget->setIndexFeedbackPolicy( HgWidget::IndexFeedbackSingleCharacter );
-    connect(mMediaWallWidget, SIGNAL(animationAboutToEnd(QModelIndex)), SLOT(fetchAlbumSongs(QModelIndex)));
-    connect(mMediaWallWidget, SIGNAL(activated(QModelIndex)), SLOT(showTrackList()));
-    connect(mMediaWallWidget, SIGNAL(scrollingStarted()), SLOT(dismissListClosingAnimation()));
 }
 
 /*!
@@ -462,6 +479,7 @@ void MpMediaWallView::scrollToNowPlaying()
         QModelIndex index;
         index = mModel->index( mCollectionData->itemIndex( albumId ) );
         mMediaWallWidget->scrollTo( index );
+        fetchAlbumSongs( index );
     }
 }
 

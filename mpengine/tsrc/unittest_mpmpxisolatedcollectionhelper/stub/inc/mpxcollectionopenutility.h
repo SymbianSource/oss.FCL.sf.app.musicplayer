@@ -47,6 +47,7 @@ public:
                               TMPXAttribute aKeyAttribute = KMPXMediaNullAttribute );
      void Stop();
      void SetDelay( TInt aDelay );
+     CMPXCollectionPath* PathL();
 public:
      TInt                      iDelay;
      TInt                      iChunkSize;

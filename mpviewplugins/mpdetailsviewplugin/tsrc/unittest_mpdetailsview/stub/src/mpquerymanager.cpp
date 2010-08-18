@@ -21,7 +21,6 @@
 #include <QFile>
 #include <QUrl>
 
-#include "mpdetailssharedialog.h"
 #include "mptrace.h"
 
 const int KRecommendationNum = 2;
@@ -56,6 +55,26 @@ void MpQueryManager::queryLocalMusicStore(QString artist,QString album,QString t
     mTitle=title;
     TX_EXIT_ARGS("STUB")    
 }
+
+void MpQueryManager::queryLocalMusicStore()
+{
+    TX_ENTRY_ARGS("STUB")
+    TX_EXIT_ARGS("STUB")    
+}
+
+void MpQueryManager::reset()
+{
+    TX_ENTRY_ARGS("STUB")
+    TX_EXIT_ARGS("STUB")    
+}
+
+bool MpQueryManager::isLocalMusicStore() const
+{
+    TX_ENTRY_ARGS("STUB - will always return TRUE")
+    TX_EXIT_ARGS("STUB") 
+    return true;
+}
+
     
 void MpQueryManager::queryInspireMeItems(QString artist,QString album,QString title)
 {
@@ -91,40 +110,18 @@ void MpQueryManager::clearRecommendations()
     TX_EXIT_ARGS("STUB")    
 }
 
-/*!
- Return recommendation songs
- */
-QStringList MpQueryManager::recommendationSongs()
-{
-    TX_LOG  
-    return mRecommendationSongs;
-}
 
 /*!
  Return recommendation artists
  */
-QStringList MpQueryManager::recommendationArtists()
+QString MpQueryManager::recommendedArtist(int index) const
 {
-    TX_LOG  
-    return mRecommendationArtists;
-}
-
-/*!
- Return recommendation album arts links
- */
-QStringList MpQueryManager::recommendationAlbumArtsLink()
-{
-    TX_LOG  
-    return mRecommendationAlbumArtsLink;
-}
-
-/*!
- Return map of name and pixmap
- */
-QMap<QString, QPixmap>  MpQueryManager::recommendationAlbumArtsMap()
-{
-    TX_LOG  
-    return mRecommendationAlbumArtsMap;
+    QString result;
+    if( (0 <= index) && (index < mRecommendationArtists.count())) {
+        result = mRecommendationArtists.at(index);
+    }
+    TX_LOG_ARGS ("recommendedArtist: " << result);    
+    return result;
 }
 
 /*!
@@ -136,13 +133,23 @@ int &MpQueryManager::albumArtsReadyCount()
     return mAlbumArtsReadyCount;
 }
 
-/*!
- Insert one uri & pixmap item into map
- */
-void MpQueryManager::insertMapItem( const QString &uri, const QPixmap &pixmap )
+int MpQueryManager::recommendationsCount() const
 {
-    TX_ENTRY_ARGS("STUB Map Item URI: " << uri );
-    mRecommendationAlbumArtsMap.insert( uri, pixmap );
-    TX_EXIT_ARGS("STUB")
+    TX_LOG_ARGS ("count: " << mRecommendationSongs.count());
+    return mRecommendationSongs.count();
 }
 
+QString MpQueryManager::recommendedSong(int index) const
+{
+    QString result;
+    if( (0 <= index) && (index < mRecommendationSongs.count())) {
+        result = mRecommendationSongs.at(index);
+    }
+    return result; 
+}
+
+HbIcon MpQueryManager::recommendedAlbumArt(int index) const
+{
+    TX_LOG_ARGS( "index = " << index )
+    return mRecommendationAlbumArtsMap.value( mRecommendationAlbumArtsLink.at( index ) );
+}

@@ -17,11 +17,11 @@
 #ifndef MPQUERYMANAGER_H_
 #define MPQUERYMANAGER_H_
 
-#include <QPixmap>
 #include <QPointer>
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QMap>
+#include <HbIcon>
 
 #include "mpviewbase.h"
 
@@ -45,66 +45,76 @@ public:
     ~MpQueryManager();
     
 public:
-    void clearNetworkReplies();
+    void reset();
     void queryLocalMusicStore( QString mArtist,QString mAlbum,QString mTitle );
     void queryInspireMeItems( QString mArtist,QString mAlbum,QString mTitle );
-    void clearRecommendations();
+    void queryLocalMusicStore();
+    bool isLocalMusicStore() const;
     
-    QStringList recommendationSongs();
-    QStringList recommendationArtists();
-    QStringList recommendationAlbumArtsLink();
-    QMap<QString, QPixmap>  recommendationAlbumArtsMap(); 
-    void insertMapItem( const QString &uri, const QPixmap &pixmap );    
+    int recommendationsCount() const;
+    QString recommendedSong(int index) const;
+    QString recommendedArtist(int index) const;
+    HbIcon recommendedAlbumArt(int index) const;
 
 private slots:
     void retrieveInformationFinished( QNetworkReply* reply );
     void retrieveInformationNetworkError( QNetworkReply::NetworkError error );
     void retrieveInformationSslErrors( const QList<QSslError> &error );
-    void DownloadFinished( QNetworkReply* reply );    
+    void albumArtDownloaded( QNetworkReply* reply );    
     void setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName );
-    void thumbnailReady( const QPixmap& pixmap, void *data, int id, int error );
+    void thumbnailReady( const QPixmap pixmap, void *data, int id, int error );
                   
 private:
+    void clearThumbnails();
+    void clearRecommendations();    
+    void clearNetworkReplies();    
+    void signalError();    
     void constructRequest( QString &uri );     
     // retrieve URI from Ovi music server
     void retrieveInformation( const QString &urlEncoded );
     
-    void composeAlbumCover( QPixmap albumart );
     QString keyValues( QStringList keys, QStringList values ) const;
     void handleParsedXML();
 
     bool writeImageToFile( const QByteArray &aImageData, const QString &aImageFileName );
     
 signals:
-    void networkError();  
-    void searchUrlRetrieved( const QString& url );
-    void recommendationAlbumArtsReady();
-
+    void inspireMeItemAlbumArtReady();
+    void localMusicStoreRetrieved(bool storeUpdated);
+    void localMusicStoreRetrievalError();
+    void inspireMeItemsRetrievalError();
+    void inspireMeItemsMetadataRetrieved();
+            
 private:    
    
-    QNetworkAccessManager   *mManager;
-    QNetworkAccessManager   *mDownloadManager;
+    QNetworkAccessManager   	*mManager;
+    QNetworkAccessManager   	*mAlbumArtDownloader;
     
-    int                     mDownloadedAlbumArts;
+    int                     	mDownloadedAlbumArts;
   
-    QList<QNetworkReply *>  mReplys;
+    QList<QNetworkReply *>  	mReplys;
+    QList<int>                  mThumbnailRequests;
     
-    QDomDocument            mDomDocument;
-    ThumbnailManager        *mThumbnailManager; //owned    
+    QDomDocument            	mDomDocument;
+    ThumbnailManager        	*mThumbnailManager; //owned    
     
-    QString                 mArtist;
-    QString                 mAlbum;
-    QString                 mTitle;
+    QString                 	mArtist;
+    QString                 	mAlbum;
+    QString                 	mTitle;
+    QString                 	mMusicStore;
+    QStringList          		mRecommendationAlbumArtsName;
     
-    QStringList          mRecommendationAlbumArtsName;
-    
-    QStringList          mRecommendationSongs;
-    QStringList          mRecommendationArtists;
-    QStringList          mRecommendationAlbumArtsLink;
-    QMap<QString, QPixmap>  mRecommendationAlbumArtsMap;
-    int                     mAlbumArtsReadyCount;
-    QPixmap                 mDefaultRecommendationAlbumArt;
+    QStringList          		mRecommendationSongs;
+    QStringList          		mRecommendationArtists;
+    QStringList          		mRecommendationAlbumArtsLink;
+    QMap<QString, HbIcon>  		mRecommendationAlbumArtsMap;
+    int                     	mAlbumArtsReadyCount;
+    HbIcon                 		mDefaultRecommendationAlbumArt;
        
+    enum RequestType { NoRequest, InspireMeItemsMetadataRequest, InspireMeItemsAlbumArtRequest, LocalStoreRequest };
+    RequestType         		mRequestType;
+    int                         mRecommendationCount;
  
 };
 #endif /* MPQUERYMANAGER_H_ */
+

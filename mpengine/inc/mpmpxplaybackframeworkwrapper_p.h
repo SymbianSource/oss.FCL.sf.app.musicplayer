@@ -29,7 +29,7 @@ class QStringList;
 class CMPXMedia;
 class MpPlaybackData;
 class XQSharableFile;
-
+class MpSongData;
 
 class MpMpxPlaybackFrameworkWrapperPrivate : public MMPXPlaybackObserver,
                                              public MMPXPlaybackCallback
@@ -39,10 +39,12 @@ public:
     explicit MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *wrapper );
     virtual ~MpMpxPlaybackFrameworkWrapperPrivate();
 
-    void init( TUid hostUid );
+    void init( TUid hostUid, MpSongData *songData );
 
     void play( QString aFilename );
     void play( const XQSharableFile& file );
+    void play();
+    void pause();
     void playPause();
     void stop();
     void skipForward();
@@ -56,8 +58,21 @@ public:
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
+    void getMaxVolume();
+    void getVolume();
+    void increaseVolume();
+    void decreaseVolume();
+    void setVolume( int value );
+    void getMuteState();
+    void mute();
+    void unmute();
+    void closeCurrentPlayback();
 
     MpPlaybackData *playbackData();
+
+    void retrieveSongDetails();
+
+private:
 
     // From MMPXPlaybackObserver
     void HandlePlaybackMessage( CMPXMessage *aMessage, TInt aError );
@@ -67,8 +82,6 @@ public:
     void HandleSubPlayerNamesL( TUid aPlayer, const MDesCArray *aSubPlayers,
                                 TBool aComplete, TInt aError );
     void HandleMediaL( const CMPXMedia& aProperties, TInt aError );
-    
-private:
 
     void DoInitL();
     void DoPlayL( QString aFilename );
@@ -76,16 +89,19 @@ private:
     void DoHandlePlaybackMessageL( const CMPXMessage& aMessage );
     void ForceStopL();
     void UpdateStateL();
-    void RetrieveSongDetailsL();
+    void DoRetrieveSongDetailsL( bool detailsRequest );
+    void DoCloseCurrentPlaybackL();
 
 private:
 
     MpMpxPlaybackFrameworkWrapper       *q_ptr;
-    MMPXPlaybackUtility                 *iPlaybackUtility;     // Own
-    CMPXMedia                           *iMedia;               // Own
-    MpPlaybackData                      *iPlaybackData;        // Own
-    TUid                                mHostUid;
-    
+    MMPXPlaybackUtility                 *iPlaybackUtility;  // Own
+    MpPlaybackData                      *iPlaybackData;     // Own
+    TUid                                iHostUid;
+
+    MpSongData                          *iSongData;         // Not owned
+    bool                                iDetailsRequest;
+
 };
 
 #endif  // MPMPXPLAYBACKFRAMEWORKWRAPPER_P_H

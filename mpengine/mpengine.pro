@@ -19,20 +19,19 @@ CONFIG += hb
 TARGET = mpengine
 symbian: { 
     TARGET.UID3 = 0x10207C93
-    MMP_RULES += "DEFFILE mpengine.def"
+    MMP_RULES += "DEFFILE mpengine.def" SMPSAFE
     defFilePath = .
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
     BLD_INF_RULES.prj_exports += \
-        "resources/nullsound.mp3 /epoc32/release/winscw/udeb/Z/system/data/nullsound.mp3" \
-        "resources/nullsound.mp3 /epoc32/data/Z/system/data/nullsound.mp3"
+        "resources/nullsound.mp3 z:/system/data/nullsound.mp3"
 }
 DEFINES += BUILD_MPENGINE_LIB
 
 INCLUDEPATH += . \
-    	       inc \
-    	       ../inc \
-    	       ../mpserviceplugins/inc    	
+               inc \
+               ../inc \
+               ../mpserviceplugins/inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lestor \
@@ -41,8 +40,6 @@ LIBS += -lestor \
         -lmpxharvesterutility \
         -lmpxcommon \
         -lmpxcollectionhelper \
-        -lremconcoreapi \
-        -lremconinterfacebase \
         -lmpsettingsmanager \
         -lmpdata \
         -lxqserviceutil \
@@ -58,11 +55,6 @@ HEADERS += ../inc/mpenginefactory.h \
            inc/mpmpxharvesterframeworkwrapper_p.h \
            inc/mpmpxplaybackframeworkwrapper.h \
            inc/mpmpxplaybackframeworkwrapper_p.h \
-           inc/mpmpxdetailsframeworkwrapper.h \
-           inc/mpmpxdetailsframeworkwrapper_p.h \
-           inc/mpmediakeyhandler.h \
-           inc/mpmediakeyhandler_p.h\
-           inc/mpmediakeyremconresponse.h \
            inc/mpmpxcollectionframeworkwrapper.h \
            inc/mpmpxisolatedcollectionhelper.h \
            inc/mpmpxcollectionframeworkwrapper_p.h \
@@ -78,11 +70,6 @@ SOURCES += src/mpenginefactory.cpp \
            src/mpmpxharvesterframeworkwrapper_p.cpp \
            src/mpmpxplaybackframeworkwrapper.cpp \
            src/mpmpxplaybackframeworkwrapper_p.cpp \
-           src/mpmpxdetailsframeworkwrapper.cpp \
-           src/mpmpxdetailsframeworkwrapper_p.cpp \
-           src/mpmediakeyhandler.cpp \
-           src/mpmediakeyhandler_p.cpp \
-           src/mpmediakeyremconresponse.cpp \
            src/mpmpxcollectionframeworkwrapper.cpp \
            src/mpmpxisolatedcollectionhelper.cpp \
            src/mpmpxcollectionframeworkwrapper_p.cpp \

@@ -25,6 +25,7 @@
 
 class MpMpxCollectionFrameworkWrapperPrivate;
 class MpMpxCollectionData;
+class MpSongData;
 class QStringList;
 
 
@@ -36,7 +37,8 @@ class MpMpxCollectionFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxCollectionFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxCollectionFrameworkWrapper( TUid hostUid=TUid::Uid(MpCommon::KMusicPlayerUid),
+        MpSongData *songData=0, QObject *parent=0 );
     virtual ~MpMpxCollectionFrameworkWrapper();
 
     void openCollection( TCollectionContext context );
@@ -67,7 +69,9 @@ public:
     void setShuffleFeatureEnabled( bool enable );
    
     void openShuffleAllSongsPath();
-    
+
+    void retrieveSongDetails( int index );
+
     void savePath( QByteArray &data );
     void restorePath( const QByteArray &data ); 
     

@@ -30,6 +30,7 @@ class MpxViewPlugin;
 class MusicServices;
 class MpGlobalPopupHandler;
 class HbActivityManager;
+class MpMediaController;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
@@ -90,7 +91,8 @@ private:
     MusicServices         *mMusicServices;         // Own
     MpGlobalPopupHandler  *mPopupHandler;          // Own
     bool                   mUserExit;
-    HbActivityManager     *mActivityManager;       //Not Own
+    HbActivityManager     *mActivityManager;       // Not Own
+    MpMediaController     *mMpMediaController;     // Own
 
 };
 

@@ -54,6 +54,7 @@ const QString KOpen = QString( "Open" );
 const QString KAdd = QString( "Add" );
 const QString KDelete = QString( "Delete" );
 const QString KRenamePlayList = QString( "RenamePlayList" );
+const QString KDetails = QString( "Details" );
 
 
 //------------------------------------------------------------------
@@ -197,6 +198,8 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
                 action = contextMenu->addAction( hbTrId( "txt_common_menu_delete" ) );
                 action->setObjectName( KDelete );
                 action->setEnabled( !usbBlocked );
+                action = contextMenu->addAction( hbTrId( "txt_mus_menu_view_details" ) );
+                action->setObjectName( KDetails );
                 break;
             case ECollectionContextAlbums:
             case ECollectionContextArtists:
@@ -212,10 +215,10 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
                 action->setEnabled( !usbBlocked );
                 break;
             case ECollectionContextPlaylists:
+                contextMenu = new HbMenu();
+                action = contextMenu->addAction( hbTrId( "txt_common_menu_open" ) );
+                action->setObjectName( KOpen );
                 if ( !mMpEngine->collectionData()->isAutoPlaylist( index ) ) {
-                    contextMenu = new HbMenu();
-                    action = contextMenu->addAction( hbTrId( "txt_common_menu_open" ) );
-                    action->setObjectName( KOpen );
                     action = contextMenu->addAction( hbTrId( "txt_common_menu_delete" ) );
                     action->setObjectName(KDelete);
                     action->setEnabled( !usbBlocked );
@@ -225,14 +228,16 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
                 }
                 break;
             case ECollectionContextPlaylistSongs:
+                contextMenu = new HbMenu();
+                action = contextMenu->addAction( hbTrId( "txt_common_menu_play_music" ) );
+                action->setObjectName( KOpen );
                 if ( !mMpEngine->collectionData()->isAutoPlaylist() ) {
-                    contextMenu = new HbMenu();
-                    action = contextMenu->addAction( hbTrId( "txt_common_menu_play_music" ) );
-                    action->setObjectName( KOpen );
                     action = contextMenu->addAction( hbTrId( "txt_common_menu_remove" ) );
                     action->setObjectName( KDelete );
                     action->setEnabled( !usbBlocked );
                 }
+                action = contextMenu->addAction( hbTrId( "txt_mus_menu_view_details" ) );
+                action->setObjectName( KDetails );
                 break;
             default:
                 break;
@@ -448,6 +453,9 @@ void MpCollectionPopupHandler::defaultContextMenuOptionSelected( HbAction *selec
             currentName = mMpEngine->collectionData()->itemData( 
                     mPermanentData->mContextMenuIndex, MpMpxCollectionData::Title );
             openRenamePlaylistItemDialog( currentName );
+        }
+        else if ( objectName == KDetails ) {
+            mView->showItemDetails( mPermanentData->mContextMenuIndex );
         }
     }
     TX_EXIT

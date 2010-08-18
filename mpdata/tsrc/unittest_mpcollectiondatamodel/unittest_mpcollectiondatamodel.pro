@@ -11,19 +11,19 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpcollectiondatamodel
+# Description: mpcollectiondatamodel unit test project file.
 #
 
-
 TEMPLATE = app
-CONFIG += qtestlib hb
-TARGET = 
+CONFIG += qtestlib hb symbian_test
+TARGET = unittest_mpcollectiontbonelistdatamodel
+TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    stub/inc \
-    ../../inc \
-    ../../../inc
+               stub/inc \
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 INCLUDEPATH += $$MW_LAYER_PUBLIC_EXPORT_PATH(hgwidgets)
 
@@ -45,3 +45,4 @@ SOURCES += src/unittest_mpcollectiondatamodel.cpp \
 DEFINES += BUILD_MPDATA_LIB
 
 RESOURCES += resources/unittest_mpcollectiondatamodelresources.qrc
+

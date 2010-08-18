@@ -21,14 +21,13 @@
 #include <hbwidget.h>
 
 class MpPlaybackData;
-
 class HbStackedLayout;
 class QString;
 class HbTextItem;
 class HbProgressSlider;
 class HbLabel;
-class HbIcon;
-class HbDocumentLoader;
+class MpPlaybackDocumentLoader;
+class MpAlbumCoverWidget;
 
 class MpPlaybackWidget : public HbWidget
 {
@@ -64,20 +63,19 @@ private:
 
 private:
 
-    MpPlaybackData          *mPlaybackData;     // Not own
-    HbDocumentLoader        *mDocumentLoader;   // Own
+    MpPlaybackData           *mPlaybackData;        // Not own
+    MpPlaybackDocumentLoader *mDocumentLoader;      // Own
 
-    HbStackedLayout         *mLayout;           // Not own
-    HbLabel                 *mSongTitle;        // Not own
-    HbLabel                 *mArtistName;       // Not own
-    HbLabel                 *mAlbumName;        // Not own
-    HbLabel                 *mAlbumArt;         // Not own
-    HbProgressSlider        *mProgressBar;      // Not own
-    HbLabel                 *mRealAudioIndicator;          // Not own
-    HbLabel                 *mRepeatIndicator;           // Not own
-
-    bool                    mProgreesBarDragging;
-    int                     mDuration;
+    HbStackedLayout          *mLayout;              // Not own
+    HbLabel                  *mSongTitle;           // Not own
+    HbLabel                  *mArtistName;          // Not own
+    HbLabel                  *mAlbumName;           // Not own
+    MpAlbumCoverWidget       *mAlbumArt;            // Not own
+    HbProgressSlider         *mProgressBar;         // Not own
+    HbLabel                  *mRealAudioIndicator;  // Not own
+    HbLabel                  *mRepeatIndicator;     // Not own
+    bool                     mProgreesBarDragging;
+    int                      mDuration;
 
     Q_DISABLE_COPY(MpPlaybackWidget)
 };

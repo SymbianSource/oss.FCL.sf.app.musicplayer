@@ -31,6 +31,7 @@
 #include "mpenginefactory.h"
 #include "mpsettingsmanager.h"
 #include "mpglobalpopuphandler.h"
+#include "mpmediacontroller.h"
 #include "mptrace.h"
 
 const QString MUSIC_MAIN_VIEW = "MusicMainView";
@@ -60,7 +61,8 @@ MpMainWindow::MpMainWindow()
       mMusicServices(0),
       mPopupHandler(0),
       mUserExit( false ),
-      mActivityManager(0)
+      mActivityManager(0),
+      mMpMediaController(0)
 {
     TX_LOG
 }
@@ -94,7 +96,10 @@ MpMainWindow::~MpMainWindow()
     if (mMediaWallViewPlugin) {
         mMediaWallViewPlugin->destroyView();
         delete mMediaWallViewPlugin;
-    }    
+    }
+
+    delete mMpMediaController;
+
     MpEngineFactory::close();
 
 
@@ -183,6 +188,7 @@ void MpMainWindow::initialize( ActivityMode mode )
         mActivityManager->removeActivity( MUSIC_NOW_PLAYING_VIEW );
         connect( app, SIGNAL( activate() ), this , SLOT( handleActivity() ) );
         connect( app, SIGNAL( aboutToQuit() ), this, SLOT( saveActivity() ) );
+        mMpMediaController = new MpMediaController();
         emit applicationReady();
         
     }
@@ -225,6 +231,9 @@ void MpMainWindow::handleCommand( int commandCode )
             break;
         case MpCommon::ActivateDetailsView:
             activateView(DetailsView);
+            break;
+        case MpCommon::ActivatePreviousView:
+            activateView(mVerticalViewType);
             break;
     }
     TX_EXIT
@@ -272,7 +281,7 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        if ( viewType != MediaWallView  ) {
+        if ( viewType != MediaWallView && viewType != DetailsView ) {
             mVerticalViewType = viewType;
         }
         addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );
@@ -319,11 +328,13 @@ void MpMainWindow::handleLibraryUpdated()
 {
     TX_ENTRY
 
-    // If library changed while playing back, always return to AllSongs collection view.
-    if ( mPlaybackViewPlugin &&
-         mCurrentViewPlugin == mPlaybackViewPlugin &&
-         mCollectionViewPlugin ) {
-
+    // Data might have changed, so other views than Collection or MediaWall are not valid any more.
+    if ( mCurrentViewPlugin == mMediaWallViewPlugin ) {
+        if ( mVerticalViewType != CollectionView ) {
+            mVerticalViewType = CollectionView;
+        }
+    }
+    else if ( mCollectionViewPlugin && mCurrentViewPlugin != mCollectionViewPlugin ) {
         activateView( CollectionView );
         MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
         collectionView->setDefaultView();
@@ -390,6 +401,7 @@ void MpMainWindow::initializeServiceView( TUid hostUid )
         Q_ASSERT_X(false, "MpMainWindow::initializeServiceView", "undefined service");
         break;
     }
+    mMpMediaController = new MpMediaController();
     emit applicationReady();
 }
 
@@ -520,6 +532,7 @@ void MpMainWindow::loadActivity( QVariant data )
     TX_ENTRY
     QVariantHash activityData = data.toHash();
     QByteArray serializedRestorePath = activityData.value( "restorePath" ).toByteArray();
+    connect( MpEngineFactory::sharedEngine(), SIGNAL( restorePathFailed() ), this, SLOT( handleRestorePathFailed() ) );
     MpEngineFactory::sharedEngine()->loadActivityData( serializedRestorePath );
     TX_EXIT
 }

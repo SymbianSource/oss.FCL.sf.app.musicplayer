@@ -13,178 +13,158 @@ EXPORTS
 	?updateAlbumArt@MpCollectionDataModel@@QAEXH@Z @ 12 NONAME ; void MpCollectionDataModel::updateAlbumArt(int)
 	?resetData@MpPlaybackData@@QAEXXZ @ 13 NONAME ; void MpPlaybackData::resetData(void)
 	??_EMpPlaybackData@@UAE@I@Z @ 14 NONAME ; MpPlaybackData::~MpPlaybackData(unsigned int)
-	?setLink@MpSongData@@QAEXABVQString@@@Z @ 15 NONAME ; void MpSongData::setLink(class QString const &)
-	?metaObject@MpPlaybackData@@UBEPBUQMetaObject@@XZ @ 16 NONAME ; struct QMetaObject const * MpPlaybackData::metaObject(void) const
-	?setCopyright@MpSongData@@QAE_NABVQString@@@Z @ 17 NONAME ; bool MpSongData::setCopyright(class QString const &)
-	?refreshModel@MpCollectionTBoneListDataModel@@QAEXXZ @ 18 NONAME ; void MpCollectionTBoneListDataModel::refreshModel(void)
-	?title@MpSongData@@QBE?AVQString@@XZ @ 19 NONAME ; class QString MpSongData::title(void) const
-	?data@MpCollectionDataModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 20 NONAME ; class QVariant MpCollectionDataModel::data(class QModelIndex const &, int) const
-	?setAlbumId@MpPlaybackData@@QAE_NH@Z @ 21 NONAME ; bool MpPlaybackData::setAlbumId(int)
-	?setDrmProtected@MpSongData@@QAE_N_N@Z @ 22 NONAME ; bool MpSongData::setDrmProtected(bool)
-	?mimeType@MpSongData@@QBE?AVQString@@XZ @ 23 NONAME ; class QString MpSongData::mimeType(void) const
-	?removeItem@MpMpxCollectionData@@QAEXH@Z @ 24 NONAME ; void MpMpxCollectionData::removeItem(int)
-	?getStaticMetaObject@MpMpxCollectionData@@SAABUQMetaObject@@XZ @ 25 NONAME ; struct QMetaObject const & MpMpxCollectionData::getStaticMetaObject(void)
-	?itemCount@MpMpxCollectionData@@QAEHH@Z @ 26 NONAME ; int MpMpxCollectionData::itemCount(int)
-	?isAutoPlaylist@MpMpxCollectionData@@QAE_NH@Z @ 27 NONAME ; bool MpMpxCollectionData::isAutoPlaylist(int)
-	?position@MpPlaybackData@@QBEHXZ @ 28 NONAME ; int MpPlaybackData::position(void) const
-	?setAlbumArtUri@MpPlaybackData@@QAEXABVQString@@@Z @ 29 NONAME ; void MpPlaybackData::setAlbumArtUri(class QString const &)
-	??_EMpCollectionDataModel@@UAE@I@Z @ 30 NONAME ; MpCollectionDataModel::~MpCollectionDataModel(unsigned int)
-	?qt_metacast@MpSongData@@UAEPAXPBD@Z @ 31 NONAME ; void * MpSongData::qt_metacast(char const *)
-	?setBitRate@MpSongData@@QAE_NH@Z @ 32 NONAME ; bool MpSongData::setBitRate(int)
-	?positionChanged@MpPlaybackData@@IAEXXZ @ 33 NONAME ; void MpPlaybackData::positionChanged(void)
-	?tr@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0H@Z @ 34 NONAME ; class QString MpCollectionTBoneListDataModel::tr(char const *, char const *, int)
-	?itemIndex@MpMpxCollectionData@@QAEHH@Z @ 35 NONAME ; int MpMpxCollectionData::itemIndex(int)
-	?title@MpPlaybackData@@QBEABVQString@@XZ @ 36 NONAME ; class QString const & MpPlaybackData::title(void) const
-	?qt_metacall@MpCollectionDataModel@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 37 NONAME ; int MpCollectionDataModel::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?artist@MpSongData@@QBE?AVQString@@XZ @ 38 NONAME ; class QString MpSongData::artist(void) const
-	?setMpxMedia@MpMpxCollectionData@@QAEXABVCMPXMedia@@_N@Z @ 39 NONAME ; void MpMpxCollectionData::setMpxMedia(class CMPXMedia const &, bool)
-	?staticMetaObject@MpSongData@@2UQMetaObject@@B @ 40 NONAME ; struct QMetaObject const MpSongData::staticMetaObject
-	?playbackState@MpPlaybackData@@QBE?AW4SimplifiedState@1@XZ @ 41 NONAME ; enum MpPlaybackData::SimplifiedState MpPlaybackData::playbackState(void) const
-	?tr@MpSongData@@SA?AVQString@@PBD0H@Z @ 42 NONAME ; class QString MpSongData::tr(char const *, char const *, int)
-	?context@MpMpxCollectionData@@QBE?AW4TCollectionContext@@XZ @ 43 NONAME ; enum TCollectionContext MpMpxCollectionData::context(void) const
-	?supportedDropActions@MpCollectionDataModel@@UBE?AV?$QFlags@W4DropAction@Qt@@@@XZ @ 44 NONAME ; class QFlags<enum Qt::DropAction> MpCollectionDataModel::supportedDropActions(void) const
-	?setContext@MpMpxCollectionData@@QAEXW4TCollectionContext@@@Z @ 45 NONAME ; void MpMpxCollectionData::setContext(enum TCollectionContext)
-	?durationChanged@MpPlaybackData@@IAEXXZ @ 46 NONAME ; void MpPlaybackData::durationChanged(void)
-	?staticMetaObject@MpPlaybackData@@2UQMetaObject@@B @ 47 NONAME ; struct QMetaObject const MpPlaybackData::staticMetaObject
-	?staticMetaObject@MpCollectionTBoneListDataModel@@2UQMetaObject@@B @ 48 NONAME ; struct QMetaObject const MpCollectionTBoneListDataModel::staticMetaObject
-	?orderChanged@MpCollectionDataModel@@IAEXHHHH@Z @ 49 NONAME ; void MpCollectionDataModel::orderChanged(int, int, int, int)
-	?metaObject@MpCollectionTBoneListDataModel@@UBEPBUQMetaObject@@XZ @ 50 NONAME ; struct QMetaObject const * MpCollectionTBoneListDataModel::metaObject(void) const
-	?tr@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0@Z @ 51 NONAME ; class QString MpCollectionTBoneListDataModel::tr(char const *, char const *)
-	?bitRate@MpSongData@@QBE?AVQString@@XZ @ 52 NONAME ; class QString MpSongData::bitRate(void) const
-	?albumDataAvailable@MpCollectionTBoneListDataModel@@IAEXXZ @ 53 NONAME ; void MpCollectionTBoneListDataModel::albumDataAvailable(void)
-	?setModified@MpSongData@@QAE_NABVQString@@@Z @ 54 NONAME ; bool MpSongData::setModified(class QString const &)
-	?setUri@MpPlaybackData@@QAE_NABVQString@@@Z @ 55 NONAME ; bool MpPlaybackData::setUri(class QString const &)
-	?qt_metacast@MpCollectionTBoneListDataModel@@UAEPAXPBD@Z @ 56 NONAME ; void * MpCollectionTBoneListDataModel::qt_metacast(char const *)
-	?removeAlbumArtFile@MpSongData@@QBEXXZ @ 57 NONAME ; void MpSongData::removeAlbumArtFile(void) const
-	?duration@MpSongData@@QBE?AVQString@@XZ @ 58 NONAME ; class QString MpSongData::duration(void) const
-	?qt_metacall@MpCollectionTBoneListDataModel@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 59 NONAME ; int MpCollectionTBoneListDataModel::qt_metacall(enum QMetaObject::Call, int, void * *)
-	??0MpCollectionDataModel@@QAE@PAVMpMpxCollectionData@@PAVQObject@@@Z @ 60 NONAME ; MpCollectionDataModel::MpCollectionDataModel(class MpMpxCollectionData *, class QObject *)
-	?isAutoPlaylist@MpMpxCollectionData@@QAE_NXZ @ 61 NONAME ; bool MpMpxCollectionData::isAutoPlaylist(void)
-	?updatePlaybackState@MpCollectionTBoneListDataModel@@QAEXXZ @ 62 NONAME ; void MpCollectionTBoneListDataModel::updatePlaybackState(void)
-	?setAlbum@MpPlaybackData@@QAE_NABVQString@@@Z @ 63 NONAME ; bool MpPlaybackData::setAlbum(class QString const &)
-	?setGenre@MpSongData@@QAE_NABVQString@@@Z @ 64 NONAME ; bool MpSongData::setGenre(class QString const &)
-	?setCurrentAlbum@MpMpxCollectionData@@QAE_NH@Z @ 65 NONAME ; bool MpMpxCollectionData::setCurrentAlbum(int)
-	?itemId@MpMpxCollectionData@@QAEHH@Z @ 66 NONAME ; int MpMpxCollectionData::itemId(int)
-	?trUtf8@MpSongData@@SA?AVQString@@PBD0H@Z @ 67 NONAME ; class QString MpSongData::trUtf8(char const *, char const *, int)
-	?artist@MpPlaybackData@@QBEABVQString@@XZ @ 68 NONAME ; class QString const & MpPlaybackData::artist(void) const
-	?setFileName@MpSongData@@QAE_NABVQString@@@Z @ 69 NONAME ; bool MpSongData::setFileName(class QString const &)
-	?setContext@MpCollectionDataModel@@QAEXW4TCollectionContext@@@Z @ 70 NONAME ; void MpCollectionDataModel::setContext(enum TCollectionContext)
-	?commitPlaybackInfo@MpSongData@@QAEXXZ @ 71 NONAME ; void MpSongData::commitPlaybackInfo(void)
-	?sampleRate@MpSongData@@QBE?AVQString@@XZ @ 72 NONAME ; class QString MpSongData::sampleRate(void) const
-	?playbackStateChanged@MpPlaybackData@@IAEXXZ @ 73 NONAME ; void MpPlaybackData::playbackStateChanged(void)
-	?copyright@MpSongData@@QBE?AVQString@@XZ @ 74 NONAME ; class QString MpSongData::copyright(void) const
-	?duration@MpPlaybackData@@QBEHXZ @ 75 NONAME ; int MpPlaybackData::duration(void) const
-	?genre@MpSongData@@QBE?AVQString@@XZ @ 76 NONAME ; class QString MpSongData::genre(void) const
-	?setMimeType@MpSongData@@QAE_NABVQString@@@Z @ 77 NONAME ; bool MpSongData::setMimeType(class QString const &)
-	??0MpCollectionTBoneListDataModel@@QAE@PAVMpMpxCollectionData@@PAVMpPlaybackData@@PAVQObject@@@Z @ 78 NONAME ; MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel(class MpMpxCollectionData *, class MpPlaybackData *, class QObject *)
-	?getStaticMetaObject@MpCollectionDataModel@@SAABUQMetaObject@@XZ @ 79 NONAME ; struct QMetaObject const & MpCollectionDataModel::getStaticMetaObject(void)
-	?setSampleRate@MpSongData@@QAE_NH@Z @ 80 NONAME ; bool MpSongData::setSampleRate(int)
-	?setDuration@MpPlaybackData@@QAEXH@Z @ 81 NONAME ; void MpPlaybackData::setDuration(int)
-	?albumDataChanged@MpMpxCollectionData@@IAEXXZ @ 82 NONAME ; void MpMpxCollectionData::albumDataChanged(void)
-	?setMusicURL@MpSongData@@QAE_NABVQString@@@Z @ 83 NONAME ; bool MpSongData::setMusicURL(class QString const &)
-	??0MpSongData@@QAE@PAVQObject@@@Z @ 84 NONAME ; MpSongData::MpSongData(class QObject *)
-	?setComment@MpSongData@@QAE_NABVQString@@@Z @ 85 NONAME ; bool MpSongData::setComment(class QString const &)
-	?uri@MpPlaybackData@@QBEABVQString@@XZ @ 86 NONAME ; class QString const & MpPlaybackData::uri(void) const
-	?albumArtReady@MpSongData@@IAEXXZ @ 87 NONAME ; void MpSongData::albumArtReady(void)
-	?rowCount@MpCollectionDataModel@@UBEHABVQModelIndex@@@Z @ 88 NONAME ; int MpCollectionDataModel::rowCount(class QModelIndex const &) const
-	?trUtf8@MpPlaybackData@@SA?AVQString@@PBD0H@Z @ 89 NONAME ; class QString MpPlaybackData::trUtf8(char const *, char const *, int)
-	?thumbnailReady@MpPlaybackData@@QAEXABVQPixmap@@PAXHH@Z @ 90 NONAME ; void MpPlaybackData::thumbnailReady(class QPixmap const &, void *, int, int)
-	?staticMetaObject@MpMpxCollectionData@@2UQMetaObject@@B @ 91 NONAME ; struct QMetaObject const MpMpxCollectionData::staticMetaObject
-	?tr@MpPlaybackData@@SA?AVQString@@PBD0H@Z @ 92 NONAME ; class QString MpPlaybackData::tr(char const *, char const *, int)
-	?modified@MpSongData@@QBE?AVQString@@XZ @ 93 NONAME ; class QString MpSongData::modified(void) const
-	?setRealAudio@MpPlaybackData@@QAE_N_N@Z @ 94 NONAME ; bool MpPlaybackData::setRealAudio(bool)
-	?qt_metacall@MpMpxCollectionData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 95 NONAME ; int MpMpxCollectionData::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?albumArtReady@MpPlaybackData@@IAEXXZ @ 96 NONAME ; void MpPlaybackData::albumArtReady(void)
-	?setAlbumTrack@MpSongData@@QAE_NABVQString@@@Z @ 97 NONAME ; bool MpSongData::setAlbumTrack(class QString const &)
-	?album@MpPlaybackData@@QBEABVQString@@XZ @ 98 NONAME ; class QString const & MpPlaybackData::album(void) const
-	?albumSongsCount@MpMpxCollectionData@@QBEHXZ @ 99 NONAME ; int MpMpxCollectionData::albumSongsCount(void) const
-	?count@MpMpxCollectionData@@QBEHXZ @ 100 NONAME ; int MpMpxCollectionData::count(void) const
-	?setAlbumArtUri@MpSongData@@QAEXABVQString@@@Z @ 101 NONAME ; void MpSongData::setAlbumArtUri(class QString const &)
-	??1MpSongData@@UAE@XZ @ 102 NONAME ; MpSongData::~MpSongData(void)
-	?dataReloaded@MpCollectionDataModel@@IAEXXZ @ 103 NONAME ; void MpCollectionDataModel::dataReloaded(void)
-	?testCachedItem@MpMpxCollectionData@@QAE_NH@Z @ 104 NONAME ; bool MpMpxCollectionData::testCachedItem(int)
-	?tr@MpCollectionDataModel@@SA?AVQString@@PBD0@Z @ 105 NONAME ; class QString MpCollectionDataModel::tr(char const *, char const *)
-	?setTitle@MpPlaybackData@@QAE_NABVQString@@@Z @ 106 NONAME ; bool MpPlaybackData::setTitle(class QString const &)
-	?getStaticMetaObject@MpCollectionTBoneListDataModel@@SAABUQMetaObject@@XZ @ 107 NONAME ; struct QMetaObject const & MpCollectionTBoneListDataModel::getStaticMetaObject(void)
-	?trUtf8@MpCollectionDataModel@@SA?AVQString@@PBD0@Z @ 108 NONAME ; class QString MpCollectionDataModel::trUtf8(char const *, char const *)
-	?setTitle@MpSongData@@QAE_NABVQString@@@Z @ 109 NONAME ; bool MpSongData::setTitle(class QString const &)
-	?musicURL@MpSongData@@QBE?AVQString@@XZ @ 110 NONAME ; class QString MpSongData::musicURL(void) const
-	?realAudio@MpPlaybackData@@QAE_NXZ @ 111 NONAME ; bool MpPlaybackData::realAudio(void)
-	?staticMetaObject@MpCollectionDataModel@@2UQMetaObject@@B @ 112 NONAME ; struct QMetaObject const MpCollectionDataModel::staticMetaObject
-	?rowCount@MpCollectionTBoneListDataModel@@UBEHABVQModelIndex@@@Z @ 113 NONAME ; int MpCollectionTBoneListDataModel::rowCount(class QModelIndex const &) const
-	?dataChanged@MpMpxCollectionData@@IAEXXZ @ 114 NONAME ; void MpMpxCollectionData::dataChanged(void)
-	?trUtf8@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0H@Z @ 115 NONAME ; class QString MpCollectionTBoneListDataModel::trUtf8(char const *, char const *, int)
-	?setItemVisibility@MpCollectionDataModel@@QAEXABVQModelIndex@@_N@Z @ 116 NONAME ; void MpCollectionDataModel::setItemVisibility(class QModelIndex const &, bool)
-	?getStaticMetaObject@MpSongData@@SAABUQMetaObject@@XZ @ 117 NONAME ; struct QMetaObject const & MpSongData::getStaticMetaObject(void)
-	?songDetailInfoChanged@MpSongData@@IAEXXZ @ 118 NONAME ; void MpSongData::songDetailInfoChanged(void)
-	?mimeTypes@MpCollectionDataModel@@UBE?AVQStringList@@XZ @ 119 NONAME ; class QStringList MpCollectionDataModel::mimeTypes(void) const
-	?albumArt@MpSongData@@QBEXAAVHbIcon@@@Z @ 120 NONAME ; void MpSongData::albumArt(class HbIcon &) const
-	?isDrmProtected@MpSongData@@QBE_NXZ @ 121 NONAME ; bool MpSongData::isDrmProtected(void) const
-	?collectionTitle@MpMpxCollectionData@@QBE?AVQString@@XZ @ 122 NONAME ; class QString MpMpxCollectionData::collectionTitle(void) const
-	?albumTrack@MpSongData@@QBE?AVQString@@XZ @ 123 NONAME ; class QString MpSongData::albumTrack(void) const
-	?setArtist@MpSongData@@QAE_NABVQString@@@Z @ 124 NONAME ; bool MpSongData::setArtist(class QString const &)
-	?tr@MpPlaybackData@@SA?AVQString@@PBD0@Z @ 125 NONAME ; class QString MpPlaybackData::tr(char const *, char const *)
-	?setYear@MpSongData@@QAE_NH@Z @ 126 NONAME ; bool MpSongData::setYear(int)
-	?qt_metacall@MpPlaybackData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 127 NONAME ; int MpPlaybackData::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?albumSongData@MpMpxCollectionData@@QBE?AVQString@@HW4DataType@1@@Z @ 128 NONAME ; class QString MpMpxCollectionData::albumSongData(int, enum MpMpxCollectionData::DataType) const
-	?playbackInfoChanged@MpSongData@@IAEXXZ @ 129 NONAME ; void MpSongData::playbackInfoChanged(void)
-	?insertCachedItem@MpMpxCollectionData@@QAEXH@Z @ 130 NONAME ; void MpMpxCollectionData::insertCachedItem(int)
-	?setComposer@MpSongData@@QAE_NABVQString@@@Z @ 131 NONAME ; bool MpSongData::setComposer(class QString const &)
-	?setAlbumContent@MpMpxCollectionData@@QAEXABVCMPXMedia@@@Z @ 132 NONAME ; void MpMpxCollectionData::setAlbumContent(class CMPXMedia const &)
-	??0MpMpxCollectionData@@QAE@PAVQObject@@@Z @ 133 NONAME ; MpMpxCollectionData::MpMpxCollectionData(class QObject *)
-	?setArtist@MpPlaybackData@@QAE_NABVQString@@@Z @ 134 NONAME ; bool MpPlaybackData::setArtist(class QString const &)
-	?trUtf8@MpSongData@@SA?AVQString@@PBD0@Z @ 135 NONAME ; class QString MpSongData::trUtf8(char const *, char const *)
-	?albumId@MpPlaybackData@@QAEHXZ @ 136 NONAME ; int MpPlaybackData::albumId(void)
-	??1MpMpxCollectionData@@UAE@XZ @ 137 NONAME ; MpMpxCollectionData::~MpMpxCollectionData(void)
-	??0MpPlaybackData@@QAE@PAVQObject@@@Z @ 138 NONAME ; MpPlaybackData::MpPlaybackData(class QObject *)
-	?trUtf8@MpCollectionDataModel@@SA?AVQString@@PBD0H@Z @ 139 NONAME ; class QString MpCollectionDataModel::trUtf8(char const *, char const *, int)
-	?metaObject@MpMpxCollectionData@@UBEPBUQMetaObject@@XZ @ 140 NONAME ; struct QMetaObject const * MpMpxCollectionData::metaObject(void) const
-	?qt_metacast@MpMpxCollectionData@@UAEPAXPBD@Z @ 141 NONAME ; void * MpMpxCollectionData::qt_metacast(char const *)
-	?qt_metacast@MpPlaybackData@@UAEPAXPBD@Z @ 142 NONAME ; void * MpPlaybackData::qt_metacast(char const *)
-	?size@MpSongData@@QBE?AVQString@@XZ @ 143 NONAME ; class QString MpSongData::size(void) const
-	??_EMpSongData@@UAE@I@Z @ 144 NONAME ; MpSongData::~MpSongData(unsigned int)
-	?containerId@MpMpxCollectionData@@QAEHXZ @ 145 NONAME ; int MpMpxCollectionData::containerId(void)
-	?containerMedia@MpMpxCollectionData@@QAEABVCMPXMedia@@XZ @ 146 NONAME ; class CMPXMedia const & MpMpxCollectionData::containerMedia(void)
-	?setDuration@MpSongData@@QAE_NH@Z @ 147 NONAME ; bool MpSongData::setDuration(int)
-	??_EMpCollectionTBoneListDataModel@@UAE@I@Z @ 148 NONAME ; MpCollectionTBoneListDataModel::~MpCollectionTBoneListDataModel(unsigned int)
-	??1MpCollectionDataModel@@UAE@XZ @ 149 NONAME ; MpCollectionDataModel::~MpCollectionDataModel(void)
-	?setSize@MpSongData@@QAE_NH@Z @ 150 NONAME ; bool MpSongData::setSize(int)
-	?thumbnailReady@MpSongData@@QAEXABVQPixmap@@PAXHH@Z @ 151 NONAME ; void MpSongData::thumbnailReady(class QPixmap const &, void *, int, int)
-	?tr@MpCollectionDataModel@@SA?AVQString@@PBD0H@Z @ 152 NONAME ; class QString MpCollectionDataModel::tr(char const *, char const *, int)
-	?reloadData@MpCollectionDataModel@@QAEXXZ @ 153 NONAME ; void MpCollectionDataModel::reloadData(void)
-	?commitSongDetailInfo@MpSongData@@QAEXXZ @ 154 NONAME ; void MpSongData::commitSongDetailInfo(void)
-	??1MpCollectionTBoneListDataModel@@UAE@XZ @ 155 NONAME ; MpCollectionTBoneListDataModel::~MpCollectionTBoneListDataModel(void)
-	?qt_metacall@MpSongData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 156 NONAME ; int MpSongData::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?reservedLength@MpSongData@@QBEHXZ @ 157 NONAME ; int MpSongData::reservedLength(void) const
-	?collectionData@MpCollectionDataModel@@QAEPAVMpMpxCollectionData@@XZ @ 158 NONAME ; class MpMpxCollectionData * MpCollectionDataModel::collectionData(void)
-	?trUtf8@MpMpxCollectionData@@SA?AVQString@@PBD0@Z @ 159 NONAME ; class QString MpMpxCollectionData::trUtf8(char const *, char const *)
-	?setPosition@MpPlaybackData@@QAEXH@Z @ 160 NONAME ; void MpPlaybackData::setPosition(int)
-	??1MpPlaybackData@@UAE@XZ @ 161 NONAME ; MpPlaybackData::~MpPlaybackData(void)
-	?tr@MpSongData@@SA?AVQString@@PBD0@Z @ 162 NONAME ; class QString MpSongData::tr(char const *, char const *)
-	?setPlaybackState@MpPlaybackData@@QAEXW4SimplifiedState@1@@Z @ 163 NONAME ; void MpPlaybackData::setPlaybackState(enum MpPlaybackData::SimplifiedState)
-	?refreshAlbumSongs@MpMpxCollectionData@@IAEXXZ @ 164 NONAME ; void MpMpxCollectionData::refreshAlbumSongs(void)
-	?trUtf8@MpPlaybackData@@SA?AVQString@@PBD0@Z @ 165 NONAME ; class QString MpPlaybackData::trUtf8(char const *, char const *)
-	?albumDataChanged@MpCollectionTBoneListDataModel@@IAEXXZ @ 166 NONAME ; void MpCollectionTBoneListDataModel::albumDataChanged(void)
-	?comment@MpSongData@@QBE?AVQString@@XZ @ 167 NONAME ; class QString MpSongData::comment(void) const
-	?year@MpSongData@@QBE?AVQString@@XZ @ 168 NONAME ; class QString MpSongData::year(void) const
-	?data@MpCollectionTBoneListDataModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 169 NONAME ; class QVariant MpCollectionTBoneListDataModel::data(class QModelIndex const &, int) const
-	?setAlbum@MpSongData@@QAE_NABVQString@@@Z @ 170 NONAME ; bool MpSongData::setAlbum(class QString const &)
-	?albumSongIndex@MpMpxCollectionData@@QAEHH@Z @ 171 NONAME ; int MpMpxCollectionData::albumSongIndex(int)
-	?getStaticMetaObject@MpPlaybackData@@SAABUQMetaObject@@XZ @ 172 NONAME ; struct QMetaObject const & MpPlaybackData::getStaticMetaObject(void)
-	?composer@MpSongData@@QBE?AVQString@@XZ @ 173 NONAME ; class QString MpSongData::composer(void) const
-	?albumArt@MpPlaybackData@@QBEXAAVHbIcon@@@Z @ 174 NONAME ; void MpPlaybackData::albumArt(class HbIcon &) const
-	?commitPlaybackInfo@MpPlaybackData@@QAEXXZ @ 175 NONAME ; void MpPlaybackData::commitPlaybackInfo(void)
-	?removeRows@MpCollectionDataModel@@UAE_NHHABVQModelIndex@@@Z @ 176 NONAME ; bool MpCollectionDataModel::removeRows(int, int, class QModelIndex const &)
-	?albumSongId@MpMpxCollectionData@@QAEHH@Z @ 177 NONAME ; int MpMpxCollectionData::albumSongId(int)
-	?id@MpPlaybackData@@QAEHXZ @ 178 NONAME ; int MpPlaybackData::id(void)
-	?album@MpSongData@@QBE?AVQString@@XZ @ 179 NONAME ; class QString MpSongData::album(void) const
-	?albumArtBase64@MpSongData@@QBE?AVQString@@XZ @ 180 NONAME ; class QString MpSongData::albumArtBase64(void) const
-	?playbackInfoChanged@MpPlaybackData@@IAEXXZ @ 181 NONAME ; void MpPlaybackData::playbackInfoChanged(void)
-	?itemData@MpMpxCollectionData@@QBE?AVQString@@HW4DataType@1@@Z @ 182 NONAME ; class QString MpMpxCollectionData::itemData(int, enum MpMpxCollectionData::DataType) const
-	?link@MpSongData@@QBE?AVQString@@XZ @ 183 NONAME ; class QString MpSongData::link(void) const
-	?trUtf8@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0@Z @ 184 NONAME ; class QString MpCollectionTBoneListDataModel::trUtf8(char const *, char const *)
-	?updateSong@MpCollectionTBoneListDataModel@@QAEXXZ @ 185 NONAME ; void MpCollectionTBoneListDataModel::updateSong(void)
-	?setId@MpPlaybackData@@QAE_NH@Z @ 186 NONAME ; bool MpPlaybackData::setId(int)
-	?metaObject@MpCollectionDataModel@@UBEPBUQMetaObject@@XZ @ 187 NONAME ; struct QMetaObject const * MpCollectionDataModel::metaObject(void) const
-	?metaObject@MpSongData@@UBEPBUQMetaObject@@XZ @ 188 NONAME ; struct QMetaObject const * MpSongData::metaObject(void) const
+	?metaObject@MpPlaybackData@@UBEPBUQMetaObject@@XZ @ 15 NONAME ; struct QMetaObject const * MpPlaybackData::metaObject(void) const
+	?refreshModel@MpCollectionTBoneListDataModel@@QAEXXZ @ 16 NONAME ; void MpCollectionTBoneListDataModel::refreshModel(void)
+	?title@MpSongData@@QBE?AVQString@@XZ @ 17 NONAME ; class QString MpSongData::title(void) const
+	?data@MpCollectionDataModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 18 NONAME ; class QVariant MpCollectionDataModel::data(class QModelIndex const &, int) const
+	?setAlbumId@MpPlaybackData@@QAE_NH@Z @ 19 NONAME ; bool MpPlaybackData::setAlbumId(int)
+	?mimeType@MpSongData@@QBE?AVQString@@XZ @ 20 NONAME ; class QString MpSongData::mimeType(void) const
+	?removeItem@MpMpxCollectionData@@QAEXH@Z @ 21 NONAME ; void MpMpxCollectionData::removeItem(int)
+	?getStaticMetaObject@MpMpxCollectionData@@SAABUQMetaObject@@XZ @ 22 NONAME ; struct QMetaObject const & MpMpxCollectionData::getStaticMetaObject(void)
+	?itemCount@MpMpxCollectionData@@QAEHH@Z @ 23 NONAME ; int MpMpxCollectionData::itemCount(int)
+	?isAutoPlaylist@MpMpxCollectionData@@QAE_NH@Z @ 24 NONAME ; bool MpMpxCollectionData::isAutoPlaylist(int)
+	?position@MpPlaybackData@@QBEHXZ @ 25 NONAME ; int MpPlaybackData::position(void) const
+	?setAlbumArtUri@MpPlaybackData@@QAEXABVQString@@@Z @ 26 NONAME ; void MpPlaybackData::setAlbumArtUri(class QString const &)
+	??_EMpCollectionDataModel@@UAE@I@Z @ 27 NONAME ; MpCollectionDataModel::~MpCollectionDataModel(unsigned int)
+	?qt_metacast@MpSongData@@UAEPAXPBD@Z @ 28 NONAME ; void * MpSongData::qt_metacast(char const *)
+	?positionChanged@MpPlaybackData@@IAEXXZ @ 29 NONAME ; void MpPlaybackData::positionChanged(void)
+	?tr@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0H@Z @ 30 NONAME ; class QString MpCollectionTBoneListDataModel::tr(char const *, char const *, int)
+	?itemIndex@MpMpxCollectionData@@QAEHH@Z @ 31 NONAME ; int MpMpxCollectionData::itemIndex(int)
+	?title@MpPlaybackData@@QBEABVQString@@XZ @ 32 NONAME ; class QString const & MpPlaybackData::title(void) const
+	?qt_metacall@MpCollectionDataModel@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 33 NONAME ; int MpCollectionDataModel::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?artist@MpSongData@@QBE?AVQString@@XZ @ 34 NONAME ; class QString MpSongData::artist(void) const
+	?setMpxMedia@MpMpxCollectionData@@QAEXABVCMPXMedia@@_N@Z @ 35 NONAME ; void MpMpxCollectionData::setMpxMedia(class CMPXMedia const &, bool)
+	?staticMetaObject@MpSongData@@2UQMetaObject@@B @ 36 NONAME ; struct QMetaObject const MpSongData::staticMetaObject
+	?playbackState@MpPlaybackData@@QBE?AW4SimplifiedState@1@XZ @ 37 NONAME ; enum MpPlaybackData::SimplifiedState MpPlaybackData::playbackState(void) const
+	?tr@MpSongData@@SA?AVQString@@PBD0H@Z @ 38 NONAME ; class QString MpSongData::tr(char const *, char const *, int)
+	?context@MpMpxCollectionData@@QBE?AW4TCollectionContext@@XZ @ 39 NONAME ; enum TCollectionContext MpMpxCollectionData::context(void) const
+	?supportedDropActions@MpCollectionDataModel@@UBE?AV?$QFlags@W4DropAction@Qt@@@@XZ @ 40 NONAME ; class QFlags<enum Qt::DropAction> MpCollectionDataModel::supportedDropActions(void) const
+	?setContext@MpMpxCollectionData@@QAEXW4TCollectionContext@@@Z @ 41 NONAME ; void MpMpxCollectionData::setContext(enum TCollectionContext)
+	?durationChanged@MpPlaybackData@@IAEXXZ @ 42 NONAME ; void MpPlaybackData::durationChanged(void)
+	?staticMetaObject@MpPlaybackData@@2UQMetaObject@@B @ 43 NONAME ; struct QMetaObject const MpPlaybackData::staticMetaObject
+	?staticMetaObject@MpCollectionTBoneListDataModel@@2UQMetaObject@@B @ 44 NONAME ; struct QMetaObject const MpCollectionTBoneListDataModel::staticMetaObject
+	?orderChanged@MpCollectionDataModel@@IAEXHHHH@Z @ 45 NONAME ; void MpCollectionDataModel::orderChanged(int, int, int, int)
+	?metaObject@MpCollectionTBoneListDataModel@@UBEPBUQMetaObject@@XZ @ 46 NONAME ; struct QMetaObject const * MpCollectionTBoneListDataModel::metaObject(void) const
+	?tr@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0@Z @ 47 NONAME ; class QString MpCollectionTBoneListDataModel::tr(char const *, char const *)
+	?bitRate@MpSongData@@QBE?AVQString@@XZ @ 48 NONAME ; class QString MpSongData::bitRate(void) const
+	?albumDataAvailable@MpCollectionTBoneListDataModel@@IAEXXZ @ 49 NONAME ; void MpCollectionTBoneListDataModel::albumDataAvailable(void)
+	?setUri@MpPlaybackData@@QAE_NABVQString@@@Z @ 50 NONAME ; bool MpPlaybackData::setUri(class QString const &)
+	?qt_metacast@MpCollectionTBoneListDataModel@@UAEPAXPBD@Z @ 51 NONAME ; void * MpCollectionTBoneListDataModel::qt_metacast(char const *)
+	?removeAlbumArtFile@MpSongData@@QBEXXZ @ 52 NONAME ; void MpSongData::removeAlbumArtFile(void) const
+	?duration@MpSongData@@QBE?AVQString@@XZ @ 53 NONAME ; class QString MpSongData::duration(void) const
+	?qt_metacall@MpCollectionTBoneListDataModel@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 54 NONAME ; int MpCollectionTBoneListDataModel::qt_metacall(enum QMetaObject::Call, int, void * *)
+	??0MpCollectionDataModel@@QAE@PAVMpMpxCollectionData@@PAVQObject@@@Z @ 55 NONAME ; MpCollectionDataModel::MpCollectionDataModel(class MpMpxCollectionData *, class QObject *)
+	?isAutoPlaylist@MpMpxCollectionData@@QAE_NXZ @ 56 NONAME ; bool MpMpxCollectionData::isAutoPlaylist(void)
+	?updatePlaybackState@MpCollectionTBoneListDataModel@@QAEXXZ @ 57 NONAME ; void MpCollectionTBoneListDataModel::updatePlaybackState(void)
+	?setAlbum@MpPlaybackData@@QAE_NABVQString@@@Z @ 58 NONAME ; bool MpPlaybackData::setAlbum(class QString const &)
+	?setCurrentAlbum@MpMpxCollectionData@@QAE_NH@Z @ 59 NONAME ; bool MpMpxCollectionData::setCurrentAlbum(int)
+	?itemId@MpMpxCollectionData@@QAEHH@Z @ 60 NONAME ; int MpMpxCollectionData::itemId(int)
+	?trUtf8@MpSongData@@SA?AVQString@@PBD0H@Z @ 61 NONAME ; class QString MpSongData::trUtf8(char const *, char const *, int)
+	?artist@MpPlaybackData@@QBEABVQString@@XZ @ 62 NONAME ; class QString const & MpPlaybackData::artist(void) const
+	?setContext@MpCollectionDataModel@@QAEXW4TCollectionContext@@@Z @ 63 NONAME ; void MpCollectionDataModel::setContext(enum TCollectionContext)
+	?sampleRate@MpSongData@@QBE?AVQString@@XZ @ 64 NONAME ; class QString MpSongData::sampleRate(void) const
+	?playbackStateChanged@MpPlaybackData@@IAEXXZ @ 65 NONAME ; void MpPlaybackData::playbackStateChanged(void)
+	?copyright@MpSongData@@QBE?AVQString@@XZ @ 66 NONAME ; class QString MpSongData::copyright(void) const
+	?duration@MpPlaybackData@@QBEHXZ @ 67 NONAME ; int MpPlaybackData::duration(void) const
+	?genre@MpSongData@@QBE?AVQString@@XZ @ 68 NONAME ; class QString MpSongData::genre(void) const
+	??0MpCollectionTBoneListDataModel@@QAE@PAVMpMpxCollectionData@@PAVMpPlaybackData@@PAVQObject@@@Z @ 69 NONAME ; MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel(class MpMpxCollectionData *, class MpPlaybackData *, class QObject *)
+	?getStaticMetaObject@MpCollectionDataModel@@SAABUQMetaObject@@XZ @ 70 NONAME ; struct QMetaObject const & MpCollectionDataModel::getStaticMetaObject(void)
+	?setDuration@MpPlaybackData@@QAEXH@Z @ 71 NONAME ; void MpPlaybackData::setDuration(int)
+	?albumDataChanged@MpMpxCollectionData@@IAEXXZ @ 72 NONAME ; void MpMpxCollectionData::albumDataChanged(void)
+	??0MpSongData@@QAE@PAVQObject@@@Z @ 73 NONAME ; MpSongData::MpSongData(class QObject *)
+	?uri@MpPlaybackData@@QBEABVQString@@XZ @ 74 NONAME ; class QString const & MpPlaybackData::uri(void) const
+	?albumArtReady@MpSongData@@IAEXXZ @ 75 NONAME ; void MpSongData::albumArtReady(void)
+	?rowCount@MpCollectionDataModel@@UBEHABVQModelIndex@@@Z @ 76 NONAME ; int MpCollectionDataModel::rowCount(class QModelIndex const &) const
+	?trUtf8@MpPlaybackData@@SA?AVQString@@PBD0H@Z @ 77 NONAME ; class QString MpPlaybackData::trUtf8(char const *, char const *, int)
+	?thumbnailReady@MpPlaybackData@@QAEXABVQPixmap@@PAXHH@Z @ 78 NONAME ; void MpPlaybackData::thumbnailReady(class QPixmap const &, void *, int, int)
+	?staticMetaObject@MpMpxCollectionData@@2UQMetaObject@@B @ 79 NONAME ; struct QMetaObject const MpMpxCollectionData::staticMetaObject
+	?tr@MpPlaybackData@@SA?AVQString@@PBD0H@Z @ 80 NONAME ; class QString MpPlaybackData::tr(char const *, char const *, int)
+	?modified@MpSongData@@QBE?AVQString@@XZ @ 81 NONAME ; class QString MpSongData::modified(void) const
+	?setRealAudio@MpPlaybackData@@QAE_N_N@Z @ 82 NONAME ; bool MpPlaybackData::setRealAudio(bool)
+	?qt_metacall@MpMpxCollectionData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 83 NONAME ; int MpMpxCollectionData::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?albumArtReady@MpPlaybackData@@IAEXXZ @ 84 NONAME ; void MpPlaybackData::albumArtReady(void)
+	?album@MpPlaybackData@@QBEABVQString@@XZ @ 85 NONAME ; class QString const & MpPlaybackData::album(void) const
+	?albumSongsCount@MpMpxCollectionData@@QBEHXZ @ 86 NONAME ; int MpMpxCollectionData::albumSongsCount(void) const
+	?count@MpMpxCollectionData@@QBEHXZ @ 87 NONAME ; int MpMpxCollectionData::count(void) const
+	??1MpSongData@@UAE@XZ @ 88 NONAME ; MpSongData::~MpSongData(void)
+	?dataReloaded@MpCollectionDataModel@@IAEXXZ @ 89 NONAME ; void MpCollectionDataModel::dataReloaded(void)
+	?testCachedItem@MpMpxCollectionData@@QAE_NH@Z @ 90 NONAME ; bool MpMpxCollectionData::testCachedItem(int)
+	?setMpxMedia@MpSongData@@QAEXABVCMPXMedia@@@Z @ 91 NONAME ; void MpSongData::setMpxMedia(class CMPXMedia const &)
+	?tr@MpCollectionDataModel@@SA?AVQString@@PBD0@Z @ 92 NONAME ; class QString MpCollectionDataModel::tr(char const *, char const *)
+	?setTitle@MpPlaybackData@@QAE_NABVQString@@@Z @ 93 NONAME ; bool MpPlaybackData::setTitle(class QString const &)
+	?getStaticMetaObject@MpCollectionTBoneListDataModel@@SAABUQMetaObject@@XZ @ 94 NONAME ; struct QMetaObject const & MpCollectionTBoneListDataModel::getStaticMetaObject(void)
+	?trUtf8@MpCollectionDataModel@@SA?AVQString@@PBD0@Z @ 95 NONAME ; class QString MpCollectionDataModel::trUtf8(char const *, char const *)
+	?musicURL@MpSongData@@QBE?AVQString@@XZ @ 96 NONAME ; class QString MpSongData::musicURL(void) const
+	?realAudio@MpPlaybackData@@QAE_NXZ @ 97 NONAME ; bool MpPlaybackData::realAudio(void)
+	?staticMetaObject@MpCollectionDataModel@@2UQMetaObject@@B @ 98 NONAME ; struct QMetaObject const MpCollectionDataModel::staticMetaObject
+	?rowCount@MpCollectionTBoneListDataModel@@UBEHABVQModelIndex@@@Z @ 99 NONAME ; int MpCollectionTBoneListDataModel::rowCount(class QModelIndex const &) const
+	?dataChanged@MpMpxCollectionData@@IAEXXZ @ 100 NONAME ; void MpMpxCollectionData::dataChanged(void)
+	?trUtf8@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0H@Z @ 101 NONAME ; class QString MpCollectionTBoneListDataModel::trUtf8(char const *, char const *, int)
+	?getStaticMetaObject@MpSongData@@SAABUQMetaObject@@XZ @ 102 NONAME ; struct QMetaObject const & MpSongData::getStaticMetaObject(void)
+	?setItemVisibility@MpCollectionDataModel@@QAEXABVQModelIndex@@_N@Z @ 103 NONAME ; void MpCollectionDataModel::setItemVisibility(class QModelIndex const &, bool)
+	?songDetailInfoChanged@MpSongData@@IAEXXZ @ 104 NONAME ; void MpSongData::songDetailInfoChanged(void)
+	?mimeTypes@MpCollectionDataModel@@UBE?AVQStringList@@XZ @ 105 NONAME ; class QStringList MpCollectionDataModel::mimeTypes(void) const
+	?albumArt@MpSongData@@QBEXAAVHbIcon@@@Z @ 106 NONAME ; void MpSongData::albumArt(class HbIcon &) const
+	?isDrmProtected@MpSongData@@QBE_NXZ @ 107 NONAME ; bool MpSongData::isDrmProtected(void) const
+	?collectionTitle@MpMpxCollectionData@@QBE?AVQString@@XZ @ 108 NONAME ; class QString MpMpxCollectionData::collectionTitle(void) const
+	?albumTrack@MpSongData@@QBE?AVQString@@XZ @ 109 NONAME ; class QString MpSongData::albumTrack(void) const
+	?tr@MpPlaybackData@@SA?AVQString@@PBD0@Z @ 110 NONAME ; class QString MpPlaybackData::tr(char const *, char const *)
+	?qt_metacall@MpPlaybackData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 111 NONAME ; int MpPlaybackData::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?albumSongData@MpMpxCollectionData@@QBE?AVQString@@HW4DataType@1@@Z @ 112 NONAME ; class QString MpMpxCollectionData::albumSongData(int, enum MpMpxCollectionData::DataType) const
+	?playbackInfoChanged@MpSongData@@IAEXXZ @ 113 NONAME ; void MpSongData::playbackInfoChanged(void)
+	?insertCachedItem@MpMpxCollectionData@@QAEXH@Z @ 114 NONAME ; void MpMpxCollectionData::insertCachedItem(int)
+	?setAlbumContent@MpMpxCollectionData@@QAEXABVCMPXMedia@@@Z @ 115 NONAME ; void MpMpxCollectionData::setAlbumContent(class CMPXMedia const &)
+	??0MpMpxCollectionData@@QAE@PAVQObject@@@Z @ 116 NONAME ; MpMpxCollectionData::MpMpxCollectionData(class QObject *)
+	?setArtist@MpPlaybackData@@QAE_NABVQString@@@Z @ 117 NONAME ; bool MpPlaybackData::setArtist(class QString const &)
+	?trUtf8@MpSongData@@SA?AVQString@@PBD0@Z @ 118 NONAME ; class QString MpSongData::trUtf8(char const *, char const *)
+	?albumId@MpPlaybackData@@QAEHXZ @ 119 NONAME ; int MpPlaybackData::albumId(void)
+	??1MpMpxCollectionData@@UAE@XZ @ 120 NONAME ; MpMpxCollectionData::~MpMpxCollectionData(void)
+	??0MpPlaybackData@@QAE@PAVQObject@@@Z @ 121 NONAME ; MpPlaybackData::MpPlaybackData(class QObject *)
+	?trUtf8@MpCollectionDataModel@@SA?AVQString@@PBD0H@Z @ 122 NONAME ; class QString MpCollectionDataModel::trUtf8(char const *, char const *, int)
+	?metaObject@MpMpxCollectionData@@UBEPBUQMetaObject@@XZ @ 123 NONAME ; struct QMetaObject const * MpMpxCollectionData::metaObject(void) const
+	?qt_metacast@MpMpxCollectionData@@UAEPAXPBD@Z @ 124 NONAME ; void * MpMpxCollectionData::qt_metacast(char const *)
+	?qt_metacast@MpPlaybackData@@UAEPAXPBD@Z @ 125 NONAME ; void * MpPlaybackData::qt_metacast(char const *)
+	?size@MpSongData@@QBE?AVQString@@XZ @ 126 NONAME ; class QString MpSongData::size(void) const
+	??_EMpSongData@@UAE@I@Z @ 127 NONAME ; MpSongData::~MpSongData(unsigned int)
+	?containerId@MpMpxCollectionData@@QAEHXZ @ 128 NONAME ; int MpMpxCollectionData::containerId(void)
+	?containerMedia@MpMpxCollectionData@@QAEABVCMPXMedia@@XZ @ 129 NONAME ; class CMPXMedia const & MpMpxCollectionData::containerMedia(void)
+	??_EMpCollectionTBoneListDataModel@@UAE@I@Z @ 130 NONAME ; MpCollectionTBoneListDataModel::~MpCollectionTBoneListDataModel(unsigned int)
+	??1MpCollectionDataModel@@UAE@XZ @ 131 NONAME ; MpCollectionDataModel::~MpCollectionDataModel(void)
+	?tr@MpCollectionDataModel@@SA?AVQString@@PBD0H@Z @ 132 NONAME ; class QString MpCollectionDataModel::tr(char const *, char const *, int)
+	?reloadData@MpCollectionDataModel@@QAEXXZ @ 133 NONAME ; void MpCollectionDataModel::reloadData(void)
+	??1MpCollectionTBoneListDataModel@@UAE@XZ @ 134 NONAME ; MpCollectionTBoneListDataModel::~MpCollectionTBoneListDataModel(void)
+	?qt_metacall@MpSongData@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 135 NONAME ; int MpSongData::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?reservedLength@MpSongData@@QBEHXZ @ 136 NONAME ; int MpSongData::reservedLength(void) const
+	?collectionData@MpCollectionDataModel@@QAEPAVMpMpxCollectionData@@XZ @ 137 NONAME ; class MpMpxCollectionData * MpCollectionDataModel::collectionData(void)
+	?trUtf8@MpMpxCollectionData@@SA?AVQString@@PBD0@Z @ 138 NONAME ; class QString MpMpxCollectionData::trUtf8(char const *, char const *)
+	?setPosition@MpPlaybackData@@QAEXH@Z @ 139 NONAME ; void MpPlaybackData::setPosition(int)
+	??1MpPlaybackData@@UAE@XZ @ 140 NONAME ; MpPlaybackData::~MpPlaybackData(void)
+	?tr@MpSongData@@SA?AVQString@@PBD0@Z @ 141 NONAME ; class QString MpSongData::tr(char const *, char const *)
+	?refreshAlbumSongs@MpMpxCollectionData@@IAEXXZ @ 142 NONAME ; void MpMpxCollectionData::refreshAlbumSongs(void)
+	?setPlaybackState@MpPlaybackData@@QAEXW4SimplifiedState@1@@Z @ 143 NONAME ; void MpPlaybackData::setPlaybackState(enum MpPlaybackData::SimplifiedState)
+	?trUtf8@MpPlaybackData@@SA?AVQString@@PBD0@Z @ 144 NONAME ; class QString MpPlaybackData::trUtf8(char const *, char const *)
+	?albumDataChanged@MpCollectionTBoneListDataModel@@IAEXXZ @ 145 NONAME ; void MpCollectionTBoneListDataModel::albumDataChanged(void)
+	?comment@MpSongData@@QBE?AVQString@@XZ @ 146 NONAME ; class QString MpSongData::comment(void) const
+	?year@MpSongData@@QBE?AVQString@@XZ @ 147 NONAME ; class QString MpSongData::year(void) const
+	?data@MpCollectionTBoneListDataModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 148 NONAME ; class QVariant MpCollectionTBoneListDataModel::data(class QModelIndex const &, int) const
+	?albumSongIndex@MpMpxCollectionData@@QAEHH@Z @ 149 NONAME ; int MpMpxCollectionData::albumSongIndex(int)
+	?getStaticMetaObject@MpPlaybackData@@SAABUQMetaObject@@XZ @ 150 NONAME ; struct QMetaObject const & MpPlaybackData::getStaticMetaObject(void)
+	?composer@MpSongData@@QBE?AVQString@@XZ @ 151 NONAME ; class QString MpSongData::composer(void) const
+	?albumArt@MpPlaybackData@@QBEXAAVHbIcon@@@Z @ 152 NONAME ; void MpPlaybackData::albumArt(class HbIcon &) const
+	?commitPlaybackInfo@MpPlaybackData@@QAEXXZ @ 153 NONAME ; void MpPlaybackData::commitPlaybackInfo(void)
+	?removeRows@MpCollectionDataModel@@UAE_NHHABVQModelIndex@@@Z @ 154 NONAME ; bool MpCollectionDataModel::removeRows(int, int, class QModelIndex const &)
+	?albumSongId@MpMpxCollectionData@@QAEHH@Z @ 155 NONAME ; int MpMpxCollectionData::albumSongId(int)
+	?thumbnailReady@MpSongData@@QAEXVQPixmap@@PAXHH@Z @ 156 NONAME ; void MpSongData::thumbnailReady(class QPixmap, void *, int, int)
+	?id@MpPlaybackData@@QAEHXZ @ 157 NONAME ; int MpPlaybackData::id(void)
+	?album@MpSongData@@QBE?AVQString@@XZ @ 158 NONAME ; class QString MpSongData::album(void) const
+	?albumArtBase64@MpSongData@@QBE?AVQString@@XZ @ 159 NONAME ; class QString MpSongData::albumArtBase64(void) const
+	?playbackInfoChanged@MpPlaybackData@@IAEXXZ @ 160 NONAME ; void MpPlaybackData::playbackInfoChanged(void)
+	?itemData@MpMpxCollectionData@@QBE?AVQString@@HW4DataType@1@@Z @ 161 NONAME ; class QString MpMpxCollectionData::itemData(int, enum MpMpxCollectionData::DataType) const
+	?link@MpSongData@@QBE?AVQString@@XZ @ 162 NONAME ; class QString MpSongData::link(void) const
+	?trUtf8@MpCollectionTBoneListDataModel@@SA?AVQString@@PBD0@Z @ 163 NONAME ; class QString MpCollectionTBoneListDataModel::trUtf8(char const *, char const *)
+	?updateSong@MpCollectionTBoneListDataModel@@QAEXXZ @ 164 NONAME ; void MpCollectionTBoneListDataModel::updateSong(void)
+	?setId@MpPlaybackData@@QAE_NH@Z @ 165 NONAME ; bool MpPlaybackData::setId(int)
+	?metaObject@MpCollectionDataModel@@UBEPBUQMetaObject@@XZ @ 166 NONAME ; struct QMetaObject const * MpCollectionDataModel::metaObject(void) const
+	?metaObject@MpSongData@@UBEPBUQMetaObject@@XZ @ 167 NONAME ; struct QMetaObject const * MpSongData::metaObject(void) const
+	?setLink@MpSongData@@QAEXABVQString@@@Z @ 168 NONAME ; void MpSongData::setLink(class QString const &)
 

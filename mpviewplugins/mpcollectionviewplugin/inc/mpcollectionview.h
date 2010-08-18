@@ -55,6 +55,7 @@ public:
     void setDefaultView();
     bool isActivated();    
     void openItem( int index );
+    void showItemDetails( int index );
 
 signals:
 
@@ -101,6 +102,8 @@ public slots:
     void handleLibraryUpdated();
 
     void setShuffleAction( bool enabled );
+    
+    void containerDataChanged();
 
 private:
 
@@ -111,6 +114,7 @@ private:
         const QString& icon, const QString& objectName );
 
     void updateMenu();
+    void addDefaultMenuOptions( HbMenu *menu, bool optRefresh, bool optExit );
     void updateToolBar();
     void setSoftkey();
 

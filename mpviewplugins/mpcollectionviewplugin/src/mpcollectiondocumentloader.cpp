@@ -19,7 +19,6 @@
 
 #include "mpcollectiondocumentloader.h"
 #include "mpnowplayingwidget.h"
-#include "mpcommondefs.h"
 #include "mptrace.h"
 
 

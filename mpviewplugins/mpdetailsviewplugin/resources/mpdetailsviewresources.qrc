@@ -1,13 +1,5 @@
 <RCC>
     <qresource prefix="/mpdetailsviewdocml">
-        <file alias="mpdetailsview.docml">mpdetailsview.docml</file>
-    </qresource>
-    <qresource prefix="/mpdetailsviewicons">
-        <file alias="qtg_large_music_album.svg">qtg_large_music_album.svg</file>
-    </qresource>
-    <qresource prefix="/shareview">
-        <file alias="index.html">index.html</file>
-        <file alias="musiccontext.js">musiccontext.js</file>
-        <file alias="musiccontext.css">musiccontext.css</file>
+        <file alias="mpdetailsview.docml">mpdetailsview.docml.bin</file>
     </qresource>
 </RCC>

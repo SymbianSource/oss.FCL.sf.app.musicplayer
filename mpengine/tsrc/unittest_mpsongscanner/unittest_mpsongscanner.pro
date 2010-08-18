@@ -11,20 +11,22 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpsongscanner unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpsongscanner
 TARGET.CAPABILITY = CAP_APPLICATION
+
+symbian: { 
+    MMP_RULES += SMPSAFE
+}
 
 DEPENDPATH += .
 INCLUDEPATH += . \
                ../../inc \
                ../../../inc
-
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \

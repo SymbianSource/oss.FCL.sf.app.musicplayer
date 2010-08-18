@@ -21,7 +21,6 @@
 #include <data_caging_paths_for_iby.hrh>
 
 S60_APP_EXE(musicplayer)
-data = ZRESOURCE\apps\musicplayer.mif                      APP_RESOURCE_DIR\musicplayer.mif
 data = ZPRIVATE\10003A3F\import\APPS\musicplayer_reg.rsc   PRIVATE\10003a3f\import\apps\musicplayer_reg.rsc
 
 data = ZSYSTEM\install\musicplayer_stub.sis          system\install\musicplayer_stub.sis

@@ -32,7 +32,7 @@ class HbPushButton;
 class HbIcon;
 class HbMarqueeItem;
 class MpEngine;
-//class MpPlaybackData;
+class MpAlbumCoverWidget;
 
 /**
  * Media key identifier for push button events
@@ -179,9 +179,7 @@ private:
     bool mMusicPlayerBlocked;
     
     // Album art for background
-    HbLabel *mAlbumArtLabel;
-    qreal mAlbumArtWidth;
-    qreal mAlbumArtHeight; 
+    MpAlbumCoverWidget *mAlbumArt;
     
     // Artist and song title identifiers 
     QString mArtist;

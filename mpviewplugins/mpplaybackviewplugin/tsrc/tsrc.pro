@@ -11,11 +11,15 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: Music Player mpplaybackviewplugin unit test project file.
 #
 
 TEMPLATE = subdirs
 
-SUBDIRS = unittest_mpequalizerwidget \
-          unittest_mpplaybackviewplugin
+SUBDIRS += unittest_mpequalizerwidget \
+           unittest_mpplaybackdocumentloader \
+           unittest_mpplaybackviewplugin \
+           unittest_mpplaybackview
+
+CONFIG += ordered
 

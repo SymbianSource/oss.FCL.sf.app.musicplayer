@@ -25,6 +25,7 @@
 
 class MpMpxPlaybackFrameworkWrapperPrivate;
 class MpPlaybackData;
+class MpSongData;
 class QStringList;
 
 
@@ -36,18 +37,27 @@ class MpMpxPlaybackFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid=TUid::Uid(MpCommon::KMusicPlayerUid),
+        MpSongData *songData=0, QObject *parent=0 );
     virtual ~MpMpxPlaybackFrameworkWrapper();
     
     MpPlaybackData *playbackData();
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
-    
+
+    void retrieveSongDetails();
+
+signals:
+
+    void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
+
 public slots:
     
     void play( QString aFilename );
     void play( const XQSharableFile& file );
+    void play();
+    void pause();
     void playPause();
     void stop();
     void skipForward();
@@ -58,7 +68,16 @@ public slots:
     void setPosition( int position );
     void setShuffle( bool mode );
     void setRepeat( bool mode );
-    
+    void getMaxVolume();
+    void getVolume();
+    void increaseVolume();
+    void decreaseVolume();
+    void setVolume( int value );
+    void getMuteState();
+    void mute();
+    void unmute();
+    void closeCurrentPlayback();
+
 private:
 
     Q_DISABLE_COPY(MpMpxPlaybackFrameworkWrapper)

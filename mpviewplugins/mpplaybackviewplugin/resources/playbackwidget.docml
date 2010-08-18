@@ -44,9 +44,7 @@
             <fontspec name="fontSpec" role="Primary"/>             
         </widget>
         
-        <widget name="albumArt" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-        </widget>
+        <widget name="albumArt" type="MpAlbumCoverWidget"/>
         
         <widget name="progressBar" type="HbProgressSlider">
             <fontspec name="fontSpec" role="PrimarySmall"/>

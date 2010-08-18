@@ -18,15 +18,19 @@
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbicon.h>
+#include <mpxmedia.h>
 
-#include"unittest_mpsongdata.h"
+#include "unittest_mpsongdata.h"
 #include "stub/inc/thumbnailmanager_qt.h"
 
 // Do this so we can access all member variables.
 #define private public
 #include "mpsongdata.h"
+#include "mpsongdata_p.h"
 #undef private
 
+// This so we can test private functions
+#include "mpsongdata_p.cpp"
 
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
@@ -48,7 +52,7 @@ if ( argc > 1 ) {
         pass[2] = "c:\\data\\unittest_mpsongdata.txt";
 
         return QTest::qExec(&tv, 3, pass);
-    }    
+    }
 }
 
 //Constructor
@@ -69,7 +73,7 @@ TestMpSongData::~TestMpSongData()
  */
 void TestMpSongData::initTestCase()
 {
-    
+
 }
 
 /*!
@@ -77,7 +81,6 @@ void TestMpSongData::initTestCase()
  */
 void TestMpSongData::cleanupTestCase()
 {
-QCoreApplication::processEvents();
 }
 
 /*!
@@ -86,6 +89,7 @@ QCoreApplication::processEvents();
 void TestMpSongData::init()
 {
     mTest = new MpSongData();
+    mTestPrivate = mTest->d_ptr;
 }
 
 /*!
@@ -111,143 +115,143 @@ void TestMpSongData::testMemberCleanup()
 
 
 /*!
- Test title() 
+ Test title()
  */
 void TestMpSongData::testTitle()
 {
-    mTest->mTitle = QString();
-    QVERIFY( mTest->title().isNull() == true );    
-    
+    mTestPrivate->mTitle = QString();
+    QVERIFY( mTest->title().isNull() == true );
+
     QString title( "title" );
-    mTest->mTitle = title;
+    mTestPrivate->mTitle = title;
     QVERIFY( mTest->title().isNull() == false );
     QCOMPARE( mTest->title(), title );
 }
 
 /*!
- Test album() 
+ Test album()
  */
 void TestMpSongData::testAlbum()
 {
-    mTest->mAlbum = QString();
+    mTestPrivate->mAlbum = QString();
     QVERIFY( mTest->album().isNull() == true );
-    
+
     QString album( "album" );
-    mTest->mAlbum = album;
+    mTestPrivate->mAlbum = album;
     QVERIFY( mTest->album().isNull() == false );
     QCOMPARE( mTest->album(), album );
 }
 
 /*!
- Test artist() 
+ Test artist()
  */
 void TestMpSongData::testArtist()
 {
-    mTest->mArtist = QString();
+    mTestPrivate->mArtist = QString();
     QVERIFY( mTest->artist().isNull() == true );
-    
+
     QString artist( "artist");
-    mTest->mArtist = artist;
+    mTestPrivate->mArtist = artist;
     QVERIFY( mTest->artist().isNull() == false );
     QCOMPARE( mTest->artist(), artist );
 }
 
 /*!
- Test comment() 
+ Test comment()
  */
 void TestMpSongData::testComment()
 {
-    mTest->mComment = QString();
+    mTestPrivate->mComment = QString();
     QVERIFY( mTest->comment().isNull() == true );
-    
+
     QString comment( "This is a nice song" );
-    mTest->mComment = comment;
+    mTestPrivate->mComment = comment;
     QVERIFY( mTest->comment().isNull() == false );
     QCOMPARE( mTest->comment(), comment );
 }
 
 /*!
- Test albumArt() 
+ Test albumArt()
  */
 void TestMpSongData::testAlbumArt()
 {
     HbIcon dummyAlbumArt;
-    mTest->albumArt( dummyAlbumArt );
+    mTestPrivate->albumArt( dummyAlbumArt );
     QVERIFY( dummyAlbumArt.isNull() == true );
-    
+
     HbIcon dummyAlbumArtTwo;
-    mTest->mAlbumArt = new HbIcon( ":/playbackviewicons/someAlbumArt.png" );
+    mTestPrivate->mAlbumArt = new HbIcon( ":/playbackviewicons/someAlbumArt.png" );
     mTest->albumArt( dummyAlbumArtTwo );
     QVERIFY( dummyAlbumArtTwo.isNull() == false );
 }
 
 /*!
- Test year() 
+ Test year()
  */
 void TestMpSongData::testYear()
 {
-    mTest->mYear = QString();
+    mTestPrivate->mYear = QString();
     QVERIFY( mTest->year().isNull() == true );
-    
+
     QString year("2000");
-    mTest->mYear = year;
+    mTestPrivate->mYear = year;
     QVERIFY( mTest->year().isNull() == false );
     QCOMPARE( mTest->year(), year );
 }
 
 /*!
- Test genre() 
+ Test genre()
  */
 void TestMpSongData::testGenre()
 {
-    mTest->mGenre = QString();    
+    mTestPrivate->mGenre = QString();
     QVERIFY( mTest->genre().isNull() == true );
 
-    QString genre( "pop" );    
-    mTest->mGenre = genre;    
+    QString genre( "pop" );
+    mTestPrivate->mGenre = genre;
     QVERIFY( mTest->genre().isNull() == false );
     QCOMPARE( mTest->genre(), genre );
 }
 
 /*!
- Test composer() 
+ Test composer()
  */
 void TestMpSongData::testComposer()
 {
-    mTest->mComposer = QString();
+    mTestPrivate->mComposer = QString();
     QVERIFY( mTest->composer().isNull() == true );
-    
+
     QString composer( "composer ");
-    mTest->mComposer = composer;
+    mTestPrivate->mComposer = composer;
     QVERIFY( mTest->composer().isNull() == false );
     QCOMPARE( mTest->composer(), composer );
 }
 
 
 /*!
- Test albumTrack() 
+ Test albumTrack()
  */
 void TestMpSongData::testAlbumtrack()
 {
-    mTest->mAlbumTrack = QString();
+    mTestPrivate->mAlbumTrack = QString();
     QVERIFY( mTest->albumTrack().isNull() == true );
-    
+
     QString albumTrack("2");
-    mTest->mAlbumTrack = albumTrack;
-    QVERIFY( mTest->albumTrack().isNull() == false );   
+    mTestPrivate->mAlbumTrack = albumTrack;
+    QVERIFY( mTest->albumTrack().isNull() == false );
     QCOMPARE( mTest->albumTrack(), albumTrack );
 }
 
 /*!
- Test link() 
+ Test link()
  */
 void TestMpSongData::testLink()
 {
-    mTest->mLink = QString();
+    mTestPrivate->mLink = QString();
     QVERIFY( mTest->link().isNull() == true );
-    
+
     QString link( "www.nokia.com" );
-    mTest->mLink = link;
+    mTestPrivate->mLink = link;
     QVERIFY( mTest->link().isNull() == false );
     QCOMPARE( mTest->link(), link );
 }
@@ -257,11 +261,11 @@ void TestMpSongData::testLink()
  */
 void TestMpSongData::testFileName()
 {
-    mTest->mFileName = QString();
+    mTestPrivate->mFileName = QString();
     QVERIFY( mTest->fileName().isNull() == true );
-    
+
     QString fileName( "test.mp3" );
-    mTest->mFileName = fileName;
+    mTestPrivate->mFileName = fileName;
     QVERIFY( mTest->fileName().isNull() == false );
     QCOMPARE( mTest->fileName(), fileName );
 }
@@ -271,11 +275,11 @@ void TestMpSongData::testFileName()
  */
 void TestMpSongData::testMimeType()
 {
-    mTest->mMimeType = QString();
+    mTestPrivate->mMimeType = QString();
     QVERIFY( mTest->mimeType().isNull() == true );
-    
+
     QString mimeType( "mp3" );
-    mTest->mMimeType = mimeType;
+    mTestPrivate->mMimeType = mimeType;
     QVERIFY( mTest->mimeType().isNull() == false );
     QCOMPARE( mTest->mimeType(), mimeType );
 }
@@ -285,11 +289,11 @@ void TestMpSongData::testMimeType()
  */
 void TestMpSongData::testDuration()
 {
-    mTest->mDuration = QString();
+    mTestPrivate->mDuration = QString();
     QVERIFY( mTest->duration().isNull() == true );
-    
+
     QString duration( "04:16" );
-    mTest->mDuration = duration;
+    mTestPrivate->mDuration = duration;
     QVERIFY( mTest->duration().isNull() == false );
     QCOMPARE( mTest->duration(), duration );
 }
@@ -299,11 +303,11 @@ void TestMpSongData::testDuration()
  */
 void TestMpSongData::testBitRate()
 {
-    mTest->mBitRate = QString();
+    mTestPrivate->mBitRate = QString();
     QVERIFY( mTest->bitRate().isNull() == true );
-    
+
     QString bitRate( "320 Kbps" );
-    mTest->mBitRate = bitRate;
+    mTestPrivate->mBitRate = bitRate;
     QVERIFY( mTest->bitRate().isNull() == false );
     QCOMPARE( mTest->bitRate(), bitRate );
 }
@@ -313,11 +317,11 @@ void TestMpSongData::testBitRate()
  */
 void TestMpSongData::testSampleRate()
 {
-    mTest->mSampleRate = QString();
+    mTestPrivate->mSampleRate = QString();
     QVERIFY( mTest->sampleRate().isNull() == true );
-    
+
     QString sampleRate( "44100 hz" );
-    mTest->mSampleRate = sampleRate;
+    mTestPrivate->mSampleRate = sampleRate;
     QVERIFY( mTest->sampleRate().isNull() == false );
     QCOMPARE( mTest->sampleRate(), sampleRate );
 }
@@ -327,11 +331,11 @@ void TestMpSongData::testSampleRate()
  */
 void TestMpSongData::testSize()
 {
-    mTest->mSize = QString();
+    mTestPrivate->mSize = QString();
     QVERIFY( mTest->size().isNull() == true );
-    
+
     QString size( "4.3MB" );
-    mTest->mSize = size;
+    mTestPrivate->mSize = size;
     QVERIFY( mTest->size().isNull() == false );
     QCOMPARE( mTest->size(), size );
 }
@@ -341,11 +345,11 @@ void TestMpSongData::testSize()
  */
 void TestMpSongData::testModified()
 {
-    mTest->mModified = QString();
+    mTestPrivate->mModified = QString();
     QVERIFY( mTest->modified().isNull() == true );
-    
+
     QString modified( "5.7.2010 14:35:08" );
-    mTest->mModified = modified;
+    mTestPrivate->mModified = modified;
     QVERIFY( mTest->modified().isNull() == false );
     QCOMPARE( mTest->modified(), modified );
 }
@@ -355,11 +359,11 @@ void TestMpSongData::testModified()
  */
 void TestMpSongData::testCopyright()
 {
-    mTest->mCopyright = QString();
+    mTestPrivate->mCopyright = QString();
     QVERIFY( mTest->copyright().isNull() == true );
-    
+
     QString copyright( "Copyright holder" );
-    mTest->mCopyright = copyright;
+    mTestPrivate->mCopyright = copyright;
     QVERIFY( mTest->copyright().isNull() == false );
     QCOMPARE( mTest->copyright(), copyright );
 }
@@ -369,11 +373,11 @@ void TestMpSongData::testCopyright()
  */
 void TestMpSongData::testMusicURL()
 {
-    mTest->mMusicURL = QString();
+    mTestPrivate->mMusicURL = QString();
     QVERIFY( mTest->musicURL().isNull() == true );
-    
+
     QString musicURL( "www.nokia.com" );
-    mTest->mMusicURL = musicURL;
+    mTestPrivate->mMusicURL = musicURL;
     QVERIFY( mTest->musicURL().isNull() == false );
     QCOMPARE( mTest->musicURL(), musicURL );
 }
@@ -383,377 +387,438 @@ void TestMpSongData::testMusicURL()
  */
 void TestMpSongData::testIsDrmProtected()
 {
-    mTest->mDrmProtected = true;
+    mTestPrivate->mDrmProtected = true;
     QVERIFY( mTest->isDrmProtected() == true );
-    
-    mTest->mDrmProtected = false;
+
+    mTestPrivate->mDrmProtected = false;
     QVERIFY( mTest->isDrmProtected() == false );
 }
 
 /*!
- Test setTitle() 
+ Test setMpxMedia()
+ */
+void TestMpSongData::testSetMpxMedia()
+{
+    RArray<TInt> supportedIds;
+    CleanupClosePushL( supportedIds );
+    supportedIds.AppendL( KMPXMediaIdMusic );
+    supportedIds.AppendL( KMPXMediaIdGeneral );
+    CMPXMedia* entries = CMPXMedia::NewL(supportedIds.Array());
+    CleanupStack::PopAndDestroy(&supportedIds);
+    CleanupStack::PushL(entries);
+
+    entries->SetTObjectValueL<TInt>(KMPXMediaGeneralId, 1);
+    entries->SetTObjectValueL<TInt>(KMPXMediaMusicAlbumId, 2);
+    entries->SetTextValueL(KMPXMediaGeneralTitle, TPtrC(reinterpret_cast<const TUint16*>(L"Title")));
+    entries->SetTextValueL(KMPXMediaMusicArtist, TPtrC(reinterpret_cast<const TUint16*>(L"Artist")));
+    entries->SetTextValueL(KMPXMediaMusicAlbum, TPtrC(reinterpret_cast<const TUint16*>(L"Album")));
+    entries->SetTextValueL(KMPXMediaMusicAlbumArtFileName, TPtrC(reinterpret_cast<const TUint16*>(L"AlbumArtFileName")));
+    entries->SetTextValueL(KMPXMediaMusicComposer, TPtrC(reinterpret_cast<const TUint16*>(L"Composer")));
+    entries->SetTObjectValueL<TInt64> (KMPXMediaMusicYear, 63241257600000000);
+    entries->SetTextValueL(KMPXMediaMusicAlbumTrack, TPtrC(reinterpret_cast<const TUint16*>(L"1")));
+    entries->SetTextValueL(KMPXMediaMusicGenre, TPtrC(reinterpret_cast<const TUint16*>(L"Genre")));
+    entries->SetTextValueL(KMPXMediaGeneralMimeType, TPtrC(reinterpret_cast<const TUint16*>(L"audio/mp3")));
+    entries->SetTObjectValueL<TInt>(KMPXMediaGeneralDuration, 205907);
+    entries->SetTObjectValueL<TUint32>(KMPXMediaAudioBitrate, 128000);
+    entries->SetTObjectValueL<TUint32>(KMPXMediaAudioSamplerate, 44100);
+    entries->SetTextValueL(KMPXMediaGeneralCopyright, TPtrC(reinterpret_cast<const TUint16*>(L"Copyright")));
+    entries->SetTextValueL(KMPXMediaMusicURL, TPtrC(reinterpret_cast<const TUint16*>(L"MusicURL")));
+
+    CMPXMedia* mediaTestData = CMPXMedia::NewL(*entries);
+    CleanupStack::PushL(mediaTestData);
+
+    QSignalSpy spy1( mTest, SIGNAL( playbackInfoChanged() ) );
+    QSignalSpy spy2( mTest, SIGNAL( songDetailInfoChanged() ) );
+
+    mTest->setMpxMedia( *mediaTestData );
+
+    QCOMPARE( spy1.count(), 1 );
+    QCOMPARE( spy2.count(), 1 );
+
+    QCOMPARE( mTest->title(), QString("Title") );
+    QCOMPARE( mTest->artist(), QString("Artist") );
+    QCOMPARE( mTest->album(), QString("Album") );
+    QCOMPARE( mTest->year(), QString("2004") );
+    QCOMPARE( mTest->genre(), QString("Genre") );
+    QCOMPARE( mTest->composer(), QString("Composer") );
+    QCOMPARE( mTest->albumTrack(), QString("1") );
+    QCOMPARE( mTest->fileName().isNull(), true );
+    QCOMPARE( mTest->mimeType(), QString("MP3") );
+    QCOMPARE( mTest->duration(), QString("03:25") );
+    QCOMPARE( mTest->bitRate(), QString("128") );
+    QCOMPARE( mTest->sampleRate(), QString("44100") );
+    QCOMPARE( mTest->copyright(), QString("Copyright") );
+    QCOMPARE( mTest->musicURL(), QString("MusicURL") );
+    QCOMPARE( mTest->isDrmProtected(), false );
+
+    CleanupStack::PopAndDestroy(mediaTestData);
+    CleanupStack::PopAndDestroy(entries);
+}
+
+/*!
+ Test setTitle()
  */
 void TestMpSongData::testSetTitle()
 {
-    bool result;    
+    bool result;
     QString title( "title" );
-    mTest->mTitle = QString();
-    result = mTest->setTitle( title );
+    mTestPrivate->mTitle = QString();
+    result = mTestPrivate->setTitle( title );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->title(), title ); 
-    
+    QCOMPARE( mTest->title(), title );
+
     result = false;
     title = QString( "title" );
-    mTest->mTitle = QString( "titleTwo" );
-    result = mTest->setTitle( title );
+    mTestPrivate->mTitle = QString( "titleTwo" );
+    result = mTestPrivate->setTitle( title );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->title(), title ); 
-    
+    QCOMPARE( mTest->title(), title );
+
     result = false;
     title = QString();
-    mTest->mTitle = QString();
-    result = mTest->setTitle( title );
+    mTestPrivate->mTitle = QString();
+    result = mTestPrivate->setTitle( title );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->title().isNull(), true ); 
-    
+    QCOMPARE( mTest->title().isNull(), true );
+
     result = false;
     title = QString();
-    mTest->mTitle = QString( "titleTwo" );
-    result = mTest->setTitle( title );
+    mTestPrivate->mTitle = QString( "titleTwo" );
+    result = mTestPrivate->setTitle( title );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->title().isNull(), true ); 
+    QCOMPARE( mTest->title().isNull(), true );
 }
 
 /*!
- Test SetAlbum() 
+ Test SetAlbum()
  */
 void TestMpSongData::TestMpSongData::testSetAlbum()
 {
-    bool result;    
+    bool result;
     QString album( "album" );
-    mTest->mAlbum = QString();
-    result = mTest->setAlbum( album );
+    mTestPrivate->mAlbum = QString();
+    result = mTestPrivate->setAlbum( album );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->album(), album ); 
-    
+    QCOMPARE( mTest->album(), album );
+
     result = false;
     album = QString( "album" );
-    mTest->mAlbum = QString( "albumTwo" );
-    result = mTest->setAlbum( album );
+    mTestPrivate->mAlbum = QString( "albumTwo" );
+    result = mTestPrivate->setAlbum( album );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->album(), album ); 
-    
+    QCOMPARE( mTest->album(), album );
+
     result = false;
     album = QString();
-    mTest->mAlbum = QString();
-    result = mTest->setAlbum( album );
+    mTestPrivate->mAlbum = QString();
+    result = mTestPrivate->setAlbum( album );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->album().isNull(), true ); 
-    
+    QCOMPARE( mTest->album().isNull(), true );
+
     result = false;
     album = QString();
-    mTest->mAlbum = QString( "albumTwo" );
-    result = mTest->setAlbum( album );
+    mTestPrivate->mAlbum = QString( "albumTwo" );
+    result = mTestPrivate->setAlbum( album );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->album().isNull(), true ); 
+    QCOMPARE( mTest->album().isNull(), true );
 }
 
 /*!
- Test SetArtist() 
+ Test SetArtist()
  */
 void TestMpSongData::testSetArtist()
 {
-    bool result;    
+    bool result;
     QString artist( "artist" );
-    mTest->mArtist = QString();
-    result = mTest->setArtist( artist );
+    mTestPrivate->mArtist = QString();
+    result = mTestPrivate->setArtist( artist );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->artist(), artist ); 
-    
+    QCOMPARE( mTest->artist(), artist );
+
     result = false;
     artist = QString( "artist" );
-    mTest->mArtist = QString( "artistTwo" );
-    result = mTest->setArtist( artist );
+    mTestPrivate->mArtist = QString( "artistTwo" );
+    result = mTestPrivate->setArtist( artist );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->artist(), artist ); 
-    
+    QCOMPARE( mTest->artist(), artist );
+
     result = false;
     artist = QString();
-    mTest->mArtist = QString();
-    result = mTest->setArtist( artist );
+    mTestPrivate->mArtist = QString();
+    result = mTestPrivate->setArtist( artist );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->artist().isNull(), true ); 
-    
+    QCOMPARE( mTest->artist().isNull(), true );
+
     result = false;
     artist = QString();
-    mTest->mArtist = QString( "artistTwo" );
-    result = mTest->setArtist( artist );
+    mTestPrivate->mArtist = QString( "artistTwo" );
+    result = mTestPrivate->setArtist( artist );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->artist().isNull(), true ); 
+    QCOMPARE( mTest->artist().isNull(), true );
 }
 
 /*!
- Test SetComment() 
+ Test SetComment()
  */
 void TestMpSongData::testSetComment()
 {
-    bool result;    
+    bool result;
     QString comment( "comment" );
-    mTest->mComment = QString();
-    result = mTest->setComment( comment );
+    mTestPrivate->mComment = QString();
+    result = mTestPrivate->setComment( comment );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->comment(), comment ); 
-    
+    QCOMPARE( mTest->comment(), comment );
+
     result = false;
     comment = QString( "comment" );
-    mTest->mComment = QString( "commentTwo" );
-    result = mTest->setComment( comment );
+    mTestPrivate->mComment = QString( "commentTwo" );
+    result = mTestPrivate->setComment( comment );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->comment(), comment ); 
-    
+    QCOMPARE( mTest->comment(), comment );
+
     result = false;
     comment = QString();
-    mTest->mComment = QString();
-    result = mTest->setComment( comment );
+    mTestPrivate->mComment = QString();
+    result = mTestPrivate->setComment( comment );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->comment().isNull(), true ); 
-    
+    QCOMPARE( mTest->comment().isNull(), true );
+
     result = false;
     comment = QString();
-    mTest->mComment = QString( "commentTwo" );
-    result = mTest->setComment( comment );
+    mTestPrivate->mComment = QString( "commentTwo" );
+    result = mTestPrivate->setComment( comment );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->comment().isNull(), true ); 
+    QCOMPARE( mTest->comment().isNull(), true );
 }
 
 /*!
- Test SetYear() 
+ Test SetYear()
  */
 void TestMpSongData::testSetYear()
 {
-    bool result;    
+    bool result;
     int year = 2010;
-    mTest->mYear = QString();
-    result = mTest->setYear( year );
+    mTestPrivate->mYear = QString();
+    result = mTestPrivate->setYear( year );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->year(), QString::number( year ) ); 
-    
+    QCOMPARE( mTest->year(), QString::number( year ) );
+
     result = false;
     year = 2010;
-    mTest->mYear = QString::number( 2011 );
-    result = mTest->setYear( year );
+    mTestPrivate->mYear = QString::number( 2011 );
+    result = mTestPrivate->setYear( year );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->year(), QString::number( year ) ); 
-    
+    QCOMPARE( mTest->year(), QString::number( year ) );
+
     result = false;
     year = -1;
-    mTest->mYear = QString();
-    result = mTest->setYear( year );
+    mTestPrivate->mYear = QString();
+    result = mTestPrivate->setYear( year );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->year().isNull(), true ); 
-    
+    QCOMPARE( mTest->year().isNull(), true );
+
     result = false;
     year = -1;
-    mTest->mYear = QString::number( 2011 );
-    result = mTest->setYear( year );
+    mTestPrivate->mYear = QString::number( 2011 );
+    result = mTestPrivate->setYear( year );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->year().isNull(), true ); 
+    QCOMPARE( mTest->year().isNull(), true );
 }
 
 /*!
- Test setGenre() 
+ Test setGenre()
  */
 void TestMpSongData::testSetGenre()
 {
-    bool result;    
+    bool result;
     QString genre( "genre" );
-    mTest->mGenre = QString();
-    result = mTest->setGenre( genre );
+    mTestPrivate->mGenre = QString();
+    result = mTestPrivate->setGenre( genre );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->genre(), genre ); 
-    
+    QCOMPARE( mTest->genre(), genre );
+
     result = false;
     genre = QString( "genre" );
-    mTest->mGenre = QString( "genreTwo" );
-    result = mTest->setGenre( genre );
+    mTestPrivate->mGenre = QString( "genreTwo" );
+    result = mTestPrivate->setGenre( genre );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->genre(), genre ); 
-    
+    QCOMPARE( mTest->genre(), genre );
+
     result = false;
     genre = QString();
-    mTest->mGenre = QString();
-    result = mTest->setGenre( genre );
+    mTestPrivate->mGenre = QString();
+    result = mTestPrivate->setGenre( genre );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->genre().isNull(), true ); 
-    
+    QCOMPARE( mTest->genre().isNull(), true );
+
     result = false;
     genre = QString();
-    mTest->mGenre = QString( "genreTwo" );
-    result = mTest->setGenre( genre );
+    mTestPrivate->mGenre = QString( "genreTwo" );
+    result = mTestPrivate->setGenre( genre );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->genre().isNull(), true ); 
+    QCOMPARE( mTest->genre().isNull(), true );
 }
 
 /*!
- Test setComposer() 
+ Test setComposer()
  */
 void TestMpSongData::testSetComposer()
 {
-    bool result;    
+    bool result;
     QString composer( "composer" );
-    mTest->mComposer = QString();
-    result = mTest->setComposer( composer );
+    mTestPrivate->mComposer = QString();
+    result = mTestPrivate->setComposer( composer );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->composer(), composer ); 
-    
+    QCOMPARE( mTest->composer(), composer );
+
     result = false;
     composer = QString( "composer" );
-    mTest->mComposer = QString( "composerTwo" );
-    result = mTest->setComposer( composer );
+    mTestPrivate->mComposer = QString( "composerTwo" );
+    result = mTestPrivate->setComposer( composer );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->composer(), composer ); 
-    
+    QCOMPARE( mTest->composer(), composer );
+
     result = false;
     composer = QString();
-    mTest->mComposer = QString();
-    result = mTest->setComposer( composer );
+    mTestPrivate->mComposer = QString();
+    result = mTestPrivate->setComposer( composer );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->composer().isNull(), true ); 
-    
+    QCOMPARE( mTest->composer().isNull(), true );
+
     result = false;
     composer = QString();
-    mTest->mComposer = QString( "composerTwo" );
-    result = mTest->setComposer( composer );
+    mTestPrivate->mComposer = QString( "composerTwo" );
+    result = mTestPrivate->setComposer( composer );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->composer().isNull(), true ); 
+    QCOMPARE( mTest->composer().isNull(), true );
 }
 
 /*!
- Test setAlbumTrack() 
+ Test setAlbumTrack()
  */
 void TestMpSongData::testSetAlbumTrack()
 {
-    bool result;    
+    bool result;
     QString albumTrack( "2" );
-    mTest->mAlbumTrack = QString();
-    result = mTest->setAlbumTrack( albumTrack );
+    mTestPrivate->mAlbumTrack = QString();
+    result = mTestPrivate->setAlbumTrack( albumTrack );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->albumTrack(), albumTrack ); 
-    
+    QCOMPARE( mTest->albumTrack(), albumTrack );
+
     result = false;
     albumTrack = QString( "2" );
-    mTest->mAlbumTrack = QString( "3" );
-    result = mTest->setAlbumTrack( albumTrack );
+    mTestPrivate->mAlbumTrack = QString( "3" );
+    result = mTestPrivate->setAlbumTrack( albumTrack );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->albumTrack(), albumTrack ); 
-    
+    QCOMPARE( mTest->albumTrack(), albumTrack );
+
     result = false;
     albumTrack = QString();
-    mTest->mAlbumTrack = QString();
-    result = mTest->setAlbumTrack( albumTrack );
+    mTestPrivate->mAlbumTrack = QString();
+    result = mTestPrivate->setAlbumTrack( albumTrack );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->albumTrack().isNull(), true ); 
-    
+    QCOMPARE( mTest->albumTrack().isNull(), true );
+
     result = false;
     albumTrack = QString();
-    mTest->mAlbumTrack = QString( "3" );
-    result = mTest->setAlbumTrack( albumTrack );
+    mTestPrivate->mAlbumTrack = QString( "3" );
+    result = mTestPrivate->setAlbumTrack( albumTrack );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->albumTrack().isNull(), true ); 
+    QCOMPARE( mTest->albumTrack().isNull(), true );
 }
 
 /*!
- Test setLink() 
+ Test setLink()
  */
 void TestMpSongData::testSetLink()
-{  
+{
     QString link( "www.nokia.com" );
-    mTest->mLink = QString();
-    mTest->setLink( link );
-    QCOMPARE( mTest->link(), link ); 
-    
+    mTestPrivate->mLink = QString();
+    mTestPrivate->setLink( link );
+    QCOMPARE( mTest->link(), link );
+
     link = QString( "www.nokia.com" );
-    mTest->mLink = QString( "www.nokia.fi" );
-    mTest->setLink( link );
-    QCOMPARE( mTest->link(), link ); 
-    
+    mTestPrivate->mLink = QString( "www.nokia.fi" );
+    mTestPrivate->setLink( link );
+    QCOMPARE( mTest->link(), link );
+
     link = QString();
-    mTest->mLink = QString();
-    mTest->setLink( link );
-    QCOMPARE( mTest->link().isNull(), true ); 
-    
+    mTestPrivate->mLink = QString();
+    mTestPrivate->setLink( link );
+    QCOMPARE( mTest->link().isNull(), true );
+
     link = QString();
-    mTest->mLink = QString( "www.nokia.fi" );
-    mTest->setLink( link );
-    QCOMPARE( mTest->link().isNull(), true ); 
+    mTestPrivate->mLink = QString( "www.nokia.fi" );
+    mTestPrivate->setLink( link );
+    QCOMPARE( mTest->link().isNull(), true );
 }
 
 /*!
- Test setFileName() 
+ Test setFileName()
  */
 void TestMpSongData::testSetFileName()
 {
-    bool result;    
+    bool result;
     QString fileName( "fileName" );
-    mTest->mFileName = QString();
-    result = mTest->setFileName( fileName );
+    mTestPrivate->mFileName = QString();
+    result = mTestPrivate->setFileName( fileName );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->fileName(), fileName ); 
-    
+    QCOMPARE( mTest->fileName(), fileName );
+
     result = false;
     fileName = QString( "fileName" );
-    mTest->mFileName = QString( "fileNameTwo" );
-    result = mTest->setFileName( fileName );
+    mTestPrivate->mFileName = QString( "fileNameTwo" );
+    result = mTestPrivate->setFileName( fileName );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->fileName(), fileName ); 
-    
+    QCOMPARE( mTest->fileName(), fileName );
+
     result = false;
     fileName = QString();
-    mTest->mFileName = QString();
-    result = mTest->setFileName( fileName );
+    mTestPrivate->mFileName = QString();
+    result = mTestPrivate->setFileName( fileName );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->fileName().isNull(), true ); 
-    
+    QCOMPARE( mTest->fileName().isNull(), true );
+
     result = false;
     fileName = QString();
-    mTest->mFileName = QString( "fileNameTwo" );
-    result = mTest->setFileName( fileName );
+    mTestPrivate->mFileName = QString( "fileNameTwo" );
+    result = mTestPrivate->setFileName( fileName );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->fileName().isNull(), true ); 
+    QCOMPARE( mTest->fileName().isNull(), true );
 }
 
 /*!
- Test setMimeType() 
+ Test setMimeType()
  */
 void TestMpSongData::testSetMimeType()
 {
-    bool result;    
+    bool result;
     QString mimeType( "mimeType" );
-    mTest->mMimeType = QString();
-    result = mTest->setMimeType( mimeType );
+    mTestPrivate->mMimeType = QString();
+    result = mTestPrivate->setMimeType( mimeType );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->mimeType(), mimeType ); 
-    
+    QCOMPARE( mTest->mimeType(), mimeType );
+
     result = false;
     mimeType = QString( "mimeType" );
-    mTest->mMimeType = QString( "mimeTypeTwo" );
-    result = mTest->setMimeType( mimeType );
+    mTestPrivate->mMimeType = QString( "mimeTypeTwo" );
+    result = mTestPrivate->setMimeType( mimeType );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->mimeType(), mimeType ); 
-    
+    QCOMPARE( mTest->mimeType(), mimeType );
+
     result = false;
     mimeType = QString();
-    mTest->mMimeType = QString();
-    result = mTest->setMimeType( mimeType );
+    mTestPrivate->mMimeType = QString();
+    result = mTestPrivate->setMimeType( mimeType );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->mimeType().isNull(), true ); 
-    
+    QCOMPARE( mTest->mimeType().isNull(), true );
+
     result = false;
     mimeType = QString();
-    mTest->mMimeType = QString( "mimeTypeTwo" );
-    result = mTest->setMimeType( mimeType );
+    mTestPrivate->mMimeType = QString( "mimeTypeTwo" );
+    result = mTestPrivate->setMimeType( mimeType );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->mimeType().isNull(), true ); 
+    QCOMPARE( mTest->mimeType().isNull(), true );
 }
 
 /*!
@@ -761,67 +826,67 @@ void TestMpSongData::testSetMimeType()
  */
 void TestMpSongData::testSetDuration()
 {
-    bool result;    
+    bool result;
     int duration = 100;
-    mTest->mDuration = QString();
-    result = mTest->setDuration( duration );
+    mTestPrivate->mDuration = QString();
+    result = mTestPrivate->setDuration( duration );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->duration(), QString("01:40") ); 
-    
+    QCOMPARE( mTest->duration(), QString("01:40") );
+
     result = false;
     duration = 100;
-    mTest->mDuration = QString( "02:00" );
-    result = mTest->setDuration( duration );
+    mTestPrivate->mDuration = QString( "02:00" );
+    result = mTestPrivate->setDuration( duration );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->duration(), QString("01:40") ); 
-    
+    QCOMPARE( mTest->duration(), QString("01:40") );
+
     result = false;
     duration = -1;
-    mTest->mDuration = QString();
-    result = mTest->setDuration( duration );
+    mTestPrivate->mDuration = QString();
+    result = mTestPrivate->setDuration( duration );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->duration().isNull(), true ); 
-    
+    QCOMPARE( mTest->duration().isNull(), true );
+
     result = false;
     duration = -1;
-    mTest->mDuration = QString( "02:00" );
-    result = mTest->setDuration( duration );
+    mTestPrivate->mDuration = QString( "02:00" );
+    result = mTestPrivate->setDuration( duration );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->duration().isNull(), true ); 
+    QCOMPARE( mTest->duration().isNull(), true );
 }
 
 /*!
- Test setBitRate() 
+ Test setBitRate()
  */
 void TestMpSongData::testSetBitRate()
 {
-    bool result;    
+    bool result;
     int bitRate = 302000;
-    mTest->mBitRate = QString();
-    result = mTest->setBitRate( bitRate );
+    mTestPrivate->mBitRate = QString();
+    result = mTestPrivate->setBitRate( bitRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->bitRate(), QString::number( bitRate / 1000 ) ); 
-    
+    QCOMPARE( mTest->bitRate(), QString::number( bitRate / 1000 ) );
+
     result = false;
     bitRate = 302000;
-    mTest->mBitRate = QString::number( 412 );
-    result = mTest->setBitRate( bitRate );
+    mTestPrivate->mBitRate = QString::number( 412 );
+    result = mTestPrivate->setBitRate( bitRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->bitRate(), QString::number( bitRate / 1000 ) ); 
-    
+    QCOMPARE( mTest->bitRate(), QString::number( bitRate / 1000 ) );
+
     result = false;
     bitRate = -1;
-    mTest->mBitRate = QString();
-    result = mTest->setBitRate( bitRate );
+    mTestPrivate->mBitRate = QString();
+    result = mTestPrivate->setBitRate( bitRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->bitRate().isNull(), true ); 
-    
+    QCOMPARE( mTest->bitRate().isNull(), true );
+
     result = false;
     bitRate = -1;
-    mTest->mBitRate = QString::number( 412 );
-    result = mTest->setBitRate( bitRate );
+    mTestPrivate->mBitRate = QString::number( 412 );
+    result = mTestPrivate->setBitRate( bitRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->bitRate().isNull(), true ); 
+    QCOMPARE( mTest->bitRate().isNull(), true );
 }
 
 /*!
@@ -829,33 +894,33 @@ void TestMpSongData::testSetBitRate()
  */
 void TestMpSongData::testSetSampleRate()
 {
-    bool result;    
+    bool result;
     int sampleRate = 44100;
-    mTest->mSampleRate = QString();
-    result = mTest->setSampleRate( sampleRate );
+    mTestPrivate->mSampleRate = QString();
+    result = mTestPrivate->setSampleRate( sampleRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->sampleRate(), QString::number( sampleRate ) ); 
-    
+    QCOMPARE( mTest->sampleRate(), QString::number( sampleRate ) );
+
     result = false;
     sampleRate = 44100;
-    mTest->mSampleRate = QString::number( 55000 );
-    result = mTest->setSampleRate( sampleRate );
+    mTestPrivate->mSampleRate = QString::number( 55000 );
+    result = mTestPrivate->setSampleRate( sampleRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->sampleRate(), QString::number( sampleRate ) ); 
-    
+    QCOMPARE( mTest->sampleRate(), QString::number( sampleRate ) );
+
     result = false;
     sampleRate = -1;
-    mTest->mSampleRate = QString();
-    result = mTest->setSampleRate( sampleRate );
+    mTestPrivate->mSampleRate = QString();
+    result = mTestPrivate->setSampleRate( sampleRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->sampleRate().isNull(), true ); 
-    
+    QCOMPARE( mTest->sampleRate().isNull(), true );
+
     result = false;
     sampleRate = -1;
-    mTest->mSampleRate = QString::number( 55000 );
-    result = mTest->setSampleRate( sampleRate );
+    mTestPrivate->mSampleRate = QString::number( 55000 );
+    result = mTestPrivate->setSampleRate( sampleRate );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->sampleRate().isNull(), true ); 
+    QCOMPARE( mTest->sampleRate().isNull(), true );
 }
 
 /*!
@@ -863,19 +928,19 @@ void TestMpSongData::testSetSampleRate()
  */
 void TestMpSongData::testSetSize()
 {
-    bool result;    
+    bool result;
     int size = 4300;
-    mTest->mSize = QString();
-    result = mTest->setSize( size );
+    mTestPrivate->mSize = QString();
+    result = mTestPrivate->setSize( size );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->size(), QString::number( size / 1000 ) ); 
-    
+    QCOMPARE( mTest->size(), QString::number( size ) );
+
     result = false;
     size = 4300;
-    mTest->mSize = QString( "5" );
-    result = mTest->setSize( size );
+    mTestPrivate->mSize = QString( "5" );
+    result = mTestPrivate->setSize( size );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->size(), QString::number( size / 1000 ) );     
+    QCOMPARE( mTest->size(), QString::number( size ) );
 }
 
 /*!
@@ -883,33 +948,33 @@ void TestMpSongData::testSetSize()
  */
 void TestMpSongData::testSetModified()
 {
-    bool result;    
+    bool result;
     QString modified( "5.7.2010 14:35:08" );
-    mTest->mModified = QString();
-    result = mTest->setModified( modified );
+    mTestPrivate->mModified = QString();
+    result = mTestPrivate->setModified( modified );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->modified(), modified ); 
-    
+    QCOMPARE( mTest->modified(), modified );
+
     result = false;
     modified = QString( "5.7.2010 14:35:08" );
-    mTest->mModified = QString( "9.7.2010 16:35:08" );
-    result = mTest->setModified( modified );
+    mTestPrivate->mModified = QString( "9.7.2010 16:35:08" );
+    result = mTestPrivate->setModified( modified );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->modified(), modified ); 
-    
+    QCOMPARE( mTest->modified(), modified );
+
     result = false;
     modified = QString();
-    mTest->mModified = QString();
-    result = mTest->setModified( modified );
+    mTestPrivate->mModified = QString();
+    result = mTestPrivate->setModified( modified );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->modified().isNull(), true ); 
-    
+    QCOMPARE( mTest->modified().isNull(), true );
+
     result = false;
     modified = QString();
-    mTest->mModified = QString( "9.7.2010 16:35:08" );
-    result = mTest->setModified( modified );
+    mTestPrivate->mModified = QString( "9.7.2010 16:35:08" );
+    result = mTestPrivate->setModified( modified );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->modified().isNull(), true ); 
+    QCOMPARE( mTest->modified().isNull(), true );
 }
 
 /*!
@@ -917,33 +982,33 @@ void TestMpSongData::testSetModified()
  */
 void TestMpSongData::testSetCopyright()
 {
-    bool result;    
+    bool result;
     QString copyright( "copyright" );
-    mTest->mCopyright = QString();
-    result = mTest->setCopyright( copyright );
+    mTestPrivate->mCopyright = QString();
+    result = mTestPrivate->setCopyright( copyright );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->copyright(), copyright ); 
-    
+    QCOMPARE( mTest->copyright(), copyright );
+
     result = false;
     copyright = QString( "copyright" );
-    mTest->mCopyright = QString( "copyrightTwo" );
-    result = mTest->setCopyright( copyright );
+    mTestPrivate->mCopyright = QString( "copyrightTwo" );
+    result = mTestPrivate->setCopyright( copyright );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->copyright(), copyright ); 
-    
+    QCOMPARE( mTest->copyright(), copyright );
+
     result = false;
     copyright = QString();
-    mTest->mCopyright = QString();
-    result = mTest->setCopyright( copyright );
+    mTestPrivate->mCopyright = QString();
+    result = mTestPrivate->setCopyright( copyright );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->copyright().isNull(), true ); 
-    
+    QCOMPARE( mTest->copyright().isNull(), true );
+
     result = false;
     copyright = QString();
-    mTest->mCopyright = QString( "copyrightTwo" );
-    result = mTest->setCopyright( copyright );
+    mTestPrivate->mCopyright = QString( "copyrightTwo" );
+    result = mTestPrivate->setCopyright( copyright );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->copyright().isNull(), true ); 
+    QCOMPARE( mTest->copyright().isNull(), true );
 }
 
 /*!
@@ -951,33 +1016,33 @@ void TestMpSongData::testSetCopyright()
  */
 void TestMpSongData::testSetMusicURL()
 {
-    bool result;    
+    bool result;
     QString musicURL( "musicURL" );
-    mTest->mMusicURL = QString();
-    result = mTest->setMusicURL( musicURL );
+    mTestPrivate->mMusicURL = QString();
+    result = mTestPrivate->setMusicURL( musicURL );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->musicURL(), musicURL ); 
-    
+    QCOMPARE( mTest->musicURL(), musicURL );
+
     result = false;
     musicURL = QString( "musicURL" );
-    mTest->mMusicURL = QString( "musicURLTwo" );
-    result = mTest->setMusicURL( musicURL );
+    mTestPrivate->mMusicURL = QString( "musicURLTwo" );
+    result = mTestPrivate->setMusicURL( musicURL );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->musicURL(), musicURL ); 
-    
+    QCOMPARE( mTest->musicURL(), musicURL );
+
     result = false;
     musicURL = QString();
-    mTest->mMusicURL = QString();
-    result = mTest->setMusicURL( musicURL );
+    mTestPrivate->mMusicURL = QString();
+    result = mTestPrivate->setMusicURL( musicURL );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->musicURL().isNull(), true ); 
-    
+    QCOMPARE( mTest->musicURL().isNull(), true );
+
     result = false;
     musicURL = QString();
-    mTest->mMusicURL = QString( "musicURLTwo" );
-    result = mTest->setMusicURL( musicURL );
+    mTestPrivate->mMusicURL = QString( "musicURLTwo" );
+    result = mTestPrivate->setMusicURL( musicURL );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->musicURL().isNull(), true ); 
+    QCOMPARE( mTest->musicURL().isNull(), true );
 }
 
 /*!
@@ -985,116 +1050,86 @@ void TestMpSongData::testSetMusicURL()
  */
 void TestMpSongData::testSetDrmProtected()
 {
-    bool result;    
+    bool result;
     bool drmProtected = false;
-    mTest->mDrmProtected = true;
-    result = mTest->setDrmProtected( drmProtected );
+    mTestPrivate->mDrmProtected = true;
+    result = mTestPrivate->setDrmProtected( drmProtected );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->isDrmProtected(), false ); 
-    
+    QCOMPARE( mTest->isDrmProtected(), false );
+
     result = false;
     drmProtected = false;
-    mTest->mDrmProtected = false;
-    result = mTest->setDrmProtected( drmProtected );
+    mTestPrivate->mDrmProtected = false;
+    result = mTestPrivate->setDrmProtected( drmProtected );
     QCOMPARE( result, false );
-    QCOMPARE( mTest->isDrmProtected(), false ); 
-    
+    QCOMPARE( mTest->isDrmProtected(), false );
+
     result = false;
     drmProtected = true;
-    mTest->mDrmProtected = true;
-    result = mTest->setDrmProtected( drmProtected);
+    mTestPrivate->mDrmProtected = true;
+    result = mTestPrivate->setDrmProtected( drmProtected);
     QCOMPARE( result, false );
-    QCOMPARE( mTest->isDrmProtected(), true ); 
-    
+    QCOMPARE( mTest->isDrmProtected(), true );
+
     result = false;
     drmProtected = true;
-    mTest->mDrmProtected = false;
-    result = mTest->setDrmProtected( drmProtected );
+    mTestPrivate->mDrmProtected = false;
+    result = mTestPrivate->setDrmProtected( drmProtected );
     QCOMPARE( result, true );
-    QCOMPARE( mTest->isDrmProtected(), true ); 
+    QCOMPARE( mTest->isDrmProtected(), true );
 }
 
 
 /*!
- Test setAlbumArtUri() 
+ Test setAlbumArtUri()
  */
-void TestMpSongData::testSetAlbumArtUri() 
+void TestMpSongData::testSetAlbumArtUri()
 {
     const QString albumArtUri( "AlbumArt" );
     const QString albumArtUriEmpty( "" );
-    
+
     QSignalSpy spy( mTest, SIGNAL( albumArtReady() ) );
-    
+
     QVERIFY( spy.isValid() );
     QCOMPARE( spy.count(), 0 );
-    
-    mTest->setAlbumArtUri( albumArtUri );
+
+    mTestPrivate->setAlbumArtUri( albumArtUri );
     QCOMPARE( spy.count(), 0 );
-    
-    mTest->mThumbnailManager->mGetThumbFails = true;
-    mTest->setAlbumArtUri( albumArtUri );
+
+    mTestPrivate->mThumbnailManager->mGetThumbFails = true;
+    mTestPrivate->setAlbumArtUri( albumArtUri );
     QCOMPARE( spy.count(), 1 );
-    QCOMPARE( mTest->mAlbumArt, mTest->mDefaultAlbumArt );
-    
-    mTest->setAlbumArtUri( albumArtUriEmpty );
+    QCOMPARE( mTestPrivate->mAlbumArt, mTestPrivate->mDefaultAlbumArt );
+
+    mTestPrivate->setAlbumArtUri( albumArtUriEmpty );
     QCOMPARE( spy.count(), 2 );
-    QCOMPARE( mTest->mAlbumArt, mTest->mDefaultAlbumArt );  
+    QCOMPARE( mTestPrivate->mAlbumArt, mTestPrivate->mDefaultAlbumArt );
 }
 
 /*!
- Test thumbnailReady()() 
+ Test thumbnailReady()
  */
 void TestMpSongData::testThumbnailReady()
 {
    connect( this, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-           mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );    
+            mTest->mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)) );
 
    QSignalSpy spy(mTest, SIGNAL(albumArtReady()));
    QVERIFY( spy.isValid() );
    QCOMPARE( spy.count(), 0 );
-   
+
    QPixmap dummyAlbumArt(":/playbackviewicons/someAlbumArt.png" );
-   
+
    emit thumbnailReady(dummyAlbumArt, 0, -1, 0);
    QCOMPARE( spy.count(), 1 );
    HbIcon dummyAlbumArtCompare;
    mTest->albumArt(dummyAlbumArtCompare);
    QCOMPARE( dummyAlbumArtCompare.isNull(), false );
-   
+
    emit thumbnailReady(dummyAlbumArt, 0, -1 , 1);
    QCOMPARE( spy.count(), 2 );
    mTest->albumArt(dummyAlbumArtCompare);
    QCOMPARE( dummyAlbumArtCompare.isNull(), false );
-   
+
 }
 
-
-/*!
- Test commitPlaybackInfo() 
- */
-void TestMpSongData::testCommitPlaybackInfo() 
-    {
-    QSignalSpy spy( mTest, SIGNAL( playbackInfoChanged() ) );
-    
-    QVERIFY( spy.isValid() );
-    QCOMPARE( spy.count(), 0 );
-    
-    mTest->commitPlaybackInfo();
-    QCOMPARE( spy.count(), 1 );
-    
-    }
-
-/*!
- Test commitSongDetailInfo() 
- */
-void TestMpSongData::testCommitSongDetailInfo() 
-    {
-    QSignalSpy spy( mTest, SIGNAL( songDetailInfoChanged() ) );
-    
-    QVERIFY( spy.isValid() );
-    QCOMPARE( spy.count(), 0 );
-    
-    mTest->commitSongDetailInfo();
-    QCOMPARE( spy.count(), 1 );
-    
-    }

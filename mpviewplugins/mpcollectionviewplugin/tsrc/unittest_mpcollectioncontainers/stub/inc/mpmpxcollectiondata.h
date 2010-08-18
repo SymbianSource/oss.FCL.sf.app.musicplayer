@@ -51,6 +51,7 @@ public:
     QString itemData( int index, MpMpxCollectionData::DataType type ) const;
 
     bool setCurrentAlbum( int index );
+    int albumSongsCount() const;
 
     const CMPXMedia& containerMedia();
 
@@ -60,6 +61,7 @@ public:
     bool                    mMediaSet;
     TCollectionContext      mContext;
     int                     mCount;
+    int                     mAlbumSongsCount;
     int                     mCurrentAlbumIndex;
     bool                    mCurrentAlbumAvailable;
     bool                    mReturnCollectionTitle;

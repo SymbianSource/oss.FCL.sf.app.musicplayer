@@ -16,6 +16,8 @@
 */
 
 #include <QGraphicsSceneMouseEvent>
+#include <QTranslator>
+#include <QLocale>
 
 #include "stub/inc/hblabel.h"
 #include "stub/inc/qdesktopservices.h"
@@ -55,13 +57,15 @@ int main(int argc, char *argv[])
 }
 
 TestMpMtpInfoLink::TestMpMtpInfoLink()
-    : mTest( 0 )
+    : mTest(0),
+      mMpTranslator(0)
 {
 }
 
 TestMpMtpInfoLink::~TestMpMtpInfoLink()
 {
     delete mTest;
+    delete mMpTranslator;
 }
 
 /*!
@@ -69,6 +73,15 @@ TestMpMtpInfoLink::~TestMpMtpInfoLink()
  */
 void TestMpMtpInfoLink::initTestCase()
 {
+    QString lang = QLocale::system().name();
+    QString path = QString("z:/resource/qt/translations/");
+    bool translatorLoaded = false;
+
+    mMpTranslator = new QTranslator(this);
+    translatorLoaded = mMpTranslator->load(path + "musicplayer_" + lang);
+    if ( translatorLoaded ) {
+        qApp->installTranslator(mMpTranslator);
+    }
 }
 
 /*!

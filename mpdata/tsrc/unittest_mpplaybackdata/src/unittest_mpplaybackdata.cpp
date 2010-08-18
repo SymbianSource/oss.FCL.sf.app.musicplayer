@@ -102,7 +102,6 @@ void TestMpPlaybackData::testConstructor()
     QCOMPARE(mTest->mThumbnailManager->getInitCounter(), 1);
     QVERIFY(mTest->mDuration == 0);
     QVERIFY(mTest->mPosition == 0);
-    QVERIFY(mTest->mDefaultAlbumArt != 0);
 
 }
 
@@ -228,18 +227,6 @@ void TestMpPlaybackData::testSetUri()
 void TestMpPlaybackData::testSetAlbumArtUri()
 {
     QSignalSpy spy(mTest, SIGNAL(albumArtReady()));
-    //Empty string
-    mTest->setAlbumArtUri(QString(""));
-    QCOMPARE(mTest->mAlbumArt, mTest->mDefaultAlbumArt);
-    QCOMPARE(spy.count(),1);
-    spy.clear();
-    
-    //Request failed
-    mTest->mThumbnailManager->mGetThumbFails = true;
-    mTest->setAlbumArtUri(QString("AlbumArt"));
-    QCOMPARE(mTest->mAlbumArt, mTest->mDefaultAlbumArt);
-    QCOMPARE(spy.count(),1);
-    spy.clear();
     
     //Succesful requests
     mTest->mThumbnailManager->mGetThumbFails = false;
@@ -269,21 +256,6 @@ void TestMpPlaybackData::testThumbnailReady()
     QSignalSpy spy(mTest, SIGNAL(albumArtReady()));
     QPixmap albumArt(100,100);
     HbIcon albumArtIcon;
-   
-    //Error
-    mTest->thumbnailReady(albumArt,temp,KUndefined,KUndefined);
-    QCOMPARE(mTest->mAlbumArt, mTest->mDefaultAlbumArt); 
-    QCOMPARE(mTest->mReqId, KUndefined);
-    QCOMPARE(spy.count(),1);
-    spy.clear();
-    
-    //Wrong id
-    mTest->mReqId = 1;
-    mTest->thumbnailReady(albumArt,temp,KUndefined,0);
-    QCOMPARE(mTest->mAlbumArt, mTest->mDefaultAlbumArt); 
-    QCOMPARE(mTest->mReqId, KUndefined);
-    QCOMPARE(spy.count(),1);
-    spy.clear();
     
     //Update album art
     mTest->mReqId = 1;

@@ -64,4 +64,6 @@ LIBRARY         mmcommon.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         mpxaudioeffectengine.lib
 
+SMPSAFE
+
 // End of File

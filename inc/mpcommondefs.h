@@ -20,6 +20,8 @@
 #ifndef MPCOMMONDEFS_H
 #define MPCOMMONDEFS_H
 
+#include <QMetaType>
+
 namespace MpCommon
 {
     // UID definition
@@ -40,7 +42,8 @@ namespace MpCommon
         ActivateCollectionView,
         ActivatePlaybackView,
         ActivateSettingsView,
-        ActivateDetailsView
+        ActivateDetailsView,
+        ActivatePreviousView
     };
 
     /*!
@@ -62,6 +65,18 @@ namespace MpCommon
         TBoneThumb,
         MediaWallThumb,
     };
+    
+    /*!
+    Volume property, used in MpMpxPlaybackFramework and MpVolumeSlider.
+    */
+    enum MpVolumeProperty{
+        MaxVolume,
+        Volume,
+        MuteState
+    };
 }
+
+    // Register MpVolumeProperty so can be used in signal and slot connection
+    Q_DECLARE_METATYPE( MpCommon::MpVolumeProperty )
 
 #endif	// MPCOMMONDEFS_H

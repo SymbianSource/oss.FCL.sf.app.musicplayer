@@ -173,24 +173,26 @@ void MpCollectionTBoneListDataModel::refreshModel()
 void MpCollectionTBoneListDataModel::updateSong()
 {
     TX_ENTRY
-    int newSongId = mPlaybackData->id();
-    
-    if ( mCurrentSongId && newSongId != mCurrentSongId) {
-        //Attempt to remove old song icon.
-        QModelIndex oldSongIndex;
-        oldSongIndex = index( mCollectionData->albumSongIndex( mCurrentSongId ) );
-        if ( oldSongIndex.isValid() ) {
-            emit dataChanged( oldSongIndex, oldSongIndex );
-        }       
-    }
+    if( mPlaybackActive ) {
+        int newSongId = mPlaybackData->id();
 
-    //Attempt to update current song data and state.
-    QModelIndex songIndex;
-    songIndex = index( mCollectionData->albumSongIndex( newSongId ) );
-    if ( songIndex.isValid() ) {
-        emit dataChanged( songIndex, songIndex );
+        if ( mCurrentSongId && newSongId != mCurrentSongId) {
+            //Attempt to remove old song icon.
+            QModelIndex oldSongIndex;
+            oldSongIndex = index( mCollectionData->albumSongIndex( mCurrentSongId ) );
+            if ( oldSongIndex.isValid() ) {
+               emit dataChanged( oldSongIndex, oldSongIndex );
+            } 
+        }
+
+        //Attempt to update current song data and state.
+        QModelIndex songIndex;
+        songIndex = index( mCollectionData->albumSongIndex( newSongId ) );
+        if ( songIndex.isValid() ) {
+            emit dataChanged( songIndex, songIndex );
+        }
+        mCurrentSongId = newSongId;
     }
-    mCurrentSongId = newSongId;
     TX_EXIT
 }
 

@@ -43,7 +43,9 @@ public:
     virtual void setModel(QAbstractItemModel *model);
     void scrollTo(const QModelIndex &index);
     QModelIndex currentIndex() const;
-
+    QSizeF itemSize() const;
+    void setDefaultImage(QImage defaultImage);
+    
 signals:
 
     void scrollingEnded();

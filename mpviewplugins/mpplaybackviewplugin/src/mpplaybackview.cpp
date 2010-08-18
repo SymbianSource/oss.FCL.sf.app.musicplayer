@@ -119,8 +119,6 @@ void MpPlaybackView::initializeView()
     connect ( mWindow, SIGNAL( viewReady() ), this, SLOT( connectButtons() ) );
     
     if ( mViewMode == MpCommon::DefaultView ) {
-        mEqualizerWidget = new MpEqualizerWidget();
-        mEqualizerWidget->prepareDialog();
         // Observe changes in settings.
         connect( MpSettingsManager::instance(), SIGNAL( shuffleChanged( bool ) ),
                  this, SLOT( shuffleChanged( bool ) ) );
@@ -268,6 +266,7 @@ void MpPlaybackView::playbackStateChanged()
 void MpPlaybackView::flip()
 {
     TX_ENTRY
+    mMpEngine->retrieveSongDetails();
     emit command( MpCommon::ActivateDetailsView );
     TX_EXIT
 }
@@ -569,11 +568,12 @@ void MpPlaybackView::connectButtons()
 void MpPlaybackView::showEqualizerDialog()
 {
     TX_ENTRY
-
-    if( mEqualizerWidget )
-    {
-        mEqualizerWidget->show();
+    if ( !mEqualizerWidget ){
+        mEqualizerWidget = new MpEqualizerWidget();
+        mEqualizerWidget->prepareDialog();
     }
+	
+	mEqualizerWidget->show();
 
     TX_EXIT
 }

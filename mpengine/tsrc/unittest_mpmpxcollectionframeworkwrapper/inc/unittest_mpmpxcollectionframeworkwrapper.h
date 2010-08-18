@@ -23,6 +23,7 @@
 class MpMpxCollectionFrameworkWrapper;
 class MpMpxCollectionFrameworkWrapperPrivate;
 class CMPXMedia;
+class MpSongData;
 
 class TestMpMpxCollectionFrameworkWrapper : public QObject
 {
@@ -53,6 +54,7 @@ private slots:
     void testHandleOpenPlaylist();
     void testHandleOperationComplete();
     void testHandleIsolatedOpen();
+    void testHandleIsolatedOpenRestorePath();
     void testOpenCollection();
     void testDoIncrementalOpen();
     void testReopenCollection();
@@ -80,6 +82,9 @@ private slots:
     void testSetRepeatFeatureEnabled();
     void testSetShuffleFeatureEnabled();
     void testCreatePlaybackUtilityL();
+    void testSavePath();
+    void testRestorePath();
+	void testRetrieveSongDetails();
 
 private:
 
@@ -88,6 +93,7 @@ private:
     CMPXMedia                                 *iMediaTestData;
     CMPXMedia                                 *iPlaylistsTestData;
     CMPXMedia                                 *iAlbumsTestData;
+    MpSongData                                *mSongData;
 
 };
 

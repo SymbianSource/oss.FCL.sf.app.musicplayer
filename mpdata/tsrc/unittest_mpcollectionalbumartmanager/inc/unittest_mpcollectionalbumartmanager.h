@@ -19,7 +19,7 @@
 #define TESTMPCOLLECTIONALBUMARTMANAGER_H
 
 #include <QtTest/QtTest>
-#include <QIcon>
+#include <hbicon.h>
 
 class MpCollectionAlbumArtManager;
 class MpMpxCollectionData;
@@ -66,7 +66,7 @@ private:
 
     MpCollectionAlbumArtManager *mTest;
     MpMpxCollectionData         *mStubData;
-    QIcon                       mIcon;
+    HbIcon                       mIcon;
 
 };
 

@@ -11,19 +11,22 @@
 #
 # Contributors:
 #
-# Description: Unit test for mpaudioeffectsframeworkwrapper
+# Description: mpaudioeffectsframeworkwrapper unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpaudioeffectsframeworkwrapper
 TARGET.CAPABILITY = CAP_APPLICATION
 
+symbian: { 
+    MMP_RULES += SMPSAFE
+}
+
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 HEADERS += inc/unittest_mpaudioeffectsframeworkwrapper.h \

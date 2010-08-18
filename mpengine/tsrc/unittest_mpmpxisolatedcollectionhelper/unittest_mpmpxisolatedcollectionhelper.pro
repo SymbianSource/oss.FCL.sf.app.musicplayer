@@ -11,29 +11,33 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpmpxisolatedcollectionhelper unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpmpxisolatedcollectionhelper
 TARGET.CAPABILITY = CAP_APPLICATION
 
+symbian: { 
+    MMP_RULES += SMPSAFE
+}
+
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \
-    -lfbscli.dll \
-    -lmpxcommon.dll \
-    -lmpxcollectionutility.dll
+        -lfbscli.dll \
+        -lmpxcommon.dll \
+        -lmpxcollectionutility.dll
 
 HEADERS += inc/unittest_mpmpxisolatedcollectionhelper.h \
-    ../../inc/mpmpxisolatedcollectionhelper.h \
-    stub/inc/mpxcollectionopenutility.h
+          ../../inc/mpmpxisolatedcollectionhelper.h \
+          stub/inc/mpxcollectionopenutility.h
 
 SOURCES += src/unittest_mpmpxisolatedcollectionhelper.cpp \
-        stub/src/mpxcollectionopenutility.cpp
+          stub/src/mpxcollectionopenutility.cpp
+

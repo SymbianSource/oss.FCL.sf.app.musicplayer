@@ -29,7 +29,8 @@ MMPXPlaybackUtility::MMPXPlaybackUtility():iShuffle(-1),
                                            iRepeat(-1),
                                            iProperty(EPbPropertyVolume),
                                            iPlay(EFalse),
-                                           iCurrentPath(0)
+                                           iCurrentPath(0),
+                                           iCurrentPlaylist(0)
 {
 }
 
@@ -91,6 +92,22 @@ void MMPXPlaybackUtility::SetL(TMPXPlaybackProperty aProperty, TInt aValue)
         TX_LOG_ARGS("PbUtility repeat set to "<< aValue);
     }    
     
+}
+
+/*!
+ Stub function.
+*/
+CMPXCollectionPlaylist* MMPXPlaybackUtility::PlaylistL()
+{
+    return iCurrentPlaylist;
+}
+
+/*!
+ Stub function.
+*/
+MMPXSource* MMPXPlaybackUtility::Source()
+{
+    return this;
 }
 
 //end of file

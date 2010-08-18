@@ -318,6 +318,8 @@ void CMPXM3uPlaylistExporter::AddLineToArrayL()
         // Convert line from Unicode to UTF-8
         // UTF-8 encoded character may consume several bytes =>
         // multiply the descriptor length in order to prevent overflow.
+        // coverity[incorrect_multiplication]
+        // coverity[buffer_alloc]
         HBufC8* line = HBufC8::NewLC(iLine->Length() * KMPXM3UUtf8ConvMultiplier);
 
         TPtr8 ptr = line->Des();
@@ -488,7 +490,7 @@ void CMPXM3uPlaylistExporter::WritePlaylistToFileL()
     CleanupClosePushL(file);
 
     // Calculate the increase in the playlist file size
-    TInt oldSize;
+    TInt oldSize = 0;
     User::LeaveIfError(file.Size(oldSize));
     TInt sizeIncr = iPlaylistBuf->Size() - oldSize;
 

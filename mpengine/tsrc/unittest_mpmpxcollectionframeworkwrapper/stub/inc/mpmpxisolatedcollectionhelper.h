@@ -22,22 +22,29 @@
 class CMPXCollectionPath;
 class CMPXMedia;
 
+const TInt KIncrementalNullOffset = 0;
+
 class MMpMpxIsolatedCollectionHelperObserver
 {
 public:
 
     virtual void HandleIsolatedOpenL( const CMPXMedia& aEntries, 
             TInt aError ) = 0;
+    virtual void HandleIsolatedOpenRestorePathL( const CMPXCollectionPath& aPath,
+            TInt aError ) = 0;
 };
 
 class CMpMpxIsolatedCollectionHelper : public CBase
 {
 public:
-
+    enum MpOpenMode{
+            DefaultMode = 0,
+            RestorePathMode 
+        };
     static CMpMpxIsolatedCollectionHelper* NewL( MMpMpxIsolatedCollectionHelperObserver* aObserver );
     static CMpMpxIsolatedCollectionHelper* NewLC( MMpMpxIsolatedCollectionHelperObserver* aObserver );
     virtual ~CMpMpxIsolatedCollectionHelper();
-    void OpenCollectionL( CMPXCollectionPath& aPath );
+    void OpenCollectionL( CMPXCollectionPath& aPath, TInt aIndex = KIncrementalNullOffset, MpOpenMode aMode = DefaultMode );
     
 private:
     CMpMpxIsolatedCollectionHelper( MMpMpxIsolatedCollectionHelperObserver* aObserver );
@@ -47,6 +54,7 @@ public:
     TBool          iOpen;
     TInt           iOpenCount;
     TInt           iCountPath;
+    MpOpenMode     iMode;
 
 };
 

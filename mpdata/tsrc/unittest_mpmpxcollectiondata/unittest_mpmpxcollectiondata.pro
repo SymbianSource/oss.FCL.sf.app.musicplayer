@@ -11,19 +11,18 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpmpxcollectiondata unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpmpxcollectiondata
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lestor.dll \
@@ -36,3 +35,4 @@ SOURCES += src/unittest_mpmpxcollectiondata.cpp \
            ../../src/mpmpxcollectiondata.cpp
 
 DEFINES += BUILD_MPDATA_LIB
+

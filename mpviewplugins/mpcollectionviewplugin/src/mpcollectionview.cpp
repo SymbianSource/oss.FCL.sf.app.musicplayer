@@ -29,6 +29,7 @@
 #include <hblabel.h>
 #include <hblistview.h>
 #include <hbscrollbar.h>
+#include <hbstyleloader.h>
 
 #include "mpcollectionview.h"
 #include "mpcollectiondocumentloader.h"
@@ -156,10 +157,12 @@ void MpCollectionView::initializeView()
 
     // Create softkey actions
     mSoftKeyQuit = new HbAction( Hb::QuitNaviAction, this );
-    connect( mSoftKeyQuit, SIGNAL( triggered() ), this, SLOT( back() ) );
+    connect( mSoftKeyQuit, SIGNAL( triggered() ), 
+	         this, SLOT( back() ) );
 
     mSoftKeyBack = new HbAction( Hb::BackNaviAction, this );
-    connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
+    connect( mSoftKeyBack, SIGNAL( triggered() ), 
+	         this, SLOT( back() ) );
 
     mMpEngine = MpEngineFactory::sharedEngine();
 
@@ -177,8 +180,12 @@ void MpCollectionView::initializeView()
     mCollectionData = mMpEngine->collectionData();
     qRegisterMetaType<TCollectionContext>("TCollectionContext");
     connect( mCollectionData, SIGNAL( contextChanged( TCollectionContext ) ), 
-             this, SLOT( setContext( TCollectionContext ) ), Qt::QueuedConnection );
+             this, SLOT( setContext( TCollectionContext ) ), 
+			 Qt::QueuedConnection );
     mCollectionDataModel = new MpCollectionDataModel( mCollectionData );
+    
+    connect( mCollectionDataModel, SIGNAL( dataReloaded() ),
+             this, SLOT( containerDataChanged() ) );
 
     mDocumentLoader = new MpCollectionDocumentLoader();
     bool ok = false;
@@ -196,7 +203,8 @@ void MpCollectionView::initializeView()
             attachNowPlayingBanner( false );
         }
         else {
-            connect( mNowPlayingBanner, SIGNAL( clicked() ), this, SLOT( startPlaybackView() ) );
+            connect( mNowPlayingBanner, SIGNAL( clicked() ), 
+				     this, SLOT( startPlaybackView() ) );
             connect( mNowPlayingBanner, SIGNAL( playbackAttachmentChanged( bool ) ),
                      this, SLOT( attachNowPlayingBanner( bool ) ) );
             attachNowPlayingBanner( mNowPlayingBanner->isBannerAttached() );
@@ -219,6 +227,11 @@ void MpCollectionView::initializeView()
         Q_ASSERT_X( ok, "MpCollectionView::initializeView", "invalid xml file" );
     }
 
+    // Load custom tbone css here so we do it only once.
+    HbStyleLoader::registerFilePath(":/css/tbonemediawall.css");
+    HbStyleLoader::registerFilePath(":/css/tbonemediawall_color.css");
+    HbStyleLoader::registerFilePath(":/css/tbonemediawall.hgmediawall.widgetml");
+        
     mContainerFactory = new MpCollectionContainerFactory( this, mDocumentLoader );
     
     mMpPopupHandler = new MpCollectionPopupHandler( this );
@@ -312,6 +325,18 @@ void MpCollectionView::openItem( int index )
     QModelIndex modelIndex;
     modelIndex = mCollectionDataModel->index( index );
     qobject_cast<MpCollectionListContainer*>(mCollectionContainer)->itemActivated( modelIndex );
+    TX_EXIT
+}
+
+/*!
+ Shows the detailed metadata information for the song with \a index.
+ It activates details view.
+ */
+void MpCollectionView::showItemDetails( int index )
+{
+    TX_ENTRY_ARGS( "index = " << index );
+    mMpEngine->retrieveSongDetails( index );
+    emit command( MpCommon::ActivateDetailsView );
     TX_EXIT
 }
 
@@ -794,6 +819,18 @@ void MpCollectionView::setShuffleAction( bool enabled )
 }
 
 /*!
+ Slot to be called when a container data is changed/updated.
+ */
+void MpCollectionView::containerDataChanged()
+{
+    TX_ENTRY
+    if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
+         updateToolBar();
+    }
+    TX_EXIT
+}
+
+/*!
  \internal
  Sets the main ( default ) toolbar for the view.
  */
@@ -960,25 +997,12 @@ void MpCollectionView::updateMenu()
                 else {
                     menuAction->setDisabled( true );
                 }
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             case ECollectionContextArtists:
+            case ECollectionContextArtistAlbums:
             case ECollectionContextAlbums:
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );                
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             case ECollectionContextArtistAlbumsTBone:
             case ECollectionContextAlbumsTBone:
@@ -994,6 +1018,7 @@ void MpCollectionView::updateMenu()
                 else {
                     menuAction->setDisabled( true );
                 }
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             case ECollectionContextArtistAllSongs:
                 mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
@@ -1008,6 +1033,7 @@ void MpCollectionView::updateMenu()
                 else {
                     menuAction->setDisabled( true );
                 }
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             case ECollectionContextPlaylists:
                 menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
@@ -1017,7 +1043,7 @@ void MpCollectionView::updateMenu()
                 else {
                     menuAction->setDisabled( true );
                 }
-                connect( myMenu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL(triggered()), this, SLOT(exit()) );
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             case ECollectionContextPlaylistSongs:
                 mShuffleAction = myMenu->addAction( hbTrId( "txt_mus_opt_shuffle" ) );
@@ -1034,6 +1060,7 @@ void MpCollectionView::updateMenu()
                         menuAction->setDisabled( true );
                     }
                 }
+                addDefaultMenuOptions( myMenu, true, true );
                 break;
             default:
                 break;
@@ -1044,13 +1071,7 @@ void MpCollectionView::updateMenu()
             case ECollectionContextAllSongs:
             case ECollectionContextArtists:
             case ECollectionContextAlbums:
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
-                if ( !mUsbBlocked ) {
-                    connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
-                }
-                else {
-                    menuAction->setDisabled( true );
-                }
+                addDefaultMenuOptions( myMenu, true, false );
                 break;
             default:
                 break;
@@ -1058,6 +1079,31 @@ void MpCollectionView::updateMenu()
     }
 
     setMenu( myMenu );
+    TX_EXIT
+}
+
+/*!
+ \internal
+ Add default options to a specific menu.
+ */
+void MpCollectionView::addDefaultMenuOptions( HbMenu *menu, bool optRefresh, bool optExit )
+{
+    TX_ENTRY
+    if ( menu ) {
+        HbAction *menuAction;
+        if( optRefresh ) {
+            menuAction = menu->addAction( hbTrId( "txt_mus_opt_refresh_library" ) );
+            if ( !mUsbBlocked ) {
+                connect( menuAction, SIGNAL( triggered() ), mMpEngine, SLOT( refreshLibrary() ) );
+            }
+            else {
+                menuAction->setDisabled( true );
+                }
+        }
+        if ( optExit ) {
+            connect( menu->addAction(hbTrId("txt_common_opt_exit")), SIGNAL( triggered() ), this, SLOT( exit() ) );
+        }
+    }
     TX_EXIT
 }
 

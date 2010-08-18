@@ -520,7 +520,7 @@ void CMPXInMemoryPlugin::DoAddL(
         iTemporaryData.Compress();
         }
     // Push onto list
-    iEmbeddedContext.Append( context );
+    iEmbeddedContext.AppendL( context );
 
     CMPXMedia* copy = CMPXMedia::NewL();
     *copy = aNewMedia;

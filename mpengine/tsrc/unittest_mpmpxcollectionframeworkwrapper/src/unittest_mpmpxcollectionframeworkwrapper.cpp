@@ -20,6 +20,7 @@
 #include <mpxmedia.h>
 #include <mpxcollectionplaylist.h>
 
+#include "mpcommondefs.h"
 #include "unittest_mpmpxcollectionframeworkwrapper.h"
 #include "stub/inc/mpmpxcollectiondata.h"
 #include "stub/inc/mpxcollectionopenutility.h"
@@ -28,6 +29,7 @@
 #include "stub/inc/mpxplaybackutility.h"
 #include "stub/inc/mpmpxisolatedcollectionhelper.h"
 #include "stub/inc/mpsettingsmanager.h"
+#include "stub/inc/mpsongdata.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -35,10 +37,10 @@
 #include "mpmpxcollectionframeworkwrapper_p.h"
 #undef private
 
-//This so we can test private functions
+// This so we can test private functions
 #include "mpmpxcollectionframeworkwrapper_p.cpp"
 
-//Test data
+// Test data
 struct TTestAttrs
     {
     const wchar_t* GeneralTitle;
@@ -86,12 +88,14 @@ TestMpMpxCollectionFrameworkWrapper::TestMpMpxCollectionFrameworkWrapper()
     : mTest(0),
       iMediaTestData(0),
       iPlaylistsTestData(0),
-      iAlbumsTestData(0)
+      iAlbumsTestData(0),
+      mSongData(0)
 {
 }
 
 TestMpMpxCollectionFrameworkWrapper::~TestMpMpxCollectionFrameworkWrapper()
 {
+    delete mSongData;
     delete mTest;
 }
 
@@ -100,6 +104,7 @@ TestMpMpxCollectionFrameworkWrapper::~TestMpMpxCollectionFrameworkWrapper()
  */
 void TestMpMpxCollectionFrameworkWrapper::initTestCase()
 {
+    mSongData = new MpSongData();
 }
 
 /*!
@@ -114,7 +119,7 @@ void TestMpMpxCollectionFrameworkWrapper::cleanupTestCase()
  */
 void TestMpMpxCollectionFrameworkWrapper::init()
 {
-    mTest = new MpMpxCollectionFrameworkWrapper();
+    mTest = new MpMpxCollectionFrameworkWrapper(TUid::Uid(MpCommon::KMusicPlayerUid), mSongData);
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -296,6 +301,63 @@ void TestMpMpxCollectionFrameworkWrapper::testHandleIsolatedOpen()
     QCOMPARE(spy.count(), 2);
 }
 
+/*!
+ Tests HandleIsolatedOpenRestorePath.
+ */
+void TestMpMpxCollectionFrameworkWrapper::testHandleIsolatedOpenRestorePath()
+{
+    QSignalSpy spy(mTest, SIGNAL(restorePathFailed()));
+    CMPXCollectionPath *testPath = CMPXCollectionPath::NewL();
+    mTestPrivate->iIsolatedCollectionHelper = CMpMpxIsolatedCollectionHelper::NewL( mTestPrivate );
+    RArray<TMPXItemId> pathItems;
+    testPath->AppendL(5);
+    for (int i = 0; i < 5; i++ ) {
+        pathItems.AppendL( TMPXItemId( 300 + i ) );
+    }
+    testPath->AppendL( pathItems.Array() );
+    
+    //Restored path item is in the same index
+    mTestPrivate->iRestorePathIndex = 3;
+    mTestPrivate->iRestorePathIndexId = TMPXItemId( 303 );
+    mTestPrivate->HandleIsolatedOpenRestorePathL( *testPath, KErrNone );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(EFalse));
+    QCOMPARE(spy.count(), 0);
+    
+    //Restored path item is not in same index, go to start of path
+    mTestPrivate->iRestorePathIndex = 2;
+    mTestPrivate->iRestorePathIndexId = TMPXItemId( 303 );
+    mTestPrivate->HandleIsolatedOpenRestorePathL( *testPath, KErrNone );
+    
+    QCOMPARE( mTestPrivate->iRestorePathIndex, 0 );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(ETrue));
+    QCOMPARE(spy.count(), 0);
+    
+    //Restored path has no items (MMC removed)
+    testPath->Reset();
+    mTestPrivate->iIsolatedCollectionHelper->iOpen = EFalse;
+    mTestPrivate->HandleIsolatedOpenRestorePathL( *testPath, KErrNone );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(ETrue));
+    QCOMPARE(spy.count(), 0);
+  
+    //Restored path has no items, go back to collection view
+    mTestPrivate->iIsolatedCollectionHelper->iOpen = EFalse;
+    mTestPrivate->iIsolatedCollectionHelper->iMode = CMpMpxIsolatedCollectionHelper::DefaultMode;
+    mTestPrivate->iRestoreDefaultPath = true;
+    mTestPrivate->HandleIsolatedOpenRestorePathL( *testPath, KErrNone );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::DefaultMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(EFalse));
+    QCOMPARE(spy.count(), 1);
+    
+    //Restored path not found
+    mTestPrivate->HandleIsolatedOpenRestorePathL( *testPath, KErrNotFound );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(ETrue));
+    QCOMPARE(spy.count(), 1);
+
+}
 /*!
  Tests openCollection for different contexts.
  */
@@ -752,9 +814,11 @@ void TestMpMpxCollectionFrameworkWrapper::testHandleCollectionMessage()
  */
 void TestMpMpxCollectionFrameworkWrapper::testHandleCollectionMediaL()
 {
-    //HandleCollectionMediaL does nothing, test added just to cover all member functions.
-    mTestPrivate->HandleCollectionMediaL( *iMediaTestData, KErrNone);
-    QVERIFY( iMediaTestData );
+    mTestPrivate->HandleCollectionMediaL( *iMediaTestData, KErrNotFound );
+    QCOMPARE(mTestPrivate->iSongData->iSetMedia, false);
+
+    mTestPrivate->HandleCollectionMediaL( *iMediaTestData, KErrNone );
+    QCOMPARE(mTestPrivate->iSongData->iSetMedia, true);
 }
 
 /*!
@@ -1228,6 +1292,123 @@ void TestMpMpxCollectionFrameworkWrapper::loadAlbumsTestData()
     CleanupStack::PopAndDestroy(albumTwoTracksTestData);
     CleanupStack::PopAndDestroy(albumOneTracksTestData);
     CleanupStack::Pop(iAlbumsTestData);
+}
+
+/*!
+ Used to test saving path
+ */
+void TestMpMpxCollectionFrameworkWrapper::testSavePath()
+{
+    mTestPrivate->createPlaybackUtilityL();
+    //Create testPath
+    CMPXCollectionPath *testPath = CMPXCollectionPath::NewL();
+    RArray<TMPXItemId> pathItems;
+    testPath->AppendL(5);
+    for (int i = 0; i < 5; i++ ) {
+        pathItems.AppendL( TMPXItemId( 300 + i ) );
+    }
+    CleanupStack::PushL(testPath);
+    testPath->AppendL( pathItems.Array() );
+    //Create testPlaylist
+    CMPXCollectionPlaylist *testPlaylist = CMPXCollectionPlaylist::NewL( *testPath );
+    mTestPrivate->iPlaybackUtility->iCurrentPlaylist = testPlaylist;
+    QByteArray serializedRestorePath;
+    mTest->savePath( serializedRestorePath );
+    
+    
+    //Verify the path is the same
+    int dataSize = serializedRestorePath.size();
+    if ( dataSize > 0 ) {
+        TPtrC8 activityDataDescriptor( reinterpret_cast<const unsigned char*> ( serializedRestorePath.constData() ), serializedRestorePath.size() );
+         
+        //Take a copy of the data
+        CBufFlat* buffer = CBufFlat::NewL( dataSize );
+        CleanupStack::PushL( buffer );
+        buffer->InsertL( 0, activityDataDescriptor, dataSize );
+        
+        TBufBuf bufBuf;
+        bufBuf.Set( *buffer, 0, TBufBuf::ERead );
+        RReadStream readStream( &bufBuf );
+        readStream.PushL();
+        
+        CMPXCollectionPath* cpath( NULL );
+        cpath = CMPXCollectionPath::NewL(readStream);
+        CleanupStack::PushL(cpath);
+        
+        QCOMPARE( testPath->Levels(), cpath->Levels() );
+        QCOMPARE( testPath->Count(), cpath->Count() );
+        QCOMPARE( testPath->Id(), cpath->Id() );
+        QCOMPARE( testPath->Index(), cpath->Index() );
+        QCOMPARE( testPath->Items().Count(), cpath->Items().Count() );
+        for ( int i = 0; i < testPath->Items().Count(); i++ ){
+            QCOMPARE( testPath->Items()[i], cpath->Items()[i] );
+        }
+        
+        CleanupStack::PopAndDestroy( cpath );
+        CleanupStack::PopAndDestroy( 2, buffer ); //readStream and buffer
+    }
+    CleanupStack::PopAndDestroy( testPath );
+}
+
+/*!
+ Used to test restoring path
+ */
+void TestMpMpxCollectionFrameworkWrapper::testRestorePath()
+{
+    QByteArray serializedRestorePath;
+    mTestPrivate->iIsolatedCollectionHelper = CMpMpxIsolatedCollectionHelper::NewL( mTestPrivate );
+    //No path was saved
+    mTest->restorePath( serializedRestorePath );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::DefaultMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(EFalse));
+    
+    //Create testPath and serialize it
+    mTestPrivate->createPlaybackUtilityL();
+    CMPXCollectionPath *testPath = CMPXCollectionPath::NewL();
+    RArray<TMPXItemId> pathItems;
+    testPath->AppendL(5);
+    for (int i = 0; i < 5; i++ ) {
+        pathItems.AppendL( TMPXItemId( 300 + i ) );
+    }
+    CleanupStack::PushL(testPath);
+    testPath->AppendL( pathItems.Array() );
+    //Create testPlaylist
+    CMPXCollectionPlaylist *testPlaylist = CMPXCollectionPlaylist::NewL( *testPath );
+    mTestPrivate->iPlaybackUtility->iCurrentPlaylist = testPlaylist;
+    mTest->savePath( serializedRestorePath );
+    
+    //Restore path sent to be opened
+    mTest->restorePath( serializedRestorePath );
+    QCOMPARE( mTestPrivate->iIsolatedCollectionHelper->iMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );
+    QCOMPARE(mTestPrivate->iIsolatedCollectionHelper->iOpen,TBool(ETrue));
+    
+    CleanupStack::PopAndDestroy( testPath );
+}
+
+/*!
+ Used to test song details retrieval
+ */
+void TestMpMpxCollectionFrameworkWrapper::testRetrieveSongDetails()
+{
+    // Retrieve details for track
+    loadTestData();
+    mTestPrivate->iCollectionData->setMpxMedia(*iMediaTestData);
+
+    mTest->retrieveSongDetails(1);
+    QVERIFY(mTestPrivate->iCollectionUtility != 0);
+    QCOMPARE(mTestPrivate->iCollectionUtility->iMedia, TBool(ETrue));
+
+    // Retrieve details for track in TBone list
+    cleanup();
+    init();
+    loadAlbumsTestData();
+    mTestPrivate->iCollectionData->setMpxMedia(*iAlbumsTestData);
+    mTestPrivate->iCollectionData->mContext = ECollectionContextAlbumsTBone;
+    mTestPrivate->iCollectionData->mCurrentAlbumIndex = 1;
+
+    mTest->retrieveSongDetails(1);
+    QVERIFY(mTestPrivate->iCollectionUtility != 0);
+    QCOMPARE(mTestPrivate->iCollectionUtility->iMedia, TBool(ETrue));
 }
 
 //end of file

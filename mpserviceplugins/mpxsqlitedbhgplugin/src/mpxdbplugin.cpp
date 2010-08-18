@@ -1004,7 +1004,7 @@ TBool CMPXDbPlugin::DoOpenIncrementalL( const CMPXCollectionPath& aPath,  const 
         for( TInt i=0; i<c; ++i )
             {
             TMPXItemId id = aArray->AtL(i)->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
-            ids.Append( id );
+            ids.AppendL( id );
             }
 
         // Rest are all blank items
@@ -1019,7 +1019,7 @@ TBool CMPXDbPlugin::DoOpenIncrementalL( const CMPXCollectionPath& aPath,  const 
         for( TInt i=0; i<count; ++i )
             {
             aArray->AppendL( *entry );
-            ids.Append( KMPXInvalidItemId );
+            ids.AppendL( KMPXInvalidItemId );
             }
         CleanupStack::PopAndDestroy( entry );
 
@@ -1688,7 +1688,7 @@ CMPXCollectionPath* CMPXDbPlugin::DoOpenPlaylistL(
                     // return all songs of a particular artist (currently highlighted)
                     path->Set(EMPXOpenGroupOrPlaylist);
                     ids.Reset();
-                    ids.Append(aPath.Id(2));
+                    ids.AppendL(aPath.Id(2));
                     path->AppendL(ids.Array());
                     path->SelectL(aPath.Id(2));
                     path->Set(EMPXOpenPlaylistOnly);
@@ -4078,14 +4078,6 @@ void CMPXDbPlugin::DoIncrementalOpenL( const CMPXCommand& aCmd )
     TInt offset = aCmd.ValueTObjectL<TInt>( KMPXCollectionCommandIdIncOpenLOffset );
     TInt numItems = aCmd.ValueTObjectL<TInt>( KMPXCollectionCommandIdIncOpenLNumItems );
 
-    TReadDirection direction(EReadUnknown);
-/*  Ascending and Decending reads are currently not used. We optimized for offset reads.
-    if( aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLAscDsc) &&
-        aCmd.IsSupported(KMPXCollectionCommandIdIncOpenLKeyItem) )
-        {
-        direction = aCmd.ValueTObjectL<TReadDirection>(KMPXCollectionCommandIdIncOpenLAscDsc);
-        }
-*/
     CMPXCollectionPath* path =  aCmd.ValueCObjectL<CMPXCollectionPath>(KMPXCollectionCommandIdIncOpenLPath);
     CleanupStack::PushL( path );
     MPX_DEBUG_PATH( *path );
@@ -4120,21 +4112,7 @@ void CMPXDbPlugin::DoIncrementalOpenL( const CMPXCommand& aCmd )
                     // Array to read data from
                     CMPXMediaArray* array = CMPXMediaArray::NewL();
                     CleanupStack::PushL( array );
-
-                    // Do we have to use offset or can we use asc/dsc
-                    //
-                    if( direction == EReadUnknown )
-                        {
-                        iDbHandler->GetSongsAtOffsetL( array, attrs.Array(), offset, numItems );
-                        }
-                    else
-                        {
-                        iDbHandler->GetSongsInBlockL( array, attrs.Array(),
-                                                      aCmd.ValueText( KMPXCollectionCommandIdIncOpenLKeyItem ),
-                                                      numItems,
-                                                      direction );
-                        }
-
+                    iDbHandler->GetSongsAtOffsetL( array, attrs.Array(), offset, numItems );
                     TInt max( path->Count() );
                     TInt count(0);
                     TInt aryCount( array->Count() );
@@ -4332,6 +4310,9 @@ void CMPXDbPlugin::SetAttributesL(
     RArray<TMPXAttribute>& aAttrs,
     RArray<TInt>& aSupportedIds )
     {
+    CleanupClosePushL(aAttrs);
+    CleanupClosePushL(aSupportedIds);
+       
     aAttrs.AppendL( TMPXAttribute(KMPXMediaIdGeneral,
         EMPXMediaGeneralId | EMPXMediaGeneralType | EMPXMediaGeneralCategory |
         EMPXMediaGeneralTitle | EMPXMediaGeneralFlags | EMPXMediaGeneralUri) );
@@ -4428,6 +4409,8 @@ void CMPXDbPlugin::SetAttributesL(
             EMPXMediaMusicArtist | EMPXMediaMusicAlbum | EMPXMediaMusicAlbumArtFileName ) );
         aSupportedIds.AppendL( KMPXMediaIdMusic );
         }
+    CleanupStack::Pop();
+    CleanupStack::Pop();
     }
 
 #ifdef _DEBUG

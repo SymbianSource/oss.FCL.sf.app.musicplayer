@@ -32,6 +32,7 @@
 //Forward declarations
 class CMPXCollectionPath;
 class MMPXCollectionFindObserver;
+class CMPXFilter;
 
 class MMPXCollection
 {
@@ -50,7 +51,10 @@ public:
     virtual void FindAllL(const CMPXSearchCriteria& aCriteria,
                           const TArray<TMPXAttribute>& aAttrs,
                           MMPXCollectionFindObserver& aObs) = 0;
-   
+    virtual void MediaL(const CMPXCollectionPath& aPath,
+                        const TArray<TMPXAttribute>& aAttrs,
+                        CMPXAttributeSpecs* aSpecs=NULL,
+                        CMPXFilter* aFilter=NULL) = 0;
 };
 
 class MMPXCollectionUtility : public MMPXCollection
@@ -81,11 +85,16 @@ public:
     void FindAllL(const CMPXSearchCriteria& aCriteria,
                   const TArray<TMPXAttribute>& aAttrs,
                   MMPXCollectionFindObserver& aObs);
-    
+    void MediaL(const CMPXCollectionPath& aPath,
+                const TArray<TMPXAttribute>& aAttrs,
+                CMPXAttributeSpecs* aSpecs=NULL,
+                CMPXFilter* aFilter=NULL);
+
 public:
  
     TBool          iBack;
     TBool          iOpen;
+    TBool          iMedia;
     TInt           iOpenCount;
     TInt           iCountPath;
     int            iIndex;

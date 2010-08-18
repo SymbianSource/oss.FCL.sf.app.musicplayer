@@ -57,7 +57,7 @@ MpEngineFactory * MpEngineFactory::instance()
  Returns an instance to an engine with \a hostUid, and \a mode, if the shared engine is 
  already created parameters are ignored.
  */
-MpEngine *MpEngineFactory::createSharedEngine( TUid hostUid , MpEngine::EngineMode mode )
+MpEngine *MpEngineFactory::createSharedEngine( TUid /*hostUid*/ , MpEngine::EngineMode /*mode*/ )
 {
     TX_LOG_ARGS("MpEngineFactory::createSharedEngine() Stub")
     if ( !instance()->mSharedEngine ) {

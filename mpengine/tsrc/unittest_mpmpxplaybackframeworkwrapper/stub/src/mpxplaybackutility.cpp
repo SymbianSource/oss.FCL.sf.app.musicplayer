@@ -24,13 +24,13 @@
 /*!
  Stub function.
 */
-MMPXPlaybackUtility::MMPXPlaybackUtility():iProperty(EPbPropertyVolume),
-                                           iObs(0),
-                                           iValue(0),
+MMPXPlaybackUtility::MMPXPlaybackUtility():iValue(0),
                                            iComandData(0),
+                                           iProperty(EPbPropertyVolume),
+                                           iObs(0),
+                                           iCMPXCmd(0),
                                            iState(EPbStateNotInitialised),
                                            iAttrs(0),
-                                           iCMPXCmd(0),
                                            iInitialized(false),
                                            iReturnSource(true)
 {
@@ -98,6 +98,15 @@ void MMPXPlaybackUtility::CommandL(CMPXCommand& aCmd, MMPXPlaybackCallback* aCal
         iCMPXCmd = 0;
     }
     iCMPXCmd = CMPXCommand::NewL(aCmd);
+}
+
+/*!
+ Stub function.
+*/
+void MMPXPlaybackUtility::PropertyL(MMPXPlaybackCallback& aCallback, TMPXPlaybackProperty aProperty)
+{
+    Q_UNUSED(aCallback);
+    iProperty = aProperty;
 }
 
 /*!

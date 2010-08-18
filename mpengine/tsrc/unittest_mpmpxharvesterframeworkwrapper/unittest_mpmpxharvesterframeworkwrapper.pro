@@ -11,34 +11,37 @@
 #
 # Contributors:
 #
-# Description: 
+# Description: mpmpxharvesterframeworkwrapper unit test project file.
 #
 
 TEMPLATE = app
-CONFIG += qtestlib
-CONFIG += symbian_test
+CONFIG += qtestlib hb symbian_test
 TARGET = unittest_mpmpxharvesterframeworkwrapper
 TARGET.CAPABILITY = CAP_APPLICATION
 
+symbian: { 
+    MMP_RULES += SMPSAFE
+}
+
 DEPENDPATH += .
 INCLUDEPATH += . \
-    ../../inc \
-    ../../../inc
+               ../../inc \
+               ../../../inc
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 LIBS += -lestor.dll \
-    -lfbscli.dll \
-    -lmpxcommon.dll \
-    -lmpxcollectionutility.dll
+        -lfbscli.dll \
+        -lmpxcommon.dll \
+        -lmpxcollectionutility.dll
 
 HEADERS += inc/unittest_mpmpxharvesterframeworkwrapper.h \
-    ../../inc/mpmpxharvesterframeworkwrapper.h \
-    ../../inc/mpmpxharvesterframeworkwrapper_p.h \
-    stub/inc/mpxcollectionutility.h \
-    stub/inc/mpxharvesterutility.h
+          ../../inc/mpmpxharvesterframeworkwrapper.h \
+          ../../inc/mpmpxharvesterframeworkwrapper_p.h \
+          stub/inc/mpxcollectionutility.h \
+          stub/inc/mpxharvesterutility.h
 
 SOURCES += src/unittest_mpmpxharvesterframeworkwrapper.cpp \
-    ../../src/mpmpxharvesterframeworkwrapper.cpp \
-    stub/src/mpxcollectionutility.cpp \
-    stub/src/mpxharvesterutility.cpp
+          ../../src/mpmpxharvesterframeworkwrapper.cpp \
+          stub/src/mpxcollectionutility.cpp \
+          stub/src/mpxharvesterutility.cpp
 

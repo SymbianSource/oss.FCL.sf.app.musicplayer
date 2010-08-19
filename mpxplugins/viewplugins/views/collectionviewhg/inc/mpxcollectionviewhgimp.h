@@ -885,7 +885,12 @@ private:
     TBool NeedToShowEducatingDialog(); 
     void LaunchEducatingURL();
     static TInt LinkCallback(TAny* aPtr);
-
+	
+	/*
+ 	 * Internal functions to Dim all options
+ 	 */
+    void DimAllOptions( TInt aResourceId, CEikMenuPane* aMenuPane );
+	
 private:    // Data
 
     MMPXCollectionUtility*      iCollectionUtility;
@@ -925,7 +930,7 @@ private:    // Data
     TInt                        iCurrentPlaylistOp;
     TInt                        iNumSongAddedToPlaylist;
     TMPXItemId                  iPlaylistId;
-
+    TInt                        iFirstIndexOnScreen;
     TInt                        iCurrentMediaLOp;   // current mediaL operation
     TInt                        iCurrentFindAllLOp; // current FindAllL operation
     TInt                        iLastDepth;

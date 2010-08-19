@@ -69,6 +69,7 @@ const TInt KMPXVolumeSteps(1);
 const TInt KTenStepsVolume = 10;   
 const TInt KTwentyStepsVolume = 20;
 const TInt KVolumePopupSynchInterval = 300000; // 300 ms
+const TInt KFilterEventInterval( 6000 ); //6ms
 const TRemConCoreApiOperationId KSupportedCoreFeatures[] = {
         ERemConCoreApiVolumeUp,
         ERemConCoreApiVolumeDown,
@@ -97,7 +98,8 @@ CMPXMediaKeyHandlerImp::CMPXMediaKeyHandlerImp(
     iObserver( aObserver ),
     iEnable( ETrue ),
     iCurrentVol( KErrNotFound ),
-    iVolumeSteps(KMPXMaxVolume)
+    iVolumeSteps(KMPXMaxVolume),
+    iPreviousVol( KErrNotFound )
     {
     }
 
@@ -211,6 +213,7 @@ void CMPXMediaKeyHandlerImp::ConstructL(
         }
 #endif
     iVolumePopupSynchTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iFilterEventTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     }
 
 // ---------------------------------------------------------------------------
@@ -236,6 +239,11 @@ MMPXMediaKeyHandler* CMPXMediaKeyHandlerImp::NewL(
 //
 CMPXMediaKeyHandlerImp::~CMPXMediaKeyHandlerImp()
     {
+	if ( iFilterEventTimer )
+		{
+	    iFilterEventTimer->Cancel();
+        delete iFilterEventTimer;
+		}
     if ( iVolumePopupSynchTimer )
         {
         iVolumePopupSynchTimer->Cancel();
@@ -346,6 +354,7 @@ void CMPXMediaKeyHandlerImp::DoFilterAndSendCommandL(
         	else
         	    {
         	    volume = iCurrentVol * KPbPlaybackVolumeLevelMax/iVolumeSteps;
+                iPreviousVol = iCurrentVol;
         	    }
             
             if ( volume < KMPXMinVolume )
@@ -486,7 +495,11 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                         aValue = iVolumeSteps;
                         }
                     }
-
+                
+                //if aValue equal to iPreviousVol, MediaKey should not set Volume again.
+                TBool OkToSetVolume = ( aValue != iPreviousVol );
+                iPreviousVol = KErrNotFound;
+                
                 if( iMuted && aValue > 0  ) // unmute
                     {
                     iMuted = EFalse;
@@ -499,11 +512,11 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                         iMuted = ETrue;
                         }
                     }
-                    else if ( aValue != iCurrentVol )
+                else if ( aValue != iCurrentVol )
                     {
-                    if ( aValue != 0 && ( iResponseHandler->iCountOfVolumeCommands == 0 ) )
+                    if ( aValue != 0 && OkToSetVolume && ( iResponseHandler->iCountOfVolumeCommands == 0 ) )
                         {
-                        // if we are processing remcon events we shouldn't change the current volume value
+                        // if we are processing remcon events we shouldn't change the current volume value                      
                         iCurrentVol = aValue;
                         }
                     }
@@ -513,7 +526,10 @@ void CMPXMediaKeyHandlerImp::DoHandlePropertyL(
                     iCurrentVol = aValue;
                     }
                 
-                StartVolumePopupSynchTimer();
+                if ( OkToSetVolume )
+                	{
+                    StartVolumePopupSynchTimer();
+                	}
                 
                 // send a command to UI to display Volume bar on device when controlling volume via UPnP  
                 if ( IsUpnpVisibleL() && iPlayerState != EPbStateNotInitialised )
@@ -1287,7 +1303,16 @@ void CMPXMediaKeyHandlerImp::HandleControlEventL( CCoeControl* aControl, TCoeEve
 			else
 				{
 				iCurrentVol = vol;
-				FilterAndSendCommand( EPbCmdSetVolume );
+				//VolPopup CallBack functon is frequently called, 
+				//But Music Palyer deals with the event slowly
+				//Thus VolPopup will not display smoothly.
+				//So Music Player needs timer to filter some events. 
+				if ( !iFilterEventTimer->IsActive() )
+					{
+				    iFilterEventTimer->Start( KFilterEventInterval, 
+				    		            KFilterEventInterval, 
+				                        TCallBack( FilterEventTimerCallback, this ) );
+					}
 				}
 			}
 		}
@@ -1373,4 +1398,25 @@ void CMPXMediaKeyHandlerImp::StartVolumePopupSynchTimer()
                                    TCallBack( VolumePopupSynchTimerCallback, this ) );
 
     }
+
+// ---------------------------------------------------------------------------
+// CMPXMediaKeyHandlerImp::FilterEventTimerCallback
+// ---------------------------------------------------------------------------
+//
+TInt CMPXMediaKeyHandlerImp::FilterEventTimerCallback( TAny* aPtr )
+	{
+	static_cast<CMPXMediaKeyHandlerImp*>( aPtr )->DoFilterEventTimer();
+	return KErrNone;
+	}
+
+// ---------------------------------------------------------------------------
+// CMPXMediaKeyHandlerImp::FilterEventTimerCallback
+// ---------------------------------------------------------------------------
+//
+void CMPXMediaKeyHandlerImp::DoFilterEventTimer()
+	{
+	MPX_FUNC("CMPXMediaKeyHandlerImp::DoFilterEventTimer");
+	iFilterEventTimer->Cancel();
+	FilterAndSendCommand( EPbCmdSetVolume );
+	}
 // End of File

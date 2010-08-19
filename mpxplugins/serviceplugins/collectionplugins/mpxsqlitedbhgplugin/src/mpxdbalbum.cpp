@@ -350,7 +350,7 @@ void CMPXDbAlbum::GetAllCategoryItemsL(
     CleanupStack::PopAndDestroy(query);
 
     CleanupClosePushL(recordset);
-    ProcessRecordsetL(aAttrs, recordset, aMediaArray);
+    ProcessAlbumRecordSetL(aAttrs, recordset, aMediaArray);
     CleanupStack::PopAndDestroy(&recordset);
     }
 
@@ -615,6 +615,110 @@ TBool CMPXDbAlbum::CheckTableL(
     CleanupStack::PopAndDestroy(query);
 
     return check;
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbAlbum::ProcessAlbumRecordSetL
+// Unknown album is stored in the database as NULL (name field). 
+// The first available unknown album is saved for later and will be appended to the array 
+// as the last item and rest available unknown album will be ignored. 
+//
+// NOTE: putting unknown album to the end of the array only takes place when title
+//       field is requested. normal sorting algorithm occurs if title isn't
+//       requested.
+// ----------------------------------------------------------------------------
+//
+void CMPXDbAlbum::ProcessAlbumRecordSetL(
+    const TArray<TMPXAttribute>& aAttrs,
+    RSqlStatement& aRecordset,
+    CMPXMediaArray& aMediaArray)
+    {
+    // populate the array
+    TBool unknownRecord(EFalse);
+    TBool firstUnknownRecord(EFalse);
+    CMPXMedia* unknownMedia(NULL);
+    TInt prevId(0);
+    TInt err(KErrNone);
+
+    TInt pPath(0);
+    if (aMediaArray.Count())
+        {
+        CMPXMedia* pMedia = aMediaArray[0];
+        if (pMedia->IsSupported(KMPXMediaGeneralValue))
+            { // Query excuted by OpenL
+            pPath = pMedia->ValueTObjectL<TInt>(KMPXMediaGeneralValue);
+            MPX_ASSERT(pPath);
+            }
+        }
+    RArray<TMPXItemId> ids;
+    CleanupClosePushL(ids);
+
+    while ((err = aRecordset.Next()) == KSqlAtRow)
+        {
+        TUint32 rowId(aRecordset.ColumnInt64(EAlbumUniqueId));
+        if (prevId == rowId)
+            {
+            continue;
+            }
+
+        prevId = rowId;
+        CMPXMedia* media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+
+        UpdateMediaL(aRecordset, aAttrs, *media);
+
+        if (MPXDbCommonUtil::GetColumnTextL(aRecordset, EAlbumName).Length() == 0)
+            {
+            if (!unknownMedia)
+                {
+                unknownMedia = media;
+                firstUnknownRecord = ETrue;
+                }
+            unknownRecord = ETrue;
+            }
+        
+        if (!unknownRecord)
+            {
+            if (media->IsSupported(KMPXMediaGeneralId) && pPath)
+                {
+                ids.AppendL(media->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId));
+                }
+            aMediaArray.AppendL(*media);
+            }
+        
+        if (!firstUnknownRecord)
+            {
+            CleanupStack::PopAndDestroy(media);
+            }
+        else
+            {
+            firstUnknownRecord = EFalse;
+            }
+        
+        unknownRecord = EFalse;
+        } // end while
+
+    if (err != KSqlAtEnd)
+        {
+        User::LeaveIfError(err);
+        }
+
+    if (unknownMedia)
+        {
+        if (unknownMedia->IsSupported(KMPXMediaGeneralId) && pPath)
+            {
+            ids.AppendL(unknownMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId));
+            }
+        aMediaArray.AppendL(*unknownMedia);
+        CleanupStack::PopAndDestroy(unknownMedia);
+        }
+
+    // Append ids to the returned path
+    if (pPath)
+        {
+        ((CMPXCollectionPath*)pPath)->AppendL(ids.Array());
+        }
+    CleanupStack::PopAndDestroy(&ids);
     }
 
 // End of File

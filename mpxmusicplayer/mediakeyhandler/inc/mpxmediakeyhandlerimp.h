@@ -343,10 +343,28 @@ private:
      */
     TBool IsAppForeground();
     
-    static VolumePopupSynchTimerCallback( TAny* aPtr );
+    static TInt VolumePopupSynchTimerCallback( TAny* aPtr );
     void DoVolumePopupSynch();
     void StartVolumePopupSynchTimer();
     
+    
+    /**
+     * Callback function of Filter event timer
+     * 
+     * @param aPtr, Pointer to an instance of CMPXMediaKeyHandlerImp
+     * @return value is ignored and is irrelevant in that context
+     */
+    static  TInt FilterEventTimerCallback( TAny* aPtr );
+    
+    /**
+     * Do with the rest event of VolPopup
+     * 
+     * VolPopup CallBack functon is frequently called, 
+     * But Music Palyer deals with the event slowly.
+     * Thus VolPopup will not display smoothly.
+	 * So Music Player needs timer to filter some events.
+     */
+    void DoFilterEventTimer();
 
 private:    // Data
 
@@ -385,7 +403,9 @@ private:    // Data
     CUpnpCopyCommand* iUpnpCopyCommand;
     #endif
     TInt iUpnpVolume; // absolute upnp volume value
+    TInt iPreviousVol;          //Last time volume
     CPeriodic* iVolumePopupSynchTimer;
+    CPeriodic* iFilterEventTimer;         //owned, filter volumePopup event
     };
 
 #endif  // C_CMPXMEDIAKEYHANDLERIMP_H

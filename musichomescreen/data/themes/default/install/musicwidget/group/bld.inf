@@ -10,6 +10,7 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
+* NTT DOCOMO, INC - BUG 2358
 *
 * Description:  The information required for building
 *
@@ -25,23 +26,14 @@ DEFAULT
 PRJ_EXPORTS
 // Support for R&D builds
 //***********************
-// For WINSCW UDEB emulator
-../hsps/00/manifest.dat /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/hsps/00/manifest.dat
-../hsps/00/widgetconfiguration.xml /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/hsps/00/widgetconfiguration.xml
-../hsps/00/musicwidgetconfiguration.dtd /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/hsps/00/musicwidgetconfiguration.dtd
-../xuikon/00/musicwidget.o0000 /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/xuikon/00/musicwidget.o0000
-../xuikon/00/MusicWidget.dat /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.dat
-../xuikon/00/MusicWidget.css /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.css
-../xuikon/00/MusicWidget.xml /epoc32/release/winscw/udeb/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.xml
-
-// For IBY exports (engineering versions)
-../hsps/00/manifest.dat /epoc32/data/Z/private/200159c0/install/musicwidget/hsps/00/manifest.dat
-../hsps/00/widgetconfiguration.xml /epoc32/data/Z/private/200159c0/install/musicwidget/hsps/00/widgetconfiguration.xml
-../hsps/00/musicwidgetconfiguration.dtd /epoc32/data/Z/private/200159c0/install/musicwidget/hsps/00/musicwidgetconfiguration.dtd
-../xuikon/00/musicwidget.o0000 /epoc32/data/Z/private/200159c0/install/musicwidget/xuikon/00/musicwidget.o0000
-../xuikon/00/MusicWidget.dat /epoc32/data/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.dat
-../xuikon/00/MusicWidget.css /epoc32/data/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.css
-../xuikon/00/MusicWidget.xml /epoc32/data/Z/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.xml
+// For WINSCW UDEB emulator & IBY exports (engineering versions)
+../hsps/00/manifest.dat Z:/private/200159c0/install/musicwidget/hsps/00/manifest.dat
+../hsps/00/widgetconfiguration.xml Z:/private/200159c0/install/musicwidget/hsps/00/widgetconfiguration.xml
+../hsps/00/musicwidgetconfiguration.dtd Z:/private/200159c0/install/musicwidget/hsps/00/musicwidgetconfiguration.dtd
+../xuikon/00/musicwidget.o0000 Z:/private/200159c0/install/musicwidget/xuikon/00/musicwidget.o0000
+../xuikon/00/MusicWidget.dat Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.dat
+../xuikon/00/MusicWidget.css Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.css
+../xuikon/00/MusicWidget.xml Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.xml
 
 // Support for productization and Carbide.Ui customization
 //********************************************************

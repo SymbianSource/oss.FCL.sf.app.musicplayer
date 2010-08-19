@@ -712,7 +712,7 @@ void CMPXDbMusic::ExecuteQueryAllSongsL(const TArray<TMPXAttribute>& aAttrs)
     // Run query and add result media objects to the cache array.
     MPX_FUNC("CMPXDbMusic::ExecuteQueryAllSongsL");
 
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAllSongs));
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryMusicGetAllSongsMinimum));
     CleanupClosePushL(recordset);
 
     TInt err(KErrNone);
@@ -2118,6 +2118,8 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
     TUint32 abstractAlbumId(0);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
+    //need to get song art for updating art field in Album and Artist tables
+    TPtrC art(KNullDesC);
     if (aMusicTable)
         {
         artistId = aMusicTable->ColumnInt64(EMusicArtist);
@@ -2127,13 +2129,14 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
         abstractAlbumId = aMusicTable->ColumnInt64(EMusicAbstractAlbum);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED        
+        art.Set(MPXDbCommonUtil::GetColumnTextL(*aMusicTable, EMusicArt));
         }
 
     // update the artist field
     TUint32 id(0);
     TUint32 artistIdForAlbum(artistId);
     if (UpdateCategoryFieldL(EMPXArtist, aMedia, KMPXMediaMusicArtist, artistId,
-        aDrive, aItemChangedMessages, id))
+        aDrive, aItemChangedMessages, id, art))
         {
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicArtist, id);
         metaDataModified = (aMusicTable != NULL);
@@ -2143,7 +2146,7 @@ CMPXDbActiveTask::TChangeVisibility CMPXDbMusic::GenerateMusicFieldsValuesL(
 
     // update the album field
     if (UpdateCategoryFieldL(EMPXAlbum, aMedia, KMPXMediaMusicAlbum, albumId,
-        aDrive, aItemChangedMessages, id))
+        aDrive, aItemChangedMessages, id, art))
         {
         MPXDbCommonUtil::AppendValueL(aFields, aValues, KMCMusicAlbum, id);
         metaDataModified = (aMusicTable != NULL);
@@ -2429,6 +2432,7 @@ void CMPXDbMusic::CreateTableL(
 
     // Do not create any other indexes than the one on UniqueId
     // as they only slow down the database overall
+    User::LeaveIfError(aDatabase.Exec(KMusicDeletedTitleIndex));
     }
 
 // ----------------------------------------------------------------------------
@@ -2464,7 +2468,7 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
     TUint32 aOldId,
     TInt aDriveId,
     CMPXMessageArray* aItemChangedMessages,
-    TUint32& aItemId)
+    TUint32& aItemId, const TDesC& aArt)
     {
     TBool updated(EFalse);
     TBool itemNotRemoved( EFalse );
@@ -2549,7 +2553,15 @@ TBool CMPXDbMusic::UpdateCategoryFieldL(
                             artistname.Set(aMedia.ValueText(KMPXMediaMusicArtist).Left(KMCMaxTextLen));
                             }
                         }
-                    iObserver.AddCategoryItemL(aCategory, name, artistname, art, aDriveId, aItemChangedMessages, itemAdded);
+                    //for the update case, need to maitain art field for Artist/Album table.
+                    if (aOldId && (aOldId != aItemId))
+                       {
+                       iObserver.AddCategoryItemL(aCategory, name, artistname, aArt, aDriveId, aItemChangedMessages, itemAdded);  
+                       } 
+                    else
+                       {      
+                       iObserver.AddCategoryItemL(aCategory, name, artistname, art, aDriveId, aItemChangedMessages, itemAdded);
+                       }
                     }
                 else
                     {

@@ -10,6 +10,7 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
+* NTT DOCOMO, INC - BUG 2358
 *
 * Description:  Build information file for project mpxequalizerview.
 *
@@ -22,8 +23,7 @@ DEFAULT
 
 PRJ_EXPORTS
 // Empty sound file
-../data/nullsound.mp3 /epoc32/release/winscw/udeb/z/system/data/nullsound.mp3
-../data/nullsound.mp3 /epoc32/data/z/system/data/nullsound.mp3
+../data/nullsound.mp3 z:/system/data/nullsound.mp3
 
 PRJ_MMPFILES
 mpxequalizerview.mmp

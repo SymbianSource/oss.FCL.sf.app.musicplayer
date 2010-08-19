@@ -82,7 +82,7 @@ void CMPXMtpWaitDialog::PreNoteDisplayHandleL()
     SetCBAL( R_AVKON_SOFTKEYS_EMPTY );
 
     // Text
-    HBufC* text = StringLoader::LoadLC( R_MPX_USB_CONNECTION_IN_PROGRESS );
+    HBufC* text = StringLoader::LoadLC( R_MPX_MTP_TRANSFER_IN_PROGRESS );
     SetTextL( *text );
     CleanupStack::PopAndDestroy( text );
 

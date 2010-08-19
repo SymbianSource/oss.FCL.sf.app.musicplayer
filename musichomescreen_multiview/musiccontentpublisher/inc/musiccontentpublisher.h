@@ -321,6 +321,17 @@ private:
     void DoPublishCmdL(const TDesC8& aCmd, const TDesC8& aKey, const CLiwMap * aValue);
 
     
+	/**
+    * Callback function for CPeriodic.
+    * Defer the creation of MCP plugin to allow the rest of homescreen plugins to be loaded and updated.
+    * This is a temporary solution which shall be replaced with HarvesterServer in Starterlist. 
+	* HarvesterServer shall then do the time consuming initialization of MPX Collection and Playback 
+	* and Harvester servers instead.
+    */
+
+    static TInt UpdateCallback(TAny* aContentPublisher);
+    
+	void DoUpdate();
 
 private: // data
 
@@ -390,6 +401,9 @@ private: // data
     TBool iWidgetForeground;
 
     HBufC* iInstanceId;
+    
+	// timer to start creating mcpplugin
+    CPeriodic* iUpdateIdle;    
    
     };
 

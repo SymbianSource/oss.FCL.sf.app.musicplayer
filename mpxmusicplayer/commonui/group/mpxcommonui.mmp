@@ -88,6 +88,7 @@ LIBRARY         featmgr.lib
 LIBRARY         aknnotify.lib 
 LIBRARY         iclextjpegapi.lib
 LIBRARY         thumbnailmanager.lib	// Album art
+LIBRARY         gfxtrans.lib //effects
 
 // CAMESE_IN_DRM_UTILITY
 LIBRARY         drmuihandling.lib

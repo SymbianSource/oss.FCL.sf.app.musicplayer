@@ -313,17 +313,24 @@ RESOURCE FORM r_mpx_cui_song_details_form
             },
         DLG_LINE
             {
-            type = EAknCtPopupField;
+            type = EEikCtEdwin;
             prompt = qtn_nmp_song_details_genre;
             id = EMPXMetadataEditorDlgCtrlIdGenre;
             itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
-            control = POPUP_FIELD
+            control = EDWIN
                 {
-                width = KMPXSongDetailsTextMaxLen;
-               // other = qtn_aknexpopfield_list_other;
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
                 };
-            tooltip = qtn_aknexpopfield_hint_text;
-            },
+             },
         DLG_LINE
             {
             type = EEikCtEdwin;
@@ -364,20 +371,7 @@ RESOURCE FORM r_mpx_cui_song_details_form
                 base_line_delta = 21;
                 };
             },
-        DLG_LINE
-            {
-            type = EAknCtPopupField;
-            prompt = qtn_nmp_episode_details_library;
-            id = EMPXMetadataEditorDlgCtrlIdLibrary;
-            itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
-            control = POPUP_FIELD
-                {
-                width = KMPXSongDetailsTextMaxLen;
-                // other = qtn_aknexpopfield_list_other;
-                };
-            tooltip = qtn_aknexpopfield_hint_text;
-            },
-	DLG_LINE
+    DLG_LINE
             {
             type = EEikCtEdwin;
             prompt = qtn_nmp_song_details_licences;
@@ -874,16 +868,23 @@ RESOURCE FORM r_mpx_cui_podcast_details_form
             },
         DLG_LINE
             {
-            type = EAknCtPopupField;
+            type = EEikCtEdwin;
             prompt = qtn_nmp_episode_details_genre;
             id = EMPXMetadataEditorDlgCtrlIdGenre;
             itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
-            control = POPUP_FIELD
+            control = EDWIN
                 {
-                width = KMPXSongDetailsTextMaxLen;
-               // other = qtn_aknexpopfield_list_other;
+                flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                width = KMPXSongDetailsTextWidth;
+                lines = KMPXSongDetailsTextLines;
+                maxlength = KMPXSongDetailsTextMaxLen;
+                // added to limit expanding in forms.
+                // If you want full screen use 6 here
+                max_view_height_in_lines = 6;
+                // if you have the line above, you must have this. 
+                // It is calculable from LAF
+                base_line_delta = 21;
                 };
-            tooltip = qtn_aknexpopfield_hint_text;
             },                    
         DLG_LINE
             {
@@ -904,19 +905,6 @@ RESOURCE FORM r_mpx_cui_podcast_details_form
                 // It is calculable from LAF
                 base_line_delta = 21;
                 };
-            },
-        DLG_LINE
-            {
-            type = EAknCtPopupField;
-            prompt = qtn_nmp_episode_details_library;
-            id = EMPXMetadataEditorDlgCtrlIdLibrary;
-            itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
-            control = POPUP_FIELD
-                {
-                width = KMPXSongDetailsTextMaxLen;
-                // other = qtn_aknexpopfield_list_other;
-                };
-            tooltip = qtn_aknexpopfield_hint_text;
             },
 	DLG_LINE
             {

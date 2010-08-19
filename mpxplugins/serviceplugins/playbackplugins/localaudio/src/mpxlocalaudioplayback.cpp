@@ -327,6 +327,7 @@ void CMPXLocalAudioPlayback::CommandL(TMPXPlaybackCommand aCmd, TInt aData)
                     else
                         {
                         MPX_TRAPD( AEErr,  ConsumeRightsL( ContentAccess::EPlay ) );
+                        iState = EStateInitialised;
                         if (AEErr == KErrDiskFull)
                         	{
                         	iDrmMediaUtility->Close();

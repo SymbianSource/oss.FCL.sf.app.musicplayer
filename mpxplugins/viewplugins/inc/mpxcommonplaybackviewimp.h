@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  MPX common playback view implementation
-*  Version     : %version: e003sa33#41.1.6.1.1.1.13 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: da1mmcf#41.1.6.1.1.1.14 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -759,6 +759,7 @@ private:    // Data
     // Indicate FF button pressed or not
     TBool iIsffButtonPressed;
     TBool iBacking;
+    TBool iErrorOccured;
 #ifdef IAD_INCLUDE_UPNP    
 	CUpnpCopyCommand* iUpnpCopyCommand;
 #endif

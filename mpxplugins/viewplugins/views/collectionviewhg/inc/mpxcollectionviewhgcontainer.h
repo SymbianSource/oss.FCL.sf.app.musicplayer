@@ -208,6 +208,13 @@ public:
      * @since 3.1
      */
     TInt TopLbxItemIndex() const;
+    /**
+     * Gets first listbox item index on screen(relative to the original listbox).
+     * @return first listbox item index on screen
+     *
+     * 
+     */
+    TInt FirstIndexOnScreen() const;
 
     /**
      * Gets bottom listbox item index (relative to the original listbox).
@@ -1022,6 +1029,7 @@ private: // data member
     TUid iPreviousViewId;
     TBool iPreviousOrientation;
     TBool iDrawBackGround;
+    TBool iIsNowPlayingView;
     };
 
 #endif  // CMPXCOLLECTIONVIEWHGCONTAINER_H

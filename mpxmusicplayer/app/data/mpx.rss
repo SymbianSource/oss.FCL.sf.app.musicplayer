@@ -265,4 +265,12 @@ RESOURCE TBUF r_mpx_cannot_proceed_with_operation
     buf = qtn_nmp_note_cannot_proceed_with_operation;
     }
 
+// ---------------------------------------------------------------------------
+// r_mus_note_cancelled_due_to_mtp
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mus_note_cancelled_due_to_mtp
+    {
+    buf = qtn_mus_note_cancelled_due_to_mtp;
+    }
 // End of File

@@ -177,6 +177,19 @@ RESOURCE TBUF r_mpx_usb_connection_in_progress
     buf = qtn_nmp_note_usb_connection_in_progress;
     }
 
+
+// -----------------------------------------------------------------------------
+//
+//  r_mpx_mtp_transfer_in_progress
+//  Text for MTP transfer wait note  
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_mtp_transfer_in_progress
+    {
+    buf = qtn_mus_note_media_transfer_in_progress;
+    }
+
 // -----------------------------------------------------------------------------
 //
 //  r_mpx_repairing_corrupt_db

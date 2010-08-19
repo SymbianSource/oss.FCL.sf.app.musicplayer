@@ -338,7 +338,6 @@ void CMPXProgressDownloadSB::CommandL(
                     if ( iConsumeStarted )
                         {
                         ConsumeRights( ContentAccess::EStop );
-                        iConsumeStarted = EFalse;
                         }
                     if ( !iFileSaved )
                         {
@@ -354,7 +353,6 @@ void CMPXProgressDownloadSB::CommandL(
                     if ( iConsumeStarted )
                         {
                         ConsumeRights( ContentAccess::EStop );
-                        iConsumeStarted = EFalse;
                         }
                     if ( !iFileSaved )
                         {
@@ -1021,17 +1019,15 @@ void CMPXProgressDownloadSB::Event(
                         else if ( event->GetErrorCode() == KErrEof ) // Playback Complete
                             {
                             MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[PlaybackComplete] errorcode=%d",event->GetErrorCode());
-                            if ( iDownloadState == EPbDlStateDownloadCompleted && !iFileSaved )
+                            if ( iDownloadState == EPbDlStateDownloadCompleted )
                                 {
-                                if ( event->GetErrorCode() == KErrEof )
+                                ConsumeRights( ContentAccess::EStop );
+								if (!iFileSaved)
                                     {
-                                    ConsumeRights( ContentAccess::EStop );
-                                    }
-                                else
-                                    {
-                                    ConsumeRights( ContentAccess::EPause );
-                                    }
-                                MoveDownloadedFileToMusicFolder();
+									iDrmMediaUtility->Close(); 
+									MoveDownloadedFileToMusicFolder();
+									}
+                                iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlayComplete, 0, KErrNone);
                                 }
                             }
                         else if ( event->GetErrorCode() == KErrDied || event->GetErrorCode() == KErrInUse ||
@@ -1094,11 +1090,7 @@ void CMPXProgressDownloadSB::Event(
                     case MStreamControl::BUFFERING:
                         MPX_DEBUG2("CMPXProgressDownloadSB::Event:EStateChanged[Buffering] errorcode= %d",event->GetErrorCode());
                         iStreamBuffering = ETrue;
-                        if ( iDownloadState != EPbDlStateDownloadPaused ||
-                                iDownloadState != EPbDlStateDownloadCanceled ||
-                                iDownloadState != EPbDlStateDownloadError ||
-                                iDownloadState != EPbDlStateNotDownloading
-                        )
+                        if ( iDownloadState == EPbDlStateDownloading)
                             {
                             iDownloadState = EPbDlStateBuffering;
                             }
@@ -1276,7 +1268,7 @@ void CMPXProgressDownloadSB::Event(
                 }
 
             TRAP_IGNORE( iDrmMediaUtility->InitL( *iPdPath ));
-            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlayComplete, 0, KErrNone);
+//            iObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlayComplete, 0, KErrNone);
 
             if ( !fileMoveError || fileMoveError == KErrAlreadyExists )
                 {
@@ -1499,6 +1491,9 @@ void CMPXProgressDownloadSB::SetMute( TBool aMute, TBool aNotifyChange )
 //
 void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder()
     {
+    
+    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder() entering");
+
     if ( iFileSaved || iPdPath == NULL ||
          ( (*iPdPath).Length() == 0 ) ||
          iMAudioProgDLSource->GetDownloadStatus() == MProgDLSource::EDeleted )
@@ -1506,7 +1501,6 @@ void CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder()
         return;
         }
 
-    MPX_DEBUG1("CMPXProgressDownloadSB::MoveDownloadedFileToMusicFolder() entering");
     TParse parse;
     parse.Set(*iPdPath,NULL,NULL);
     TPtrC drive = parse.Drive();
@@ -1538,8 +1532,17 @@ void CMPXProgressDownloadSB::ConsumeRights(
         {
         switch ( aIntent )
             {
-            case ContentAccess::EPlay:
             case ContentAccess::EStop:
+                {
+                iPlaying = EFalse;
+                iConsumeStarted = EFalse;
+                break;
+                }
+            case ContentAccess::EPlay:
+                {
+                iPlaying = ETrue;
+                break;
+                }
             case ContentAccess::EPause:
             case ContentAccess::EContinue:
                 {
@@ -1552,8 +1555,12 @@ void CMPXProgressDownloadSB::ConsumeRights(
                 break;
                 }
             }
-        MPX_DEBUG2("-->CMPXProgressDownloadSB::ConsumeRights(): Executing intent %d", aIntent);
-        iDrmCustomCommand->ExecuteIntent(aIntent);
+        MPX_DEBUG2("-->CMPXProgressDownloadSB::ConsumeRights(): EvaluateIntent intent %d", aIntent);
+        if (iDrmCustomCommand->EvaluateIntent(aIntent) == KErrNone)
+            {
+            MPX_DEBUG2("-->CMPXProgressDownloadSB::ConsumeRights(): Executing intent %d", aIntent);
+            iDrmCustomCommand->ExecuteIntent(aIntent);
+            }
         }
     MPX_DEBUG2("<--CMPXProgressDownloadSB::ConsumeRights(%d)", aIntent);
     }

@@ -1085,7 +1085,7 @@ void CMCPMusicPlayer::Opening()
 //  
 void CMCPMusicPlayer::PlaylisIsEmpty()
     {
-    //TRAP_IGNORE( DoHandlePlaylisIsEmptyL() );
+    TRAP_IGNORE( DoHandlePlaylisIsEmptyL() );
     }
 // ---------------------------------------------------------------------------
 // From MAiPlayerPluginEngineObserver

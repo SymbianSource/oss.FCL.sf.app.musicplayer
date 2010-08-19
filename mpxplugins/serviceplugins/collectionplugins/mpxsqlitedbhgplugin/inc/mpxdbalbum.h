@@ -176,6 +176,16 @@ class CMPXDbAlbum :
         * @returns alternative albumart retrieved in the specified Album.
         */
         HBufC* AlbumartForAlbumL(const TUint32 aId, TPtrC aArt);
+        
+        /**
+        * Processes a recordset by constructing media instances and adding them
+        * to the specified array.
+        * @param aAttrs attributes to be returned
+        * @param aRecordset recordset to be processed
+        * @param aMediaArray returns the media instances
+        */
+        void ProcessAlbumRecordSetL(const TArray<TMPXAttribute>& aAttrs,
+            RSqlStatement& aRecordset, CMPXMediaArray& aMediaArray);
 
     private:    // from MMPXTable
 

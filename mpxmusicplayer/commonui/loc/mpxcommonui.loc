@@ -352,4 +352,11 @@
 //
 #define qtn_nmp_note_no_media_key "Media key event not supported by player"
 
+// d:Text in navi pane label.
+// d:Shows total duration of tracks in days and 1 hour.
+// l:list_single_heading_pane_t1_cp2
+// r:5.2
+//
+#define qtn_mus_time_frmt_plural_day_single_hr "%N days, 1 hour"
+
 // End of File

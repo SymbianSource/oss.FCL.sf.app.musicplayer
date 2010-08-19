@@ -236,7 +236,24 @@ TKeyResponse CMPXFileNameQueryDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, T
     { 
     TKeyResponse response = EKeyWasNotConsumed;
     // consume 'enter' so it won't acknowledge the dialog
-    if ( aType == EEventKey && aKeyEvent.iCode == EKeyEnter ) 
+
+    TBool vkbOpen = EFalse;
+    CAknQueryControl* queryControl = QueryControl();
+    if ( queryControl )
+        {
+        CEikEdwin* edwin = static_cast< CEikEdwin* >(
+            queryControl->ControlByLayoutOrNull( EDataLayout ) );
+        if ( edwin )
+            {            
+            if ( edwin->AknEdwinFlags() & EAknEditorFlagTouchInputModeOpened )
+                {
+                // virtual keyboard is active.                
+                vkbOpen = ETrue;
+                }
+            }
+        }    
+    
+    if ( vkbOpen && aType == EEventKey && aKeyEvent.iCode == EKeyEnter ) 
         { 
         response = EKeyWasConsumed;
         } 

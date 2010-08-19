@@ -79,7 +79,7 @@
 #include "mpxdrmuihelper.h"
 #include "mpxinternalcrkeys.h"
 #include "mpxlog.h"
-
+#include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
 
 // CONSTANTS
 const TInt KMPXOneSecInMicroSecs( 1000000 );
@@ -1309,6 +1309,7 @@ EXPORT_C TInt CMPXCommonUiHelper::HandleErrorL(
         case KErrCASizeNotDetermined:
         case KErrCANewFileHandleRequired:
             {
+            GfxTransEffect::AbortFullScreen();
             TRAPD(err, ret = iMpxDrmHelper->HandleDrmErrorL( aError, aMedia, aFile ));
             if (err)
                 {
@@ -1384,8 +1385,9 @@ EXPORT_C TInt CMPXCommonUiHelper::HandleErrorL(
                 }
             break;
             }
-        case KErrLocked:
-            errorText = StringLoader::LoadLC( R_MPX_CANNOT_PROCEED_WITH_OPERATION );
+        case KErrLocked: 
+            //KErrLocked only happen if MTP is connected but no active sync on going.        
+            errorText = StringLoader::LoadLC( R_MUS_NOTE_CANCELLED_DUE_TO_MTP );
             break;
         case KErrDisMounted:
         	break;

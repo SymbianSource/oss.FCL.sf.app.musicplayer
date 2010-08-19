@@ -1094,6 +1094,7 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
                     {
                     iIsDeleting = ETrue;
                     iCollectionUiHelper->DeleteL( *path, this );
+                    iFirstIndexOnScreen = iContainer->FirstIndexOnScreen();               
                     }
                 else if( iContainer )
                     {
@@ -1270,7 +1271,7 @@ void CMPXCollectionViewHgImp::UpdateListBoxL(
             else if ( ( aIndex > 0 )
                 && ( aIndex < iContainer->CurrentListItemCount() ) )
                 {
-                // No need to do anything here
+				iContainer->SetLbxCurrentItemIndexAndDraw( aIndex );
                 }
             else
                 {
@@ -4287,7 +4288,16 @@ void CMPXCollectionViewHgImp::HandleOpenL(
             }
         else
             {
-            UpdateListBoxL( aEntries, aIndex, aComplete );
+            TInt topIndex = aIndex;
+            if ( iFirstIndexOnScreen > 0 )
+                {
+                topIndex = iFirstIndexOnScreen;
+                if ( aComplete )
+                    {
+                    iFirstIndexOnScreen = 0;
+                    }
+                }
+            UpdateListBoxL( aEntries, topIndex, aComplete );            
             }
 #else
         UpdateListBoxL( aEntries, aIndex, aComplete );
@@ -6974,6 +6984,14 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
         static_cast<CMPXCollectionViewListBoxArray*>(
         iContainer->ListBoxArray() );
 	const CMPXMedia& containerMedia = array->ContainerMedia();
+
+    if ( &containerMedia == NULL )
+        {
+        // If containerMedia is NULL, Dim all options 
+        DimAllOptions(aResourceId, aMenuPane);
+        return; 
+        } 
+		
 	TMPXGeneralType containerType(
 		containerMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) );
 	TMPXGeneralCategory containerCategory(
@@ -8475,5 +8493,52 @@ TBool CMPXCollectionViewHgImp::NeedToShowEducatingDialog()
         }
     else
         return EFalse;
+    }
+
+void CMPXCollectionViewHgImp::DimAllOptions(TInt aResourceId, CEikMenuPane* aMenuPane)
+    {
+    switch ( aResourceId )
+        {
+        case R_MPX_COLLECTION_VIEW_MENU_1:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdGoToNowPlaying, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToArtistAlbums, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToAllSongs, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToPlaylists, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToGenre, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToPodcasts, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToMusicShop, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdGoToMultipleMusicShop, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdMusicLibraryDetails, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRefreshLibrary, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAbout, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdFind, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUpnpPlayVia, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdUPnPAiwCmdCopyToExternalCriteria, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdCreatePlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddToPlaylist, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAddSongs, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdReorder, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSend, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdDelete, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdRemove, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
+            break;
+            }
+        case R_MPX_COLLECTION_VIEW_MENU_2:
+            {
+            aMenuPane->SetItemDimmed( EMPXCmdRename, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdAlbumArt, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
+            aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+            break;
+            }
+        case R_AVKON_MENUPANE_MARKABLE_LIST:
+            {
+            aMenuPane->SetItemDimmed(EAknCmdEditListMenu, ETrue);
+            break;
+            }
+        }    
     }
 //  End of File

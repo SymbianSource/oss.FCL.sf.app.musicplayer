@@ -686,7 +686,7 @@ class CMPXDbMusic :
         */
         TBool UpdateCategoryFieldL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,
             const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
-            CMPXMessageArray* aItemChangedMessages, TUint32& aItemId);
+            CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, const TDesC& aArt = KNullDesC);
 
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:

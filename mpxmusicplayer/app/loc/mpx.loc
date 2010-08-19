@@ -107,4 +107,9 @@
 // r:3.2.3
 #define qtn_nmp_note_cannot_proceed_with_operation "Cannot proceed with operation during USB connection."
 
+// d:Dialog shown not to proceed with operation during Media Transfer operation.
+// l:popup_note_window
+// r:5.2
+#define qtn_mus_note_cancelled_due_to_mtp "Unable to perform operation during Media Transfer operation."
+
 // End of File

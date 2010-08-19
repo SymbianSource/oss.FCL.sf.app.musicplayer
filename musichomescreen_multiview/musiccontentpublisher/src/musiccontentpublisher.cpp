@@ -51,6 +51,8 @@ _LIT8( KMyActive, "active" );
 _LIT8( KMyDeActive, "deactive");
 _LIT8( KMySuspend, "suspend");
 _LIT8( KMyResume, "resume");
+_LIT8( KMyPluginshutdown, "pluginshutdown");
+_LIT8( KMySystemshutdown, "systemshutdown");
 _LIT8( KMyActionMap, "action_map" );
 _LIT8( KMyItem, "item" );
 _LIT8( KMyAdd, "Add" );
@@ -68,6 +70,7 @@ _LIT8( KMessage, "message" );
 //for application launcher AHPlugin
 const TInt KMmUid3AsTInt( 0x101f4cd2 );
 const TInt KMSGUidAsTInt( 0x10003A39 );
+const TInt KDelayTime( 6000000 ); // CPeriodic timer
 _LIT8( KAdditionalData, "additional_data" );
 _LIT( KLaunchApp, "launch_application" );
 _LIT( KMessageWithTail, "message_with_tail" );
@@ -147,7 +150,7 @@ void CMusicContentPublisher::ConstructL()
     MPX_DEBUG1("CMusicContentPublisher::ConstructL resources loaded");
     
     // connect to the skin server, to receive skin changed event.
-    iAknsSrvSession.Connect(this);
+    User::LeaveIfError(iAknsSrvSession.Connect(this));
     
     // enable skin.
     AknsUtils::InitSkinSupportL();
@@ -178,6 +181,7 @@ void CMusicContentPublisher::ConstructL()
     
     MPX_DEBUG1("CMusicContentPublisher::ConstructL initializing content");
     PublishDefaultL();
+    iUpdateIdle = CPeriodic::NewL(CActive::EPriorityStandard);
     
     MPX_DEBUG1("CMusicContentPublisher::ConstructL --->");
     }
@@ -229,6 +233,12 @@ CMusicContentPublisher::~CMusicContentPublisher()
     	{
     	delete iInstanceId;
     	}
+    
+    if ( iUpdateIdle )
+        {
+        iUpdateIdle->Cancel();
+        delete iUpdateIdle;
+        }    
     }
 
 // ---------------------------------------------------------------------------
@@ -801,6 +811,37 @@ void CMusicContentPublisher::BecameActiveL( CMCPPlugin* aPlugin )
         iActivePlugin = aPlugin;
         }
     }
+
+// ---------------------------------------------------------------------------
+// Callback function for CPeriodic.
+// ---------------------------------------------------------------------------
+//   
+TInt CMusicContentPublisher::UpdateCallback(TAny* aContentPublisher)
+    {
+    MPX_FUNC("CMusicContentPublisher::UpdateCallback");
+    
+    CMusicContentPublisher* self = 
+            reinterpret_cast<CMusicContentPublisher*> (aContentPublisher);
+    self->DoUpdate();
+    
+    return EFalse;
+    }
+
+// ---------------------------------------------------------------------------
+// Create plugin manager.
+// ---------------------------------------------------------------------------
+//   
+void CMusicContentPublisher::DoUpdate()
+    {
+    MPX_FUNC("CMusicContentPublisher::DoUpdate")
+    
+    TRAP_IGNORE( iPluginManager = CPluginManager::NewL(
+            TUid::Uid( KMCPPluginUid ), 
+            static_cast<MMCPPluginObserver*>( this ),
+            this ));    
+    iUpdateIdle->Cancel();
+    }
+
 // ---------------------------------------------------------------------------
 // From CContentHarvesterPlugin
 // This function updates information in CPS storage
@@ -809,13 +850,14 @@ void CMusicContentPublisher::BecameActiveL( CMCPPlugin* aPlugin )
 void CMusicContentPublisher::UpdateL() 
     {
     MPX_FUNC("CMusicContentPublisher::UpdateL");
-    if ( !iPluginManager )
+        
+    // Construct plugin manager asynchronously for not to block the caller
+    // thread
+    if ( !iPluginManager && !iUpdateIdle->IsActive())
         {
         MPX_DEBUG1("CMusicContentPublisher::UpdateL creating the plugin manager");
-        iPluginManager = CPluginManager::NewL(
-                TUid::Uid( KMCPPluginUid ), 
-                static_cast<MMCPPluginObserver*>( this ),
-                this );
+        
+        iUpdateIdle->Start(KDelayTime, KDelayTime, TCallBack(UpdateCallback,this));
         }
     }
 
@@ -849,8 +891,7 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
         }
     else if ( aTrigger ==  KMyDeActive )
         {
-        DoPublishDeleteAllL();
-        delete iInstanceId;
+        delete iInstanceId;  
         iInstanceId = NULL;
         }
     else if ( aTrigger ==  KMySuspend && iWidgetForeground)
@@ -862,6 +903,11 @@ void CMusicContentPublisher::HandlePublisherNotificationL( const TDesC& aContent
         iWidgetForeground = ETrue;
         DoPublishModifiedL();
         }
+    else if ( aTrigger == KMyPluginshutdown || aTrigger == KMySystemshutdown )
+        {
+        DoPublishDeleteAllL();   // Delete the data only if widget is removed or Phone is shutting down.
+		}
+
     MPX_DEBUG1("<--CMusicContentPublisher::HandlePublisherNotificationL");
     }
 

@@ -57,7 +57,7 @@
 // LOCALISATION STRINGS
 
 // d:Title for Add songs view
-// l:title_pane_t2/opt9
+// l:title_pane_t1/opt3
 // r:3.1
 //
 #define qtn_nmp_title_add_songs     "Add Songs"

@@ -46,6 +46,6 @@ PRJ_EXPORTS
 
 mpxmusicplayerstub.sis              /epoc32/data/z/system/install/mpxmusicplayerstub.sis
 // Secure backup & restore
-backup_registration.xml /epoc32/release/winscw/urel/z/private/102072c3/backup_registration.xml
-backup_registration.xml /epoc32/release/winscw/udeb/z/private/102072c3/backup_registration.xml
-backup_registration.xml /epoc32/data/z/private/102072c3/backup_registration.xml
+backup_registration.xml z:/private/102072c3/backup_registration.xml
+
+

@@ -382,9 +382,15 @@ void CAiPlayerPluginEngine::DoHandlePlaybackMessageL(
             case TMPXPlaybackMessage::EMediaChanged:
             case TMPXPlaybackMessage::EPlaylistUpdated:
                 {
-                iPlaybackUtility->PropertyL( *this, EPbPropertyPosition );
-                iPlaybackUtility->PropertyL( *this, EPbPropertyDuration );
-                RequestMediaL();
+                MMPXSource* s = iPlaybackUtility->Source();
+                if ( s )
+                    {
+                    RequestMediaL();
+                    }
+                else
+                    {
+                    iObserver->PlaylisIsEmpty();
+                    }
                 break;
                 }
             case TMPXPlaybackMessage::ECommandReceived:
@@ -539,10 +545,6 @@ void CAiPlayerPluginEngine::RequestMediaL()
         attrs.Append( KMPXMediaMusicAlbumArtFileName );
         s->MediaL( attrs.Array(), *this );
         CleanupStack::PopAndDestroy( &attrs );
-        }
-    else 
-        {
-        iObserver->PlaylisIsEmpty();
         }
     }
 //  End of File

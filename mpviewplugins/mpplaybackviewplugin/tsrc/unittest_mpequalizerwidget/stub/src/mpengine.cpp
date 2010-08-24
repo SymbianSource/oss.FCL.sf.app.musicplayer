@@ -21,7 +21,7 @@
 
 
 MpEngine::MpEngine()
-    : mActivePreset(-1),
+    : mActivePreset(0),
       mApplyPresetCount(0),
       mDisableEquqlizerCount(0)
 {
@@ -53,7 +53,7 @@ void MpEngine::applyPreset( int preset )
 void MpEngine::disableEqualizer()
 {
     mDisableEquqlizerCount++;
-    mActivePreset = -1;
+    mActivePreset = 0;
 }
 
 /*!

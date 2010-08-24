@@ -52,6 +52,17 @@
     \sa setMpxMedia()
  */
 
+/*!
+    \fn void dataChanged( int fromIndex, int toIndex )
+
+    This signal is emitted when a new data set is available within the
+    same context. This can happen during an incremental open operation,
+    if the view accesses a range of data that doesn't have final data
+    (i.e. Unknown). This signal is emitted upon completion of incremental
+    open operation, if such unavailable range was accessed.
+
+    \sa setMpxMedia()
+ */
 
 /*!
     \fn void albumDataChanged()
@@ -241,6 +252,27 @@ QString MpMpxCollectionData::albumSongData( int index, MpMpxCollectionData::Data
 }
 
 /*!
+ Returns item property for the specified \a index and \a type in the current item.
+ Currently supported data types are: Corrupted and DrmExpired. All others will return
+ false bool.
+ */
+
+bool MpMpxCollectionData::hasItemProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    return d_ptr->hasItemProperty( index, type );
+}
+
+/*!
+ Returns item property for the specified \a index and \a type in the current album.
+ Currently supported data types are: Corrupted and DrmExpired. All others will return
+ false bool.
+ */
+bool MpMpxCollectionData::hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    return d_ptr->hasAlbumSongProperty( index, type);
+}
+
+/*!
  Sets the media \a entries from the MPX framework. The \a reopen flag indicates
  whether the new media is a result of reopenCollection() operation in the MpEngine.
  Internal usage only from MpEngine.
@@ -248,6 +280,15 @@ QString MpMpxCollectionData::albumSongData( int index, MpMpxCollectionData::Data
 void MpMpxCollectionData::setMpxMedia( const CMPXMedia& entries, bool reopen )
 {
     d_ptr->setMpxMedia(entries, reopen);
+}
+
+/*!
+ Called when collection was opened with incremental open. This indicates that the
+ media received in setMpxMedia() has an update.
+ */
+void MpMpxCollectionData::incrementalOpenUpdate()
+{
+    d_ptr->incrementalOpenUpdate();
 }
 
 /*!
@@ -304,6 +345,32 @@ int MpMpxCollectionData::albumSongIndex( int songUniqueId )
     return d_ptr->albumSongIndex( songUniqueId );
 }
 
-//EOF
+/*!
+ Returns the list of index for the song with \a songUniqueId. 
+ A list is returned due to playlist can contain the same song 
+ multiple times.
 
+ */
+QList<int>  MpMpxCollectionData::songIndex( int songUniqueId )
+{
+    return d_ptr->songIndex( songUniqueId );
+}
+
+/*!
+ Set model index \a index as corrupted.  
+
+ */
+void MpMpxCollectionData::setCorruptValue( QModelIndex index, bool tBone )
+{
+    d_ptr->setCorruptValue( index, tBone );
+}
+
+/*!
+ Set the reloadAlbumContent variable to \a reloadAlbum
+
+ */
+void MpMpxCollectionData::setReloadAlbumContent( bool reloadAlbum )
+{
+    d_ptr->setReloadAlbumContent( reloadAlbum );
+}
 

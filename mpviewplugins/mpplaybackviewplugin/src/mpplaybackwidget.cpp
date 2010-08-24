@@ -84,7 +84,6 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
         mAlbumArt->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("realAudio"));
         mRealAudioIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
-        mRealAudioIndicator->hide();
         tmpWidgetPtr = mDocumentLoader->findWidget(QString("repeatIcon"));
         mRepeatIndicator = qobject_cast<HbLabel*>(tmpWidgetPtr);
                 
@@ -142,9 +141,25 @@ void MpPlaybackWidget::repeatChanged( bool value )
 void MpPlaybackWidget::playbackInfoChanged( )
 {
     TX_ENTRY
+    //Title
     mSongTitle->setPlainText( mPlaybackData->title() );
-    mArtistName->setPlainText( mPlaybackData->artist() );
-    mAlbumName->setPlainText( mPlaybackData->album() );
+    // Artist
+    QString data = mPlaybackData->artist();
+    if ( !data.isEmpty() ) {
+        mArtistName->setPlainText( data );
+    }
+    else {
+        mArtistName->setPlainText( hbTrId( "txt_mus_other_unknown3" ) );
+    }
+    // Album
+    data = mPlaybackData->album();
+    if ( !data.isEmpty() ) {
+        mAlbumName->setPlainText( data );
+    }
+    else {
+        mAlbumName->setPlainText( hbTrId( "txt_mus_other_unknown4" ) );
+    }
+    // RealAudioIcon
     mRealAudioIndicator->setVisible( mPlaybackData->realAudio() );
     emit signalPlaybackInfoChanged();
     TX_EXIT

@@ -138,4 +138,5 @@ EXPORTS
 	?reorderPlaylist@MpEngine@@QAEXHHHH@Z @ 137 NONAME ; void MpEngine::reorderPlaylist(int, int, int, int)
 	?scanFinished@MpSongScanner@@IAEXHH@Z @ 138 NONAME ; void MpSongScanner::scanFinished(int, int)
 	?setLoudness@MpEngine@@QAEX_N@Z @ 139 NONAME ; void MpEngine::setLoudness(bool)
+	?corruptedStop@MpEngine@@IAEXXZ @ 140 NONAME ; void MpEngine::corruptedStop(void)
 

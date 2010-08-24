@@ -38,5 +38,12 @@ enum TCollectionContext {
 // Register so type can be used in signal and slot connection
 Q_DECLARE_METATYPE(TCollectionContext)
 
+// Layout where the collection is being shown.
+enum TCollectionLayout {
+    ECollectionListView = 0,
+    ECollectionSelectionDialog,
+    ECollectionArrangeSongsDialog
+};
+
 #endif  // MPMPXCOLLECTIONVIEWDEFS_H
 

@@ -24,6 +24,7 @@
 
 class MpMpxCollectionData;
 class MpCollectionAlbumArtManager;
+class MpPlaybackData;
 
 #if defined(BUILD_MPDATA_LIB)
 #define MPDATA_EXPORT Q_DECL_EXPORT
@@ -37,7 +38,7 @@ class MPDATA_EXPORT MpCollectionDataModel : public QAbstractListModel
    
 public:
 
-    explicit MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent=0 );
+    explicit MpCollectionDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData = 0, QObject *parent=0 );
     virtual ~MpCollectionDataModel();
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -52,6 +53,8 @@ public:
     
     MpMpxCollectionData *collectionData();
     
+    void setLayout(TCollectionLayout layout);
+    
 signals:
 
     void orderChanged( int containerId, int itemId, int itemOrdinal, int newOrdinal );
@@ -63,14 +66,18 @@ public slots:
     void updateAlbumArt( int index );
     void refreshModel();
     void reloadData();
+    void reloadData( int fromIndex, int toIndex );
+    void fileCorrupted( int songId );     
 
 private:
 
     MpMpxCollectionData             *mCollectionData;       // Not own
+    MpPlaybackData                  *mPlaybackData;         // Not own
     MpCollectionAlbumArtManager     *mAlbumArtManager;      // Own
     int                             mRowCount;
     int                             mAlbumIndexOffset;
     int                             mHiddenItemIndex;
+    TCollectionLayout               mCollectionLayout;
 
 };
 

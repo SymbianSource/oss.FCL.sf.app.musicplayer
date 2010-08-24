@@ -87,12 +87,11 @@ private slots:
     void handleInspireMeGroupBoxToggled( bool state );
     void renderInspireMeMetadata();
     void renderInspireMeAlbumArts();
-    void abortInspireMeProcess();    
+    void abortInspireMeProcess();
 
 private:
     void startInspireMe();
     bool isMetadata() const;
-    void setupMenu();
     void saveGroupBoxStates();
 
 private:    

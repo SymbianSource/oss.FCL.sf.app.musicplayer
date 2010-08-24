@@ -17,7 +17,10 @@ TEMPLATE = app
 TARGET = mpfetchertestapp
 
 CONFIG += hb
-LIBS += -lxqservice -lxqserviceutil
+LIBS += -lxqservice \
+        -lxqserviceutil \
+        -lapgrfx \
+        -lcone
 
 HEADERS += inc/mpfetchertestappview.h 
 

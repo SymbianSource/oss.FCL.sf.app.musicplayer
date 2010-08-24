@@ -279,4 +279,13 @@ void MpPlaybackData::resetData()
     mId = 0;
     mRealAudio = false;
 }
+
+/*!
+ Stub function.
+*/
+void MpPlaybackData::setCorrupted( int id )
+{
+
+}
+
 //end of file

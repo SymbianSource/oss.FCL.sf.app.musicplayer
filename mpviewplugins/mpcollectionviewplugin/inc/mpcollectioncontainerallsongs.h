@@ -20,8 +20,6 @@
 
 #include "mpcollectionlistcontainer.h"
 
-class HbGroupBox;
-
 class MpCollectionContainerAllSongs : public MpCollectionListContainer
 {
     Q_OBJECT
@@ -38,10 +36,6 @@ public slots:
 private:
 
     void setupContainer();
-
-private:
-
-    HbGroupBox     *mInfoBar;   // Own
 
 };
 

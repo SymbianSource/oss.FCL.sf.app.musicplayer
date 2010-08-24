@@ -18,7 +18,9 @@
 #include <QtCore>
 
 #include <hbabstractviewitem.h>
+#include <hbgroupbox.h>
 
+#include "mpcollectiondocumentloader.h"
 #include "mpcollectioncontainer.h"
 #include "mpcollectiondatamodel.h"
 #include "mpmpxcollectiondata.h"
@@ -60,7 +62,9 @@ MpCollectionContainer::MpCollectionContainer( HbDocumentLoader *loader, QGraphic
       mDocumentLoader(loader),
       mViewMode(MpCommon::DefaultView)
 {
-    TX_LOG
+    TX_ENTRY
+    mInfoBar = qobject_cast<HbGroupBox*>(mDocumentLoader->findWidget(QString( "infoBar")));
+    TX_EXIT
 }
 
 /*!

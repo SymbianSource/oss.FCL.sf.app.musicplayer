@@ -58,6 +58,7 @@ public:
     bool setAlbumId( int id );
     bool setId( int id );
     void resetData();
+    void setCorrupted( int id );
 
 
 public:

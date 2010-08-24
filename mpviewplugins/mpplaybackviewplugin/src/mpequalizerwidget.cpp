@@ -39,7 +39,7 @@
 MpEqualizerWidget::MpEqualizerWidget() :
     mMpEngine(0),
     mPresetsList(0),
-    mOriginalPreset(KEqualizerPresetNone)
+    mOriginalPresetIndex(0)
 {
     TX_ENTRY
     
@@ -82,7 +82,7 @@ void MpEqualizerWidget::prepareDialog()
     setFrameType(HbPopup::Strong);
     setHeadingWidget(new HbLabel(hbTrId("txt_mus_title_select_preset")));
 
-    mOriginalPreset = mMpEngine->activePreset();
+    mOriginalPresetIndex = mMpEngine->activePreset();
     QStringList listItems;
     QStringList presetNames = mMpEngine->presetNames();
     for ( int i=0; i<presetNames.count(); i++ ) {
@@ -98,15 +98,8 @@ void MpEqualizerWidget::prepareDialog()
     }
     listItems.prepend(hbTrId("txt_mus_list_off"));
     TX_LOG_ARGS( "PresetNames=" << listItems);
-    int presetSelected;
-    if (mOriginalPreset == KEqualizerPresetNone) {
-        presetSelected = 0;     //First list item corresponds to "OFF"
-    }
-    else {
-        presetSelected = mOriginalPreset;
-    }
-
-    mPresetsList = new HbRadioButtonList(listItems, presetSelected, HbRadioButtonList::NoPreview, this);
+    
+    mPresetsList = new HbRadioButtonList(listItems, mOriginalPresetIndex, HbRadioButtonList::NoPreview, this);
     setContentWidget( mPresetsList );  //mPresetsList now owned by HbDialog
 
     connect( mPresetsList, 
@@ -154,14 +147,14 @@ void MpEqualizerWidget::cancelSelected(bool checked)
     
     if (mMpEngine && mPresetsList) {
         // Return to the original Preset
-        if (mOriginalPreset != mMpEngine->activePreset()) {
-            if (mOriginalPreset == KEqualizerPresetNone) {
+        if (mOriginalPresetIndex != mMpEngine->activePreset()) {
+            if (mOriginalPresetIndex == 0) {
                 mMpEngine->disableEqualizer();
                 mPresetsList->setSelected( 0 );     //First list item corresponds to "OFF"
             }
             else {
-                mMpEngine->applyPreset( mOriginalPreset );
-                mPresetsList->setSelected( mOriginalPreset );
+                mMpEngine->applyPreset( mOriginalPresetIndex );
+                mPresetsList->setSelected( mOriginalPresetIndex );
             }            
         }
     }
@@ -179,7 +172,7 @@ void MpEqualizerWidget::okSelected(bool checked)
     
     //Update original preset
     if (mMpEngine) {
-        mOriginalPreset = mMpEngine->activePreset();
+        mOriginalPresetIndex = mMpEngine->activePreset();
     }
     
     TX_EXIT

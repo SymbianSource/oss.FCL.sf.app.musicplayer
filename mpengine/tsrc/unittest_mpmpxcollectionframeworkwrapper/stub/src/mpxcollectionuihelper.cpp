@@ -23,7 +23,6 @@
 #include <e32debug.h>
 
 #include "stub/inc/mpxcollectionuihelper.h"
-const TInt KMPXAllSongsViewIndex = 0;
 const TInt KMPXPlaylistViewIndex = 1;
 
 
@@ -33,10 +32,10 @@ const TInt KMPXPlaylistViewIndex = 1;
 MMPXCollectionUiHelper::MMPXCollectionUiHelper():iIncAdd(EFalse),
                                                  iDelete(EFalse),
                                                  iCancel(EFalse),
+                                                 iMedia(0),
                                                  iValidRename(EFalse),
-                                                 iValidReorder(EFalse),
-                                                 iMedia(0)
-{   
+                                                 iValidReorder(EFalse)
+{
 }
 
 /*!

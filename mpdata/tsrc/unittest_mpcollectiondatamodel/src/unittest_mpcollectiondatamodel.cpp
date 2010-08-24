@@ -30,6 +30,7 @@
 #include "unittest_helper.h"
 #include "stub/inc/mpcollectionalbumartmanager.h"
 #include "stub/inc/mpmpxcollectiondata.h"
+#include "stub/inc/mpplaybackdata.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -58,6 +59,7 @@ TestMpCollectionDataModel::TestMpCollectionDataModel()
     : mTest(0),
       mHelper(0),
       mStubData(0),
+      mStubPlaybackData(0),
       mMpTranslator(0)
 {
 }
@@ -67,6 +69,7 @@ TestMpCollectionDataModel::~TestMpCollectionDataModel()
     delete mTest;
     delete mHelper;
     delete mStubData;
+    delete mStubPlaybackData;
     delete mMpTranslator;
 }
 
@@ -86,6 +89,7 @@ void TestMpCollectionDataModel::initTestCase()
     }
 
     mStubData = new MpMpxCollectionData();
+    mStubPlaybackData = new MpPlaybackData(this);
     mHelper = new TestHelper();
 }
 
@@ -96,6 +100,8 @@ void TestMpCollectionDataModel::cleanupTestCase()
 {
     delete mStubData;
     mStubData = 0;
+    delete mStubPlaybackData;
+    mStubPlaybackData = 0;
     delete mHelper;
     mHelper = 0;
 }
@@ -105,7 +111,7 @@ void TestMpCollectionDataModel::cleanupTestCase()
  */
 void TestMpCollectionDataModel::init()
 {
-    mTest = new MpCollectionDataModel(mStubData);
+    mTest = new MpCollectionDataModel(mStubData, mStubPlaybackData);
     MpMpxCollectionData::resetItemDataCounter();
     mTest->mCollectionData->mItemDataReturn = true;
     mTest->mCollectionData->mCollectionTitleReturn = true;
@@ -964,6 +970,15 @@ void TestMpCollectionDataModel::testSetContext()
     QCOMPARE(mTest->mAlbumIndexOffset, 0);
     mTest->mCollectionData->setContext(ECollectionContextPlaylistSongs);
     QCOMPARE(mTest->mAlbumIndexOffset, 0);
+}
+
+/*!
+ Tests fileCorrupted()
+ */
+void TestMpCollectionDataModel::testFileCorrupted()
+{
+    
+    
 }
 
 // End of file

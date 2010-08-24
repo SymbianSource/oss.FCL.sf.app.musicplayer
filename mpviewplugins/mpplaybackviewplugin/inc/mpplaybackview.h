@@ -80,6 +80,7 @@ public slots:
     void endForward();
     
     void connectButtons();
+    void showCorruptedNote();
 
 private:
 

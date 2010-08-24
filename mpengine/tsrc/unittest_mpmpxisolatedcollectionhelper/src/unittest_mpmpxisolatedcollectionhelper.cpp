@@ -108,7 +108,7 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
 {
     CMPXCollectionPath* path = CMPXCollectionPath::NewL();
     mTest->OpenCollectionL(*path);
-    QCOMPARE(mTest->iIncrementalOpenUtil->iDelay, KIncrementalDelayHalfSecond);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDelay, KIncrementalDelay);
     QCOMPARE(mTest->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTest->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTest->iFirstIncrementalOpen,TBool(ETrue));
@@ -118,7 +118,7 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
     QCOMPARE(mTest->iOpenMode, CMpMpxIsolatedCollectionHelper::DefaultMode );
     
     mTest->OpenCollectionL(*path,0,CMpMpxIsolatedCollectionHelper::RestorePathMode);
-    QCOMPARE(mTest->iIncrementalOpenUtil->iDelay, KIncrementalDelayHalfSecond);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDelay, KIncrementalDelay);
     QCOMPARE(mTest->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTest->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTest->iFirstIncrementalOpen,TBool(ETrue));

@@ -26,6 +26,8 @@
 #include <hbtoolbutton.h>
 #include <hblistview.h>
 #include <hbstyleloader.h>
+#include <hbmessagebox.h>
+
 
 #include <hgmediawall.h>
 
@@ -148,7 +150,7 @@ void MpMediaWallView::initializeView()
         
         mEngine = MpEngineFactory::createIsolatedEngine( MpEngine::MediaBrowsing );
         mCollectionData = mEngine->collectionData();
-        mModel = new MpCollectionDataModel( mCollectionData, this );
+        mModel = new MpCollectionDataModel( mCollectionData, mPlaybackData, this );
         
         connect( mCollectionData, SIGNAL( contextChanged( TCollectionContext ) ), 
                  this, SLOT( contextOpened( TCollectionContext ) ) );
@@ -170,7 +172,9 @@ void MpMediaWallView::initializeView()
     
     mTrackList = new MpTrackListWidget( this );
     mTrackList->setGraphicsEffect( new MpReflectionEffect(mTrackList) );
-    mTrackList->list()->setModel( new MpCollectionTBoneListDataModel(mCollectionData, mPlaybackData, mTrackList ) );
+    MpCollectionTBoneListDataModel *model = new MpCollectionTBoneListDataModel(mCollectionData, mPlaybackData, mTrackList );
+    model->enablePlaybackIndicatorEnable(true);
+    mTrackList->list()->setModel( model );
     mTrackList->hide();
     
     connect(mAlbumCover,SIGNAL(clicked()),this, SLOT(hideTracksList()));
@@ -392,10 +396,19 @@ void MpMediaWallView::dismissListClosingAnimation()
  */
 void MpMediaWallView::listItemActivated( const QModelIndex &index )
 {
-    int albumIndex = mMediaWallWidget->currentIndex().row();
-    //We are playing on the shared engine, but we pass the collection data that
-    //points to albums on media wall, this is used to construct the playlist.
-    MpEngineFactory::sharedEngine()->playAlbumSongs( albumIndex, index.row(), mCollectionData );
+    if (!mCollectionData->hasAlbumSongProperty(index.row(), MpMpxCollectionData::Corrupted)) {
+        int albumIndex = mMediaWallWidget->currentIndex().row();
+        //We are playing on the shared engine, but we pass the collection data that
+        //points to albums on media wall, this is used to construct the playlist.
+        MpEngineFactory::sharedEngine()->playAlbumSongs( albumIndex, index.row(), mCollectionData );
+    }
+    else{
+        //pop up corrupted note
+        HbMessageBox *messageBox = new HbMessageBox( hbTrId( "txt_mus_info_file_is_corrupt" ), HbMessageBox::MessageTypeInformation );
+        messageBox->setAttribute( Qt::WA_DeleteOnClose );
+        messageBox->setIcon( HbIcon( QString("qtg_small_fail") ) ); 
+        messageBox->show();   
+    }
 }
 
 /*!

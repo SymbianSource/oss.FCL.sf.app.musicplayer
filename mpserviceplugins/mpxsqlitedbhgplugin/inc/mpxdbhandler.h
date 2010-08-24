@@ -65,7 +65,6 @@ class CMPXDbComposer;
 class CMPXDbHandler :
     public CBase,
     public MMPXDbMusicObserver,
-    public MMPXDbArtistObserver,
     public MMPXDbAlbumObserver,
 	public MMPXDbPlaylistObserver
     {
@@ -1017,39 +1016,30 @@ class CMPXDbHandler :
 
     private:    // From MMPXDbMusicObserver
 
+        /**
+        * @see MMPXDbMusicObserver
+        */
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-        /**
-        * @see MMPXDbMusicObserver
-        */
-        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory,
-            const TDesC& aName,
-            TInt aDriveId,
-            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist,
-            const TDesC& aUri,
-            const TDesC& aAlbumArtist=KNullDesC);
-#else
-
-        /**
-        * @see MMPXDbMusicObserver
-        */
-        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory,
-            const TDesC& aName, TInt aDriveId,
-            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
+       virtual TUint32 AddAbstractAlbumItemL(const TDesC& aName, 
+            TInt aDriveId, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist,
+            const TDesC& aUri, const TDesC& aAlbumArtist=KNullDesC);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 
-       virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-           const TDesC& aArtistName, const TDesC& aArt,
+       virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,       
             TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
-
+       
        virtual void UpdateCategoryItemL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
             const CMPXMedia& aMedia, TInt aDrive, CMPXMessageArray* aItemChangedMessages);
 
+       virtual TUint32 GenerateUniqueIdForAlbumL(const CMPXMedia& aMedia);
+       
+       virtual TBool IsUnknownAlbumL(const TUint32 aId);
+
         /**
         * @see MMPXDbMusicObserver
         */
-        virtual void DeleteSongForCategoryL(TMPXGeneralCategory aCategory,
-            TUint32 aCategoryId, TInt aDriveId, CMPXMessageArray* aItemChangedMessages,
-            TBool& aItemExist);
+        virtual void DeleteSongForCategoryL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TDesC& aArt = KNullDesC);
 
         /**
         * @see MMPXDbMusicObserver
@@ -1066,37 +1056,32 @@ class CMPXDbHandler :
         */
         virtual HBufC* HandleGetAlbumNameFromIdL(TUint32 aId);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
-    private:    // From MMPXDbArtistObserver
-    /**
-    * @see MMPXDbArtistObser
-    */
-        virtual TInt HandleGetAlbumsCountForArtistL(TUint32 aArtistId);
-
-    private:    // From MMPXDbAlbumObserver
-    /**
-    * @see MMPXDbAlbumObserver
-    */
-    virtual TBool HandleIsUnknownArtistL(TUint32 aArtistId);
-    /**
-    * Get the Artistname of song which belongs to the specified Album.     
-    * @param aId, The Album ID.
-	* @returns alternative artistname retrieved in the specified Album.
-    */
-    virtual HBufC* HandleArtistForAlbumL(const TUint32 aAlbumId);
         
-    /**
-    * Get the Albumart of song which belongs to the specified Album.     
-    * @param aId, The Album ID.
-    * @param aArt, the AlbumArt uri.
-	* @returns alternative albumart retrieved in the specified Album.
-    */
-    virtual HBufC* HandleAlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt);
+    private:    // From MMPXDbAlbumObserver   
+        /**
+        * Get the Albumart of song which belongs to the specified Album.     
+        * @param aId, The Album ID.
+        * @param aArt, the AlbumArt uri.
+	    * @returns alternative albumart retrieved in the specified Album.
+        */
+        virtual HBufC* HandleAlbumartForAlbumL(const TUint32 aAlbumId, TPtrC aArt);
+       
+        /**
+        * @see MMPXDbAlbumObserver
+        */
+        virtual void DeleteAlbumForArtistL(TUint32 aCategoryId,
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages);
+
+        /**
+        * @see MMPXDbAlbumObserver
+        */
+        virtual TUint32 AddAlbumArtistL(const TDesC& aName, const TDesC& aArt, TInt aDriveId);       
 
     private:	// From MMPXDbPlaylistObserver
-	/**
-	* @see MMPXDbPlaylistObserver
-	*/
-		virtual TInt HandlePlaylistDurationL(TUint32 aPlaylistId);
+        /**
+        * @see MMPXDbPlaylistObserver
+        */
+        virtual TInt HandlePlaylistDurationL(TUint32 aPlaylistId);
         virtual void HandlePlaylistInfoL(TUint32 aPlaylistId, TInt& aCount, TInt& aDuration);
 
     private:

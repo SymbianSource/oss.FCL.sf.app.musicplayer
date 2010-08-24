@@ -525,7 +525,7 @@ void TestMpEngine::testDisableEqualizer()
     mTest = MpEngineFactory::createIsolatedEngine( MpEngine::StandAlone );
     mTest->disableEqualizer();
     
-    QCOMPARE( mTest->mCurrentPresetIndex, KEqualizerPresetNone );
+    QCOMPARE( mTest->mCurrentPresetIndex, 0 );
 }
 
 /*!
@@ -557,7 +557,7 @@ void TestMpEngine::testHandleEqualizerReady()
     QSignalSpy spy( mTest, SIGNAL( equalizerReady() ) );
     
     mTest->handleEqualizerReady();
-    QCOMPARE( mTest->mCurrentPresetIndex, 1 );
+    QCOMPARE( mTest->mCurrentPresetIndex, 0 );
     QVERIFY( spy.count() == 1 );
 }
 

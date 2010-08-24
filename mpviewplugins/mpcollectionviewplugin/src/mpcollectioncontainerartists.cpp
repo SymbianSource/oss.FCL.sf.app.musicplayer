@@ -30,6 +30,7 @@
 #include "mpcollectiondatamodel.h"
 #include "mpcollectiontbonelistdatamodel.h"
 #include "mptrace.h"
+#include "mpenginefactory.h"
 
 /*!
     \class MpCollectionContainerArtists
@@ -53,7 +54,6 @@
  */
 MpCollectionContainerArtists::MpCollectionContainerArtists( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionListContainer(loader, parent),
-      mInfoBar(0),
       mTBone(0),
       mTBoneListModel(0),
       mCurrentArtistIndex(0),
@@ -69,7 +69,6 @@ MpCollectionContainerArtists::MpCollectionContainerArtists( HbDocumentLoader *lo
 MpCollectionContainerArtists::~MpCollectionContainerArtists()
 {
     TX_ENTRY
-    delete mInfoBar;
     delete mTBone;
     delete mList;
     delete mTBoneListModel;
@@ -135,7 +134,7 @@ void MpCollectionContainerArtists::setDataModel( MpCollectionDataModel *dataMode
                 mTBone->setModel(dataModel);
                 mTBone->scrollTo( dataModel->index(mCurrentAlbumIndex - mAlbumIndexOffset, 0) );
                 if ( mTBoneListModel == 0 ) {
-                    mTBoneListModel = new MpCollectionTBoneListDataModel(mCollectionData);
+                    mTBoneListModel = new MpCollectionTBoneListDataModel(mCollectionData, MpEngineFactory::sharedEngine()->playbackData());
                     connect( mTBoneListModel, SIGNAL(albumDataChanged()), this, SLOT(albumDataChanged()) );
                     connect( mTBoneListModel, SIGNAL(albumDataAvailable()), this, SLOT(albumDataAvailable()) );
                 }
@@ -314,6 +313,9 @@ void MpCollectionContainerArtists::albumDataAvailable()
 void MpCollectionContainerArtists::setupContainer()
 {
     TX_ENTRY_ARGS("mCollectionContext=" << mCollectionContext);
+           
+    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "showInfoBar");
+    
     if ( mCollectionData->count() ) {
         bool ok = false;
         QGraphicsWidget *widget;
@@ -331,14 +333,13 @@ void MpCollectionContainerArtists::setupContainer()
                     mIndexFeedback->setItemView(mList);
                     initializeList();
                 }
-                if ( mInfoBar ) {
-                    delete mInfoBar;
-                    mInfoBar = 0;
-                }
                 if ( mTBone ) {
                     delete mTBone;
                     mTBone = 0;
                 }
+                
+                mInfoBar->setHeading(hbTrId("txt_mus_subhead_artist_1l").arg(mCollectionData->count()));
+     
                 break;
             case ECollectionContextArtistAlbums:
                 mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "artistAlbums", &ok);
@@ -346,8 +347,6 @@ void MpCollectionContainerArtists::setupContainer()
                     TX_LOG_ARGS("Error: invalid xml file.");
                     Q_ASSERT_X(ok, "MpCollectionContainerArtists::setupContainer", "invalid xml file");
                 }
-                widget = mDocumentLoader->findWidget(QString("artistDetail"));
-                mInfoBar = qobject_cast<HbGroupBox*>(widget);
 
                 artist = mCollectionData->collectionTitle();
                 if ( artist.isEmpty() ) {
@@ -367,9 +366,8 @@ void MpCollectionContainerArtists::setupContainer()
                         TX_LOG_ARGS("Error: invalid xml file.");
                         Q_ASSERT_X(ok, "MpCollectionContainerAlbums::setupContainer", "invalid xml file");
                     }
-                    widget = mDocumentLoader->findWidget(QString("artistDetail"));
-                    mInfoBar = qobject_cast<HbGroupBox*>(widget);
-                    mInfoBar->setHeading( hbTrId("txt_mus_subtitle_select_a_song") );
+                    
+                    mInfoBar->setHeading( hbTrId("txt_mus_subtitle_select_song") );
                 }
                 else {
                     mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "artistAlbumTBone", &ok);
@@ -377,10 +375,9 @@ void MpCollectionContainerArtists::setupContainer()
                         TX_LOG_ARGS("Error: invalid xml file.");
                         Q_ASSERT_X(ok, "MpCollectionContainerAlbums::setupContainer", "invalid xml file");
                     }
-                    if ( mInfoBar ) {
-                        delete mInfoBar;
-                        mInfoBar = 0;
-                    }
+                    
+                    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "hideInfoBar");
+                                       
                 }
                 widget = mDocumentLoader->findWidget(QString("artistAlbumWall"));
                 mTBone = qobject_cast<HgMediawall*>(widget);
@@ -397,7 +394,7 @@ void MpCollectionContainerArtists::setupContainer()
                 // No need to load anything. Just reuse the section "artistAlbums" loaded
                 // in ECollectionContextArtistAlbums context.
                 if ( mViewMode == MpCommon::FetchView ) {
-                    mInfoBar->setHeading( hbTrId("txt_mus_subtitle_select_a_song") );
+                    mInfoBar->setHeading( hbTrId("txt_mus_subtitle_select_song") );
                 }
                 else {
                     artist = mCollectionData->collectionTitle();
@@ -415,15 +412,14 @@ void MpCollectionContainerArtists::setupContainer()
         }
     }
     else {
-        // Must delete widgets when last song is deleted and view is reloaded.
-        if ( mInfoBar ) {
-            delete mInfoBar;
-            mInfoBar = 0;
-        }
+        // Must delete widget when last song is deleted and view is reloaded.
         if ( mTBone ) {
             delete mTBone;
             mTBone = 0;
         }
+
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_artist_1l").arg(0));
+                
         // Call empty list from base class
         setupEmptyListContainer();
     }

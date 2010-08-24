@@ -43,6 +43,7 @@ public:
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
+    void enablePlaybackIndicatorEnable(bool enable);
 
 signals:
 
@@ -54,6 +55,8 @@ public slots:
     void refreshModel();
     void updateSong();
     void updatePlaybackState();
+    void fileCorrupted(int songId);
+    
 
 private:
 
@@ -62,6 +65,7 @@ private:
     int                             mRowCount;
     int                             mCurrentSongId;
     bool                            mPlaybackActive;
+    bool                            mPlaybackIndicatorEnabled;
 
 };
 

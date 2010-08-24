@@ -30,7 +30,6 @@ public:
 
     void setViewMode(MpCommon::MpViewMode viewMode) { mViewMode = viewMode; }
     MpCommon::MpViewMode viewMode() { return mViewMode; }
-    virtual void setDefaultView() { }
 
 signals:
 

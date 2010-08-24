@@ -260,7 +260,7 @@ void TestMpCollectionContainers::testSetupContainerAllSongsFetcher()
     MpCollectionContainerAllSongs *allSongs = static_cast<MpCollectionContainerAllSongs*>(mTest);
 
     // Fetcher mode.
-    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_a_song"));
+    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
 }
 
 /*!
@@ -409,7 +409,7 @@ void TestMpCollectionContainers::testSetupContainerArtistsFetcher()
     QVERIFY(artists->mTBoneListModel != 0);
     QVERIFY(artists->mAlbumIndexOffset == 0);
     QCOMPARE(spy.count(), 1);
-    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_a_song"));
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
 
     // User selects back - navigate back to artists
     mCollectionData->mContext = ECollectionContextArtists;
@@ -434,7 +434,7 @@ void TestMpCollectionContainers::testSetupContainerArtistsFetcher()
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtistAllSongs);
     QVERIFY(artists->mList != 0);
     QVERIFY(artists->mInfoBar != 0);
-    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_a_song"));
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
 }
 
 /*!
@@ -529,7 +529,7 @@ void TestMpCollectionContainers::testSetupContainerAlbumsFetcher()
     QCOMPARE(albums->mTBone->reflectionsEnabled(), false);
     // We set mCurrentAlbumAvailable to true, so no signal should emit.
     QCOMPARE(spy.count(), 0);
-    QCOMPARE(albums->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_a_song"));
+    QCOMPARE(albums->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
 
     // User selects back - navigate back to albums
     mCollectionData->mContext = ECollectionContextAlbums;
@@ -620,7 +620,7 @@ void TestMpCollectionContainers::testSetupContainerPlaylistsFetcher()
     QVERIFY(playlists->mList != 0);
     QVERIFY(playlists->mInfoBar != 0);
     QVERIFY(playlists->mNoMusic == 0);
-    QCOMPARE(playlists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_a_song"));
+    QCOMPARE(playlists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
 
     // User selects back - navigate back to playlists
     mCollectionData->mContext = ECollectionContextPlaylists;

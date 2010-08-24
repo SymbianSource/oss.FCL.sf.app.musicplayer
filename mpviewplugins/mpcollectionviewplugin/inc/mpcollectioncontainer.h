@@ -30,6 +30,7 @@
 class HbDocumentLoader;
 class MpCollectionDataModel;
 class MpMpxCollectionData;
+class HbGroupBox;
 
 class MpCollectionContainer : public HbWidget
 {
@@ -62,6 +63,7 @@ protected:
 
 protected:
 
+    HbGroupBox              *mInfoBar;
     HbDocumentLoader        *mDocumentLoader;   // Not own
     MpCollectionDataModel   *mDataModel;        // Not own
     MpMpxCollectionData     *mCollectionData;   // Not own

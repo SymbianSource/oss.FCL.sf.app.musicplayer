@@ -26,6 +26,7 @@
 #include "mpviewbase.h"
 
 class QNetworkAccessManager;
+class QSignalMapper;
 class ThumbnailManager;
 
 /*!
@@ -46,10 +47,9 @@ public:
     
 public:
     void reset();
-    void queryLocalMusicStore( QString mArtist,QString mAlbum,QString mTitle );
     void queryInspireMeItems( QString mArtist,QString mAlbum,QString mTitle );
     void queryLocalMusicStore();
-    bool isLocalMusicStore() const;
+    bool isLocalMusicStore();
     
     int recommendationsCount() const;
     QString recommendedSong(int index) const;
@@ -60,15 +60,12 @@ private slots:
     void retrieveInformationFinished( QNetworkReply* reply );
     void retrieveInformationNetworkError( QNetworkReply::NetworkError error );
     void retrieveInformationSslErrors( const QList<QSslError> &error );
-    void albumArtDownloaded( QNetworkReply* reply );    
-    void setAlbumArtUri( const QString &albumArtUri, const QString &albumArtName );
-    void thumbnailReady( const QPixmap pixmap, void *data, int id, int error );
+    void albumArtDownloaded( int index );    
                   
 private:
-    void clearThumbnails();
     void clearRecommendations();    
     void clearNetworkReplies();    
-    void signalError();    
+    void signalError();
     void constructRequest( QString &uri );     
     // retrieve URI from Ovi music server
     void retrieveInformation( const QString &urlEncoded );
@@ -76,7 +73,6 @@ private:
     QString keyValues( QStringList keys, QStringList values ) const;
     void handleParsedXML();
 
-    bool writeImageToFile( const QByteArray &aImageData, const QString &aImageFileName );
     
 signals:
     void inspireMeItemAlbumArtReady();
@@ -95,14 +91,12 @@ private:
     QList<QNetworkReply *>  	mReplys;
     QList<int>                  mThumbnailRequests;
     
-    QDomDocument            	mDomDocument;
-    ThumbnailManager        	*mThumbnailManager; //owned    
+    QDomDocument            	mDomDocument; 
     
     QString                 	mArtist;
     QString                 	mAlbum;
     QString                 	mTitle;
     QString                 	mMusicStore;
-    QStringList          		mRecommendationAlbumArtsName;
     
     QStringList          		mRecommendationSongs;
     QStringList          		mRecommendationArtists;
@@ -115,6 +109,8 @@ private:
     RequestType         		mRequestType;
     int                         mRecommendationCount;
  
+    QSignalMapper               *mDownloadSignalMapper;
+
 };
 #endif /* MPQUERYMANAGER_H_ */
 

@@ -138,4 +138,5 @@ EXPORTS
 	_ZTV13MpSongScanner @ 137 NONAME
 	_ZTV15MpEngineFactory @ 138 NONAME
 	_ZTV8MpEngine @ 139 NONAME
+	_ZN8MpEngine13corruptedStopEv @ 140 NONAME
 

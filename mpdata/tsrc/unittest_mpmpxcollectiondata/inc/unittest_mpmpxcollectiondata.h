@@ -62,6 +62,9 @@ private slots:
     void testSetAlbumContent();
     void testSetCurrentAlbum();
     void testAlbumSongData();
+    void testHasItemProperty();
+    void testHasAlbumSongProperty();
+
 
 private:
 

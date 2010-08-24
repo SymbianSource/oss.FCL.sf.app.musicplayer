@@ -40,7 +40,8 @@ class MpMainWindow: public MpxViewFramework
 public:
 
     enum ViewType {
-        CollectionView = 1,
+        NoView = 0,
+        CollectionView,
         PlaybackView,
         SettingsView,
         DetailsView,
@@ -88,6 +89,7 @@ private:
     MpxViewPlugin         *mMediaWallViewPlugin;  // Own
     MpxViewPlugin         *mCurrentViewPlugin;    // Own
     ViewType              mVerticalViewType;
+    ViewType              mPreviousVerticalViewType;
     MusicServices         *mMusicServices;         // Own
     MpGlobalPopupHandler  *mPopupHandler;          // Own
     bool                   mUserExit;

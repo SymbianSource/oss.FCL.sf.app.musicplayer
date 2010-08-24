@@ -38,13 +38,15 @@
  \internal
  */
 MpMpxCollectionDataPrivate::MpMpxCollectionDataPrivate( MpMpxCollectionData *wrapper )
-    : q_ptr( wrapper ),
-      iContext( ECollectionContextUnknown ),
+    : q_ptr(wrapper),
+      iContext(ECollectionContextUnknown),
       iContainerMedia(0),
       iMediaArray(0),
       iCachedRemovedItem(0),
       iCurrentAlbumIndex(-1),
-      iAlbumSongCount(0)
+      iAlbumSongCount(0),
+      iReloadAlbumContent(false),
+	  iNeedReload(false)
 {
     TX_LOG
 }
@@ -99,7 +101,7 @@ QString MpMpxCollectionDataPrivate::collectionTitle() const
 /*!
  \internal
  */
-QString MpMpxCollectionDataPrivate::itemData( int index, MpMpxCollectionData::DataType type ) const
+QString MpMpxCollectionDataPrivate::itemData( int index, MpMpxCollectionData::DataType type )
 {
     TX_ENTRY_ARGS("index=" << index << ", type=" << type);
     QString data;
@@ -318,6 +320,36 @@ QString MpMpxCollectionDataPrivate::albumSongData( int index, MpMpxCollectionDat
 
 /*!
  \internal
+ */
+bool MpMpxCollectionDataPrivate::hasItemProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    TX_ENTRY_ARGS("index=" << index << ", type=" << type);
+    bool available = false;
+    TRAPD(err, available = DoHasItemPropertyL(index, type));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return available;
+}
+
+/*!
+ \internal
+ */
+bool MpMpxCollectionDataPrivate::hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    TX_ENTRY_ARGS("index=" << index << ", type=" << type);
+    bool available = false;
+    TRAPD(err, available = DoHasAlbumSongPropertyL(index, type));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+    return available;
+}
+
+/*!
+ \internal
  New data from MPX collection. This could be due to Open operation, in which case
  context would have changed. This could also be due to Re-open after operations
  such as delete, playlist renaming, playlist rearraging, etc., in which case the
@@ -413,6 +445,23 @@ void MpMpxCollectionDataPrivate::setMpxMedia( const CMPXMedia& entries, bool reo
 
 /*!
  \internal
+ This indicates data update during incremental open operation. This indicates
+ that media received in setMpxMedia() has updates.
+ */
+void MpMpxCollectionDataPrivate::incrementalOpenUpdate()
+{
+    TX_ENTRY_ARGS( "iNeedReload=" << iNeedReload);
+    if ( iNeedReload ) {
+        if ( itemId(iReloadRange.second) != -1 ) {
+            iNeedReload = false;
+            emit q_ptr->dataChanged(iReloadRange.first, iReloadRange.second);
+        }
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
  */
 const CMPXMedia& MpMpxCollectionDataPrivate::containerMedia()
 {
@@ -455,7 +504,7 @@ void MpMpxCollectionDataPrivate::setAlbumContent( const CMPXMedia& albumContent 
  */
 int MpMpxCollectionDataPrivate::itemIndex( int itemUniqueId )
 {
-    return albumIdIndexMapping.value( itemUniqueId, -1 );
+    return iAlbumIdIndexMapping.value( itemUniqueId, -1 );
 }
 
 /*!
@@ -465,9 +514,47 @@ int MpMpxCollectionDataPrivate::itemIndex( int itemUniqueId )
  */
 int MpMpxCollectionDataPrivate::albumSongIndex( int songUniqueId )
 {
-    return albumSongIdIndexMapping.value( songUniqueId, -1 );
+    return iAlbumSongIdIndexMapping.value( songUniqueId, -1 );
 }
 
+/*!
+ \internal
+   Use to lookup playing song id to index of song in collection and playlist
+   view 
+ */
+QList<int>  MpMpxCollectionDataPrivate::songIndex( int songUniqueId )
+{
+    TX_ENTRY
+    if(iSongIdIndexMapping.empty()){
+        for ( int i = count() - 1 ; i >= 0 ; i-- ) {
+            iSongIdIndexMapping.insertMulti( itemId2( i ) , i );
+        }
+    }
+    TX_EXIT
+    return iSongIdIndexMapping.values( songUniqueId );
+}
+
+/*!
+ \internal
+   Set item at index to corrupted depends on if viewing TBone
+ */
+void MpMpxCollectionDataPrivate::setCorruptValue( QModelIndex index, bool tBone)
+{
+    TX_ENTRY
+    TRAPD(err, DoSetCorruptValueL(index, tBone));
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::setReloadAlbumContent( bool reloadAlbum )
+{
+    iReloadAlbumContent = reloadAlbum;
+}
 
 /*!
  \internal
@@ -475,12 +562,12 @@ int MpMpxCollectionDataPrivate::albumSongIndex( int songUniqueId )
 void MpMpxCollectionDataPrivate::loadAlbumsLookup()
 {
     //Clearing all the album ids.
-    albumIdIndexMapping.clear();
+    iAlbumIdIndexMapping.clear();
     if ( iContext == ECollectionContextAlbumsMediaWall) {
         //Adding album ids and indixes to the hash, for itemIndex lookup.
         //This is disabled for other containers to save resources.
         for ( int i = count() - 1 ; i >= 0 ; i-- ) {
-            albumIdIndexMapping.insert( itemId( i ) , i );
+            iAlbumIdIndexMapping.insert( itemId( i ) , i );
         }
     }
 }
@@ -491,23 +578,65 @@ void MpMpxCollectionDataPrivate::loadAlbumsLookup()
 void MpMpxCollectionDataPrivate::loadAlbumSongsLookup()
 {
     //Clearing all the song ids.
-    albumSongIdIndexMapping.clear();
-    if ( iContext == ECollectionContextAlbumsMediaWall) {
-        //Adding album song ids and indixes to the hash, for albumSongIndex lookup.
-        //This is disabled for other containers to save resources.
-        for ( int i = albumSongsCount() - 1 ; i >= 0 ; i-- ) {
-            albumSongIdIndexMapping.insert( albumSongId( i ) , i );
-        }
+    iAlbumSongIdIndexMapping.clear();
+    //Adding album song ids and indixes to the hash, for albumSongIndex lookup.
+    //This is disabled for other containers to save resources.
+    for ( int i = albumSongsCount() - 1 ; i >= 0 ; i-- ) {
+        iAlbumSongIdIndexMapping.insert( albumSongId( i ) , i );
     }
 }
 
 /*!
  \internal
  */
-void MpMpxCollectionDataPrivate::DoGetDataL( int index, MpMpxCollectionData::DataType type, QString& data ) const
+void MpMpxCollectionDataPrivate::setReloadRange( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index);
+    if ( !iNeedReload ) {
+        iNeedReload = true;
+        iReloadRange.first = index;
+        iReloadRange.second = index;
+    }
+    else if ( index < iReloadRange.first ) {
+        iReloadRange.first = index;
+    }
+    else if ( index > iReloadRange.second ) {
+        iReloadRange.second = index;
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::itemId2( int index )
+{
+    TX_ENTRY_ARGS( "index=" << index );
+    int id = -1;
+    TRAPD( err, id = DoGetItemId2L( index ) );
+    if ( err == KErrNone ) {
+        TX_LOG_ARGS( "id=" << id );
+    }
+    else {
+        TX_LOG_ARGS( "Error: " << err << "; should never get here." );
+    }
+    TX_EXIT
+    return id;
+}
+
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::DoGetDataL( int index, MpMpxCollectionData::DataType type, QString& data )
 {
     TX_ENTRY
     CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
+
+    if ( currentMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId) == KMPXInvalidItemId ) {
+        // Accessing a data that hasn't been fully fetched from the collection.
+        // This can happen during incremental open. Set the index as reload candidate.
+        setReloadRange(index);
+    }
 
     TBuf<10> countBuf;
     TInt count = 0;
@@ -631,10 +760,29 @@ int MpMpxCollectionDataPrivate::DoGetContainerIdL()
 int MpMpxCollectionDataPrivate::DoGetItemIdL( int index )
 {
     CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
-    if ( !currentMedia->IsSupported( KMPXMediaGeneralId ) ) {
-        User::Leave(KErrNotFound);
+    if ( currentMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId) == KMPXInvalidItemId ) {
+        return -1;
     }
-    return currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
+    else {
+        int id1 = (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )).iId1;
+        int id2 = (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )).iId2;
+        TX_LOG_ARGS( "id1=" << id1 << ", id2=" << id2 );
+        return (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )).iId1;
+    }
+}
+
+/*!
+ \internal
+ */
+int MpMpxCollectionDataPrivate::DoGetItemId2L( int index )
+{
+    CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
+    if ( currentMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId) == KMPXInvalidItemId ) {
+        return -1;
+    }
+    else {
+        return (currentMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId )).iId2;
+    }
 }
 
 /*!
@@ -646,10 +794,12 @@ int MpMpxCollectionDataPrivate::DoGetAlbumSongIdL( int index )
     const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
     User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
     CMPXMedia* song = songs->AtL(index);
-    if ( !song->IsSupported( KMPXMediaGeneralId ) ) {
-        User::Leave(KErrNotFound);
+    if ( song->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId) == KMPXInvalidItemId ) {
+        return -1;
     }
-    return song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
+    else {
+        return song->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
+    }
 }
 
 /*!
@@ -683,16 +833,18 @@ bool MpMpxCollectionDataPrivate::DoSetCurrentAlbumL( int index )
     iCurrentAlbumIndex = index;
 
     bool songsAvailable = false;
-    CMPXMedia* album( iMediaArray->AtL( index ) );
-    if ( album->IsSupported(KMPXMediaArrayContents) ) {
-        // We've previously fetched the songs for this album so
-        // all we do now is populate the list with the song titles.
-        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
-        iAlbumSongCount = songs->Count();
-        songsAvailable = true;
-        TX_LOG_ARGS("Songs available.");
-        loadAlbumSongsLookup();
-        emit q_ptr->refreshAlbumSongs();
+    if (!iReloadAlbumContent){    
+        CMPXMedia* album( iMediaArray->AtL( index ) );
+        if ( album->IsSupported(KMPXMediaArrayContents) ) {
+            // We've previously fetched the songs for this album so
+            // all we do now is populate the list with the song titles.
+            const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+            iAlbumSongCount = songs->Count();
+            songsAvailable = true;
+            TX_LOG_ARGS("Songs available.");
+            loadAlbumSongsLookup();
+            emit q_ptr->refreshAlbumSongs();
+        }
     }
     TX_EXIT
     return songsAvailable;
@@ -737,9 +889,75 @@ void MpMpxCollectionDataPrivate::DoGetAlbumSongDataL( int index, MpMpxCollection
 /*!
  \internal
  */
+bool MpMpxCollectionDataPrivate::DoHasItemPropertyL( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    TX_ENTRY
+    CMPXMedia* currentMedia( iMediaArray->AtL( index ) );
+
+    TInt flags(0);
+    if ( currentMedia->IsSupported( KMPXMediaGeneralFlags ) ) {
+        flags = currentMedia->ValueTObjectL<TUint>( KMPXMediaGeneralFlags );
+    }
+    switch ( type ) {
+        case MpMpxCollectionData::Corrupted:
+            if ( ( flags ) & ( KMPXMediaGeneralFlagsIsCorrupted ) ){
+                return true;
+            }
+            break;
+        case MpMpxCollectionData::DrmExpired:
+            if ( ( flags ) & ( KMPXMediaGeneralFlagsIsDrmLicenceInvalid ) ){
+                return true;
+            }
+            break;
+        default:
+            break;
+    }
+    TX_EXIT
+    return false;    
+}
+
+/*!
+ \internal
+ */
+bool MpMpxCollectionDataPrivate::DoHasAlbumSongPropertyL( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+    TX_ENTRY
+    CMPXMedia* album( iMediaArray->AtL( iCurrentAlbumIndex ) );
+    if ( album->IsSupported(KMPXMediaArrayContents) ) {
+        const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+        User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+        CMPXMedia* song = songs->AtL(index);
+        TInt flags(0);
+        if ( song->IsSupported( KMPXMediaGeneralFlags ) ) {
+            flags = song->ValueTObjectL<TUint>( KMPXMediaGeneralFlags );
+        }
+        switch ( type ) {
+            case MpMpxCollectionData::Corrupted:
+                if ( ( flags ) & ( KMPXMediaGeneralFlagsIsCorrupted ) ){
+                    return true;
+                }
+                break;
+            case MpMpxCollectionData::DrmExpired:
+                if ( ( flags ) & ( KMPXMediaGeneralFlagsIsDrmLicenceInvalid ) ){
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+        
+    }
+    TX_EXIT
+    return false;    
+}
+/*!
+ \internal
+ */
 void MpMpxCollectionDataPrivate::SetCollectionContextL()
 {
     TX_ENTRY
+	// Clear Song Index Hash when context switched
+    iSongIdIndexMapping.clear();
     TMPXGeneralType containerType( EMPXNoType );
     if ( iContainerMedia->IsSupported( KMPXMediaGeneralType ) ) {
         containerType = iContainerMedia->ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType );
@@ -802,7 +1020,7 @@ void MpMpxCollectionDataPrivate::DoSetMpxMediaL( const CMPXMedia& entries )
     iContainerMedia = CMPXMedia::NewL(entries);
     iMediaArray = const_cast<CMPXMediaArray*>(iContainerMedia->Value<CMPXMediaArray>( KMPXMediaArrayContents ) );
     TX_LOG_ARGS("media count=" << iMediaArray->Count() );
-
+    iReloadAlbumContent = false;
     SetCollectionContextL();
     TX_EXIT
 }
@@ -829,4 +1047,25 @@ void MpMpxCollectionDataPrivate::DoSetAlbumContentL( const CMPXMedia& albumConte
     TX_EXIT
 }
 
+/*!
+ \internal
+ */
+void MpMpxCollectionDataPrivate::DoSetCorruptValueL(QModelIndex index, bool tBone)
+{
+    TX_ENTRY
+    if (tBone){
+        CMPXMedia* album( iMediaArray->AtL( iCurrentAlbumIndex ) );
+        if ( album->IsSupported(KMPXMediaArrayContents) ) {
+            const CMPXMediaArray* songs = album->Value<CMPXMediaArray>(KMPXMediaArrayContents);
+            User::LeaveIfNull(const_cast<CMPXMediaArray*>(songs));
+            CMPXMedia* song = songs->AtL( index.row() );
+            song->SetTObjectValueL<TUint>( KMPXMediaGeneralFlags,KMPXMediaGeneralFlagsIsCorrupted );
+        }
+    }
+    else {
+        CMPXMedia* song( iMediaArray->AtL( index.row() ) );
+        song->SetTObjectValueL<TUint>( KMPXMediaGeneralFlags,KMPXMediaGeneralFlagsIsCorrupted );        
+    }
+    TX_EXIT  
+}
 

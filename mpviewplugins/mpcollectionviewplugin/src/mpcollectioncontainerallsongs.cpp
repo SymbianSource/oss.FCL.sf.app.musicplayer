@@ -41,8 +41,7 @@
  Constructs the collection container.
  */
 MpCollectionContainerAllSongs::MpCollectionContainerAllSongs( HbDocumentLoader *loader, QGraphicsItem *parent )
-    : MpCollectionListContainer(loader, parent),
-      mInfoBar(0)
+    : MpCollectionListContainer(loader, parent)
 {
     TX_LOG
     mCollectionContext = ECollectionContextAllSongs;
@@ -54,7 +53,6 @@ MpCollectionContainerAllSongs::MpCollectionContainerAllSongs( HbDocumentLoader *
 MpCollectionContainerAllSongs::~MpCollectionContainerAllSongs()
 {
     TX_ENTRY
-    delete mInfoBar;
     delete mList;
     TX_EXIT
 }
@@ -91,16 +89,18 @@ void MpCollectionContainerAllSongs::dataReloaded()
 void MpCollectionContainerAllSongs::setupContainer()
 {
     TX_ENTRY
+    
+    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "showInfoBar");
+    
     if ( mCollectionData->count() ) {
         bool ok = false;
+        QGraphicsWidget *widget;
+        
         mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "allSongs", &ok);
         if ( !ok ) {
             TX_LOG_ARGS("Error: invalid xml file.");
             Q_ASSERT_X(ok, "MpCollectionContainerAllSongs::setupContainer", "invalid xml file");
         }
-        QGraphicsWidget *widget;
-        widget = mDocumentLoader->findWidget(QString("allSongsDetail"));
-        mInfoBar = qobject_cast<HbGroupBox*>(widget);
 
         widget = mDocumentLoader->findWidget(QString("allSongsList"));
         mList = qobject_cast<HbListView*>(widget);
@@ -109,15 +109,16 @@ void MpCollectionContainerAllSongs::setupContainer()
 
         QString details;
         if ( mViewMode == MpCommon::FetchView ) {
-            details = hbTrId("txt_mus_subtitle_select_a_song");
+            details = hbTrId("txt_mus_subtitle_select_song");
         }
         else {
-            int count = mCollectionData->count();
-            details = hbTrId("txt_mus_subhead_songs_l1").arg( count );
+            details = hbTrId("txt_mus_subhead_songs_l1").arg(mCollectionData->count());
         }
         mInfoBar->setHeading(details);
     }
     else {
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_songs_l1").arg(0));
+
         // Call empty list from base class
         setupEmptyListContainer();
     }

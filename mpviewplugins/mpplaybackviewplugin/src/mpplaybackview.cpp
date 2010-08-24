@@ -24,6 +24,7 @@
 #include <hbtoolbutton.h>
 #include <hbaction.h>
 #include <hbicon.h>
+#include <hbmessagebox.h>
 
 #include "mpplaybackview.h"
 #include "mpplaybackwidget.h"
@@ -102,6 +103,7 @@ void MpPlaybackView::initializeView()
     connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
 
     mMpEngine = MpEngineFactory::sharedEngine();
+    connect( mMpEngine, SIGNAL( corruptedStop() ), this, SLOT(showCorruptedNote() ));
     mPlaybackData = mMpEngine->playbackData();
     connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
              this, SLOT( playbackStateChanged() ) );
@@ -560,6 +562,19 @@ void MpPlaybackView::connectButtons()
             }
         }
     }
+}
+
+/*!
+ Slot to be called to show corrupted message box.
+ */
+void MpPlaybackView::showCorruptedNote()
+{
+    mMpEngine->stop();
+    HbMessageBox *messageBox = new HbMessageBox( hbTrId( "txt_mus_info_unable_to_play_selection" ), HbMessageBox::MessageTypeWarning );
+    messageBox->setAttribute( Qt::WA_DeleteOnClose );
+    messageBox->setIcon( HbIcon( QString("qtg_small_fail") ) ); 
+    connect (messageBox, SIGNAL( aboutToClose() ), this, SLOT( back() ) );
+    messageBox->show();
 }
 
 /*!

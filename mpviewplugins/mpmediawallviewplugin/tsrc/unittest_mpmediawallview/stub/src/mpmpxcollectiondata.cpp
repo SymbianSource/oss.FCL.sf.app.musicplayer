@@ -97,6 +97,14 @@ bool MpMpxCollectionData::setCurrentAlbum( int index )
 /*!
  Stub function.
 */
+bool MpMpxCollectionData::hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+
+}
+
+/*!
+ Stub function.
+*/
 const CMPXMedia& MpMpxCollectionData::containerMedia()
 {
     return *mContainerMedia;

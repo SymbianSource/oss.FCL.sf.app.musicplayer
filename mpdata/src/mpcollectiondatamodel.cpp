@@ -26,6 +26,7 @@
 
 #include "mpcollectiondatamodel.h"
 #include "mpcollectionalbumartmanager.h"
+#include "mpplaybackdata.h"
 #include "mpmpxcollectiondata.h"
 #include "mptrace.h"
 
@@ -67,18 +68,26 @@
 /*!
  Constructs the collection data model.
  */
-MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent )
-    : QAbstractListModel( parent ),
-      mCollectionData( data ),
-      mRowCount( 0 ),
-      mAlbumIndexOffset( 0 ),
-      mHiddenItemIndex( -1 )
+MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData, QObject *parent )
+    : QAbstractListModel(parent),
+      mCollectionData(data),
+      mPlaybackData(playbackData),
+      mRowCount(0),
+      mAlbumIndexOffset(0),
+      mHiddenItemIndex(-1),
+      mCollectionLayout(ECollectionListView)
 {
     TX_ENTRY
     connect( mCollectionData, SIGNAL(contextChanged(TCollectionContext)), this, SLOT(setContext(TCollectionContext)) );
     connect( mCollectionData, SIGNAL(dataChanged()), this, SLOT(reloadData()) );
+    connect( mCollectionData, SIGNAL(dataChanged(int, int)), this, SLOT(reloadData(int, int)) );
     mAlbumArtManager = new MpCollectionAlbumArtManager(mCollectionData);
     connect( mAlbumArtManager, SIGNAL(albumArtReady(int)), this, SLOT(updateAlbumArt(int)) );
+    
+    if ( mPlaybackData ) {         
+        connect( mPlaybackData, SIGNAL(fileCorrupted(int)), 
+                 this, SLOT(fileCorrupted(int)) );
+    }
     TX_EXIT
 }
 
@@ -143,7 +152,24 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << primaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown4");
+                    switch ( context ) {
+                        case ECollectionContextArtists:
+                            display << hbTrId("txt_mus_list_unknown");
+                            break;
+                        case ECollectionContextArtistAlbums:
+                        case ECollectionContextAlbums:
+                            display << hbTrId("txt_mus_dblist_unknown");
+                            break;
+                        case ECollectionContextAlbumsTBone:
+                        case ECollectionContextArtistAlbumsTBone:
+                            display << hbTrId("txt_mus_other_unknown8");
+                            break;
+                        default:
+                            // Otherwise the primary text should be the Song Title or File Name
+                            // but can not be empty, if so there is an error.
+                            TX_LOG_ARGS("Error: Song title empty.");
+                            break;
+                    }
                 }
                 break;
             case ECollectionContextAlbumsMediaWall:
@@ -152,7 +178,7 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << primaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown4");
+                    display << hbTrId("txt_mus_other_unknown2");
                 }    
                 break;
             default:
@@ -171,7 +197,26 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << secondaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown3");
+                    switch ( context ) {
+                        case ECollectionContextAllSongs:
+                        case ECollectionContextPlaylistSongs:
+                            if ( mCollectionLayout == ECollectionSelectionDialog ) {
+                                display << hbTrId("txt_mus_dblist_val_unknown4");
+                            }
+                            else if ( mCollectionLayout == ECollectionArrangeSongsDialog ) {
+                                display << hbTrId("txt_mus_other_unknown9");
+                            }
+                            else {
+                                display << hbTrId("txt_mus_dblist_val_unknown");
+                            }
+                            break;
+                        case ECollectionContextAlbums:
+                            display << hbTrId("txt_mus_dblist_val_unknown2");
+                            break;
+                        case ECollectionContextAlbumsTBone:
+                            display << hbTrId("txt_mus_other_unknown5");
+                            break;
+                    }
                 }
                 break;
             case ECollectionContextArtistAlbumsTBone:
@@ -180,7 +225,7 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << secondaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown3");
+                    display << hbTrId("txt_mus_other_unknown5");
                 }
                 break;
             case ECollectionContextArtistAllSongs:
@@ -189,7 +234,7 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << secondaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown4");
+                    display << hbTrId("txt_mus_dblist_val_unknown3");
                 }
                 break;
             case ECollectionContextAlbumsMediaWall:
@@ -198,7 +243,7 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                     display << secondaryText;
                 }
                 else {
-                    display << hbTrId("txt_mus_other_unknown3");
+                    display << hbTrId("txt_mus_other_unknown1");
                 }
                 break;
             default:
@@ -221,6 +266,24 @@ QVariant MpCollectionDataModel::data(const QModelIndex &index, int role) const
                 else {
                     returnValue = mAlbumArtManager->albumArt( row );
                 }
+                break;
+            case ECollectionContextAllSongs:
+            case ECollectionContextArtistAllSongs:
+            case ECollectionContextPlaylistSongs:
+                if( mCollectionData->hasItemProperty(row, MpMpxCollectionData::Corrupted) ){
+					QList<QVariant> iconList;
+                    iconList << QVariant();
+                    iconList << HbIcon("qtg_mono_corrupted");
+                    returnValue = iconList;
+                }
+                else if ( mCollectionData->hasItemProperty(row, MpMpxCollectionData::DrmExpired) ) {
+                    QList<QVariant> iconList;
+                    iconList << QVariant();
+                    iconList << HbIcon("qtg_small_drm_rights_expired");
+                    returnValue = iconList;
+                } 
+                break;
+            default:
                 break;
         }
     }
@@ -375,6 +438,14 @@ MpMpxCollectionData *MpCollectionDataModel::collectionData()
 }
 
 /*!
+ Sets the layout where the collection is being displayed.
+ */
+void MpCollectionDataModel::setLayout(TCollectionLayout layout)
+{
+    mCollectionLayout = layout;
+}
+
+/*!
  Slot to be called when collection context is changed.
  */
 void MpCollectionDataModel::setContext( TCollectionContext context )
@@ -419,8 +490,7 @@ void MpCollectionDataModel::updateAlbumArt( int index )
 
     index -= mAlbumIndexOffset;
     if ( index >= 0 && index < mRowCount ) {
-        QModelIndex modelIndex = QAbstractItemModel::createIndex(index, 0);
-        emit dataChanged(modelIndex, modelIndex);
+        emit dataChanged(this->index(index, 0), this->index(index, 0));
     }
     TX_EXIT
 }
@@ -461,4 +531,36 @@ void MpCollectionDataModel::reloadData()
     emit dataReloaded();
     TX_EXIT
 }
+
+/*!
+ Slot to be called when data has changed (same context) and model needs to reload
+ the data in the specified range.
+ */
+void MpCollectionDataModel::reloadData( int fromIndex, int toIndex )
+{
+    TX_ENTRY_ARGS("fromIndex=" << fromIndex << ", toIndex=" << toIndex);
+    emit dataChanged(this->index(fromIndex,0), this->index(toIndex,0));
+    TX_EXIT
+}
+
+/*!
+ Slot to be called when a song is marked as corrupted
+ */
+void MpCollectionDataModel::fileCorrupted(int songId)
+{
+    TX_ENTRY
+    QModelIndex corruptedSongIndex;
+    QList<int> indexList = mCollectionData->songIndex( songId );
+    for (int i = 0; i < indexList.count(); i++){
+        corruptedSongIndex = index( indexList.at(i) );
+        if ( corruptedSongIndex.isValid() && (!(mCollectionData->hasItemProperty(corruptedSongIndex.row(),
+                MpMpxCollectionData::Corrupted)))) {
+        
+            mCollectionData->setCorruptValue(corruptedSongIndex, false);
+            emit dataChanged( corruptedSongIndex, corruptedSongIndex );
+        }
+    }
+    TX_EXIT   
+}
+
 

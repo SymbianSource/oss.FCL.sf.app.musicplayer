@@ -400,11 +400,11 @@ void TestMpMpxCollectionFrameworkWrapper::testOpenCollection()
 void TestMpMpxCollectionFrameworkWrapper::testDoIncrementalOpen()
 {
     mTestPrivate->DoIncrementalOpenL();
-    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDelay, KIncrementalDelayHalfSecond);
+    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDelay, KIncrementalDelay);
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTestPrivate->iFirstIncrementalOpen,TBool(ETrue));
-    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
+    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchDown);
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
 }
 
@@ -770,13 +770,13 @@ void TestMpMpxCollectionFrameworkWrapper::testHandleCollectionMessage()
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralData,EMcContainerOpened);
     mTestPrivate->DoHandleCollectionMessageL(*testMessage);
     //mTestPrivate->HandleCollectionMessage(*testMessage, KErrNone);
-    QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(EFalse)); 
-    
-    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDelay, KIncrementalDelayHalfSecond);
+    QCOMPARE(mTestPrivate->iCollectionUtility->iOpen,TBool(EFalse));
+
+    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDelay, KIncrementalDelay);
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTestPrivate->iFirstIncrementalOpen,TBool(ETrue));
-    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
+    QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchDown);
     QCOMPARE(mTestPrivate->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
 
     //Opened a song

@@ -30,7 +30,6 @@
 #include <e32debug.h>
 
 #include "stub/inc/mpxcollectionutility.h"
-const TInt KMPXAllSongsViewIndex = 0;
 const TInt KMPXPlaylistViewIndex = 1;
 
 /*!
@@ -39,14 +38,13 @@ const TInt KMPXPlaylistViewIndex = 1;
 MMPXCollectionUtility::MMPXCollectionUtility():iBack(EFalse),
                                                iOpen(EFalse),
                                                iMedia(EFalse),
-                                               iIndex(0),
                                                iOpenCount(0),
                                                iCountPath(0),
+                                               iIndex(0),
                                                iPlaylists(0),
                                                iAlbumSongs(0),
                                                iAsynchFindResult(0)
 {
-    
 }
 
 /*!
@@ -114,7 +112,8 @@ CMPXMedia* MMPXCollectionUtility::FindAllL(const CMPXSearchCriteria& aCriteria,
        aCriteria.IsSupported(KMPXMediaGeneralCategory) && EMPXSong == aCriteria.ValueTObjectL<TMPXGeneralCategory>(KMPXMediaGeneralCategory) &&
        aCriteria.IsSupported(KMPXMediaGeneralId) && iAlbumSongs &&
        //it is assumed that album ID matches index on the media array, just to make test logic more simple.
-       TUint32(aCriteria.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId)) >= 0 && TUint32(aCriteria.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId)) < iAlbumSongs->Count())
+       aCriteria.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId).iId2 &&
+       (aCriteria.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId).iId2 < iAlbumSongs->Count()) )
         {
         return CMPXMedia::NewL(*iAlbumSongs->AtL(aCriteria.ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId)));
         }

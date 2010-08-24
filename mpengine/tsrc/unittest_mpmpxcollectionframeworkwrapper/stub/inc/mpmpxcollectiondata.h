@@ -54,6 +54,7 @@ public:
     int currentAlbumIndex() const;
 
     void setMpxMedia( const CMPXMedia& entries, bool reopen=false );
+    void incrementalOpenUpdate();
     const CMPXMedia& containerMedia();
 
     void setAlbumContent( const CMPXMedia& albumContent );

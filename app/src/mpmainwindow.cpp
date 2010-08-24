@@ -58,6 +58,7 @@ MpMainWindow::MpMainWindow()
       mMediaWallViewPlugin(0),
       mCurrentViewPlugin(0),
       mVerticalViewType( CollectionView ),
+      mPreviousVerticalViewType( NoView ),
       mMusicServices(0),
       mPopupHandler(0),
       mUserExit( false ),
@@ -221,19 +222,22 @@ void MpMainWindow::handleCommand( int commandCode )
             lower();
             break;
         case MpCommon::ActivateCollectionView:
-            activateView(CollectionView);
+            activateView( CollectionView );
             break;
         case MpCommon::ActivatePlaybackView:
-            activateView(PlaybackView);
+            activateView( PlaybackView );
             break;
         case MpCommon::ActivateSettingsView:
-            activateView(SettingsView);
+            activateView( SettingsView );
             break;
         case MpCommon::ActivateDetailsView:
-            activateView(DetailsView);
+            activateView( DetailsView );
             break;
         case MpCommon::ActivatePreviousView:
-            activateView(mVerticalViewType);
+            if ( orientation() == Qt::Vertical 
+                    && mPreviousVerticalViewType != NoView ) {
+                activateView( mPreviousVerticalViewType );
+            }
             break;
     }
     TX_EXIT
@@ -248,7 +252,7 @@ void MpMainWindow::switchView( Qt::Orientation orientation )
             activateView( mVerticalViewType );   
         }
         else {
-            activateView(MediaWallView);
+            activateView( MediaWallView );
         }
 }
 
@@ -281,7 +285,13 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     Q_ASSERT( mCurrentViewPlugin );
 
     if ( mCurrentViewPlugin ) {
-        if ( viewType != MediaWallView && viewType != DetailsView ) {
+        if ( viewType != MediaWallView ) {
+            //storing previous vertical view type only if it is not the same
+            //view, this to be able to keep track of the previously activated 
+            //view excluding media wall switching.
+            if ( mVerticalViewType != viewType ) {
+                mPreviousVerticalViewType = mVerticalViewType;
+            }
             mVerticalViewType = viewType;
         }
         addView( reinterpret_cast<HbView*>( mCurrentViewPlugin->getView() ) );
@@ -336,8 +346,7 @@ void MpMainWindow::handleLibraryUpdated()
     }
     else if ( mCollectionViewPlugin && mCurrentViewPlugin != mCollectionViewPlugin ) {
         activateView( CollectionView );
-        MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
-        collectionView->setDefaultView();
+
     }
 
     TX_EXIT

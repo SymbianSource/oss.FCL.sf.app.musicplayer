@@ -59,9 +59,8 @@
 #include "mpsettingsmanager.h"
 #include "mpsongdata.h"
 
-const TInt KIncrementalDelayNone = 0;
-const TInt KIncrementalDelayHalfSecond = 500000;
-const TInt KIncrementalFetchBlockSize = 400;
+const TInt KIncrementalDelay = 0;
+const TInt KIncrementalFetchBlockSize = 1000;
 
 const TInt KMPXChunkSize = 100;  // number of songs added in each chunk, IncAddL
 _LIT( KPlaylistPath, "C:\\Data\\Playlists\\" ); // Todo
@@ -452,12 +451,14 @@ void MpMpxCollectionFrameworkWrapperPrivate::HandleOpenL(
             iFirstIncrementalOpen = EFalse;
             if( iShuffleAll ) {
                 iShuffleAll = EFalse;
-                TX_ENTRY_ARGS( "Path is ready" );
+                TX_LOG_ARGS( "Path is ready" );
                 DoPlayAllSongsPlaylistL();
-                
             }
             iCollectionData->setMpxMedia( aEntries, iReopen );
             iReopen = EFalse;
+        }
+        else {
+            iCollectionData->incrementalOpenUpdate();
         }
     }
     else {
@@ -749,10 +750,9 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoIncrementalOpenL()
     RArray<TMPXAttribute> attrs;
     CleanupClosePushL( attrs );
     TArray<TMPXAttribute> ary = attrs.Array();
-    iIncrementalOpenUtil->SetDelay( KIncrementalDelayNone );
+    iIncrementalOpenUtil->SetDelay( KIncrementalDelay );
     iIncrementalOpenUtil->StartL( ary, KIncrementalFetchBlockSize,
-                                  KErrNotFound, CMPXCollectionOpenUtility::EFetchDown );
-    iIncrementalOpenUtil->SetDelay( KIncrementalDelayHalfSecond );
+            0, CMPXCollectionOpenUtility::EFetchDown );
     CleanupStack::PopAndDestroy( &attrs );
     TX_EXIT
 }

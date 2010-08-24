@@ -120,14 +120,15 @@ int MpEqualizerFrameworkWrapperPrivate::getPresetIndex( int presetNameKey )
 {
     TX_ENTRY_ARGS( "Preset Name Key = " << presetNameKey);
 
-    int presetIndex = KEqualizerPresetNone;
+    int presetIndex = 0;
     if ( mEqualizerUtility && presetNameKey != KEqualizerPresetNone ) {
         TArray<TEfAudioEqualizerUtilityPreset> presetArray = mEqualizerUtility->Presets();
         for ( TInt i = 0; i < presetArray.Count(); i++ ) {
             TX_LOG_ARGS("presetArray[" << i << "].iPresetNameKey (" 
                 << presetArray[i].iPresetNameKey << ") vs presetId (" <<presetNameKey << ")");
             if ( presetArray[i].iPresetNameKey == static_cast<TUint32>( presetNameKey ) ) {
-                presetIndex = i;
+				//Set the current preset index. 1 is added to index because index 0 represent "Off" at UI level.
+                presetIndex = i+1;
                 break;
             }
         }

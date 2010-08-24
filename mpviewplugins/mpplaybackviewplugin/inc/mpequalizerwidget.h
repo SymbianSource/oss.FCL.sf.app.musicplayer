@@ -51,7 +51,7 @@ private:
     
     MpEngine           *mMpEngine;         // Own
     HbRadioButtonList  *mPresetsList;  //owned
-    int                mOriginalPreset;
+    int                mOriginalPresetIndex;
 
     Q_DISABLE_COPY(MpEqualizerWidget)
     

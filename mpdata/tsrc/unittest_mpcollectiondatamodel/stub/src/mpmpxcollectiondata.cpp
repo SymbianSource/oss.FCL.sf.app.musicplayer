@@ -195,6 +195,14 @@ QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType 
 /*!
  Stub function.
  */
+bool MpMpxCollectionData::hasItemProperty( int index, MpMpxCollectionData:: DataProperty type ) const
+{
+
+}
+
+/*!
+ Stub function.
+ */
 int MpMpxCollectionData::containerId()
 {
     return 65535;
@@ -245,4 +253,28 @@ void MpMpxCollectionData::setContext( TCollectionContext context )
     emit contextChanged(mContext);
     return ;
 }
+
+/*!
+ Stub function.
+ */
+QList<int> MpMpxCollectionData::songIndex( int songUniqueId )
+    {
+    
+    }
+
+/*!
+ Stub function.
+ */
+void MpMpxCollectionData::setCorruptValue(QModelIndex index, bool tBone )
+    {
+    
+    }
+
+/*!
+ Stub function.
+ */
+void MpMpxCollectionData::setReloadAlbumContent( bool reloadAlbum )
+    {
+    
+    }
 

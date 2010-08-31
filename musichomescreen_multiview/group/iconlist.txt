@@ -1,9 +1,0 @@
--c8,8 qgn_prop_image_tb_prev
--c8,8 qgn_prop_image_tb_next
--c8,8 qgn_prop_image_tb_pause
--c8,8 qgn_prop_image_tb_play2
--c8,8 qgn_prop_image_tb_prev_dimmed
--c8,8 qgn_prop_image_tb_next_dimmed
--c8,8 qgn_prop_image_tb_pause_dimmed
--c8,8 qgn_prop_image_tb_play2_dimmed
--c8,8 qgn_indi_mup_default_album

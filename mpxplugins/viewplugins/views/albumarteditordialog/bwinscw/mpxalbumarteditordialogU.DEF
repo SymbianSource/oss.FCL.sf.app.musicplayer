@@ -1,5 +1,0 @@
-EXPORTS
-	??1CMPXAlbumArtEditorDialog@@UAE@XZ @ 1 NONAME ; CMPXAlbumArtEditorDialog::~CMPXAlbumArtEditorDialog(void)
-	?NewL@CMPXAlbumArtEditorDialog@@SAPAV1@XZ @ 2 NONAME ; class CMPXAlbumArtEditorDialog * CMPXAlbumArtEditorDialog::NewL(void)
-	?SetParamL@CMPXAlbumArtEditorDialog@@QAEXPBVTDesC16@@@Z @ 3 NONAME ; void CMPXAlbumArtEditorDialog::SetParamL(class TDesC16 const *)
-

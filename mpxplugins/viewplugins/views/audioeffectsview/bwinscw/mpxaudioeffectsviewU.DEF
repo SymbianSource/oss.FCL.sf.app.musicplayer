@@ -1,4 +1,0 @@
-EXPORTS
-	?NewL@CMPXAudioEffectsView@@SAPAV1@XZ @ 1 NONAME ; class CMPXAudioEffectsView * CMPXAudioEffectsView::NewL(void)
-	?NewLC@CMPXAudioEffectsView@@SAPAV1@XZ @ 2 NONAME ; class CMPXAudioEffectsView * CMPXAudioEffectsView::NewLC(void)
-

@@ -1,4 +1,0 @@
-EXPORTS
-	?NewL@CMPXMainView@@SAPAV1@XZ @ 1 NONAME ; class CMPXMainView * CMPXMainView::NewL(void)
-	?NewLC@CMPXMainView@@SAPAV1@XZ @ 2 NONAME ; class CMPXMainView * CMPXMainView::NewLC(void)
-

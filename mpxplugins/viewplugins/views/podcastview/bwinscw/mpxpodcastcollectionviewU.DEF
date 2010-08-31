@@ -1,4 +1,0 @@
-EXPORTS
-	?NewL@CMPXPodcastCollectionView@@SAPAV1@XZ @ 1 NONAME ; class CMPXPodcastCollectionView * CMPXPodcastCollectionView::NewL(void)
-	?NewLC@CMPXPodcastCollectionView@@SAPAV1@XZ @ 2 NONAME ; class CMPXPodcastCollectionView * CMPXPodcastCollectionView::NewLC(void)
-

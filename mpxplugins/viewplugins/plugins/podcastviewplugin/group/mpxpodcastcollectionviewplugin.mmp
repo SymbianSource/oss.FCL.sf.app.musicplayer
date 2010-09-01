@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxpodcastcollectionviewplugin.
+*
+*/
+
+
+
+#include <data_caging_paths.hrh>
+#include <bldvariant.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxpodcastcollectionviewplugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x101FFC9B
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+VERSION 15.0
+
+SOURCEPATH      ../src
+SOURCE          mpxpodcastcollectionviewpluginproxy.cpp
+SOURCE          mpxpodcastcollectionviewplugin.cpp
+
+START RESOURCE  ../data/101ffc9b.rss
+TARGET          mpxpodcastcollectionviewplugin.rsc
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         avkon.lib
+LIBRARY         ecom.lib
+LIBRARY         mpxviewplugin.lib
+LIBRARY         mpxpodcastcollectionview.lib
+
+// End of File

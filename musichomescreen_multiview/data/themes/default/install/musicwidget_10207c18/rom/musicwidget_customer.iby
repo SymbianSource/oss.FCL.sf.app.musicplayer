@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Music widget HSPS-plugin language specific IBY file.
+*
+*/
+
+
+#ifndef __MUSICWIDGET_10207c18_CUSTOMER_IBY__
+#define __MUSICWIDGET_10207c18_CUSTOMER_IBY__
+
+//#if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)          
+
+// Enabled by DTD-localization tools, language specific
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\xuikon\00\musicwidget.o0000 \private\200159c0\install\musicwidget_10207c18\xuikon\00\musicwidget.o0000
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgetconfiguration.dtd \private\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgetconfiguration.dtd
+
+//#endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
+
+#endif // __MUSICWIDGET_10207c18_CUSTOMER_IBY__

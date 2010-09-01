@@ -1,0 +1,5 @@
+EXPORTS
+	??1CMPXMetadataEditorDialog@@UAE@XZ @ 1 NONAME ; CMPXMetadataEditorDialog::~CMPXMetadataEditorDialog(void)
+	?NewL@CMPXMetadataEditorDialog@@SAPAV1@XZ @ 2 NONAME ; class CMPXMetadataEditorDialog * CMPXMetadataEditorDialog::NewL(void)
+	?SetParamL@CMPXMetadataEditorDialog@@QAEXPBVTDesC16@@@Z @ 3 NONAME ; void CMPXMetadataEditorDialog::SetParamL(class TDesC16 const *)
+

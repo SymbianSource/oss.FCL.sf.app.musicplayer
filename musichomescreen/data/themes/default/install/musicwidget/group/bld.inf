@@ -1,0 +1,92 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+* NTT DOCOMO, INC - BUG 2358
+*
+* Description:  The information required for building
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for R&D builds
+//***********************
+// For WINSCW UDEB emulator & IBY exports (engineering versions)
+../hsps/00/manifest.dat Z:/private/200159c0/install/musicwidget/hsps/00/manifest.dat
+../hsps/00/widgetconfiguration.xml Z:/private/200159c0/install/musicwidget/hsps/00/widgetconfiguration.xml
+../hsps/00/musicwidgetconfiguration.dtd Z:/private/200159c0/install/musicwidget/hsps/00/musicwidgetconfiguration.dtd
+../xuikon/00/musicwidget.o0000 Z:/private/200159c0/install/musicwidget/xuikon/00/musicwidget.o0000
+../xuikon/00/MusicWidget.dat Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.dat
+../xuikon/00/MusicWidget.css Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.css
+../xuikon/00/MusicWidget.xml Z:/private/200159c0/install/musicwidget/xuikon/00/MusicWidget.xml
+
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/musicwidget/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/musicwidget/hsps/widgetconfiguration.xml
+../hsps/00/musicwidgetconfiguration.dtd /epoc32/data/Z/resource/homescreen/musicwidget/hsps/musicwidgetconfiguration.dtd
+
+../xuikon/00/MusicWidget.dat /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/MusicWidget.dat
+../xuikon/00/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/MusicWidget.css
+../xuikon/00/MusicWidget.xml /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/MusicWidget.xml
+
+
+// Arabic languages
+//*****************
+../xuikon/37/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/37/MusicWidget.css
+../xuikon/50/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/50/MusicWidget.css
+../xuikon/57/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/57/MusicWidget.css
+../xuikon/94/MusicWidget.css /epoc32/data/Z/resource/homescreen/musicwidget/xuikon/94/MusicWidget.css
+
+
+// Support for S60 localization
+//*****************************
+// export localizable loc files (engineering versions)
+../loc/musicwidgetconfiguration.loc         APP_LAYER_LOC_EXPORT_PATH(musicwidgetconfiguration.loc)
+
+// Support for S60 builds
+//***********************
+// export iby files
+../rom/musicwidget_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(musicwidget_resources.iby)
+../rom/musicwidget_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(musicwidget_customer.iby)
+../rom/musicwidget_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(musicwidget_variant.iby)
+../rom/musicwidget.iby CORE_APP_LAYER_IBY_EXPORT_PATH(musicwidget.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME musicwidget
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+// build icons
+
+
+// build application
+
+PRJ_TESTMMPFILES
+
+//#endif
+
+//  End of File  

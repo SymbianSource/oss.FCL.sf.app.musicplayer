@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/mpdetailsviewdocml">
-        <file alias="mpdetailsview.docml">mpdetailsview.docml.bin</file>
-    </qresource>
-</RCC>

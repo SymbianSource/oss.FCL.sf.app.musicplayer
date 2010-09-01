@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for MusicHomeScreen.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../loc/musichomescreen.loc APP_LAYER_LOC_EXPORT_PATH(musichomescreen.loc)
+
+../rom/musichomescreen.iby CORE_APP_LAYER_IBY_EXPORT_PATH(musichomescreen.iby)
+../rom/musichomescreenrsc.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(musichomescreenrsc.iby)
+
+
+
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE musichomescreenicons.mif
+OPTION HEADERFILE musichomescreenicons.mbg
+OPTION SOURCEFILE iconlist.txt
+END
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE musicwidgeticon.mif
+OPTION HEADERFILE musicwidgeticon.mbg
+OPTION SOURCEFILE musicwidgeticon.txt
+END
+
+PRJ_MMPFILES
+musicsuiteconf.mmp
+
+
+#include "../musiccontentpublisher/group/bld.inf"
+#include "../mcpmusicplayer/group/bld.inf"
+#include "../musicplayeractionhandlerplugin/group/bld.inf"
+#include "../data/themes/default/group/bld.inf"
+PRJ_TESTMMPFILES
+PRJ_TESTEXPORTS
+
+
+
+//  End of File

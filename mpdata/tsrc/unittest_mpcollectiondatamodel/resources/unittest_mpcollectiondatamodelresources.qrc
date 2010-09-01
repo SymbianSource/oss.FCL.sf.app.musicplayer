@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/testicons" >      
-        <file alias="default_album.png">default_album.png</file>    
-    </qresource>    
-</RCC>

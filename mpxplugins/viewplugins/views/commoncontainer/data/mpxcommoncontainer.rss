@@ -1,0 +1,117 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxcommoncontainer
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MXCC // 4 letter ID
+
+// INCLUDES
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <bldvariant.hrh>
+
+#include <mpxcommoncontainer.loc>
+#include "mpxcommoncontainer.hrh"
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// -----------------------------------------------------------------------------
+//    
+//    r_mpx_common_container_lbx
+//    common container's listbox resource.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE LISTBOX r_mpx_common_container_lbx
+    {
+    flags = EAknListBoxMarkableList;
+    }
+
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_details_number_of_songs
+// Details text for multiple items
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_details_number_of_songs
+    {
+    buf = qtn_vmp_detail_n_songs;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_details_one_song
+// Details text for single item
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_details_one_song
+    {
+    buf = qtn_vmp_detail_1_song;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_details_one_album
+// Details text for single item
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_details_one_album
+    {
+    buf = qtn_vmp_collection_detail_1_album;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_details_number_of_episodes
+// Details text for multiple items
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_details_number_of_episodes
+    {
+    buf = qtn_vmp_num_episode;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_details_one_episode
+// Details text for single item
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_details_one_episode
+    {
+    buf = qtn_vmp_one_episode;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_commoncontainer_unknown
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_commoncontainer_unknown
+    {
+    buf = qtn_vmp_unknown;
+    }
+
+// End of File

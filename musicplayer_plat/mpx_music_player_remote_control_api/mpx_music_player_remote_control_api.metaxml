@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<api id="cd7edbc96589920d16d57d07000d931c" dataversion="2.0">
+<name>MPX Music Player Remote Control API</name>
+<description>Provides means to control MPX Music Player remotely (e.g. from Active Idle plugin)</description>
+<type>c++</type>
+<collection>mpxmusicplayer</collection>
+<libs>
+</libs>
+<release category="platform" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

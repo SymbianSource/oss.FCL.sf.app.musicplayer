@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+
+
+    <widget id="MusicWidget">
+        <property class="ContentSource" name="MWCS" value="0x20019594"/>
+        <configuration name="service" value="Service.ContentPublishing"/>
+        <configuration name="interface" value="IContentPublishing"/>
+        <configuration name="command" value="GetList"/>
+
+        <box id="area1" focusable="true">
+            <actions>
+                <action>
+                    <trigger name="stylus">
+                        <property name="eventtype" value="up" />
+                    </trigger>
+                    <trigger name="activate"/>
+                    <trigger name="keyevent">
+                        <property name="scancode" value="3"/>
+                        <property name="eventtype" value="1"/>
+                    </trigger>
+                    <event name="MWCS/img1(MWTrigger1)"/>
+                </action>
+            </actions>
+
+          <image class="area1_images" id="DefaultImage" path="SKIN(270501603 8633)"/>
+            <image class="area1_images" id="area1_image1">
+                <property class="MWCS/img1"/>
+                <property class="policy/emptyContent" name="DefaultImage" value="display: block;"/>
+                <property class="policy/Content" name="DefaultImage" value="display: none;"/>
+                <configuration name="publisher" value="MWPublisher"/>
+                <configuration name="content_type" value="image"/>
+                <configuration name="content_id" value="area1_image1_content"/>
+                <configuration name="results" value="area1_image1_data"/>
+            </image>
+        </box><!--#area1-->
+
+        <box id="area2">        
+            <box id="player_inactive" visualisationaware="true">            
+                <box id="textbox2" focusable="true">
+                <actions>
+                    <action>
+                        <trigger name="stylus">
+                            <property name="eventtype" value="up" />
+                        </trigger>
+                        <trigger name="activate"/>
+                        <trigger name="keyevent">
+                            <property name="scancode" value="3"/>
+                            <property name="eventtype" value="1"/>
+                        </trigger>
+                        <event name="MWCS/default_text(MWTrigger2)"/>
+                    </action>
+                    <action>                    
+                        <trigger name="losevisualisation" />
+                        <event name="system/setfocus">
+                            <property name="id" value="area1"/>
+                        </event>                    
+                    </action>
+                </actions>
+    
+                <text id="area2_default_text">
+                    <property class="MWCS/default_text"/>                
+                                    
+                    <property class="policy/emptyContent" name="player_inactive" value="display: none;"/>
+                    <property class="policy/emptyContent" name="player_active" value="display: block;"/>
+                    
+                    <property class="policy/Content"      name="player_inactive" value="display: block;"/>
+                    <property class="policy/Content"      name="player_active" value="display: none;"/>
+                                        
+                    <configuration name="publisher" value="MWPublisher"/>
+                    <configuration name="content_type" value="text"/>
+                    <configuration name="content_id" value="default_text_content"/>
+                    <configuration name="results" value="default_text_data"/>
+                </text>
+                </box><!--#textbox2-->            
+            </box>
+            
+            <box id="player_active" visualisationaware="true">
+                <box id="textbox">
+                    <text id="area2_text1">
+                        <property class="MWCS/txt1"/>
+                        <configuration name="publisher" value="MWPublisher"/>
+                        <configuration name="content_type" value="text"/>
+                        <configuration name="content_id" value="area2_text1_content"/>
+                        <configuration name="results" value="area2_text1_data"/>
+                    </text>
+    
+                </box><!--#textbox-->
+    
+                <box id="toolbarbox">
+                    <box id="toolbarbutton1" class="toolbarbuttonbox" focusable="true">
+                        <actions>
+                            <action>
+                                <trigger name="stylus">
+                                    <property name="eventtype" value="up" />
+                                </trigger>
+                                <trigger name="activate"/>
+                                <trigger name="keyevent">
+                                    <property name="scancode" value="3"/>
+                                    <property name="eventtype" value="1"/>
+                                </trigger>
+                                <event name="MWCS/TB1(TB1Trigger)"/>
+                            </action>
+                            <action>
+                                <trigger name="losevisualisation" />
+                                <event name="system/setfocus">
+                                    <property name="id" value="area1"/>
+                                </event>
+                            </action>
+                        </actions>
+                        <image class="toolbarimage" id="toolbarimage1" >
+                            <property class="MWCS/TB1"/>
+                            <configuration name="publisher" value="MWPublisher"/>
+                            <configuration name="content_type" value="image"/>
+                            <configuration name="content_id" value="toolbar_b1_content"/>
+                            <configuration name="results" value="toolbar_b1_data"/>
+                        </image>
+                    </box><!--.toolbarbuttonbox-->
+    
+                    <box id="toolbarbutton2" class="toolbarbuttonbox" focusable="true">
+                        <actions>
+                            <action>
+                                <trigger name="stylus">
+                                    <property name="eventtype" value="up" />
+                                </trigger>
+                                <trigger name="activate"/>
+                                <trigger name="keyevent">
+                                    <property name="scancode" value="3"/>
+                                    <property name="eventtype" value="1"/>
+                                </trigger>
+                                <event name="MWCS/TB2(TB2Trigger)"/>
+                            </action>
+                            <action>
+                                <trigger name="losevisualisation" />
+                                <event name="system/setfocus">
+                                    <property name="id" value="area1"/>
+                                </event>
+                            </action>
+                        </actions>
+                        <image class="toolbarimage" id="toolbarimage2">
+                            <property class="MWCS/TB2"/>                            
+                            <property class="policy/emptyContent"      name="player_active" value="display: none;"/>
+			    <property class="policy/emptyContent"      name="player_inactive" value="display: block;"/>                                                        
+                            <configuration name="publisher" value="MWPublisher"/>
+                            <configuration name="content_type" value="image"/>
+                            <configuration name="content_id" value="toolbar_b2_content"/>
+                            <configuration name="results" value="toolbar_b2_data"/>
+                        </image>
+                    </box><!--.toolbarbuttonbox-->
+    
+                    <box id="toolbarbutton3" class="toolbarbuttonbox" focusable="true">
+                        <actions>
+                            <action>
+                                <trigger name="stylus">
+                                    <property name="eventtype" value="up" />
+                                </trigger>
+                                <trigger name="activate"/>
+                                <trigger name="keyevent">
+                                    <property name="scancode" value="3"/>
+                                    <property name="eventtype" value="1"/>
+                                </trigger>
+                                <event name="MWCS/TB3(TB3Trigger)"/>
+                            </action>
+                            <action>
+                                <trigger name="losevisualisation" />
+                                <event name="system/setfocus">
+                                    <property name="id" value="area1"/>
+                                </event>
+                            </action>
+                        </actions>
+                        <image class="toolbarimage" id="toolbarimage3">
+                            <property class="MWCS/TB3"/>
+                            <configuration name="publisher" value="MWPublisher"/>
+                            <configuration name="content_type" value="image"/>
+                            <configuration name="content_id" value="toolbar_b3_content"/>
+                            <configuration name="results" value="toolbar_b3_data"/>
+                        </image>
+                    </box><!--.toolbarbuttonbox-->    
+                </box><!--#toolbarbox-->                
+            </box>                                
+        </box><!--#area2-->
+    </widget><!--#MusicWidget-->
+</xmluiml>

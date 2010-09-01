@@ -1,0 +1,5 @@
+EXPORTS
+	??1CMPXAddTracksDialog@@UAE@XZ @ 1 NONAME ; CMPXAddTracksDialog::~CMPXAddTracksDialog(void)
+	?NewL@CMPXAddTracksDialog@@SAPAV1@XZ @ 2 NONAME ; class CMPXAddTracksDialog * CMPXAddTracksDialog::NewL(void)
+	?NewLC@CMPXAddTracksDialog@@SAPAV1@XZ @ 3 NONAME ; class CMPXAddTracksDialog * CMPXAddTracksDialog::NewLC(void)
+

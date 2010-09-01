@@ -1,0 +1,5 @@
+EXPORTS
+	?HandleCommandL@CMPXPodcastPlaybackViewImp@@EAEXH@Z @ 1 NONAME ; void CMPXPodcastPlaybackViewImp::HandleCommandL(int)
+	?NewL@CMPXPodcastPlaybackView@@SAPAV1@XZ @ 2 NONAME ; class CMPXPodcastPlaybackView * CMPXPodcastPlaybackView::NewL(void)
+	?NewLC@CMPXPodcastPlaybackView@@SAPAV1@XZ @ 3 NONAME ; class CMPXPodcastPlaybackView * CMPXPodcastPlaybackView::NewLC(void)
+

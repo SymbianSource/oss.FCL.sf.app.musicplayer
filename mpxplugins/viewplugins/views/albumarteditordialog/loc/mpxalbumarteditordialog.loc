@@ -1,0 +1,151 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project mpxalbumarteditordialog
+*
+*/
+
+
+
+/*
+  The syntax of a logical name entry in this file is the following:
+
+  // d:context description (line 1)
+  // d:context description (line N)
+  // l:layout id
+  // w:
+  // r:release information
+  //
+  #define qtn_<?feature_or_application>_?freetext "?text"
+
+  where
+      "qtn_" starts a logical name.  Note: "text_" has been used in
+           old logical names, but is deprecated.
+      "?feature/application" is 2-5 lower-case characters and/or numbers
+           identifying the larger context of the display text.
+      "?freetext" is the free text portion of the logical name.
+           It may contain only lower-case letters ('a' to 'z'), numbers
+           ('0' to '9'), and the underscore ('_').  The total length of
+           the logical name does must not exceed 50 characters.
+      "d:" Starts a description line clarifying the entry's context with
+           information like:
+           - Is a word a verb in imperative or is it a noun?  (For instance,
+             what does "Set" mean?)
+           - What will replace %U (unicode text parameter) or %N (number
+             parameter) included in texts?  (For instance, is it a phone
+             number or an e-mail address?)
+      "l:" Starts a layout id information (one line).
+           "P" and "No" are symbols in LAF's information table
+                - "P" is parent pane or current pane
+                - "No" is reference number in table
+      "r:" Starts a release information: one line indicating in which
+           S60 release the text was used for the first time.
+
+  Refer to the S60 localization instructions for more information.
+*/
+
+
+// LOCALISATION STRINGS
+
+// d:Album art details popup.
+// d:Title for album art popup.
+// l:heading_pane_t1
+// r:5.0
+//
+#define qtn_mus_title_select_album_art "Select album art:"
+
+// d:album art editor title
+// l:title_pane_t2/opt9
+// r:3.1
+//
+#define qtn_nmp_title_album_art "Album art"
+
+// d:Meta data editing softkey Option
+// d:Restores album art to image contained in meta data
+// l:list_single_pane_t1_cp2
+// r:3.1
+//
+#define qtn_options_restore_original "Restore original" 
+
+// d:Meta data editing Query
+// d:Confirmation yes or no, for adding all album art
+// l:popup_note_window/opt1
+// r:3.1
+//
+#define qtn_nmp_query_add_art_to_album "Album art for all songs in album will be changed. Continue?"
+
+// d:Meta data editing Query
+// d:Confirmation yes or no, for restoring all album art
+// l:popup_note_window/opt1
+// r:3.1
+//
+#define qtn_nmp_query_restore_art_to_album "Original art for all songs in album will be restored. Continue?"
+
+// d:Meta data editing Album art status
+// d:Displayed in Album art's position
+// d:when there is no album art to display
+// l:main_pane_empty_t1/opt2
+// r:3.1
+//
+#define qtn_nmp_empty_album_art "(no album art selected)"
+
+// d:Text for wait note for opening album art
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_nmp_note_opening "Opening"
+
+// d:Text for wait note for restoring album art
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_nmp_note_restoring_album_art "Restoring album art"
+
+// d:Text for wait note for changing album art
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_nmp_note_adding_album_art "Changing album art"
+
+// d:Confirmation text for restoring album art
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_art_restored "Original album art restored"
+
+// d:Confirmation text for changing album art
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_art_changed "Album art changed"
+
+// d:information text for changing album art with invalid files
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_change_with_invalid "Album art for some songs could not be changed"
+
+// d:information text for restoring album art with invalid files
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_restore_with_invalid "Album art for some songs could not be restored"
+
+// d:Confirmation note text.
+// d:Notify for unable to select the item because it's DRM protected.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mp_drm_not_allowed  "Unable to select a copyright protected item."
+
+// End of File

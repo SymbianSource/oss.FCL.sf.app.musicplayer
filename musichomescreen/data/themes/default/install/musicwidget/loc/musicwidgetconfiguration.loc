@@ -1,0 +1,24 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for Music Widget Configuration
+*
+*/
+
+
+// d: This is the text used to identify the music widget,
+// d: this is listed on the homescreen "add widget" dialog
+// l: ai_gene_pane_1_t1
+// w:
+// r: S60 v5.1
+#define qtn_musicwidget_configuration_name  "Music Widget"

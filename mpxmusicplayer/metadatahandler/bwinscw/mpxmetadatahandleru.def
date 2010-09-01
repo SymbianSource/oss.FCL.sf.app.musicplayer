@@ -1,0 +1,3 @@
+EXPORTS
+	?NewL@MMPXMetaDataHandler@@SAPAV1@AAVCRemConInterfaceSelector@@@Z @ 1 NONAME ; class MMPXMetaDataHandler * MMPXMetaDataHandler::NewL(class CRemConInterfaceSelector &)
+

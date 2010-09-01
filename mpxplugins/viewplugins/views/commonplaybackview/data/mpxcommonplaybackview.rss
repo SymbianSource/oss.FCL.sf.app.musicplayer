@@ -1,0 +1,2464 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxcommonplaybackview
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MCPV // 4 letter ID
+
+// INCLUDES
+#include <e32keys.h>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.mbg>
+#include <aknsconstants.hrh>
+#include <bldvariant.hrh>
+#include <mpxcommonplaybackview.mbg>
+
+#include <AiwCommon.hrh>
+#include <AiwCommon.rh>
+#include <mpxcommonui.loc>
+#include <mpxcommonplaybackview.loc>
+#include "mpxcommonplaybackview.hrh"
+#include "mpxcommonplaybackviewui.rh"
+
+#include <data_caging_paths_strings.hrh>
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_view
+// Playback view information resource.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_mpx_playback_view
+    {
+    menubar = r_mpx_playback_view_menubar;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    toolbar = r_mpx_pbv_touch_toolbar;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_view_menubar
+// Playback view menu bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_mpx_playback_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_mpx_playback_view_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_view_menu
+// Playback view menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_playback_view_menu
+    {
+    items=
+        {
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdGotoMusicMenu;
+            txt = qtn_mus_options_music_menu;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdRandom;
+            txt = qtn_mus_options_shuffle;
+            cascade = r_mpx_playback_random_sub_menu; 
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdRepeat;
+            txt = qtn_mus_option_repeat;
+            cascade = r_mpx_playback_repeat_sub_menu; 
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdSongDetails;
+            txt = qtn_mus_options_details_track;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdFMTransmitter;
+            txt = qtn_nmp_go_to_fm_transmitter;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdUpnpPlayVia;
+            txt = qtn_mp_options_player;
+            cascade = r_mpx_playback_play_via_sub_menu; 
+            },
+#if defined(__EQUALIZER) && defined(__AUDIO_EFFECTS_API)
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdEqualizer;
+            txt = qtn_mus_options_equalizer;
+            },
+#endif
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdOpenMusicSettings;
+            txt = qtn_nmp_options_audio_settings;
+            },
+
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdAddToPlaylist;
+            txt = qtn_mus_options_add_to_pl;
+            cascade = r_mpx_pbv_add_to_pl_sub_menu;
+            },
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdUseAsCascade;
+            txt = qtn_mus_options_use_tone_as;
+            cascade = r_mpx_use_as_cascade;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_repeat_sub_menu
+// Playback view Repeat sub menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_playback_repeat_sub_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdRepeatOff;
+            txt = qtn_nmp_options_repeat_subm_off;
+            flags = EEikMenuItemRadioStart;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdRepeatAll;
+            txt = qtn_nmp_repeat_subm_all;
+            flags = EEikMenuItemRadioMiddle;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdRepeatOne;
+            txt = qtn_nmp_repeat_subm_song;
+            flags = EEikMenuItemRadioEnd;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_playback_random_sub_menu
+// Playback view Random sub menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_playback_random_sub_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdRandomOff;
+            txt = qtn_nmp_options_random_subm_off;
+            flags = EEikMenuItemRadioEnd;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdRandomOn; 
+            txt = qtn_nmp_options_random_subm_on; 
+            flags = EEikMenuItemRadioStart;
+            }
+        };
+    }
+    
+// ---------------------------------------------------------------------------
+// r_mpx_playback_play_via_sub_menu
+// Playback view UPnP Play Via sub menu items.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_playback_play_via_sub_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdUpnpPlayViaLocal;
+            txt = qtn_nmp_options_player_device;
+            flags = EEikMenuItemRadioStart;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdUpnpPlayViaRemotePlayer;
+            txt = qtn_nmp_options_player_homenet;
+            flags = EEikMenuItemRadioEnd;
+            }
+        };
+    }    
+
+// -----------------------------------------------------------------------------
+//    r_mpx_add_to_pl_sub_menu
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_pbv_add_to_pl_sub_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdAddToSavedPlaylist;
+            txt = qtn_nmp_sub_add_to_playlist_saved;
+            },
+        MENU_ITEM
+            { 
+            command = EMPXPbvCmdAddToNewPlaylist;
+            txt = qtn_nmp_sub_add_to_playlist_new; 
+            }
+        };
+    }
+
+//------------------------------------------------------------------------------
+//
+//      r_mpx_aiw_assign_interest
+//      AIW interest criteria for "Use tone as" menu
+//
+//------------------------------------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_mpx_aiw_assign_interest
+    {
+    items=
+        {
+        AIW_CRITERIA_ITEM
+            {
+            id = EMPXPbvCmdAiwCmdAssign;
+            serviceCmd = KAiwCmdAssign;
+            contentType = "*";
+            serviceClass = KAiwClassMenu;
+            }
+        };
+    }    
+
+//----------------------------------------------------
+//
+//    r_mplayer_use_as_cascade
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_mpx_use_as_cascade
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = EMPXPbvCmdAiwCmdAssign;
+            txt = "";
+            }
+        };
+    }
+// ---------------------------------------------------------------------------
+// r_mpx_playbackview_title
+// Title for Playback view. Only used in landscape orientation.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_playbackview_title
+    {
+    buf = qtn_nmp_title_now_playing;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_no_tracks_label
+// Label for No tracks.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_pbv_no_tracks_label
+    {
+    buf = qtn_rp_nowplaying_empty;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_unknown_artist_label
+// Text to show when artist information is not available.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_pbv_unknown_artist_label
+    {
+    buf = qtn_nmp_unknown_artist;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_song_opening_label
+// Text used when song is opening.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_pbv_song_opening_label
+    {
+    buf = qtn_nmp_nowplaying_song_opening;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_playlist_item_counter_label
+// Text used for showing track position in the playlist.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_pbv_playlist_item_counter_label
+    {
+    buf = qtn_rp_nr_of_tracks;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_pbv_track_duration_format
+// Format used for track duration.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_pbv_track_duration_format
+    {
+    buf = qtn_nmp_nowplaying_song_duration;
+    }
+
+// -----------------------------------------------------------------------------
+//    r_mpx_wait_upnp_loading_song
+//    Text used in wait note while loading a song to remote player.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_wait_upnp_loading_song
+    {
+    buf = qtn_nmp_wait_loading_items;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_note_remote_connection_failed
+// Text used when a remote connection failed and player reverts to Local
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_note_remote_connection_failed
+    {
+    buf = qtn_nmp_note_remote_connection_failed;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_media_keys_not_supported
+// Display when media keys aren't supported by player
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_media_keys_not_supported
+    {
+    buf = qtn_nmp_note_no_media_key;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_generic_confirmation_query
+//    Generic confirmation query dialog.
+//
+// -----------------------------------------------------------------------------
+// 
+RESOURCE DIALOG r_mpx_generic_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+
+// ***********************************************************
+// *** Rocker Key Sound setting                            ***
+// ***********************************************************
+
+// -----------------------------------------------------------------------------
+// r_mpx_pbv_left_right_keys_silent
+// Disable left right keys sounds while seeking
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_SKEY_LIST r_mpx_pbv_left_right_keys_silent
+    {
+    list=
+        {
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyLeftArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeLong;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyLeftArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeRepeat;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyRightArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeLong;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyRightArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeRepeat;
+            }
+        };
+    }
+
+// ***********************************************************
+// *** Layouts for lowest portrait with Rocker key mapping ***
+// ***********************************************************
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_track_value_layout
+// Label layout for track name.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout
+    {
+    font = EAknLogicalFontTitleFont; C = 0; l = 6; r = 6; B = 88; W = 164; J = ELayoutAlignCenter;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_artist_value_layout
+// Label layout for artist name.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 6; r = 6; B = 104; W = 164; J = ELayoutAlignCenter;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_track_pos_layout
+// Label layout for track position.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 105; r = 6; B = 35; W = 65; J = ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_track_dur_layout
+// Label layout for track duration.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 6; B = 118; W = 164; J = ELayoutAlignCenter;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_elapsed_time_layout
+// Label layout for elasped time value.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 88; B = 118; W = 82; J = ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_remaining_time_layout
+// Label layout for remaining time value.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 88; r = 6; B = 118; W = 82; J = ELayoutAlignRight;
+    }
+        
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_empty_state_txt_layout
+// Label layout for empty state.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 6; r = 6; B = 88; W = 164; J = ELayoutAlignCenter;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_download_state_layout
+// Label layout for progressive download state.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 6; B = 141; W = 164; J = ELayoutAlignCenter;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_progress_bar_pane_layout
+// Pane layout for progress bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout
+    {
+    l = 6; t = 121; W = 164; H = 8;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_progress_bar_background_layout
+// Image layout for progress bar background.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout
+    {
+    l = 0; t = 0; W = 164; H = 8;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_playback_progress_bar_layout
+// Image layout for playback progress bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout
+    {
+    l = 2; t = 2; W = 160; H = 4;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_download_progress_bar_layout
+// Image layout for download progress bar.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout
+    {
+    l = 2; t = 2; W = 160; H = 4;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_playback_indi_layout
+// Image layout for playback indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout
+    {
+    l = 151; t = 6; W = 0; H = 0;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_shuffle_indi_layout
+// Image layout for shuffle indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout
+    {
+    l = 151; t = 6; W = 19; H = 15;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_repeat_indi_layout
+// Image layout for repeat indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout
+    {
+    l = 128; t = 6; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout
+    {
+    l = 105; t = 6; W = 19; H = 15;
+    }
+#endif
+
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_album_art_icon_layout
+// Image layout for album art icon.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout
+    {
+    l = 11; t = 4; W = 87; H = 78;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout
+    {
+    l = 56; t = 135; W = 74; H = 29;
+    }
+
+
+// **************************************************************
+// *** Layouts for lowest portrait without Rocker key mapping ***
+// **************************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_without_rocker
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_without_rocker
+    {
+    font = EAknLogicalFontTitleFont; C = 0; l = 6; r = 6; B = 108; W = 164; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_without_rocker
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 6; r = 6; B = 124; W = 164; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_without_rocker
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 105; r = 6; B = 35; W = 65; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_without_rocker
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 6; B = 138; W = 164; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_without_rocker
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 88; B = 138; W = 82; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_without_rocker
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 88; r = 6; B = 138; W = 82; J = ELayoutAlignRight;
+    }  
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_without_rocker
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 6; r = 6; B = 98; W = 164; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_without_rocker
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 6; r = 6; B = 166; W = 164; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_without_rocker
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_without_rocker
+    {
+    l = 6; t = 141; W = 164; H = 8;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_without_rocker
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_without_rocker
+    {
+    l = 0; t = 0; W = 164; H = 8;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_without_rocker
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_without_rocker
+    {
+    l = 2; t = 2; W = 160; H = 4;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_without_rocker
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_without_rocker
+    {
+    l = 2; t = 2; W = 160; H = 4;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_without_rocker
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_without_rocker
+    {
+    l = 151; t = 6; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_without_rocker
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_without_rocker
+    {
+    l = 128; t = 6; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_without_rocker
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_without_rocker
+    {
+    l = 105; t = 6; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_without_rocker
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_without_rocker
+    {
+    l = 83; t = 6; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_without_rocker
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_without_rocker
+    {
+    l = 6; t = 6; W = 82; H = 82;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_rocker_layout_without_rocker
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_rocker_layout_without_rocker
+    {
+    l = 0; t = 142; W = 0; H = 0;
+    }
+
+
+// *************************************************************
+// *** Layouts for double portrait ***
+// *************************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_double_portrait
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_double_portrait
+    {
+    font = EAknLogicalFontTitleFont; C = 215; l = 10; r = 10; B = 226; W = 332; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_double_portrait
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_double_portrait
+    {
+    font = EAknLogicalFontPrimaryFont; C = 215; l = 10; r = 10; B = 258; W = 332; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_double_portrait
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 214; r = 10; B = 68; W = 128; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_double_portrait
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 10; r = 12; B = 312; W = 332; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_double_portrait
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 10; r = 266; B = 312; W = 76; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_double_portrait
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 266; r = 10; B = 312; W = 76; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_double_portrait
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_double_portrait
+    {
+    font = EAknLogicalFontPrimaryFont; C = 215; l = 10; r = 10; B = 238; W = 332; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_double_portrait
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_double_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 10; r = 10; B = 365; W = 332; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_double_portrait
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_double_portrait
+    {
+    l = 10; t = 276; W = 332; H = 16;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_double_portrait
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_double_portrait
+    {
+    l = 0; t = 0; W = 332; H = 16;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_double_portrait
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_double_portrait
+    {
+    l = 4; t = 4; W = 324; H = 8;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_double_portrait
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_double_portrait
+    {
+    l = 4; t = 4; W = 324; H = 8;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_double_portrait
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_double_portrait
+    {
+    l = 304; t = 10; W = 38; H = 30;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_double_portrait
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_double_portrait
+    {
+    l = 260; t = 10; W = 38; H = 30;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_double_portrait
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_double_portrait
+    {
+    l = 216; t = 10; W = 38; H = 30;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_double_portrait
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_double_portrait
+    {
+    l = 172; t = 10; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_double_portrait
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_double_portrait
+    {
+    l = 10; t = 10; W = 174; H = 174;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout_double_portrait
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout_double_portrait
+    {
+    l = 244; t = 80; W = 98; H = 98;
+    }
+
+
+// *********************************************************
+// *** Layouts for Qvga portrait with Rocker key mapping ***
+// *********************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_qvga_portrait
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_qvga_portrait
+    {
+    font = EAknLogicalFontTitleFont; C = 0; l = 15; r = 15; B = 151; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_qvga_portrait
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_qvga_portrait
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 171; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_qvga_portrait
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 43; W = 75; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_qvga_portrait
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 15; B = 202; W = 210; J = ELayoutAlignCenter;
+    }
+
+#if defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS) || defined(__JAPANESE)
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_portrait
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 125; B = 208; W = 100; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_portrait
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 125; r = 15; B = 208; W = 100; J = ELayoutAlignRight;
+    }
+#else
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_portrait
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 125; B = 202; W = 100; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_portrait
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 125; r = 15; B = 202; W = 100; J = ELayoutAlignRight;
+    }
+#endif // defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS) || defined(__JAPANESE)
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_qvga_portrait
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_qvga_portrait
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 144; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_qvga_portrait
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_qvga_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 15; B = 220; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_qvga_portrait
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_qvga_portrait
+    {
+    l = 15; t = 177; W = 210; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_qvga_portrait
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_qvga_portrait
+    {
+    l = 0; t = 0; W = 210; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_qvga_portrait
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_qvga_portrait
+    {
+    l = 2; t = 2; W = 206; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_qvga_portrait
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_qvga_portrait
+    {
+    l = 2; t = 2; W = 206; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_qvga_portrait
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_qvga_portrait
+    {
+    l = 207; t = 8; W = 0; H = 0;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_qvga_portrait
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_qvga_portrait
+    {
+    l = 206; t = 8; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_qvga_portrait
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_qvga_portrait
+    {
+    l = 183; t = 8; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_qvga_portrait
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_qvga_portrait
+    {
+    l = 160; t = 8; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_qvga_portrait
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_qvga_portrait
+    {
+    l = 15; t = 8; W = 115; H = 115;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout_qvga_portrait
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout_qvga_portrait
+    {
+    l = 70; t = 221; W = 100; H = 45;
+    }
+
+
+// ***********************************************************
+// *** Layouts for Qvga portrait without Rocker key maping ***
+// ***********************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_qvga_portrait_without_rocker
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontTitleFont; C = 0; l = 15; r = 15; B = 165; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_qvga_portrait_without_rocker
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 191; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_qvga_portrait_without_rocker
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 43; W = 75; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_qvga_portrait_without_rocker
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 15; B = 235; W = 210; J = ELayoutAlignCenter;
+    }
+
+#if defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS) || defined(__JAPANESE)
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_portrait_without_rocker
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 125; B = 241; W = 100; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_portrait_without_rocker
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 125; r = 15; B = 241; W = 100; J = ELayoutAlignRight;
+    }
+#else
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_portrait_without_rocker
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 125; B = 235; W = 100; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_portrait_without_rocker
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 125; r = 15; B = 235; W = 100; J = ELayoutAlignRight;
+    }
+#endif // defined(__CHINESE_PRC_FONTS) || defined(__CHINESE_TAIWAN_HK_FONTS) || defined(__JAPANESE)
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_qvga_portrait_without_rocker
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 143; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_qvga_portrait_without_rocker
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_qvga_portrait_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 15; B = 260; W = 210; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_qvga_portrait_without_rocker
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_qvga_portrait_without_rocker
+    {
+    l = 15; t = 207; W = 210; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_qvga_portrait_without_rocker
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_qvga_portrait_without_rocker
+    {
+    l = 0; t = 0; W = 210; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_qvga_portrait_without_rocker
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_qvga_portrait_without_rocker
+    {
+    l = 2; t = 2; W = 206; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_qvga_portrait_without_rocker
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_qvga_portrait_without_rocker
+    {
+    l = 2; t = 2; W = 206; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_qvga_portrait_without_rocker
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_qvga_portrait_without_rocker
+    {
+    l = 210; t = 8; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_qvga_portrait_without_rocker
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_qvga_portrait_without_rocker
+    {
+    l = 187; t = 8; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_qvga_portrait_without_rocker
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_qvga_portrait_without_rocker
+    {
+    l = 164; t = 8; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_qvga_portrait_without_rocker
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_qvga_portrait_without_rocker
+    {
+    l = 141; t = 8; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_qvga_portrait_without_rocker
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_qvga_portrait_without_rocker
+    {
+    l = 15; t = 8; W = 115; H = 115;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout_qvga_portrait_without_rocker
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout_qvga_portrait_without_rocker
+    {
+    l = 0; t = 221; W = 0; H = 0;
+    }
+
+
+// **********************************************************
+// *** Layouts for Qvga Landscape with Rocker key mapping ***
+// **********************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_qvga_landscape
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_qvga_landscape
+    {
+    font = EAknLogicalFontTitleFont; C = 0; l = 15; r = 15; B = 150; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_qvga_landscape
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_qvga_landscape
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 168; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_qvga_landscape
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 15; r = 15; B = 186; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_qvga_landscape
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 35; W = 155; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_landscape
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 96; B = 35; W = 74; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_landscape
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 231; r = 15; B = 35; W = 74; J = ELayoutAlignRight;
+    }  
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_qvga_landscape
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_qvga_landscape
+    {
+    font = EAknLogicalFontPrimaryFont; C = 0; l = 15; r = 15; B = 150; W = 290; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_qvga_landscape
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_qvga_landscape
+    {
+    font = EAknLogicalFontSecondaryFont; C = 0; l = 150; r = 15; B = 71; W = 155; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_qvga_landscape
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_qvga_landscape
+    {
+    l = 150; t = 43; W = 155; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_qvga_landscape
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_qvga_landscape
+    {
+    l = 0; t = 0; W = 155; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_qvga_landscape
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_qvga_landscape
+    {
+    l = 2; t = 2; W = 151; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_qvga_landscape
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_qvga_landscape
+    {
+    l = 2; t = 2; W = 151; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_qvga_landscape
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_qvga_landscape
+    {
+    l = 207; t = 8; W = 0; H = 0;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_qvga_landscape
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_qvga_landscape
+    {
+    l = 286; t = 6; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_qvga_landscape
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_qvga_landscape
+    {
+    l = 259; t = 6; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_qvga_landscape
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_qvga_landscape
+    {
+    l = 232; t = 6; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_qvga_landscape
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_qvga_landscape
+    {
+    l = 15; t = 6; W = 115; H = 115;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout_qvga_landscape
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout_qvga_landscape
+    {
+    l = 213; t = 81; W = 100; H = 45;
+    }
+
+
+// *************************************************************
+// *** Layouts for Qvga Landscape without Rocker key mapping ***
+// *************************************************************
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_value_layout_qvga_landscape_without_rocker
+//    Label layout for track name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_value_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontTitleFont; C = 215; l = 15; r = 15; B = 150; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_artist_value_layout_qvga_landscape_without_rocker
+//    Label layout for artist name.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_artist_value_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 215; l = 15; r = 15; B = 168; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_pos_layout_qvga_landscape_without_rocker
+//    Label layout for track position.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_pos_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 15; r = 15; B = 186; W = 290; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_track_dur_layout_qvga_landscape_without_rocker
+//    Label layout for track duration.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_track_dur_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 150; r = 15; B = 35; W = 155; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_elapsed_time_layout_qvga_landscape_without_rocker
+//    Label layout for elasped time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_elapsed_time_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 150; r = 96; B = 35; W = 74; J = ELayoutAlignLeft;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_remaining_time_layout_qvga_landscape_without_rocker
+//    Label layout for remaining time value.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_remaining_time_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 231; r = 15; B = 35; W = 74; J = ELayoutAlignRight;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_empty_state_txt_layout_qvga_landscape_without_rocker
+//    Label layout for empty state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_empty_state_txt_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontPrimaryFont; C = 215; l = 15; r = 15; B = 106; W = 290; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_download_state_layout_qvga_landscape_without_rocker
+//    Label layout for progressive download state.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_LABEL r_mpx_pbv_download_state_layout_qvga_landscape_without_rocker
+    {
+    font = EAknLogicalFontSecondaryFont; C = 215; l = 150; r = 15; B = 71; W = 155; J = ELayoutAlignCenter;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_pane_layout_qvga_landscape_without_rocker
+//    Pane layout for progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_pane_layout_qvga_landscape_without_rocker
+    {
+    l = 150; t = 43; W = 155; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_progress_bar_background_layout_qvga_landscape_without_rocker
+//    Image layout for progress bar background.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_progress_bar_background_layout_qvga_landscape_without_rocker
+    {
+    l = 0; t = 0; W = 155; H = 10;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_playback_progress_bar_layout_qvga_landscape_without_rocker
+//    Image layout for playback progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_progress_bar_layout_qvga_landscape_without_rocker
+    {
+    l = 2; t = 2; W = 151; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_mpx_pbv_download_progress_bar_layout_qvga_landscape_without_rocker
+//    Image layout for download progress bar.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_download_progress_bar_layout_qvga_landscape_without_rocker
+    {
+    l = 2; t = 2; W = 151; H = 6;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_playback_indi_layout_qvga_landscape_without_rocker
+//    Image layout for playback indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_playback_indi_layout_qvga_landscape_without_rocker
+    {
+    l = 286; t = 6; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_shuffle_indi_layout_qvga_landscape_without_rocker
+//    Image layout for shuffle indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_shuffle_indi_layout_qvga_landscape_without_rocker
+    {
+    l = 259; t = 6; W = 19; H = 15;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_repeat_indi_layout_qvga_landscape_without_rocker
+//    Image layout for repeat indicator.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_repeat_indi_layout_qvga_landscape_without_rocker
+    {
+    l = 232; t = 6; W = 19; H = 15;
+    }
+
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+// ---------------------------------------------------------------------------
+// r_mpx_pbv_real_indi_layout_qvga_landscape_without_rocker
+// Image layout for Real Player indicator.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_real_indi_layout_qvga_landscape_without_rocker
+    {
+    l = 205; t = 6; W = 19; H = 15;
+    }
+#endif
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_album_art_icon_layout_qvga_landscape_without_rocker
+//    Image layout for album art icon.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_album_art_icon_layout_qvga_landscape_without_rocker
+    {
+    l = 15; t = 6; W = 115; H = 115;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    r_mpx_pbv_rocker_layout_qvga_landscape_without_rocker
+//    Image layout for rocker mapping.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_mpx_pbv_rocker_layout_qvga_landscape_without_rocker
+    {
+    l = 149; t = 60; W = 0; H = 0;
+    }
+    
+RESOURCE AVKON_BUTTONS r_mpx_pbv_rocker_avkon_buttons
+    {
+    buttons = 
+        {
+        //Play
+        AVKON_BUTTON
+            {
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_play_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_play_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_play_extension;
+                    }
+                };
+            },
+        //Pause
+        AVKON_BUTTON
+            {
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_pause_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_pause_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_pause_extension;
+                    }
+                };
+            },
+        //FF
+        AVKON_BUTTON
+            {
+            // Original flags for fast forward
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonReportOnLongPress|KAknButtonRequestExitOnButtonUpEvent;
+            //flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent|KAknButtonKeyRepeat;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_forward_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_forward_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_forward_extension;
+                    }
+                };
+            },
+        // FR
+        AVKON_BUTTON
+            {
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonReportOnLongPress|KAknButtonRequestExitOnButtonUpEvent;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_rewind_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_rewind_focused_mask;
+                    extension = r_mpx_pbv_rocker_avkon_buttons_rewind_extension;
+                    }
+                };
+            }
+        };
+    }
+    
+    RESOURCE AVKON_BUTTONS r_mpx_pbv_rocker_volume_avkon_buttons
+    {
+    buttons = 
+        {
+        // Volumn Down
+        AVKON_BUTTON
+            {
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent|KAknButtonKeyRepeat;
+            //flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonReportOnLongPress|KAknButtonRequestExitOnButtonUpEvent;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_focused_mask;
+                    extension=r_mpx_pbv_rocker_volume_avkon_buttons_down_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_down_focused_mask;
+                    extension=r_mpx_pbv_rocker_volume_avkon_buttons_down_extension;
+                    }
+                };
+            },
+        // Volumn UP
+        AVKON_BUTTON
+            {
+            // original flags for volume
+            flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent|KAknButtonKeyRepeat;
+            //flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonReportOnLongPress|KAknButtonRequestExitOnButtonUpEvent;
+            states =
+                {
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up; 
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_dimmed_mask;
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_focused;
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_focused_mask;
+                    extension=r_mpx_pbv_rocker_volume_avkon_buttons_up_extension;
+                    },
+                AVKON_BUTTON_STATE
+                    {
+                    bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                    press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up; 
+                    press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_mask;
+                    dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_dimmed;
+                    dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_dimmed_mask;
+                    bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_focused;
+                    bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_volume_up_focused_mask;
+                    extension=r_mpx_pbv_rocker_volume_avkon_buttons_up_extension;
+                    }
+                };
+            }
+        };
+    }
+    
+RESOURCE AVKON_BUTTON r_mpx_pbv_rocker_stop_avkon_button
+    {
+    //Stop
+    flags=KAknButtonNoFrame|KAknButtonNoClear|KAknButtonHitTest|KAknButtonNoFramePressEvent|KAknButtonRequestExitOnButtonUpEvent;
+    states =
+        {
+        AVKON_BUTTON_STATE
+            {
+            bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+            bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop; 
+            bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_mask;
+            dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_dimmed;
+            dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_dimmed_mask;
+            press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_focused;
+            press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_focused_mask;
+            extension = r_mpx_pbv_rocker_stop_avkon_button_extension;
+            },
+        AVKON_BUTTON_STATE
+            {
+            bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+            press_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop; 
+            press_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_mask;
+            dim_bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_dimmed;
+            dim_bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_dimmed_mask;
+            bmpid=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_focused;
+            bmpmask=EMbmMpxcommonplaybackviewQgn_indi_mup4_stop_focused_mask;
+            extension = r_mpx_pbv_rocker_stop_avkon_button_extension;
+            }
+        };
+    }
+//----------------------------------------------------
+//   
+//    r_mpx_pbv_touch_toolbar
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_TOOLBAR r_mpx_pbv_touch_toolbar
+    {
+    flags = KAknToolbarFixed|KAknToolbarWithoutCba;
+    items =
+        {
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = EMPXPbvCmdPreviousListItem;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonReportOnLongPress;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                        bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev; 
+                        bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev_mask;
+                        dim_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev_dimmed;
+                        dim_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev_dimmed_mask;
+                        press_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev_focused;
+                        press_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_prev_focused_mask;
+                        extension = r_mpx_pbv_touch_toolbar_prev_button_state_extension;
+                        }
+                    };            
+                };
+            },
+            
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+              id = EMPXPbvCmdPlayPause;
+            control = AVKON_BUTTON
+                {
+                flags = 0;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                        bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause; 
+                        bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause_mask;
+                        dim_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause_dimmed;
+                        dim_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause_dimmed_mask;
+                        press_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause_focused;
+                        press_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_pause_focused_mask;
+                        extension = r_mpx_pbv_touch_toolbar_pause_button_state_extension;
+                        },                 
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                        bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2; 
+                        bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2_mask;
+                        dim_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2_dimmed;
+                        dim_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2_dimmed_mask;
+                        press_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2_focused;
+                        press_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_play2_focused_mask;
+                        extension = r_mpx_pbv_touch_toolbar_play_button_state_extension;
+                        }                 
+                    };            
+                };
+            },
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = EMPXPbvCmdNextListItem;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonReportOnLongPress;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile=BITMAP_DIR"\\mpxcommonplaybackview.mif";
+                        bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next; 
+                        bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next_mask;
+                        dim_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next_dimmed;
+                        dim_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next_dimmed_mask;
+                        press_bmpid=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next_focused;
+                        press_bmpmask=EMbmMpxcommonplaybackviewQgn_prop_image_tb_next_focused_mask;
+                        extension = r_mpx_pbv_touch_toolbar_next_button_state_extension;
+                        }                 
+                    };            
+                };
+            }
+        };    
+    }
+
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_touch_toolbar_prev_button_state_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnPropImageTbPrev;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnPropImageTbPrevDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnPropImageTbPrevFocused;
+    }
+    
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_touch_toolbar_next_button_state_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnPropImageTbNext;    
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnPropImageTbNextDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnPropImageTbNextFocused;   
+    }    
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_touch_toolbar_play_button_state_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnPropImageTbPlay2;    
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnPropImageTbPlay2Dimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnPropImageTbPlay2Focused;  
+    }
+    
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_touch_toolbar_pause_button_state_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnPropImageTbPause;    
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnPropImageTbPauseDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnPropImageTbPauseFocused;    
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_avkon_buttons_play_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4Play;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4PlayDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4PlayFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_stop_avkon_button_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4Stop;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4StopDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4StopFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_avkon_buttons_pause_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4Pause;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4PauseDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4PauseFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_avkon_buttons_forward_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4Forward;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4ForwardDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4ForwardFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_avkon_buttons_rewind_extension
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4Rewind;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4RewindDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4RewindFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_volume_avkon_buttons_down_extension
+	{
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeDown;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeDownDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeDownFocused;
+    }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION  r_mpx_pbv_rocker_volume_avkon_buttons_up_extension
+	{
+    bmbSkinIdMajor = EAknsMajorGeneric; 
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeUp;
+    dimSkinIdMajor = EAknsMajorGeneric;
+    dimSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeUpDimmed;
+    pressSkinIdMajor = EAknsMajorGeneric;
+    pressSkinIdMinor = EAknsMinorGenericQgnIndiMup4VolumeUpFocused;
+    }
+// ---------------------------------------------------------------------------
+// r_mpx_request_rejected
+// Error note when tapping on the progress bar in remote mode.
+// ---------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_request_rejected
+    {
+    buf = text_request_rejected;
+    }
+// End of File

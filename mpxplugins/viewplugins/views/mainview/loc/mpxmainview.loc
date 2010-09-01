@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project mpxmainview
+*
+*/
+
+
+
+/*
+  The syntax of a logical name entry in this file is the following:
+
+  // d:context description (line 1)
+  // d:context description (line N)
+  // l:layout id
+  // w:
+  // r:release information
+  //
+  #define qtn_<?feature_or_application>_?freetext "?text"
+
+  where
+      "qtn_" starts a logical name.  Note: "text_" has been used in
+           old logical names, but is deprecated.
+      "?feature/application" is 2-5 lower-case characters and/or numbers
+           identifying the larger context of the display text.
+      "?freetext" is the free text portion of the logical name.
+           It may contain only lower-case letters ('a' to 'z'), numbers
+           ('0' to '9'), and the underscore ('_').  The total length of
+           the logical name does must not exceed 50 characters.
+      "d:" Starts a description line clarifying the entry's context with
+           information like:
+           - Is a word a verb in imperative or is it a noun?  (For instance,
+             what does "Set" mean?)
+           - What will replace %U (unicode text parameter) or %N (number
+             parameter) included in texts?  (For instance, is it a phone
+             number or an e-mail address?)
+      "l:" Starts a layout id information (one line).
+           "P" and "No" are symbols in LAF's information table
+                - "P" is parent pane or current pane
+                - "No" is reference number in table
+      "r:" Starts a release information: one line indicating in which
+           S60 release the text was used for the first time.
+
+  Refer to the S60 localization instructions for more information.
+*/
+
+
+// LOCALISATION STRINGS
+
+// Title
+
+// d:Text in title pane
+// d:Main view
+// l:title_pane_t2/opt9
+// r:3.1
+//
+#define qtn_mus_application_name "Music player"
+
+// d:Text in main view menu pan to refresh the collection
+// l:list_single_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_options_update_collection "Refresh"
+
+// d:Dialog shown to query the user if they want to refresh 
+// d:database after a USB session
+// l:popup_note_window/opt1
+// r:3.1
+//
+#define qtn_nmp_note_library_refresh_sync "Music May need to be refreshed due to recent USB sync. Refresh Now?"
+
+
+// d:track position in playlist
+// d:%N current position in track
+// d:%N total number of tracks
+// l:list_double_graphic_pane_t2_cp2 
+// r:3.1
+//
+#define qtn_nmp_track_position "%0N/%1N"
+
+// d:Options menu item for go to now playing.
+// l:list_single_pane_t1_cp2/opt1
+// r:3.1
+//
+#define qtn_nmp_options_go_to_nowplaying "Go to Now Playing"
+
+// End of File

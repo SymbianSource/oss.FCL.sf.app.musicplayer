@@ -1,0 +1,127 @@
+widget#MusicWidget
+    {
+    display: block;
+    visibility: visible;
+    width:312px;
+    height:75px;
+    padding-top: 4px;
+    padding-bottom: 3px;
+    padding-right: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    block-progression: rl;
+    direction: rtl;
+    nav-index:appearance;
+    }
+    
+box#area1
+    {
+    display: block;
+    visibility: visible;
+    width: 70px;
+    height: 70px;
+    margin-left: 3px;
+    padding-top: 3px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    direction: ltr;
+    block-progression: tb;
+    background-color: "SKIN(268458534 9886)";
+    nav-index:appearance;
+    }
+
+box#area2
+    {
+    display: block;
+    visibility: visible;
+    width: auto; 
+    height: auto; 
+    block-progression: tb;
+    nav-index:appearance;
+    }
+    
+box#textbox
+    {
+    display: block;
+    visibility: visible;
+    margin-left: 3px;
+    width: 100%; 
+    height: 40%;
+    nav-index:appearance;
+    }
+
+box#toolbarbox
+    {
+    display: block;
+    visibility: visible;
+    width: auto; 
+    height: 60%;
+    direction: ltr;
+    block-progression: rl;
+    nav-index:appearance;
+    }
+    
+box.toolbarbuttonbox
+    {
+    display: block;
+    visibility: visible;
+    width: auto; 
+    height: 100%;
+    margin-left: 3px;
+    background-color: "SKIN(268458534 9886)";
+    nav-index:appearance;
+    }
+    
+box#textbox2
+    {
+    display: block;
+    visibility: visible;
+    margin-left: 3px;
+    width: auto; 
+    height: 100%; 
+    background-color: "SKIN(268458534 9886)";
+    nav-index:appearance;
+    }
+
+box#player_inactive
+{
+    display: block;
+
+}
+
+box#player_active
+{
+    display: none;
+}
+
+image
+    {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    }
+image.area1_images
+    {
+    width: 70px;
+    height: 70px;
+    }
+    
+image.toolbarimage
+    {
+    width: 41px;
+    height: 41px;
+    }
+
+text
+    {
+    color:"SKIN(268458534 13056 74)";
+    display: block;
+    visibility: visible;
+    position: static;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 3.5u;
+    text-align:center;
+    direction: ltr;
+    }

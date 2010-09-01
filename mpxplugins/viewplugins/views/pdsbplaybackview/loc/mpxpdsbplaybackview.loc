@@ -1,0 +1,114 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project mpxpdsbplaybackview
+*
+*/
+
+
+
+/*
+  The syntax of a logical name entry in this file is the following:
+
+  // d:context description (line 1)
+  // d:context description (line N)
+  // l:layout id
+  // w:
+  // r:release information
+  //
+  #define qtn_<?feature_or_application>_?freetext "?text"
+
+  where
+      "qtn_" starts a logical name.  Note: "text_" has been used in
+           old logical names, but is deprecated.
+      "?feature/application" is 2-5 lower-case characters and/or numbers
+           identifying the larger context of the display text.
+      "?freetext" is the free text portion of the logical name.
+           It may contain only lower-case letters ('a' to 'z'), numbers
+           ('0' to '9'), and the underscore ('_').  The total length of
+           the logical name does must not exceed 50 characters.
+      "d:" Starts a description line clarifying the entry's context with
+           information like:
+           - Is a word a verb in imperative or is it a noun?  (For instance,
+             what does "Set" mean?)
+           - What will replace %U (unicode text parameter) or %N (number
+             parameter) included in texts?  (For instance, is it a phone
+             number or an e-mail address?)
+      "l:" Starts a layout id information (one line).
+           "P" and "No" are symbols in LAF's information table
+                - "P" is parent pane or current pane
+                - "No" is reference number in table
+      "r:" Starts a release information: one line indicating in which
+           S60 release the text was used for the first time.
+
+  Refer to the S60 localization instructions for more information.
+*/
+
+
+// LOCALISATION STRINGS
+
+// d:Options menu item for cancelling a progressive download.
+// l:list_single_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_options_cancel_dl "Cancel download"
+
+// d:Options menu item for resuming a paused progressive download.
+// l:list_single_pane_t1_cp2
+// r:3.1
+//
+#define qtn_mus_options_resume_dl "Resume download"
+
+// d:A string in the main pane.
+// d:Shown in progresive playback view when content is buffering.
+// l:mup3_progress_pane_t3
+// r:3.1
+//
+#define qtn_music_shop_status_buffering "Buffering..."
+
+// d:A string in the main pane.
+// d:Shown in progresive playback view when download is paused.
+// l:mup3_progress_pane_t3
+// r:3.1
+//
+#define qtn_music_shop_downloadstatus_paused "Download paused"
+
+// d:A string in the main pane.
+// d:Shown in progresive playback view when download is completed.
+// l:mup3_progress_pane_t3
+// r:3.1
+//
+#define qtn_music_shop_downloadstatus_completed "Download completed"
+
+// d:A string in the main pane.
+// d:Shown in progresive playback view when download is interrupted.
+// l:mup3_progress_pane_t3
+// r:3.1
+//
+#define qtn_music_shop_downloadstatus_stopped "Download stopped"
+
+// d:Confirmation query, yes or no to cancel downloading
+// d:If yes is selected, MusicShop will cancel the download and it cannot be resumed
+// l:popup_note_window
+// r:3.1
+//
+#define qtn_musicshop_note_cancel "Unable to resume download after cancelling. Cancel anyway?"
+
+// d:Information note text
+// d:Display when progressive download is paused and playback reaches
+// d:the end of the partially download file.
+// l:popup_note_window
+// r:3.1
+//
+#define qtn_musicshop_note_played_all_content "All downloaded content has been played."
+// End of File

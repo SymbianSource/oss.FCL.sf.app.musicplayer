@@ -1,0 +1,65 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxmetadatahandler.
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxmetadatahandler.dll
+TARGETTYPE      dll
+UID             0x1000006C 0x2001E26D
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+VERSION 10.0
+
+SOURCEPATH      ../src
+SOURCE          mpxmetadatahandler.cpp
+SOURCE          mpxmetadatahandlerimp.cpp
+
+START RESOURCE  ../data/mplayeravrcpsettings.rss
+HEADER
+TARGETPATH      RESOURCE_FILES_DIR
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+LIBRARY     euser.lib                           // standard user library
+LIBRARY     efsrv.lib                           // file server
+LIBRARY     bafl.lib                            // resource files
+LIBRARY     remconinterfacebase.lib             // remcon interface selector
+LIBRARY     mpxplaybackutility.lib              // the playback properties
+LIBRARY     mpxcommon.lib                       // common MPX FW definitions
+LIBRARY     remconplayerinformation.lib         // AVRCP 1.3 API
+LIBRARY     remconmediainformationapi.lib       // AVRCP 1.3 API
+LIBRARY     remcongroupnavigationapi.lib        // AVRCP 1.3 API
+LIBRARY     charconv.lib                        // Unicode character conversions
+LIBRARY     mpxcollectionutility.lib            // access the music collection
+LIBRARY     centralrepository.lib               // access the equalizer
+
+#if defined(ARMCC)
+deffile ../eabi/ 
+#elif defined(WINSCW)
+deffile ../bwinscw/ 
+#endif
+
+// End of File

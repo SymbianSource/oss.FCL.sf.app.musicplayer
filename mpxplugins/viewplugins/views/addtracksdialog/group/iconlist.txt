@@ -1,0 +1,12 @@
+/c8,8 qgn_graf_mup_adtl_chmrk_fr01
+/c8,8 qgn_graf_mup_adtl_chmrk_fr02
+/c8,8 qgn_graf_mup_adtl_chmrk_fr03
+/c8,8 qgn_graf_mup_adtl_chmrk_fr04
+/c8,8 qgn_graf_mup_lst_colpsd_artist
+/c8,8 qgn_graf_mup_lst_colpsd_track
+/c8,8 qgn_graf_mup_lst_empty
+/c8,8 qgn_graf_mup_lst_expd_artist
+/c8,8 qgn_graf_mup_lst_expd_track
+/c8,8 qgn_indi_mmc_add
+/c8,8 qgn_graf_mup_ctx_addsong
+

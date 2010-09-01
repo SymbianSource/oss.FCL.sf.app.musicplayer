@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<api id="a7944ba9b50d3c2a677ab38b945f2b16" dataversion="2.0">
+<name>MPX Music Player Commonui API</name>
+<description>Provides common music player UI interface</description>
+<type>c++</type>
+<collection>mpxmusicplayer</collection>
+<libs>
+<lib name="mpxcommonui.lib"/>
+</libs>
+<release category="platform" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

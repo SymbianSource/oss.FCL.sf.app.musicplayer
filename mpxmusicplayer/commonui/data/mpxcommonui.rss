@@ -1,0 +1,784 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxcommonui
+*
+*/
+
+
+
+// RESOURCE NAME IDENTIFIER
+NAME    MXCU // 4 letter ID
+
+// INCLUDES
+#include <e32keys.h>
+#include <pathconfiguration.hrh>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <CommonDialogs.hrh> 
+#include <CommonDialogs.rh> 
+#include "mpxcommonui.hrh"
+#include <mpxcommonui.loc>
+
+
+// RESOURCE IDENTIFIER
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    {
+    buf = "";
+    }
+
+
+// RESOURCE DEFINITIONS 
+
+// -----------------------------------------------------------------------------
+// r_mpx_time_durat_hhhmmss_with_zero
+// 103:55:23, 003:15:12 (hours, minutes and seconds) 
+// (separators are locale dependent)
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_time_durat_hhhmmss_with_zero
+    {
+    buf = "%:0%N%:1%T%:2%S%:3";
+    }
+
+
+// ** Set as ringing tone **
+
+// -----------------------------------------------------------------------------
+// r_mpx_change_rt_for_all_confirmation_query
+// Confirmation query for set as ringtone for all profiles.
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_change_rt_for_all_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationLayout;
+                label = qtn_mg_query_rtone_change_for_all;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_ringtone_set_text
+// Note text when ringtone is set.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_ringtone_set_text
+    {
+    buf = qtn_nmp_note_ringtone_set;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_ringtone_not_allowed_text
+// Note text when set as ringtone is not allowed.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_ringtone_not_allowed_text
+    {
+    buf = text_not_allowed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_ringtone_unprotected_file_text
+// Note text when the unprotected file can't be set as ringtone.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_ringtone_unprotected_file_text
+    {
+    buf = qtn_profiles_info_tone_no_drm;
+    }
+
+
+// ** Error Strings **
+
+// -----------------------------------------------------------------------------
+// r_mpx_file_not_found_text
+// Note text when attempting to perform an operation on broken file.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_file_not_found_text
+   {
+   buf = qtn_mp_note_broken_file;
+   } 
+
+// -----------------------------------------------------------------------------
+// r_mpx_invalid_group_text
+// Text for an information note shown when user attempts to play a playlist
+// or a category of songs, and all of the tracks are missing or unplayable.
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_invalid_group_text
+   {
+   buf = qtn_nmp_note_invalid_list;
+   } 
+
+// -----------------------------------------------------------------------------
+// r_mpx_invalid_clip
+// Notification that a file is corrupted
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_invalid_clip
+    {
+    buf = qtn_mp_note_corrupt_file;
+    }
+
+
+// *** Unit conversion ***
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_b
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_b
+    {
+    buf = qtn_mus_memory_b;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_b_free
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_b_free
+    {
+    buf = qtn_mus_memory_b_free;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_gb
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_gb
+    {
+    buf = qtn_mus_memory_gb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_gb1_free
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_gb1_free
+    {
+    buf = qtn_mus_memory_gb1_free;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_mb
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_mb
+    {
+    buf = qtn_nmp_memory_mb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_mb1_free
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_mb1_free
+    {
+    buf = qtn_mus_memory_mb1_free;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_kb
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_kb
+    {
+    buf = qtn_nmp_memory_kb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_kb1_free
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_kb1_free
+    {
+    buf = qtn_mus_memory_kb1_free;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_phone_memory_root_path
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_phone_memory_root_path
+    {
+    buf = text_phone_memory_root_path;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memory_card_root_path
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memory_card_root_path
+    {
+    buf = text_memory_card_root_path;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_memlo_not_enough_memory
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_memlo_not_enough_memory
+    {
+    buf = qtn_memlo_not_enough_memory;
+    }
+
+// ** Speed scrolling **
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_up_down_keys_silent
+// Keysound behaviour when end of list is reached.
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_SKEY_LIST r_mpx_cui_up_down_keys_silent
+    {
+    list=
+        {
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyUpArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeLong;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyUpArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeRepeat;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyDownArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeLong;
+            },
+        AVKON_SKEY_INFO 
+            {
+            key = EStdKeyDownArrow; 
+            sid = EAvkonSIDNoSound; 
+            type = ESKeyTypeRepeat;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_scroll_speed_fast
+// Text format used for displaying scrolling speed
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_scroll_speed_fast
+    {
+    buf = qtn_nmp_navi_speed_fast;
+    }
+
+// *** Playlist ***
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_playlist_query_list
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LIST_QUERY r_mpx_cui_playlist_query_list
+    {
+    flags = EGeneralQueryFlags;
+    softkeys = R_AVKON_SOFTKEYS_OK_CANCEL;
+    items =
+        {
+        AVKON_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                heading = qtn_mus_title_select_pl;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    };
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_generic_wait_note
+// Generic wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_generic_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = 0x1000;
+            control = AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_waitnote_softkeys_empty_stop
+// Softkeys used by generic wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE CBA r_mpx_waitnote_softkeys_empty_stop
+    {
+    buttons=
+        {
+        CBA_BUTTON
+            {
+            txt = text_softkey_empty;
+            },
+        CBA_BUTTON
+            {
+            id = EAknSoftkeyCancel;
+            txt = text_softkey_stop;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_playlist_memory_selection_locations
+// -----------------------------------------------------------------------------
+// 
+RESOURCE MEMORYSELECTIONDIALOG r_mpx_playlist_memory_selection_locations
+    {
+    title = qtn_mp_save_to_query;
+    softkey_1 = text_softkey_ok;
+    softkey_2 = text_softkey_cancel;
+    locations =
+        {
+        LOCATION
+            {
+            root_path = text_phone_memory_root_path;
+            },
+        LOCATION
+            {
+            root_path = text_memory_card_root_path;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_targetfolder_playlist
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_targetfolder_playlist
+    {
+    buf = text_targetfolder_playlists;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_playlist_name_query_title
+// -----------------------------------------------------------------------------
+// 
+RESOURCE TBUF r_mpx_playlist_name_query_title
+    {
+    buf = qtn_mus_enter_pl_name;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_default_playlist_name
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_default_playlist_name
+    {
+    buf = qtn_mg_def_name_playlist;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_nmp_note_adding_one_song
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_mpx_qtn_nmp_note_adding_one_song
+    {
+    buf = qtn_nmp_note_adding_one_song;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_mus_note_adding_tracks
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_mpx_qtn_mus_note_adding_tracks
+    {
+    buf = qtn_mus_note_adding_tracks;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_multiple_tracks_added_to_pl
+// Confirmation text for adding tracks to playlist (plural).
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_mus_multiple_tracks_added_to_pl
+    {
+    buf = qtn_mus_multiple_tracks_added_to_pl;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_qtn_mus_note_track_added_to_pl
+// Confirmation text for adding track to playlist (singular).
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_mus_note_track_added_to_pl
+    {
+    buf = qtn_mus_note_track_added_to_pl;
+    }
+
+
+// *** DRM ***
+
+// -----------------------------------------------------------------------------
+// r_mpx_drm_expired_playback
+// Note text when the DRM file cannot be played
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_drm_expired_playback
+    {
+    buf = qtn_nmp_drm_expired_playback;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_drm_prev_rights_set
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_drm_prev_rights_set
+    {
+    buf = qtn_drm_prev_rights_set;
+    }
+
+// -----------------------------------------------------------------------------
+//    r_mpx_no_drm_over_bt
+//    Cannot play DRM protected music over bluetooth
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_no_drm_over_bt
+    {
+    buf = qtn_nmp_note_protected_over_bluetooth;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_confirm_query_with_yes_no
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_confirm_query_with_yes_no
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery; 
+            control = AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_fldr_illegal_characters
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_fldr_illegal_characters
+    {
+    buf = qtn_fldr_illegal_characters;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_fldr_bad_file_name
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_fldr_bad_file_name
+    {
+    buf = qtn_fldr_bad_file_name;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_qtn_fldr_overwrite_query
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_qtn_fldr_overwrite_query
+    {
+    buf = qtn_fldr_overwrite_query;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_file_name_query
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_file_name_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_DATA_QUERY
+                {
+                layout = EDataLayout;
+                label = qtn_fldr_item_name_prmpt;
+                control = EDWIN
+                    {
+                    flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                    lines = 1;
+                    maxlength = 256;
+                    };
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_create_playlist_name_query
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_create_playlist_name_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_DATA_QUERY
+                {
+                layout = EDataLayout;
+                label = qtn_mus_enter_pl_name;
+                control = EDWIN
+                    {
+                    flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                    lines = 1;
+                    maxlength = 256;
+                    };
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_sec_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_sec_text
+    {
+    buf = qtn_mus_time_frmt_single_second;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_secs_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_secs_text
+    {
+    buf = qtn_mus_time_frmt_plural_second;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_min_sec_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_min_sec_text
+    {
+    buf = qtn_mus_time_frmt_single_min_single_sec;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_min_secs_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_min_secs_text
+    {
+    buf = qtn_mus_time_frmt_single_min_plural_sec;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_mins_sec_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_mins_sec_text
+    {
+    buf = qtn_mus_time_frmt_plural_min_single_sec;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_mins_secs_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_mins_secs_text
+    {
+    buf = qtn_mus_time_frmt_plural_min_plural_sec;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_hr_min_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_hr_min_text
+    {
+    buf = qtn_mus_time_frmt_single_hr_single_min;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_hr_mins_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_hr_mins_text
+    {
+    buf = qtn_mus_time_frmt_single_hr_plural_min;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_hrs_min_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_hrs_min_text
+    {
+    buf = qtn_mus_time_frmt_plural_hr_single_min;
+    }    
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_hrs_mins_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_hrs_mins_text
+    {
+    buf = qtn_mus_time_frmt_plural_hr_plural_min;
+    }  
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_day_hr_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_day_hr_text
+    {
+    buf = qtn_mus_time_frmt_single_day_single_hr;
+    }    
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_day_hrs_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_day_hrs_text
+    {
+    buf = qtn_mus_time_frmt_single_day_plural_hr;
+    }  
+    
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_days_hr_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_days_hr_text
+    {
+    buf = qtn_mus_time_frmt_plural_day_single_hr;
+    }
+
+// -----------------------------------------------------------------------------
+// r_mpx_cui_time_days_hrs_text
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_cui_time_days_hrs_text
+    {
+    buf = qtn_mus_time_frmt_plural_day_plural_hr;
+    }
+
+// ---------------------------------------------------------------------------
+// r_mpx_generic_wait_note
+// Generic wait note.
+// ---------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_mpx_delete_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = 0x1000;
+            control = AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                imagefile = AVKON_BITMAP_FILE; // bitmap file
+                imageid = EMbmAvkonQgn_note_erased;
+                imagemask = EMbmAvkonQgn_note_erased_mask;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// qtn_mus_playlist_name_exist
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_mpx_playlist_name_exist
+    {
+    buf = qtn_fldr_rename_query;
+    }
+
+//----------------------------------------------------
+//   
+//    r_attendee_query
+//    
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_rename_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// End of File

@@ -1,0 +1,115 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project mpxmusicplayer
+*
+*/
+
+
+
+/*
+  The syntax of a logical name entry in this file is the following:
+
+  // d:context description (line 1)
+  // d:context description (line N)
+  // l:layout id
+  // w:
+  // r:release information
+  //
+  #define qtn_<?feature_or_application>_?freetext "?text"
+
+  where
+      "qtn_" starts a logical name.  Note: "text_" has been used in
+           old logical names, but is deprecated.
+      "?feature/application" is 2-5 lower-case characters and/or numbers
+           identifying the larger context of the display text.
+      "?freetext" is the free text portion of the logical name.
+           It may contain only lower-case letters ('a' to 'z'), numbers
+           ('0' to '9'), and the underscore ('_').  The total length of
+           the logical name does must not exceed 50 characters.
+      "d:" Starts a description line clarifying the entry's context with
+           information like:
+           - Is a word a verb in imperative or is it a noun?  (For instance,
+             what does "Set" mean?)
+           - What will replace %U (unicode text parameter) or %N (number
+             parameter) included in texts?  (For instance, is it a phone
+             number or an e-mail address?)
+      "l:" Starts a layout id information (one line).
+           "P" and "No" are symbols in LAF's information table
+                - "P" is parent pane or current pane
+                - "No" is reference number in table
+      "r:" Starts a release information: one line indicating in which
+           S60 release the text was used for the first time.
+
+  Refer to the S60 localization instructions for more information.
+*/
+
+
+// LOCALISATION STRINGS
+
+// d:MPXMusicPlayer app title for aif caption file.
+// l:cell_app_pane_t1
+// r:3.1
+//
+#define qtn_apps_mplayer_grid "Music player"
+
+// d:Error note text.
+// d:User attempted to start Music Player application while a video call was in
+// d:progress.
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_mus_info_video_call_ongoing "Music Player cannot be used during video call."
+
+// d:Text for wait note for saving a file where %U is the filename
+// l:popup_note_wait_window
+// r:3.1
+//
+#define qtn_nmp_wait_save_one_item "Saving %U"
+
+// d:Text for saved to Music Player
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_saved_to_collection "Saved. Added to Music Player"
+
+// d:Text for saved to Gallery
+// l:popup_note_window/opt2
+// r:3.1
+//
+#define qtn_nmp_note_saved_to_gallery "Saved"
+
+// d:Text for a confirmation query shown to ask user to save
+// l:popup_note_window/opt1
+// r:3.1
+//
+#define qtn_iv_query_conf_save_downloaded    "%U has not been saved. Save now?"
+
+// d:Dialog shown to query the user if they want to refresh 
+// d:database after a USB session
+// l:popup_note_window
+// r:3.1
+//
+#define qtn_nmp_note_library_refresh_sync "Music May need to be refreshed due to recent USB sync. Refresh Now?"
+
+// d:Dialog shown not to proceed with operation during USB connection.
+// l:popup_note_window
+// r:3.2.3
+#define qtn_nmp_note_cannot_proceed_with_operation "Cannot proceed with operation during USB connection."
+
+// d:Dialog shown not to proceed with operation during Media Transfer operation.
+// l:popup_note_window
+// r:5.2
+#define qtn_mus_note_cancelled_due_to_mtp "Unable to perform operation during Media Transfer operation."
+
+// End of File

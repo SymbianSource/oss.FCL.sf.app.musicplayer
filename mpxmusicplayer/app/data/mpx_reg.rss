@@ -1,0 +1,99 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project mpxmusicplayer
+*
+*/
+
+
+
+#include <appinfo.rh>
+#include <bldvariant.hrh>
+#include <data_caging_paths_strings.hrh>
+#include <mpx.rsg>
+#include <mpxmusicplayer.hrh>
+
+
+UID2 KUidAppRegistrationResourceFile
+UID3 KMusicPlayerAppUidConstant
+
+#define EDataTypePriorityMPX 0xFFFA
+
+RESOURCE APP_REGISTRATION_INFO
+    {
+    app_file = "mpx";
+
+    localisable_resource_file = APP_RESOURCE_DIR"\\mpx";
+    localisable_resource_id = R_MPX_LOCALISABLE_APP_INFO;
+
+    embeddability = KAppEmbeddable;
+
+    // MIME types supported by the application
+    // Note: the audio/x-amr content-type header definition can be removed after 
+    //       official registration of the AMR format by the IANA registry.
+    datatype_list =
+        {
+#ifdef __SERIES60_MIDI
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-midi"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/midi"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/sp-midi"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-beatnik-rmf"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-rmf"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/rmf"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mobile-xmf"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/vnd.nokia.mobile-xmf"; },
+#endif
+
+#ifdef __SERIES60_DRM
+        DATATYPE { priority = EDataTypePriorityMPX; type = "application/x-mrv.xml"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "application/x-mrv.wbxml"; },
+#endif
+
+#if (defined __WMA || defined __WINDOWS_MEDIA)
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-ms-wma"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "x-caf-audio/x-ms-wma"; },
+#endif
+#ifdef RD_RA_SUPPORT_FOR_MUSIC_PLAYER
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-pn-realaudio"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-realaudio"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/vnd.rn-realaudio"; },
+//        DATATYPE { priority = EDataTypePriorityMPX; type = "application/vnd.rn-realmedia"; }
+#endif
+
+        DATATYPE { priority = EDataTypePriorityMPX; type = "playlist/mpegurl"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mpeg"; }, 
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mp3"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/m4a"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-mp3"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/3gpp"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/3gpp2"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mp4"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/aac"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/basic"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/amr"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/amr-wb"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/awb"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-amr"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-epoc-wve"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-sibo-wve"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/wav"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-wav"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-au"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/au"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "application/vnd.nokia.ringing-tone"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/x-mpegurl"; },
+        DATATYPE { priority = EDataTypePriorityMPX; type = "audio/mpegurl"; }
+        };
+    }
+
+// End of File

@@ -1,0 +1,156 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource headers for project mpxcollectionview
+*
+*/
+
+
+
+#ifndef MPXCOLLECTIONVIEWHG_HRH
+#define MPXCOLLECTIONVIEWHG_HRH
+
+#define KMPXCollectionViewHgId 0x10207C85
+
+// ENUMS
+
+// command ID's
+enum TMPXCollectionCommandIds
+    {
+    EMPXCmdSongDetails = 0x0010,
+    EMPXCmdAlbumArt,
+    EMPXCmdSend,
+    EMPXCmdDelete,
+    EMPXCmdSetAsRingtone,
+    EMPXCmdCreatePlaylist,
+    EMPXCmdAddToPlaylist,
+    EMPXCmdAddToNewPlaylist,
+    EMPXCmdAddToSavedPlaylist,
+    EMPXCmdFindInMusicShop,
+    EMPXCmdRename,
+    EMPXCmdPlaylistDetails,
+    EMPXCmdReorder,
+    EMPXCmdAddSongs,
+    EMPXCmdRemove,
+    EMPXCmdGoToMusicShop,
+    EMPXCmdGoToMultipleMusicShop,
+    EMPXCmdGoToNokiaMusicShop,
+    EMPXCmdGoToOperatorMusicShop,
+    EMPXCmdMusicLibraryDetails,
+    EMPXCmdSavePlaylist,
+    EMPXCmdReorderGrab,
+    EMPXCmdReorderDrop,
+    EMPXCmdReorderDone,
+    EMPXCmdReorderCancel,
+    EMPXCmdUpArrow,
+    EMPXCmdDownArrow,
+    EMPXCmdUpArrowAfterListboxHandled,
+    EMPXCmdDownArrowAfterListboxHandled,
+    EMPXCmdFind,
+    EMPXCmdFindCancel,
+    EMPXCmdUPnPAiwCmdCopyToExternalCriteria,    
+    EMPXCmdUpnpPlayVia,
+    EMPXCmdUpnpPlayViaLocal,
+    EMPXCmdUpnpPlayViaRemotePlayer,  // 0x0032
+    // Should always be the last one in the list.  Sets the end of the Upnpplayer commands.
+    // Allows for dynamic upnp player commands.  Currently set to allow up to 28 more
+    // dynamic players.  If more are needed then this number needs to be adjusted.
+    EMPXCmdUpnpLastCommandId = 0x004E,
+    EMPXCmdAiwCmdAssign,
+    EMPXCmdUseAsCascade,
+    EMPXCmdGoToAllSongs,
+    EMPXCmdGoToArtistAlbums,    
+    EMPXCmdGoToPlaylists,    
+    EMPXCmdGoToPodcasts,
+    EMPXCmdGoToGenre
+#ifdef __ENABLE_PODCAST_IN_MUSIC_MENU                
+    ,EMPXCmdRefreshLibrary
+#endif
+    ,EMPXCmdPlayItem
+    ,EMPXCmdAbout
+    };
+
+// current MediaL operation
+enum TMPXCollectionViewCurrentMediaLOp
+    {
+    EMPXOpMediaLIdle,
+    EMPXOpMediaLCopyToRemote,
+    EMPXOpMediaLGetContainerInfo,
+    EMPXOpMediaLSend,
+    EMPXOpMediaLCollectionDetails,
+    EMPXOpMediaLPlaylistDetails,
+    EMPXOpMediaLRenamePlaylist,
+    EMPXOpMediaLSongDetailsFileCheck,
+    EMPXOpMediaLAlbumArtFileCheck,
+    EMPXOpMediaLNewPlaylistCollectionSongCount,
+    EMPXOpMediaLFindInMusicShopSongDetails,
+    EMPXOpMediaLFindInMusicShopMediaLCompleted
+    };
+
+// current FindAllL operation    
+enum TMPXCollectionViewCurrentFindAllLOp
+    {
+    EMPXOpFindAllLIdle,
+    EMPXOpFindAllLUpnp,
+    EMPXOpFindAllLGetPlaylists,
+    EMPXOpFindAllLRenameArtist,
+    EMPXOpFindAllLRenameAlbum,
+    EMPXOpFindAllLRenameGenre,
+    EMPXOpFindAllLRenameComposer,
+    EMPXOpFindAllLAlbumArtistAddToNewPlaylist,
+    EMPXOpFindAllLAlbumArtistAddToSavedPlaylist,
+    EMPXOpFindAllLPlaylistTracksCount,
+    EMPXOpFindAllLUpnpPlayback
+    };    
+
+// current playlist related operation    
+enum TMPXCollectionViewCurrentPlaylistOp
+    {
+    EMPXOpPLIdle,
+    EMPXOpPLCreating,
+    EMPXOpPlOpening
+    };
+
+// headings in file detail dialog
+enum TMPXCollectionDetailsHeading
+    {
+    EMPXCollectionDetailsSongs,
+    EMPXCollectionDetailsDuration,
+    EMPXCollectionDetailsPhoneMemory,
+    EMPXCollectionDetailsMemoryCard,
+    EMPXCollectionDetailsRefreshed,
+    EMPXCollectionDetailsCount
+    };
+
+// headings in playlist detail dialog    
+enum TMPXPlaylistDetailsHeading
+    {
+    EMPXPlaylistDetailsName,
+    EMPXPlaylistDetailsSongs,
+    EMPXPlaylistDetailsDuration,
+    EMPXPlaylistDetailsUri,
+    EMPXPlaylistDetailsDate,
+    EMPXPlaylistDetailsTime,
+    EMPXPlaylistDetailsCount
+    };
+
+// Different state of educating User Popup
+enum TMPXEducatingPopup 
+    {
+    // EMPXInitialEducatingPopup,   // Initial state
+    EMPXShowEducatingPopup,      // Show popup at manual refresh, if any new songs added
+    EMPXDonotShowEducatingPopup  // User doesn't want to see popup
+    };
+#endif  // MPXCOLLECTIONVIEWHG_HRH
+
+// End of File

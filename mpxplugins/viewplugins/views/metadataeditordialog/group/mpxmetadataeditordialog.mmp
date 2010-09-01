@@ -1,0 +1,81 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project mpxmetadataeditordialog.
+*
+*/
+
+
+
+#include <data_caging_paths.hrh>
+#include <bldvariant.hrh>
+#include <platform_paths.hrh>
+
+TARGET          mpxmetadataeditordialog.dll
+TARGETTYPE      dll
+UID             0x10009D8D 0x101FFC82
+
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+VERSION 15.0
+
+MACRO __ENABLE_MSK
+
+#if defined(ARMCC)
+deffile ../eabi/ 
+#elif defined(WINSCW)
+deffile ../bwinscw/ 
+#endif
+
+SOURCEPATH      ../src
+SOURCE          mpxmetadataeditordialog.cpp
+
+START RESOURCE  ../data/mpxmetadataeditordialog.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS 
+END // RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         eikdlg.lib
+LIBRARY         avkon.lib
+LIBRARY         hlplch.lib
+LIBRARY         eikctl.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         efsrv.lib
+LIBRARY         estor.lib
+LIBRARY         bafl.lib
+LIBRARY         commonengine.lib
+LIBRARY         apgrfx.lib 
+LIBRARY         apmime.lib 
+LIBRARY         tzclient.lib
+
+LIBRARY         mpxcollectionutility.lib
+LIBRARY         mpxcollectionhelper.lib
+LIBRARY         mpxcommonui.lib
+LIBRARY         mpxcommon.lib
+LIBRARY         centralrepository.lib  
+LIBRARY         mpxplaybackutility.lib
+
+LIBRARY         drmuihandling.lib
+
+// End of File

@@ -1,0 +1,4 @@
+EXPORTS
+	?ExecuteLD@CMPXUPnPBrowseDialog@@UAEHH@Z @ 1 NONAME ; int CMPXUPnPBrowseDialog::ExecuteLD(int)
+	?NewL@CMPXUPnPBrowseDialog@@SAPAV1@H@Z @ 2 NONAME ; class CMPXUPnPBrowseDialog * CMPXUPnPBrowseDialog::NewL(int)
+

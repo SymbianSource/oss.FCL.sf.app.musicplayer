@@ -1,0 +1,31 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+* NTT DOCOMO, INC - BUG 2358
+*
+* Description:  Build information file for project mpxequalizerview.
+*
+*/
+
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Empty sound file
+../data/nullsound.mp3 z:/system/data/nullsound.mp3
+
+PRJ_MMPFILES
+mpxequalizerview.mmp
+
+PRJ_TESTMMPFILES

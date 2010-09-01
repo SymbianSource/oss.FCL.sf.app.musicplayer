@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project mpxmediakeyhandler.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../rom/mpxmediakeyhandler.iby       CORE_APP_LAYER_IBY_EXPORT_PATH(mpxmediakeyhandler.iby)
+../rom/mpxmediakeyhandlerrsc.iby    LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(mpxmediakeyhandlerrsc.iby)
+../loc/mpxmediakeyhandler.loc	    APP_LAYER_LOC_EXPORT_PATH(mpxmediakeyhandler.loc)
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE mpxmediakeyhandler.mif
+OPTION HEADERFILE mpxmediakeyhandler.mbg
+OPTION SOURCES -c8,8 qgn_graf_mup_status_pop_pause -c8,8 qgn_graf_mup_status_pop_play \
+               -c8,8 qgn_indi_mup_forw -c8,8 qgn_indi_mup_rew \
+               -c8,8 qgn_indi_mup_pause -c8,8 qgn_indi_mup_play
+END
+PRJ_MMPFILES
+
+
+mpxmediakeyhandler.mmp
+
+PRJ_TESTMMPFILES

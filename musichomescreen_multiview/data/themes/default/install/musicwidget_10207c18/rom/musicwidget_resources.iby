@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2008-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Music widget HSPS-plugin language specific IBY file.
+*
+*/
+
+
+#ifndef __MUSICWIDGET_10207c18_RESOURCES_IBY__
+#define __MUSICWIDGET_10207c18_RESOURCES_IBY__
+
+//#if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)          
+
+// Enabled by DTD-localization tools, language specific
+#if defined (__LOCALES_37_IBY__)
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\xuikon\37\musicwidget.o0037 \private\200159c0\install\musicwidget_10207c18\xuikon\37\musicwidget.o0037
+#endif
+#if defined  (__LOCALES_50_IBY__)
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\xuikon\50\musicwidget.o0050 \private\200159c0\install\musicwidget_10207c18\xuikon\50\musicwidget.o0050
+#endif
+#if defined  (__LOCALES_57_IBY__)
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\xuikon\57\musicwidget.o0057 \private\200159c0\install\musicwidget_10207c18\xuikon\57\musicwidget.o0057
+#endif
+#if defined  (__LOCALES_94_IBY__)
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\xuikon\94\musicwidget.o0094 \private\200159c0\install\musicwidget_10207c18\xuikon\94\musicwidget.o0094
+#endif
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgetconfiguration.dtd \private\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgetconfiguration.dtd
+data=ZPRIVATE\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgeticon.mif \private\200159c0\install\musicwidget_10207c18\hsps\00\musicwidgeticon.mif
+
+//#endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
+
+#endif // __MUSICWIDGET_10207c18_RESOURCES_IBY__

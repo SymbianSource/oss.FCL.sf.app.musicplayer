@@ -1,0 +1,44 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+TARGET          dummyMusic.dll
+TARGETTYPE      dll
+
+CAPABILITY      CAP_GENERAL_DLL
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+SOURCEPATH      ../src
+SOURCE          dummy.cpp
+
+SOURCEPATH      .
+USERINCLUDE     ../loc
+
+START RESOURCE  ../data/musichomescreen.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+
+LANGUAGE_IDS
+END
+
+// End of file

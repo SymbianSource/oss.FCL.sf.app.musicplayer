@@ -1,0 +1,5 @@
+/c8,8 qgn_graf_mup_npv_icon_pause
+/c8,8 qgn_graf_mup_npv_icon_play
+/c8,8 qgn_indi_mup_default_album.svg
+/c8,8 qgn_graf_mup_npv_defalbumart_transp
+/c8,8 qgn_indi_mup_default_album_pcast.svg

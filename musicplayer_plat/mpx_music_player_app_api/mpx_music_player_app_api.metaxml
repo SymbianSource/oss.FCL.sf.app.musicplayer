@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<api id="0795d44c7f1995198e04bfe40216cc78" dataversion="2.0">
+<name>MPX Music Player App API</name>
+<description>Provides declarations/definition for the music player app</description>
+<type>c++</type>
+<collection>mpxmusicplayer</collection>
+<libs>
+</libs>
+<release category="platform" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

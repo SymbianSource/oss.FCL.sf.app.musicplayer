@@ -1,0 +1,36 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project mpxcommonplaybackview.
+*
+*/
+
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../loc/mpxcommonplaybackview.loc	APP_LAYER_LOC_EXPORT_PATH(mpxcommonplaybackview.loc)
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE mpxcommonplaybackview.mif
+OPTION HEADERFILE mpxcommonplaybackview.mbg
+OPTION SOURCEFILE iconlist.txt
+END
+
+PRJ_MMPFILES
+mpxcommonplaybackview.mmp
+
+PRJ_TESTMMPFILES

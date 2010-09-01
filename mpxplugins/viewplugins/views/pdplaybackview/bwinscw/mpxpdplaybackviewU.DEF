@@ -1,0 +1,4 @@
+EXPORTS
+	?NewL@CMPXPdPlaybackView@@SAPAV1@XZ @ 1 NONAME ; class CMPXPdPlaybackView * CMPXPdPlaybackView::NewL(void)
+	?NewLC@CMPXPdPlaybackView@@SAPAV1@XZ @ 2 NONAME ; class CMPXPdPlaybackView * CMPXPdPlaybackView::NewLC(void)
+

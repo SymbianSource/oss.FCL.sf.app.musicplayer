@@ -147,8 +147,10 @@ _LIT(KQueryMusicGetRecentlyAdded, "SELECT Music.*,Artist.Name,Album.Name,Genre.N
 
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryMusicGetAllSongsMinimum, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,'',0,0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title");
+_LIT(KQueryMusicGetAllSongsMinimumLimited, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,'',0,0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title LIMIT %u");
 #else
 _LIT(KQueryMusicGetAllSongsMinimum, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title");
+_LIT(KQueryMusicGetAllSongsMinimumLimited, "SELECT Music.UniqueId,Music.DbFlag,Music.VolumeId,Music.Title,0,Music.Art,Music.Deleted,Music.Location,0,0,'','',0,0,0,0,0,0,0,0,'','','',0,0,0,0,0,0,'',0,Artist.Name FROM :dbname.Music,:dbname.Artist WHERE Deleted=0 AND Music.Artist=Artist.UniqueId ORDER BY MUSIC.Title LIMIT %u");
 #endif
 
 _LIT(KQueryMusicGetAllSongs, "SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId ORDER BY 4");
@@ -207,11 +209,11 @@ _LIT(KQueryMusicGetMusicUris, "SELECT UniqueId,Location FROM :dbname.Music WHERE
 _LIT(KQueryMusicGetMusicUrisFrom, "SELECT UniqueId,Location FROM :dbname.Music WHERE Deleted=0 AND UniqueId > %u ORDER BY UniqueId ASC LIMIT %u");
 
 _LIT(KQueryMusicCount, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0");
-_LIT(KQueryMusicAlbum, "SELECT DISTINCT Album FROM :dbname.Music WHERE Deleted=0 AND Artist=%u ORDER BY Album");
+_LIT(KQueryMusicAlbum, "SELECT DISTINCT Album FROM :dbname.Music WHERE Deleted=0 AND Artist=%u ORDER BY Album");  // deprecated, not maintained
 _LIT(KQueryMusicVolume, "SELECT VolumeId FROM :dbname.Music WHERE Deleted=0 AND UniqueId=%u");
 _LIT(KQueryMusicVolumeAll, "SELECT VolumeId FROM :dbname.Music WHERE UniqueId=%u");
 _LIT(KQueryMusicInfo, "SELECT * FROM :dbname.Music WHERE Deleted=0 AND UniqueId=%u");
-_LIT(KQueryOtherSongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND UniqueId<>%u AND Artist=%u AND Album=%u");
+_LIT(KQueryOtherSongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND UniqueId<>%u AND Artist=%u AND Album=%u");  // deprecated, not maintained
 
 _LIT(KQueryMusicDurationAll, "SELECT sum(Duration) FROM :dbname.Music WHERE Deleted=0");
 _LIT(KQueryMusicDurationArtist, "SELECT sum(Duration) FROM :dbname.Music WHERE Deleted=0 AND Artist=%u");
@@ -228,7 +230,7 @@ _LIT(KQueryMusicGetDurationMostPlayed, "SELECT Duration,PlayCount,TimePlayed FRO
 _LIT(KQueryMusicGetDurationRecentlyAdded, "SELECT Duration FROM :dbname.Music WHERE Deleted=0 AND (julianday(TimeAdded) > julianday('now','-7 days'))");
 
 // Select songs information from music, playlistsongs and playlistsonginfo via playlistid order by playlistsongs's ordinal
-_LIT(KQueryMusicGetAllSongsbyPl,"select mu.UniqueId,mu.DbFlag,mu.VolumeId,mu.Title,mu.Artist,mu.Art,0,mu.Location,pl.UniqueId as PlUId, pl.ordinal from :dbname.music as mu,:pldbname.playlistsongs as pl where mu.Deleted=0 AND mu.uniqueid = pl.songid and pl.playlistid =%u ORDER BY 10");
+_LIT(KQueryMusicGetAllSongsbyPl,"select mu.UniqueId,mu.DbFlag,mu.VolumeId,mu.Title,mu.Artist,mu.Art,0,mu.Location,pl.UniqueId as PlUId, pl.ordinal from :dbname.music as mu,:pldbname.playlistsongs as pl where mu.Deleted=0 AND mu.uniqueid = pl.songid and pl.playlistid =%u ORDER BY 10");  // deprecated, not maintained
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre.Name,Composer.Name,pl.UniqueId as PlUId,pl.ordinal FROM :dbname.Music,:dbname.Artist,:dbname.Album,:dbname.Genre,:dbname.Composer,:pldbname.playlistsongs as pl WHERE Music.Deleted=0 AND Music.Album=Album.UniqueId AND Music.Artist=Artist.UniqueId AND Music.Genre=Genre.UniqueId AND Music.Composer=Composer.UniqueId AND Music.UniqueId=pl .songid and pl .PlaylistId=%u ORDER BY 40");
 #else
@@ -236,6 +238,7 @@ _LIT(KQueryMusicGetAllSongsInfobyPl,"SELECT Music.*,Artist.Name,Album.Name,Genre
 #endif
 _LIT(KQuerySongsInArtistAlbum, "SELECT count(*) FROM :dbname.Music WHERE Deleted=0 AND Artist=%u AND Album=%u");
 _LIT(KQueryMusicGetArtistForAlbum, "SELECT Artist FROM :dbname.Music,:dbname.Artist WHERE Music.Deleted=0 AND Music.Artist=Artist.UniqueId AND Music.Album=%u");
+_LIT(KQueryMusicGetAlbumsforArtist, "SELECT Album.* FROM :dbname.Album,:dbname.Music WHERE Music.Deleted=0 AND Music.Artist=%u AND Album.UniqueId=Music.Album ORDER BY Name, UniqueId");
 _LIT(KQueryMusicGetAlbumartForAlbum, "SELECT Art FROM :dbname.Music WHERE Music.Deleted=0 AND Music.Album=%u");
 // == Category table queries ==================================================
 //
@@ -259,7 +262,6 @@ _LIT(KQueryCategoryItemBySongId, "SELECT ##table##.* FROM :dbname.##table##,:dbn
 _LIT(KQueryCategoryAll, "SELECT * FROM :dbname.##table## ORDER BY Name");
 _LIT(KQueryCategoryItems, "SELECT * FROM :dbname.##table## WHERE %S ORDER BY Name ASC");
 _LIT(KQueryCategorySongCount, "SELECT SongCount FROM :dbname.##table## WHERE UniqueId=%u");
-_LIT(KQueryCategorySubcategoryItems, "SELECT Album.* FROM :dbname.Album,:dbname.Music WHERE Music.Deleted=0 AND Music.Artist=%u AND Album.UniqueId=Music.Album ORDER BY Name");
 
 _LIT(KQueryCategoryIncrementSongCount, "UPDATE :dbname.##table## SET SongCount=SongCount+1 WHERE UniqueId=%u");
 _LIT(KQueryCategoryDecrementSongCount, "UPDATE :dbname.##table## SET SongCount=SongCount-1 WHERE UniqueId=%u");
@@ -277,9 +279,9 @@ _LIT(KAuxiliaryCreateTable, "CREATE TABLE Auxiliary("
 _LIT(KAuxiliaryDropTable,"DROP TABLE Auxiliary");
 _LIT(KAuxiliaryCheckTable, "SELECT Id,Version,TimeRefreshed,TimeSynced,Corrupt,SaveDeletedRecordCount FROM AUXILIARY");
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.7.0',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.8.0',%u)");
 #else
-_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.7.1',%u)");
+_LIT(KQueryAuxiliaryInsert, "INSERT INTO Auxiliary(Id,Version,Corrupt) VALUES(0,'6.8.1',%u)");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
 _LIT(KQueryAuxiliarySetTime, "UPDATE :dbname.Auxiliary SET TimeRefreshed='%S', Corrupt=0");
 _LIT(KQueryAuxiliaryGetTime, "SELECT TimeRefreshed FROM :dbname.Auxiliary");
@@ -434,19 +436,19 @@ _LIT(KCriterionPlaylistSongId, "PlaylistSongs.SongId=%u");
 //
 _LIT(KAlbumCreateTable,"CREATE TABLE Album("
     L"UniqueId INTEGER PRIMARY KEY,"
-    L"ArtistName TEXT COLLATE NOCASE,"
     L"Name TEXT COLLATE NOCASE,"
     L"SongCount INTEGER,"
-	L"Art TEXT)");
+    L"Artist INTEGER,"
+    L"ArtistName TEXT COLLATE NOCASE,"
+    L"Art TEXT)");
 
-_LIT(KAlbumCheckTable,"SELECT UniqueId,ArtistName,Name,SongCount,Art FROM Album");
+_LIT(KAlbumCheckTable,"SELECT UniqueId,Name,SongCount,Artist,ArtistName,Art FROM Album");
 
-_LIT(KQueryAlbumInsert, "INSERT INTO :dbname.Album(UniqueId,ArtistName,Name,SongCount,Art) VALUES(%u,'%S','%S',%u,'%S')");
+_LIT(KQueryAlbumInsert, "INSERT INTO :dbname.Album(UniqueId,Name,SongCount,Artist,ArtistName,Art) VALUES(%u,'%S',%u,%u,'%S','%S')");
 _LIT(KQueryAlbumUpdate, "UPDATE :dbname.Album SET %S WHERE UniqueId=%u");
 
-_LIT(KQueryAlbumItem, "SELECT Album.*,Artist.Name FROM :dbname.Album,:dbname.Artist WHERE Album.Artist=Artist.UniqueId AND UniqueId=%u");
-_LIT(KQueryAlbumAll, "SELECT Album.* FROM :dbname.Album ORDER BY Name");
-_LIT(KQueryAlbumAllMediaWall, "SELECT Album.* FROM :dbname.Album ORDER BY ArtistName");
+_LIT(KQueryAlbumAll, "SELECT Album.* FROM :dbname.Album ORDER BY Name, ArtistName");
+_LIT(KQueryAlbumAllMediaWall, "SELECT Album.* FROM :dbname.Album ORDER BY ArtistName, Name");
 _LIT(KCriterionArtistName, "ArtistName='%S'");
 _LIT(KCriterionArt, "Art='%S'");
 
@@ -456,15 +458,21 @@ _LIT(KArtistCreateTable,"CREATE TABLE Artist("
     L"UniqueId INTEGER PRIMARY KEY,"
     L"Name TEXT COLLATE NOCASE,"
     L"SongCount INTEGER,"
+    L"AlbumCount INTEGER,"
     L"Art TEXT)");
 
-_LIT(KArtistCheckTable,"SELECT UniqueId,Name,SongCount,Art FROM Artist");
+_LIT(KArtistCheckTable,"SELECT UniqueId,Name,SongCount,AlbumCount,Art FROM Artist");
 
-_LIT(KQueryArtistInsert, "INSERT INTO :dbname.Artist(UniqueId,Name,SongCount,Art) VALUES(%u,'%S',%u,'%S')");
+_LIT(KQueryArtistInsert, "INSERT INTO :dbname.Artist(UniqueId,Name,SongCount,AlbumCount,Art) VALUES(%u,'%S',%u,%u,'%S')");
 _LIT(KQueryArtistUpdate, "UPDATE :dbname.Artist SET %S WHERE UniqueId=%u");
 
-_LIT(KQueryArtistAll, "SELECT Artist.* FROM :dbname.Artist ORDER BY 2");
+_LIT(KQueryArtistAll, "SELECT Artist.* FROM :dbname.Artist WHERE SongCount > 0 ORDER BY 2");
 _LIT(KQueryArtistName, "SELECT Artist.Name FROM :dbname.Artist WHERE UniqueId=%u");
+
+_LIT(KQueryArtistIncrementAlbumCount, "UPDATE :dbname.Artist SET AlbumCount=AlbumCount+1 WHERE UniqueId=%u");
+_LIT(KQueryArtistDecrementAlbumCount, "UPDATE :dbname.Artist SET AlbumCount=AlbumCount-1 WHERE UniqueId=%u");
+_LIT(KQueryArtistGetSongCountAndAlbumCount, "SELECT SongCount,AlbumCount FROM :dbname.Artist WHERE UniqueId=%u");
+_LIT(KQueryArtistItems, "SELECT * FROM :dbname.Artist WHERE %S AND SongCount > 0 ORDER BY Name ASC");
 
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
 // == AbstractAlbum table queries ==========================================

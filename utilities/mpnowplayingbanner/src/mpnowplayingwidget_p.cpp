@@ -301,7 +301,13 @@ void MpNowPlayingWidgetPrivate::updateBannerInfo()
     mPrimaryText->setPlainText( mPlaybackData->title() );
     mPrimaryText->setProperty( "state", mPrimaryText->property("state").toString() );
     
-    mSecondaryText->setPlainText( mPlaybackData->artist() );
+    QString data = mPlaybackData->artist();
+    if ( !data.isEmpty() ) {
+        mSecondaryText->setPlainText( data );
+    }
+    else {
+        mSecondaryText->setPlainText( hbTrId( "txt_mus_other_unknown" ) );
+    }
     mSecondaryText->setProperty( "state", mSecondaryText->property("state").toString() );
 }
 

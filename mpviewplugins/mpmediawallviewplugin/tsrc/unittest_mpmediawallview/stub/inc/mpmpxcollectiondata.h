@@ -39,6 +39,11 @@ public:
         Rating,
         AlbumArtUri
     };
+    
+    enum DataProperty {
+           Corrupted,
+           DrmExpired
+    };
 
     // Stub functions
     explicit MpMpxCollectionData( QObject *parent=0 );
@@ -53,6 +58,7 @@ public:
     void setContext( TCollectionContext context );
     int itemIndex( int itemUniqueId );    
     bool setCurrentAlbum( int index );
+    bool hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const;
 
     const CMPXMedia& containerMedia();
 

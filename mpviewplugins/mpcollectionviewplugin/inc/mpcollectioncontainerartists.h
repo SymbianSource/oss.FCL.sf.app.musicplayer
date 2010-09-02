@@ -20,7 +20,6 @@
 
 #include "mpcollectionlistcontainer.h"
 
-class HbGroupBox;
 class HgMediawall;
 class MpCollectionTBoneListDataModel;
 
@@ -49,8 +48,7 @@ private:
     void setupContainer();
 
 private:
-
-    HbGroupBox                      *mInfoBar;          // Own
+    
     HgMediawall                     *mTBone;            // Own
     MpCollectionTBoneListDataModel  *mTBoneListModel;   // Own
     int                             mCurrentArtistIndex;

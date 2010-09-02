@@ -133,21 +133,21 @@ void TestMpEqualizerFrameworkWrapper::testGetPresetIndex()
     
     // When EqualizerUtility is not ready
     presetIndex = mTestPrivate->getPresetIndex(0x0B);    
-    QVERIFY(presetIndex == KEqualizerPresetNone);
+    QVERIFY(presetIndex == 0);
     
     mTestPrivate->MapcInitComplete(KErrNone, 0);
     
     //When a valid preset is currently set
     presetIndex = mTestPrivate->getPresetIndex(0x0B);    
-    QVERIFY(presetIndex == 1);
+    QVERIFY(presetIndex == 2);
     
     //When there is no any preset set
     presetIndex = mTestPrivate->getPresetIndex(KEqualizerPresetNone);    
-    QVERIFY(presetIndex == KEqualizerPresetNone);
+    QVERIFY(presetIndex == 0);
 
     //When an invalid preset is currently set
     presetIndex = mTestPrivate->getPresetIndex(0xFF);    
-    QVERIFY(presetIndex == KEqualizerPresetNone);
+    QVERIFY(presetIndex == 0);
 }
 
 /*!

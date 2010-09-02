@@ -367,6 +367,7 @@ void MpCollectionPopupHandler::openAddToCurrentPlaylist( MpMpxCollectionData* co
     MpCollectionDataModel *collectionDataModel;
     collectionDataModel = new MpCollectionDataModel( collectionData );
     collectionDataModel->refreshModel();
+    mPermanentData->mAbstractItemModel = collectionDataModel;
 
     getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), collectionDataModel, 
                      SLOT( handleAddToCurrentPlaylist( HbAction* ) ) );
@@ -642,9 +643,14 @@ void MpCollectionPopupHandler::handleAddSongsToPlayList( HbAction *selectedActio
         }
     }
 
-    //Dialog is using CollectionView main model, avoid dialog destructor to alter it.
-    dialog->setModel( 0 );
-
+    //Dialog won't use CollectionView main model any more, return it to its original layout.
+    MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( dialog->model() );
+    if ( mpModel ) {
+        //setLayout() only applies for MpCollectionDataModel where we need to 
+        //decide which layout to use for the secondary text.
+        //MpCollectionTBoneListDataModel doesn't have secondary text.
+        mpModel->setLayout( ECollectionListView );
+    }
     TX_EXIT
 }
 
@@ -672,9 +678,14 @@ void MpCollectionPopupHandler::handleDeleteSongs( HbAction *selectedAction )
         }
     }
 
-    //Dialog is using CollectionView main model, avoid dialog destructor to alter it.
-    dialog->setModel( 0 );
-
+    //Dialog won't use CollectionView main model any more, return it to its original layout.
+    MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( dialog->model() );
+    if ( mpModel ) {
+        //setLayout() only applies for MpCollectionDataModel where we need to 
+        //decide which layout to use for the secondary text.
+        //MpCollectionTBoneListDataModel doesn't have secondary text.
+        mpModel->setLayout( ECollectionListView );
+    }
     TX_EXIT
 }
 
@@ -703,10 +714,7 @@ void MpCollectionPopupHandler::handleAddToCurrentPlaylist( HbAction *selectedAct
         }
     }
 
-    //Pull the model to delete it. Dialog destructor only removes items from model, but doesn't delete them.
-    mPermanentData->mAbstractItemModel = dialog->model();
-    dialog->setModel( 0 );
-
+    //Dialog is using an isolated model which will be deleted, no need to change its layout.
     mPermanentData->clear();
 
     TX_EXIT
@@ -774,8 +782,7 @@ void MpCollectionPopupHandler::handleCreateNewPlaylistGetModelIndexesFinished( H
         }
     }
 
-    dialog->setModel( 0 );
-
+    //Dialog is using an isolated model which will be deleted, no need to change its layout.
     mPermanentData->clear();
 
     TX_EXIT
@@ -833,7 +840,7 @@ void MpCollectionPopupHandler::handleDeleteStarted( TCollectionContext context, 
         }
     }
     else if (context != ECollectionContextPlaylists ) {  //no progress dialog for delete playlist
-        launchProgressDialog( "txt_mus_info_deleting" );
+        launchProgressDialog( "txt_common_info_deleting" );
     }
     TX_EXIT
 }
@@ -1021,6 +1028,13 @@ void MpCollectionPopupHandler::getModelIndexes( const QString &label, QAbstractI
     HbSelectionDialog *dialog = new HbSelectionDialog();
     dialog->setHeadingWidget( new HbLabel( label ) );
     dialog->setSelectionMode( HbAbstractItemView::MultiSelection );
+    MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( model );
+    if ( mpModel ) {
+        //setLayout() only applies for MpCollectionDataModel where we need to 
+        //decide which layout to use for the secondary text.
+        //MpCollectionTBoneListDataModel doesn't have secondary text.
+        mpModel->setLayout( ECollectionSelectionDialog );
+    }
     dialog->setModel( model );
     dialog->clearActions();
     action = new HbAction( hbTrId( "txt_common_button_ok" ) );
@@ -1055,12 +1069,19 @@ void MpCollectionPopupHandler::launchArrangeSongsDialog()
     listView->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
     MpCollectionDataModel *model;
     //Ownership of the model is passed to the listView as a child object.
-    model = new MpCollectionDataModel( mMpEngine->collectionData() , listView );
+    model = new MpCollectionDataModel( mMpEngine->collectionData() , mMpEngine->playbackData(), listView );
     model->refreshModel();
     connect( model,
              SIGNAL( orderChanged( int, int, int, int ) ),
              mMpEngine,
              SLOT( reorderPlaylist( int, int, int, int ) ) );
+    MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( model );
+    if ( mpModel ) {
+        //setLayout() only applies for MpCollectionDataModel where we need to 
+        //decide which layout to use for the secondary text.
+        //MpCollectionTBoneListDataModel doesn't have secondary text.
+        mpModel->setLayout( ECollectionArrangeSongsDialog );
+    }
     listView->setModel( model );
     listView->setArrangeMode( true );
     HbDialog *dialog = new HbDialog();

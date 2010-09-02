@@ -57,3 +57,18 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
     return QVariant();;
 }
 
+/*!
+ Stub function
+ */
+void MpCollectionTBoneListDataModel::enablePlaybackIndicatorEnable(bool enable)
+{
+    Q_UNUSED(enable);
+}
+
+/*!
+ Stub function
+ */
+void MpCollectionTBoneListDataModel::fileCorrupted(int songId)
+{
+    Q_UNUSED(songId);
+}

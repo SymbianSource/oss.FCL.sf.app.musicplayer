@@ -36,6 +36,19 @@
  */
 
 /*!
+    \fn void corruptedStop();
+
+    This signal is emitted when a courrpted song is discovered and is the last song of 
+    the playlist
+ */
+
+/*!
+    \fn void fileCorrupted(int fileId);
+
+    This signal is emitted when a courrpted song is discovered with fileId.
+ */
+
+/*!
  Constructs the utility wrapper.
  */
 MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )

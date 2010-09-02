@@ -188,6 +188,12 @@
     such as EPbPropertyVolume, EPbPropertyMaxVolume, EPbPropertyMute.
  */
 
+/*!
+    \fn void corruptedStop();
+    
+    This signal is emitted when framework determines the corrupted song is the last 
+    song of the playlist.
+*/
 
 /*!
  Constructs music player engine.
@@ -199,7 +205,7 @@ MpEngine::MpEngine()
       mMpxPlaybackWrapper(0),
       mAudioEffectsWrapper(0),
       mEqualizerWrapper(0),
-      mCurrentPresetIndex(KEqualizerPresetNone),
+      mCurrentPresetIndex(0),
       mSongData(0),
       mUsbBlockingState(USB_NotConnected),
       mPreviousUsbState(USB_NotConnected),
@@ -289,7 +295,9 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
         connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
-        connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
+        connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop() ),
+                 this, SIGNAL( corruptedStop() ));
+		connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
                  this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
 
         // AudioEffects wrapper
@@ -326,7 +334,9 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, 0 );
         connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
-        connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
+	    connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop() ),
+				 this, SIGNAL( corruptedStop() ));
+	    connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
                  this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
 
     }
@@ -1122,9 +1132,9 @@ void MpEngine::disableEqualizer()
 {
     TX_ENTRY
 
-    mCurrentPresetIndex = KEqualizerPresetNone;
+    mCurrentPresetIndex = 0;
     // Store in CenRep file
-    MpSettingsManager::setPreset( mCurrentPresetIndex );
+    MpSettingsManager::setPreset( KEqualizerPresetNone );
     // Notify playback framework of the change.
     mMpxPlaybackWrapper->applyEqualizer();
 
@@ -1175,9 +1185,7 @@ void MpEngine::handleEqualizerReady()
     // Get preset id from cenrep
     TInt presetKey( MpSettingsManager::preset() );
     
-    //Set the current preset index. 1 is added to index because index 0 represent "Off" at UI level.
     mCurrentPresetIndex = mEqualizerWrapper->getPresetIndex( presetKey );
-    mCurrentPresetIndex++;
     emit equalizerReady();
     
     TX_EXIT

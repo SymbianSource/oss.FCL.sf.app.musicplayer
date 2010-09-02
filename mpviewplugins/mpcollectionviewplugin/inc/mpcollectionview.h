@@ -52,7 +52,6 @@ public:
     void initializeView();
     void activateView();
     void deactivateView();
-    void setDefaultView();
     bool isActivated();    
     void openItem( int index );
     void showItemDetails( int index );
@@ -122,6 +121,7 @@ private:
     int generateShuffleIndex();
     void startContainerTransition( TCollectionContext contextFrom, TCollectionContext contextTo );
     void closeActiveDialog( bool onlyContextMenu = false );
+    void showCorruptedNote();
 
 private:
 

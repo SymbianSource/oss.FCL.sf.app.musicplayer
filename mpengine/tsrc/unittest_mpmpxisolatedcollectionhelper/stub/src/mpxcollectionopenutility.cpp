@@ -28,9 +28,9 @@
  Stub function.
 */
 CMPXCollectionOpenUtility::CMPXCollectionOpenUtility():iDelay(0),
-                                                       iStart(EFalse),
-                                                       iStop(EFalse),
                                                        iChunkSize(0),
+                                                       iStop(EFalse),
+                                                       iStart(EFalse),
                                                        iDirection(EFetchDown),
                                                        iMode(TUid::Null())
 {

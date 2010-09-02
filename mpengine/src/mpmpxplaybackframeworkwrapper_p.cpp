@@ -28,6 +28,7 @@
 #include <mpxplaybackframeworkdefs.h>
 #include <hbglobal.h>
 #include <xqsharablefile.h>
+#include <mpxcollectionplaylist.h>
 
 #include "mpmpxplaybackframeworkwrapper_p.h"
 #include "mpmpxplaybackframeworkwrapper.h"
@@ -36,6 +37,7 @@
 #include "mptrace.h"
 #include "mpxaudioeffectengine.h"
 #include "mpsongdata.h"
+#include "mpxcollectionpath.h"
 
 _LIT(KMPXPnRealAudioMimeType, "audio/x-pn-realaudio");
 _LIT(KMPXRealAudioMimeType, "audio/x-realaudio");
@@ -456,6 +458,9 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandlePlaybackMessage( CMPXMessage *a
     if ( aError == KErrNone && aMessage ) {
         TRAP_IGNORE( DoHandlePlaybackMessageL(*aMessage) );
     }
+    else{
+        TRAP_IGNORE( DoHandlePlaybackErrorL(aError) );
+	}
     TX_EXIT
 }
 
@@ -720,6 +725,39 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackMessageL( const CMPXM
                 break;
         }
     }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackErrorL( const TInt aError )
+{
+    TX_ENTRY
+    switch ( aError ) {
+                case KErrCorrupt:{
+                    MMPXSource* source( iPlaybackUtility->Source() );
+                    if ( source ){
+                        CMPXCollectionPlaylist* playlist( source->PlaylistL() );
+                        if ( playlist ){
+                            MpPlaybackData* pData = playbackData();
+                            pData->setCorrupted( playlist->Path().IdOfIndex( playlist->Index() ).iId2 );
+                            
+                            if ( playlist->Index() == ( playlist->Count()-1 ) ){
+                                //reach the end of list, pop up corrupt notification
+                                emit q_ptr->corruptedStop();
+                            }
+                            else{
+                                //corrupted song, skip to next song
+                                skipForward();
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
     TX_EXIT
 }
 

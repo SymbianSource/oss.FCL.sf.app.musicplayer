@@ -3,7 +3,7 @@
   <!ENTITY layer_real_source_path "sf/app/musicplayer" >
 ]> 
 
-<SystemDefinition name="avdomain" schema="1.5.1">
+<SystemDefinition name="musicplayer" schema="1.5.1">
 	<systemModel>
   <!-- Common file for prebuild layers-->
   	<layer name="app_layer">

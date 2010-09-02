@@ -19,15 +19,17 @@
 
 #include "stub/inc/mpcollectiondatamodel.h"
 #include "stub/inc/mpmpxcollectiondata.h"
+#include "stub/inc/mpplaybackdata.h"
 
 
 /*!
  Stub function
  */
-MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, QObject *parent )
+MpCollectionDataModel::MpCollectionDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData, QObject *parent )
     : QAbstractListModel(parent)
 {
     Q_UNUSED(data);
+    Q_UNUSED(playbackData);
 }
 
 /*!

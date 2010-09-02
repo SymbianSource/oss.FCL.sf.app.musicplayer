@@ -43,7 +43,6 @@ const QString KDiskFullDialog = QString( "DiskFullDialog" );
 const QString KScanFinished = QString( "ScanFinishedDialog" );
 const QString KUnableToContinueDueUSB = QString( "UnableToContinueDueUSB" );
 const QString KUsbBlockingNote = QString( "UsbBlockingNote" );
-const QString KPromptRefresh = QString( "PromptRefresh" );
 const QString KMTPInfoDialog = QString( "MTPInfoDialog" );
 
 // Popups Actions
@@ -317,13 +316,9 @@ void MpGlobalPopupHandler::launchScanFinishedDialog( bool ok , int itemsAdded )
 void MpGlobalPopupHandler::launchDiskFullDialog()
 {
     TX_ENTRY
-    QString diskfull;
-    diskfull = hbTrId( "txt_mus_title_refresh_cancelled" );
-    diskfull.append(" ");
-    diskfull.append( hbTrId( "txt_mus_info_out_of_disk_space" ) );
     HbMessageBox *diskFullDialog = new HbMessageBox();
     diskFullDialog->setIcon( HbIcon( QString("qtg_small_fail") ) );
-    diskFullDialog->setText( diskfull );
+    diskFullDialog->setText( hbTrId( "txt_mus_info_out_of_disk_space" ) );
     diskFullDialog->setTimeout( HbPopup::NoTimeout);
     diskFullDialog->setAttribute( Qt::WA_DeleteOnClose );
     diskFullDialog->setObjectName( KDiskFullDialog );

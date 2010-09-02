@@ -75,7 +75,8 @@ MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionD
       mPlaybackData( playbackData ),
       mRowCount( 0 ),
       mCurrentSongId( 0 ),
-      mPlaybackActive( false )
+      mPlaybackActive( false ),
+      mPlaybackIndicatorEnabled( false )
 {
     TX_ENTRY
     connect( mCollectionData, SIGNAL(refreshAlbumSongs()),
@@ -84,12 +85,8 @@ MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionD
              this, SIGNAL(albumDataChanged()) );
     
     if ( mPlaybackData ) {
-        connect( mPlaybackData, SIGNAL(playbackInfoChanged()),
-                this, SLOT(updateSong()));
-        
-        connect( mPlaybackData, SIGNAL(playbackStateChanged()), 
-                this, SLOT(updatePlaybackState()));
-        mPlaybackActive = mPlaybackData->playbackState() != MpPlaybackData::NotPlaying;
+		connect( mPlaybackData, SIGNAL(fileCorrupted( int )), 
+        		this, SLOT(fileCorrupted( int )));
     }
     
     TX_EXIT
@@ -141,7 +138,19 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
         }
     }
     else if ( role == Qt::DecorationRole ) {
-        if ( mPlaybackActive
+        if ( mCollectionData->hasAlbumSongProperty(row, MpMpxCollectionData::Corrupted) ) {
+                QList<QVariant> iconList;
+                iconList << QVariant();
+                iconList << HbIcon("qtg_mono_corrupted");
+                returnValue = iconList;
+        }
+        else if ( mCollectionData->hasAlbumSongProperty(row, MpMpxCollectionData::DrmExpired) ) {
+            QList<QVariant> iconList;
+            iconList << QVariant();
+            iconList << HbIcon("qtg_small_drm_rights_expired");
+            returnValue = iconList;
+        }
+        else if ( mPlaybackActive && mPlaybackIndicatorEnabled
                 && mPlaybackData->id() == mCollectionData->albumSongId( row ) ) {
             QList<QVariant> iconList;
             iconList << QVariant(); //primary icon is not used.
@@ -152,6 +161,36 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
     }
     TX_EXIT
     return returnValue;
+}
+
+/*!
+ Set Playback Indicator in TBone List Model 
+ */
+void MpCollectionTBoneListDataModel::enablePlaybackIndicatorEnable(bool enable)
+{   
+    TX_ENTRY
+    if ( !mPlaybackData ) {
+        return;
+    }
+    if ( enable ){
+        connect( mPlaybackData, SIGNAL(playbackInfoChanged()),
+                        this, SLOT(updateSong()));
+                
+        connect( mPlaybackData, SIGNAL(playbackStateChanged()), 
+                this, SLOT(updatePlaybackState()));
+        mPlaybackActive = mPlaybackData->playbackState() != MpPlaybackData::NotPlaying;
+        mPlaybackIndicatorEnabled = true;
+    }
+    else{
+        disconnect( mPlaybackData, SIGNAL(playbackInfoChanged()),
+                        this, SLOT(updateSong()));
+                
+        disconnect( mPlaybackData, SIGNAL(playbackStateChanged()), 
+                this, SLOT(updatePlaybackState()));
+        mPlaybackActive = false;
+        mPlaybackIndicatorEnabled = false;
+    }
+    TX_EXIT
 }
 
 /*!
@@ -209,6 +248,25 @@ void MpCollectionTBoneListDataModel::updatePlaybackState()
         updateSong();
     }
 }    
+
+/*!
+ Slot to be called when a song is marked as corrupted
+ */
+void MpCollectionTBoneListDataModel::fileCorrupted(int songId)
+{
+    TX_ENTRY
+    QModelIndex corruptedSongIndex;
+    corruptedSongIndex = index( mCollectionData->albumSongIndex( songId ) );
+    if ( !(corruptedSongIndex.isValid()) ){
+        mCollectionData->setReloadAlbumContent( true );
+    }
+    else if (!(mCollectionData->hasAlbumSongProperty(corruptedSongIndex.row(),
+            MpMpxCollectionData::Corrupted))) {   
+        mCollectionData->setCorruptValue(corruptedSongIndex, true);
+        emit dataChanged( corruptedSongIndex, corruptedSongIndex );
+    }
+    TX_EXIT
+}
     
 
 //EOF

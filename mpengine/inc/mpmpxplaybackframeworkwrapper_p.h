@@ -87,6 +87,7 @@ private:
     void DoPlayL( QString aFilename );
     void DoPlayL( const XQSharableFile& file );
     void DoHandlePlaybackMessageL( const CMPXMessage& aMessage );
+    void DoHandlePlaybackErrorL( const TInt aError );
     void ForceStopL();
     void UpdateStateL();
     void DoRetrieveSongDetailsL( bool detailsRequest );

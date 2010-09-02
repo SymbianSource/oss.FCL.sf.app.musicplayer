@@ -120,6 +120,13 @@ void MpMpxCollectionData::setMpxMedia( const CMPXMedia& entries, bool reopen)
 
 /*!
  Stub function.
+ */
+void MpMpxCollectionData::incrementalOpenUpdate()
+{
+}
+
+/*!
+ Stub function.
 */
 const CMPXMedia& MpMpxCollectionData::containerMedia()
 {

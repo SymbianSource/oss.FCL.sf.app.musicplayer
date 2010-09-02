@@ -182,7 +182,7 @@ void MpCollectionView::initializeView()
     connect( mCollectionData, SIGNAL( contextChanged( TCollectionContext ) ), 
              this, SLOT( setContext( TCollectionContext ) ), 
 			 Qt::QueuedConnection );
-    mCollectionDataModel = new MpCollectionDataModel( mCollectionData );
+    mCollectionDataModel = new MpCollectionDataModel( mCollectionData , mMpEngine->playbackData());
     
     connect( mCollectionDataModel, SIGNAL( dataReloaded() ),
              this, SLOT( containerDataChanged() ) );
@@ -289,21 +289,6 @@ void MpCollectionView::deactivateView()
     closeActiveDialog( true );
 
     setNavigationAction( 0 );
-    TX_EXIT
-}
-
-/*!
- Sets the default collection - AllSongs
- */
-void MpCollectionView::setDefaultView()
-{
-    TX_ENTRY
-    if ( mCollectionContext != ECollectionContextAllSongs ) {
-        // Open 'All Songs' by default
-        mMpEngine->openCollection( ECollectionContextAllSongs );
-    }
-
-
     TX_EXIT
 }
 
@@ -458,14 +443,24 @@ void MpCollectionView::openIndex( int index )
             case ECollectionContextArtistAllSongs:
             case ECollectionContextPlaylistSongs:
                 doOpen = false;
-                songUri = mCollectionData->itemData( index, MpMpxCollectionData::Uri );
-                emit songSelected( songUri );
+                if (!mCollectionData->hasItemProperty(index, MpMpxCollectionData::Corrupted)) {
+                    songUri = mCollectionData->itemData( index, MpMpxCollectionData::Uri );
+                    emit songSelected( songUri );
+                    }
+                else {
+                    showCorruptedNote();
+                }
                 break;
             case ECollectionContextArtistAlbumsTBone:
             case ECollectionContextAlbumsTBone:
                 doOpen = false;
-                songUri = mCollectionData->albumSongData( index, MpMpxCollectionData::Uri );
-                emit songSelected( songUri );
+                if (!mCollectionData->hasAlbumSongProperty(index, MpMpxCollectionData::Corrupted)) {
+                    songUri = mCollectionData->albumSongData( index, MpMpxCollectionData::Uri );
+                    emit songSelected( songUri );
+                    }
+                else {
+                    showCorruptedNote();
+                }
                 break;
             default:
                 break;
@@ -489,8 +484,23 @@ void MpCollectionView::openIndex( int index )
             mCollectionData->setContext( ECollectionContextAlbumsTBone );
         }
         else {
-            // Real open. Forward it to the engine.
-            mMpEngine->openCollectionItem( index );
+            switch ( mCollectionContext ) {
+                case ECollectionContextAllSongs:
+                case ECollectionContextArtistAllSongs:
+                case ECollectionContextPlaylistSongs:
+                    if (!mCollectionData->hasItemProperty(index, MpMpxCollectionData::Corrupted)) {
+                        mMpEngine->openCollectionItem( index );
+                        }
+                    else {
+                        showCorruptedNote();
+                    }
+                    break;
+                case ECollectionContextArtists:
+                case ECollectionContextPlaylists:
+                    mMpEngine->openCollectionItem( index );
+                default:
+                    break;
+            }
         }
     }
     TX_EXIT
@@ -514,7 +524,12 @@ void MpCollectionView::findAlbumSongs( int index )
 void MpCollectionView::playAlbumSongs( int albumIndex, int songIndex )
 {
     TX_ENTRY_ARGS( "albumIndex=" << albumIndex << "songIndex=" << songIndex );
-    mMpEngine->playAlbumSongs(albumIndex, songIndex);
+    if (!mCollectionData->hasAlbumSongProperty(songIndex, MpMpxCollectionData::Corrupted)) {
+        mMpEngine->playAlbumSongs(albumIndex, songIndex);
+    }
+    else {
+        showCorruptedNote();
+    }
     TX_EXIT
 }
 
@@ -620,6 +635,7 @@ void MpCollectionView::containerTransitionComplete( const HbEffect::EffectStatus
  */
 void MpCollectionView::shufflePlayAll()
 {
+    TX_ENTRY
     mMpEngine->setShuffle( true );
     MpSettingsManager::setShuffle( true );
     int index = generateShuffleIndex();
@@ -632,6 +648,7 @@ void MpCollectionView::shufflePlayAll()
             openIndex( index );
             break;
     }
+    TX_EXIT
 }
 
 /*!
@@ -795,10 +812,16 @@ void MpCollectionView::handleLibraryUpdated()
     }
     else {
         closeActiveDialog();
-        
-        //Update cache, even if collection is in background.
-        //Library refreshing could be triggered at any point due USB/MMC events.
-        mMpEngine->reopenCollection();
+
+        // Update cache, even if collection is in background.
+        // Library refreshing could be triggered at any point due USB/MMC events.
+        if ( mCollectionContext == ECollectionContextAllSongs ) {
+            mMpEngine->reopenCollection();
+        }
+		// We force to go to the all songs collection when the refresh is finished.
+        else{
+            openSongs();
+        }
     }
     TX_EXIT
 }
@@ -1176,11 +1199,9 @@ void MpCollectionView::setBannerVisibility( bool visible )
     bool ok = false;
     if ( visible ) {
         mDocumentLoader->load( MUSIC_COLLECTION_DOCML, "showBanner", &ok );
-        mNowPlayingBanner->show();
     }
     else {
         mDocumentLoader->load( MUSIC_COLLECTION_DOCML, "hideBanner", &ok );
-        mNowPlayingBanner->hide();
     }
 
     if ( !ok ) {
@@ -1191,27 +1212,54 @@ void MpCollectionView::setBannerVisibility( bool visible )
 
 /*!
  \internal
- Generates a random index for shuffle all.
+ Generates a random index for shuffle all. In case of All Songs, due to incremental open
+ delay, the chosen index may not be available yet. In such case, narrow down the upper limit
+ and regenerate until a valid index is found.
  */
 int MpCollectionView::generateShuffleIndex()
 {
     int low = 0;
     int high = 0;
+    bool tbone;
     switch ( mCollectionContext ) {
         case ECollectionContextArtistAlbumsTBone:
         case ECollectionContextAlbumsTBone:
+            tbone = true;
             high = mCollectionData->albumSongsCount();
             break;
         default:
+            tbone = false;
             high = mCollectionData->count();
             break;
     }
 
+    bool validIndex = false;
+    int index = 0;
+    int songId;
     time_t seconds;
-    time( &seconds );
-    srand( ( unsigned int ) seconds );
+    while ( !validIndex ) {
+        time( &seconds );
+        srand( ( unsigned int ) seconds );
+        index = rand() % ( high - low + 1 ) + low;
 
-    int index = rand() % ( high - low + 1 ) + low;
+        if ( tbone ) {
+            songId = mCollectionData->albumSongId(index);
+        }
+        else {
+            songId = mCollectionData->itemId(index);
+        }
+
+        if ( songId != -1 ) {
+            // Got a valid index; exit the loop.
+            validIndex = true;
+        }
+        else {
+            // Invalid index; re-select an index, but narrow down the
+            // upper range to increase the change of hitting a valid index.
+            high = index;
+        }
+        TX_LOG_ARGS( "index=" << index << "valid=" << validIndex );
+    }
     return index;
 }
 
@@ -1279,3 +1327,16 @@ void MpCollectionView::closeActiveDialog( bool onlyContextMenu )
     menu()->close();
 }
 
+/*!
+ \internal
+ Shows Corrupted Note in collection view
+ */
+void MpCollectionView::showCorruptedNote()
+{
+    TX_ENTRY
+    HbMessageBox *messageBox = new HbMessageBox( hbTrId( "txt_mus_info_file_is_corrupt" ), HbMessageBox::MessageTypeInformation );
+    messageBox->setAttribute( Qt::WA_DeleteOnClose );
+    messageBox->setIcon( HbIcon( QString("qtg_small_fail") ) ); 
+    messageBox->show();
+    TX_EXIT
+}

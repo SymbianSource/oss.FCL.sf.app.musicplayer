@@ -176,9 +176,6 @@ void MpDetailsView::initializeView()
 
     mMpEngine = MpEngineFactory::sharedEngine();
     mSongData = mMpEngine->songData();
-
-    // TODO: might need later
-    setupMenu();
     mMpQueryManager = new MpQueryManager();
 
     connect( mSoftKeyBack, SIGNAL( triggered() ), this, SLOT( back() ) );
@@ -191,7 +188,7 @@ void MpDetailsView::initializeView()
     connect( mMpQueryManager, SIGNAL(inspireMeItemsMetadataRetrieved()), this, SLOT(renderInspireMeMetadata()));
     connect( mMpQueryManager, SIGNAL(inspireMeItemAlbumArtReady()), this, SLOT(renderInspireMeAlbumArts()));    
     connect( mMpQueryManager, SIGNAL(localMusicStoreRetrieved(bool)), this, SLOT(queryInspireMe(bool)), Qt::QueuedConnection);
-    connect( mMpQueryManager, SIGNAL(localMusicStoreRetrievalError()), this, SLOT(abortInspireMeProcess()));
+	connect( mMpQueryManager, SIGNAL(localMusicStoreRetrievalError()), this, SLOT(abortInspireMeProcess()));
     connect( mMpQueryManager, SIGNAL(inspireMeItemsRetrievalError()), this, SLOT(queryLocalMusicStore()), Qt::QueuedConnection);
 
     TX_EXIT
@@ -253,16 +250,6 @@ void MpDetailsView::saveGroupBoxStates()
 }
  
 /*!
- Setup the menu.
- */
-void MpDetailsView::setupMenu()
-{
-    TX_ENTRY
-
-    TX_EXIT
-}
-
-/*!
  Slot to handle back command from softkey.
  */
 void MpDetailsView::back()
@@ -287,7 +274,7 @@ void MpDetailsView::albumArtChanged( )
 /*!
  Slot to handle network error.
  */
-void MpDetailsView::abortInspireMeProcess()
+void MpDetailsView::abortInspireMeProcess( )
 {
     TX_ENTRY
     mInspireMeProgressBar->hide();    

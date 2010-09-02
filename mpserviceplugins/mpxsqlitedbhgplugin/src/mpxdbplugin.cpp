@@ -59,7 +59,7 @@
 #include "mpxdbplugin.h"
 
 // CONSTANTS
-const TInt KFirstFetchCount = 400;
+const TInt KFirstFetchCount = 100;
 
 const TUid KCRUIDMusicPlayerFeatures = { 0x101FFCD0 };
 const TInt KMusicPlayerFeatures = 1;

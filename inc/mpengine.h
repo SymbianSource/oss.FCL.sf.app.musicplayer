@@ -147,6 +147,7 @@ signals:
 
     // Playback related
     void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
+    void corruptedStop();
 
     // Equalizer related
     void equalizerReady();

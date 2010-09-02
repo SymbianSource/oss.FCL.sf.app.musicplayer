@@ -76,6 +76,7 @@ public:
 
     void commitPlaybackInfo();
     void resetData();
+    void setCorrupted( int id );
     
 
 public slots:
@@ -89,6 +90,7 @@ signals:
     void albumArtReady();
     void playbackStateChanged();
     void playbackInfoChanged();
+    void fileCorrupted(int id );
     
 private:
 

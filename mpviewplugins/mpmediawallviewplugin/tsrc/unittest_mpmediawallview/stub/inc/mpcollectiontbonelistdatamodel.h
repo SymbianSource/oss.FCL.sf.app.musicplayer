@@ -36,6 +36,11 @@ public:
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
+    void enablePlaybackIndicatorEnable(bool enable);
+    
+public slots:
+
+    void fileCorrupted(int songId);
 
 
 };

@@ -20,7 +20,6 @@
 
 #include "mpcollectionlistcontainer.h"
 
-class HbGroupBox;
 
 class MpCollectionContainerPlaylists : public MpCollectionListContainer
 {
@@ -43,8 +42,6 @@ private:
     void setupContainer();
 
 private:
-
-    HbGroupBox      *mInfoBar;              // Own
     int             mCurrentPlaylistIndex;
     
 };

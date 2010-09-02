@@ -68,6 +68,13 @@ const int KUndefined = -1;
     title, artist and album name.
  */
 
+/*!
+    \fn void fileCorrupted()
+
+    This signal is emitted when a file is found corrupted.  Call by 
+    PlayBackWrapper.  
+ */
+
 
 
 /*!
@@ -174,16 +181,10 @@ bool MpPlaybackData::setArtist( const QString& artist )
 {
     TX_ENTRY_ARGS( "artist = " << artist )
     bool change = false;
-    // data is different or mArtist was not set befor or it was reset.
-    // When artist is empty and mArtist is empty mArtist should be unknown text.
+    // data is different or mArtist was not set before or it was reset.
     if ( artist != mArtist || mArtist.isNull()) {
         change = true;
-        if ( artist.isEmpty() ){
-            mArtist = hbTrId( "txt_mus_other_unknown3" );      
-        }
-        else {
-            mArtist = artist;
-        }
+        mArtist = artist;
     }
     TX_EXIT
     return change;
@@ -205,16 +206,10 @@ bool MpPlaybackData::setAlbum( const QString& album )
 {
     TX_ENTRY_ARGS( "album = " << album )
     bool change = false;
-    // data is different or mAlbum was not set befor or it was reset.
-    // when album is empty and mAlbum is empty mAlbum should be unknown text.
+    // data is different or mAlbum was not set before or it was reset.
     if ( album != mAlbum || mAlbum.isNull() ) {
         change = true;
-        if ( album.isEmpty() ){
-            mAlbum = hbTrId( "txt_mus_other_unknown4" );
-        }
-        else{
-            mAlbum = album;            
-        }
+        mAlbum = album;
     }
     TX_EXIT
     return change;
@@ -408,6 +403,14 @@ void MpPlaybackData::resetData()
     emit positionChanged();
     emit albumArtReady();
     emit playbackInfoChanged();
+}
+
+/*!
+ Emit fileCorrupted(id) signal when a file with id is corrupted
+*/
+void MpPlaybackData::setCorrupted( int id )
+{
+   emit fileCorrupted( id );
 }
 
 /*!

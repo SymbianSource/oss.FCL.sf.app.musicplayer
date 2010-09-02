@@ -49,7 +49,6 @@
  */
 MpCollectionContainerPlaylists::MpCollectionContainerPlaylists( HbDocumentLoader *loader, QGraphicsItem *parent )
     : MpCollectionListContainer(loader, parent),
-      mInfoBar(0),
       mCurrentPlaylistIndex(0)
 {
     TX_LOG
@@ -63,7 +62,6 @@ MpCollectionContainerPlaylists::MpCollectionContainerPlaylists( HbDocumentLoader
 MpCollectionContainerPlaylists::~MpCollectionContainerPlaylists()
 {
     TX_ENTRY
-    delete mInfoBar;
     delete mList;
     TX_EXIT
 }
@@ -130,6 +128,9 @@ void MpCollectionContainerPlaylists::dataReloaded()
 void MpCollectionContainerPlaylists::setupContainer()
 {
     TX_ENTRY_ARGS("mCollectionContext=" << mCollectionContext);
+    
+    mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "showInfoBar");
+       
     if ( mCollectionData->count() ) {
         bool ok = false;
         QGraphicsWidget *widget;
@@ -144,10 +145,8 @@ void MpCollectionContainerPlaylists::setupContainer()
                 mList = qobject_cast<HbListView*>(widget);
                 initializeList();
             }
-            if ( mInfoBar ) {
-                delete mInfoBar;
-                mInfoBar = 0;
-            }
+
+            mInfoBar->setHeading(hbTrId("txt_mus_subhead_playlists_1l").arg(mCollectionData->count()));
         }
         else if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
             mDocumentLoader->load(QString(":/docml/musiccollection.docml"), "playlistSongs", &ok);
@@ -155,16 +154,13 @@ void MpCollectionContainerPlaylists::setupContainer()
                 TX_LOG_ARGS("Error: invalid xml file.");
                 Q_ASSERT_X(ok, "MpCollectionContainerPlaylists::setupContainer", "invalid xml file");
             }
-
-            widget = mDocumentLoader->findWidget(QString("playlistSongsDetail"));
-            mInfoBar = qobject_cast<HbGroupBox*>(widget);
-
+            
             QString details;
             if ( mViewMode == MpCommon::FetchView ) {
-                details = hbTrId("txt_mus_subtitle_select_a_song");
+                details = hbTrId("txt_mus_subtitle_select_song");
             }
             else {
-                details = mCollectionData->collectionTitle();
+                details = hbTrId("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(mCollectionData->count()); 
             }
             mInfoBar->setHeading(details);
         }
@@ -174,11 +170,10 @@ void MpCollectionContainerPlaylists::setupContainer()
         }
     }
     else {
-        if ( mInfoBar ) {
-            delete mInfoBar;
-            mInfoBar = 0;
-        }
-        // Call empty list from base class
+    
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(0));
+
+        // Call empty list from base class    
         setupEmptyListContainer();
     }
     TX_EXIT

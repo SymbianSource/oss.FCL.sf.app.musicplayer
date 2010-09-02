@@ -50,7 +50,9 @@ public:
 
 signals:
 
-    void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
+	void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
+    void corruptedStop();
+    void fileCorrupted(int fileId);
 
 public slots:
     

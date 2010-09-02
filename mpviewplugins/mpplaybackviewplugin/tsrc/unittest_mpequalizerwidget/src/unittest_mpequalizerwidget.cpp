@@ -122,7 +122,7 @@ void TestMpEqualizerWidget::testInitialize()
 void TestMpEqualizerWidget::testPrepareDialog()
 {
     mTest->prepareDialog();
-    QVERIFY(mTest->mOriginalPreset == -1 );    
+    QVERIFY(mTest->mOriginalPresetIndex == 0 );    
     QVERIFY(mTest->timeout() == HbDialog::NoTimeout);
     QVERIFY(mTest->dismissPolicy() == HbDialog::NoDismiss);
     QVERIFY(mTest->frameType() == HbPopup::Strong);
@@ -165,25 +165,25 @@ void TestMpEqualizerWidget::testCancelSelected()
     
     //When Original Preset == -1 "Off"
     mTest->mMpEngine->mActivePreset = 4;
-    mTest->mOriginalPreset = -1;
+    mTest->mOriginalPresetIndex = 0;
     mTest->cancelSelected(true);
     QVERIFY(mTest->mMpEngine->mDisableEquqlizerCount == 1);
-    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPreset);
+    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPresetIndex);
     
     //When Original Preset != -1 "Any other different than Off"
     mTest->mMpEngine->mActivePreset = 4;
-    mTest->mOriginalPreset = 2;
+    mTest->mOriginalPresetIndex = 2;
     mTest->cancelSelected(true);
     QVERIFY(mTest->mMpEngine->mApplyPresetCount == 1);
-    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPreset);
+    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPresetIndex);
         
     //Cancel, when Current preset selected == Original Preset
     mTest->mMpEngine->mActivePreset = 3;
-    mTest->mOriginalPreset = 3;
+    mTest->mOriginalPresetIndex = 3;
     mTest->cancelSelected(true);
     QVERIFY(mTest->mMpEngine->mApplyPresetCount == 1);
     QVERIFY(mTest->mMpEngine->mDisableEquqlizerCount == 1);
-    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPreset);
+    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPresetIndex);
 }
 
 /*!
@@ -192,9 +192,9 @@ void TestMpEqualizerWidget::testCancelSelected()
 void TestMpEqualizerWidget::testOkSelected()
 {
     mTest->mMpEngine->mActivePreset = 2;
-    mTest->mOriginalPreset = -1;
+    mTest->mOriginalPresetIndex = -1;
     mTest->okSelected(true);
-    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPreset);   
+    QCOMPARE(mTest->mMpEngine->mActivePreset, mTest->mOriginalPresetIndex);   
 }
 
 /*!

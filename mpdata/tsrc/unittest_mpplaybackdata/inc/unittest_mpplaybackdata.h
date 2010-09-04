@@ -53,6 +53,7 @@ private slots:
     void testSeAlbumId();
     void testSetPlaybackState();
     void testCommitPlaybackInfo();
+    void testSetCorrupted();
     
 //    void testDeactivateView();
 //    void testGetView();

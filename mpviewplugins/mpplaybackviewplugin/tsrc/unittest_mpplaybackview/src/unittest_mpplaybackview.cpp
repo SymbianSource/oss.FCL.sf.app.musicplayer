@@ -21,10 +21,14 @@
 #include <QTranslator>
 #include <QLocale>
 
+#include "stub/inc/mpengine.h"
+#include "stub/inc/mpenginefactory.h"
 #include "stub/inc/mpequalizerwidget.h"
-#include "mpcommondefs.h"
-#include "stub/inc/mpviewbase.h"
+#include "stub/inc/mpplaybackdata.h"
+#include "stub/inc/mpplaybackwidget.h"
 #include "stub/inc/mpsettingsmanager.h"
+#include "stub/inc/mpviewbase.h"
+#include "mpcommondefs.h"
 #include "unittest_mpplaybackview.h"
 
 // Do this so we can access all member variables.
@@ -75,14 +79,14 @@ TestMpPlaybackView::~TestMpPlaybackView()
 void TestMpPlaybackView::initTestCase()
 {
 
-}   
+}
 
 /*!
  Called after the last testfunction was executed.
  */
 void TestMpPlaybackView::cleanupTestCase()
 {
-QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 }
 
 /*!
@@ -99,19 +103,21 @@ void TestMpPlaybackView::init()
  */
 void TestMpPlaybackView::cleanup()
 {
-    mTest->mMpEngine->retrieveSongDetailsCount = 0;
-    mTest->mMpEngine->stopCount = 0;
-    mTest->mEqualizerWidget->showEqualizerWidgetCount = 0;
-    mTest->mEqualizerWidget->closeEqualizerWidgetCount = 0;
-    mTest->mMpEngine->startSeekBackwardCount = 0;
-    mTest->mMpEngine->startSeekForwardCount = 0;
-    mTest->mMpEngine->stopSeekingCount = 0;
-    mTest->mMpEngine->skipBackwardCount = 0;
-    mTest->mMpEngine->skipForwardCount = 0;
     delete mTest;
     mTest = 0;
+    MpEngineFactory::close();
 }
 
+/*!
+Test initializeView
+ */
+void TestMpPlaybackView::testInitializeView()
+{
+    QVERIFY( mTest->mSoftKeyBack );
+    QVERIFY( mTest->mMpEngine );
+    QVERIFY( mTest->mPlaybackData );
+    QVERIFY( mTest->mPlaybackWidget );
+}
 
 /*!
 Test ActivateView
@@ -119,10 +125,9 @@ Test ActivateView
 void TestMpPlaybackView::testActivateView()
 {
     QCOMPARE( mTest->mActivated, false );
-    mTest->activateView();    
+    mTest->activateView();
     QCOMPARE( mTest->mActivated, true );
     QVERIFY( mTest->navigationAction() == mTest->mSoftKeyBack );
-
 }
 
 /*!
@@ -193,23 +198,23 @@ void TestMpPlaybackView::testStartSettingsView()
 void TestMpPlaybackView::testBack()
 {
     //test Stop() gets called in MpEngine
-    mTest->mMpEngine->stopCount=0;
+    mTest->mMpEngine->mStopCount=0;
     mTest->mViewMode = MpCommon::EmbeddedView;
     mTest->back();
-    QCOMPARE(mTest->mMpEngine->stopCount,1);
+    QCOMPARE(mTest->mMpEngine->mStopCount,1);
 
     mTest->mViewMode = MpCommon::FetchView;
     mTest->back();
-    QCOMPARE(mTest->mMpEngine->stopCount,2);
+    QCOMPARE(mTest->mMpEngine->mStopCount,2);
 
     QSignalSpy spy(mTest, SIGNAL(command(int)));
-    mTest->mMpEngine->stopCount = 0;   
+    mTest->mMpEngine->mStopCount = 0;   
     mTest->mViewMode = MpCommon::DefaultView;
 
     mTest->back();
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0), QVariant(MpCommon::ActivateCollectionView));
-    QCOMPARE(mTest->mMpEngine->stopCount,0);
+    QCOMPARE(mTest->mMpEngine->mStopCount,0);
 }
 
 /*!
@@ -229,12 +234,12 @@ void TestMpPlaybackView::testExit()
 void TestMpPlaybackView::testPlaybackStateChanged()
 {
     //test signal slot connection
-    mTest->mMpEngine->stopCount=0;
+    mTest->mMpEngine->mStopCount=0;
     mTest->mViewMode = MpCommon::FetchView;
     mTest->mPlaybackData->setPlaybackState(MpPlaybackData::Stopped);
 
     mTest->mPlaybackData->triggerStateUpdate(MpPlaybackData::Stopped);
-    QCOMPARE(mTest->mMpEngine->stopCount,1);
+    QCOMPARE(mTest->mMpEngine->mStopCount,1);
 }
 
 /*!
@@ -246,7 +251,7 @@ void TestMpPlaybackView::testFlip()
     mTest->flip();
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0), QVariant(MpCommon::ActivateDetailsView));
-    QCOMPARE(mTest->mMpEngine->retrieveSongDetailsCount,1);
+    QCOMPARE(mTest->mMpEngine->mRetrieveSongDetailsCount, 1);
 }
 
 /*!
@@ -260,12 +265,12 @@ void TestMpPlaybackView::testShuffle()
     mTest->toggleShuffle();
     mTest->shuffleChanged(true); //simulate signal
     QCOMPARE(mTest->shuffleEnabled(), true);
-    QVERIFY(mTest->mShuffleAction->icon() == *mTest->mShuffleOnIcon);
+    QVERIFY(mTest->mShuffleAction->isChecked());
 
     mTest->toggleShuffle();
     mTest->shuffleChanged(false);
     QCOMPARE(mTest->shuffleEnabled(), false);
-    QVERIFY(mTest->mShuffleAction->icon() == *mTest->mShuffleOffIcon);
+    QVERIFY(!mTest->mShuffleAction->isChecked());
 }
 
 /*!
@@ -292,14 +297,14 @@ void TestMpPlaybackView::testRepeat()
   */
 void TestMpPlaybackView::testHandleSongSelected()
 {
-    mTest->mMpEngine->stopCount=0;
+    mTest->mMpEngine->mStopCount=0;
     mTest->mPlaybackData->setUri("testUri");
 
     QSignalSpy spy(mTest, SIGNAL(songSelected(QString)));
     mTest->handleSongSelected();
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).at(0), QVariant("testUri"));
-    QCOMPARE(mTest->mMpEngine->stopCount,1);
+    QCOMPARE(mTest->mMpEngine->mStopCount,1);
 }
 
 /*!
@@ -307,7 +312,6 @@ void TestMpPlaybackView::testHandleSongSelected()
   */
 void TestMpPlaybackView::testShowEqualizerDialog()
 {
-    mTest->mEqualizerWidget->showEqualizerWidgetCount = 0;
     mTest->showEqualizerDialog();
     QCOMPARE(mTest->mEqualizerWidget->showEqualizerWidgetCount,1);
 }
@@ -317,24 +321,37 @@ void TestMpPlaybackView::testShowEqualizerDialog()
   */
 void TestMpPlaybackView::testCloseEqualizerDialog()
 {
-    mTest->mEqualizerWidget->closeEqualizerWidgetCount = 0;
+    // Equalizer no displayed before, closeEqualizerDialog should do nothing.
+    mTest->closeEqualizerDialog();
+    QVERIFY(!mTest->mEqualizerWidget);
+
+    // Equalizer previously displyaed
+    mTest->showEqualizerDialog();
     mTest->closeEqualizerDialog();
     QCOMPARE(mTest->mEqualizerWidget->closeEqualizerWidgetCount,1);
 }
 
+/*!
+    Test showCorruptedNote
+  */
+void TestMpPlaybackView::testShowCorruptedNote()
+{
+    mTest->showCorruptedNote();
+    QCOMPARE(mTest->mMpEngine->mStopCount, 1);
+}
 
 /*!
     Test StartRewindTimer and startSeekRewind
   */
 void TestMpPlaybackView::testSeekRewind()
 {    
-    mTest->mMpEngine->startSeekBackwardCount = 0;
+    mTest->mMpEngine->mStartSeekBackwardCount = 0;
     mTest->mSeeking = false;
 
     mTest->startRewindTimer();
     QTest::qWait(2000); // wait for timer to fire and call startSeekRewind()
 
-    QCOMPARE(mTest->mMpEngine->startSeekBackwardCount,1);
+    QCOMPARE(mTest->mMpEngine->mStartSeekBackwardCount,1);
     QCOMPARE(mTest->mSeeking,true);
 }
 
@@ -343,13 +360,13 @@ void TestMpPlaybackView::testSeekRewind()
   */
 void TestMpPlaybackView::testSeekForward()
 {
-    mTest->mMpEngine->startSeekForwardCount = 0;
+    mTest->mMpEngine->mStartSeekForwardCount = 0;
     mTest->mSeeking = false;
 
     mTest->startForwardTimer();
     QTest::qWait(2000); // wait for timer to fire and call startSeekForward()
 
-    QCOMPARE(mTest->mMpEngine->startSeekForwardCount,1);
+    QCOMPARE(mTest->mMpEngine->mStartSeekForwardCount,1);
     QCOMPARE(mTest->mSeeking,true);
 }
 
@@ -360,11 +377,11 @@ void TestMpPlaybackView::testEndRewind()
 {
     mTest->mSeeking = true;
     mTest->endRewind();
-    QCOMPARE(mTest->mMpEngine->stopSeekingCount,1);
+    QCOMPARE(mTest->mMpEngine->mStopSeekingCount,1);
     QCOMPARE(mTest->mSeeking,false);
     
     mTest->endRewind();
-    QCOMPARE(mTest->mMpEngine->skipBackwardCount,1);
+    QCOMPARE(mTest->mMpEngine->mSkipBackwardCount,1);
     QCOMPARE(mTest->mSeeking,false);
 }
 
@@ -375,11 +392,11 @@ void TestMpPlaybackView::testEndForward()
 {
     mTest->mSeeking = true;
     mTest->endForward();
-    QCOMPARE(mTest->mMpEngine->stopSeekingCount,1);
+    QCOMPARE(mTest->mMpEngine->mStopSeekingCount,1);
     QCOMPARE(mTest->mSeeking,false);
     
     mTest->endForward();
-    QCOMPARE(mTest->mMpEngine->skipForwardCount,1);
+    QCOMPARE(mTest->mMpEngine->mSkipForwardCount,1);
     QCOMPARE(mTest->mSeeking,false);    
 }
 

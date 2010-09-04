@@ -58,7 +58,8 @@ LIBS += -lecom \
         -lmusicservices \
         -lmpsettingsmanager \
         -lmpengine \
-        -lmpmediacontroller
+        -lmpmediacontroller \
+        -lafservice
 
 # Input
 HEADERS += inc/mpmainwindow.h \

@@ -17,6 +17,7 @@
 
 #include <Qt>
 #include <mpxcollectionplaylist.h>
+#include <mpxcollectionpath.h>
 #include <mptrace.h>
 
 #include "stub/inc/mpxplaybackutility.h"
@@ -32,7 +33,9 @@ MMPXPlaybackUtility::MMPXPlaybackUtility():iValue(0),
                                            iState(EPbStateNotInitialised),
                                            iAttrs(0),
                                            iInitialized(false),
-                                           iReturnSource(true)
+                                           iReturnSource(true),
+                                           iSetPlaylistEnd(false),
+                                           iCurrentPlaylist(0)
 {
 }
 
@@ -144,8 +147,21 @@ TMPXPlaybackState MMPXPlaybackUtility::StateL() const
 */
 CMPXCollectionPlaylist* MMPXPlaybackUtility::PlaylistL()
 {
-    CMPXCollectionPlaylist* temp = CMPXCollectionPlaylist::NewL();
-    return temp;
+    CMPXCollectionPath *testPath = CMPXCollectionPath::NewL();
+    RArray<TMPXItemId> pathItems;
+    CleanupStack::PushL(testPath);
+    testPath->AppendL(5);
+    for (int i = 0; i < 5; i++ ) {
+        pathItems.AppendL( TMPXItemId( 300 + i ) );
+    }
+    testPath->AppendL( pathItems.Array() );
+    //Create testPlaylist
+    iCurrentPlaylist = CMPXCollectionPlaylist::NewL( *testPath );
+    if (iSetPlaylistEnd){
+        iCurrentPlaylist->SetToLast();
+    }
+    CleanupStack::PopAndDestroy( testPath );
+    return iCurrentPlaylist;
 }
 
 /*!

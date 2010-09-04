@@ -112,7 +112,7 @@ void MpCollectionListContainer::onLongPressed( HbAbstractViewItem *listViewItem,
     TX_ENTRY
     if ( mLongPressEnabled ) {
         mLongPressedIndex = listViewItem->modelIndex().row();
-        emit MpCollectionContainer::itemLongPressed(mLongPressedIndex, coords);
+        emit MpCollectionContainer::itemLongPressed(listViewItem->modelIndex(), coords);
     }
     TX_EXIT
 }

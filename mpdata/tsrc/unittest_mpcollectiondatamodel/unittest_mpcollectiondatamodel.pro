@@ -16,7 +16,7 @@
 
 TEMPLATE = app
 CONFIG += qtestlib hb symbian_test
-TARGET = unittest_mpcollectiontbonelistdatamodel
+TARGET = unittest_mpcollectiondatamodel
 TARGET.CAPABILITY = CAP_APPLICATION
 
 DEPENDPATH += .
@@ -34,12 +34,14 @@ HEADERS += inc/unittest_mpcollectiondatamodel.h \
            inc/unittest_helper.h \
            stub/inc/mpcollectionalbumartmanager.h \
            stub/inc/mpmpxcollectiondata.h \
-           ../../../inc/mpcollectiondatamodel.h \
+           stub/inc/mpplaybackdata.h \
+           ../../../inc/mpcollectiondatamodel.h
                
 SOURCES += src/unittest_mpcollectiondatamodel.cpp \
            src/unittest_helper.cpp \
            stub/src/mpcollectionalbumartmanager.cpp \
            stub/src/mpmpxcollectiondata.cpp \
+           stub/src/mpplaybackdata.cpp \
            ../../src/mpcollectiondatamodel.cpp
 
 DEFINES += BUILD_MPDATA_LIB

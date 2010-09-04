@@ -16,7 +16,6 @@
 */
 
 #include <qnamespace.h>
-#include <hbtoolbutton.h>
 
 #include "stub/inc/hgmediawall.h"
 #include "unittest_mpmediawalldocumentloader.h"
@@ -102,22 +101,6 @@ void TestMpMediaWallDocumentLoader::testCreateHgMediawall()
     QCOMPARE(theObject->metaObject()->className(),"HgMediawall");
     QCOMPARE(theObject->objectName(),QString("myHgMediawall"));
     QVERIFY(qobject_cast<HgMediawall*>(theObject));
-    delete theObject;
-
-}
-
-/*!
- Tests the correct creation of HbToolButton.
- */
-void TestMpMediaWallDocumentLoader::testCreateHbToolButton()
-{
-    cleanup();
-    init();
-    QObject *theObject;
-    theObject = mTest->createObject(QString("HbToolButton"),QString("myHbToolButton"));
-    QCOMPARE(theObject->metaObject()->className(),"HbToolButton");
-    QCOMPARE(theObject->objectName(),QString("myHbToolButton"));
-    QVERIFY(qobject_cast<HbToolButton*>(theObject));
     delete theObject;
 
 }

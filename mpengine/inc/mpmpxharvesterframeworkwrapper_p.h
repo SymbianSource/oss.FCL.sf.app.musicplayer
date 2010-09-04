@@ -35,7 +35,7 @@ public:
     explicit MpMpxHarvesterFrameworkWrapperPrivate( MpMpxHarvesterFrameworkWrapper *wrapper );
     virtual ~MpMpxHarvesterFrameworkWrapperPrivate();
 
-    void init( TUid hostUid );
+    void init( quint32 clientSecureId );
     void scan();
     void cancelScan();
     void checkForSystemEvents();
@@ -64,7 +64,7 @@ private:
     TInt                            iNumItemsAdded;
     TBool                           iScanning;
     TInt                            iPreviousBroadCastMsg;
-    TUid                            mHostUid;
+    TUid                            iHostUid;
 
 };
 

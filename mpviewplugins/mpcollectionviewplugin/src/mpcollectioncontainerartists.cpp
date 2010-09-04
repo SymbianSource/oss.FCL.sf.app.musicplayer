@@ -259,6 +259,9 @@ void MpCollectionContainerArtists::dataReloaded()
             emit findAlbumSongs(mCurrentAlbumIndex);
         }
     }
+    else if( mCollectionContext == ECollectionContextArtists ){
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_artist_1l").arg(mCollectionData->count()));
+    }
     else {
         MpCollectionListContainer::dataReloaded();
     }
@@ -385,7 +388,7 @@ void MpCollectionContainerArtists::setupContainer()
                 defaultIcon.setSize(mTBone->itemSize());
                 mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
                 mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
-                mTBone->enableReflections(true);
+                mTBone->enableReflections( false );
                 connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
                 connect( mTBone, SIGNAL(animationAboutToEnd(QModelIndex)), this, SLOT(albumCentered(QModelIndex)) );
                 }
@@ -402,7 +405,7 @@ void MpCollectionContainerArtists::setupContainer()
                         artist = hbTrId("txt_mus_subtitle_unknown_all");
                     }
                     else {
-                        artist = HbParameterLengthLimiter(hbTrId("txt_mus_subtitle_1_all")).arg(artist);
+                        artist = HbParameterLengthLimiter("txt_mus_subtitle_1_all").arg(artist);
                     }
                     mInfoBar->setHeading(artist);
                 }

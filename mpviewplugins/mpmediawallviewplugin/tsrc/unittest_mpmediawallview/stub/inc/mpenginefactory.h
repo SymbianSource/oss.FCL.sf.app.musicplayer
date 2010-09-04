@@ -26,19 +26,19 @@
 
 class MpEngineFactory
 {
-private:
+public:
     explicit MpEngineFactory();
 
-public:
+
     virtual ~MpEngineFactory();
     static MpEngineFactory * instance();
-    
-    static MpEngine *createSharedEngine( TUid uid = TUid::Uid( MpCommon::KMusicPlayerUid ), MpEngine::EngineMode mode = MpEngine::StandAlone );
+
+    static MpEngine *createSharedEngine( quint32 clientSecureId=MpCommon::KMusicPlayerUid, MpEngine::EngineMode mode = MpEngine::StandAlone );
     static MpEngine *sharedEngine();
     static MpEngine *createIsolatedEngine( MpEngine::EngineMode mode );
     static void close();
 	
-private:       
+   
     MpEngine    *mSharedEngine;
     QList<MpEngine *>    mEngines;
 };

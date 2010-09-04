@@ -23,6 +23,10 @@ DEFAULT
 
 PRJ_EXPORTS
 
+../rom/mpxsqlitedbhgplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxsqlitedbhgplugin.iby)
+../rom/mpxsqlitedbhgpluginrsc.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxsqlitedbhgpluginrsc.iby)
+
+
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE mpxdbhgplugin.mif

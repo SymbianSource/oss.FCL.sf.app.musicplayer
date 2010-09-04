@@ -21,6 +21,7 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../rom/mpxaudioeffects.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxaudioeffects.iby)
 
 PRJ_MMPFILES
 mpxaudioeffectengine.mmp

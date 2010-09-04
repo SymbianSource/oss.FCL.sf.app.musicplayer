@@ -107,7 +107,7 @@ void TestMpMpxPlaybackFrameworkWrapper::cleanupTestCase()
  */
 void TestMpMpxPlaybackFrameworkWrapper::init()
 {
-    mTest = new MpMpxPlaybackFrameworkWrapper(TUid::Uid(MpCommon::KMusicPlayerUid), mSongData);
+    mTest = new MpMpxPlaybackFrameworkWrapper(MpCommon::KMusicPlayerUid, mSongData);
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -268,6 +268,23 @@ void TestMpMpxPlaybackFrameworkWrapper::testHandlePlaybackMessage()
     QCOMPARE(mTestPrivate->iPlaybackUtility->iAttrs->Count(), 8);
 
     CleanupStack::PopAndDestroy(testMessage);
+}
+
+/*!
+ Tests handlePlaybackError
+ */
+void TestMpMpxPlaybackFrameworkWrapper::testHandlePlaybackError()
+{
+    mTestPrivate->iPlaybackUtility->iReturnSource = true;
+    mTestPrivate->DoHandlePlaybackErrorL(-20);
+    QCOMPARE(mTestPrivate->iPlaybackUtility->iCmd, EPbCmdNext);
+    QCOMPARE(mTestPrivate->iPlaybackData->mCorrupted, true);
+    QSignalSpy spy(mTest, SIGNAL(corruptedStop()));
+    mTestPrivate->iPlaybackData->mCorrupted = false;
+    mTestPrivate->iPlaybackUtility->iSetPlaylistEnd = true;
+    mTestPrivate->DoHandlePlaybackErrorL(-20);
+    QCOMPARE(mTestPrivate->iPlaybackData->mCorrupted, true);
+    QCOMPARE(spy.count(), 1);    
 }
 
 /*!

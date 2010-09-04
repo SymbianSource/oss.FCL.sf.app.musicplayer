@@ -19,6 +19,7 @@
 #define MPCOLLECTIONPOPUPHANDLER_H
 
 #include <QObject>
+#include <QModelIndex>
 #include "mpmpxcollectionviewdefs.h"
 
 class MpCollectionView;
@@ -38,15 +39,16 @@ public:
     MpCollectionPopupHandler( MpCollectionView *parent );
     virtual ~MpCollectionPopupHandler();
 
-    void openDefaultViewContextMenu( int index, const QPointF &coords );
-    void openFetchViewContextMenu( int index, const QPointF &coords );
+    void openDefaultViewContextMenu( const QModelIndex &index, const QPointF &coords );
+    void openFetchViewContextMenu( const QModelIndex &index, const QPointF &coords );
     void openRenamePlaylistContainerDialog( const QString &currentName );
     void openRenamePlaylistItemDialog( const QString &currentName );
     void openAddSongsToPlaylist( QAbstractItemModel* model );
     void openAddSongsToPlaylistFromTBone();
     void openDeleteSongs( QAbstractItemModel* model );
     void openAddToCurrentPlaylist( MpMpxCollectionData* collectionData );
-    void openCreateNewPlaylist( MpMpxCollectionData* collectionData );
+    void openCreateNewPlaylist( MpMpxCollectionData* collectionData, bool isolated );
+    void openCreateNewPlaylistFromTBone();
     void openArrangeSongs();
     void cancelOngoingPopup(  bool onlyContextMenu );
 
@@ -74,16 +76,17 @@ public slots:
     void handleOperationEnded( bool success );
 
     void outstandingPopupClosing();
+    void inputDialogChanged( QString text );
+    void requestDelete();
 
 private:
     void setOutstandingPopup( HbPopup *popup );
     void clearOutstandingPopup( HbPopup *popup );    
     void launchAddToPlaylistDialog( QList<int> &selection );
     void queryNewPlaylistName(const QStringList &playlists, const char *handler );
-    void getText(const QString &label, const QString &text, const char *handler );
-    void getModelIndexes( const QString &label, QAbstractItemModel* model, const char *handler );
+    void getText(const QString &label, const QString &text, const QString &confirmationActionLabel, const char *handler );
+    void getModelIndexes( const QString &label, const QString &confirmationActionLabel, QAbstractItemModel* model, const char *handler );
     void launchArrangeSongsDialog();
-    void requestDelete( QList<int> &selection );
     void launchProgressDialog( const char *id );
     void connectExternalEvents();
 

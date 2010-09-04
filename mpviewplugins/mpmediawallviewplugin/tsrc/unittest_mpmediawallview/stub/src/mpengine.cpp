@@ -21,7 +21,9 @@
 #include "mpmpxcollectiondata.h"
 
 
-MpEngine::MpEngine() : mOpenCollectionCalled(0)
+MpEngine::MpEngine() : mOpenCollectionCalled(0),
+    mPlayAlbumSongsCount(0),
+    mPlayPauseCount(0)
 {
     TX_LOG_ARGS("Stub")
 }
@@ -146,6 +148,7 @@ void MpEngine::playAlbumSongs( int albumIndex, int songIndex, MpMpxCollectionDat
     Q_UNUSED(albumIndex)
     Q_UNUSED(songIndex)
     Q_UNUSED(collectionData)
+    mPlayAlbumSongsCount++;
     TX_ENTRY_ARGS("Stub")
 }
 
@@ -191,6 +194,7 @@ void MpEngine::playEmbedded(const XQSharableFile& file )
 void MpEngine::playPause()
 {
     TX_ENTRY_ARGS("Stub")
+    mPlayPauseCount++;
 }
 
 void MpEngine::stop()

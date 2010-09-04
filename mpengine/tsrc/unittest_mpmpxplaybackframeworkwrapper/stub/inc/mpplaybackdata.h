@@ -72,6 +72,7 @@ public:
     QString                  currentUri;
     TBool                    mMediaReady;
     bool                     mRealAudio;
+    bool                     mCorrupted;
     int                      mAlbumId;
     int                      mId;
 

@@ -22,6 +22,7 @@
 #include <QAbstractListModel>
 
 class MpMpxCollectionData;
+class MpPlaybackData;
 
 class MpCollectionTBoneListDataModel : public QAbstractListModel
 {
@@ -29,7 +30,8 @@ class MpCollectionTBoneListDataModel : public QAbstractListModel
 
 public:
 
-    explicit MpCollectionTBoneListDataModel( MpMpxCollectionData *data, QObject *parent=0 );
+    explicit MpCollectionTBoneListDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData = 0,
+            QObject *parent=0 );
     virtual ~MpCollectionTBoneListDataModel();
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;

@@ -62,9 +62,9 @@ public slots:
 
 signals:
 
-    void playReady( const QString& aFileName );
+    void playReady( const QString& uri );
     void playReady( const XQSharableFile& file );
-    void serviceActive( TUid hostUid );
+    void serviceActive( quint32 clientSecureId );
 
 private:
     

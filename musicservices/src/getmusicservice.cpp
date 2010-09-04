@@ -23,8 +23,6 @@
 #include "mptrace.h"
 
 
-
-
 /*!
  Constructs music fetcher service
  */
@@ -114,8 +112,7 @@ void GetMusicService::fetch()
    //TODO: change to string constant when available
     mTitle = requestInfo().info("WindowTitle").toString();
     mServiceApp->setCurrentService( MusicServices::EUriFetcher );
-    TUid uid = TUid::Uid( requestInfo().clientSecureId() ); 
-    emit mServiceApp->serviceActive( uid );
+    emit mServiceApp->serviceActive( requestInfo().clientSecureId() );
     connect(this, SIGNAL( clientDisconnected() ), qApp, SLOT( quit() ) );
     mRequestIndex = setCurrentRequestAsync();
  

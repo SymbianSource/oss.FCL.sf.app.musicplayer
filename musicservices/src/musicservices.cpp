@@ -31,9 +31,9 @@
 */
 
 /*!
-    \fn void playReady( const QString& aFileName )
+    \fn void playReady( const QString& uri )
 
-    This signal is emitted when the play service has been loaded and playback of aFilenName should start
+    This signal is emitted when the play service has been loaded and playback of \a uri should start.
 
  */
 
@@ -45,9 +45,9 @@
  */
 
 /*!
-    \fn void serviceActive()
+    \fn void serviceActive( quint32 clientSecureId )
 
-    This signal is emitted when the requested service has been detected and view initialization should continue
+    This signal is emitted when the requested service has been detected and view initialization should continue.
 
  */
 
@@ -95,7 +95,6 @@ void MusicServices::setCurrentService( MusicServices::MusicService service )
  */
 QString MusicServices::contextTitle() const
 {
-
     if( mCurrentService == MusicServices::EUriFetcher ) {
         return mFetchService->contextTitle();
     }
@@ -106,8 +105,6 @@ QString MusicServices::contextTitle() const
         Q_ASSERT_X(false, "MusicServices::contexTitle", "undefined service");
         return QString();
     }
-    
-    
 }
 
 /*!
@@ -124,6 +121,5 @@ void MusicServices::itemSelected( QString songName )
     else if ( mCurrentService == MusicServices::EPlayback ) {
         mPlayService->complete( list );
     }
-    
 }
 

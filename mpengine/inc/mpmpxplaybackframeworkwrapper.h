@@ -37,7 +37,7 @@ class MpMpxPlaybackFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid=TUid::Uid(MpCommon::KMusicPlayerUid),
+    explicit MpMpxPlaybackFrameworkWrapper( quint32 clientSecureId=MpCommon::KMusicPlayerUid,
         MpSongData *songData=0, QObject *parent=0 );
     virtual ~MpMpxPlaybackFrameworkWrapper();
     
@@ -51,8 +51,8 @@ public:
 signals:
 
 	void volumePropertyChanged( MpCommon::MpVolumeProperty property, int value );
-    void corruptedStop();
-    void fileCorrupted(int fileId);
+    void corruptedStop( bool lastSong );
+    void fileCorrupted( int fileId );
 
 public slots:
     

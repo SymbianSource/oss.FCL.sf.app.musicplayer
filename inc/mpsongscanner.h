@@ -50,12 +50,15 @@ public:
     bool isAutomaticScan();
 
 signals:
+
     void scanStarted();
     void scanCountChanged( int count );
     void scanFinished( int error, int itemsAdded );
 
 public slots:
+
     void cancelScan();
+    void handleScanStarted();
     void handleScanEnded( int numItemsAdded, int error );
     void handleDiskEvent( MpxDiskEvents event );
 

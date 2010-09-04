@@ -46,7 +46,7 @@ public:
     virtual ~MpEngine();
 
     MpPlaybackData *playbackData();
-    void retrieveSongDetails();
+    void retrieveSongDetails( int index = -1 );
    
     // Equalizer related
     void applyPreset( int preset );
@@ -71,6 +71,7 @@ signals:
 
     // Equalizer related
     void libraryUpdated();
+    void corruptedStop();
 
 private:
     Q_DISABLE_COPY( MpEngine )
@@ -79,13 +80,13 @@ public:
     int mActivePreset;
     int mApplyPresetCount;
     int mDisableEquqlizerCount;
-    int retrieveSongDetailsCount;
-    int stopCount;
-    int startSeekBackwardCount;
-    int startSeekForwardCount;
-    int stopSeekingCount;
-    int skipBackwardCount;
-    int skipForwardCount;
+    int mRetrieveSongDetailsCount;
+    int mStopCount;
+    int mStartSeekBackwardCount;
+    int mStartSeekForwardCount;
+    int mStopSeekingCount;
+    int mSkipBackwardCount;
+    int mSkipForwardCount;
 
 };
 

@@ -16,8 +16,8 @@
 
 TEMPLATE = subdirs
 
-#SUBDIRS += unittest_mpcollectioncontainers \
-SUBDIRS += unittest_mpcollectiondocumentloader \
+SUBDIRS += unittest_mpcollectioncontainers \
+           unittest_mpcollectiondocumentloader \
            unittest_mpsnapshotwidget
 
 CONFIG += ordered

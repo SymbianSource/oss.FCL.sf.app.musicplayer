@@ -54,21 +54,10 @@ int main(int argc, char *argv[])
     TX_STATIC_ENTRY
 
     // Initialization
-    HbApplication app(argc, argv, Hb::NoSplash);
-    if ( !XQServiceUtil::isService() ) {
-        HbSplashScreen::start( );
-    }
-    QVariantHash params = app.activateParams();
+    HbApplication app( argc, argv, XQServiceUtil::isService(argc, argv) ? Hb::NoSplash : Hb::DefaultApplicationFlags );
+
     HbTranslator translator;
     translator.loadCommon();
-    MpMainWindow::ActivityMode mode;
-    
-    if ( !params.value( "activityname" ).toString().compare( "MusicNowPlayingView" ) ) { 
-        mode = MpMainWindow::MusicNowPlayingView;
-    }
-    else {
-        mode = MpMainWindow::MusicMainView;
-    }
 
     // Main window widget.
     // Includes decorators such as signal strength and battery life indicator.
@@ -77,7 +66,7 @@ int main(int argc, char *argv[])
     mainWindow.viewport()->grabGesture(Qt::PanGesture);
     mainWindow.viewport()->grabGesture(Qt::TapGesture);
     mainWindow.viewport()->grabGesture(Qt::TapAndHoldGesture);
-    mainWindow.initialize( mode );
+    mainWindow.initialize();
     mainWindow.show();
 
     // Enter event loop

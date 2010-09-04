@@ -42,7 +42,6 @@ public slots:
 
 private slots:
     void testCreateHgMediawall();
-    void testCreateHbToolButton();
     void testCreateQObject();
 
 private:

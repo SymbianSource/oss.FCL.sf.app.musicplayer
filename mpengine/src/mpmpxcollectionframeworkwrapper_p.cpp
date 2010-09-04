@@ -129,10 +129,10 @@ MpMpxCollectionFrameworkWrapperPrivate::~MpMpxCollectionFrameworkWrapperPrivate(
 /*!
  \internal
  */
-void MpMpxCollectionFrameworkWrapperPrivate::init( TUid hostUid, MpSongData *songData )
+void MpMpxCollectionFrameworkWrapperPrivate::init( quint32 clientSecureId, MpSongData *songData )
 {
     TX_ENTRY
-    iHostUid = hostUid;
+    iHostUid = TUid::Uid( clientSecureId );
     iSongData = songData;
     TRAPD( err, DoInitL() );
     if ( err != KErrNone ) {
@@ -1423,13 +1423,19 @@ void MpMpxCollectionFrameworkWrapperPrivate::DoPlayAllSongsPlaylistL()
     TX_ENTRY
     CMPXCollectionPath* cpath = iCollectionUtility->Collection().PathL();
     CleanupStack::PushL( cpath );
-    CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
-    CleanupStack::PushL( playList );
-    playList->SetShuffleL( true, false );
-    MpSettingsManager::setShuffle( true );
-    createPlaybackUtilityL();
-    iPlaybackUtility->InitL( *playList, ETrue );
-    CleanupStack::PopAndDestroy( playList );
+    if ( cpath->Count() > 0 ) {
+        CMPXCollectionPlaylist* playList = CMPXCollectionPlaylist::NewL( *cpath );
+        CleanupStack::PushL( playList );
+        playList->SetShuffleL( true, false );
+        MpSettingsManager::setShuffle( true );
+        createPlaybackUtilityL();
+        iPlaybackUtility->InitL( *playList, ETrue );
+        CleanupStack::PopAndDestroy( playList );
+    }
+    else {
+        //There were no songs to be played so switch back to collection view
+        emit q_ptr->restorePathFailed();
+    }
     CleanupStack::PopAndDestroy( cpath );
     TX_EXIT
 }

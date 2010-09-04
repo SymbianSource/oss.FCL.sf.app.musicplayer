@@ -30,14 +30,17 @@ private:
 
 public:
     virtual ~MpEngineFactory();
-    static MpEngineFactory * instance();    
-    static MpEngine *sharedEngine();
-    static MpEngine *createIsolatedEngine( MpEngine::EngineMode mode );
-    static void close();
-    static MpEngine *createSharedEngine( TUid uid = TUid::Uid( MpCommon::KMusicPlayerUid ), MpEngine::EngineMode mode = MpEngine::StandAlone );
+    static MpEngineFactory * instance();
 
+    static MpEngine *createSharedEngine( quint32 clientSecureId=MpCommon::KMusicPlayerUid, MpEngine::EngineMode mode=MpEngine::StandAlone );
+    static MpEngine *createIsolatedEngine( MpEngine::EngineMode mode );
+    static MpEngine *sharedEngine();
+    static void close();
+	
+private:
     
-private:    
+    Q_DISABLE_COPY( MpEngineFactory )
+    
     MpEngine             *mSharedEngine;
     QList<MpEngine *>    mEngines;
 };

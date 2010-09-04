@@ -65,8 +65,6 @@ MpPlaybackView::MpPlaybackView()
       mActivated( false ),
       mPlayIcon( 0 ),
       mPauseIcon( 0 ),
-      mShuffleOnIcon( 0 ),
-      mShuffleOffIcon( 0 ),
       mTimer(0),
       mSeeking(false)
 
@@ -83,8 +81,6 @@ MpPlaybackView::~MpPlaybackView()
     delete mSoftKeyBack;
     delete mPlayIcon;
     delete mPauseIcon;
-    delete mShuffleOnIcon;
-    delete mShuffleOffIcon;
     delete mEqualizerWidget;
     TX_EXIT
 }
@@ -288,7 +284,7 @@ void MpPlaybackView::toggleShuffle()
 void MpPlaybackView::shuffleChanged( bool shuffle )
 {
     mShuffle = shuffle;
-    mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon );
+    mShuffleAction->setChecked( mShuffle );
 }
 
 /*!
@@ -352,12 +348,11 @@ void MpPlaybackView::setupToolbar()
     QActionGroup *actionsGroup = new QActionGroup( myToolBar );
 
     if ( mViewMode == MpCommon::DefaultView || mViewMode == MpCommon::EmbeddedView ) {
-        mShuffleOnIcon = new HbIcon( "qtg_mono_shuffle" );
-        mShuffleOffIcon = new HbIcon( "qtg_mono_shuffle_off" );
         mShuffleAction = new HbAction( actionsGroup );
         mShuffle = MpSettingsManager::shuffle();
-        mShuffleAction->setIcon( mShuffle ? *mShuffleOnIcon : *mShuffleOffIcon );
-        mShuffleAction->setCheckable( false );
+        mShuffleAction->setIcon( HbIcon( "qtg_mono_shuffle" ) );
+        mShuffleAction->setCheckable( true );
+        mShuffleAction->setChecked( mShuffle );
         
         if ( mViewMode == MpCommon::DefaultView ) {
             connect( mShuffleAction, SIGNAL( triggered( bool ) ),
@@ -587,8 +582,8 @@ void MpPlaybackView::showEqualizerDialog()
         mEqualizerWidget = new MpEqualizerWidget();
         mEqualizerWidget->prepareDialog();
     }
-	
-	mEqualizerWidget->show();
+    
+    mEqualizerWidget->show();
 
     TX_EXIT
 }

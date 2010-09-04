@@ -59,7 +59,7 @@ public:
     explicit MpMpxCollectionFrameworkWrapperPrivate( MpMpxCollectionFrameworkWrapper *wrapper );
     virtual ~MpMpxCollectionFrameworkWrapperPrivate();
 
-    void init( TUid hostUid, MpSongData *songData );
+    void init( quint32 clientSecureId, MpSongData *songData );
     void openCollection( TCollectionContext context );
     void openCollectionItem( int index );
     void reopenCollection();

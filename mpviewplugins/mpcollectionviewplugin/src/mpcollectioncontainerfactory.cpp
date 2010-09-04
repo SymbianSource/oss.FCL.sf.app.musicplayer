@@ -73,7 +73,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
         mCurrentContainer = new MpCollectionContainerAllSongs(mDocumentLoader);
         mCurrentContainer->initialize();
         connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-        connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+        connect( mCurrentContainer, SIGNAL(itemLongPressed(QModelIndex, QPointF)), mView, SLOT(openContextMenu(QModelIndex, QPointF)) );
         connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         break;
     case ECollectionContextArtists:
@@ -85,7 +85,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             mCurrentContainer = new MpCollectionContainerArtists(mDocumentLoader);
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-            connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(itemLongPressed(QModelIndex, QPointF)), mView, SLOT(openContextMenu(QModelIndex, QPointF)) );
             connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
             connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
             connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
@@ -97,7 +97,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             mCurrentContainer = new MpCollectionContainerAlbums(mDocumentLoader);
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-            connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(itemLongPressed(QModelIndex, QPointF)), mView, SLOT(openContextMenu(QModelIndex, QPointF)) );
             connect( mCurrentContainer, SIGNAL(findAlbumSongs(int)), mView, SLOT(findAlbumSongs(int)) );
             connect( mCurrentContainer, SIGNAL(playAlbumSongs(int, int)), mView, SLOT(playAlbumSongs(int, int)) );
             connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
@@ -109,7 +109,7 @@ MpCollectionContainer *MpCollectionContainerFactory::createContainer(
             mCurrentContainer = new MpCollectionContainerPlaylists(mDocumentLoader);
             mCurrentContainer->initialize();
             connect( mCurrentContainer, SIGNAL(itemActivated(int)), mView, SLOT(openIndex(int)) );
-            connect( mCurrentContainer, SIGNAL(itemLongPressed(int, QPointF)), mView, SLOT(openContextMenu(int, QPointF)) );
+            connect( mCurrentContainer, SIGNAL(itemLongPressed(QModelIndex, QPointF)), mView, SLOT(openContextMenu(QModelIndex, QPointF)) );
             connect( mCurrentContainer, SIGNAL(shuffleEnabled(bool)), mView, SLOT(setShuffleAction(bool)) );
         }
         break;

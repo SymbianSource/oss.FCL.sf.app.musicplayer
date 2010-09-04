@@ -17,13 +17,14 @@
 
 
 #include <hbapplication.h>
-#include <hbactivitymanager.h>
 #include <hbview.h>
 #include <mpxviewpluginqt.h>
 #include <xqpluginloader.h>
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
 #include <xqsharablefile.h>
+#include <afactivitystorage.h>
+#include <afactivation.h>
 
 #include "mpmainwindow.h"
 #include "mpviewbase.h"
@@ -62,8 +63,8 @@ MpMainWindow::MpMainWindow()
       mMusicServices(0),
       mPopupHandler(0),
       mUserExit( false ),
-      mActivityManager(0),
-      mMpMediaController(0)
+      mMpMediaController(0),
+      mActivityStorage(0)
 {
     TX_LOG
 }
@@ -100,6 +101,7 @@ MpMainWindow::~MpMainWindow()
     }
 
     delete mMpMediaController;
+    delete mActivityStorage;
 
     MpEngineFactory::close();
 
@@ -111,7 +113,7 @@ MpMainWindow::~MpMainWindow()
 /*!
 Initialize and activate the collection view
  */
-void MpMainWindow::initialize( ActivityMode mode )
+void MpMainWindow::initialize()
 {
     TX_ENTRY
 
@@ -128,21 +130,25 @@ void MpMainWindow::initialize( ActivityMode mode )
         // Music Service mode
         // Set the Collection View and Playback View to fetcher mode
         mMusicServices = new MusicServices();
-        int err = connect(mMusicServices, SIGNAL(serviceActive( TUid )), this, SLOT(initializeServiceView( TUid )));
+        int err = connect(mMusicServices, SIGNAL(serviceActive( quint32 )), this, SLOT(initializeServiceView( quint32 )));
         TX_LOG_ARGS("connection error: " << err);
         XQServiceUtil::toBackground( false );
     }
+    AfActivation *activation = new AfActivation( this );
+    
 
+    mActivityStorage = new AfActivityStorage;
     if ( !mMusicServices ) {
-        HbApplication* app = qobject_cast<HbApplication*>(qApp);
-        QVariantHash params = app->activateParams();
+        QVariantHash params = activation->parameters();
+        ActivityMode mode = !params.value( "activityname" ).toString().compare( MUSIC_NOW_PLAYING_VIEW ) ? MpMainWindow::MusicNowPlayingView : MpMainWindow::MusicMainView; 
+        
         MpEngineFactory::createSharedEngine();
         mPopupHandler = new MpGlobalPopupHandler( this );
-        if( app->activateReason() == Hb::ActivationReasonActivity ) {
+        if( activation->reason() == Af::ActivationReasonActivity ) {
             // Restoring an activity, not a fresh startup or a service
             // Activities from Task switcher only have one parameter
             if( params.count() == 1 ) {
-                 loadActivity( app->activateData() );
+                 loadActivity( mActivityStorage->activityData( activation->name() ) );
             }
         }
         if ( orientation() == Qt::Vertical ) {
@@ -183,12 +189,12 @@ void MpMainWindow::initialize( ActivityMode mode )
         connect( MpEngineFactory::sharedEngine(), SIGNAL( libraryUpdated() ), SLOT( handleLibraryUpdated() ) );
         MpEngineFactory::sharedEngine()->checkForSystemEvents();
         //Register to application manager to wait for activities and clear previous activities on the task switcher
-        mActivityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
-        mActivityManager->waitActivity();
-        mActivityManager->removeActivity( MUSIC_MAIN_VIEW );
-        mActivityManager->removeActivity( MUSIC_NOW_PLAYING_VIEW );
-        connect( app, SIGNAL( activate() ), this , SLOT( handleActivity() ) );
-        connect( app, SIGNAL( aboutToQuit() ), this, SLOT( saveActivity() ) );
+        qRegisterMetaType<Af::ActivationReason>( "Af::ActivationReason" );
+        connect( activation, SIGNAL( activated( Af::ActivationReason, QString, QVariantHash ) ), this, SLOT( loadActivityData( Af::ActivationReason, QString, QVariantHash ) ) );
+        connect( MpEngineFactory::sharedEngine(), SIGNAL( restorePathFailed() ), this, SLOT( handleRestorePathFailed() ) );
+        mActivityStorage->removeActivity( MUSIC_MAIN_VIEW );
+        mActivityStorage->removeActivity( MUSIC_NOW_PLAYING_VIEW );
+        connect( qApp, SIGNAL( aboutToQuit() ), this, SLOT( saveActivity() ) );
         mMpMediaController = new MpMediaController();
         emit applicationReady();
         
@@ -358,6 +364,8 @@ void MpMainWindow::handleLibraryUpdated()
 void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key()) {
+    //RND feature to rotate on emulator.
+#ifdef __WINS__   
     case 16842753:
     case Qt::Key_Call:
         if (orientation () == Qt::Vertical) {
@@ -367,6 +375,7 @@ void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
             setOrientation(Qt::Vertical, false);
         }
         break;
+#endif // __WINS__
     default:
         HbMainWindow::keyPressEvent (event);
         break;          
@@ -376,13 +385,13 @@ void 	MpMainWindow::keyPressEvent(QKeyEvent *event)
 /*!
   Slot to initialize the view that corresponds to the requested service  
  */
-void MpMainWindow::initializeServiceView( TUid hostUid )
+void MpMainWindow::initializeServiceView( quint32 clientSecureId )
 {
     switch (mMusicServices->currentService()) {
  
     case MusicServices::EUriFetcher:
         {
-            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Fetch );
+            MpEngineFactory::createSharedEngine( clientSecureId , MpEngine::Fetch );
             mPopupHandler = new MpGlobalPopupHandler( this );
             loadView( CollectionView, MpCommon::FetchView );
             MpViewBase* collectionView = reinterpret_cast<MpViewBase*>(mCollectionViewPlugin->getView());
@@ -397,8 +406,8 @@ void MpMainWindow::initializeServiceView( TUid hostUid )
         }
     case MusicServices::EPlayback:
         {
-            MpEngineFactory::createSharedEngine( hostUid , MpEngine::Embedded );
-            loadView(PlaybackView, MpCommon::EmbeddedView );   
+            MpEngineFactory::createSharedEngine( clientSecureId , MpEngine::Embedded );
+            loadView(PlaybackView, MpCommon::EmbeddedView );
             MpViewBase* playbackView = reinterpret_cast<MpViewBase*>(mPlaybackViewPlugin->getView());
             connect(mMusicServices, SIGNAL(playReady(QString)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(QString)));
             connect(mMusicServices, SIGNAL(playReady(const XQSharableFile&)), MpEngineFactory::sharedEngine(), SLOT(playEmbedded(const XQSharableFile&)));
@@ -419,21 +428,26 @@ void MpMainWindow::initializeServiceView( TUid hostUid )
   in the activity manager to wait for activities.
   Only running activity supported at the moment is "MusicNowPlayingView"
  */
-void MpMainWindow::handleActivity()
+
+void MpMainWindow::loadActivityData( Af::ActivationReason reason, const QString &name, QVariantHash parameter )
 {
     TX_ENTRY
-    HbApplication* app = qobject_cast<HbApplication*>(qApp);
-    QString activityId = app->activateId();
-    
-    if( !activityId.compare( MUSIC_NOW_PLAYING_VIEW ) ) {
-        if ( orientation() == Qt::Vertical ) {
-            if( mVerticalViewType != PlaybackView ) {
-                activateView( PlaybackView );
+    if( reason == Af::ActivationReasonActivity ) {
+        QString activityId = name;
+        QVariantHash params = parameter;
+        if( !activityId.compare( MUSIC_NOW_PLAYING_VIEW ) ) {
+            if( params.contains( "shuffle" ) ) {
+                if( !params.value( "shuffle" ).toString().compare( "yes" ) ) {
+                    MpEngineFactory::sharedEngine()->shuffleAll();
+                }
+            }
+            if ( orientation() == Qt::Vertical ) {
+                if( mVerticalViewType != PlaybackView ) {
+                    activateView( PlaybackView );
+                }
             }
         }
     }
-    
-    mActivityManager->waitActivity();
     TX_EXIT
 }
 
@@ -460,7 +474,7 @@ void MpMainWindow::saveActivity()
     activityData.insert( "restorePath", serializedRestorePath );
        
     
-    bool ok = mActivityManager->addActivity( activity , activityData, activityParameters );
+    bool ok = mActivityStorage->saveActivity( activity , activityData, activityParameters );
     if ( !ok ){
         TX_LOG_ARGS( "Error: Add Failed; should never get here." );
     }
@@ -541,7 +555,6 @@ void MpMainWindow::loadActivity( QVariant data )
     TX_ENTRY
     QVariantHash activityData = data.toHash();
     QByteArray serializedRestorePath = activityData.value( "restorePath" ).toByteArray();
-    connect( MpEngineFactory::sharedEngine(), SIGNAL( restorePathFailed() ), this, SLOT( handleRestorePathFailed() ) );
     MpEngineFactory::sharedEngine()->loadActivityData( serializedRestorePath );
     TX_EXIT
 }

@@ -28,7 +28,7 @@ class MpMpxHarvesterFrameworkWrapper : public QObject
     Q_OBJECT
 
 public:
-    explicit MpMpxHarvesterFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxHarvesterFrameworkWrapper( quint32 clientSecureId=MpCommon::KMusicPlayerUid, QObject *parent=0 );
     virtual ~MpMpxHarvesterFrameworkWrapper();
 
     // mock functions

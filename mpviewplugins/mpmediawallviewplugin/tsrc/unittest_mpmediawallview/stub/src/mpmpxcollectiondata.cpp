@@ -31,7 +31,9 @@ MpMpxCollectionData::MpMpxCollectionData( QObject *parent )
       mCount(0),
       mCurrentAlbumIndex(-1),
       mCurrentAlbumAvailable(false),
-      mReturnCollectionTitle(true)
+      mReturnCollectionTitle(true),
+      mArbitraryAlbumSongId(0),
+      mAlbumSongProperty(false)
 {
 }
 
@@ -97,9 +99,16 @@ bool MpMpxCollectionData::setCurrentAlbum( int index )
 /*!
  Stub function.
 */
+int MpMpxCollectionData::albumSongId(int index)
+{
+    Q_UNUSED(index);
+    return mArbitraryAlbumSongId;
+}
 bool MpMpxCollectionData::hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const
 {
-
+    Q_UNUSED(index);
+    Q_UNUSED(type);
+    return mAlbumSongProperty;
 }
 
 /*!

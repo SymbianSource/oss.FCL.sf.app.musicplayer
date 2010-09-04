@@ -35,7 +35,7 @@ public:
 
 private:
     explicit MpEngine();
-    void initialize( TUid hostUid, EngineMode mode);
+    void initialize( quint32 clientSecureId, EngineMode mode);
 
 public:
     virtual ~MpEngine();

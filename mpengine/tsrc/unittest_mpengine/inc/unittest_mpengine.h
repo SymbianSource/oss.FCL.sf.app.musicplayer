@@ -97,7 +97,7 @@ public:
     }
     static MpEngine *createIsolatedEngine( MpEngine::EngineMode mode ) {
         instance()->mEngines.append( new MpEngine() );
-        instance()->mEngines.last()->initialize( TUid::Uid( MpCommon::KMusicPlayerUid + instance()->mEngines.count() ), mode );
+        instance()->mEngines.last()->initialize( (MpCommon::KMusicPlayerUid + instance()->mEngines.count()), mode );
         return instance()->mEngines.last();
     }    
     static void close() {

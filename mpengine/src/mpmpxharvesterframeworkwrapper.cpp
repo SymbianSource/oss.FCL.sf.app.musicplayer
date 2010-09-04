@@ -65,11 +65,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( TUid hostUid, QObject *parent )
+MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( quint32 clientSecureId, QObject *parent )
     : QObject( parent )
 {
     d_ptr = new MpMpxHarvesterFrameworkWrapperPrivate( this );
-    d_ptr->init( hostUid );
+    d_ptr->init( clientSecureId );
 }
 
 /*!

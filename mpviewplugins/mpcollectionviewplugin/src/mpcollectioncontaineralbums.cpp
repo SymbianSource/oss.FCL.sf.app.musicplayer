@@ -192,6 +192,9 @@ void MpCollectionContainerAlbums::dataReloaded()
             emit findAlbumSongs(mCurrentAlbumIndex);
         }
     }
+    else if( mCollectionContext == ECollectionContextAlbums ) {
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_albums_1l").arg(mCollectionData->count()));
+    }
     else {
         MpCollectionListContainer::dataReloaded();
     }
@@ -298,7 +301,7 @@ void MpCollectionContainerAlbums::setupContainer()
             defaultIcon.setSize(mTBone->itemSize());
             mTBone->setDefaultImage( defaultIcon.pixmap().toImage() );
             mTBone->setScrollBarPolicy( HgWidget::ScrollBarAlwaysOff );
-            mTBone->enableReflections(true);
+            mTBone->enableReflections( false );
             connect( mTBone, SIGNAL(scrollingStarted()), this, SLOT(scrollingStarted()) );
             connect( mTBone, SIGNAL(animationAboutToEnd(QModelIndex)), this, SLOT(albumCentered(QModelIndex)) );
         }

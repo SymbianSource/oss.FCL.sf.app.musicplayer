@@ -18,7 +18,9 @@ TEMPLATE = subdirs
 
 SUBDIRS += ../mpnowplayingbanner/tsrc \
            ../mpsettingsmanager/tsrc \
-           ../mpmediacontroller/tsrc
+           ../mpmediacontroller/tsrc \
+           ../mpalbumcoverwidget/tsrc \
+           ../mpapplicationmonitor/tsrc
 
 CONFIG += ordered
 

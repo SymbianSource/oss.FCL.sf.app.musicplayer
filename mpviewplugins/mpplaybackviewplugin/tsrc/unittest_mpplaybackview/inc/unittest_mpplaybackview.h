@@ -45,6 +45,7 @@ public slots:
 
 private slots:
 //Test Cases
+    void testInitializeView();
     void testActivateView();
     void testDeactivateView();
     void testShuffleEnabled();
@@ -63,6 +64,7 @@ private slots:
     void testHandleSongSelected();
     void testShowEqualizerDialog();
     void testCloseEqualizerDialog();
+    void testShowCorruptedNote();
 
     void testSeekForward();
     void testSeekRewind();

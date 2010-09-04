@@ -35,6 +35,7 @@ public:
     HbListView *list(); 
 
 
+
 signals:
 
     void closed();
@@ -44,6 +45,8 @@ private:
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     void gestureEvent(QGestureEvent *event);
+    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, 
+            QWidget *widget = 0 );
     QSwipeGesture::SwipeDirection swipeAngleToDirection( int angle );
     
 private:

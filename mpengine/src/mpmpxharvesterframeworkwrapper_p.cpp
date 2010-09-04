@@ -77,9 +77,9 @@ MpMpxHarvesterFrameworkWrapperPrivate::~MpMpxHarvesterFrameworkWrapperPrivate()
 /*!
  \internal
  */
-void MpMpxHarvesterFrameworkWrapperPrivate::init( TUid hostUid )
+void MpMpxHarvesterFrameworkWrapperPrivate::init( quint32 clientSecureId )
 {
-    mHostUid = hostUid;
+    iHostUid = TUid::Uid( clientSecureId );
     TRAPD( err, DoInitL() );
     if ( err != KErrNone ) {
         TX_LOG_ARGS( "Error: " << err << "; should never get here." );
@@ -176,7 +176,7 @@ void MpMpxHarvesterFrameworkWrapperPrivate::HandleCollectionMessage(
 void MpMpxHarvesterFrameworkWrapperPrivate::DoInitL()
 {
     TX_ENTRY
-    iCollectionUtility = MMPXCollectionUtility::NewL( this, mHostUid );
+    iCollectionUtility = MMPXCollectionUtility::NewL( this, iHostUid );
     iHarvesterUtility = CMPXHarvesterFactory::NewL();
     iHarvesterUtility->CheckForSystemEventsL();
     TX_EXIT

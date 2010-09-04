@@ -44,6 +44,7 @@ public:
     // Stub functions
     void emitPlaybackStateChanged();
     void setPlaybackState(MpPlaybackData::SimplifiedState state);
+    int id();
 
 signals:
     void playbackStateChanged();
@@ -56,10 +57,10 @@ public:
     MpPlaybackData::SimplifiedState playbackState() const;
 
 
-private:
     QString                  mArtist;
     QString                  mTitle;
     SimplifiedState          mPlaybackState;
+    int                      mSongId;
 
 };
 

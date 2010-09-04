@@ -45,7 +45,8 @@ LIBS += -lestor \
         -lxqserviceutil \
         -laudioequalizerutility \
         -lmediaclientaudio \
-        -lefsrv
+        -lefsrv \
+        -lmpapplicationmonitor
 
 # Input
 HEADERS += ../inc/mpenginefactory.h \

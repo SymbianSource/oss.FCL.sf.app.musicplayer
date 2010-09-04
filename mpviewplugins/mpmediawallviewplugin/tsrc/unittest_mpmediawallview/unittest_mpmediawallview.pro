@@ -34,32 +34,31 @@ LIBS += -lmpxviewframeworkqt.dll \
 
 # Input
 HEADERS += inc/unittest_mpmediawallview.h \
-            ../../inc/mpmediawallview.h \            
+           ../../inc/mpmediawallview.h \
            ../../../../inc/mpviewbase.h \
            stub/inc/hgmediawall.h \
-            stub/inc/mpengine.h \
-            stub/inc/mpenginefactory.h \
-            stub/inc/mpmpxcollectiondata.h \
-            stub/inc/mpcollectiondatamodel.h \
-            stub/inc/mpplaybackdata.h \
-            stub/inc/mpalbumcoverwidget.h \
-            stub/inc/mpmediawalldocumentloader.h \
-            stub/inc/mptracklistwidget.h \
-            stub/inc/mpcollectiontbonelistdatamodel.h \
-            stub/inc/mpreflectioneffect.h
+           stub/inc/mpengine.h \
+           stub/inc/mpenginefactory.h \
+           stub/inc/mpmpxcollectiondata.h \
+           stub/inc/mpcollectiondatamodel.h \
+           stub/inc/mpplaybackdata.h \
+           stub/inc/mpalbumcoverwidget.h \
+           stub/inc/mpmediawalldocumentloader.h \
+           stub/inc/mptracklistwidget.h \
+           stub/inc/mpcollectiontbonelistdatamodel.h \
+           stub/inc/hbmessagebox.h
 
-SOURCES += src/unittest_mpmediawallview.cpp \               
-                stub/src/hgmediawall.cpp \
-                stub/src/mpengine.cpp \
-                stub/src/mpenginefactory.cpp \
-                stub/src/mpmpxcollectiondata.cpp \
-                stub/src/mpcollectiondatamodel.cpp \
-                stub/src/mpplaybackdata.cpp \
-                stub/src/mpalbumcoverwidget.cpp \
-                stub/src/mpmediawalldocumentloader.cpp \
-                stub/src/mptracklistwidget.cpp \
-                stub/src/mpcollectiontbonelistdatamodel.cpp \
-                stub/src/mpreflectioneffect.cpp
+SOURCES += src/unittest_mpmediawallview.cpp \
+           stub/src/hgmediawall.cpp \
+           stub/src/mpengine.cpp \
+           stub/src/mpenginefactory.cpp \
+           stub/src/mpmpxcollectiondata.cpp \
+           stub/src/mpcollectiondatamodel.cpp \
+           stub/src/mpplaybackdata.cpp \
+           stub/src/mpalbumcoverwidget.cpp \
+           stub/src/mpmediawalldocumentloader.cpp \
+           stub/src/mptracklistwidget.cpp \
+           stub/src/mpcollectiontbonelistdatamodel.cpp
 
 
 RESOURCES += ../../resources/mpmediawallviewresources.qrc

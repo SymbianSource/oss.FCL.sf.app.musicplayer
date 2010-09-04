@@ -15,8 +15,8 @@
 *
 */
 
-#ifndef TESTMPREFLECTIONEFFECT_H
-#define TESTMPREFLECTIONEFFECT_H
+#ifndef TESTMPTRACKLISTWIDGET_H
+#define TESTMPTRACKLISTWIDGET_H
 
 #include <QtTest/QtTest>
 
@@ -45,4 +45,4 @@ private:
     MpTrackListWidget          *mTest;
 };
 
-#endif  // TESTMPREFLECTIONEFFECT_H
+#endif  // TESTMPTRACKLISTWIDGET_H

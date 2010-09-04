@@ -34,7 +34,6 @@
 #include "mpcollectionpopuphandler.h"
 #include "mptrace.h"
 
-const int KNullIndex = -1;
 const int KSongsToDisplayProgressDlg = 100;
 
 // Popups launched by this class
@@ -74,11 +73,12 @@ class MpPopupHandlerPermanentData : public QObject
         virtual ~MpPopupHandlerPermanentData();
         void clear();
     public:
-        MpMpxCollectionData         *mIsolatedCollectionData;        // Not own
-        QAbstractItemModel          *mAbstractItemModel;             // Own
+        MpMpxCollectionData         *mCollectionData;      // ownership depends on mIsolatedOperation
+        QAbstractItemModel          *mAbstractItemModel;   // ownership depends on use case, parented.
         QList<int>                  mSelectedItems;
         QString                     mOriginalName;
-        int                         mContextMenuIndex;
+        QModelIndex                 mContextMenuModelIndex;
+        bool                        mIsolatedOperation;
 };
 
 /*!
@@ -86,9 +86,10 @@ class MpPopupHandlerPermanentData : public QObject
  */
 MpPopupHandlerPermanentData::MpPopupHandlerPermanentData( QObject *parent )
     : QObject( parent ),
-      mIsolatedCollectionData( 0 ),
+      mCollectionData( 0 ),
       mAbstractItemModel( 0 ),
-      mContextMenuIndex( KNullIndex )
+      mContextMenuModelIndex(),
+      mIsolatedOperation( false )
 {
       TX_ENTRY
       mSelectedItems.clear();
@@ -115,15 +116,18 @@ void MpPopupHandlerPermanentData::clear()
     TX_ENTRY
     mSelectedItems.clear();
     mOriginalName.clear();
-    mContextMenuIndex = KNullIndex;
-    if ( mIsolatedCollectionData ) {
-        MpEngineFactory::sharedEngine()->releaseIsolatedCollection();
-        mIsolatedCollectionData = 0;
+    mContextMenuModelIndex = QModelIndex();
+    if ( mIsolatedOperation ) {
+        mIsolatedOperation = false;
+        if ( mCollectionData ) {
+            MpEngineFactory::sharedEngine()->releaseIsolatedCollection();
+            mCollectionData = 0;
+        }
     }
-    if ( mAbstractItemModel ) {
-        delete mAbstractItemModel;
-        mAbstractItemModel = 0;
-    }
+
+    //deleted by parenting if owned
+    mAbstractItemModel = 0;
+
     //clearing any child Objects.
     foreach (QObject* child, children()) {
         child->deleteLater();
@@ -174,7 +178,7 @@ MpCollectionPopupHandler::~MpCollectionPopupHandler()
 /*!
  Default view context menu.
  */
-void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPointF &coords )
+void MpCollectionPopupHandler::openDefaultViewContextMenu( const QModelIndex &index, const QPointF &coords )
 {
     TX_ENTRY
 
@@ -218,7 +222,7 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
                 contextMenu = new HbMenu();
                 action = contextMenu->addAction( hbTrId( "txt_common_menu_open" ) );
                 action->setObjectName( KOpen );
-                if ( !mMpEngine->collectionData()->isAutoPlaylist( index ) ) {
+                if ( !mMpEngine->collectionData()->isAutoPlaylist( index.row() ) ) {
                     action = contextMenu->addAction( hbTrId( "txt_common_menu_delete" ) );
                     action->setObjectName(KDelete);
                     action->setEnabled( !usbBlocked );
@@ -244,7 +248,7 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
         }
 
         if ( contextMenu ) {
-            mPermanentData->mContextMenuIndex = index;
+            mPermanentData->mContextMenuModelIndex = index;
             contextMenu->setPreferredPos( coords );
             contextMenu->setObjectName( KContextMenu );
             contextMenu->setAttribute( Qt::WA_DeleteOnClose );
@@ -259,9 +263,9 @@ void MpCollectionPopupHandler::openDefaultViewContextMenu( int index, const QPoi
 /*!
  Fetch view context menu
  */
-void MpCollectionPopupHandler::openFetchViewContextMenu( int index, const QPointF &coords )
+void MpCollectionPopupHandler::openFetchViewContextMenu( const QModelIndex &index, const QPointF &coords )
 {
-    TX_ENTRY_ARGS( "index=" << index );
+    TX_ENTRY_ARGS( "index=" << index.row() );
 
     if ( mView->isActivated() ) {
 
@@ -283,7 +287,7 @@ void MpCollectionPopupHandler::openFetchViewContextMenu( int index, const QPoint
         }
 
         if ( contextMenu ) {
-            mPermanentData->mContextMenuIndex = index;
+            mPermanentData->mContextMenuModelIndex = index;
             contextMenu->setPreferredPos( coords );
             contextMenu->setAttribute( Qt::WA_DeleteOnClose );
             contextMenu->setObjectName( KContextMenu );
@@ -302,7 +306,9 @@ void MpCollectionPopupHandler::openRenamePlaylistContainerDialog( const QString 
 {
     TX_ENTRY_ARGS( "Current name=" << currentName );
     mPermanentData->mOriginalName = currentName;
-    getText( hbTrId( "txt_mus_dialog_enter_name" ), currentName,
+    getText( hbTrId( "txt_mus_dialog_enter_name" ), 
+             currentName,
+             hbTrId( "txt_common_button_ok" ), //TODO:replace for "rename" when string is available
              SLOT( handleRenamePlaylistContainer( HbAction* ) ) );
     TX_EXIT
 }
@@ -314,7 +320,9 @@ void MpCollectionPopupHandler::openRenamePlaylistItemDialog( const QString &curr
 {
     TX_ENTRY_ARGS( "Current name=" << currentName );
     mPermanentData->mOriginalName = currentName;
-    getText( hbTrId( "txt_mus_dialog_enter_name" ), currentName,
+    getText( hbTrId( "txt_mus_dialog_enter_name" ), 
+             currentName,
+             hbTrId( "txt_common_button_ok" ),//TODO:replace for "rename" when string is available
              SLOT( handleRenamePlaylistItem( HbAction* ) ) );
     TX_EXIT
 }
@@ -325,7 +333,9 @@ void MpCollectionPopupHandler::openRenamePlaylistItemDialog( const QString &curr
 void MpCollectionPopupHandler::openAddSongsToPlaylist( QAbstractItemModel* model )
 {
     TX_ENTRY
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), model,
+    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+                     hbTrId( "txt_common_button_add_dialog" ),
+                     model,
                      SLOT( handleAddSongsToPlayList( HbAction* ) ) );
     TX_EXIT
 }
@@ -341,7 +351,9 @@ void MpCollectionPopupHandler::openAddSongsToPlaylistFromTBone( )
     //this item will be deleted when clearing permanent data.
     model->setParent(mPermanentData);
     model->refreshModel();
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), model,
+    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+                     hbTrId( "txt_common_button_add_dialog" ),
+                     model,
                      SLOT( handleAddSongsToPlayList( HbAction* ) ) );
     TX_EXIT
 }
@@ -352,7 +364,10 @@ void MpCollectionPopupHandler::openAddSongsToPlaylistFromTBone( )
 void MpCollectionPopupHandler::openDeleteSongs( QAbstractItemModel* model )
 {
     TX_ENTRY
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), model, 
+    //currently we can only get here from playlistsongs, no need to check for that.
+    getModelIndexes( hbTrId( "txt_mus_title_remove_songs" ), 
+                     hbTrId( "txt_common_button_remove_dialog" ),
+                     model, 
                      SLOT( handleDeleteSongs( HbAction* ) ) );
     TX_EXIT
 }
@@ -363,13 +378,18 @@ void MpCollectionPopupHandler::openDeleteSongs( QAbstractItemModel* model )
 void MpCollectionPopupHandler::openAddToCurrentPlaylist( MpMpxCollectionData* collectionData )
 {
     TX_ENTRY
-    mPermanentData->mIsolatedCollectionData = collectionData;
+    mPermanentData->mIsolatedOperation = true;
+    mPermanentData->mCollectionData = collectionData;
     MpCollectionDataModel *collectionDataModel;
     collectionDataModel = new MpCollectionDataModel( collectionData );
+    //this item will be deleted when clearing permanent data.
+    collectionDataModel->setParent( mPermanentData );
     collectionDataModel->refreshModel();
     mPermanentData->mAbstractItemModel = collectionDataModel;
 
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), collectionDataModel, 
+    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+                     hbTrId( "txt_common_button_add_dialog" ),
+                     collectionDataModel,
                      SLOT( handleAddToCurrentPlaylist( HbAction* ) ) );
     TX_EXIT
 }
@@ -377,16 +397,36 @@ void MpCollectionPopupHandler::openAddToCurrentPlaylist( MpMpxCollectionData* co
 /*!
  Request to create a new play list and then add songs to it.
  */
-void MpCollectionPopupHandler::openCreateNewPlaylist( MpMpxCollectionData* collectionData )
+void MpCollectionPopupHandler::openCreateNewPlaylist( MpMpxCollectionData* collectionData, bool isolated )
 {
     TX_ENTRY
-    mPermanentData->mIsolatedCollectionData = collectionData;
-
+    mPermanentData->mIsolatedOperation = isolated;
+    mPermanentData->mCollectionData = collectionData;
     MpCollectionDataModel *collectionDataModel;
+    //this item will be deleted when clearing permanent data.
     collectionDataModel = new MpCollectionDataModel( collectionData );
+    collectionDataModel->setParent( mPermanentData );
     collectionDataModel->refreshModel();
     mPermanentData->mAbstractItemModel = collectionDataModel;
+    QStringList playlists;
+    mMpEngine->findPlaylists( playlists );
+    queryNewPlaylistName( playlists, SLOT( handleCreateNewPlaylistGetTextFinished( HbAction* ) ) );
+    TX_EXIT
+}
 
+/*!
+ Request to create a new playlist from TBone
+ */
+void MpCollectionPopupHandler::openCreateNewPlaylistFromTBone( )
+{
+    TX_ENTRY
+    mPermanentData->mIsolatedOperation = false;
+    MpCollectionTBoneListDataModel *model;
+    model = new MpCollectionTBoneListDataModel( mMpEngine->collectionData() );
+    //this item will be deleted when clearing permanent data.
+    model->setParent(mPermanentData);
+    model->refreshModel();
+    mPermanentData->mAbstractItemModel = model;
     QStringList playlists;
     mMpEngine->findPlaylists( playlists );
     queryNewPlaylistName( playlists, SLOT( handleCreateNewPlaylistGetTextFinished( HbAction* ) ) );
@@ -418,7 +458,7 @@ void MpCollectionPopupHandler::cancelOngoingPopup( bool onlyContextMenu )
         }
         else {
             mOutstandingPopup->close();
-            //Delete/Clear permanent data until current popup gets deleted
+            //Delete/Clear permanent data when current popup is deleted
             mPermanentData->setParent( mOutstandingPopup );
             //Generate new permanent data for future popups
             mPermanentData = new MpPopupHandlerPermanentData( this );
@@ -439,24 +479,25 @@ void MpCollectionPopupHandler::defaultContextMenuOptionSelected( HbAction *selec
     if ( selectedAction ) {
         QString objectName = selectedAction->objectName();
         QList<int> selection;
-        selection.append( mPermanentData->mContextMenuIndex );
+        selection.append( mPermanentData->mContextMenuModelIndex.row() );
         if ( objectName == KOpen ) {
-            mView->openItem( mPermanentData->mContextMenuIndex );
+            mView->openItem( mPermanentData->mContextMenuModelIndex );
         }
         if ( objectName == KAdd ) {
             launchAddToPlaylistDialog( selection );
         }
         else if ( objectName == KDelete ) {
-            requestDelete( selection );
+            mPermanentData->mSelectedItems = selection;
+            requestDelete();
         }
         else if ( objectName == KRenamePlayList ) {
             QString currentName;
             currentName = mMpEngine->collectionData()->itemData( 
-                    mPermanentData->mContextMenuIndex, MpMpxCollectionData::Title );
+                    mPermanentData->mContextMenuModelIndex.row(), MpMpxCollectionData::Title );
             openRenamePlaylistItemDialog( currentName );
         }
         else if ( objectName == KDetails ) {
-            mView->showItemDetails( mPermanentData->mContextMenuIndex );
+            mView->showItemDetails( mPermanentData->mContextMenuModelIndex.row() );
         }
     }
     TX_EXIT
@@ -470,7 +511,7 @@ void MpCollectionPopupHandler::fetcherContextMenuOptionSelected( HbAction *selec
     TX_ENTRY
     if ( selectedAction ) {
         // Start the playback process. View will switch to playbackview.
-        mMpEngine->previewItem( mPermanentData->mContextMenuIndex );
+        mMpEngine->previewItem( mPermanentData->mContextMenuModelIndex.row() );
     }        
     TX_EXIT
 }
@@ -519,16 +560,8 @@ void MpCollectionPopupHandler::handleAddToPlaylistGetTextFinished( HbAction *sel
         QString objectName = selectedAction->objectName();
         if ( objectName == KOk ) {
             QString newPlaylistName = dialog->value().toString();
-            if ( newPlaylistName.length() ) {
-                //Create new playlist with given name
-                mMpEngine->createPlaylist( newPlaylistName, mPermanentData->mSelectedItems );
-            }
-            else {
-                //No valid name, prompt for one again.
-                getText( hbTrId( "txt_mus_dialog_enter_name" ), newPlaylistName,
-                         SLOT( handleAddToPlaylistGetTextFinished( HbAction* ) ) );
-                operationCompleted = false;
-            }
+            //Create new playlist with given name
+            mMpEngine->createPlaylist( newPlaylistName, mPermanentData->mSelectedItems );
         }
         else {
             // user decided to not provide a new name, go back to playlist list selection
@@ -556,29 +589,17 @@ void MpCollectionPopupHandler::handleRenamePlaylistContainer( HbAction *selected
     TX_ENTRY
     HbInputDialog *dialog = qobject_cast<HbInputDialog *>( sender() );
     clearOutstandingPopup( dialog );
-    bool operationCompleted( true );
 
     if ( selectedAction ) {
         QString objectName = selectedAction->objectName();
         if ( objectName == KOk ) {
             QString newPlaylistName = dialog->value().toString();
-            if ( newPlaylistName.length() ) {
-                if ( newPlaylistName != mPermanentData->mOriginalName ) {
-                    mMpEngine->renamePlaylist( newPlaylistName );
-                }
-            }
-            else {
-                //No valid name, prompt for one again.
-                getText( hbTrId( "txt_mus_dialog_enter_name" ), newPlaylistName,
-                         SLOT( handleRenamePlaylistContainer( HbAction* ) ) );
-                operationCompleted = false;
+            if ( newPlaylistName != mPermanentData->mOriginalName ) {
+                mMpEngine->renamePlaylist( newPlaylistName );
             }
         }
     }
-
-    if ( operationCompleted ) {
-        mPermanentData->clear();
-    }
+    mPermanentData->clear();
     TX_EXIT
 }
 
@@ -590,29 +611,17 @@ void MpCollectionPopupHandler::handleRenamePlaylistItem( HbAction *selectedActio
     TX_ENTRY
     HbInputDialog *dialog = qobject_cast<HbInputDialog *>( sender() );
     clearOutstandingPopup( dialog );
-    bool operationCompleted( true );
 
     if ( selectedAction ) {
         QString objectName = selectedAction->objectName();
         if ( objectName == KOk ) {
             QString newPlaylistName = dialog->value().toString();
-            if ( newPlaylistName.length() ) {
-                if ( newPlaylistName != mPermanentData->mOriginalName ) {
-                    mMpEngine->renamePlaylist( newPlaylistName, mPermanentData->mContextMenuIndex );
+            if ( newPlaylistName != mPermanentData->mOriginalName ) {
+                mMpEngine->renamePlaylist( newPlaylistName, mPermanentData->mContextMenuModelIndex.row() );
                 }
-            }
-            else {
-                //No valid name, prompt for one again.
-                getText( hbTrId( "txt_mus_dialog_enter_name" ), newPlaylistName,
-                         SLOT( handleRenamePlaylistItem( HbAction* ) ) );
-                operationCompleted = false;
-            }
         }
     }
-
-    if ( operationCompleted ) {
-        mPermanentData->clear();
-    }
+    mPermanentData->clear();
     TX_EXIT
 }
 
@@ -639,7 +648,10 @@ void MpCollectionPopupHandler::handleAddSongsToPlayList( HbAction *selectedActio
             }
         }
         else {
-            mPermanentData->clear();
+            //Delete/Clear permanent data when current dialog is deleted
+            mPermanentData->setParent( dialog );
+            //Generate new permanent data for future popups
+            mPermanentData = new MpPopupHandlerPermanentData( this );
         }
     }
 
@@ -663,21 +675,22 @@ void MpCollectionPopupHandler::handleDeleteSongs( HbAction *selectedAction )
     HbSelectionDialog *dialog = qobject_cast<HbSelectionDialog *>( sender() );
     clearOutstandingPopup( dialog );
 
-    if ( selectedAction ) {
-        QString objectName = selectedAction->objectName();
-        if ( objectName == KOk ) {
-            QModelIndexList selectedModelIndexes;
-            selectedModelIndexes = dialog->selectedModelIndexes();
-            if ( selectedModelIndexes.count() ) {
-                QList<int> selection;
-                for ( int i = 0; i < selectedModelIndexes.size(); ++i ) {
-                    selection.append( selectedModelIndexes.at( i ).row() );
-                }
-                requestDelete( selection );
+    if ( selectedAction && selectedAction->objectName() == KOk ) {
+        QModelIndexList selectedModelIndexes;
+        selectedModelIndexes = dialog->selectedModelIndexes();
+        if ( selectedModelIndexes.count() ) {
+            QList<int> selection;
+            for ( int i = 0; i < selectedModelIndexes.size(); ++i ) {
+                selection.append( selectedModelIndexes.at( i ).row() );
             }
+            mPermanentData->mSelectedItems = selection;
         }
+        //we have to delay the delete, so the list on the dialog does not get the update (flicker!)
+        connect( dialog, SIGNAL( destroyed() ), this, SLOT( requestDelete() ) );
     }
-
+    else {
+        mPermanentData->clear();
+    }
     //Dialog won't use CollectionView main model any more, return it to its original layout.
     MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( dialog->model() );
     if ( mpModel ) {
@@ -709,14 +722,18 @@ void MpCollectionPopupHandler::handleAddToCurrentPlaylist( HbAction *selectedAct
                     selection.append( selectedModelIndexes.at( i ).row() );
                 }
                 mMpEngine->saveToCurrentPlaylist( selection,
-                        mPermanentData->mIsolatedCollectionData );
+                        mPermanentData->mCollectionData );
             }
         }
     }
 
     //Dialog is using an isolated model which will be deleted, no need to change its layout.
-    mPermanentData->clear();
-
+    
+    //Delete/Clear permanent data when current dialog is deleted
+    mPermanentData->setParent( dialog );
+    //Generate new permanent data for future popups
+    mPermanentData = new MpPopupHandlerPermanentData( this );
+    
     TX_EXIT
 }
 
@@ -728,29 +745,17 @@ void MpCollectionPopupHandler::handleCreateNewPlaylistGetTextFinished( HbAction 
     TX_ENTRY
     HbInputDialog *dialog = qobject_cast<HbInputDialog *>( sender() );
     clearOutstandingPopup( dialog );
-    bool operationCompleted( true );
 
-    if ( selectedAction ) {
-        QString objectName = selectedAction->objectName();
-        if ( objectName == KOk ) {
-            QString newPlaylistName = dialog->value().toString();
-            if ( newPlaylistName.length() ) {
-                //Store the new playlist name and query for the items to be added
-                mPermanentData->mOriginalName = newPlaylistName;
-                getModelIndexes( hbTrId( "txt_mus_title_select_songs" ), 
-                                 mPermanentData->mAbstractItemModel, 
-                                 SLOT( handleCreateNewPlaylistGetModelIndexesFinished( HbAction* ) ) );
-            }
-            else {
-                //No valid name, prompt for one again.
-                getText( hbTrId( "txt_mus_dialog_enter_name" ), newPlaylistName,
-                         SLOT( handleCreateNewPlaylistGetTextFinished( HbAction* ) ) );
-            }
-            operationCompleted = false;
-        }
+    if ( selectedAction && selectedAction->objectName() == KOk) {
+        QString newPlaylistName = dialog->value().toString();
+        //Store the new playlist name and query for the items to be added
+        mPermanentData->mOriginalName = newPlaylistName;
+        getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+                         hbTrId( "txt_common_button_add_dialog" ),
+                         mPermanentData->mAbstractItemModel, 
+                         SLOT( handleCreateNewPlaylistGetModelIndexesFinished( HbAction* ) ) );
     }
-
-    if ( operationCompleted ) {
+    else {
         mPermanentData->clear();
     }
     TX_EXIT
@@ -775,16 +780,27 @@ void MpCollectionPopupHandler::handleCreateNewPlaylistGetModelIndexesFinished( H
                 for ( int i = 0; i < selectedModelIndexes.size(); ++i ) {
                     selection.append( selectedModelIndexes.at( i ).row() );
                 }
+                mMpEngine->createPlaylist( mPermanentData->mOriginalName, selection,
+                        mPermanentData->mCollectionData );
             }
-            //Creating Playlist even when there is no selection.
-            mMpEngine->createPlaylist( mPermanentData->mOriginalName, selection,
-                    mPermanentData->mIsolatedCollectionData );
         }
     }
 
-    //Dialog is using an isolated model which will be deleted, no need to change its layout.
-    mPermanentData->clear();
+    
+    //Delete/Clear permanent data when current dialog is deleted
+    mPermanentData->setParent( dialog );
+    //Generate new permanent data for future popups
+    mPermanentData = new MpPopupHandlerPermanentData( this );
 
+
+    //Dialog won't use model any more, return it to its original layout.
+    MpCollectionDataModel *mpModel = qobject_cast<MpCollectionDataModel *>( dialog->model() );
+    if ( mpModel ) {
+        //setLayout() only applies for MpCollectionDataModel where we need to 
+        //decide which layout to use for the secondary text.
+        //MpCollectionTBoneListDataModel doesn't have secondary text.
+        mpModel->setLayout( ECollectionListView );
+    }
     TX_EXIT
 }
 
@@ -896,6 +912,90 @@ void MpCollectionPopupHandler::outstandingPopupClosing()
 }
 
 /*!
+ Slot to be called when the text on an input dialog changes.
+ */
+void MpCollectionPopupHandler::inputDialogChanged( QString text )
+{
+    if ( !mOutstandingPopup ) {
+        return;
+    }
+    //Attempt to cast the outstanding dialog as the input dialog that owns the 
+    //line edit that changed. If cast fails it means that the dialog is out of
+    //scope and the operation is not needed anymore.
+    HbInputDialog *dialog = qobject_cast<HbInputDialog *>( mOutstandingPopup );
+    HbLineEdit *dialogLineEdit = qobject_cast<HbLineEdit *>( sender() );
+    if ( dialog && dialogLineEdit && dialog->lineEdit() == dialogLineEdit ) {
+        if ( dialog->actions().count() ) {
+            dialog->actions()[0]->setEnabled( !text.isEmpty() );
+        }
+    }
+}
+
+/*!
+ \internal
+ Slot to be called to request a delete operation upon user confirmation.
+ */
+void MpCollectionPopupHandler::requestDelete()
+{
+    TX_ENTRY
+    QString message;
+    bool needsConfirmation = true;
+    connectExternalEvents();
+
+    switch ( mMpEngine->collectionData()->context() ) {
+        case ECollectionContextAllSongs:
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextArtistAllSongs:
+        case ECollectionContextAlbumsTBone:
+            message = hbTrId( "txt_mus_delete_song" );
+            break;
+        case ECollectionContextArtists:
+            message = hbTrId( "txt_mus_delete_artist" );
+            break;
+        case ECollectionContextAlbums:
+        case ECollectionContextArtistAlbums:
+            message = hbTrId( "txt_mus_delete_album" );
+            break;
+        case ECollectionContextPlaylists:
+            message = hbTrId( "txt_mus_delete_playlist" );
+            break;
+        case ECollectionContextPlaylistSongs:
+            needsConfirmation = false;
+            mMpEngine->deleteSongs( mPermanentData->mSelectedItems );
+            mPermanentData->clear();
+            break;
+        case ECollectionContextUnknown:
+        default:
+            // We shouldn't be here
+            needsConfirmation = false;
+            mPermanentData->clear();
+            TX_LOG_ARGS( "Invalid Collection Context" );
+            break;
+    }
+
+    if ( needsConfirmation ) {
+        HbAction *action;
+        HbMessageBox *dialog = new HbMessageBox( HbMessageBox::MessageTypeQuestion );
+
+        dialog->setText( message );
+        dialog->setTimeout( HbPopup::NoTimeout );
+        dialog->clearActions();
+        action = new HbAction( hbTrId( "txt_common_button_yes" ) );
+        action->setObjectName( KOk );
+        dialog->addAction( action );
+        action = new HbAction( hbTrId( "txt_common_button_no" ) );
+        action->setObjectName( KCancel );
+        dialog->addAction( action );
+        dialog->setObjectName( KRequestDeleteMessageBox );
+        dialog->setAttribute( Qt::WA_DeleteOnClose );
+        setOutstandingPopup( dialog );
+        dialog->open( this, SLOT( handleRequestDelete( HbAction* ) ) );
+    }
+
+    TX_EXIT
+}
+
+/*!
  \internal
  sets \a popup as the current outstanding popup and cancels any other previous popup.
  */
@@ -941,6 +1041,7 @@ void MpCollectionPopupHandler::launchAddToPlaylistDialog( QList<int> &selection 
         HbSelectionDialog *dialog = new HbSelectionDialog();
         dialog->setStringItems( playlists );
         dialog->setSelectionMode( HbAbstractItemView::SingleSelection );
+        dialog->setSelectedItems( QList< QVariant >());
         dialog->setHeadingWidget(new HbLabel( hbTrId( "txt_mus_title_select_playlist" ) ) );
         dialog->clearActions();
         action = new HbAction( hbTrId( "txt_mus_button_new" ) );
@@ -976,7 +1077,10 @@ void MpCollectionPopupHandler::queryNewPlaylistName(const QStringList &playlists
          playlists.contains( hbTrId( "txt_mus_dialog_enter_name_entry_playlist_l1" ).arg( i ) ) ;
          i++ ) {};
     QString suggestedPlaylistName = hbTrId( "txt_mus_dialog_enter_name_entry_playlist_l1" ).arg( i );
-    getText( hbTrId( "txt_mus_dialog_enter_name" ), suggestedPlaylistName, handler );
+    getText( hbTrId( "txt_mus_dialog_enter_name" ), 
+             suggestedPlaylistName, 
+             hbTrId( "txt_mus_button_create_new" ),
+             handler );
     TX_EXIT
 }
 
@@ -985,9 +1089,12 @@ void MpCollectionPopupHandler::queryNewPlaylistName(const QStringList &playlists
  Launches an input text dialog.
  \a label Dialog title.
  \a text Suggested text.
+ \a confirmationActionLabel label for the first action on the dialog.
  \a handler Slot to be called when input dialog finishes.
  */
-void MpCollectionPopupHandler::getText( const QString &label, const QString &text,
+void MpCollectionPopupHandler::getText( const QString &label, 
+                                        const QString &text,
+                                        const QString &confirmationActionLabel,
                                         const char *handler )
 {
     TX_ENTRY
@@ -997,9 +1104,16 @@ void MpCollectionPopupHandler::getText( const QString &label, const QString &tex
     dialog->setInputMode( HbInputDialog::TextInput );
     dialog->setValue( text );
     dialog->clearActions();
-    action = new HbAction( hbTrId( "txt_common_button_ok" ) );
+    action = new HbAction( confirmationActionLabel );
     action->setObjectName( KOk );
     dialog->addAction( action );
+    
+    //we want to prevent the user from slecting an empty string.
+    HbLineEdit  * lineEdit;
+    lineEdit = dialog->lineEdit();
+    connect (lineEdit , SIGNAL(textChanged(QString)), SLOT(inputDialogChanged(QString)) );
+    action->setEnabled( !lineEdit->text().isEmpty() );
+    
     action = new HbAction( hbTrId( "txt_common_button_cancel" ) );
     action->setObjectName( KCancel );
     dialog->addAction( action );
@@ -1014,10 +1128,13 @@ void MpCollectionPopupHandler::getText( const QString &label, const QString &tex
  \internal
  Launches a list dialog to select items.
  \a label Dialog title.
+ \a confirmationActionLabel label for the first action on the dialog.
  \a model List model.
  \a handler Slot to be called when list dialog finishes.
  */
-void MpCollectionPopupHandler::getModelIndexes( const QString &label, QAbstractItemModel* model,
+void MpCollectionPopupHandler::getModelIndexes( const QString &label, 
+                                                const QString &confirmationActionLabel,
+                                                QAbstractItemModel* model,
                                                 const char *handler)
 {   
     TX_ENTRY
@@ -1037,7 +1154,7 @@ void MpCollectionPopupHandler::getModelIndexes( const QString &label, QAbstractI
     }
     dialog->setModel( model );
     dialog->clearActions();
-    action = new HbAction( hbTrId( "txt_common_button_ok" ) );
+    action = new HbAction( confirmationActionLabel );
     action->setObjectName( KOk );
     dialog->addAction( action );
     action = new HbAction( hbTrId( "txt_common_button_cancel" ) );
@@ -1099,72 +1216,6 @@ void MpCollectionPopupHandler::launchArrangeSongsDialog()
     dialog->setAttribute( Qt::WA_DeleteOnClose );
     setOutstandingPopup(dialog);
     dialog->open( this, SLOT( handleArrangeSongs( HbAction* ) ) );
-
-    TX_EXIT
-}
-
-/*!
- \internal
- Request a delete operation always it has been confirmed.
- \a selection Items selected to be deleted.
- */
-void MpCollectionPopupHandler::requestDelete( QList<int> &selection )
-{
-    TX_ENTRY
-    QString message;
-    mPermanentData->mSelectedItems = selection;
-    bool needsConfirmation = true;
-    connectExternalEvents();
-
-    switch ( mMpEngine->collectionData()->context() ) {
-        case ECollectionContextAllSongs:
-        case ECollectionContextArtistAlbumsTBone:
-        case ECollectionContextArtistAllSongs:
-        case ECollectionContextAlbumsTBone:
-            message = hbTrId( "txt_mus_delete_song" );
-            break;
-        case ECollectionContextArtists:
-            message = hbTrId( "txt_mus_delete_artist" );
-            break;
-        case ECollectionContextAlbums:
-        case ECollectionContextArtistAlbums:
-            message = hbTrId( "txt_mus_delete_album" );
-            break;
-        case ECollectionContextPlaylists:
-            message = hbTrId( "txt_mus_delete_playlist" );
-            break;
-        case ECollectionContextPlaylistSongs:
-            needsConfirmation = false;
-            mMpEngine->deleteSongs( mPermanentData->mSelectedItems );
-            mPermanentData->clear();
-            break;
-        case ECollectionContextUnknown:
-        default:
-            // We shouldn't be here
-            needsConfirmation = false;
-            mPermanentData->clear();
-            TX_LOG_ARGS( "Invalid Collection Context" );
-            break;
-    }
-
-    if ( needsConfirmation ) {
-        HbAction *action;
-        HbMessageBox *dialog = new HbMessageBox( HbMessageBox::MessageTypeQuestion );
-
-        dialog->setText( message );
-        dialog->setTimeout( HbPopup::NoTimeout );
-        dialog->clearActions();
-        action = new HbAction( hbTrId( "txt_common_button_yes" ) );
-        action->setObjectName( KOk );
-        dialog->addAction( action );
-        action = new HbAction( hbTrId( "txt_common_button_no" ) );
-        action->setObjectName( KCancel );
-        dialog->addAction( action );
-        dialog->setObjectName( KRequestDeleteMessageBox );
-        dialog->setAttribute( Qt::WA_DeleteOnClose );
-        setOutstandingPopup( dialog );
-        dialog->open( this, SLOT( handleRequestDelete( HbAction* ) ) );
-    }
 
     TX_EXIT
 }

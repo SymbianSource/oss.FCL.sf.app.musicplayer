@@ -60,3 +60,14 @@ MpEngine *MpEngineFactory::sharedEngine()
     }
     return instance()->mSharedEngine;
 }
+
+/*!
+ Closes all engines created on this process.
+ */
+void MpEngineFactory::close()
+{
+    if ( instance()->mSharedEngine ) {
+        delete instance()->mSharedEngine;
+        instance()->mSharedEngine = 0;
+    }
+}

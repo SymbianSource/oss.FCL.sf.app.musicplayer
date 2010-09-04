@@ -23,6 +23,10 @@ DEFAULT
 
 PRJ_EXPORTS
 
+../rom/mpxsqlitepodcastdbplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxsqlitepodcastdbplugin.iby)
+../rom/mpxsqlitepodcastdbpluginrsc.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxsqlitepodcastdbpluginrsc.iby)
+
+
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE mpxpodcastdbplugin.mif

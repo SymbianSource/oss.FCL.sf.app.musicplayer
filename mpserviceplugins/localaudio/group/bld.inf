@@ -21,6 +21,8 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../rom/mpxlocalaudioplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxlocalaudioplugin.iby)
+
 
 PRJ_MMPFILES
 mpxlocalaudioplayback.mmp

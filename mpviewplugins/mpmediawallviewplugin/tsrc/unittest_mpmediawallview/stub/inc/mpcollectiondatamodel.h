@@ -32,7 +32,8 @@ class MpCollectionDataModel : public QAbstractListModel
 
 public:
 
-    explicit MpCollectionDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData = 0, QObject *parent=0 );
+    explicit MpCollectionDataModel( MpMpxCollectionData *data, MpPlaybackData *playbackData = 0,
+	        QObject *parent=0 );
     virtual ~MpCollectionDataModel();
 
     int rowCount(const QModelIndex &parent=QModelIndex()) const;

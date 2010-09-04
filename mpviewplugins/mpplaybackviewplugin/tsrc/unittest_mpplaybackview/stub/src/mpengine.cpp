@@ -23,7 +23,17 @@
 /*!
   Stub
   */
-MpEngine::MpEngine()
+MpEngine::MpEngine() :
+    mActivePreset(-1),
+    mApplyPresetCount(0),
+    mDisableEquqlizerCount(0),
+    mRetrieveSongDetailsCount(0),
+    mStopCount(0),
+    mStartSeekBackwardCount(0),
+    mStartSeekForwardCount(0),
+    mStopSeekingCount(0),
+    mSkipBackwardCount(0),
+    mSkipForwardCount(0)
 {
     TX_LOG_ARGS("Stub")
 }
@@ -87,15 +97,18 @@ MpPlaybackData *MpEngine::playbackData()
   */
 void MpEngine::stop()
 {
-    stopCount++;
+    mStopCount++;
 }
 
 /*!
   Stub
   */
-void MpEngine::retrieveSongDetails()
+void MpEngine::retrieveSongDetails( int index )
 {
-    retrieveSongDetailsCount++;
+    if ( index == -1 ) {
+        // Retrieve song details of currently playing song
+        mRetrieveSongDetailsCount++;
+    }
 }
 
 /*!
@@ -118,7 +131,7 @@ void MpEngine::setRepeat( bool mode )
   */
 void MpEngine::startSeekBackward()
 {
-    startSeekBackwardCount++;
+    mStartSeekBackwardCount++;
 }
 
 /*!
@@ -126,7 +139,7 @@ void MpEngine::startSeekBackward()
   */
 void MpEngine::startSeekForward()
 {
-    startSeekForwardCount++;
+    mStartSeekForwardCount++;
 }
 
 /*!
@@ -134,7 +147,7 @@ void MpEngine::startSeekForward()
   */
 void MpEngine::stopSeeking()
 {
-    stopSeekingCount++;
+    mStopSeekingCount++;
 }
 
 /*!
@@ -142,7 +155,7 @@ void MpEngine::stopSeeking()
   */
 void MpEngine::skipBackward()
 {
-    skipBackwardCount++;
+    mSkipBackwardCount++;
 }
 
 /*!
@@ -150,7 +163,7 @@ void MpEngine::skipBackward()
   */
 void MpEngine::skipForward()
 {
-    skipForwardCount++;
+    mSkipForwardCount++;
 }
 
 /*!

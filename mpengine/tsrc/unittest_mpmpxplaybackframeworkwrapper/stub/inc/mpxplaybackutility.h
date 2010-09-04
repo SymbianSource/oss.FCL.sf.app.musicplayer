@@ -76,8 +76,10 @@ public:
     CMPXCommand*            iCMPXCmd;
     TMPXPlaybackState       iState;
     RArray<TMPXAttribute>*  iAttrs;
+    CMPXCollectionPlaylist* iCurrentPlaylist;
     bool                    iInitialized;
     bool                    iReturnSource;
+    bool                    iSetPlaylistEnd;
 };
 
 #endif      // MMPXPLAYBACKUTILITY_H

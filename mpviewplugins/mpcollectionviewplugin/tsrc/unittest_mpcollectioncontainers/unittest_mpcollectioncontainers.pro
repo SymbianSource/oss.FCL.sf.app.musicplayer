@@ -44,8 +44,11 @@ HEADERS += inc/unittest_mpcollectioncontainers.h \
            stub/inc/mpmpxcollectiondata.h \
            stub/inc/mpcollectionview.h \
     	   stub/inc/hgmediawall.h \
-	   stub/inc/mpnowplayingwidget.h
-
+	   stub/inc/mpnowplayingwidget.h\
+	   stub/inc/mpplaybackdata.h \
+	   stub/inc/mpengine.h \
+	   stub/inc/mpenginefactory.h
+	  
 SOURCES += src/unittest_mpcollectioncontainers.cpp \
            ../../src/mpcollectioncontainerfactory.cpp \
            ../../src/mpcollectioncontainer.cpp \
@@ -60,7 +63,11 @@ SOURCES += src/unittest_mpcollectioncontainers.cpp \
            stub/src/mpmpxcollectiondata.cpp \
            stub/src/mpcollectionview.cpp \
 	   stub/src/hgmediawall.cpp \
-	   stub/src/mpnowplayingwidget.cpp 
+	   stub/src/mpnowplayingwidget.cpp \
+	   stub/src/mpplaybackdata.cpp \
+	   stub/src/mpengine.cpp \
+	   stub/src/mpenginefactory.cpp
+	  
 
 RESOURCES += ../../resources/mpcollectionviewresources.qrc
 

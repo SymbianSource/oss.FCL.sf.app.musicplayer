@@ -16,9 +16,10 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += unittest_mpmediawalldocumentloader
-SUBDIRS += unittest_mpmediawallview
-SUBDIRS += unittest_mpmediawallviewplugin
+SUBDIRS += unittest_mpmediawalldocumentloader \
+           unittest_mpmediawallview \
+           unittest_mpmediawallviewplugin \
+           unittest_mptracklistwidget
 
 CONFIG += ordered
 

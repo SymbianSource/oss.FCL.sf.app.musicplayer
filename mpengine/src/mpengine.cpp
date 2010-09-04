@@ -28,6 +28,7 @@
 #include "mpsettingsmanager.h"
 #include "mpsongscanner.h"
 #include "mpsongdata.h"
+#include "mpapplicationmonitor.h"
 
 /*!
     \class MpEngine
@@ -207,6 +208,7 @@ MpEngine::MpEngine()
       mEqualizerWrapper(0),
       mCurrentPresetIndex(0),
       mSongData(0),
+      mApplicationMonitor(0),
       mUsbBlockingState(USB_NotConnected),
       mPreviousUsbState(USB_NotConnected),
       mHandleMediaCommands(true)
@@ -227,22 +229,23 @@ MpEngine::~MpEngine()
     delete mEqualizerWrapper;
     delete mSongScanner;
     delete mSongData;
+    delete mApplicationMonitor;
     TX_EXIT
 }
 
 /*!
  Initialize engine
  */
-void MpEngine::initialize( TUid hostUid, EngineMode mode )
+void MpEngine::initialize( quint32 clientSecureId, EngineMode mode )
 {
-    TX_ENTRY_ARGS("hostUid=" << hostUid.iUid << ", mode=" << mode);
-    mHostUid = hostUid;
+    TX_ENTRY_ARGS("clientSecureId=" << clientSecureId << ", mode=" << mode);
 
+    mEngineMode = mode;
     if ( StandAlone == mode ) {
         mSongData = new MpSongData();
 
         // Harvesting Wrapper
-        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mHostUid );
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( clientSecureId );
         connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
                  this, SLOT( handleScanStarted() ), 
 				 Qt::QueuedConnection );
@@ -259,7 +262,7 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 				 Qt::QueuedConnection );
 
         // Collection Wrapper
-        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, mSongData );
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, mSongData );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
                  this, SIGNAL( collectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
@@ -292,11 +295,11 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 				 Qt::QueuedConnection );
 
         // Playback Wrapper
-        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( clientSecureId, mSongData );
         connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
-        connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop() ),
-                 this, SIGNAL( corruptedStop() ));
+        connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop(bool) ),
+                 this, SLOT( handleCorruptedStop(bool) ));
 		connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
                  this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
 
@@ -305,7 +308,7 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
     }
     else if ( Fetch == mode ) {
         // Harvesting Wrapper
-        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( mHostUid );
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( clientSecureId );
         connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
                  this, SLOT( handleScanStarted() ), 
 				 Qt::QueuedConnection );
@@ -322,7 +325,7 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
 				 Qt::QueuedConnection );
 
         // Collection Wrapper
-        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, 0 );
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, 0 );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
                  this, SIGNAL( collectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
@@ -331,18 +334,18 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
         mMpxCollectionWrapper->setShuffleFeatureEnabled( false );
 
         // Playback Wrapper
-        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, 0 );
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( clientSecureId, 0 );
         connect( this, SIGNAL( libraryUpdated() ),
                  mMpxPlaybackWrapper, SLOT( closeCurrentPlayback() ) );
-	    connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop() ),
-				 this, SIGNAL( corruptedStop() ));
+        connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop(bool) ),
+                 this, SLOT( handleCorruptedStop(bool) ));				 
 	    connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
                  this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
 
     }
     else if ( MediaBrowsing == mode ) {
         // Collection Wrapper
-        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( mHostUid, 0 );
+        mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, 0 );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
                  this, SIGNAL( collectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
@@ -353,10 +356,32 @@ void MpEngine::initialize( TUid hostUid, EngineMode mode )
     else if ( Embedded == mode ) {
         mSongData = new MpSongData();
         // Playback Wrapper
-        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( mHostUid, mSongData );
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( clientSecureId, mSongData );
         connect( mMpxPlaybackWrapper, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ),
                  this, SIGNAL( volumePropertyChanged( MpCommon::MpVolumeProperty, int ) ) );
+        connect( mMpxPlaybackWrapper, SIGNAL ( corruptedStop(bool) ),
+                 this, SLOT( handleCorruptedStop(bool) ));
+    }
+    else if ( HomeScreen == mode ) {
+        // Harvesting Wrapper
+        mMpxHarvesterWrapper = new MpMpxHarvesterFrameworkWrapper( clientSecureId );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
+                 this, SLOT( handleScanStarted() ),
+                 Qt::QueuedConnection );
+        connect( mMpxHarvesterWrapper, SIGNAL( scanEnded(int, int) ),
+                 this, SLOT( handleScanEnded(int, int) ),
+                 Qt::QueuedConnection );
+        qRegisterMetaType<MpxDiskEvents>("MpxDiskEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( diskEvent(MpxDiskEvents) ),
+                 this, SLOT( handleDiskEvent(MpxDiskEvents) ),
+                 Qt::QueuedConnection );
+        qRegisterMetaType<MpxUsbEvents>("MpxUsbEvents");
+        connect( mMpxHarvesterWrapper, SIGNAL( usbEvent(MpxUsbEvents) ),
+                 this, SLOT( handleUsbEvent(MpxUsbEvents) ),
+                 Qt::QueuedConnection );
 
+        // Playback Wrapper
+        mMpxPlaybackWrapper = new MpMpxPlaybackFrameworkWrapper( clientSecureId, mSongData );
     }
     TX_EXIT
 }
@@ -428,6 +453,7 @@ void MpEngine::refreshLibrary( bool automaticRequest )
 void MpEngine::handleScanStarted() {
     TX_ENTRY
     mHandleMediaCommands = false;
+    emit libraryUpdateStarted();
     TX_EXIT
 }
 
@@ -463,7 +489,7 @@ void MpEngine::handleDiskEvent( MpxDiskEvents event )
             break;
         case DiskInserted:
             if ( mUsbBlockingState == USB_NotConnected ) {
-                refreshLibrary( true );
+                autoRefreshLibrary(true);
             }
             else if ( mUsbBlockingState == USB_Connected ) {
                 emit libraryUpdated();
@@ -528,7 +554,7 @@ void MpEngine::handleUsbMassStorageEndEvent()
     changeUsbBlockingState( USB_NotConnected );
     emit usbBlocked(false);
     emit usbSynchronizationFinished();
-    refreshLibrary();
+    autoRefreshLibrary();
 
     TX_EXIT
 }
@@ -590,6 +616,29 @@ void MpEngine::changeUsbBlockingState( UsbBlockingState state )
     TX_ENTRY
     mPreviousUsbState = mUsbBlockingState;
     mUsbBlockingState = state;
+    TX_EXIT
+}
+
+/*!
+ Internal
+ */
+void MpEngine::autoRefreshLibrary( bool automaticRequest )
+{
+    TX_ENTRY_ARGS( "mEngineMode=" << mEngineMode );
+    if ( mEngineMode == StandAlone ) {
+        refreshLibrary(automaticRequest);
+    }
+    else if ( mEngineMode == Fetch ) {
+        if ( !mApplicationMonitor ) {
+            mApplicationMonitor = new MpApplicationMonitor();
+        }
+        if ( !mApplicationMonitor->isApplicationRunning() ) {
+            // In Fetcher mode, only perform library update when main Music
+            // Player application is not running. Otherwise, let the main
+            // application take care.
+            refreshLibrary(automaticRequest);
+        }
+    }
     TX_EXIT
 }
 
@@ -1026,6 +1075,22 @@ void MpEngine::unmute()
 {
     if ( mHandleMediaCommands ) {
         mMpxPlaybackWrapper->unmute();
+    }
+}
+
+/*!
+ Slot to be called when playback encounters a corrupted song. \a lastSong
+    indicates whether this is the last song of the playlist.
+ */
+void MpEngine::handleCorruptedStop( bool lastSong )
+{
+    if ( lastSong ) {
+        emit corruptedStop();
+    }
+    else {
+        if ( mEngineMode == StandAlone ) {
+            skipForward();
+        }
     }
 }
 

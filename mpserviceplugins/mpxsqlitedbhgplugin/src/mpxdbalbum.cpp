@@ -1063,14 +1063,11 @@ void CMPXDbAlbum::RetrieveArtist(const CMPXMedia& aMedia, TPtrC& aName)
 // ----------------------------------------------------------------------------
 //
 TBool CMPXDbAlbum::NeedToUpdateArt(const TDesC& aDeletedSongArt, const TDesC& aCurrentAlbumArt)
-    {    
-    if (aDeletedSongArt.Length() == 0)
-        {
-        // Deleted song's art has default album art
-        return EFalse;
-        }
+    { 
+    TBool needToUpdateArt = EFalse;
+    
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-    else
+    TBool isNonEmbedded = EFalse;
     if (aDeletedSongArt.Length() > 0)
         {
         TParsePtrC parse(aDeletedSongArt);
@@ -1080,20 +1077,21 @@ TBool CMPXDbAlbum::NeedToUpdateArt(const TDesC& aDeletedSongArt, const TDesC& aC
         if (ext.CompareF(KAbstractAlbumExt) == 0) 
             {     
             // Deleted song's art is Non-embedded album art
-            return EFalse;
+            isNonEmbedded = ETrue;
             }
         }
-    else
-#endif   
-    if (aDeletedSongArt.Length() > 0 && aCurrentAlbumArt.Length() > 0 && aDeletedSongArt.CompareF(aCurrentAlbumArt) == 0)
+    if (!isNonEmbedded)
         {
-        // Deleted song's art is Embedded album art and it is the same as Album's current art
-        return ETrue;
+#endif   // ABSTRACTAUDIOALBUM_INCLUDED
+        if (aDeletedSongArt.Length() > 0 && aCurrentAlbumArt.Length() > 0 && aDeletedSongArt.CompareF(aCurrentAlbumArt) == 0)
+            {
+            // Deleted song's art is Embedded album art and it is the same as Album's current art
+            needToUpdateArt = ETrue;
+            }
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED            
         }
-    else
-        {
-        return EFalse;
-        }
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+    return needToUpdateArt;
     }
 
 // ----------------------------------------------------------------------------

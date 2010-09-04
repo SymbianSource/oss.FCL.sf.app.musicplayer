@@ -33,8 +33,8 @@ MpEngine::~MpEngine()
 /*!
  Initialize engine
  */
-void MpEngine::initialize( TUid hostUid, EngineMode mode )
+void MpEngine::initialize( quint32 clientSecureId, EngineMode mode )
 {
-    Q_UNUSED( hostUid );
+    Q_UNUSED( clientSecureId );
     Q_UNUSED( mode );
 }

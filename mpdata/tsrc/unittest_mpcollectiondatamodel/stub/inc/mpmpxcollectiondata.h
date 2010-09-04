@@ -75,11 +75,12 @@ public:
     void setContext( TCollectionContext context );
     QList<int> songIndex( int songUniqueId );
     void setCorruptValue(QModelIndex index, bool tBone );
-    void setReloadAlbumContent( bool reloadAlbum );
 
 signals:
 
     void contextChanged( TCollectionContext context );
+    void dataChanged();
+    void dataChanged( int fromIndex, int toIndex );
 
 public:
 
@@ -87,6 +88,7 @@ public:
     int                     mCount;
     bool                    mItemDataReturn;
     bool                    mCollectionTitleReturn;
+    QList<int>              mCorruptedIndex;
 
 };
 

@@ -43,13 +43,11 @@ public slots:
 private slots:
 
     void testInitializeView();
-    void testActivateView();
-    void testDeactivateView();
-    void testSendToBackground();    
+    void testDeactivateView();   
     void testContextOpened();
     void testContainerContentsChanged();
     void testLibraryUpdated();
-    void testUpdatePlayPauseAction();
+    void testListItemActivated();
 
 private:
     MpMediaWallView *mTest;

@@ -112,7 +112,7 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
     QCOMPARE(mTest->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTest->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTest->iFirstIncrementalOpen,TBool(ETrue));
-    QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchDown);
     QCOMPARE(mTest->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
     QCOMPARE((int)mTest->iIncrementalOpenUtil->iPath, (int)path);
     QCOMPARE(mTest->iOpenMode, CMpMpxIsolatedCollectionHelper::DefaultMode );
@@ -122,7 +122,7 @@ void TestCMpMpxIsolatedCollectionHelper::testOpenCollection()
     QCOMPARE(mTest->iIncrementalOpenUtil->iStop,TBool(ETrue));
     QCOMPARE(mTest->iIncrementalOpenUtil->iStart,TBool(ETrue));
     QCOMPARE(mTest->iFirstIncrementalOpen,TBool(ETrue));
-    QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchNormal);
+    QCOMPARE(mTest->iIncrementalOpenUtil->iDirection,CMPXCollectionOpenUtility::EFetchDown);
     QCOMPARE(mTest->iIncrementalOpenUtil->iChunkSize, KIncrementalFetchBlockSize);
     QCOMPARE((int)mTest->iIncrementalOpenUtil->iPath, (int)path);
     QCOMPARE(mTest->iOpenMode, CMpMpxIsolatedCollectionHelper::RestorePathMode );

@@ -304,12 +304,10 @@ bool MpCollectionView::isActivated()
 /*!
  Opens or plays an item through collection container in order to keep track of the Artist / Album data used by infobar.
  */
-void MpCollectionView::openItem( int index )
+void MpCollectionView::openItem( const QModelIndex &index )
 {
-    TX_ENTRY_ARGS( "index = " << index );
-    QModelIndex modelIndex;
-    modelIndex = mCollectionDataModel->index( index );
-    qobject_cast<MpCollectionListContainer*>(mCollectionContainer)->itemActivated( modelIndex );
+    TX_ENTRY_ARGS( "index = " << index.row() );
+    qobject_cast<MpCollectionListContainer*>(mCollectionContainer)->itemActivated( index );
     TX_EXIT
 }
 
@@ -668,6 +666,25 @@ void MpCollectionView::addToPlaylist()
 }
 
 /*!
+ Slot to be called when 'New Playlist' is clicked by the user from the menu.
+ */
+void MpCollectionView::createNewPlaylist() 
+{
+    
+    switch ( mCollectionContext ) {
+        case ECollectionContextArtistAlbumsTBone:
+        case ECollectionContextAlbumsTBone:
+            mMpPopupHandler->openCreateNewPlaylistFromTBone();    
+            break;
+        default:
+            //second parameter, means it is an not an isolated collection, 
+            //ownership is  not transferred.
+            mMpPopupHandler->openCreateNewPlaylist( mCollectionData, false );
+            break;
+    }
+}
+
+/*!
  Slot to be called when 'Delete' is clicked by the user from the menu.
  */
 void MpCollectionView::deleteSongs()
@@ -740,7 +757,8 @@ void MpCollectionView::handleIsolatedCollectionOpened( MpMpxCollectionData* coll
             mMpPopupHandler->openAddToCurrentPlaylist( collectionData );
         }
         else if (ECollectionContextPlaylists == mCollectionContext) {
-            mMpPopupHandler->openCreateNewPlaylist( collectionData );
+            //second parameter, means it is an isolated collection, ownership is transferred.
+            mMpPopupHandler->openCreateNewPlaylist( collectionData, true );
         }
     }
     TX_EXIT
@@ -757,9 +775,9 @@ void MpCollectionView::arrangeSongs( )
 /*!
  Slot to be called when an item is long pressed by the user.
  */
-void MpCollectionView::openContextMenu( int index, const QPointF &coords )
+void MpCollectionView::openContextMenu( const QModelIndex &index, const QPointF &coords )
 {
-    TX_ENTRY_ARGS( "index=" << index );
+    TX_ENTRY_ARGS( "index=" << index.row() );
     switch ( mViewMode ) {
         case MpCommon::DefaultView:
             mMpPopupHandler->openDefaultViewContextMenu( index, coords );
@@ -1013,11 +1031,16 @@ void MpCollectionView::updateMenu()
                 if ( count <= 1 ) {
                     mShuffleAction->setDisabled( true );
                 }
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                 if ( count && !mUsbBlocked ) {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( createNewPlaylist() ) );
                 }
                 else {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                    menuAction->setDisabled( true );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
                     menuAction->setDisabled( true );
                 }
                 addDefaultMenuOptions( myMenu, true, true );
@@ -1034,11 +1057,16 @@ void MpCollectionView::updateMenu()
                 if ( !mShuffleEnabled ) {
                     mShuffleAction->setDisabled( true );
                 }
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                 if ( !mUsbBlocked ) {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( createNewPlaylist() ) );
                 }
                 else {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                    menuAction->setDisabled( true );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
                     menuAction->setDisabled( true );
                 }
                 addDefaultMenuOptions( myMenu, true, true );
@@ -1049,11 +1077,16 @@ void MpCollectionView::updateMenu()
                 if ( count <= 1 ) {
                     mShuffleAction->setDisabled( true );
                 }
-                menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                 if ( !mUsbBlocked ) {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
                     connect( menuAction, SIGNAL( triggered() ), this, SLOT( addToPlaylist() ) );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
+                    connect( menuAction, SIGNAL( triggered() ), this, SLOT( createNewPlaylist() ) );
                 }
                 else {
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_add_to_playlist" ) );
+                    menuAction->setDisabled( true );
+                    menuAction = myMenu->addAction( hbTrId( "txt_mus_opt_new_playlist" ) );
                     menuAction->setDisabled( true );
                 }
                 addDefaultMenuOptions( myMenu, true, true );
@@ -1086,6 +1119,8 @@ void MpCollectionView::updateMenu()
                 addDefaultMenuOptions( myMenu, true, true );
                 break;
             default:
+                //if we accidentally fall in an unknown context
+                addDefaultMenuOptions( myMenu, false, true );
                 break;
         }
     }
@@ -1097,6 +1132,8 @@ void MpCollectionView::updateMenu()
                 addDefaultMenuOptions( myMenu, true, false );
                 break;
             default:
+                //if we accidentally fall in an unknown context
+                addDefaultMenuOptions( myMenu, false, true );
                 break;
         }
     }

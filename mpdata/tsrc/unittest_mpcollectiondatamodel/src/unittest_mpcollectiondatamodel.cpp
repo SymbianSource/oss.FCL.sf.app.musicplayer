@@ -45,14 +45,17 @@ int main(int argc, char *argv[])
     HbApplication app(argc, argv);
     TestMpCollectionDataModel tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpcollectiondatamodel.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpcollectiondatamodel.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpCollectionDataModel::TestMpCollectionDataModel()
@@ -89,7 +92,7 @@ void TestMpCollectionDataModel::initTestCase()
     }
 
     mStubData = new MpMpxCollectionData();
-    mStubPlaybackData = new MpPlaybackData(this);
+    mStubPlaybackData = new MpPlaybackData();
     mHelper = new TestHelper();
 }
 
@@ -232,9 +235,8 @@ void TestMpCollectionDataModel::testDataAllSongsNoData()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.count(), 1);
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_dblist_val_unknown"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
@@ -320,8 +322,8 @@ void TestMpCollectionDataModel::testDataArtistAlbums()
     QCOMPARE(dataList.at(0), QString("Title1"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -349,8 +351,8 @@ void TestMpCollectionDataModel::testDataArtistAlbumsNoData()
 
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -377,8 +379,8 @@ void TestMpCollectionDataModel::testDataArtistAlbumsTBone()
     QCOMPARE(dataList.at(1), QString("CollectionTitle"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 }
 
 /*!
@@ -399,12 +401,12 @@ void TestMpCollectionDataModel::testDataArtistAlbumsTBoneNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown8"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown5"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 }
 
 /*!
@@ -451,9 +453,8 @@ void TestMpCollectionDataModel::testDataArtistAllSongsNoData()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.count(), 1);
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_dblist_val_unknown3"));
 
 
     // Qt::DecorationRole
@@ -485,8 +486,8 @@ void TestMpCollectionDataModel::testDataAlbums()
     QCOMPARE(dataList.at(1), QString("Artist1"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -510,12 +511,12 @@ void TestMpCollectionDataModel::testDataAlbumsNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_dblist_unknown"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_dblist_val_unknown2"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -542,8 +543,8 @@ void TestMpCollectionDataModel::testDataAlbumsTBone()
     QCOMPARE(dataList.at(1), QString("Artist1"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -567,12 +568,12 @@ void TestMpCollectionDataModel::testDataAlbumsTBoneNoData()
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
     QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown8"));
+    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown5"));
 
     // Qt::DecorationRole
-    data = mTest->data(modelIndex, Qt::DecorationRole);
-    QCOMPARE(data.userType(), QMetaType::type("QIcon"));
+    QVariant iconData = mTest->data(modelIndex, Qt::DecorationRole);
+    QVERIFY(iconData.isValid());
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -622,8 +623,7 @@ void TestMpCollectionDataModel::testDataPlaylistsNoData()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 1);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
+    QCOMPARE(dataList.count(), 0);
 
     // Hb::IndexFeedbackRole
     data = mTest->data(modelIndex, Hb::IndexFeedbackRole);
@@ -674,9 +674,8 @@ void TestMpCollectionDataModel::testDataPlaylistSongsNoData()
     QVariant data = mTest->data(modelIndex, Qt::DisplayRole);
     QCOMPARE(data.canConvert(QVariant::StringList), true);
     QStringList dataList = data.toStringList();
-    QCOMPARE(dataList.count(), 2);
-    QCOMPARE(dataList.at(0), hbTrId("txt_mus_other_unknown4"));
-    QCOMPARE(dataList.at(1), hbTrId("txt_mus_other_unknown3"));
+    QCOMPARE(dataList.count(), 1);
+    QCOMPARE(dataList.at(0), hbTrId("txt_mus_dblist_val_unknown"));
 
     // Qt::DecorationRole
     data = mTest->data(modelIndex, Qt::DecorationRole);
@@ -977,8 +976,27 @@ void TestMpCollectionDataModel::testSetContext()
  */
 void TestMpCollectionDataModel::testFileCorrupted()
 {
+    QSignalSpy spy(mTest, SIGNAL(dataChanged( QModelIndex, QModelIndex )));
+    mTest->mRowCount = 4;
+    mTest->fileCorrupted(1);
+    QCOMPARE(mStubData->mCorruptedIndex.value(0), 1);
+    QCOMPARE(mStubData->mCorruptedIndex.value(1), 3);
+    QCOMPARE(spy.count(), 2);
     
-    
+}
+
+/*!
+ Tests setLayout()
+ */
+void TestMpCollectionDataModel::testSetLayout()
+{
+    QCOMPARE(mTest->mCollectionLayout, ECollectionListView);
+    mTest->setLayout(ECollectionSelectionDialog);
+    QCOMPARE(mTest->mCollectionLayout, ECollectionSelectionDialog);
+    mTest->setLayout(ECollectionArrangeSongsDialog);
+    QCOMPARE(mTest->mCollectionLayout, ECollectionArrangeSongsDialog);
+    mTest->setLayout(ECollectionListView);
+    QCOMPARE(mTest->mCollectionLayout, ECollectionListView);
 }
 
 // End of file

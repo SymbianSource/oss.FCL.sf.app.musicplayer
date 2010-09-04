@@ -39,7 +39,7 @@ public:
     explicit MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *wrapper );
     virtual ~MpMpxPlaybackFrameworkWrapperPrivate();
 
-    void init( TUid hostUid, MpSongData *songData );
+    void init( quint32 clientSecureId, MpSongData *songData );
 
     void play( QString aFilename );
     void play( const XQSharableFile& file );

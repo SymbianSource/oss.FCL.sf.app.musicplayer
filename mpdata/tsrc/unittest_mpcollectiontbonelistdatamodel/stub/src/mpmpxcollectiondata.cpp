@@ -99,8 +99,48 @@ QString MpMpxCollectionData::albumSongData( int index, MpMpxCollectionData::Data
 /*!
  Stub function.
  */
+bool MpMpxCollectionData::hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type )
+{
+    TX_ENTRY
+    Q_UNUSED(type);
+    if (index == 2){
+    mHasAlbumSongProperty = true;
+    return true;
+    }
+    else {
+    mHasAlbumSongProperty = false;
+    return false;
+    }
+}
+
+/*!
+ Stub function.
+ */
 int MpMpxCollectionData::albumSongIndex( int songUniqueId )
 {
-    Q_UNUSED(songUniqueId);
-    return 0;
+    if (songUniqueId == 0){
+        return -1;
+    }
+    else {
+        return songUniqueId;
+    }
+      
 }
+
+/*!
+ Stub function.
+ */
+void MpMpxCollectionData::setCorruptValue(QModelIndex index, bool tBone )
+{
+    Q_UNUSED(tBone);
+    mCorruptedIndex.append(index.row());
+}
+
+/*!
+ Stub function.
+ */
+void MpMpxCollectionData::setReloadAlbumContent( bool reload )
+{
+    mReloadAlbumContent = reload;
+}
+

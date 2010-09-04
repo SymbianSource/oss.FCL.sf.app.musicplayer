@@ -85,8 +85,8 @@ MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionD
              this, SIGNAL(albumDataChanged()) );
     
     if ( mPlaybackData ) {
-		connect( mPlaybackData, SIGNAL(fileCorrupted( int )), 
-        		this, SLOT(fileCorrupted( int )));
+        connect( mPlaybackData, SIGNAL(fileCorrupted( int )), 
+                this, SLOT(fileCorrupted( int )));
     }
     
     TX_EXIT
@@ -154,8 +154,12 @@ QVariant MpCollectionTBoneListDataModel::data(const QModelIndex &index, int role
                 && mPlaybackData->id() == mCollectionData->albumSongId( row ) ) {
             QList<QVariant> iconList;
             iconList << QVariant(); //primary icon is not used.
-
-            iconList << HbIcon("qtg_small_speaker");
+            if ( mPlaybackData->playbackState() == MpPlaybackData::Playing ) {
+                iconList << HbIcon("qtg_mono_play");
+            }
+            else {
+                iconList << HbIcon("qtg_mono_pause");
+            }
             returnValue = iconList;
         }
     }
@@ -240,13 +244,8 @@ void MpCollectionTBoneListDataModel::updateSong()
  */
 void MpCollectionTBoneListDataModel::updatePlaybackState()
 {
-    //This logic is to account for when song plays the very first time, we get
-    //media before playback is active.
-    bool playbackWasActive = mPlaybackActive;
     mPlaybackActive = mPlaybackData->playbackState() != MpPlaybackData::NotPlaying;
-    if ( mPlaybackActive && !playbackWasActive ) {
-        updateSong();
-    }
+    updateSong();
 }    
 
 /*!

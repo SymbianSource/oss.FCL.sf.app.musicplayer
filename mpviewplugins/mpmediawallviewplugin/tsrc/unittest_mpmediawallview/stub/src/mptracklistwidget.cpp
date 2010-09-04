@@ -26,7 +26,7 @@
 
 
 #include "mptracklistwidget.h"
-#include "mpreflectioneffect.h"
+
 
 /*!
     Stub.

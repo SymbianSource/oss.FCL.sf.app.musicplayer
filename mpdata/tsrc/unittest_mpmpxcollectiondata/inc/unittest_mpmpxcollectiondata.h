@@ -23,6 +23,7 @@
 
 class MpMpxCollectionData;
 class MpMpxCollectionDataPrivate;
+class TestHelper;
 
 class TestMpMpxCollectionData : public QObject
 {
@@ -64,12 +65,15 @@ private slots:
     void testAlbumSongData();
     void testHasItemProperty();
     void testHasAlbumSongProperty();
+    void testSetCorruptValue();
+    void testSetReloadAlbumContent();
 
 
 private:
 
     MpMpxCollectionData         *mTest;
     MpMpxCollectionDataPrivate  *mTestPrivate;
+    TestHelper                  *mHelper;
 
 };
 

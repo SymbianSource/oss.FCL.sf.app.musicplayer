@@ -30,10 +30,10 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )
+MpMpxPlaybackFrameworkWrapper::MpMpxPlaybackFrameworkWrapper( quint32 clientSecureId, MpSongData *songData, QObject *parent )
     : QObject(parent)
 {
-    Q_UNUSED(hostUid);
+    Q_UNUSED(clientSecureId);
     Q_UNUSED(songData);
 }
 

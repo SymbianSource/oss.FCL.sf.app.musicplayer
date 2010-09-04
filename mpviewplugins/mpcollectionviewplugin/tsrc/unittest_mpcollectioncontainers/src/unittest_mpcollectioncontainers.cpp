@@ -23,12 +23,15 @@
 #include <hbindexfeedback.h>
 #include <hbgroupbox.h>
 #include <hgmediawall.h>
+#include <hbparameterlengthlimiter.h>
 
 #include "mpcommondefs.h"
 #include "mpcollectiondocumentloader.h"
 #include "stub/inc/mpcollectionview.h"
 #include "stub/inc/mpmpxcollectiondata.h"
 #include "stub/inc/mpcollectiondatamodel.h"
+#include "stub/inc/mpengine.h"
+#include "stub/inc/mpenginefactory.h"
 
 #include "unittest_mpcollectioncontainers.h"
 
@@ -135,7 +138,7 @@ void TestMpCollectionContainers::testConstructorAllSongs()
     QCOMPARE(mView->mContainerFactory->mCurrentContext, ECollectionContextAllSongs);
     MpCollectionContainerAllSongs *allSongs = static_cast<MpCollectionContainerAllSongs*>(mTest);
     QVERIFY(allSongs->mList == 0);
-    QVERIFY(allSongs->mInfoBar == 0);
+    QVERIFY(allSongs->mInfoBar != 0);
     QVERIFY(allSongs->mNoMusic == 0);
     QVERIFY(allSongs->mIndexFeedback != 0);
     QVERIFY(allSongs->mIndexFeedback->indexFeedbackPolicy() == HbIndexFeedback::IndexFeedbackSingleCharacter);
@@ -152,7 +155,7 @@ void TestMpCollectionContainers::testConstructorArtists()
     QCOMPARE(mView->mContainerFactory->mCurrentContext, ECollectionContextArtists);
     MpCollectionContainerArtists *artists = static_cast<MpCollectionContainerArtists*>(mTest);
     QVERIFY(artists->mList == 0);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mNoMusic == 0);
     QVERIFY(artists->mIndexFeedback != 0);
     QVERIFY(artists->mIndexFeedback->indexFeedbackPolicy() == HbIndexFeedback::IndexFeedbackSingleCharacter);
@@ -186,7 +189,7 @@ void TestMpCollectionContainers::testConstructorAlbums()
     QCOMPARE(mView->mContainerFactory->mCurrentContext, ECollectionContextAlbums);
     MpCollectionContainerAlbums *albums = static_cast<MpCollectionContainerAlbums*>(mTest);
     QVERIFY(albums->mList == 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QVERIFY(albums->mInfoBar != 0);
     QVERIFY(albums->mNoMusic == 0);
     QVERIFY(albums->mIndexFeedback != 0);
     QVERIFY(albums->mIndexFeedback->indexFeedbackPolicy() == HbIndexFeedback::IndexFeedbackSingleCharacter);
@@ -210,7 +213,7 @@ void TestMpCollectionContainers::testConstructorPlaylists()
     MpCollectionContainerPlaylists *playlists = static_cast<MpCollectionContainerPlaylists*>(mTest);
 
     QVERIFY(playlists->mList == 0);
-    QVERIFY(playlists->mInfoBar == 0);
+    QVERIFY(playlists->mInfoBar != 0);
     QVERIFY(playlists->mNoMusic == 0);
     QVERIFY(playlists->mIndexFeedback != 0);
     QVERIFY(playlists->mIndexFeedback->indexFeedbackPolicy() == HbIndexFeedback::IndexFeedbackSingleCharacter);
@@ -236,16 +239,13 @@ void TestMpCollectionContainers::testSetupContainerAllSongs()
     QVERIFY(allSongs->mInfoBar != 0);
     QVERIFY(allSongs->mNoMusic == 0);
     QCOMPARE(allSongs->mList->itemRecycling(), true);
-    QCOMPARE(allSongs->mList->scrollingStyle(), HbListView::PanOrFlick);
-    QCOMPARE(allSongs->mList->clampingStyle(), HbListView::BounceBackClamping);
-    QCOMPARE(allSongs->mList->frictionEnabled(), true);
     QCOMPARE(allSongs->mList->longPressEnabled(), true);
     QCOMPARE(allSongs->mList->verticalScrollBarPolicy(), HbScrollArea::ScrollBarAsNeeded);
     QCOMPARE(allSongs->mList->listItemPrototype()->graphicsSize(), HbListViewItem::Thumbnail);
     QVERIFY(allSongs->mIndexFeedback->itemView() == allSongs->mList);
 
     // Normal mode. Should see count.
-    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subhead_songs_l1").arg( 5 ) );
+    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subhead_songs_l1").arg(5) );
 }
 
 /*!
@@ -274,7 +274,7 @@ void TestMpCollectionContainers::testSetupContainerAllSongsNoData()
     MpCollectionContainerAllSongs *allSongs = static_cast<MpCollectionContainerAllSongs*>(mTest);
 
     QVERIFY(allSongs->mList == 0);
-    QVERIFY(allSongs->mInfoBar == 0);
+    QCOMPARE(allSongs->mInfoBar->heading(), hbTrId("txt_mus_subhead_songs_l1").arg(0) );
     QVERIFY(allSongs->mNoMusic != 0);
 }
 
@@ -292,18 +292,16 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     MpCollectionContainerArtists *artists = static_cast<MpCollectionContainerArtists*>(mTest);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtists);
     QVERIFY(artists->mList != 0);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mTBone == 0);
     QVERIFY(artists->mNoMusic == 0);
     QCOMPARE(artists->mList->itemRecycling(), true);
-    QCOMPARE(artists->mList->scrollingStyle(), HbListView::PanOrFlick);
-    QCOMPARE(artists->mList->clampingStyle(), HbListView::BounceBackClamping);
-    QCOMPARE(artists->mList->frictionEnabled(), true);
     QCOMPARE(artists->mList->longPressEnabled(), true);
     QCOMPARE(artists->mList->verticalScrollBarPolicy(), HbScrollArea::ScrollBarAsNeeded);
     QCOMPARE(artists->mList->listItemPrototype()->graphicsSize(), HbListViewItem::Thumbnail);
     QVERIFY(artists->mIndexFeedback->itemView() == artists->mList);
     QVERIFY(artists->mCurrentAlbumIndex == 0);
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subhead_artist_1l").arg(5));
 
     // User selects an artist - case where artist has more than 1 album
     mCollectionData->mContext = ECollectionContextArtistAlbums;
@@ -320,7 +318,7 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtistAlbumsTBone);
     QVERIFY(artists->mList != 0);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mTBone != 0);
     QVERIFY(artists->mTBoneListModel != 0);
     QVERIFY(artists->mAlbumIndexOffset == 1);
@@ -343,7 +341,7 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtistAllSongs);
     QVERIFY(artists->mList != 0);
     QVERIFY(artists->mInfoBar != 0);
-    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subtitle_1_all").arg("Title"));
+    QCOMPARE(artists->mInfoBar->heading(), QString(HbParameterLengthLimiter("txt_mus_subtitle_1_all").arg(QString("Title"))));
 
     // User selects back - navigate back to artist albums
     mCollectionData->mContext = ECollectionContextArtistAlbums;
@@ -354,7 +352,7 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     mCollectionData->mContext = ECollectionContextArtists;
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtists);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mCurrentAlbumIndex == 0);
 
     // User selects an artist - case where artist has 1 album
@@ -365,7 +363,7 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtistAlbumsTBone);
     QVERIFY(artists->mList != 0);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mTBone != 0);
     QVERIFY(artists->mTBoneListModel != 0);
     QVERIFY(artists->mAlbumIndexOffset == 0);
@@ -376,9 +374,10 @@ void TestMpCollectionContainers::testSetupContainerArtists()
     mCollectionData->mContext = ECollectionContextArtists;
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtists);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mTBone == 0);
     QVERIFY(artists->mCurrentAlbumIndex == 0);
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subhead_artist_1l").arg(1));
 }
 
 /*!
@@ -415,9 +414,10 @@ void TestMpCollectionContainers::testSetupContainerArtistsFetcher()
     mCollectionData->mContext = ECollectionContextArtists;
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(artists->mCollectionContext, ECollectionContextArtists);
-    QVERIFY(artists->mInfoBar == 0);
+    QVERIFY(artists->mInfoBar != 0);
     QVERIFY(artists->mTBone == 0);
     QVERIFY(artists->mCurrentAlbumIndex == 0);
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subhead_artist_1l").arg(1));
 
     // User selects an artist - case where artist has more than 1 album
     mCollectionData->mCount = 5;
@@ -448,7 +448,7 @@ void TestMpCollectionContainers::testSetupContainerArtistsNoData()
     MpCollectionContainerArtists *artists = static_cast<MpCollectionContainerArtists*>(mTest);
 
     QVERIFY(artists->mList == 0);
-    QVERIFY(artists->mInfoBar == 0);
+    QCOMPARE(artists->mInfoBar->heading(), hbTrId("txt_mus_subhead_artist_1l").arg(0));
     QVERIFY(artists->mTBone == 0);
     QVERIFY(artists->mNoMusic != 0);
 }
@@ -467,17 +467,15 @@ void TestMpCollectionContainers::testSetupContainerAlbums()
     MpCollectionContainerAlbums *albums = static_cast<MpCollectionContainerAlbums*>(mTest);
     QCOMPARE(albums->mCollectionContext, ECollectionContextAlbums);
     QVERIFY(albums->mList != 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QVERIFY(albums->mInfoBar != 0);
     QVERIFY(albums->mTBone == 0);
     QVERIFY(albums->mNoMusic == 0);
     QCOMPARE(albums->mList->itemRecycling(), true);
-    QCOMPARE(albums->mList->scrollingStyle(), HbListView::PanOrFlick);
-    QCOMPARE(albums->mList->clampingStyle(), HbListView::BounceBackClamping);
-    QCOMPARE(albums->mList->frictionEnabled(), true);
     QCOMPARE(albums->mList->longPressEnabled(), true);
     QCOMPARE(albums->mList->verticalScrollBarPolicy(), HbScrollArea::ScrollBarAsNeeded);
     QCOMPARE(albums->mList->listItemPrototype()->graphicsSize(), HbListViewItem::Thumbnail);
     QVERIFY(albums->mIndexFeedback->itemView() == albums->mList);
+    QCOMPARE(albums->mInfoBar->heading(),hbTrId("txt_mus_subhead_albums_1l").arg(5));
 
     // User selects an album
     QSignalSpy spy(mTest, SIGNAL(findAlbumSongs(int)));
@@ -486,7 +484,7 @@ void TestMpCollectionContainers::testSetupContainerAlbums()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(albums->mCollectionContext, ECollectionContextAlbumsTBone);
     QVERIFY(albums->mList != 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QVERIFY(albums->mInfoBar != 0);
     QVERIFY(albums->mTBone != 0);
     QVERIFY(albums->mTBoneListModel != 0);
     QCOMPARE(albums->mTBone->reflectionsEnabled(), false);
@@ -497,8 +495,9 @@ void TestMpCollectionContainers::testSetupContainerAlbums()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(albums->mCollectionContext, ECollectionContextAlbums);
     QVERIFY(albums->mList != 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QVERIFY(albums->mInfoBar != 0);
     QVERIFY(albums->mTBone == 0);
+    QCOMPARE(albums->mInfoBar->heading(),hbTrId("txt_mus_subhead_albums_1l").arg(5));
 }
 
 /*!
@@ -524,6 +523,7 @@ void TestMpCollectionContainers::testSetupContainerAlbumsFetcher()
     QCOMPARE(albums->mCollectionContext, ECollectionContextAlbumsTBone);
     QVERIFY(albums->mList != 0);
     QVERIFY(albums->mInfoBar != 0);
+    QCOMPARE(albums->mInfoBar->heading(), hbTrId("txt_mus_subtitle_select_song"));
     QVERIFY(albums->mTBone != 0);
     QVERIFY(albums->mTBoneListModel != 0);
     QCOMPARE(albums->mTBone->reflectionsEnabled(), false);
@@ -536,8 +536,9 @@ void TestMpCollectionContainers::testSetupContainerAlbumsFetcher()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(albums->mCollectionContext, ECollectionContextAlbums);
     QVERIFY(albums->mList != 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QVERIFY(albums->mInfoBar != 0);
     QVERIFY(albums->mTBone == 0);
+    QCOMPARE(albums->mInfoBar->heading(),hbTrId("txt_mus_subhead_albums_1l").arg(5));
 }
 
 /*!
@@ -551,7 +552,7 @@ void TestMpCollectionContainers::testSetupContainerAlbumsNoData()
     MpCollectionContainerAlbums *albums = static_cast<MpCollectionContainerAlbums*>(mTest);
 
     QVERIFY(albums->mList == 0);
-    QVERIFY(albums->mInfoBar == 0);
+    QCOMPARE(albums->mInfoBar->heading(),hbTrId("txt_mus_subhead_albums_1l").arg(0));
     QVERIFY(albums->mTBone == 0);
     QVERIFY(albums->mNoMusic != 0);
 }
@@ -570,16 +571,14 @@ void TestMpCollectionContainers::testSetupContainerPlaylists()
     MpCollectionContainerPlaylists *playlists = static_cast<MpCollectionContainerPlaylists*>(mTest);
     QCOMPARE(playlists->mCollectionContext, ECollectionContextPlaylists);
     QVERIFY(playlists->mList != 0);
-    QVERIFY(playlists->mInfoBar == 0);
+    QVERIFY(playlists->mInfoBar != 0);
     QVERIFY(playlists->mNoMusic == 0);
     QCOMPARE(playlists->mList->itemRecycling(), true);
-    QCOMPARE(playlists->mList->scrollingStyle(), HbListView::PanOrFlick);
-    QCOMPARE(playlists->mList->clampingStyle(), HbListView::BounceBackClamping);
-    QCOMPARE(playlists->mList->frictionEnabled(), true);
     QCOMPARE(playlists->mList->longPressEnabled(), true);
     QCOMPARE(playlists->mList->verticalScrollBarPolicy(), HbScrollArea::ScrollBarAsNeeded);
     QCOMPARE(playlists->mList->listItemPrototype()->graphicsSize(), HbListViewItem::Thumbnail);
     QVERIFY(playlists->mIndexFeedback->itemView() == 0 );
+    QCOMPARE(playlists->mInfoBar->heading(),hbTrId("txt_mus_subhead_playlists_1l").arg(5));
 
     // User selects a playlist
     mCollectionData->mContext = ECollectionContextPlaylistSongs;
@@ -588,14 +587,15 @@ void TestMpCollectionContainers::testSetupContainerPlaylists()
     QVERIFY(playlists->mList != 0);
     QVERIFY(playlists->mInfoBar != 0);
     QVERIFY(playlists->mNoMusic == 0);
-    QCOMPARE(playlists->mInfoBar->heading(), QString("Title"));
-
+    QCOMPARE(playlists->mInfoBar->heading(), QString(HbParameterLengthLimiter("txt_mus_subhead_1_2l").arg(QString("Title")).arg(5)));
+    
     // User selects back - navigate back to playlists
     mCollectionData->mContext = ECollectionContextPlaylists;
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(playlists->mCollectionContext, ECollectionContextPlaylists);
     QVERIFY(playlists->mList != 0);
-    QVERIFY(playlists->mInfoBar == 0);
+    QVERIFY(playlists->mInfoBar != 0);
+    QCOMPARE(playlists->mInfoBar->heading(),hbTrId("txt_mus_subhead_playlists_1l").arg(5));
 }
 
 /*!
@@ -627,7 +627,8 @@ void TestMpCollectionContainers::testSetupContainerPlaylistsFetcher()
     mTest->setDataModel(mCollectionDataModel);
     QCOMPARE(playlists->mCollectionContext, ECollectionContextPlaylists);
     QVERIFY(playlists->mList != 0);
-    QVERIFY(playlists->mInfoBar == 0);
+    QVERIFY(playlists->mInfoBar != 0);
+    QCOMPARE(playlists->mInfoBar->heading(),hbTrId("txt_mus_subhead_playlists_1l").arg(5));
 }
 
 /*!
@@ -641,7 +642,7 @@ void TestMpCollectionContainers::testSetupContainerPlaylistsNoData()
     MpCollectionContainerPlaylists *playlists = static_cast<MpCollectionContainerPlaylists*>(mTest);
 
     QVERIFY(playlists->mList == 0);
-    QVERIFY(playlists->mInfoBar == 0);
+    QCOMPARE(playlists->mInfoBar->heading(), QString(HbParameterLengthLimiter("txt_mus_subhead_1_2l").arg(QString("Title")).arg(0)));
     QVERIFY(playlists->mNoMusic != 0);
 }
 
@@ -758,34 +759,36 @@ void TestMpCollectionContainers::testItemActivatedPlaylists()
 */
 void TestMpCollectionContainers::testOnLongPressed()
 {
+    qRegisterMetaType<QModelIndex>("QModelIndex");
+
     mTest = mView->mContainerFactory->createContainer(ECollectionContextAllSongs);
-    QSignalSpy spy(mTest, SIGNAL(itemLongPressed( int, QPointF )));
+    QSignalSpy spy(mTest, SIGNAL(itemLongPressed( QModelIndex, QPointF )));
 
     HbListView *viewItem = new HbListView();
     static_cast<MpCollectionContainerAllSongs*>(mTest)->onLongPressed(viewItem->listItemPrototype(), QPointF());
     QCOMPARE(spy.count(), 1);
-    QCOMPARE(qvariant_cast<int>(spy.at(0).at(0)), -1);
+    QCOMPARE(qvariant_cast<int>(spy.at(0).at(0)), 0);
 
     mTest = 0;
     mTest = mView->mContainerFactory->createContainer(ECollectionContextArtists);
-    QSignalSpy spy2(mTest, SIGNAL(itemLongPressed( int, QPointF )));
+    QSignalSpy spy2(mTest, SIGNAL(itemLongPressed( QModelIndex, QPointF )));
     static_cast<MpCollectionContainerArtists*>(mTest)->onLongPressed(viewItem->listItemPrototype(), QPointF());
     QCOMPARE(spy2.count(), 1);
-    QCOMPARE(qvariant_cast<int>(spy2.at(0).at(0)), -1);
+    QCOMPARE(qvariant_cast<int>(spy2.at(0).at(0)), 0);
 
     mTest = 0;
     mTest = mView->mContainerFactory->createContainer(ECollectionContextAlbums);
-    QSignalSpy spy3(mTest, SIGNAL(itemLongPressed( int, QPointF )));
+    QSignalSpy spy3(mTest, SIGNAL(itemLongPressed( QModelIndex, QPointF )));
     static_cast<MpCollectionContainerAlbums*>(mTest)->onLongPressed(viewItem->listItemPrototype(), QPointF());
     QCOMPARE(spy3.count(), 1);
-    QCOMPARE(qvariant_cast<int>(spy3.at(0).at(0)), -1);
+    QCOMPARE(qvariant_cast<int>(spy3.at(0).at(0)), 0);
 
     mTest = 0;
     mTest = mView->mContainerFactory->createContainer(ECollectionContextPlaylists);
-    QSignalSpy spy4(mTest, SIGNAL(itemLongPressed( int, QPointF )));
+    QSignalSpy spy4(mTest, SIGNAL(itemLongPressed( QModelIndex, QPointF )));
     static_cast<MpCollectionContainerPlaylists*>(mTest)->onLongPressed(viewItem->listItemPrototype(), QPointF());
     QCOMPARE(spy4.count(), 1);
-    QCOMPARE(qvariant_cast<int>(spy4.at(0).at(0)), -1);
+    QCOMPARE(qvariant_cast<int>(spy4.at(0).at(0)), 0);
 }
 
 

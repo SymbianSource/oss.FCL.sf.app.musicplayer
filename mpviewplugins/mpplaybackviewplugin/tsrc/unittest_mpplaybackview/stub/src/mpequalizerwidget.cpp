@@ -30,6 +30,8 @@
  Constructs the Equalizer widget.
  */
 MpEqualizerWidget::MpEqualizerWidget() :
+    showEqualizerWidgetCount( 0 ),
+    closeEqualizerWidgetCount( 0 ),
     mMpEngine(0)
 {
     TX_ENTRY    

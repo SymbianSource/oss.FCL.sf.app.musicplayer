@@ -21,6 +21,8 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../rom/mpxm3uplaylistplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxm3uplaylistplugin.iby)
+
 
 PRJ_MMPFILES
 mpxm3uplaylistparsers.mmp

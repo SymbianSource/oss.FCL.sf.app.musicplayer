@@ -59,7 +59,7 @@ MpSongScanner::MpSongScanner( MpMpxHarvesterFrameworkWrapper *wrapper, QObject *
 {
     TX_ENTRY
     connect( mMpxHarvesterWrapper, SIGNAL( scanStarted() ),
-            this, SIGNAL( scanStarted() ), Qt::QueuedConnection );
+            this, SLOT( handleScanStarted() ), Qt::QueuedConnection );
     connect( mMpxHarvesterWrapper, SIGNAL( scanEnded( int, int ) ),
             this, SLOT( handleScanEnded( int, int ) ), Qt::QueuedConnection );
     connect( mMpxHarvesterWrapper, SIGNAL( scanCountChanged( int ) ), 
@@ -116,12 +116,24 @@ void MpSongScanner::cancelScan()
 }
 
 /*!
+ Slot called upon notification from MPX Harvesting FW indicating start of
+ scanning process.
+ */
+void MpSongScanner::handleScanStarted()
+{
+    TX_ENTRY
+    mScanning = true;
+    emit scanStarted();
+    TX_EXIT
+}
+
+/*!
  Slot called upon notification from MPX Harvesting FW indicating end of
  scanning process.
  */
 void MpSongScanner::handleScanEnded( int numItemsAdded, int error )
 {
-    TX_ENTRY
+    TX_ENTRY_ARGS("error=" << error << ", numItemsAdded=" << numItemsAdded);
     if (error == KErrDiskFull) {
         emit scanFinished( ScanErrorDiskFull, 0 );
         mScanning = false;

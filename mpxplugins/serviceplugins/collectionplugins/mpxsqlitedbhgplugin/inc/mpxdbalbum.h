@@ -29,8 +29,6 @@
 class MMPXDbAlbumObserver
     {
     public:
-        virtual TInt HandleIsUnknownArtistL(TUint32 aId) = 0;
-        virtual HBufC* HandleArtistForAlbumL( const TUint32 aId ) = 0;
         /**
         * HandleAlbumartForAlbumL.
         * @param aId, The album ID.
@@ -38,6 +36,24 @@ class MMPXDbAlbumObserver
         * @returns alternative albumart retrieved in the specified Album.
         */
         virtual HBufC* HandleAlbumartForAlbumL( const TUint32 aId, TPtrC aArt ) = 0;
+               
+        /**
+        * Called when album artist is removed from an album
+        * @param aCategoryId category item ID
+        * @param aDrive drive the category item is on
+        * @param aItemChangedMessages changed mesages array to be updated or NULL
+        */
+        virtual void DeleteAlbumForArtistL(TUint32 aCategoryId,
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages) = 0;
+
+        /**
+        * Called when album artist is added to an album
+        * @param aName name string
+        * @param aArt Album art path
+        * @param aDriveId drive to add the category to
+        * @return the ID of the category item (new or existing)
+        */
+        virtual TUint32 AddAlbumArtistL(const TDesC& aName, const TDesC& aArt, TInt aDriveId) = 0;
     };
 /**
 * Responsible for managing all music databases
@@ -58,7 +74,7 @@ class CMPXDbAlbum :
         */
         static CMPXDbAlbum* NewL(CMPXDbManager& aDbManager,
             TMPXGeneralCategory aCategory, MMPXDbAlbumObserver& aObserver);
-
+        
         /**
         * Two-phased constructor.
         * @param aDbManager database manager to use for database interactions
@@ -67,18 +83,18 @@ class CMPXDbAlbum :
         */
         static CMPXDbAlbum* NewLC(CMPXDbManager& aDbManager,
             TMPXGeneralCategory aCategory, MMPXDbAlbumObserver& aObserver);
-
+        
         /**
         * Destructor
         */
         virtual ~CMPXDbAlbum();
 
     public:
-
         /**
-        * Add a category item. If the record already exists, its counter will
+        * Add an album item. If the record already exists, its counter will
         * be incremented.
-        * @param aName: This is the name to be entered into the row
+        * @param aCategory category type
+        * @param aMedia: The media object
         * @param aDriveId: The Drive Id the name (category) belongs
         * @param aNewRecord: indicates to the caller if a new record is created.
         *        ETrue if a new row is created in the table; otherwise EFalse.
@@ -86,9 +102,9 @@ class CMPXDbAlbum :
         *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
-        TUint32 AddItemL(const TDesC& aName, const TDesC& aArtistName, const TDesC& aArt, TInt aDriveId, TBool& aNewRecord,
+        virtual TUint32 AddItemL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
-
+        
         /**
         * Decrement the number of songs for the item. If the count gets to 0, remove
         * the item.
@@ -102,43 +118,52 @@ class CMPXDbAlbum :
         *                  category was deleted
         * @param aItemExist Out parameter, ETrue if the category is not deleted after the delete,
         *        EFalse otherwise
-        * @param aArtist: The ID of the artist
         * @param aArt: The albumart uri
         */
-        void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
-            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TUint32 aArtist, const TDesC& aArt );
+        void DecrementSongsForAlbumL(TUint32 aId, TInt aDriveId,
+            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TDesC& aArt );
 
         /**
-    * Gets the details for all category items.
-    * @param aAttrs attributes to be returned
-    * @param aMediaArray returns the requested attributes for all items
-    */
+        * Gets the details for all category items.
+        * @param aAttrs attributes to be returned
+        * @param aMediaArray returns the requested attributes for all items
+        */
         void GetAllCategoryItemsL(const TArray<TMPXAttribute>& aAttrs,
             CMPXMediaArray& aMediaArray);
 
-    /**
-    * Update a category item.
-    * @param aId: The ID of the category to update
-    * @param aMedia: The media data
-    * @param aDriveId: The Drive Id the name (category) belongs
-    * @param aItemChangedMessages: if valid on return contains a updated message if the
-    *        category was updated
-    */
+        /**
+        * Update a category item.
+        * @param aId: The ID of the category to update
+        * @param aMedia: The media data
+        * @param aDriveId: The Drive Id the name (category) belongs
+        * @param aItemChangedMessages: if valid on return contains a updated message if the
+        *        category was updated
+        */
         void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
 
-    public:
+    public:        
         /**
-    * Get albums count for a specified artist
-    * @param aId: The ID of the artist
-    */
-        TInt GetAlbumsCountForArtistL(TUint32 aArtistId);
-
-        /**
-    * Get songs count for a specified album and a specified artist
-    * @param aArtistId: The ID of the artist
-    * @param aAlbumId: The ID of the album
-    */
+        * Get songs count for a specified album and a specified artist
+        * @param aArtistId: The ID of the artist
+        * @param aAlbumId: The ID of the album
+        */
         TInt GetSongsCountInAlbumMatchingArtistL(TUint32 aArtistId, TUint32 aAlbumId);
+       /**
+        * Check if the specified album ID is an unknown album.
+        * An “Unknown album” is one where the album name and album artist are unknown.
+        * @param aId: The ID of the album
+        * @return ETrue if it's an unknown album
+        */
+        TBool IsUnknownAlbumL(const TUint32 aId);
+        
+        /**
+        * Generate Unique ID for Album
+        * @param aMedia media object
+        * @param aCaseSensitive indicates whether case sensitivity should be taken
+        *        into consideration when generating the unique row id
+        * @return the ID of album
+        */
+        TUint32 GenerateUniqueIdL(const CMPXMedia& aMedia);
 
     private:
         /**
@@ -159,16 +184,7 @@ class CMPXDbAlbum :
         */
         void GenerateAlbumFieldsValuesL(const CMPXMedia& aMedia,
             CDesCArray& aFields, CDesCArray& aValues);
-
-
-        TBool IsUnknownArtistL(TUint32 aId);
-
-        /**
-        * Get the ArtistName of song which belongs to the specified Album.
-        * @param aId The ID of the album
-        * @returns alternative artistname retrieved in the specified Album.
-        */
-        HBufC* ArtistForAlbumL(const TUint32 aId);
+        
         /**
         * Get the Albumart of song which belongs to the specified Album.
         * @param aId The ID of the album
@@ -186,7 +202,31 @@ class CMPXDbAlbum :
         */
         void ProcessAlbumRecordSetL(const TArray<TMPXAttribute>& aAttrs,
             RSqlStatement& aRecordset, CMPXMediaArray& aMediaArray);
+        
+        /**
+        * Retrieve AlbumArtist name from media object
+        * @param aMedia media object
+        * @param aName returned name
+        * @return ETrue if name is available
+        */   
+        TBool RetrieveAlbumArtistL(const CMPXMedia& aMedia, TPtrC& aName);
 
+        /**
+        * Retrieve Artist name from media object
+        * @param aMedia media object
+        * @param aName returned name
+        */   
+        void RetrieveArtist(const CMPXMedia& aMedia, TPtrC& aName);
+
+        /**
+        * Check if Art needs to be updated
+        * @param aDeletedSongArt deleted song's art
+        * @param aCurrentAlbumArt Album's current art
+        * @return ETrue if aDeletedSongArt is not non-embedded album art and 
+        *         aDeleteSongArt and aCurrentAlbumArt are the same and known
+        */   
+        TBool NeedToUpdateArt(const TDesC& aDeletedSongArt, const TDesC& aCurrentAlbumArt);
+        
     private:    // from MMPXTable
 
         /**
@@ -207,7 +247,7 @@ class CMPXDbAlbum :
         * @param aCategory identifies the category
         */
         CMPXDbAlbum(CMPXDbManager& aDbManager, TMPXGeneralCategory aCategory, MMPXDbAlbumObserver& aObserver);
-
+        
         /**
         * Second phase constructor.
         */
@@ -221,16 +261,20 @@ class CMPXDbAlbum :
         enum TAlbumColumns
             {
             EAlbumUniqueId = KMPXTableDefaultIndex,
-            EAlbumArtistName,
             EAlbumName,
             EAlbumSongCount,      
+            EAlbumArtist,
+            EAlbumArtistName,
             EAlbumArt,
             EAlbumFieldCount
             };
 
     private:    // Data
         MMPXDbAlbumObserver& iObserver;
+        RPointerArray<CMPXMedia> iUnknownArtists;
+        RPointerArray<CMPXMedia> iUnknownAlbums;
     };
+    
 #endif // MPXDBALBUM_H
 
 // End of File

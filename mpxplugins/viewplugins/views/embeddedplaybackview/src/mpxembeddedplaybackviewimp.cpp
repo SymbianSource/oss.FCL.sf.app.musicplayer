@@ -549,7 +549,7 @@ void CMPXEmbeddedPlaybackViewImp::HandleCommandL( TInt aCommand )
                 fileParse.Path().Left(
                     KMPXMusicplayerPrivateFolder().Length())));
 
-        if ( iCommonUiHelper->IsHostMessagingL()
+        if ( (iCommonUiHelper->IsHostMessagingL() || iCommonUiHelper->IsHostCalendarL() )
                 && mediapath.CompareF(savedpath) && isPrivate )
             {
             HandleSaveL( (TMPXNpvSaveMode)aCommand );

@@ -510,7 +510,7 @@ void CMPXDbAbstractAlbum::UpdateMediaL(
 void CMPXDbAbstractAlbum::GetAllItemsWithNoSongL(RArray<TUint32>& aItemsIds)
     {
     MPX_FUNC("CMPXDbAbstractAlbum::GetAllItemsWithNoSongL");
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAbstractAlbumsWithNoSong));
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAbstractAlbumsWithNoSong())); 
     CleanupClosePushL(recordset);
 
     TInt err(KErrNone);

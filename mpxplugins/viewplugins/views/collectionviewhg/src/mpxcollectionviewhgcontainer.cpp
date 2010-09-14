@@ -801,8 +801,15 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             SetRect( clientRect );
             iBgContext->SetRect(((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect());
 
-            // call HandleLbxItemAdditionL
-            HandleLbxItemAdditionL();
+ 			if ( iCurrentViewType == EMPXViewMediawall )
+				{
+				PrepareTboneViewL();
+				}
+			else
+				{
+	            // call HandleLbxItemAdditionL
+	            HandleLbxItemAdditionL();
+				}
             }
         );
     if(iMediaWall)
@@ -1304,11 +1311,6 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
                 {
                 RestoreSelectedAlbumItemL(mediaArray);
                 PrepareMediaWallWithListL( mediaArray, count );
-                // We need to adjust the CBA for this view.
-                if( iCbaHandler )
-                    {
-                    iCbaHandler->UpdateCba();
-                    }
                 break;
                 }
             case EMPXViewList:
@@ -1726,7 +1728,10 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 
     ((CAknAppUi*)iCoeEnv->AppUi())->StatusPane()->MakeVisible(EFalse);
     iThumbnailManager->SetSizeL( EAudioGridThumbnailSize );
-
+    if( iCbaHandler )
+        {
+        iCbaHandler->UpdateCba();
+        }
     TRect clientRect = ((CAknView*)iView)->ClientRect();
 
     TAknLayoutRect mediawallLayout;
@@ -4729,7 +4734,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
         SetupTransitionType(KMPXInterviewTransition);
         BeginFullScreenAnimation();
         }
-    else if( !iLayoutSwitch && iMediaWall )
+    else if( !iLayoutSwitch && iMediaWall && ( iCurrentViewType == EMPXViewMediawall ) )
         {
         // Close mediawall "flip animation"
         iMediaWall->StartOpeningAnimationL( EFalse );
@@ -4765,6 +4770,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsL( const CMPXMedia& aAlbum )
 		listSize++;
 		indexAddition = 1;
 		}
+	currentList->Reset(); //clears any selection along with list reset	
 	// Add space for shuffle item if list contains more than one item.
 	currentList->ResizeL( listSize );
 

@@ -139,4 +139,5 @@ EXPORTS
 	_ZTV12CMPXResource @ 138 NONAME
 	_ZTV13CMPXDbManager @ 139 NONAME
 	_ZN15MPXDbCommonUtil27AddItemAlbumChangedMessageLER14CMPXMediaArray10TMPXItemId19TMPXChangeEventType19TMPXGeneralCategoryjiS2_ @ 140 NONAME
+	_ZN13CMPXDbManager19ExecuteSelectQueryLERK7TDesC16 @ 141 NONAME
 

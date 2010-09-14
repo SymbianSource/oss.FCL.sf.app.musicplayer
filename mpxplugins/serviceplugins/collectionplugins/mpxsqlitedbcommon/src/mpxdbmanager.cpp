@@ -2856,6 +2856,18 @@ EXPORT_C void CMPXDbManager::EnsureRamSpaceL()
 #endif //__RAMDISK_PERF_ENABLE    
     }
 
+// ---------------------------------------------------------------------------
+// CMPXDbManager::ExecuteSelectQueryL
+// ---------------------------------------------------------------------------
+//
+EXPORT_C RSqlStatement CMPXDbManager::ExecuteSelectQueryL( const TDesC& aQuery ) 
+    {
+    MPX_FUNC("CMPXDatabase::ExecuteSelectQueryL( const TDesC& aQuery )");
+    HBufC* tmp( aQuery.AllocLC() );
+    RSqlStatement statement( ExecuteSelectQueryOnAllDrivesL( tmp->Des() ) );
+    CleanupStack::PopAndDestroy(tmp);
+    return statement;
+    }
 
 // ---------------------------------------------------------------------------
 // CMPXDbManager::EnsureDiskSpaceL

@@ -28,12 +28,13 @@
 
 // Db filename
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
-_LIT(KMCDbFile, "mpxv3_1.db");
-_LIT(KMCDbFileEMMC, "mpxv3_1i.db");
+_LIT(KMCDbFile, "mpxv3_2.db");
+_LIT(KMCDbFileEMMC, "mpxv3_2i.db");
 #else 
-_LIT(KMCDbFile, "mpxv3_1n.db");
-_LIT(KMCDbFileEMMC, "mpxv3_1in.db");
+_LIT(KMCDbFile, "mpxv3_2n.db");
+_LIT(KMCDbFileEMMC, "mpxv3_2in.db");
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
+
 // Collection Db resource file
 _LIT(KMPXCollectionDbResourceFile,  "mpxcollectiondbhgres.rsc");
 

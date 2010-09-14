@@ -308,6 +308,7 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
     delete iCurrentCba;
     delete iIncrementalOpenUtil;
     delete iCachedSelectionIndex;
+    delete iCurrentSelectedIndex;
     FeatureManager::UnInitializeLib();
     delete iOperatorMusicStoreName ;
     if ( iOperatorMusicStoreURI )
@@ -6979,7 +6980,20 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
     CEikMenuPane* aMenuPane )
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPaneL" );
-
+    
+    if ( iContainer->IsTBoneView() )
+        {
+	    //makesure mediawall is not flicking before handling long tap
+	    TInt currentIndex( iContainer->CurrentLbxItemIndex() );
+	    MPX_DEBUG2( "CMPXCollectionViewHgImp::DynInitMenuPaneL currentIndex = %d", currentIndex );
+	    if (currentIndex == KErrNotFound)
+	        {
+	        MPX_DEBUG1( "DynInitMenuPaneL NOT handling stylus popup menu when flicking");        
+	        DimAllOptions(aResourceId, aMenuPane);
+	        return;
+	        }
+        }
+        
     CMPXCollectionViewListBoxArray* array =
         static_cast<CMPXCollectionViewListBoxArray*>(
         iContainer->ListBoxArray() );
@@ -8532,6 +8546,7 @@ void CMPXCollectionViewHgImp::DimAllOptions(TInt aResourceId, CEikMenuPane* aMen
             aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
+			aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue ); 
             break;
             }
         case R_AVKON_MENUPANE_MARKABLE_LIST:

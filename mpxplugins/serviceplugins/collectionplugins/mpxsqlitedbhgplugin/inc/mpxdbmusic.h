@@ -51,37 +51,33 @@ class MMPXDbMusicObserver
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Called when a new category item has to be added to a category table.
-        * @param aCategory category type
-        * @param aName name string
+        * @param aName Abstract Album art name
         * @param aDrive drive to add the category to
         * @param aItemChangedMessages changed mesages array to be updated or NULL
         * @param aItemExist Out parameter, ETrue if the item already exist before the add,
         *        EFalse otherwise
+        * @param aUri Abstract Album art Uri
         * @param aAlbumArtist AlbumArtist string
-        * @param aGenre Genre string
         * @return the ID of the category item (new or existing)
         */
-        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TDesC& aAlbumArtist=KNullDesC,
-            const TDesC& aGenre=KNullDesC) = 0;
-#else
+        virtual TUint32 AddAbstractAlbumItemL(const TDesC& aName, 
+            TInt aDriveId, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist,
+            const TDesC& aUri, const TDesC& aAlbumArtist=KNullDesC) = 0;
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
         /**
         * Called when a new category item has to be added to a category table.
         * @param aCategory category type
-        * @param aName name string
+        * @param aMedia media object
         * @param aDrive drive to add the category to
         * @param aItemChangedMessages changed mesages array to be updated or NULL
         * @param aItemExist Out parameter, ETrue if the item already exist before the add,
         *        EFalse otherwise
         * @return the ID of the category item (new or existing)
         */
-        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
+        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia,       
             TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
-#endif // ABSTRACTAUDIOALBUM_INCLUDED
-       // for Album and Artist table
-        virtual TUint32 AddCategoryItemL(TMPXGeneralCategory aCategory, const TDesC& aName,
-            const TDesC& aArtistName, const TDesC& aArt,
-            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
+
         /**
         * Called when the ID of a category item changed for a Music record, for example when
         * the artist name changed for a song. The implementation is supposed to update the
@@ -92,9 +88,13 @@ class MMPXDbMusicObserver
         * @param aItemChangedMessages changed mesages array to be updated or NULL
         * @param aItemExist Out parameter, ETrue if the category is not deleted after the delete,
         *        EFalse otherwise
+        * @param aArt Art of the music record. 
+        *             Art needs to be given so that the cateogry can switch over to different art 
+        *             if necessary
+        * 
         */
         virtual void DeleteSongForCategoryL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
-            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist) = 0;
+            TInt aDrive, CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, const TDesC& aArt = KNullDesC) = 0;
 
         /**
         * Called when the play count attribute of a song is changed. Should add an item changed
@@ -121,6 +121,7 @@ class MMPXDbMusicObserver
          */
         virtual void UpdateCategoryItemL(TMPXGeneralCategory aCategory, TUint32 aCategoryId,
              const CMPXMedia& aMedia, TInt aDrive, CMPXMessageArray* aItemChangedMessages) = 0;
+
 #ifdef ABSTRACTAUDIOALBUM_INCLUDED
         /**
         * Get title from the Id
@@ -128,7 +129,23 @@ class MMPXDbMusicObserver
         * @return name matching the ID
         */
         virtual HBufC* HandleGetAlbumNameFromIdL( TUint32 aId ) = 0;
-#endif // ABSTRACTAUDIOALBUM_INCLUDED    
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+        
+        /**
+        * Generate Unique ID for Album
+        * @param aMedia media object
+        * @param aCaseSensitive indicates whether case sensitivity should be taken
+        *        into consideration when generating the unique row id
+        * @return the ID of album
+        */
+        virtual TUint32 GenerateUniqueIdForAlbumL(const CMPXMedia& aMedia) = 0;
+
+        /**
+        * Check if the specified album ID is Unknown album
+        * @param aId: The ID of the album
+        * @return ETrue if it's Unknown album
+        */
+        virtual TBool IsUnknownAlbumL(const TUint32 aId) = 0;
     };
 
 /**
@@ -149,7 +166,7 @@ class CMPXDbMusic :
         */
         static CMPXDbMusic* NewL(CMPXDbManager& aDbManager, CMPXResource& aResource,
             MMPXDbMusicObserver& aObserver);
-
+        
         /**
         * Two-phased constructor.
         * @param aDbManager database manager to use for database interactions
@@ -158,7 +175,7 @@ class CMPXDbMusic :
         */
         static CMPXDbMusic* NewLC(CMPXDbManager& aDbManager, CMPXResource& aResource,
             MMPXDbMusicObserver& aObserver);
-
+            
         /**
         * Destructor
         */
@@ -501,11 +518,13 @@ class CMPXDbMusic :
         * @param aAttrs the attributes to include for the artist(s) matching the
         *        selection criteria
         * @param aMediaArray returns the songs
-        */
+        * @param aSortByTrackOrder if TRUE sorts tracks according to their track numbers, 
+		*        if FALSE using track titles or filename
+        */       
         void FindSongsL(TUint32 aGeneralId, TUint32 aContainerId, TMPXGeneralType aType,
             const CMPXMedia& aCriteria, const TArray<TMPXAttribute>& aAttrs,
-            CMPXMediaArray& aMediaArray);
-
+            CMPXMediaArray& aMediaArray, TBool aSortByTrackOrder = EFalse);
+        
         /**
         * Returns the track count for a given drive
         * @param aDrive drive
@@ -523,12 +542,6 @@ class CMPXDbMusic :
         */
         void GetMusicUriArrayL(TInt aDrive, TInt aFromID, TInt aRecords,
                                CDesCArray& aUriArr, TInt& aLastID);
-
-        /**
-         * Get the ID of Artist which belongs to the specified Album
-         * @param aId, the ID of Album
-         */
-        TUint32 ArtistForAlbumL(const TUint32 aId);
             
         /**
         * Get the Albumart of song which belongs to the specified Album
@@ -672,13 +685,12 @@ class CMPXDbMusic :
         HBufC* ConstructUriL(RSqlStatement& aMusicTable);
 
         /**
-        * Checks if the specified category field (artist/album/genre/composer)
+        * Checks if the specified category field (artist/genre/composer/abstractalbum)
         * will change and notifies the observer if so.
         * @param aCategory identifies the category
         * @param aMedia contains the new record attributes
         * @param aAttribute corresponding attribute in the media parameter
-        * @param aColumnIndex column index in the recordset
-        * @param aMusicTable current record in the music table or NULL if this is an insert
+        * @param aOldId the current category item ID
         * @param aDriveId drive ID the update is for
         * @param aItemChangedMessages item changed messages to append to
         * @param aItemId returns the category item ID
@@ -688,6 +700,22 @@ class CMPXDbMusic :
             const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, const TDesC& aArt = KNullDesC);
 
+        /**
+        * Checks if album will change and notifies the observer if so.
+        * @param aMedia contains the new record attributes
+        * @param aAttribute corresponding attribute in the media parameter
+        * @param aOldId the current category item ID
+        * @param aDriveId drive ID the update is for
+        * @param aItemChangedMessages item changed messages to append to
+        * @param aItemId returns the album item ID
+		* @param aArt old art of the music record
+		* @param aCaseSensitive indicates whether case sensitivity should be taken
+        * @return ETrue if the field was modified
+        */
+        TBool UpdateCategoryFieldForAlbumL(const CMPXMedia& aMedia, 
+		    const TMPXAttribute& aAttribute, TUint32 aOldId, TInt aDriveId, 
+			CMPXMessageArray* aItemChangedMessages, TUint32& aItemId, const TDesC& aArt = KNullDesC);       
+        
         /**
         * Checks if extra attributes are required. The "standard attribute set includes:
         * EMPXMediaGeneralId, EMPXMediaGeneralType, EMPXMediaGeneralCategory,

@@ -112,7 +112,7 @@ TTime CMPXDbAuxiliary::LastRefreshedTimeL()
     {
     MPX_FUNC("CMPXDbAuxiliary::LastRefreshedTimeL");
 
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAuxiliaryGetTime));
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAuxiliaryGetTime()));
     CleanupClosePushL(recordset);
 
     if (recordset.Next() != KSqlAtRow)
@@ -195,7 +195,7 @@ TBool CMPXDbAuxiliary::IsRefreshedL()
 
     TBool refreshed(ETrue);
 
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAuxiliaryGetTime));
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryAuxiliaryGetTime()));
     CleanupClosePushL(recordset);
 
     TInt count(0);

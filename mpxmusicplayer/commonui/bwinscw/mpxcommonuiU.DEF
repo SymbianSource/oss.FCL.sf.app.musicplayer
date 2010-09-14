@@ -57,4 +57,5 @@ EXPORTS
 	?SetNeedSave@MPXTlsHelper@@SAXH@Z @ 56 NONAME ; void MPXTlsHelper::SetNeedSave(int)
 	??1CMPXLbxExtendedFeatures@@UAE@XZ @ 57 NONAME ; CMPXLbxExtendedFeatures::~CMPXLbxExtendedFeatures(void)
 	?SpeedNaviUpdating@CMPXLbxExtendedFeatures@@QAEXH@Z @ 58 NONAME ; void CMPXLbxExtendedFeatures::SpeedNaviUpdating(int)
+	?IsHostCalendarL@CMPXCommonUiHelper@@QAEHXZ @ 59 NONAME ; int CMPXCommonUiHelper::IsHostCalendarL(void)
 

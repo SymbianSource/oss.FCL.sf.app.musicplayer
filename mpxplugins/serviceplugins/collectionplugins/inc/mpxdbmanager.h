@@ -316,6 +316,15 @@ class CMPXDbManager :
         IMPORT_C void EnsureRamSpaceL() ;
 
         /**
+         * overloaded function for calls where string is allready formatted
+         * 
+         * @param  aQuery data base query string
+         * @return RSqlStatement
+         */
+        IMPORT_C RSqlStatement ExecuteSelectQueryL( const TDesC& aQuery );
+        
+        
+        /**
         *  Move DBs from RAMDisk to disks
         */
         //IMPORT_C void BackupDBsL();

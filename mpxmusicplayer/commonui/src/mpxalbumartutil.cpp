@@ -253,6 +253,11 @@ void CMPXAlbumArtUtil::ThumbnailReady(
             iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );
             }
         } 	
+    else if ( aError == KErrUnderflow || aError == KErrTimedOut || aError == KErrCompletion)
+        {
+        // Abort imaging decoding
+        iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );
+        }
     else if (iArtUtil && iFilename)
         {
         TRAPD( err,
@@ -265,7 +270,11 @@ void CMPXAlbumArtUtil::ThumbnailReady(
             iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );
             }  
         } 
-
+    else        
+        {
+        iObserver->ExtractAlbumArtCompleted( NULL, KErrNotFound );
+        }
+		
     iReqId = 0;
     }
 

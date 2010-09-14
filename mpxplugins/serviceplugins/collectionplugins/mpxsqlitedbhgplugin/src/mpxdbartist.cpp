@@ -42,12 +42,11 @@
 //
 CMPXDbArtist* CMPXDbArtist::NewL(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory,
-    MMPXDbArtistObserver& aObserver)
+    TMPXGeneralCategory aCategory)
     {
     MPX_FUNC("CMPXDbArtist::NewL");
 
-    CMPXDbArtist* self = CMPXDbArtist::NewLC(aDbManager, aCategory, aObserver);
+    CMPXDbArtist* self = CMPXDbArtist::NewLC(aDbManager, aCategory);
     CleanupStack::Pop(self);
     return self;
     }
@@ -58,12 +57,11 @@ CMPXDbArtist* CMPXDbArtist::NewL(
 //
 CMPXDbArtist* CMPXDbArtist::NewLC(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory,
-    MMPXDbArtistObserver& aObserver)
+    TMPXGeneralCategory aCategory)
     {
     MPX_FUNC("CMPXDbArtist::NewLC");
 
-    CMPXDbArtist* self = new (ELeave) CMPXDbArtist(aDbManager, aCategory, aObserver);
+    CMPXDbArtist* self = new (ELeave) CMPXDbArtist(aDbManager, aCategory);
     CleanupStack::PushL(self);
     self->ConstructL();
     return self;
@@ -84,10 +82,8 @@ CMPXDbArtist::~CMPXDbArtist()
 //
 CMPXDbArtist::CMPXDbArtist(
     CMPXDbManager& aDbManager,
-    TMPXGeneralCategory aCategory,
-    MMPXDbArtistObserver& aObserver) :
-    CMPXDbCategory(aDbManager, aCategory),
-    iObserver(aObserver)
+    TMPXGeneralCategory aCategory) :
+    CMPXDbCategory(aDbManager, aCategory)
     {
     MPX_FUNC("CMPXDbArtist::CMPXDbArtist");
     }
@@ -108,58 +104,63 @@ void CMPXDbArtist::ConstructL()
 // ----------------------------------------------------------------------------
 //
 TUint32 CMPXDbArtist::AddItemL(
-    const TDesC& aName,
-    const TDesC& aArt,
+    TMPXGeneralCategory /*aCategory*/,        
+    const CMPXMedia& aMedia,
     TInt aDriveId,
     TBool& aNewRecord,
     TBool aCaseSensitive)
     {
     MPX_FUNC("CMPXDbArtist::AddItemL");
 
+    TPtrC artist(KNullDesC);
+    TPtrC albumArt(KNullDesC);
+    
+    if (aMedia.IsSupported(KMPXMediaMusicArtist))
+        {
+        artist.Set(aMedia.ValueText(KMPXMediaMusicArtist).Left(KMCMaxTextLen));
+        }
+    
+    if (aMedia.IsSupported(KMPXMediaMusicAlbumArtFileName))
+        {
+        albumArt.Set(aMedia.ValueText(KMPXMediaMusicAlbumArtFileName).Left(KMCMaxTextLen));
+        }
+       
     // try to find the item first
     TUint32 rowId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
-        aName, aCaseSensitive));
-    aNewRecord = !CategoryItemExistsL(aDriveId, rowId);
+        artist, aCaseSensitive));
 
-    if (aNewRecord)
+    HBufC* query = PreProcessStringLC(KQueryCategoryItem);
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(aDriveId, *query, rowId));
+    CleanupStack::PopAndDestroy(query);
+    CleanupClosePushL(recordset);
+    
+    TInt result(recordset.Next());
+    if (result == KSqlAtEnd)
         {
+        aNewRecord = result;
+        
         // insert new
-        HBufC* query = PreProcessStringLC(KQueryArtistInsert);
-        HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(aName);
-        HBufC* art = MPXDbCommonUtil::ProcessSingleQuotesLC(aArt);
+        HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(artist);
+        HBufC* art = MPXDbCommonUtil::ProcessSingleQuotesLC(albumArt);
 
-        iDbManager.ExecuteQueryL(aDriveId, *query, rowId, name, 1, art);
+        iDbManager.ExecuteQueryL(aDriveId, KQueryArtistInsert, rowId, name, 1, 0, art);
 
         CleanupStack::PopAndDestroy(art);
         CleanupStack::PopAndDestroy(name);
-        CleanupStack::PopAndDestroy(query);
         }
-    else
+    else if (result == KSqlAtRow)
         {
-        // retrieve the existing record
-        HBufC* query = NULL;
-        query = PreProcessStringLC(KQueryCategoryItem);
-        RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query, rowId));
-        CleanupStack::PopAndDestroy(query);
-
-        CleanupClosePushL(recordset);
-
-        if (recordset.Next() != KSqlAtRow)
-            {
-            User::Leave(KErrNotFound);
-        }
-
-        // Album Art
+        // retrieve Art from Artist table
         TPtrC art(KNullDesC);
         art.Set(MPXDbCommonUtil::GetColumnTextL(recordset, EArtistArt));
 
         // the current one is Unknown and the new one is Not Unknown
-        if ( art == KNullDesC && aArt != KNullDesC )
+        if ( art == KNullDesC && albumArt != KNullDesC )
             {
             HBufC* artReplaceSingleQuote = 
-                MPXDbCommonUtil::ProcessSingleQuotesLC( aArt );
+                MPXDbCommonUtil::ProcessSingleQuotesLC( albumArt );
             _LIT( KFormatArt, "Art=\'%S\'" );
-            HBufC* setStr = HBufC::NewLC(256);
+            HBufC* setStr = HBufC::NewLC(KMaxFileName);
             setStr->Des().Format( KFormatArt, artReplaceSingleQuote );
 
             iDbManager.ExecuteQueryL(aDriveId, KQueryArtistUpdate, setStr, rowId);
@@ -167,35 +168,68 @@ TUint32 CMPXDbArtist::AddItemL(
             CleanupStack::PopAndDestroy(artReplaceSingleQuote);
             }
 
-        CleanupStack::PopAndDestroy(&recordset);
-
         // increment the number of songs for the category
         query = PreProcessStringLC(KQueryCategoryIncrementSongCount);
         iDbManager.ExecuteQueryL(aDriveId, *query, rowId);
         CleanupStack::PopAndDestroy(query);
         }
-
+    else
+        {
+        MPX_DEBUG2("SQL error %d", result);
+        User::Leave(result);
+        }
+    
+    CleanupStack::PopAndDestroy(&recordset);
+    
     return rowId;
     }
-
+    
 // ----------------------------------------------------------------------------
-// CMPXDbArtist::IsUnknownArtistL
+// CMPXDbArtist::DecrementSongsForCategoryL
 // ----------------------------------------------------------------------------
 //
-TBool CMPXDbArtist::IsUnknownArtistL(TUint32 aId)
+void CMPXDbArtist::DecrementSongsForCategoryL(
+    const TUint32 aId,
+    TInt aDriveId,
+    CMPXMessageArray* aItemChangedMessages,
+    TBool& aItemExist
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+    ,
+    TBool /*aMTPInUse*/
+#endif //ABSTRACTAUDIOALBUM_INCLUDED
+    )
     {
-	MPX_FUNC("CMPXDbArtist::IsUnknownArtistL");
+    MPX_FUNC("CMPXDbArtist::DecrementSongsForCategoryL");
+    
+    TInt songsCount(0);
+    TInt albumsCount(0);
+    
+    GetSongsAndAlbumsCountL(aDriveId, aId, songsCount, albumsCount); 
+            
+    MPX_DEBUG4("id %d, songsCount %d, albumsCount %d", aId, songsCount, albumsCount);
+    
+    // if just one song uses this category. Use <= just in case
+    if (songsCount <= 1 && albumsCount == 0)  
+        {
+        aItemExist = EFalse;
+        // delete the category
+        DeleteCategoryL(aId, aDriveId);
 
-    HBufC* name = GetNameL(aId);
-
-	TInt ret = EFalse;
-	if (*name == KNullDesC)
-		{
-		ret = ETrue;
-		}
-	delete name;
-
-	return ret;
+        if (aItemChangedMessages)
+            {
+            // add the item changed message
+            MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemDeleted,
+                iCategory, KDBPluginUid);
+            }
+        }
+    else if (songsCount > 0)
+        {
+        aItemExist = ETrue;
+        // decrement the number of songs for the category
+        HBufC* query = PreProcessStringLC(KQueryCategoryDecrementSongCount);
+        iDbManager.ExecuteQueryL(aDriveId, *query, aId);
+        CleanupStack::PopAndDestroy(query);
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -237,10 +271,6 @@ void CMPXDbArtist::UpdateMediaL(
                 }
             if (attributeId & EMPXMediaGeneralCount)
                 {
-//				TInt albumCount = GetAlbumsCountL(aRecord.ColumnInt64(EArtistUniqueId));
-//              aMedia.SetTObjectValueL<TInt>(KMPXMediaGeneralCount,albumCount);
-//              MPX_DEBUG1("	EMPXMediaGeneralCount");
-//				MPX_DEBUG2("	AlbumCount[%d]", albumCount);
                 // get songs count from all drives
                 TInt songCount = GetSongsCountL( KDbManagerAllDrives,
                                     aRecord.ColumnInt64( EArtistUniqueId ) );
@@ -281,17 +311,6 @@ void CMPXDbArtist::GenerateArtistFieldsValuesL(const CMPXMedia& aMedia, CDesCArr
     }
 
 // ----------------------------------------------------------------------------
-// CMPXDbArtist::GetAlbumsCountL
-// ----------------------------------------------------------------------------
-//
-TInt CMPXDbArtist::GetAlbumsCountL(TUint32 aId)
-    {
-    MPX_FUNC("CMPXDbArtist::GetAlbumsCountL");
-
-	return iObserver.HandleGetAlbumsCountForArtistL(aId);
-    }
-
-// ----------------------------------------------------------------------------
 // CMPXDbArtist::GetAllCategoryItemsL
 // ----------------------------------------------------------------------------
 //
@@ -300,9 +319,7 @@ void CMPXDbArtist::GetAllCategoryItemsL(
     CMPXMediaArray& aMediaArray)
     {
     MPX_FUNC("CMPXDbArtist::GetAllCategoryItemsL");
-    HBufC* query = PreProcessStringLC(KQueryArtistAll);
-    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query));
-    CleanupStack::PopAndDestroy(query);
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(KQueryArtistAll()));
     CleanupClosePushL(recordset);
     ProcessRecordsetL(aAttrs, recordset, aMediaArray);
     CleanupStack::PopAndDestroy(&recordset);
@@ -343,37 +360,169 @@ void CMPXDbArtist::UpdateItemL(
     CleanupStack::PopAndDestroy(values);
     CleanupStack::PopAndDestroy(fields);
     }
+
 // ----------------------------------------------------------------------------
-// CMPXDbAlbum::CreateTableL
+// CMPXDbArtist::AddAlbumArtistL
+// ----------------------------------------------------------------------------
+//
+TUint32 CMPXDbArtist::AddAlbumArtistL(
+    const TDesC& aName,
+    const TDesC& aArt,
+    TInt aDriveId)
+    {
+    MPX_FUNC("CMPXDbArtist::AddAlbumArtistL");
+
+    // try to find the item first
+    TUint32 rowId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
+        aName, ETrue));
+    HBufC* query = PreProcessStringLC(KQueryCategoryItem);
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(aDriveId, *query, rowId));
+    CleanupStack::PopAndDestroy(query);
+    CleanupClosePushL(recordset);
+    
+    TInt result(recordset.Next());
+    if (result == KSqlAtEnd)
+        {
+        // insert new
+        HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(aName);
+        HBufC* art = MPXDbCommonUtil::ProcessSingleQuotesLC(aArt);
+
+        iDbManager.ExecuteQueryL(aDriveId, KQueryArtistInsert, rowId, name, 0, 1, art);
+
+        CleanupStack::PopAndDestroy(art);
+        CleanupStack::PopAndDestroy(name);
+        }
+    else if (result == KSqlAtRow)
+        {
+        // retrieve Art from Artist table
+        TPtrC art(KNullDesC);
+        art.Set(MPXDbCommonUtil::GetColumnTextL(recordset, EArtistArt));
+
+        // the current one is Unknown and the new one is Not Unknown
+        if ( art == KNullDesC && aArt != KNullDesC )
+            {
+            HBufC* artReplaceSingleQuote = 
+                MPXDbCommonUtil::ProcessSingleQuotesLC( aArt );
+            _LIT( KFormatArt, "Art=\'%S\'" );
+            HBufC* setStr = HBufC::NewLC(KMaxFileName);
+            setStr->Des().Format( KFormatArt, artReplaceSingleQuote );
+
+            iDbManager.ExecuteQueryL(aDriveId, KQueryArtistUpdate, setStr, rowId);
+            CleanupStack::PopAndDestroy(setStr);
+            CleanupStack::PopAndDestroy(artReplaceSingleQuote);
+            }
+
+        // increment the number of songs for the category
+        iDbManager.ExecuteQueryL(aDriveId, KQueryArtistIncrementAlbumCount, rowId);
+        }
+    else
+        {
+        MPX_DEBUG2("SQL error %d", result);
+        User::Leave(result);
+        }
+
+    CleanupStack::PopAndDestroy(&recordset);
+    
+    return rowId;
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbArtist::DecrementAlbumsForArtistL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbArtist::DecrementAlbumsForArtistL(
+    const TUint32 aId,
+    TInt aDriveId,
+    CMPXMessageArray* aItemChangedMessages
+    )
+    {
+    MPX_FUNC("CMPXDbArtist::DecrementAlbumsForCategoryL");
+    
+    TInt songsCount(0);
+    TInt albumsCount(0);
+    
+    GetSongsAndAlbumsCountL(aDriveId, aId, songsCount, albumsCount);
+    
+    MPX_DEBUG4("id %d, songsCount %d, albumsCount %d", aId, songsCount, albumsCount);
+    
+    // if just one album uses this category. Use <= just in case
+    if (songsCount == 0 && albumsCount <= 1)
+        {
+        // delete the category
+        DeleteCategoryL(aId, aDriveId);
+
+        if (aItemChangedMessages)
+            {
+            // add the item changed message
+            MPXDbCommonUtil::AddItemChangedMessageL(*aItemChangedMessages, aId, EMPXItemDeleted,
+                iCategory, KDBPluginUid);
+            }
+        }
+    else if (albumsCount > 0)
+        {
+        // decrement the number of albums for the category
+        iDbManager.ExecuteQueryL(aDriveId, KQueryArtistDecrementAlbumCount, aId);
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbArtist::GetSongsAndAlbumsCountL
+// ----------------------------------------------------------------------------
+//
+void CMPXDbArtist::GetSongsAndAlbumsCountL(
+    TInt aDriveId,
+    TUint32 aId, 
+    TInt& aSongCount,
+    TInt& aAlbumCount)
+    {
+    MPX_FUNC("CMPXDbArtist::GetSongsAndAlbumsCountL");
+
+    RSqlStatement recordset(
+        iDbManager.ExecuteSelectQueryL(aDriveId, KQueryArtistGetSongCountAndAlbumCount, aId));
+    CleanupClosePushL(recordset);
+
+    TInt err(KErrNone);
+    while ((err = recordset.Next()) == KSqlAtRow)
+        {
+        aSongCount += recordset.ColumnInt(KMPXTableDefaultIndex);
+        aAlbumCount += recordset.ColumnInt(KMPXTableDefaultIndex+1);
+        }
+
+    if (err != KSqlAtEnd)
+        {
+        User::Leave(err);
+        }
+
+    CleanupStack::PopAndDestroy(&recordset);
+    }
+
+// ----------------------------------------------------------------------------
+// CMPXDbArtist::CreateTableL
 // ----------------------------------------------------------------------------
 //
 void CMPXDbArtist::CreateTableL(
     RSqlDatabase& aDatabase,
     TBool /* aCorruptTable */)
     {
-    MPX_FUNC("CMPXDbCategory::CreateTableL");
+    MPX_FUNC("CMPXDbArtist::CreateTableL");
 
     // create the table
-    HBufC* query = PreProcessStringLC(KArtistCreateTable);
-    User::LeaveIfError(aDatabase.Exec(*query));
-    CleanupStack::PopAndDestroy(query);
+    User::LeaveIfError(aDatabase.Exec(KArtistCreateTable));
 
     // do not create an index on the Name field
     // as it only slows down the insert/update queries overall
     }
 
 // ----------------------------------------------------------------------------
-// CMPXDbAlbum::CheckTableL
+// CMPXDbArtist::CheckTableL
 // ----------------------------------------------------------------------------
 //
 TBool CMPXDbArtist::CheckTableL(
     RSqlDatabase& aDatabase)
     {
-    MPX_FUNC("CMPXDbCategory::CheckTableL");
+    MPX_FUNC("CMPXDbArtist::CheckTableL");
 
-    HBufC* query = PreProcessStringLC(KArtistCheckTable);
-    TBool check(DoCheckTable(aDatabase, *query));
-    CleanupStack::PopAndDestroy(query);
+    TBool check(DoCheckTable(aDatabase, KArtistCheckTable));
 
     return check;
     }

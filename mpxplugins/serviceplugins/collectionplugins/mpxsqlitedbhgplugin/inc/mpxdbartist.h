@@ -24,11 +24,6 @@
 #include "mpxdbcategory.h"
 
 // CLASS DECLARATION
-class MMPXDbArtistObserver
-    {
-    public:
-		virtual TInt HandleGetAlbumsCountForArtistL(TUint32 aId) = 0;
-	};
 
 /**
 * Responsible for managing all music databases
@@ -47,7 +42,7 @@ class CMPXDbArtist :
         * @return New CMPXDbArtist instance.
         */
         static CMPXDbArtist* NewL(CMPXDbManager& aDbManager,
-            TMPXGeneralCategory aCategory, MMPXDbArtistObserver& aObserver);
+            TMPXGeneralCategory aCategory);
 
         /**
         * Two-phased constructor.
@@ -56,8 +51,8 @@ class CMPXDbArtist :
         * @return New CMPXDbArtist instance on the cleanup stack.
         */
         static CMPXDbArtist* NewLC(CMPXDbManager& aDbManager,
-            TMPXGeneralCategory aCategory, MMPXDbArtistObserver& aObserver);
-
+            TMPXGeneralCategory aCategory);
+        
         /**
         * Destructor
         */
@@ -65,17 +60,16 @@ class CMPXDbArtist :
 
     public:
         /**
-        * Add a category item. If the record already exists, its counter will
+        * Add a artist item. If the record already exists, its counter will
         * be incremented.
-        * @param aName: This is the name to be entered into the row
+        * @param aCategory category type
+        * @param aMedia: This is the media object
         * @param aDriveId: The Drive Id the name (category) belongs
         * @param aNewRecord: indicates to the caller if a new record is created.
         *        ETrue if a new row is created in the table; otherwise EFalse.
-        * @param aCaseSensitive indicates whether case sensitivity should be taken
-        *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
-        TUint32 AddItemL(const TDesC& aName, const TDesC& aArt, TInt aDriveId, TBool& aNewRecord,
+        virtual TUint32 AddItemL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
 
         /**
@@ -94,14 +88,54 @@ class CMPXDbArtist :
         * @param aItemChangedMessages: if valid on return contains a updated message if the
         *        category was updated
         */
-        void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
-
-        /*
-        * Checks if the specified artist item is unknown
-        * @param aId identifies the artist item
-        * @return ETrue if it is unknown, EFalse otherwise
+        virtual void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+        
+        /**
+        * Decrement the number of songs for the item. If the song and album count gets to 0, 
+        * remove the item.
+        * @param aId: The ID of the category to delete.
+        * @param aDriveId: The drive Id the name (category) belongs to. Songs on different
+        *                  drives may belong to the same album or artist; consequently, one
+        *                  row for each artist/album id and drive ID pair will exist in the
+        *                  lookup table with a count existing for each row that tracks the
+        *                  number number of songs on that drive with that album/artist.
+        * @param aItemChangedMessages if valid on return contains a deleted message if the
+        *                  category was deleted
+        * @param aItemExist Out parameter, ETrue if the category is not deleted after the delete,
+        *        EFalse otherwise
         */
-        TBool IsUnknownArtistL(TUint32 aId);
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        virtual void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
+            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, TBool aMtpInUse = EFalse); 
+#else
+        virtual void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
+            CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
+#endif //ABSTRACTAUDIOALBUM_INCLUDED            
+
+        /**
+        * Add a AlbumArtist. If the record already exists, its counter will
+        * be incremented.
+        * @param aName: This is the name to be entered into the row
+        * @param aArt: Album art
+        * @param aDriveId: The Drive Id the name (category) belongs
+        * @return The unique id of the row added.
+        */
+        TUint32 AddAlbumArtistL(const TDesC& aName, const TDesC& aArt, TInt aDriveId);
+        
+        /**
+        * Decrement the number of albums for the item. If the song and album count gets to 0, 
+        * remove the item.
+        * @param aId: The ID of the category to delete.
+        * @param aDriveId: The drive Id the name (category) belongs to. Songs on different
+        *                  drives may belong to the same album or artist; consequently, one
+        *                  row for each artist/album id and drive ID pair will exist in the
+        *                  lookup table with a count existing for each row that tracks the
+        *                  number number of songs on that drive with that album/artist.
+        * @param aItemChangedMessages if valid on return contains a deleted message if the
+        *                  category was deleted
+        */
+        void DecrementAlbumsForArtistL(TUint32 aId, TInt aDriveId,
+            CMPXMessageArray* aItemChangedMessages);       
 
     private:
 
@@ -123,14 +157,16 @@ class CMPXDbArtist :
         */
         void GenerateArtistFieldsValuesL(const CMPXMedia& aMedia,
             CDesCArray& aFields, CDesCArray& aValues);
-
+       
         /**
-        * Gets the Album counts for a Artist item
+        * Gets the Songs count and Albums count for a Artist item
+        * @param aDrivceId The Drive Id the name (category) belongs
         * @param aId identifies the Artist item
-        * @return value of the Album counts
+        * @param aSongsCount songs count
+        * @param aAlbumsCount albums count
         */
-        TInt GetAlbumsCountL(TUint32 aId);
-
+        void GetSongsAndAlbumsCountL(TInt aDriveId, TUint32 aId, TInt& aSongsCount, TInt& aAlbumsCount);
+        
     private:    // from MMPXTable
 
         /**
@@ -150,7 +186,7 @@ class CMPXDbArtist :
         * @param aDbManager database manager to use for database interactions
         * @param aCategory identifies the category
         */
-        CMPXDbArtist(CMPXDbManager& aDbManager, TMPXGeneralCategory aCategory, MMPXDbArtistObserver& aObserver);
+        CMPXDbArtist(CMPXDbManager& aDbManager, TMPXGeneralCategory aCategory);
 
         /**
         * Second phase constructor.
@@ -167,13 +203,12 @@ class CMPXDbArtist :
             EArtistUniqueId = KMPXTableDefaultIndex,
             EArtistName,
             EArtistSongCount,
+            EArtistAlbumCount,
             EArtistArt,
             EArtistFieldCount
             };
-
-    private:    // Data
-        MMPXDbArtistObserver& iObserver;
     };
+    
 #endif // MPXDBARTIST_H
 
 // End of File

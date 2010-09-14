@@ -239,6 +239,21 @@ EXPORT_C TBool CMPXCommonUiHelper::IsHostMessagingL()
         }
     return ret;
     }
+     
+// ---------------------------------------------------------------------------
+// Check if the host application is calendar
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TBool CMPXCommonUiHelper::IsHostCalendarL()
+{
+    TBool ret( EFalse );
+    TInt hostUid = MPXTlsHelper::HostUid().iUid;
+    if ( hostUid == KMPXCalendarUid)
+        {
+        ret = ETrue;
+        }
+    return ret;
+}
 
 // ---------------------------------------------------------------------------
 // Check if the host application is browser

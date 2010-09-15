@@ -2343,6 +2343,7 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
             {
             // To open the selected album.
             iView->ProcessCommandL( EMPXCmdCommonEnterKey );
+            iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
             }
 
 		// Disable transition in reorder mode
@@ -4142,11 +4143,13 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 					}
 				else
 					{
+					iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
 					cpath->Set(aIndex-1); // actual selection
 					}
 				}
 			else
 				{
+				iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
 				cpath->Set(aIndex);
 				}
 			}

@@ -20,14 +20,14 @@
 /*!
  Stub function.
  */
-MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( TUid hostUid, QObject *parent )
+MpMpxHarvesterFrameworkWrapper::MpMpxHarvesterFrameworkWrapper( quint32 clientSecureId, QObject *parent )
     : QObject( parent ),
       mScanRequested( false ),
       mScanning( false ),
       mScanCount( -1 ),
       mCheckSystemEventsRequested( false )
 {
-    Q_UNUSED( hostUid );
+    Q_UNUSED( clientSecureId );
 }
 
 

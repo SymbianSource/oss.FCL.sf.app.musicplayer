@@ -19,6 +19,7 @@
 #define MPMPXCOLLECTIONDATA_H
 
 #include <QObject>
+#include <QAbstractListModel>
 
 #include "mpmpxcollectionviewdefs.h"
 
@@ -40,6 +41,11 @@ public:
         Rating,
         AlbumArtUri
     };
+    
+    enum DataProperty {
+           Corrupted,
+           DrmExpired
+    };
 
     // Test utility functions
     static int getInitCounter();
@@ -52,17 +58,23 @@ public:
     int albumSongsCount() const;
     int albumSongId( int index );
     QString albumSongData( int index, MpMpxCollectionData::DataType type ) const;
+    bool hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type );
     int albumSongIndex( int songUniqueId );
-
+    void setCorruptValue(QModelIndex index, bool tBone );
+    void setReloadAlbumContent( bool );
 signals:
 
     void contextChanged( TCollectionContext context );
     void refreshAlbumSongs();
+	void dataChanged();
 
 public:
 
     int                     mAlbumSongCount;
     bool                    mItemDataReturn;
+    bool                    mReloadAlbumContent;
+    bool                    mHasAlbumSongProperty;
+    QList<int>              mCorruptedIndex;
 
 };
 

@@ -101,8 +101,6 @@ private:
 
     HbIcon                  *mPlayIcon;         // Own
     HbIcon                  *mPauseIcon;        // Own
-    HbIcon                  *mShuffleOnIcon;    // Own
-    HbIcon                  *mShuffleOffIcon;   // Own
 
     HbAction                *mPlayPauseAction;  // Not own
     HbAction                *mRepeatAction;     // Not own

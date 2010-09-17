@@ -91,11 +91,11 @@
 /*!
  Constructs the utility wrapper.
  */
-MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( TUid hostUid, MpSongData *songData, QObject *parent )
+MpMpxCollectionFrameworkWrapper::MpMpxCollectionFrameworkWrapper( quint32 clientSecureId, MpSongData *songData, QObject *parent )
     : QObject( parent )
 {
     d_ptr = new MpMpxCollectionFrameworkWrapperPrivate( this );
-    d_ptr->init( hostUid, songData );
+    d_ptr->init( clientSecureId, songData );
 }
 
 /*!

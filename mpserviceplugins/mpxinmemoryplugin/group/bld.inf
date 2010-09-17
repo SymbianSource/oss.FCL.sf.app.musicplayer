@@ -21,6 +21,8 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../rom/mpxinmemplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxinmemplugin.iby)
+
 
 PRJ_MMPFILES
 mpxinmemoryplugin.mmp

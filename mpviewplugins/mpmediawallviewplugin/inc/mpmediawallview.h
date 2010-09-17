@@ -29,7 +29,6 @@ class MpCollectionDataModel;
 class HbLabel;
 class MpMediaWallDocumentLoader;
 class HbAction;
-class HbIcon;
 class MpPlaybackData;
 class QParallelAnimationGroup;
 class QPropertyAnimation;
@@ -58,8 +57,6 @@ public slots:
     void containerContentsChanged();
     void libraryAboutToUpdate();
     void libraryUpdated();
-    void sendToBackground();
-    void updatePlayPauseAction();
     void hideTracksList();
     void showTrackList();
     void dismissListClosingAnimation();
@@ -80,14 +77,8 @@ private:
     HgMediawall                  *mMediaWallWidget;        // own - parented
     HbLabel                      *mNoMusic;                // own - parented
     MpMediaWallDocumentLoader    *mDocumentLoader;         // own
-    QGraphicsWidget              *mPlayPauseContainer;     // own - parented
-    HbIcon                       *mPlayIcon;               // own
-    HbIcon                       *mPauseIcon;              // own
-    HbAction                     *mPlayPauseAction;        // own - parented
     bool                         mLibraryUpdating;
     MpPlaybackData               *mPlaybackData;           // not own
-    bool                         mActivated;
-    bool                         mIconUpdateNedded;
     QParallelAnimationGroup      *mListShowAnimationGroup; // own - parented
     QPropertyAnimation           *mListShowListAnimation;  // own - parented
     QPropertyAnimation           *mCoverShowListAnimation; // own - parented

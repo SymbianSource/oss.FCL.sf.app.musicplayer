@@ -57,7 +57,7 @@ public:
 public slots:
 
     void openIndex( int index );
-    void openContextMenu( int index, const QPointF &coords );
+    void openContextMenu( const QModelIndex &index, const QPointF &coords );
     void findAlbumSongs( int index );
     void playAlbumSongs( int albumIndex, int songIndex );
 

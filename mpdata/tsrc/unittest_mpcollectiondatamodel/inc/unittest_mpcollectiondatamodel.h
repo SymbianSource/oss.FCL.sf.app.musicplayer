@@ -78,6 +78,7 @@ private slots:
     void testDropMimeData();
     void testSetContext();
     void testFileCorrupted();
+    void testSetLayout();
 
 private:
 

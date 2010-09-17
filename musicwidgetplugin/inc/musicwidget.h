@@ -109,8 +109,8 @@ public slots:
     
     /**
      * MpEngine slots
-     */    
-    void libraryAboutToUpdate();
+     */
+    void libraryUpdateStarted();
     void libraryUpdated();
     void usbBlocked( bool blocked );    
 

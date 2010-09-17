@@ -60,7 +60,7 @@ MpEngine *MpEngineFactory::sharedEngine()
 MpEngine *MpEngineFactory::createIsolatedEngine( MpEngine::EngineMode mode )
 {
     instance()->mEngines.append( new MpEngine() );
-    instance()->mEngines.last()->initialize( TUid::Uid( MpCommon::KMusicPlayerUid + instance()->mEngines.count() ), mode );
+    instance()->mEngines.last()->initialize( (MpCommon::KMusicPlayerUid + instance()->mEngines.count()), mode );
     return instance()->mEngines.last();
 }
 
@@ -82,14 +82,14 @@ void MpEngineFactory::close()
 }
 
 /*!
- Returns an instance to an engine with \a hostUid, and \a mode, if the shared engine is 
+ Returns an instance to an engine with \a clientSecureId, and \a mode, if the shared engine is
  already created parameters are ignored.
  */
-MpEngine *MpEngineFactory::createSharedEngine( TUid hostUid , MpEngine::EngineMode mode )
+MpEngine *MpEngineFactory::createSharedEngine( quint32 clientSecureId , MpEngine::EngineMode mode )
 {
     if ( !instance()->mSharedEngine ) {
         instance()->mSharedEngine = new MpEngine();
-        instance()->mSharedEngine->initialize( hostUid, mode );
+        instance()->mSharedEngine->initialize( clientSecureId, mode );
     }
     return instance()->mSharedEngine;
 }

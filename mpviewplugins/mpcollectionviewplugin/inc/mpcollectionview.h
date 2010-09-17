@@ -53,7 +53,7 @@ public:
     void activateView();
     void deactivateView();
     bool isActivated();    
-    void openItem( int index );
+    void openItem( const QModelIndex &index );
     void showItemDetails( int index );
 
 signals:
@@ -84,6 +84,7 @@ public slots:
 
     void shufflePlayAll();
     void addToPlaylist();
+    void createNewPlaylist();
     void deleteSongs();
     void renameCurrentPlaylistContainer();
 
@@ -94,7 +95,7 @@ public slots:
     void prepareToAddToPlaylist();
     void handleIsolatedCollectionOpened( MpMpxCollectionData* collectionData );
     void arrangeSongs();
-    void openContextMenu( int index, const QPointF &coords );
+    void openContextMenu( const QModelIndex &index, const QPointF &coords );
 
     void handleUsbBlocked( bool blocked );
     void handleLibraryAboutToUpdate();

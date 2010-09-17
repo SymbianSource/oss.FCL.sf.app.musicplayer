@@ -34,6 +34,7 @@ MpPlaybackData::MpPlaybackData()
       mPlaybackState(MpPlaybackData::Stopped),
       mMediaReady(EFalse),
       mRealAudio( false ),
+      mCorrupted( false ),
       mAlbumId( 0 ),
       mId( 0 )
 {
@@ -278,6 +279,7 @@ void MpPlaybackData::resetData()
     mAlbumId = 0;
     mId = 0;
     mRealAudio = false;
+    mCorrupted = false;
 }
 
 /*!
@@ -285,7 +287,8 @@ void MpPlaybackData::resetData()
 */
 void MpPlaybackData::setCorrupted( int id )
 {
-
+    Q_UNUSED(id);
+    mCorrupted = true;
 }
 
 //end of file

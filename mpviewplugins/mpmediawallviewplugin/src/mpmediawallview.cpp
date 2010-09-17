@@ -23,11 +23,9 @@
 #include <hbapplication.h>
 #include <hbscrollbar.h>
 #include <hblabel.h>
-#include <hbtoolbutton.h>
 #include <hblistview.h>
 #include <hbstyleloader.h>
 #include <hbmessagebox.h>
-
 
 #include <hgmediawall.h>
 
@@ -42,7 +40,6 @@
 #include "mptracklistwidget.h"
 #include "mpcollectiontbonelistdatamodel.h"
 #include "mptrace.h"
-#include "mpreflectioneffect.h"
 
 const char*MUSIC_MEDIAWALL_DOCML = ":/mediawallviewdocml/mediawall.docml";
 
@@ -71,14 +68,8 @@ MpMediaWallView::MpMediaWallView()
       mMediaWallWidget( 0 ),
       mNoMusic( 0 ),
       mDocumentLoader( 0 ),
-      mPlayPauseContainer( 0 ),
-      mPlayIcon( 0 ),
-      mPauseIcon( 0 ),
-      mPlayPauseAction( 0 ),
       mLibraryUpdating( false ),
       mPlaybackData( 0 ),
-      mActivated( false ),
-      mIconUpdateNedded( false ),
       mListShowAnimationGroup( 0 ),
       mListShowListAnimation( 0 ),
       mCoverShowListAnimation( 0 ),
@@ -101,8 +92,6 @@ MpMediaWallView::~MpMediaWallView()
     TX_ENTRY
     //delete not parented objects
     delete mDocumentLoader;
-    delete mPlayIcon;
-    delete mPauseIcon;
     TX_EXIT
 }
 
@@ -121,36 +110,16 @@ void MpMediaWallView::initializeView()
     if ( ok ) {
         QGraphicsWidget *widget;
         
-        //Setup fake softkey to hide the app
-        widget = mDocumentLoader->findWidget( QString( "navigationButton" ) );
-        HbAction  *action;
-        action = new HbAction( Hb::BackNaviAction, this );
-        connect( action, SIGNAL( triggered( bool ) ), this, SLOT( sendToBackground() ) );
-        qobject_cast<HbToolButton*>( widget )->setAction( action );
         
-        //Setup the play/pause command button
-        widget = mDocumentLoader->findWidget( QString( "playPauseButton" ) );
-        mPauseIcon = new HbIcon( "qtg_mono_pause" );
-        mPlayIcon = new HbIcon( "qtg_mono_play" );
-        mPlayPauseAction = new HbAction( HbIcon() , QString(), this );  
         mPlaybackData = MpEngineFactory::sharedEngine()->playbackData();
-        qobject_cast<HbToolButton*>( widget )->setAction( mPlayPauseAction );
-        //we need this widget to hide the play pause button, for some reason it does not want to hide.
-        mPlayPauseContainer = mDocumentLoader->findWidget( QString( "playPauseButtonContainer" ) );
-        updatePlayPauseAction();
-        connect( mPlaybackData, SIGNAL( playbackStateChanged() ),
-                 this, SLOT( updatePlayPauseAction() ) );
-        connect( mPlayPauseAction, SIGNAL( triggered( bool ) ),
-                 MpEngineFactory::sharedEngine(), SLOT( playPause() ) );
-
-        
+               
         //Get the main container and set as widget.
         widget = mDocumentLoader->findWidget( QString( "container" ) );
         setWidget( widget );
         
         mEngine = MpEngineFactory::createIsolatedEngine( MpEngine::MediaBrowsing );
         mCollectionData = mEngine->collectionData();
-        mModel = new MpCollectionDataModel( mCollectionData, mPlaybackData, this );
+        mModel = new MpCollectionDataModel( mCollectionData, 0, this );
         
         connect( mCollectionData, SIGNAL( contextChanged( TCollectionContext ) ), 
                  this, SLOT( contextOpened( TCollectionContext ) ) );
@@ -164,18 +133,16 @@ void MpMediaWallView::initializeView()
         TX_LOG_ARGS( "Error: invalid xml file." );
         Q_ASSERT_X( ok, "MpCollectionView::initializeView", "invalid xml file" );
     }
-    
-    mAlbumCover = new MpAlbumCoverWidget( this );
-    mAlbumCover->setGraphicsEffect( new MpReflectionEffect(mAlbumCover) );
-    mAlbumCover->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
-    mAlbumCover->hide();
-    
+       
     mTrackList = new MpTrackListWidget( this );
-    mTrackList->setGraphicsEffect( new MpReflectionEffect(mTrackList) );
     MpCollectionTBoneListDataModel *model = new MpCollectionTBoneListDataModel(mCollectionData, mPlaybackData, mTrackList );
     model->enablePlaybackIndicatorEnable(true);
     mTrackList->list()->setModel( model );
     mTrackList->hide();
+    
+    mAlbumCover = new MpAlbumCoverWidget( this );
+    mAlbumCover->setDefaultIcon( HbIcon( "qtg_large_album_art" ) );
+    mAlbumCover->hide();
     
     connect(mAlbumCover,SIGNAL(clicked()),this, SLOT(hideTracksList()));
     connect(mTrackList->list(), SIGNAL(activated(QModelIndex)), this, SLOT(listItemActivated(QModelIndex)));
@@ -194,11 +161,6 @@ void MpMediaWallView::initializeView()
 void MpMediaWallView::activateView()
 {
     TX_ENTRY
-    mActivated = true;
-    if ( mIconUpdateNedded ) {
-        updatePlayPauseAction();
-        mIconUpdateNedded = false;
-    }
     scrollToNowPlaying();   
     TX_EXIT
 }
@@ -209,7 +171,6 @@ void MpMediaWallView::activateView()
 void MpMediaWallView::deactivateView()
 {
     TX_ENTRY
-    mActivated = false;
     dismissListClosingAnimation();
     TX_EXIT
 }
@@ -241,8 +202,6 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
                 widget = mDocumentLoader->findWidget(QString("MPmediaWallWidget"));
                 mMediaWallWidget = qobject_cast<HgMediawall*>(widget);
                 //set these items as children of the media wall so they show behind the scrollbar.
-                mTrackList->setParentItem(mMediaWallWidget);
-                mAlbumCover->setParentItem(mMediaWallWidget);
                 mModel->refreshModel();
                 setUpMediaWallWidget();
             }
@@ -256,8 +215,6 @@ void MpMediaWallView::contextOpened( TCollectionContext context )
     else {
         if ( mMediaWallWidget ) {
             //Take ownership of these items to prevent delete from media wall widget.
-            mTrackList->setParentItem( this );
-            mAlbumCover->setParentItem( this );
             delete mMediaWallWidget;
             mMediaWallWidget = 0;
             
@@ -310,47 +267,6 @@ void MpMediaWallView::libraryUpdated()
 }
 
 /*!
- Slot to be called to send to background.
- */
-void MpMediaWallView::sendToBackground()
-{
-    TX_ENTRY
-    emit command( MpCommon::SendToBackground );
-    TX_EXIT
-}
-
-/*!
- Slot to update teh play pause action icon.
- */
-void MpMediaWallView::updatePlayPauseAction()
-{
-    if ( !mActivated ) {
-        mIconUpdateNedded = true;
-        return;
-    }
-    TX_ENTRY
-    switch ( mPlaybackData->playbackState() ) {
-        case MpPlaybackData::Playing:
-            TX_LOG_ARGS( "MpPlaybackData::Playing" )
-            mPlayPauseAction->setIcon( *mPauseIcon );
-            mPlayPauseContainer->show();
-            break;
-        case MpPlaybackData::Paused:
-        case MpPlaybackData::Stopped:
-            TX_LOG_ARGS( "MpPlaybackData::Paused" )
-            mPlayPauseAction->setIcon( *mPlayIcon );
-            mPlayPauseContainer->show();
-            break;
-        case MpPlaybackData::NotPlaying:
-            mPlayPauseContainer->hide();       
-            break;
-        default:
-            break;
-    }
-    TX_EXIT
-}
-
-/*!
  Slot called to start the album and list opening animation.
  */
 void MpMediaWallView::showTrackList()
@@ -396,18 +312,22 @@ void MpMediaWallView::dismissListClosingAnimation()
  */
 void MpMediaWallView::listItemActivated( const QModelIndex &index )
 {
-    if (!mCollectionData->hasAlbumSongProperty(index.row(), MpMpxCollectionData::Corrupted)) {
-        int albumIndex = mMediaWallWidget->currentIndex().row();
-        //We are playing on the shared engine, but we pass the collection data that
-        //points to albums on media wall, this is used to construct the playlist.
-        MpEngineFactory::sharedEngine()->playAlbumSongs( albumIndex, index.row(), mCollectionData );
-    }
-    else{
+    if (mCollectionData->hasAlbumSongProperty(index.row(), MpMpxCollectionData::Corrupted)) {
         //pop up corrupted note
         HbMessageBox *messageBox = new HbMessageBox( hbTrId( "txt_mus_info_file_is_corrupt" ), HbMessageBox::MessageTypeInformation );
         messageBox->setAttribute( Qt::WA_DeleteOnClose );
         messageBox->setIcon( HbIcon( QString("qtg_small_fail") ) ); 
         messageBox->show();   
+    }
+    else if	( (mPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) 
+        && ( mPlaybackData->id() == mCollectionData->albumSongId( index.row() ) ) ) {
+         MpEngineFactory::sharedEngine()->playPause();
+    }
+    else {
+        int albumIndex = mMediaWallWidget->currentIndex().row();
+        //We are playing on the shared engine, but we pass the collection data that
+        //points to albums on media wall, this is used to construct the playlist.
+        MpEngineFactory::sharedEngine()->playAlbumSongs( albumIndex, index.row(), mCollectionData );
     }
 }
 
@@ -429,7 +349,7 @@ void MpMediaWallView::setUpMediaWallWidget()
     HbIcon defaultIcon( "qtg_large_album_art" );
     defaultIcon.setSize(mMediaWallWidget->itemSize());
     mMediaWallWidget->setDefaultImage( defaultIcon.pixmap().toImage() );
-    mMediaWallWidget->enableReflections( true );
+    mMediaWallWidget->enableReflections( false );
     mMediaWallWidget->setModel( mModel );
     scrollToDefault();
     mMediaWallWidget->setTitleFontSpec( HbFontSpec( HbFontSpec::Primary ) );

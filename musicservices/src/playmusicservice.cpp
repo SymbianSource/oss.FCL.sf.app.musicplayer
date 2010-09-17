@@ -122,8 +122,7 @@ bool PlayMusicService::view(const QString& file)
     uri.replace(QString("/"),QString("\\"));
     mTitle = requestInfo().info("WindowTitle").toString();
     mServiceApp->setCurrentService( MusicServices::EPlayback );
-    TUid uid = TUid::Uid(requestInfo().clientSecureId()); 
-    emit mServiceApp->serviceActive( uid );
+    emit mServiceApp->serviceActive( requestInfo().clientSecureId() );
     emit mServiceApp->playReady( uri );
     connect(this, SIGNAL( clientDisconnected() ), qApp, SLOT( quit() ) );
     mRequestIndex = setCurrentRequestAsync();
@@ -186,8 +185,7 @@ bool PlayMusicService::view(const XQSharableFile& file)
     TX_ENTRY
     mTitle = requestInfo().info("WindowTitle").toString();
     mServiceApp->setCurrentService( MusicServices::EPlayback );
-    TUid uid = TUid::Uid(requestInfo().clientSecureId()); 
-    emit mServiceApp->serviceActive( uid );
+    emit mServiceApp->serviceActive( requestInfo().clientSecureId() );
     emit mServiceApp->playReady( file );
     connect(this, SIGNAL( clientDisconnected() ), qApp, SLOT( quit() ) );
     mRequestIndex = setCurrentRequestAsync();

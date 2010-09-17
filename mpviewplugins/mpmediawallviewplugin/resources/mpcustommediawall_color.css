@@ -1,9 +1,9 @@
 HgMediawall#MPmediaWallWidget::title
 {
-    color: var(qtg_view_normal);
+    color: var(qtc_view_normal);
 }
 
 HgMediawall#MPmediaWallWidget::description
 {
-    color: var(qtg_view_normal_secondary);
+    color: var(qtc_view_normal_secondary);
 }

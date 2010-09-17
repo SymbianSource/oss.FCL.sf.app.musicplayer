@@ -36,7 +36,7 @@ class MpMpxPlaybackFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxPlaybackFrameworkWrapper( TUid hostUid=TUid::Uid(MpCommon::KMusicPlayerUid),
+    explicit MpMpxPlaybackFrameworkWrapper( quint32 clientSecureId=MpCommon::KMusicPlayerUid,
         MpSongData *songData=0, QObject *parent=0 );
     virtual ~MpMpxPlaybackFrameworkWrapper();
     

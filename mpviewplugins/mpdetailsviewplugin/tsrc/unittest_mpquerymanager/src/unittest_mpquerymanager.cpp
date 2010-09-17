@@ -61,14 +61,17 @@ int main(int argc, char *argv[])
 
     TestMpQueryManager tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_testmpquerymanager.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_testmpquerymanager.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 //Constructor

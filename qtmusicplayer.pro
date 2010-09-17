@@ -25,6 +25,7 @@ symbian {
     include(utilities/mpnowplayingbanner/rom/rom.pri)
     include(utilities/mpalbumcoverwidget/rom/rom.pri)
     include(utilities/mpmediacontroller/rom/rom.pri)
+    include(utilities/mpapplicationmonitor/rom/rom.pri)
     include(mpviewplugins/mpcollectionviewplugin/rom/rom.pri)
     include(mpviewplugins/mpplaybackviewplugin/rom/rom.pri)
     include(mpviewplugins/mpsettingsviewplugin/rom/rom.pri)

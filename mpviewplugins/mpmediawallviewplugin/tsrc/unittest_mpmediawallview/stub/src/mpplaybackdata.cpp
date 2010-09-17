@@ -25,7 +25,8 @@ int gUpdateCounter = 0;
  Stub function.
  */
 MpPlaybackData::MpPlaybackData()
-    : mPlaybackState(NotPlaying)
+    : mPlaybackState(NotPlaying),
+      mSongId(0)
 {
     gUpdateCounter++;
 }
@@ -77,7 +78,19 @@ void MpPlaybackData::emitPlaybackStateChanged()
    emit playbackStateChanged();
 }
 
- void MpPlaybackData::setPlaybackState(MpPlaybackData::SimplifiedState state)
- {
+/*!
+ Stub function.
+ */
+void MpPlaybackData::setPlaybackState(MpPlaybackData::SimplifiedState state)
+{
      mPlaybackState=state;
- }
+}
+
+/*!
+ Stub function.
+ */
+int MpPlaybackData::id()
+{
+    return mSongId;
+}
+ 

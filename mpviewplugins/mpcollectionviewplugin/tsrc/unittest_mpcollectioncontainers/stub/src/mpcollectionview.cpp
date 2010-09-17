@@ -78,7 +78,7 @@ void MpCollectionView::openIndex( int index )
 /*!
  Stub function
  */
-void MpCollectionView::openContextMenu( int index, const QPointF &coords )
+void MpCollectionView::openContextMenu( const QModelIndex &index, const QPointF &coords )
 {
     Q_UNUSED(index);
     Q_UNUSED(coords);

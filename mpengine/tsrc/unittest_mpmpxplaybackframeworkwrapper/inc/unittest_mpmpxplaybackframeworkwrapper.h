@@ -56,6 +56,7 @@ private slots:
     void testSetShuffle();
     void testSetRepeat();
     void testHandlePlaybackMessage();
+    void testHandlePlaybackError();
     void testHandleProperty();
     void testHandleMedia();
     void testHandleMediaDetails();

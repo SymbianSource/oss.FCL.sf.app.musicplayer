@@ -41,7 +41,6 @@ public:
         MediaBrowsing
     };
     
-private:
 
     enum UsbBlockingState {
         USB_NotConnected,          // Not connected
@@ -49,7 +48,6 @@ private:
         USB_Synchronizing          // Connected in MassStorage mode or MTP mode and synchronizing
     };
 
-private:
     explicit MpEngine();
 
 public:
@@ -111,8 +109,9 @@ public slots:
 public:
     //for stubs
     int mOpenCollectionCalled;
+    int mPlayPauseCount;
+    int mPlayAlbumSongsCount;
 
-private:
 
     Q_DISABLE_COPY( MpEngine )
 

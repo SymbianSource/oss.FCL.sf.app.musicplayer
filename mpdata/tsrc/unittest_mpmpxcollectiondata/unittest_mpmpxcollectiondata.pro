@@ -29,10 +29,12 @@ LIBS += -lestor.dll \
         -lmpxcommon.dll
 
 HEADERS += inc/unittest_mpmpxcollectiondata.h \
-           ../../../inc/mpmpxcollectiondata.h
+           ../../../inc/mpmpxcollectiondata.h \
+	   inc/unittest_helper.h 
            
 SOURCES += src/unittest_mpmpxcollectiondata.cpp \
-           ../../src/mpmpxcollectiondata.cpp
+           ../../src/mpmpxcollectiondata.cpp \
+	   src/unittest_helper.cpp 
 
 DEFINES += BUILD_MPDATA_LIB
 

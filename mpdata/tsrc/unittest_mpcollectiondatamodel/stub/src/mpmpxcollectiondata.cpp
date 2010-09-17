@@ -109,6 +109,7 @@ MpMpxCollectionData::MpMpxCollectionData( QObject *parent )
       mCount(0),
       mItemDataReturn(true),
       mCollectionTitleReturn(true)
+ 
 {
     gInitCounter++;
 }
@@ -197,7 +198,15 @@ QString MpMpxCollectionData::itemData( int index, MpMpxCollectionData::DataType 
  */
 bool MpMpxCollectionData::hasItemProperty( int index, MpMpxCollectionData:: DataProperty type ) const
 {
-
+    TX_ENTRY
+    Q_UNUSED(type);
+    if (index == 2){
+    return true;
+    }
+    else {
+    return false;
+    }
+    
 }
 
 /*!
@@ -258,23 +267,22 @@ void MpMpxCollectionData::setContext( TCollectionContext context )
  Stub function.
  */
 QList<int> MpMpxCollectionData::songIndex( int songUniqueId )
-    {
+{
+    QHash<int, int> iList;
+    iList.insertMulti(1,3);
+    iList.insertMulti(1,2);
+    iList.insertMulti(4,6);
+    iList.insertMulti(1,1);
+    return iList.values(songUniqueId);
     
-    }
+}
 
 /*!
  Stub function.
  */
 void MpMpxCollectionData::setCorruptValue(QModelIndex index, bool tBone )
-    {
-    
-    }
-
-/*!
- Stub function.
- */
-void MpMpxCollectionData::setReloadAlbumContent( bool reloadAlbum )
-    {
-    
-    }
+{
+    Q_UNUSED(tBone);
+    mCorruptedIndex.append(index.row());
+}
 

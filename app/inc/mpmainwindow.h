@@ -22,6 +22,7 @@
 // System includes
 #include <hbmainwindow.h>
 #include <mpxviewframeworkqt.h>
+#include <afactivities_global.h>
 
 #include "mpcommondefs.h"
 
@@ -31,6 +32,8 @@ class MusicServices;
 class MpGlobalPopupHandler;
 class HbActivityManager;
 class MpMediaController;
+class AfActivityStorage;
+class AfActivation;
 
 // Class declaration
 class MpMainWindow: public MpxViewFramework
@@ -56,7 +59,7 @@ public:
     MpMainWindow();
     ~MpMainWindow();
 
-    void initialize( ActivityMode mode );
+    void initialize();
 
 signals:
     // For automation testability
@@ -67,8 +70,8 @@ public slots:
     void handleLibraryUpdated();
 
     void switchView( Qt::Orientation orientation );
-    void initializeServiceView( TUid hostUid );
-    void handleActivity();
+    void initializeServiceView( quint32 clientSecureId );
+    void loadActivityData( Af::ActivationReason reason, const QString &name, QVariantHash parameter );
     void saveActivity();
     void handleRestorePathFailed();
 
@@ -92,10 +95,10 @@ private:
     ViewType              mPreviousVerticalViewType;
     MusicServices         *mMusicServices;         // Own
     MpGlobalPopupHandler  *mPopupHandler;          // Own
-    bool                   mUserExit;
-    HbActivityManager     *mActivityManager;       // Not Own
+    bool                  mUserExit;
     MpMediaController     *mMpMediaController;     // Own
-
+    AfActivityStorage     *mActivityStorage;       // Own
 };
 
 #endif // MPMAINVIEW_H
+

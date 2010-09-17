@@ -28,12 +28,15 @@
 #include <hbframeitem.h>
 #include <hbmainwindow.h>
 #include <hbstyleloader.h>
+#include <hbscrollbar.h>
+#include <hbcolorscheme.h>
 
 
 #include "mptracklistwidget.h"
 
 
 const int swipeAngleTolerance = 30; // angle is from 0 to 360
+const int tracklistOutlineSize = 1; //
 
 /*!
     \class MpTrackListWidget
@@ -56,20 +59,25 @@ const int swipeAngleTolerance = 30; // angle is from 0 to 360
  */
 MpTrackListWidget::MpTrackListWidget( QGraphicsItem *parent ) : HbWidget( parent ) 
 {
+    setFlag( QGraphicsItem::ItemHasNoContents, false );
     // Register the custorm css path for the list items.
-    HbStyleLoader::registerFilePath(":/css/mpcustomlistitem.css");
-    HbStyleLoader::registerFilePath(":/css/mpcustomlistitem.hblistviewitem.widgetml");    
+    HbStyleLoader::registerFilePath( ":/css/mpcustomlistitem.css" );
+    HbStyleLoader::registerFilePath( ":/css/mpcustomlistitem.hblistviewitem.widgetml" );    
     mList = new HbListView( this );
     // set layout name that matches the custom list item layout.
-    mList->setLayoutName("mpmwtracklist");
+    mList->setLayoutName( "mpmwtracklist" );
+    HbScrollBar *scrollbar = mList->verticalScrollBar();
+    scrollbar->show();
+    scrollbar->setInteractive( true );
+    mList->setVerticalScrollBarPolicy( HbScrollArea::ScrollBarAlwaysOn );
     
     //grab the gesture for close.
     grabGesture(Qt::SwipeGesture);
     
     mFrameItem = new HbFrameItem( this );
-    mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
-    mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );  
-    mFrameItem->setZValue(-1);
+    mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+    mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_popup_c" );  //replace for qtg_graf_mediawall_list_bg when available.
+    mFrameItem->setFlag(QGraphicsItem::ItemStacksBehindParent);
 }
 
 /*!
@@ -93,8 +101,7 @@ HbListView *MpTrackListWidget::list()
 void MpTrackListWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
 {
     mFrameItem->setGeometry( rect() );
-    qreal margin = 0.0;
-    style()->parameter(QString("var(hb-param-margin-gene-middle-vertical)"), margin);
+    qreal margin = tracklistOutlineSize;
     mList->setGeometry( rect().adjusted( margin, margin, -margin, -margin ) );
     HbWidget::resizeEvent( event );
 }
@@ -140,6 +147,20 @@ void MpTrackListWidget::gestureEvent(QGestureEvent *event)
             event->accept(Qt::SwipeGesture);
         }
     }    
+}
+
+/*!
+    \reimp
+ */
+void MpTrackListWidget::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
+{
+    Q_UNUSED( widget )
+    Q_UNUSED( option )
+    painter->save();
+    qreal outlineWidth(tracklistOutlineSize);
+    painter->setPen(QPen(HbColorScheme::color("qtc_view_normal_secondary"), outlineWidth,Qt::SolidLine,Qt::FlatCap,Qt::MiterJoin));
+    painter->drawRect( rect().adjusted(outlineWidth/2,outlineWidth/2,-outlineWidth/2,-outlineWidth/2) );
+    painter->restore();
 }
 
 /*!

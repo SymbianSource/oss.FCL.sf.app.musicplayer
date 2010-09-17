@@ -132,7 +132,7 @@ MusicWidget::MusicWidget(QGraphicsItem* parent, Qt::WindowFlags flags):
     setupUi();
     
     // Connect to MP engine and playback data
-    mMpEngine = MpEngineFactory::createSharedEngine();
+    mMpEngine = MpEngineFactory::createSharedEngine(MpCommon::KMusicPlayerUid, MpEngine::HomeScreen );
     Q_ASSERT_X(mMpEngine, "music_widget", "no music player engine");
     TX_LOG_ARGS("got mp engine")
     
@@ -176,7 +176,7 @@ MusicWidget::MusicWidget(QGraphicsItem* parent, Qt::WindowFlags flags):
     QObject::connect(mNextPushButton, SIGNAL(clicked()), this, SLOT(nextSong()));
 
     // MpEngine
-    QObject::connect(mMpEngine, SIGNAL(libraryAboutToUpdate()), this, SLOT(libraryAboutToUpdate()));
+    QObject::connect(mMpEngine, SIGNAL(libraryUpdateStarted()), this, SLOT(libraryUpdateStarted()));
     QObject::connect(mMpEngine, SIGNAL(libraryUpdated()), this, SLOT(libraryUpdated()));
     QObject::connect(mMpEngine, SIGNAL(usbBlocked(bool)), this, SLOT(usbBlocked(bool)));
 
@@ -615,7 +615,7 @@ bool MusicWidget::eventFilter(QObject *target, QEvent *event)
 /*!
  MpEngine related
  */
-void MusicWidget::libraryAboutToUpdate()
+void MusicWidget::libraryUpdateStarted()
 {
     TX_LOG
     //Refresh Library start

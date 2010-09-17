@@ -18,16 +18,19 @@
 
 #include "stub/inc/mpcollectiontbonelistdatamodel.h"
 #include "stub/inc/mpmpxcollectiondata.h"
+#include "stub/inc/mpplaybackdata.h"
 #include "mptrace.h"
 
 /*!
  Stub function
  */
-MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionData *data, QObject *parent )
+MpCollectionTBoneListDataModel::MpCollectionTBoneListDataModel( MpMpxCollectionData *data, 
+        MpPlaybackData *playbackData, QObject *parent )
     : QAbstractListModel(parent),
       mCollectionData(data),
       mRowCount(0)
 {
+    Q_UNUSED(playbackData);
     TX_LOG
 }
 

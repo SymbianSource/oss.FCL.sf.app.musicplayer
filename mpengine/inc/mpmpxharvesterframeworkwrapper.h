@@ -32,7 +32,7 @@ class MpMpxHarvesterFrameworkWrapper : public QObject
 
 public:
 
-    explicit MpMpxHarvesterFrameworkWrapper( TUid hostUid = TUid::Uid( MpCommon::KMusicPlayerUid ), QObject *parent=0 );
+    explicit MpMpxHarvesterFrameworkWrapper( quint32 clientSecureId=MpCommon::KMusicPlayerUid, QObject *parent=0 );
     virtual ~MpMpxHarvesterFrameworkWrapper();
 
     void scan();

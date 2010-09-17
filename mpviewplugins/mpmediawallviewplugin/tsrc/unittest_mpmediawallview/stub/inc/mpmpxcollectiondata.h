@@ -58,8 +58,8 @@ public:
     void setContext( TCollectionContext context );
     int itemIndex( int itemUniqueId );    
     bool setCurrentAlbum( int index );
+    int albumSongId(int index);
     bool hasAlbumSongProperty( int index, MpMpxCollectionData:: DataProperty type ) const;
-
     const CMPXMedia& containerMedia();
 
 public:
@@ -71,6 +71,8 @@ public:
     int                     mCurrentAlbumIndex;
     bool                    mCurrentAlbumAvailable;
     bool                    mReturnCollectionTitle;
+    int                     mArbitraryAlbumSongId;
+    bool                    mAlbumSongProperty;
 
 };
 

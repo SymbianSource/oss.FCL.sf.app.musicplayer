@@ -25,12 +25,12 @@
 namespace MpCommon
 {
     // UID definition
-    const long int KMusicPlayerUid      = {0x10207C62};
-    const long int KCollectionViewUid   = {0x10207C63};
-    const long int KPlaybackViewUid     = {0x10207C64};
-    const long int KSettingsViewUid     = {0x10207C66};
-    const long int KDetailsViewUid      = {0x2002D0AA};
-    const long int KMediaWallViewUid    = {0x10207C94};
+    const quint32 KMusicPlayerUid      = {0x10207C62};
+    const quint32 KCollectionViewUid   = {0x10207C63};
+    const quint32 KPlaybackViewUid     = {0x10207C64};
+    const quint32 KSettingsViewUid     = {0x10207C66};
+    const quint32 KDetailsViewUid      = {0x2002D0AA};
+    const quint32 KMediaWallViewUid    = {0x10207C94};
 
     /*!
      Command code sent from the views to the application main window

@@ -79,10 +79,10 @@ MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
 /*!
  \internal
  */
-void MpMpxPlaybackFrameworkWrapperPrivate::init( TUid hostUid, MpSongData *songData )
+void MpMpxPlaybackFrameworkWrapperPrivate::init( quint32 clientSecureId, MpSongData *songData )
 {
     TX_ENTRY
-    iHostUid = hostUid;
+    iHostUid = TUid::Uid( clientSecureId );
     iSongData = songData;
     TRAPD(err, DoInitL());
     if ( err != KErrNone ) {
@@ -735,29 +735,34 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoHandlePlaybackErrorL( const TInt aE
 {
     TX_ENTRY
     switch ( aError ) {
-                case KErrCorrupt:{
-                    MMPXSource* source( iPlaybackUtility->Source() );
-                    if ( source ){
-                        CMPXCollectionPlaylist* playlist( source->PlaylistL() );
-                        if ( playlist ){
-                            MpPlaybackData* pData = playbackData();
-                            pData->setCorrupted( playlist->Path().IdOfIndex( playlist->Index() ).iId2 );
-                            
-                            if ( playlist->Index() == ( playlist->Count()-1 ) ){
-                                //reach the end of list, pop up corrupt notification
-                                emit q_ptr->corruptedStop();
-                            }
-                            else{
-                                //corrupted song, skip to next song
-                                skipForward();
-                            }
-                        }
+        case KErrNotSupported:
+        case KErrCorrupt:{
+            MMPXSource* source( iPlaybackUtility->Source() );
+            if ( source ){
+                CMPXCollectionPlaylist* playlist( source->PlaylistL() );
+                if ( playlist ){
+                    MpPlaybackData* pData = playbackData();
+                    pData->setCorrupted( playlist->Path().IdOfIndex( playlist->Index() ).iId2 );
+                           
+                    if ( playlist->Index() == ( playlist->Count()-1 ) ){
+                        //reach the end of list, pop up corrupt notification
+                        emit q_ptr->corruptedStop(true);
                     }
-                    break;
+                    else{
+                        //corrupted song; there is more song in the playlist
+                        emit q_ptr->corruptedStop(false);
+                    }
                 }
-                default:
-                    break;
+                else{
+                    // No playlist;single file playback.
+                    emit q_ptr->corruptedStop(true);
+                }
             }
+            break;
+        }
+        default:
+            break;
+    }
     TX_EXIT
 }
 

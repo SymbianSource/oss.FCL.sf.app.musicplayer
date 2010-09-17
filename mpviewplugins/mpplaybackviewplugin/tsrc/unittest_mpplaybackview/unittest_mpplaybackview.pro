@@ -34,7 +34,7 @@ LIBS += -lestor.dll \
 
 HEADERS += inc/unittest_mpplaybackview.h \
     ../../inc/mpplaybackview.h \
-    ../../../../inc/mpviewbase.h \
+    stub\inc\mpviewbase.h \
     stub\inc\mpengine.h \
     stub\inc\mpenginefactory.h \
     stub\inc\mpplaybackwidget.h \

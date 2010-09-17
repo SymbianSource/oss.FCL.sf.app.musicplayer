@@ -42,14 +42,17 @@ int main(int argc, char *argv[])
     HbMainWindow window;
     TestMpPlaybackData tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\unittest_mpplaybackdata.txt";
+    if ( argc > 1 ) {
+        return QTest::qExec( &tv, argc, argv);
+    }
+    else {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\unittest_mpplaybackdata.txt";
 
-    int res = QTest::qExec(&tv, 3, pass);
-
-    return res;
+        return QTest::qExec(&tv, 3, pass);
+    }
 }
 
 TestMpPlaybackData::TestMpPlaybackData()
@@ -318,6 +321,16 @@ void TestMpPlaybackData::testCommitPlaybackInfo()
         mTest->commitPlaybackInfo();
         QCOMPARE(spy.count(),i);
     }
+}
+
+/*!
+ test setCorrupted
+ */
+void TestMpPlaybackData::testSetCorrupted()
+{
+    QSignalSpy spy(mTest, SIGNAL(fileCorrupted(int)));
+    mTest->setCorrupted(123);
+    QCOMPARE(spy.count(),1);    
 }
 
 // End of file

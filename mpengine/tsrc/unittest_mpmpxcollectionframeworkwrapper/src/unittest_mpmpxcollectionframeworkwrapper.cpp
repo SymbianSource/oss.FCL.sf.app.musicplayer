@@ -119,7 +119,7 @@ void TestMpMpxCollectionFrameworkWrapper::cleanupTestCase()
  */
 void TestMpMpxCollectionFrameworkWrapper::init()
 {
-    mTest = new MpMpxCollectionFrameworkWrapper(TUid::Uid(MpCommon::KMusicPlayerUid), mSongData);
+    mTest = new MpMpxCollectionFrameworkWrapper(MpCommon::KMusicPlayerUid, mSongData);
     mTestPrivate = mTest->d_ptr;
 }
 
@@ -803,6 +803,7 @@ void TestMpMpxCollectionFrameworkWrapper::testHandleCollectionMessage()
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralEvent,TMPXCollectionMessage::EPathChanged);
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralType,EMcPathChangedByOpen);
     testMessage->SetTObjectValueL<TInt>(KMPXMessageGeneralData,EMcItemOpened);
+    testMessage->SetTObjectValueL<TMPXChangeEventType>(KMPXMessageChangeEventType,EMPXItemDeleted);
     mTestPrivate->DoHandleCollectionMessageL(*testMessage);
     QCOMPARE(spy.count(), 1);
 

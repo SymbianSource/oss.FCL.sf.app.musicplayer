@@ -21,6 +21,7 @@
 #include <hblistview.h>
 #include <hbgroupbox.h>
 #include <hblabel.h>
+#include <hbparameterlengthlimiter.h>
 
 #include "mpcollectioncontainerplaylists.h"
 #include "mpcollectiondatamodel.h"
@@ -108,7 +109,7 @@ void MpCollectionContainerPlaylists::dataReloaded()
     MpCollectionListContainer::dataReloaded();
     if ( mCollectionContext == ECollectionContextPlaylistSongs ) {
         // Playlist could have been renamed.
-        QString details = mCollectionData->collectionTitle();
+        QString details = HbParameterLengthLimiter("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(mCollectionData->count());
         mInfoBar->setHeading(details);
         if ( mCollectionData->count() > 1 ) {
             emit shuffleEnabled(true);
@@ -117,6 +118,10 @@ void MpCollectionContainerPlaylists::dataReloaded()
             emit shuffleEnabled(false);
         }
     }
+    else if ( mCollectionContext == ECollectionContextPlaylists ) {
+        mInfoBar->setHeading(hbTrId("txt_mus_subhead_playlists_1l").arg(mCollectionData->count()));
+    }
+    
     TX_EXIT
 }
 
@@ -160,7 +165,7 @@ void MpCollectionContainerPlaylists::setupContainer()
                 details = hbTrId("txt_mus_subtitle_select_song");
             }
             else {
-                details = hbTrId("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(mCollectionData->count()); 
+                details = HbParameterLengthLimiter("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(mCollectionData->count()); 
             }
             mInfoBar->setHeading(details);
         }
@@ -171,7 +176,7 @@ void MpCollectionContainerPlaylists::setupContainer()
     }
     else {
     
-        mInfoBar->setHeading(hbTrId("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(0));
+        mInfoBar->setHeading(HbParameterLengthLimiter("txt_mus_subhead_1_2l").arg(mCollectionData->collectionTitle()).arg(0));
 
         // Call empty list from base class    
         setupEmptyListContainer();

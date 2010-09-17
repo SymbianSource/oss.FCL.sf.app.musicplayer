@@ -36,7 +36,8 @@ public:
     virtual ~MpEngineFactory();
     static MpEngineFactory * instance(); 
     static MpEngine * sharedEngine();
-    
+    static void close();
+
 private:
     Q_DISABLE_COPY( MpEngineFactory )
     

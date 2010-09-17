@@ -36,6 +36,7 @@ class XQSharableFile;
 class MpEngineFactory;
 class MpAudioEffectsFrameworkWrapper;
 class MpEqualizerFrameworkWrapper;
+class MpApplicationMonitor;
 
 #if defined(BUILD_MPENGINE_LIB)
 #define MPENGINE_EXPORT Q_DECL_EXPORT
@@ -56,7 +57,8 @@ public:
         StandAlone,
         Fetch,
         Embedded,
-        MediaBrowsing
+        MediaBrowsing,
+        HomeScreen
     };
 
 private:
@@ -128,6 +130,7 @@ signals:
 
     // Harvester related
     void libraryAboutToUpdate();
+    void libraryUpdateStarted();
     void libraryUpdated();
     void usbBlocked( bool blocked );
     void unableToCotinueDueUSB();
@@ -191,6 +194,7 @@ public slots:
     void getMuteState();
     void mute();
     void unmute();
+    void handleCorruptedStop( bool lastSong );
 
     // Audio Effects related
     void setBalance( int balance );
@@ -200,8 +204,8 @@ public slots:
     void handleEqualizerReady();
 
 private:
-    
-    void initialize( TUid hostUid, EngineMode mode);
+
+    void initialize( quint32 clientSecureId, EngineMode mode);
 
     // Harvester related
     void handleUsbMassStorageStartEvent();
@@ -210,35 +214,38 @@ private:
     void handleUsbMtpEndEvent();
     void handleUsbMtpNotActive();
     void changeUsbBlockingState( UsbBlockingState state );
+    void autoRefreshLibrary( bool automaticRequest=false );
 
 private:
 
     Q_DISABLE_COPY( MpEngine )
 
+    EngineMode                          mEngineMode;
+
     // Harvesting related
-    MpMpxHarvesterFrameworkWrapper       *mMpxHarvesterWrapper;  // Own
-    MpSongScanner                        *mSongScanner;          // Own
+    MpMpxHarvesterFrameworkWrapper      *mMpxHarvesterWrapper;  // Own
+    MpSongScanner                       *mSongScanner;          // Own
 
     // Collection related
-    MpMpxCollectionFrameworkWrapper      *mMpxCollectionWrapper; //Own
+    MpMpxCollectionFrameworkWrapper     *mMpxCollectionWrapper; // Own
 
     // Playback related
-    MpMpxPlaybackFrameworkWrapper        *mMpxPlaybackWrapper; //Own
+    MpMpxPlaybackFrameworkWrapper       *mMpxPlaybackWrapper;   // Own
 
     // Audio Effects related
-    MpAudioEffectsFrameworkWrapper       *mAudioEffectsWrapper; // Own
+    MpAudioEffectsFrameworkWrapper      *mAudioEffectsWrapper;  // Own
 
     // Equalizer related
-    MpEqualizerFrameworkWrapper          *mEqualizerWrapper; // Own
-    int                                  mCurrentPresetIndex;
+    MpEqualizerFrameworkWrapper         *mEqualizerWrapper;     // Own
+    int                                 mCurrentPresetIndex;
 
-    MpSongData                           *mSongData;            // Owned
+    MpSongData                          *mSongData;             // Own
+    MpApplicationMonitor                *mApplicationMonitor;   // Own
 
-    // General
-    UsbBlockingState                     mUsbBlockingState;
-    UsbBlockingState                     mPreviousUsbState;
-    bool                                 mHandleMediaCommands;
-    TUid                                 mHostUid;
+    UsbBlockingState                    mUsbBlockingState;
+    UsbBlockingState                    mPreviousUsbState;
+    bool                                mHandleMediaCommands;
+
 };
 
 #endif // MPENGINE_H

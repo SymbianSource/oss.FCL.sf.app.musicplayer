@@ -19,9 +19,9 @@
 #define MPNOWPLAYINGWIDGET_H
 
 //includes
-#include <QObject>
+#include <hbwidget.h>
 
-class MpNowPlayingWidget : public QObject
+class MpNowPlayingWidget : public HbWidget
 {
     Q_OBJECT
 

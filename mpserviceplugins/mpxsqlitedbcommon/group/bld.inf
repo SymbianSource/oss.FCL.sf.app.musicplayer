@@ -21,6 +21,8 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../rom/mpxsqlitedbcommon.iby CORE_APP_LAYER_IBY_EXPORT_PATH(mpxsqlitedbcommon.iby)
+
 
 PRJ_MMPFILES
 mpxsqlitedbcommon.mmp

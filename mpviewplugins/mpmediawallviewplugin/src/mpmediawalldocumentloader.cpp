@@ -16,7 +16,6 @@
 */
 
 #include <hgmediawall.h>
-#include <hbtoolbutton.h>
 
 #include "mpmediawalldocumentloader.h"
 #include "mptrace.h"
@@ -41,12 +40,6 @@ QObject *MpMediaWallDocumentLoader::createObject(const QString& type, const QStr
 
     if ( type == HgMediawall::staticMetaObject.className() ) {
         QObject *object = new HgMediawall();
-        object->setObjectName(name);
-        TX_EXIT
-        return object;
-    }
-    else if ( type == HbToolButton::staticMetaObject.className() ) {
-        QObject *object = new HbToolButton();
         object->setObjectName(name);
         TX_EXIT
         return object;

@@ -29,9 +29,9 @@
 #include <mpxcollectionuihelper.h>
 #include <mpxcollectionhelperfactory.h>
 
-
 #include "unittest_mpmpxcollectiondata.h"
 #include "mpcommondefs.h"
+#include "unittest_helper.h"
 
 
 // Do this so we can access all member variables.
@@ -88,13 +88,15 @@ int main(int argc, char *argv[])
 }
 
 TestMpMpxCollectionData::TestMpMpxCollectionData()
-    : mTest(0)
+    : mTest(0),
+      mHelper(0)
 {
 }
 
 TestMpMpxCollectionData::~TestMpMpxCollectionData()
 {
     delete mTest;
+    delete mHelper;
 }
 
 /*!
@@ -118,6 +120,7 @@ void TestMpMpxCollectionData::init()
 {
     mTest = new MpMpxCollectionData();
     mTestPrivate = mTest->d_ptr;
+    mHelper = new TestHelper();
 }
 
 /*!
@@ -419,6 +422,7 @@ void TestMpMpxCollectionData::testSetCollectionContextL()
     mTestPrivate->iContainerMedia = entries;
     mTestPrivate->SetCollectionContextL();
     QCOMPARE(mTestPrivate->iContext, ECollectionContextAllSongs);
+    QCOMPARE(mTestPrivate->iSongIdIndexMapping.empty(), true);
 
     // All artists
     entries->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXGroup);
@@ -535,6 +539,7 @@ void TestMpMpxCollectionData::testSetMpxMediaAllSongs()
     QCOMPARE(spy.count(), 1);
     TCollectionContext context = qvariant_cast<TCollectionContext>(spy.at(0).at(0));
     QCOMPARE(context, ECollectionContextAllSongs);
+    QCOMPARE(mTestPrivate->iReloadAlbumContent, false);
     CleanupStack::PopAndDestroy(entries);
 }
 
@@ -566,7 +571,7 @@ void TestMpMpxCollectionData::testItemId()
     array->AppendL(item);
 
     mTestPrivate->iMediaArray = array;
-    QCOMPARE( mTest->itemId(0), -1);
+    QCOMPARE( mTest->itemId(0), 0);
 
     item->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
     QCOMPARE( mTest->itemId(0), itemId);
@@ -752,6 +757,7 @@ void TestMpMpxCollectionData::testSetAlbumContent()
 void TestMpMpxCollectionData::testSetCurrentAlbum()
 {
     QSignalSpy spy(mTest, SIGNAL(refreshAlbumSongs()));
+    mTestPrivate->iReloadAlbumContent = false;
 
     // Create media array that doesn't have the album songs yet.
     CMPXMediaArray* array = CMPXMediaArray::NewL();
@@ -863,7 +869,7 @@ void TestMpMpxCollectionData::testAlbumSongData()
 }
 
 /*!
- Tests hasAlbumSongProperty().
+ Tests hasItemProperty().
  */
 void TestMpMpxCollectionData::testHasItemProperty()
 {
@@ -973,3 +979,33 @@ void TestMpMpxCollectionData::testHasAlbumSongProperty()
     mTestPrivate->iMediaArray = NULL;
     CleanupStack::PopAndDestroy(array);
 }
+
+/*!
+ Tests setCorruptValue().
+ */
+void TestMpMpxCollectionData::testSetCorruptValue()
+{
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL(array);
+    CMPXMedia* song = CMPXMedia::NewL();   
+    array->AppendL(*song);
+    mTestPrivate->iMediaArray = array;
+    QModelIndex modelIndex = mHelper->indexFor(0);
+    mTest->setCorruptValue(modelIndex,false);
+    QCOMPARE(mTest->hasItemProperty( 0, MpMpxCollectionData::Corrupted), true);
+    CleanupStack::PopAndDestroy(array);
+    mTestPrivate->iMediaArray = NULL;    
+}
+
+/*!
+ Tests setReloadAlbumContent().
+ */
+void TestMpMpxCollectionData::testSetReloadAlbumContent()
+{
+    mTest->setReloadAlbumContent(false);
+    QCOMPARE(mTestPrivate->iReloadAlbumContent, false);
+    mTest->setReloadAlbumContent(true);
+    QCOMPARE(mTestPrivate->iReloadAlbumContent, true);
+    
+}
+

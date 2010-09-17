@@ -22,6 +22,10 @@
 
 #include "unittest_mpmediawallview.h"
 #include "stub/inc/mpplaybackdata.h"
+#include "stub/inc/mpengine.h"
+#include "stub/inc/mpenginefactory.h"
+#include "stub/inc/hbmessagebox.h"
+
 
 // Do this so we can access all member variables.
 #define private public
@@ -30,6 +34,7 @@
 
 // Do this so we can access all memeber functions
 #include "../../src/mpmediawallview.cpp"
+
 
 /*!
  Make our test case a stand-alone executable that runs all the test functions.
@@ -112,9 +117,6 @@ void TestMpMediaWallView::testInitializeView()
     QVERIFY(!mTest->mAlbumCover);
     QVERIFY(!mTest->mTrackList);
     QVERIFY(!mTest->mPlaybackData);
-    QVERIFY(!mTest->mPauseIcon);
-    QVERIFY(!mTest->mPlayIcon);
-    QVERIFY(!mTest->mPlayPauseContainer);
 
     //test member variables are initialized
     mTest->initializeView();
@@ -124,27 +126,7 @@ void TestMpMediaWallView::testInitializeView()
     QVERIFY(mTest->mAlbumCover);
     QVERIFY(mTest->mTrackList);
     QVERIFY(mTest->mPlaybackData);
-    QVERIFY(mTest->mPauseIcon);
-    QVERIFY(mTest->mPlayIcon);
-    QVERIFY(mTest->mPlayPauseContainer);
 
-}
-
-/*!
- Test ActivateView
- */
-void TestMpMediaWallView::testActivateView()
-{
-
-    //Create playbackdata and set to playing state
-    mTest->mPlaybackData = new MpPlaybackData();    
-    mTest->mPlaybackData->setPlaybackState(MpPlaybackData::Playing);
-
-    mTest->mIconUpdateNedded=false;
-    mTest->mActivated=false;
-
-    mTest->activateView();
-    QCOMPARE(mTest->mActivated, true );
 }
 
 /*!
@@ -153,25 +135,10 @@ void TestMpMediaWallView::testActivateView()
 void TestMpMediaWallView::testDeactivateView()
 {
     mTest->initializeView();
-    mTest->mActivated = true;
     mTest->mShowingSongsList = true;
     mTest->setUpListAnimation();
     mTest->deactivateView();
-    QCOMPARE(mTest->mActivated, false);
     QCOMPARE(mTest->mShowingSongsList, false);
-
-}
-
-/*!
-  Test SendToBackground
-  */
-void TestMpMediaWallView::testSendToBackground()
-{
-    //test that signal gets emitted
-    QSignalSpy spy( mTest, SIGNAL(command(int)) );
-    mTest->sendToBackground();
-    QCOMPARE(spy.count(), 1);
-    QCOMPARE(spy.at(0).at(0), QVariant(MpCommon::SendToBackground));
 
 }
 
@@ -239,24 +206,52 @@ void TestMpMediaWallView::testLibraryUpdated()
 }
 
 /*!
-  Test UpdatePlayPauseAction
+  Test listItemActivated
   */
-void TestMpMediaWallView::testUpdatePlayPauseAction()
+void TestMpMediaWallView::testListItemActivated()
 {
-    //test icon gets updated correctly
-    mTest->initializeView();
-    mTest->mActivated = true;
     
-    mTest->mPlaybackData->setPlaybackState( MpPlaybackData::Paused );
-    mTest->updatePlayPauseAction();
-    HbIcon temp = mTest->mPlayPauseAction->icon();
-    QVERIFY( mTest->mPlayPauseAction->icon() ==  HbIcon( "qtg_mono_play" ));
+    if ( MpEngineFactory::instance()->mSharedEngine ) {
+        delete MpEngineFactory::instance()->mSharedEngine;
+    }
+    MpEngineFactory::instance()->mSharedEngine = new MpEngine();
+    mTest->initializeView();
 
-    mTest->mPlaybackData->setPlaybackState( MpPlaybackData::Playing );
-    mTest->updatePlayPauseAction();
-    QVERIFY( mTest->mPlayPauseAction->icon() ==  HbIcon( "qtg_mono_pause" ));
+    //Test with corrupted song
+    mTest->mCollectionData->mAlbumSongProperty = true;
+    MpEngineFactory::sharedEngine()->mPlayPauseCount = 0;
+    MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount = 0;
+    mTest->listItemActivated(QModelIndex());
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayPauseCount == 0);
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount == 0);
 
-    mTest->mPlaybackData->setPlaybackState( MpPlaybackData::Stopped );
-    mTest->updatePlayPauseAction();
-    QVERIFY( mTest->mPlayPauseAction->icon() ==  HbIcon( "qtg_mono_play" ));
+    //Test select nowplaying item that is playing.
+    mTest->mCollectionData->mAlbumSongProperty = false;
+    mTest->mPlaybackData->mPlaybackState = MpPlaybackData::Playing;
+    mTest->mPlaybackData->mSongId = 1234;
+    mTest->mCollectionData->mArbitraryAlbumSongId = 1234;
+    MpEngineFactory::sharedEngine()->mPlayPauseCount = 0;
+    MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount = 0;
+    mTest->listItemActivated(QModelIndex());
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayPauseCount == 1);
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount == 0);
+
+    //Test select nowplaying item that is not initialized.
+    mTest->mCollectionData->mAlbumSongProperty = false;
+    mTest->mPlaybackData->mPlaybackState = MpPlaybackData::NotPlaying;
+    MpEngineFactory::sharedEngine()->mPlayPauseCount = 0;
+    MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount = 0;
+    mTest->listItemActivated(QModelIndex());
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayPauseCount == 0);
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount == 1);
+        
+    //Test select an item that is not playing.
+    mTest->mCollectionData->mAlbumSongProperty = false;
+    mTest->mCollectionData->mArbitraryAlbumSongId = 4321;
+    MpEngineFactory::sharedEngine()->mPlayPauseCount = 0;
+    MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount = 0;
+    mTest->listItemActivated(QModelIndex());
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayPauseCount == 0);
+    QVERIFY(MpEngineFactory::sharedEngine()->mPlayAlbumSongsCount == 1);
 }
+

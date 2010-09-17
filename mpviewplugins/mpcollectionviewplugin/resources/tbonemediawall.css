@@ -15,18 +15,6 @@ HgMediawall#albumWall::content
   zvalue: 0;
 }
 
-HgMediawall#albumWall::centeritem
-{
-  size-policy: fixed fixed;
-  fixed-height: 24.5un;
-  fixed-width: 24.5un;
-  left:0un;
-  right:0un;
-  top:-var(hb-param-margin-gene-screen);
-  bottom:0un;
-  zvalue: 2;
-}
-
 HgMediawall#albumWall::title
 {
   text-height: var(hb-param-text-height-primary);
@@ -37,8 +25,8 @@ HgMediawall#albumWall::title
   text-wrap-mode:no-wrap;
   left:-var(hb-param-margin-gene-screen);
   right:var(hb-param-margin-gene-screen);
-  top:0un;
-  bottom:var(hb-param-margin-middle-vertical);
+  top:-var(hb-param-margin-gene-screen);
+  bottom:var(hb-param-margin-gene-middle-vertical);
   zvalue: 2;
 }
 
@@ -52,11 +40,22 @@ HgMediawall#albumWall::description
   text-wrap-mode:no-wrap;
   left:-var(hb-param-margin-gene-screen);
   right:var(hb-param-margin-gene-screen);
-  top:0un;
-  bottom:1.5un;
+  top:-var(hb-param-margin-gene-middle-vertical);
+  bottom:var(hb-param-margin-gene-middle-vertical);
   zvalue: 2;
 }
 
+HgMediawall#albumWall::centeritem
+{
+  size-policy: fixed fixed;
+  fixed-height: 24.5un;
+  fixed-width: 24.5un;
+  left:0un;
+  right:0un;
+  top:-var(hb-param-margin-gene-middle-vertical);
+  bottom:1.5un;
+  zvalue: 2;
+}
 
 /*Artist Albums TBone*/
 HgMediawall#artistAlbumWall
@@ -75,18 +74,6 @@ HgMediawall#artistAlbumWall::content
   zvalue: 0;
 }
 
-HgMediawall#artistAlbumWall::centeritem
-{
-  size-policy: fixed fixed;
-  fixed-height: 24.5un;
-  fixed-width: 24.5un;
-  left:0un;
-  right:0un;
-  top:-var(hb-param-margin-gene-screen);
-  bottom:0un;
-  zvalue: 2;
-}
-
 HgMediawall#artistAlbumWall::title
 {
   text-height: var(hb-param-text-height-primary);
@@ -97,8 +84,8 @@ HgMediawall#artistAlbumWall::title
   text-wrap-mode:no-wrap;
   left:-var(hb-param-margin-gene-screen);
   right:var(hb-param-margin-gene-screen);
-  top:0un;
-  bottom:var(hb-param-margin-middle-vertical);
+  top:-var(hb-param-margin-gene-screen);
+  bottom:var(hb-param-margin-gene-middle-vertical);
   zvalue: 2;
 }
 
@@ -112,8 +99,18 @@ HgMediawall#artistAlbumWall::description
   text-wrap-mode:no-wrap;
   left:-var(hb-param-margin-gene-screen);
   right:var(hb-param-margin-gene-screen);
-  top:0un;
+  top:-var(hb-param-margin-gene-middle-vertical);
+  bottom:var(hb-param-margin-gene-middle-vertical);
+  zvalue: 2;
+}
+HgMediawall#artistAlbumWall::centeritem
+{
+  size-policy: fixed fixed;
+  fixed-height: 24.5un;
+  fixed-width: 24.5un;
+  left:0un;
+  right:0un;
+  top:-var(hb-param-margin-gene-middle-vertical);
   bottom:1.5un;
   zvalue: 2;
 }
-

@@ -23,6 +23,7 @@
 class QTranslator;
 class MpCollectionTBoneListDataModel;
 class MpMpxCollectionData;
+class MpPlaybackData;
 class TestHelper;
 
 class TestMpCollectionTBoneListDataModel : public QObject
@@ -52,12 +53,15 @@ private slots:
     void testData();
     void testDataNoData();
     void testDataAnyOtherRole();
+    void testFileCorrupted();
+    void testEnablePlaybackIndicatorEnable();
 
 private:
 
     MpCollectionTBoneListDataModel  *mTest;
     TestHelper                      *mHelper;
     MpMpxCollectionData             *mStubData;
+    MpPlaybackData                  *mStubPlaybackData;
     QTranslator                     *mMpTranslator; // Own
 
 };

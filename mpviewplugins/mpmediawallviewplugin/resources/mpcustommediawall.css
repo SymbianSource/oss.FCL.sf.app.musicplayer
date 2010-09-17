@@ -22,9 +22,9 @@ HgMediawall#MPmediaWallWidget::title
   text-line-count-min:1;
   text-line-count-max:1;
   text-wrap-mode:no-wrap;
-  left:-expr(var(hb-param-touch-area-gene-primary-medium)+var(hb-param-margin-gene-left));
-  right:expr(var(hb-param-touch-area-gene-primary-medium)+var(hb-param-margin-gene-right));
-  top:0un;
+  left:-var(hb-param-margin-gene-screen);
+  right:var(hb-param-margin-gene-screen);
+  top:-var(hb-param-margin-gene-middle-vertical);
   bottom:0un;
   zvalue: 2;
 }
@@ -37,9 +37,9 @@ HgMediawall#MPmediaWallWidget::description
   text-line-count-min:1;
   text-line-count-max:1;
   text-wrap-mode:no-wrap;
-  left:-expr(var(hb-param-touch-area-gene-primary-medium)+var(hb-param-margin-gene-left));
-  right:expr(var(hb-param-touch-area-gene-primary-medium)+var(hb-param-margin-gene-right));
-  top:0un;
+  left:-var(hb-param-margin-gene-screen);
+  right:var(hb-param-margin-gene-screen);
+  top:-var(hb-param-margin-gene-middle-vertical);
   bottom:0un;
   zvalue: 2;
 }
@@ -47,11 +47,11 @@ HgMediawall#MPmediaWallWidget::description
 HgMediawall#MPmediaWallWidget::centeritem
 {
   size-policy: fixed fixed;
-  fixed-height: 41un;
-  fixed-width: 41un;
+  fixed-height: expr(var(hb-param-screen-short-edge)-var(hb-param-text-height-primary)-var(hb-param-text-height-secondary)-4*var(hb-param-margin-gene-middle-vertical)-var(hb-param-widget-scroll-bar-indicative-width));
+  fixed-width:  expr(var(hb-param-screen-short-edge)-var(hb-param-text-height-primary)-var(hb-param-text-height-secondary)-4*var(hb-param-margin-gene-middle-vertical)-var(hb-param-widget-scroll-bar-indicative-width));
   left:0un;
   right:0un;
-  top:0un;
+  top:-var(hb-param-margin-gene-middle-vertical);
   bottom:0un;
   zvalue: 2;
 }

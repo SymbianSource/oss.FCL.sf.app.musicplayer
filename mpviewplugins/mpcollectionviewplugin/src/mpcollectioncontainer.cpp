@@ -42,7 +42,7 @@
  */
 
 /*!
-    \fn void itemLongPressed( int index, const QPointF &coords );
+    \fn void itemLongPressed( const QModelIndex &index, const QPointF &coords );
 
     This signal is emitted when an item of the container with \a index is long pressed.
  */

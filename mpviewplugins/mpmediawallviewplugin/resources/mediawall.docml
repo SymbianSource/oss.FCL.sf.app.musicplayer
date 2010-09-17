@@ -4,25 +4,8 @@
     <widget name="container" type="HbWidget">
         
         <widget name="mediawalContainer" type="HbWidget"/>
-        
-        <!-- for some reason we cannot hide the hbtoolbutton, suing a container to be able to hide -->
-        <widget name="playPauseButtonContainer" type="HbWidget">
-            <widget name="playPauseButton" type="HbToolButton">
-                <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                <sizehint height="var(hb-param-touch-area-gene-primary-small)" type="FIXED" width="var(hb-param-touch-area-gene-primary-medium)"/>
-            </widget>
-        </widget>
-        
-        <widget name="navigationButton" type="HbToolButton">
-            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-            <sizehint height="var(hb-param-touch-area-gene-primary-small)" type="FIXED" width="var(hb-param-touch-area-gene-primary-medium)"/>
-        </widget>
-        
+               
         <layout type="anchor" >
-            <anchoritem dst="playPauseButtonContainer" dstEdge="LEFT" spacing="0.0" src="" srcEdge="LEFT"/>
-            <anchoritem dst="playPauseButtonContainer" dstEdge="TOP" spacing="0.0" src="" srcEdge="TOP"/>
-            <anchoritem dst="navigationButton" dstEdge="RIGHT" spacing="0.0" src="" srcEdge="RIGHT"/>
-            <anchoritem dst="navigationButton" dstEdge="TOP" spacing="0.0" src="" srcEdge="TOP"/>
             <anchoritem dst="mediawalContainer" dstEdge="LEFT" spacing="0.0" src="" srcEdge="LEFT"/>
             <anchoritem dst="mediawalContainer" dstEdge="TOP" spacing="0.0" src="" srcEdge="TOP"/>
             <anchoritem dst="mediawalContainer" dstEdge="RIGHT" spacing="0.0" src="" srcEdge="RIGHT"/>

@@ -47,13 +47,11 @@ HEADERS += ../../inc/mpviewbase.h \
            inc/mpmediawallviewplugin.h \
            inc/mpmediawallview.h \
            inc/mpmediawalldocumentloader.h \
-           inc/mptracklistwidget.h \
-           inc/mpreflectioneffect.h
+           inc/mptracklistwidget.h
 SOURCES += src/mpmediawallviewplugin.cpp \
            src/mpmediawallview.cpp \
            src/mpmediawalldocumentloader.cpp \
-           src/mptracklistwidget.cpp \
-           src/mpreflectioneffect.cpp
+           src/mptracklistwidget.cpp
 RESOURCES += resources/mpmediawallviewresources.qrc
 
 DOCML += resources/mediawall.docml

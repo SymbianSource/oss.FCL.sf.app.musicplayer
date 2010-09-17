@@ -2,7 +2,7 @@ EXPORTS
 	_ZN13MusicServices11qt_metacallEN11QMetaObject4CallEiPPv @ 1 NONAME
 	_ZN13MusicServices11qt_metacastEPKc @ 2 NONAME
 	_ZN13MusicServices12itemSelectedE7QString @ 3 NONAME
-	_ZN13MusicServices13serviceActiveE4TUid @ 4 NONAME
+	_ZN13MusicServices13serviceActiveEj @ 4 NONAME
 	_ZN13MusicServices14currentServiceEv @ 5 NONAME
 	_ZN13MusicServices16staticMetaObjectE @ 6 NONAME DATA 16
 	_ZN13MusicServices17setCurrentServiceENS_12MusicServiceE @ 7 NONAME

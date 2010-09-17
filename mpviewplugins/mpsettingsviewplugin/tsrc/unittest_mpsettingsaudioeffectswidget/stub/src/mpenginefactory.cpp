@@ -49,12 +49,12 @@ MpEngineFactory * MpEngineFactory::instance()
 }
 
 /*!
- Returns an instance to an engine with \a hostUid, and \a mode, if the shared engine is 
+ Returns an instance to an engine with \a clientSecureId, and \a mode, if the shared engine is
  already created parameters are ignored.
  */
-MpEngine *MpEngineFactory::createSharedEngine( TUid hostUid , MpEngine::EngineMode mode )
+MpEngine *MpEngineFactory::createSharedEngine( quint32 clientSecureId, MpEngine::EngineMode mode )
 {
-    Q_UNUSED( hostUid );
+    Q_UNUSED( clientSecureId );
     Q_UNUSED( mode );
     if ( !instance()->mSharedEngine ) {
         instance()->mSharedEngine = new MpEngine();

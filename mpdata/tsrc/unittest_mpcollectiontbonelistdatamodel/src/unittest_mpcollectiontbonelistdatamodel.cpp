@@ -27,6 +27,7 @@
 #include "unittest_mpcollectiontbonelistdatamodel.h"
 #include "unittest_helper.h"
 #include "stub/inc/mpmpxcollectiondata.h"
+#include "stub/inc/mpplaybackdata.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -58,6 +59,7 @@ TestMpCollectionTBoneListDataModel::TestMpCollectionTBoneListDataModel()
     : mTest(0),
       mHelper(0),
       mStubData(0),
+      mStubPlaybackData(0),
       mMpTranslator(0)
 {
 }
@@ -67,6 +69,7 @@ TestMpCollectionTBoneListDataModel::~TestMpCollectionTBoneListDataModel()
     delete mTest;
     delete mHelper;
     delete mStubData;
+    delete mStubPlaybackData;
     delete mMpTranslator;
 }
 
@@ -86,6 +89,7 @@ void TestMpCollectionTBoneListDataModel::initTestCase()
     }
 
     mStubData = new MpMpxCollectionData();
+    mStubPlaybackData = new MpPlaybackData();
     mHelper = new TestHelper();
 }
 
@@ -96,6 +100,8 @@ void TestMpCollectionTBoneListDataModel::cleanupTestCase()
 {
     delete mStubData;
     mStubData = 0;
+    delete mStubPlaybackData;
+    mStubPlaybackData = 0;
     delete mHelper;
     mHelper = 0;
 }
@@ -105,7 +111,7 @@ void TestMpCollectionTBoneListDataModel::cleanupTestCase()
  */
 void TestMpCollectionTBoneListDataModel::init()
 {
-    mTest = new MpCollectionTBoneListDataModel(mStubData);
+    mTest = new MpCollectionTBoneListDataModel(mStubData, mStubPlaybackData);
     mTest->mCollectionData->mItemDataReturn = true;
 }
 
@@ -188,3 +194,31 @@ void TestMpCollectionTBoneListDataModel::testDataAnyOtherRole()
     QCOMPARE(data.isValid(), false);
 }
 
+/*!
+ Tests fileCorrupted()
+ */
+void TestMpCollectionTBoneListDataModel::testFileCorrupted()
+{
+    QSignalSpy spy(mTest, SIGNAL(dataChanged( QModelIndex, QModelIndex )));
+    mTest->mRowCount = 4;
+    mTest->fileCorrupted(2);
+    QCOMPARE(mStubData->mHasAlbumSongProperty, true);
+    mTest->fileCorrupted(0);
+    QCOMPARE(mStubData->mReloadAlbumContent, true);
+    mTest->fileCorrupted(1);
+    QCOMPARE(mStubData->mCorruptedIndex.value(0), 1);
+    QCOMPARE(spy.count(), 1);
+    
+}
+
+void TestMpCollectionTBoneListDataModel::testEnablePlaybackIndicatorEnable()
+{
+    mStubPlaybackData->mPlaybackState = MpPlaybackData::Playing;
+    mTest->enablePlaybackIndicatorEnable(true);
+    QCOMPARE( mTest->mPlaybackActive, true);
+    QCOMPARE( mTest->mPlaybackIndicatorEnabled, true);
+    mTest->enablePlaybackIndicatorEnable(false);
+    QCOMPARE( mTest->mPlaybackActive, false);
+    QCOMPARE( mTest->mPlaybackIndicatorEnabled, false);
+
+}

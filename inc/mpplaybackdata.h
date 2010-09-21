@@ -74,9 +74,10 @@ public:
     void setPlaybackState( const SimplifiedState state );
     MpPlaybackData::SimplifiedState playbackState() const;
 
-    void commitPlaybackInfo();
+    void commitPlaybackInfo( bool changed );
     void resetData();
     void setCorrupted( int id );
+    void handleCollectionPlaylistOpened();
     
 
 public slots:
@@ -91,6 +92,7 @@ signals:
     void playbackStateChanged();
     void playbackInfoChanged();
     void fileCorrupted(int id );
+    void collectionPlaylistOpened();
     
 private:
 
@@ -108,6 +110,7 @@ private:
     HbIcon                   mAlbumArt;
     SimplifiedState          mPlaybackState;
     bool                     mRealAudio;
+    bool                     mCollectionPlaylistOpened;
 
     Q_DISABLE_COPY(MpPlaybackData)
 };

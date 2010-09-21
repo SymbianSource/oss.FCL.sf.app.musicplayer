@@ -1108,7 +1108,7 @@ void MpCollectionView::updateMenu()
                     mShuffleAction->setDisabled( true );
                 }
                 if ( !mCollectionData->isAutoPlaylist() ) {
-                menuAction = myMenu->addAction( hbTrId( "txt_common_menu_rename_item" ) );
+                menuAction = myMenu->addAction( hbTrId( "txt_common_opt_rename_item" ) );
                     if ( !mUsbBlocked ) {
                         connect( menuAction, SIGNAL( triggered() ), this, SLOT( renameCurrentPlaylistContainer() ) );
                     }
@@ -1119,23 +1119,13 @@ void MpCollectionView::updateMenu()
                 addDefaultMenuOptions( myMenu, true, true );
                 break;
             default:
-                //if we accidentally fall in an unknown context
+                // Provide 'exit' if we accidentally fall in an unknown context
                 addDefaultMenuOptions( myMenu, false, true );
                 break;
         }
     }
     else if ( mViewMode == MpCommon::FetchView ) {
-        switch ( mCollectionContext ) {
-            case ECollectionContextAllSongs:
-            case ECollectionContextArtists:
-            case ECollectionContextAlbums:
-                addDefaultMenuOptions( myMenu, true, false );
-                break;
-            default:
-                //if we accidentally fall in an unknown context
-                addDefaultMenuOptions( myMenu, false, true );
-                break;
-        }
+        addDefaultMenuOptions( myMenu, true, false );
     }
 
     setMenu( myMenu );

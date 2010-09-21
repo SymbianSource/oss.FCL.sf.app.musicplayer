@@ -17,6 +17,7 @@
 
 
 #include <hbtoolbutton.h>
+#include <hbmarqueeitem.h>
 
 #include "musicwidgetdocumentloader.h"
 #include "mpalbumcoverwidget.h"
@@ -42,6 +43,14 @@ QObject *MusicWidgetDocumentLoader::createObject(const QString& type, const QStr
 
     if ( type == MpAlbumCoverWidget::staticMetaObject.className() ) {
         QObject *object = new MpAlbumCoverWidget();
+        object->setObjectName(name);
+        TX_EXIT
+        return object;
+    }
+
+    if (type == HbMarqueeItem::staticMetaObject.className())
+    {
+        QObject *object = new HbMarqueeItem;
         object->setObjectName(name);
         TX_EXIT
         return object;

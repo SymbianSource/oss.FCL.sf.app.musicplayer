@@ -29,7 +29,7 @@ EXPORTS
 	_ZN14MpPlaybackData15positionChangedEv @ 28 NONAME
 	_ZN14MpPlaybackData16setPlaybackStateENS_15SimplifiedStateE @ 29 NONAME
 	_ZN14MpPlaybackData16staticMetaObjectE @ 30 NONAME DATA 16
-	_ZN14MpPlaybackData18commitPlaybackInfoEv @ 31 NONAME
+	_ZN14MpPlaybackData18commitPlaybackInfoEb @ 31 NONAME
 	_ZN14MpPlaybackData19getStaticMetaObjectEv @ 32 NONAME
 	_ZN14MpPlaybackData19playbackInfoChangedEv @ 33 NONAME
 	_ZN14MpPlaybackData20playbackStateChangedEv @ 34 NONAME
@@ -181,4 +181,6 @@ EXPORTS
 	_ZN19MpMpxCollectionData11dataChangedEii @ 180 NONAME
 	_ZN19MpMpxCollectionData21incrementalOpenUpdateEv @ 181 NONAME
 	_ZN21MpCollectionDataModel10reloadDataEii @ 182 NONAME
+	_ZN14MpPlaybackData24collectionPlaylistOpenedEv @ 183 NONAME
+	_ZN14MpPlaybackData30handleCollectionPlaylistOpenedEv @ 184 NONAME
 

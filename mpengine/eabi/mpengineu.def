@@ -143,4 +143,5 @@ EXPORTS
 	_ZTV15MpEngineFactory @ 142 NONAME
 	_ZTV8MpEngine @ 143 NONAME
 	_ZN13MpSongScanner17handleScanStartedEv @ 144 NONAME
+	_ZN8MpEngine30handleCollectionPlaylistOpenedEv @ 145 NONAME
 

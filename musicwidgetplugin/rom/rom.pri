@@ -24,17 +24,5 @@ MP_IBY_DIR = $$section(PWD,":",1)
 BLD_INF_RULES.prj_exports += "$$MP_IBY_DIR/musicwidgetplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(musicwidgetplugin.iby)"
 
 #iby exports to language
-#BLD_INF_RULES.prj_exports += "$$MP_IBY_DIR/musicwidgetplugin_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(musicwidgetplugin_resources.iby)"
+BLD_INF_RULES.prj_exports += "$$MP_IBY_DIR/musicwidgetplugin_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(musicwidgetplugin_resources.iby)"
 }
-
-
-BLD_INF_RULES.prj_extensions += \
-
-#$$LITERAL_HASH"ifdef MARM" \
-#" START EXTENSION app-services/buildstubsis" \
-#" OPTION SRCDIR rom" \
-#" OPTION SISNAME musicwidgetplugin_stub" \
-#" END" \
-#$$LITERAL_HASH"endif"
-
-

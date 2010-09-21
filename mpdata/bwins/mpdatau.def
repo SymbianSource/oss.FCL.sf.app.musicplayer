@@ -161,7 +161,7 @@ EXPORTS
 	?getStaticMetaObject@MpPlaybackData@@SAABUQMetaObject@@XZ @ 160 NONAME ; struct QMetaObject const & MpPlaybackData::getStaticMetaObject(void)
 	?composer@MpSongData@@QBE?AVQString@@XZ @ 161 NONAME ; class QString MpSongData::composer(void) const
 	?albumArt@MpPlaybackData@@QBEXAAVHbIcon@@@Z @ 162 NONAME ; void MpPlaybackData::albumArt(class HbIcon &) const
-	?commitPlaybackInfo@MpPlaybackData@@QAEXXZ @ 163 NONAME ; void MpPlaybackData::commitPlaybackInfo(void)
+	?commitPlaybackInfo@MpPlaybackData@@QAEX_N@Z @ 163 NONAME ; void MpPlaybackData::commitPlaybackInfo(bool)
 	?removeRows@MpCollectionDataModel@@UAE_NHHABVQModelIndex@@@Z @ 164 NONAME ; bool MpCollectionDataModel::removeRows(int, int, class QModelIndex const &)
 	?albumSongId@MpMpxCollectionData@@QAEHH@Z @ 165 NONAME ; int MpMpxCollectionData::albumSongId(int)
 	?thumbnailReady@MpSongData@@QAEXVQPixmap@@PAXHH@Z @ 166 NONAME ; void MpSongData::thumbnailReady(class QPixmap, void *, int, int)
@@ -181,4 +181,6 @@ EXPORTS
 	?dataChanged@MpMpxCollectionData@@IAEXHH@Z @ 180 NONAME ; void MpMpxCollectionData::dataChanged(int, int)
 	?reloadData@MpCollectionDataModel@@QAEXHH@Z @ 181 NONAME ; void MpCollectionDataModel::reloadData(int, int)
 	?incrementalOpenUpdate@MpMpxCollectionData@@QAEXXZ @ 182 NONAME ; void MpMpxCollectionData::incrementalOpenUpdate(void)
+	?handleCollectionPlaylistOpened@MpPlaybackData@@QAEXXZ @ 183 NONAME ; void MpPlaybackData::handleCollectionPlaylistOpened(void)
+	?collectionPlaylistOpened@MpPlaybackData@@IAEXXZ @ 184 NONAME ; void MpPlaybackData::collectionPlaylistOpened(void)
 

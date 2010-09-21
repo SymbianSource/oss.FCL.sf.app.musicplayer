@@ -55,6 +55,7 @@ HEADERS += ../inc/mpenginefactory.h \
            inc/mpmpxharvesterframeworkwrapper.h \
            inc/mpmpxharvesterframeworkwrapper_p.h \
            inc/mpmpxplaybackframeworkwrapper.h \
+           inc/mpmpxembeddedplaybackhelper.h \
            inc/mpmpxplaybackframeworkwrapper_p.h \
            inc/mpmpxcollectionframeworkwrapper.h \
            inc/mpmpxisolatedcollectionhelper.h \
@@ -70,6 +71,7 @@ SOURCES += src/mpenginefactory.cpp \
            src/mpmpxharvesterframeworkwrapper.cpp \
            src/mpmpxharvesterframeworkwrapper_p.cpp \
            src/mpmpxplaybackframeworkwrapper.cpp \
+           src/mpmpxembeddedplaybackhelper.cpp \
            src/mpmpxplaybackframeworkwrapper_p.cpp \
            src/mpmpxcollectionframeworkwrapper.cpp \
            src/mpmpxisolatedcollectionhelper.cpp \
@@ -77,5 +79,5 @@ SOURCES += src/mpenginefactory.cpp \
            src/mpaudioeffectsframeworkwrapper.cpp \
            src/mpaudioeffectsframeworkwrapper_p.cpp \
            src/mpequalizerframeworkwrapper.cpp \
-           src/mpequalizerframeworkwrapper_p.cpp   
+           src/mpequalizerframeworkwrapper_p.cpp
 

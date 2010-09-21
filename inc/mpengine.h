@@ -170,6 +170,7 @@ public slots:
     void handleDeleteStarted( TCollectionContext context, int count );
     void handleDeleteEnded( bool success );
     void cancelCollectionRequest();
+    void handleCollectionPlaylistOpened();
 
     // Playback related
     void playEmbedded( QString aFilename );

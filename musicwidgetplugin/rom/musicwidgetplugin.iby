@@ -22,6 +22,5 @@ file=ABI_DIR\BUILD_DIR\musicwidgetplugin.dll                                    
 data=ZPRIVATE\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.qtplugin        private\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.qtplugin
 data=ZPRIVATE\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.manifest        private\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.manifest
 data=ZPRIVATE\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.xml             private\20022f35\import\widgetregistry\200286FA\musicwidgetplugin.xml
-data=ZPRIVATE\20022f35\import\widgetregistry\200286FA\musicwidgeticon.png               private\20022f35\import\widgetregistry\200286FA\musicwidgeticon.png
 
 #endif // MUSICWIDGETPLUGIN_IBY

@@ -24,6 +24,7 @@
 #include "stub/inc/mpplaybackdata.h"
 #include "stub/inc/mpxplaybackutility.h"
 #include "stub/inc/mpsongdata.h"
+#include "stub/inc/mpmpxembeddedplaybackhelper.h"
 
 // Do this so we can access all member variables.
 #define private public
@@ -483,7 +484,7 @@ void TestMpMpxPlaybackFrameworkWrapper::testPlay()
     //Play from filename
     QString fileName = QString("z:\\system\\data\\nullsound.mp3");
     mTest->play( fileName );
-    QVERIFY( mTestPrivate->iPlaybackUtility->iInitialized );
+    QCOMPARE( mTestPrivate->iEmbeddedPlaybackHelper->iFileNameToPlay, fileName );
 
     //Play from Shareable file
     mTestPrivate->iPlaybackUtility->iInitialized = false;
@@ -498,7 +499,7 @@ void TestMpMpxPlaybackFrameworkWrapper::testPlay()
             XQSharableFile* sFile = new XQSharableFile(file);
 
             mTest->play( *sFile );
-            QVERIFY( mTestPrivate->iPlaybackUtility->iInitialized );
+            QCOMPARE( mTestPrivate->iEmbeddedPlaybackHelper->iFileNameToPlay, sFile->fileName() );
 
             sFile->close();
             delete sFile;
@@ -512,6 +513,15 @@ void TestMpMpxPlaybackFrameworkWrapper::testPlay()
     else {
         QWARN("Not able to create RF Session");
     }
+    
+    //Play empty filename
+    QSignalSpy spy(mTest, SIGNAL(corruptedStop( bool )));
+    QList<QVariant> arguments;
+    QString emptyFileName = "";
+    mTest->play( emptyFileName );
+    QVERIFY( spy.count() == 1 );
+    arguments = spy.takeFirst();
+    QVERIFY( arguments.at(0).toBool() == true );
 
     //Play command
     cleanup();

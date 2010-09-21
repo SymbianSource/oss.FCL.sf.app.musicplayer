@@ -32,6 +32,7 @@ HEADERS += inc/unittest_mpplaybackwidget.h \
 		   stub/inc/mpplaybackdata.h \
 		   stub/inc/mpalbumcoverwidget.h \
 		   stub/inc/mpplaybackdocumentloader.h \
+		   stub/inc/mplightmonitor.h \
            ../../inc/mpplaybackwidget.h
            
 
@@ -39,6 +40,7 @@ SOURCES += src/unittest_mpplaybackwidget.cpp \
   		   stub/src/mpplaybackdata.cpp \
   		   stub/src/mpalbumcoverwidget.cpp \
   		   stub/src/mpplaybackdocumentloader.cpp \
+		   stub/src/mplightmonitor.cpp \
 		   ../../src/mpplaybackwidget.cpp
 
 RESOURCES += ../../resources/mpplaybackviewpluginresources.qrc

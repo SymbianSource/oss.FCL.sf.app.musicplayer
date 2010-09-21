@@ -143,4 +143,5 @@ EXPORTS
 	?scanFinished@MpSongScanner@@IAEXHH@Z @ 142 NONAME ; void MpSongScanner::scanFinished(int, int)
 	?setLoudness@MpEngine@@QAEX_N@Z @ 143 NONAME ; void MpEngine::setLoudness(bool)
 	?handleScanStarted@MpSongScanner@@QAEXXZ @ 144 NONAME ; void MpSongScanner::handleScanStarted(void)
+	?handleCollectionPlaylistOpened@MpEngine@@QAEXXZ @ 145 NONAME ; void MpEngine::handleCollectionPlaylistOpened(void)
 

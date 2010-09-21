@@ -47,11 +47,13 @@ HEADERS += inc/unittest_mpmpxplaybackframeworkwrapper.h \
           stub/inc/mpxplaybackutility.h \
           stub/inc/hbglobal.h \
           stub/inc/mpsongdata.h \
+          stub/inc/mpmpxembeddedplaybackhelper.h \
           ../../../mpserviceplugins/inc/mpxaudioeffectengine.h
 
 SOURCES += src/unittest_mpmpxplaybackframeworkwrapper.cpp \
           ../../src/mpmpxplaybackframeworkwrapper.cpp \
           stub/src/mpplaybackdata.cpp \
           stub/src/mpxplaybackutility.cpp \
-          stub/src/mpsongdata.cpp
+          stub/src/mpsongdata.cpp \
+          stub/src/mpmpxembeddedplaybackhelper.cpp
 

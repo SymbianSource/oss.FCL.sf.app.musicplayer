@@ -55,6 +55,7 @@ _LIT(KMPXRnRealAudioMimeType, "audio/vnd.rn-realaudio");
 MpMpxPlaybackFrameworkWrapperPrivate::MpMpxPlaybackFrameworkWrapperPrivate( MpMpxPlaybackFrameworkWrapper *qq)
     : q_ptr(qq),
       iPlaybackUtility(0),
+      iEmbeddedPlaybackHelper(0),
       iPlaybackData(0),
       iDetailsRequest(false)
 {
@@ -68,10 +69,10 @@ MpMpxPlaybackFrameworkWrapperPrivate::~MpMpxPlaybackFrameworkWrapperPrivate()
 {
     TX_ENTRY
     if ( iPlaybackUtility ) {
-        TRAP_IGNORE( ForceStopL() );
         TRAP_IGNORE( iPlaybackUtility->RemoveObserverL(*this) );
         iPlaybackUtility->Close();
     }
+    delete iEmbeddedPlaybackHelper;
     delete iPlaybackData;
     TX_EXIT
 }
@@ -452,6 +453,19 @@ void MpMpxPlaybackFrameworkWrapperPrivate::retrieveSongDetails()
 /*!
  \internal
  */
+void MpMpxPlaybackFrameworkWrapperPrivate::forceStop()
+{
+    TX_ENTRY
+    TRAPD( err, ForceStopL() );
+    if ( err != KErrNone ) {
+        TX_LOG_ARGS("Error: " << err << "; should never get here.");
+    }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
 void MpMpxPlaybackFrameworkWrapperPrivate::HandlePlaybackMessage( CMPXMessage *aMessage, TInt aError )
 {
     TX_ENTRY_ARGS("aError=" << aError);
@@ -609,11 +623,20 @@ void MpMpxPlaybackFrameworkWrapperPrivate::HandleMediaL(
                     aMedia.ValueTObjectL<TInt>( KMPXMediaGeneralId ) );
         }
 
-        if ( changed ) {
-            // This is required to propagate the playback info to UI at once.
-            iPlaybackData->commitPlaybackInfo();
-        }
+        // This is required to propagate the playback info to UI at once.
+        iPlaybackData->commitPlaybackInfo( changed );
     }
+    TX_EXIT
+}
+
+/*!
+ \internal
+ */
+void MpMpxPlaybackFrameworkWrapperPrivate::HandleEmbeddedPlaybackError( TInt aError )
+{
+    TX_ENTRY_ARGS( "aError=" << aError );
+    Q_UNUSED( aError );
+    emit q_ptr->corruptedStop( true );
     TX_EXIT
 }
 
@@ -639,10 +662,17 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoInitL()
  */
 void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( QString aFilename )
 {
-    TX_ENTRY
-    if ( !aFilename.isNull() ) {
+    TX_ENTRY_ARGS( "Filename: " << aFilename );
+    if ( !aFilename.isEmpty() ) {
         const TDesC& playTitle = TPtrC(reinterpret_cast<const TText*>( aFilename.constData() ));
-        iPlaybackUtility->InitL( playTitle );
+        if ( !iEmbeddedPlaybackHelper ) {
+            iEmbeddedPlaybackHelper = 
+                    CMpMpxEmbeddedPlaybackHelper::NewL( iHostUid, iPlaybackUtility, this );
+        }
+        iEmbeddedPlaybackHelper->playL( playTitle );
+    }
+    else {
+        HandleEmbeddedPlaybackError( KErrArgument );
     }
     TX_EXIT
 }
@@ -653,15 +683,7 @@ void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( QString aFilename )
 void MpMpxPlaybackFrameworkWrapperPrivate::DoPlayL( const XQSharableFile& file )
 {
     TX_ENTRY
-
-    RFile xqfile;
-    bool ok = file.getHandle( xqfile );
-    if ( ok ) {
-        iPlaybackUtility->InitL( xqfile );
-    }
-    else {
-        TX_LOG_ARGS("Error: " << ok << "; should never get here.");
-    }
+    DoPlayL( file.fileName() );
     TX_EXIT
 }
 

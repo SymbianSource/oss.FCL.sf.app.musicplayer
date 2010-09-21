@@ -20,7 +20,7 @@
    <component id="mpengine_build" filter="s60" name="Music Player Engine Build" introduced="^4">
     <unit bldFile="mpengine" qt:proFile="mpengine.pro" qt:qmakeArgs="-r -config rom"/>
    </component>
-   <component id="mpengine_test" name="Music Player Engine Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="mpengine_test" name="Music Player Engine Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="mpengine/tsrc" qt:proFile="tsrc.pro"/>
    </component>
   </collection>
@@ -40,7 +40,7 @@
    <component id="mpapplicationmonitor" filter="s60" name="MP Application Monitor" introduced="^4">
     <unit bldFile="utilities/mpapplicationmonitor" qt:proFile="mpapplicationmonitor.pro" qt:qmakeArgs="-r -config rom"/>
    </component>      
-   <component id="musicplayer_utilities_test" name="Music Player Utilities Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="musicplayer_utilities_test" name="Music Player Utilities Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="utilities/tsrc" qt:proFile="tsrc.pro"/>
    </component>
    <component id="musicplayer_utilities_rom" name="Music Player Utilities ROM" filter="s60" class="config">
@@ -54,7 +54,7 @@
    <component id="musicservices_build" filter="s60" name="Music Services Build" introduced="^4">
     <unit bldFile="musicservices" qt:proFile="musicservices.pro" qt:qmakeArgs="-r -config rom"/>
    </component>
-   <component id="musicservices_test" name="Music Services Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="musicservices_test" name="Music Services Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="musicservices/tsrc" qt:proFile="tsrc.pro"/>
    </component>
   </collection>
@@ -65,7 +65,7 @@
    <component id="musicplayer_app_build" filter="s60" name="Music Player Application Build" introduced="^4">
     <unit bldFile="app" qt:proFile="app.pro" qt:qmakeArgs="-r -config rom"/>
    </component>
-   <component id="musicplayer_app_test" name="Music Player Application Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="musicplayer_app_test" name="Music Player Application Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="app/tsrc" qt:proFile="tsrc.pro"/>
    </component>
   </collection>
@@ -88,7 +88,7 @@
    <component id="mpviewplugins_rom" name="Music Player View Plugins ROM" filter="s60" class="config">
      <unit bldFile="mpviewplugins/rom"/>
    </component>
-   <component id="mpviewplugins_test" name="Music Player View Plugins Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="mpviewplugins_test" name="Music Player View Plugins Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="mpviewplugins/tsrc" qt:proFile="tsrc.pro"/>
    </component>
   </collection>
@@ -99,7 +99,7 @@
    <component id="musicwidgetplugin_build" filter="s60" name="Music Widget Plugin" introduced="^4" class="plugin">
     <unit bldFile="musicwidgetplugin" qt:proFile="musicwidgetplugin.pro" qt:qmakeArgs="-r -config rom"/>
    </component>
-   <component id="musicwidgetplugin_test" name="Music Widget Plugin Test" filter="s60,qt_unit_test,pref_test,TA_MUSICPLAYER">
+   <component id="musicwidgetplugin_test" name="Music Widget Plugin Test" filter="s60,test,qt_unit_test,pref_test,TA_MUSICPLAYER">
      <unit bldFile="musicwidgetplugin/tsrc" qt:proFile="tsrc.pro"/>
    </component>
   </collection>

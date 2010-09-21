@@ -18,13 +18,9 @@
 #ifndef MUSICWIDGET_H
 #define MUSICWIDGET_H
 
-// System includes
-#include <QGraphicsLinearLayout>
-#include <QGraphicsGridLayout>
+// includes
 #include <hbwidget.h>
 #include <xqappmgr.h>
-
-#include "mpplaybackdata.h"
 
 // Forward declarations
 class HbLabel;
@@ -33,11 +29,13 @@ class HbIcon;
 class HbMarqueeItem;
 class MpEngine;
 class MpAlbumCoverWidget;
+class MpApplicationMonitor;
+class MpPlaybackData;
 
 /**
  * Media key identifier for push button events
  */
-enum MediaKeyIdentifier{
+enum MediaKeyIdentifier {
     EPrevious = 1,
     EPlayPause,
     ENext
@@ -46,9 +44,10 @@ enum MediaKeyIdentifier{
 /**
  * Music Player launch source identifier
  */    
-enum LaunchIdentifier{
-    ELaunchFromPlay,
-    ELaunchFromShortcut
+enum LaunchIdentifier {
+    ELaunchToMainView,
+    ELaunchToNowPlayingView,
+    ELaunchToNowPlayingViewWithShuffle
 };
 
 class MusicWidget: public HbWidget
@@ -74,33 +73,32 @@ private:
     /**
      * Launch Music Player to view
      */      
-    void launchMusicPlayer(int launchMode = ELaunchFromShortcut);
+    void launchMusicPlayer( int launchMode );
     
     /**
-     * Similar to public slots mediaButtonPressed and mediaButtonReleased, but this oen is called internally
-     * Draws the spesified button to disabled state
-     */
-    void mediaButtonDisabled( int aMediaKeyId );
-    
-    /**
-     * Similar to public slots mediaButtonPressed and mediaButtonReleased, but this oen is called internally
-     * Draws the spesified button to enabled state
-     */    
-    void mediaButtonEnabled( int aMediaKeyId );
-    
-    /**
-     * Disable/enable widget buttons according to Music Player state
+     * Update widget buttons according to Music Player state
      */       
-    void toggleButtons();
+    void updateButtons();
+
+    /**
+     * Connect/disconnect Music Player engine and playback data
+     */           
+    void connectMusicPlayerEngine( bool connect );
     
-public:
-    QRectF boundingRect() const;
-    QPainterPath shape() const;
+    /**
+     * Get the playback state
+     */
+    int getPlaybackState();
+
+    /**
+     * Clear the song data
+     */
+    void clearData();
     
 public slots:
 
     /**
-     * Widget slots
+     * Widget related
      */    
     void onInitialize();
     void onShow();
@@ -108,64 +106,37 @@ public slots:
     void onUninitialize();
     
     /**
-     * MpEngine slots
-     */
+     * MpEngine related
+     */    
     void libraryUpdateStarted();
     void libraryUpdated();
     void usbBlocked( bool blocked );    
 
     /**
-     * MpPlaybackData slots
+     * MpPlaybackData related
      */        
     void albumArtReady();
     void playbackStateChanged();
     void playbackInfoChanged();    
     
-    /**
-     * ?????
-     */            
-    bool eventFilter(QObject *target, QEvent *event);
-    
-    /**
-     * Button specific slots
-     */        
-    void mediaButtonPressed( int aMediaKeyId );
-    void mediaButtonReleased( int aMediaKeyId );
-    
-protected:
-    
-    /**
-     * Called from mediaButtonPressed and from mediaButtonReleased slots. 
-     * Calls defineMediaButton to redraw the media button
-     */
-    void mediaButtonEvent( MediaKeyIdentifier aMediaKeyId, QString aGraphicsId, QString aIconColor );
-
-    /**
-     * Creates the aTarget push button based on params aGraphicsId and aSuffix. 
-     * Used to change the look and feel of the button based to the aState
-     * param: aTarget is the push button to be changed, must not be Null
-     * param: aGraphicsId defines the button background graphics
-     * param: aSuffix filename suffix, see KPrevButPrefix for example from musicwidget.cpp
-     */
-    void defineMediaButton( HbPushButton& aTarget, QString aGraphicsId, QStringList aSuffix, QString aIconColor );
-
 private slots:
 
     /**
      * Slots to be called after button press
      */    
-    void prevSong();
-    void playSong();
-    void nextSong();
-    void shortcutButton();
+    void handlePrevButtonClicked();
+    void handlePlayButtonClicked();
+    void handleNextButtonClicked();
+    void handleAlbumArtClicked();
+    
+    /**
+     * MpApplicationMonitor related
+     */
+    void applicationStatusChanged( bool isrunning );
     
 private:  
-    // mShortcutButtonLayout items
-    HbPushButton *mShortcutArea;
-
     //mSongDataLayout items
-    HbWidget *mSongDataBG;
-    HbLabel *mInformationSongName;
+    HbLabel *mSongDataBackground;
     HbMarqueeItem *mMarqueeText;
     
     // mControlButtonsLayout items
@@ -174,24 +145,22 @@ private:
     HbPushButton *mNextPushButton;
     
     // MusicPlayer related state identifiers
-    bool mMusicPlayerNoSongData;
     bool mMusicPlayerUpdating;
     bool mMusicPlayerBlocked;
+    bool mMusicPlayerRunning;
     
     // Album art for background
     MpAlbumCoverWidget *mAlbumArt;
-    
-    // Artist and song title identifiers 
-    QString mArtist;
-    QString mTitle;
     
     // Used to launch MusicPlayer
     XQApplicationManager mApplicationManager;
     
     // MusicPlayer control and state updates
-    MpEngine* mMpEngine;
-    MpPlaybackData* mMpPlaybackData;
-
+    MpEngine *mMpEngine;
+    MpPlaybackData *mMpPlaybackData;
+    
+    // Music Player observer
+    MpApplicationMonitor *mMpApplicationMonitor;
 };
 
 #endif // MUSICWIDGET_H

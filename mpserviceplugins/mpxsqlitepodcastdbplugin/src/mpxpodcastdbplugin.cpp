@@ -18,7 +18,7 @@
 
 // INCLUDE FILES
 #include <e32cmn.h>
-#include <PCRes.rsg>
+#include <pcres.rsg>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
 

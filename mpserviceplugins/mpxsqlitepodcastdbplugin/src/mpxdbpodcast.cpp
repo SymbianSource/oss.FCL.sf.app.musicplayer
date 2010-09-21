@@ -17,7 +17,7 @@
 
 
 // INCLUDE FILES
-#include <PCRes.rsg>
+#include <pcres.rsg>
 #include <sqldb.h>
 
 #include <mpxmedia.h>

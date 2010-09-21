@@ -19,8 +19,8 @@ TEMPLATE = subdirs
 SUBDIRS += unittest_mpequalizerwidget \
            unittest_mpplaybackdocumentloader \
            unittest_mpplaybackviewplugin \
-           unittest_mpplaybackview
-#           unittest_mpplaybackwidget
+           unittest_mpplaybackview \
+           unittest_mpplaybackwidget
 
 CONFIG += ordered
 

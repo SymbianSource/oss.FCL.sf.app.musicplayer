@@ -28,6 +28,7 @@ class HbProgressSlider;
 class HbLabel;
 class MpPlaybackDocumentLoader;
 class MpAlbumCoverWidget;
+class MpLightMonitor;
 
 class MpPlaybackWidget : public HbWidget
 {
@@ -50,6 +51,8 @@ public slots:
     void durationChanged();
     void positionChanged();
     void albumArtChanged();
+    void handleLcdLightStatus( bool lightOn );
+    void handleCollectionPlaylistOpened();
   
 private slots:
 
@@ -60,11 +63,14 @@ private slots:
 private:
 
     QString formatDuration( int seconds );
+    void connectPlaybackDataSignals( bool connectSignal );
+	void updatePlaybackInfo();
 
 private:
 
     MpPlaybackData           *mPlaybackData;        // Not own
     MpPlaybackDocumentLoader *mDocumentLoader;      // Own
+    MpLightMonitor           *mLightMonitor;        // Own
 
     HbStackedLayout          *mLayout;              // Not own
     HbLabel                  *mSongTitle;           // Not own

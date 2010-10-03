@@ -75,7 +75,11 @@ const int KUndefined = -1;
     PlayBackWrapper.  
  */
 
+/*!
+    \fn void collectionPlaylistOpened()
 
+    This signal is emitted when user selects an item from collection view.
+ */
 
 /*!
     Constructs a new MpPlaybackData.
@@ -90,7 +94,8 @@ MpPlaybackData::MpPlaybackData( QObject *parent )
       mId(0),
       mAlbumArt( "qtg_large_album_art" ),
       mPlaybackState( NotPlaying ),
-      mRealAudio( false )
+      mRealAudio( false ),
+	  mCollectionPlaylistOpened( false )
 {
     TX_ENTRY
     mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForQuality );
@@ -374,12 +379,18 @@ MpPlaybackData::SimplifiedState MpPlaybackData::playbackState() const
 }
 
 /*!
-
+ Indicates that all playback information is available and ready to be committed to the view. 
+ Signal is emitted only when any information has changed indicated by \a changed. A special
+ handling is covered, when the same song is re-selected by the user from the collection view, 
+ in which case we force the reload even if the information hasn’t changed within this class.
 */
-void MpPlaybackData::commitPlaybackInfo()
+void MpPlaybackData::commitPlaybackInfo( bool changed )
 {
     TX_ENTRY
-    emit playbackInfoChanged();
+	if ( changed || mCollectionPlaylistOpened ) {
+        emit playbackInfoChanged();
+		mCollectionPlaylistOpened = false;
+	}
     TX_EXIT
 }
 
@@ -432,3 +443,11 @@ void MpPlaybackData::thumbnailReady(
     TX_EXIT
 }
 
+/*!
+ Emit collectionPlaylistOpened signal when user selects an item from collection view.
+*/
+void MpPlaybackData::handleCollectionPlaylistOpened()
+{
+    mCollectionPlaylistOpened = true;
+    emit collectionPlaylistOpened();
+}

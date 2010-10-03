@@ -20,6 +20,7 @@
 
 #include <e32base.h>
 #include <mpxplaybackobserver.h>
+#include "mpmpxembeddedplaybackhelper.h"
 #include "mpcommondefs.h"
 
 
@@ -32,7 +33,8 @@ class XQSharableFile;
 class MpSongData;
 
 class MpMpxPlaybackFrameworkWrapperPrivate : public MMPXPlaybackObserver,
-                                             public MMPXPlaybackCallback
+                                             public MMPXPlaybackCallback,
+                                             public MMpMpxEmbeddedPlaybackHelperObserver
 {
 public:
 
@@ -71,7 +73,8 @@ public:
     MpPlaybackData *playbackData();
 
     void retrieveSongDetails();
-
+    void forceStop();
+    
 private:
 
     // From MMPXPlaybackObserver
@@ -82,6 +85,9 @@ private:
     void HandleSubPlayerNamesL( TUid aPlayer, const MDesCArray *aSubPlayers,
                                 TBool aComplete, TInt aError );
     void HandleMediaL( const CMPXMedia& aProperties, TInt aError );
+
+    // From MMpMpxEmbeddedPlaybackHelperObserver
+    void HandleEmbeddedPlaybackError( TInt aError );
 
     void DoInitL();
     void DoPlayL( QString aFilename );
@@ -96,11 +102,12 @@ private:
 private:
 
     MpMpxPlaybackFrameworkWrapper       *q_ptr;
-    MMPXPlaybackUtility                 *iPlaybackUtility;  // Own
-    MpPlaybackData                      *iPlaybackData;     // Own
+    MMPXPlaybackUtility                 *iPlaybackUtility;         // Own
+    CMpMpxEmbeddedPlaybackHelper        *iEmbeddedPlaybackHelper;  // Own
+    MpPlaybackData                      *iPlaybackData;            // Own
     TUid                                iHostUid;
 
-    MpSongData                          *iSongData;         // Not owned
+    MpSongData                          *iSongData;                // Not owned
     bool                                iDetailsRequest;
 
 };

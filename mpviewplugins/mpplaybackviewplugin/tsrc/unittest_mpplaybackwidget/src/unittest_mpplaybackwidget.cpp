@@ -158,5 +158,26 @@ void TestMpPlaybackWidget::testAlbumArtChanged()
     QVERIFY( mTest->mAlbumArt->isEnabled() == true );
 }
 
+/*!
+ test handleLcdLightStatus
+ */
+void TestMpPlaybackWidget::testHandleLcdLightStatus( )
+{
+    mTest->handleLcdLightStatus( true );
+    testPlaybackInfoChanged();
+	
+}
+
+/*!
+ test handleCollectionPlaylistOpened
+ */
+void TestMpPlaybackWidget::testHandleCollectionPlaylistOpened()
+{
+    mTest->handleCollectionPlaylistOpened();
+    QVERIFY( mTest->mSongTitle->plainText() == " " );
+    QVERIFY( mTest->mArtistName->plainText() == " " );
+    QVERIFY( mTest->mAlbumName->plainText() == " " );
+}
+
 
 // End of file

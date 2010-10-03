@@ -308,7 +308,7 @@ void MpCollectionPopupHandler::openRenamePlaylistContainerDialog( const QString 
     mPermanentData->mOriginalName = currentName;
     getText( hbTrId( "txt_mus_dialog_enter_name" ), 
              currentName,
-             hbTrId( "txt_common_button_ok" ), //TODO:replace for "rename" when string is available
+             hbTrId( "txt_mus_button_rename" ),
              SLOT( handleRenamePlaylistContainer( HbAction* ) ) );
     TX_EXIT
 }
@@ -322,7 +322,7 @@ void MpCollectionPopupHandler::openRenamePlaylistItemDialog( const QString &curr
     mPermanentData->mOriginalName = currentName;
     getText( hbTrId( "txt_mus_dialog_enter_name" ), 
              currentName,
-             hbTrId( "txt_common_button_ok" ),//TODO:replace for "rename" when string is available
+             hbTrId( "txt_mus_button_rename" ),
              SLOT( handleRenamePlaylistItem( HbAction* ) ) );
     TX_EXIT
 }
@@ -333,7 +333,7 @@ void MpCollectionPopupHandler::openRenamePlaylistItemDialog( const QString &curr
 void MpCollectionPopupHandler::openAddSongsToPlaylist( QAbstractItemModel* model )
 {
     TX_ENTRY
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+    getModelIndexes( hbTrId( "txt_mus_title_add_songs" ),
                      hbTrId( "txt_common_button_add_dialog" ),
                      model,
                      SLOT( handleAddSongsToPlayList( HbAction* ) ) );
@@ -351,7 +351,7 @@ void MpCollectionPopupHandler::openAddSongsToPlaylistFromTBone( )
     //this item will be deleted when clearing permanent data.
     model->setParent(mPermanentData);
     model->refreshModel();
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+    getModelIndexes( hbTrId( "txt_mus_title_add_songs" ),
                      hbTrId( "txt_common_button_add_dialog" ),
                      model,
                      SLOT( handleAddSongsToPlayList( HbAction* ) ) );
@@ -387,7 +387,7 @@ void MpCollectionPopupHandler::openAddToCurrentPlaylist( MpMpxCollectionData* co
     collectionDataModel->refreshModel();
     mPermanentData->mAbstractItemModel = collectionDataModel;
 
-    getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+    getModelIndexes( hbTrId( "txt_mus_title_add_songs" ),
                      hbTrId( "txt_common_button_add_dialog" ),
                      collectionDataModel,
                      SLOT( handleAddToCurrentPlaylist( HbAction* ) ) );
@@ -750,7 +750,7 @@ void MpCollectionPopupHandler::handleCreateNewPlaylistGetTextFinished( HbAction 
         QString newPlaylistName = dialog->value().toString();
         //Store the new playlist name and query for the items to be added
         mPermanentData->mOriginalName = newPlaylistName;
-        getModelIndexes( hbTrId( "txt_mus_title_select_songs" ),//TODO:replace for "add songs" when string is available
+        getModelIndexes( hbTrId( "txt_mus_title_add_songs" ),
                          hbTrId( "txt_common_button_add_dialog" ),
                          mPermanentData->mAbstractItemModel, 
                          SLOT( handleCreateNewPlaylistGetModelIndexesFinished( HbAction* ) ) );

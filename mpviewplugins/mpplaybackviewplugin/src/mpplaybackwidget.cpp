@@ -28,6 +28,7 @@
 #include "mpalbumcoverwidget.h"
 #include "mpplaybackdocumentloader.h"
 #include "mptrace.h"
+#include "mplightmonitor.h"
 
 const unsigned int KMicroSecToMiliSec( 1000 );
 
@@ -45,6 +46,13 @@ const unsigned int KMicroSecToMiliSec( 1000 );
     position, \a value indicates the position.
  */
 
+ /*!
+    \fn void signalPlaybackInfoChanged()
+
+    This signal is emitted when playback information has changed. Added for MATTI testing support.
+ */
+
+
 /*!
  Constructs the collection view plugin.
  */
@@ -52,6 +60,7 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
     : HbWidget(parent),
       mPlaybackData(data),
       mDocumentLoader(0),
+      mLightMonitor(0),
       mProgreesBarDragging(false),
       mDuration(0)
 {
@@ -98,21 +107,17 @@ MpPlaybackWidget::MpPlaybackWidget(MpPlaybackData *data, QGraphicsItem *parent )
         Q_ASSERT_X(widgetsOk, "MpPlaybackWidget", "invalid xml file - widget");
     }
 
+    mLightMonitor = new MpLightMonitor (this);
+    connect( mLightMonitor, SIGNAL(lcdLightStatus(bool)), this, SLOT(handleLcdLightStatus(bool)) );
+
     connect( mProgressBar, SIGNAL(sliderPressed()), this, SLOT(handleSliderPressed()) );
     connect( mProgressBar, SIGNAL(sliderReleased()), this, SLOT(handleSliderReleased()) );
     connect( mProgressBar, SIGNAL(sliderMoved(int)), this, SLOT(handleSliderMoved(int)) );
 
-    connect( mPlaybackData, SIGNAL(playbackInfoChanged()), this, SLOT(playbackInfoChanged()) );
-    connect( mPlaybackData, SIGNAL(durationChanged()), this, SLOT(durationChanged()) );
-    connect( mPlaybackData, SIGNAL(positionChanged()), this, SLOT(positionChanged()) );
-    connect( mPlaybackData, SIGNAL(albumArtReady()), this, SLOT(albumArtChanged()) );
-    
-    //Update to set initial conditions if playback has already started.
+    connectPlaybackDataSignals(true);
+    // Update to set initial conditions if playback has already started.
     if ( mPlaybackData->playbackState() != MpPlaybackData::NotPlaying ) {
-        playbackInfoChanged();
-        durationChanged();
-        positionChanged();
-        albumArtChanged();
+        updatePlaybackInfo();
     }
     TX_EXIT
 }
@@ -124,6 +129,7 @@ MpPlaybackWidget::~MpPlaybackWidget()
 {
     TX_ENTRY
     delete mDocumentLoader;
+    delete mLightMonitor;
     TX_EXIT
 }
 
@@ -132,7 +138,7 @@ MpPlaybackWidget::~MpPlaybackWidget()
  */
 void MpPlaybackWidget::repeatChanged( bool value )
 {
-    mRepeatIndicator->setVisible( value );   
+    mRepeatIndicator->setVisible( value );
 }
 
 /*!
@@ -271,4 +277,73 @@ QString MpPlaybackWidget::formatDuration( int seconds )
     }
 }
 
+
+/*!
+ Slot to be called to handle LCD light status change.
+ */
+void MpPlaybackWidget::handleLcdLightStatus( bool lightOn )
+{
+    TX_ENTRY
+    if ( lightOn ) {
+        connectPlaybackDataSignals( true );
+        updatePlaybackInfo();
+    }
+    else {
+        connectPlaybackDataSignals( false );
+    }
+    TX_EXIT
+}
+
+/*!
+ Connect/disconnect the signals from the Playback data according to /a connect.
+ */
+void MpPlaybackWidget::connectPlaybackDataSignals( bool connectSignal )
+{
+    TX_ENTRY
+    if ( connectSignal ) {
+        connect( mPlaybackData, SIGNAL(playbackInfoChanged()), this, SLOT(playbackInfoChanged()) );
+        connect( mPlaybackData, SIGNAL(durationChanged()), this, SLOT(durationChanged()) );
+        connect( mPlaybackData, SIGNAL(positionChanged()), this, SLOT(positionChanged()) );
+        connect( mPlaybackData, SIGNAL(albumArtReady()), this, SLOT(albumArtChanged()) );
+        connect( mPlaybackData, SIGNAL(collectionPlaylistOpened()), this, SLOT(handleCollectionPlaylistOpened()) );     
+       }
+    else {
+        mPlaybackData->disconnect( this );
+    }
+    TX_EXIT
+}
+
+/*!
+ Update playback information.
+ */
+void MpPlaybackWidget::updatePlaybackInfo()
+{
+    TX_ENTRY
+    playbackInfoChanged();
+    durationChanged();
+    positionChanged();
+    albumArtChanged();
+    TX_EXIT
+}
+
+/*!
+ Slot to be called to handle the selection of an item from collection view when playback
+ view was previously activated with another item. We reset or hide the view items 
+ in order to reduce the flickering.
+ */
+void MpPlaybackWidget::handleCollectionPlaylistOpened()
+{
+    TX_ENTRY
+    QString blankSpace = " ";   
+    mAlbumArt->setEnabled( false );
+    mArtistName->setPlainText( blankSpace );
+    mAlbumName->setPlainText( blankSpace );
+    mSongTitle->setPlainText( blankSpace );
+    mRealAudioIndicator->setVisible( false );
+    mProgressBar->setProgressValue( 0 );
+    mProgressBar->setSliderValue( 0 );
+    mProgressBar->setMinText( formatDuration( 0 ) );
+    mProgressBar->setMaxText( formatDuration( 0 ) );
+    TX_EXIT
+}
 

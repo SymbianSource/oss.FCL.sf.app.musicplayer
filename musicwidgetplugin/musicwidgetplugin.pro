@@ -15,27 +15,33 @@
 #
 
 TEMPLATE = lib
+TARGET   = musicwidgetplugin
+TRANSLATIONS += musicwidgetplugin.ts
 CONFIG += plugin mobility hb
 MOBILITY = serviceframework
 
-LIBS += -lxqservice
-LIBS += -lxqserviceutil
-LIBS += -lmpengine
-LIBS += -lmpdata
-LIBS += -lmpalbumcoverwidget
+LIBS += -lxqservice \
+        -lxqserviceutil \
+        -lmpengine \
+        -lmpdata \
+        -lmpalbumcoverwidget \
+        -lmpapplicationmonitor
 
-INCLUDEPATH += ./inc
-INCLUDEPATH += ../inc
+INCLUDEPATH += inc \
+               ../inc
 
-HEADERS += ./inc/*.h
-SOURCES += ./src/*.cpp
+HEADERS += inc/musicwidget.h \
+           inc/musicwidgetdocumentloader.h \
+           inc/musicwidgetplugin.h
+           
+SOURCES += src/musicwidget.cpp \
+           src/musicwidgetdocumentloader.cpp \
+           src/musicwidgetplugin.cpp
 
 
 RESOURCES = resource/musicwidgetui.qrc
 
 UID = 200286FA
-
-symbian:include(./rom/rom.pri)
 
 symbian: {
 
@@ -45,7 +51,6 @@ symbian: {
     TARGET.UID3 = 0x$${UID}
     TARGET.EPOCALLOWDLLDATA=1
     TARGET.CAPABILITY = ALL -TCB
-    #TRANSLATIONS    += musicwidgetplugin.ts
         
     plugins.path = $${DESTDIR}
     plugins.sources = $${TARGET}.dll 
@@ -53,7 +58,6 @@ symbian: {
     widgetResources.path = $${DESTDIR}
     widgetResources.sources += resource/$${TARGET}.xml
     widgetResources.sources += resource/$${TARGET}.manifest
-    widgetResources.sources += resource/musicwidgeticon.png
     
     DEPLOYMENT += plugins \
                   widgetResources

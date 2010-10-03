@@ -29,6 +29,7 @@
 #include "mpsongscanner.h"
 #include "mpsongdata.h"
 #include "mpapplicationmonitor.h"
+#include "mpplaybackdata.h"
 
 /*!
     \class MpEngine
@@ -222,7 +223,14 @@ MpEngine::MpEngine()
 MpEngine::~MpEngine()
 {
     TX_ENTRY
-    delete mMpxPlaybackWrapper;
+    if ( mMpxPlaybackWrapper ) {
+        // Don't send stop cmd if mode=HomeScreen, because we don't want to stop playback when the music widget is deleted.
+        if ( mEngineMode != HomeScreen ) {
+            mMpxPlaybackWrapper->forceStop();
+        }
+        delete mMpxPlaybackWrapper;
+    }
+    
     delete mMpxHarvesterWrapper;
     delete mMpxCollectionWrapper;
     delete mAudioEffectsWrapper;
@@ -264,7 +272,7 @@ void MpEngine::initialize( quint32 clientSecureId, EngineMode mode )
         // Collection Wrapper
         mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, mSongData );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
-                 this, SIGNAL( collectionPlaylistOpened() ), 
+                 this, SLOT( handleCollectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
         connect( mMpxCollectionWrapper, SIGNAL( aboutToAddSongs(int) ),
                  this, SIGNAL( aboutToAddSongs(int) ) );
@@ -327,7 +335,7 @@ void MpEngine::initialize( quint32 clientSecureId, EngineMode mode )
         // Collection Wrapper
         mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, 0 );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
-                 this, SIGNAL( collectionPlaylistOpened() ), 
+                 this, SLOT( handleCollectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
         // Disabling these since fetch mode plays only one song at a time.
         mMpxCollectionWrapper->setRepeatFeatureEnabled( false );
@@ -347,7 +355,7 @@ void MpEngine::initialize( quint32 clientSecureId, EngineMode mode )
         // Collection Wrapper
         mMpxCollectionWrapper = new MpMpxCollectionFrameworkWrapper( clientSecureId, 0 );
         connect( mMpxCollectionWrapper, SIGNAL( collectionPlaylistOpened() ),
-                 this, SIGNAL( collectionPlaylistOpened() ), 
+                 this, SLOT( handleCollectionPlaylistOpened() ), 
 				 Qt::QueuedConnection );
         connect( mMpxCollectionWrapper, SIGNAL( containerContentsChanged() ),
                  this, SIGNAL( containerContentsChanged() ), 
@@ -1256,3 +1264,15 @@ void MpEngine::handleEqualizerReady()
     TX_EXIT
 }
 
+/*!
+ Slot to handle the open of a collecion playlist.
+ */
+void MpEngine::handleCollectionPlaylistOpened()
+{
+    TX_ENTRY
+    
+    playbackData()->handleCollectionPlaylistOpened();
+    emit collectionPlaylistOpened();
+    
+    TX_EXIT
+}

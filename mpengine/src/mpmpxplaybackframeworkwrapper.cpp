@@ -294,3 +294,10 @@ void MpMpxPlaybackFrameworkWrapper::retrieveSongDetails()
     d_ptr->retrieveSongDetails();
 }
 
+/*!
+ Force the playback to stop.
+ */
+void MpMpxPlaybackFrameworkWrapper::forceStop()
+{
+    d_ptr->forceStop();
+}

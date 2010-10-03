@@ -52,7 +52,7 @@ public:
     const QString& album() const;
     const QString& artist() const;
     MpPlaybackData::SimplifiedPlaybackState playbackState();
-    void commitPlaybackInfo();
+    void commitPlaybackInfo( bool changed );
     void handleMediaReady();
     bool setRealAudio( bool mode );
     bool setAlbumId( int id );

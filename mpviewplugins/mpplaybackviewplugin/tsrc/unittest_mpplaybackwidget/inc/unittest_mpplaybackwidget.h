@@ -43,7 +43,9 @@ private slots:
     void testDurationChanged();
     void testPositionChanged();
     void testAlbumArtChanged();
-
+    void testHandleLcdLightStatus();
+    void testHandleCollectionPlaylistOpened();
+	
 private:
     MpPlaybackWidget          *mTest;
 

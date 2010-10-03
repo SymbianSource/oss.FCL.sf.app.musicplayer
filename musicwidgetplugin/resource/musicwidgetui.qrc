@@ -1,6 +1,5 @@
 <RCC>
-    <qresource prefix="/gfx">
+    <qresource prefix="/docml">
         <file alias="music_widget.docml">music_widget.docml.bin</file>
-        <file>musicwidgeticon.png</file>
     </qresource>
 </RCC>

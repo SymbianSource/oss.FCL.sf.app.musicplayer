@@ -208,10 +208,10 @@ void MpPlaybackData::setPlaybackState(const SimplifiedPlaybackState state )
 /*!
  Stub function.
 */
-void MpPlaybackData::commitPlaybackInfo()
+void MpPlaybackData::commitPlaybackInfo( bool changed )
 {
     TX_ENTRY
-    mMediaReady = ETrue;
+    mMediaReady = changed;
     TX_EXIT
 }
 

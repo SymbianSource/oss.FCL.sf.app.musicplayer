@@ -270,7 +270,7 @@ void MpMainWindow::activateView(MpMainWindow::ViewType viewType)
     TX_ENTRY_ARGS("viewType=" << viewType );
 
     bool doTransition = true;
-    Hb::ViewSwitchFlags  transitionFlags = Hb::ViewSwitchDefault;
+    Hb::ViewSwitchFlags  transitionFlags = Hb::ViewSwitchCachedFullScreen;
     
     if ( mCurrentViewPlugin ) {     
         disconnectView();

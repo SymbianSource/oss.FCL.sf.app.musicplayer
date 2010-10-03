@@ -41,7 +41,8 @@ LIBS += -lmpxplaybackutility \
         -lmpsettingsmanager \
         -lmpengine \
         -lmpdata \
-        -lmpalbumcoverwidget
+        -lmpalbumcoverwidget \
+        -lhwrmlightclient
 
 # Input
 HEADERS += ../../inc/mpviewbase.h \
@@ -49,13 +50,17 @@ HEADERS += ../../inc/mpviewbase.h \
            inc/mpplaybackview.h \
            inc/mpplaybackwidget.h \
            inc/mpequalizerwidget.h \
-           inc/mpplaybackdocumentloader.h
+           inc/mpplaybackdocumentloader.h \
+           inc/mplightmonitor_p.h \
+           inc/mplightmonitor.h
 
 SOURCES += src/mpplaybackviewplugin.cpp \
           src/mpplaybackview.cpp \
           src/mpplaybackwidget.cpp \
           src/mpequalizerwidget.cpp \
-          src/mpplaybackdocumentloader.cpp
+          src/mpplaybackdocumentloader.cpp \
+          src/mplightmonitor_p.cpp \
+          src/mplightmonitor.cpp
        
 RESOURCES += resources/mpplaybackviewpluginresources.qrc
 

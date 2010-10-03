@@ -24,7 +24,7 @@
 
 #include <hbicon.h>
 
-//forward declartions
+//forward declarations
 
 class MpPlaybackData : public QObject
 {
@@ -66,6 +66,8 @@ signals:
     void albumArtReady();
     void playbackStateChanged();
     void playbackInfoChanged();
+    void collectionPlaylistOpened();
+
     
 public:
 

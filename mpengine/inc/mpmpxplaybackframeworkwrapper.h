@@ -45,8 +45,8 @@ public:
     void setBalance( int balance );
     void applyAudioEffects();
     void applyEqualizer();
-
     void retrieveSongDetails();
+    void forceStop();
 
 signals:
 

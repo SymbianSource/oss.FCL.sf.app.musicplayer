@@ -18,7 +18,7 @@
 
 
 // INCLUDE FILES
-#include <PCRes.rsg>
+#include <pcres.rsg>
 #include <bautils.h>
 #include <MetaDataUtility.h>
 #ifdef RD_MULTIPLE_DRIVE

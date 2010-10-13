@@ -30,7 +30,6 @@
 #include "mpxdbpluginqueries.h"
 #include "mpxdbutil.h"
 #include "mpxdbcategory.h"
-#include "mpxmediamusicdefs.h"
 
 // CONSTANTS
 
@@ -80,26 +79,23 @@ void CMPXDbCategory::BaseConstructL()
 // ----------------------------------------------------------------------------
 //
 TUint32 CMPXDbCategory::AddItemL(
-    TMPXGeneralCategory aCategory,        
-    const CMPXMedia& aMedia,
+    const TDesC& aName,
     TInt aDriveId,
     TBool& aNewRecord,
     TBool aCaseSensitive)
     {
     MPX_FUNC("CMPXDbCategory::AddItemL");
 
-    TPtrC itemName(ItemNameL(aCategory, aMedia));
-    
     // try to find the item first
     TUint32 rowId(MPXDbCommonUtil::GenerateUniqueIdL(iDbManager.Fs(), iCategory,
-        itemName, aCaseSensitive));
+        aName, aCaseSensitive));
     aNewRecord = !CategoryItemExistsL(aDriveId, rowId);
 
     if (aNewRecord)
         {
         // insert new
         HBufC* query = PreProcessStringLC(KQueryCategoryInsert);
-        HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(itemName);
+        HBufC* name = MPXDbCommonUtil::ProcessSingleQuotesLC(aName);
 
         iDbManager.ExecuteQueryL(aDriveId, *query, rowId, name, 1);
 
@@ -116,7 +112,7 @@ TUint32 CMPXDbCategory::AddItemL(
 
     return rowId;
     }
-		
+
 // ----------------------------------------------------------------------------
 // CMPXDbCategory::GetNameL
 // ----------------------------------------------------------------------------
@@ -244,37 +240,20 @@ void CMPXDbCategory::FindAllL(
         }
 
     // construct criteria string
-    HBufC* criteriaStr = NULL;
-    if (criteriaArray->Count() > 0)
-        {
-        criteriaStr = MPXDbCommonUtil::StringFromArrayLC(*criteriaArray, KMCAndKeyword);
-        }
-    else
-        {
-        _LIT(KCriteriaTrue, "1");
-        criteriaStr = KCriteriaTrue().AllocLC();
-        }
-        
-    RSqlStatement recordset;
-    if (iCategory == EMPXArtist)
-        {
-        recordset = iDbManager.ExecuteSelectQueryL(KQueryArtistItems, criteriaStr);
-        CleanupStack::PopAndDestroy(2, criteriaArray);  //criteriaStr, criteriaArray
-        }
-    else 
-        {
-        HBufC* query = PreProcessStringLC(KQueryCategoryItems);
-        recordset = iDbManager.ExecuteSelectQueryL(*query, criteriaStr);
-        CleanupStack::PopAndDestroy(3, criteriaArray);  //query, criteriaStr, criteriaArray 
-        }
+    HBufC* criteriaStr = MPXDbCommonUtil::StringFromArrayLC(*criteriaArray, KMCAndKeyword);
 
+    // either get all items or items filtered based on criteria
+    HBufC* query = PreProcessStringLC(criteriaStr->Length() ?
+        KQueryCategoryItems() : KQueryCategoryAll());
+    RSqlStatement recordset(iDbManager.ExecuteSelectQueryL(*query, criteriaStr));
+    CleanupStack::PopAndDestroy(3, criteriaArray); // query, criteriaStr, criteriaArray
     CleanupClosePushL(recordset);
 
     // process the results
     ProcessRecordsetL(aAttrs, recordset, aMediaArray);
     CleanupStack::PopAndDestroy(&recordset);
     }
-        
+
 // ----------------------------------------------------------------------------
 // CMPXDbCategory::DecrementSongsForCategoryL
 // ----------------------------------------------------------------------------
@@ -507,9 +486,7 @@ void CMPXDbCategory::UpdateItemL(
     TInt /*aDriveId*/,
     CMPXMessageArray* /*aItemChangedMessages*/)
 	{
-    MPX_FUNC("CMPXDbCategory::UpdateItemL");
-    
-	// do nothing
+	// nothing
 	}
 
 // ----------------------------------------------------------------------------
@@ -597,7 +574,7 @@ HBufC* CMPXDbCategory::PreProcessStringLC(
 
 // ----------------------------------------------------------------------------
 // CMPXDbCategory::ProcessRecordsetL
-// Unknown item is stored in the database as empty string (name field). This ensures the
+// Unknown item is stored in the database as NULL (name field). This ensures the
 // unknown item to be the 1st found record if it exists. This will save time in
 // searching for the unknown record among the results and avoid performing
 // descriptor comparison. If the 1st record is the unknown item, it won't be
@@ -686,46 +663,6 @@ void CMPXDbCategory::ProcessRecordsetL(
         ((CMPXCollectionPath*)pPath)->AppendL(ids.Array());
         }
     CleanupStack::PopAndDestroy(&ids);
-    }
-
-// ----------------------------------------------------------------------------
-// CMPXDbCategory::ItemNameL
-// ----------------------------------------------------------------------------
-//
-TPtrC CMPXDbCategory::ItemNameL(
-    TMPXGeneralCategory aCategory,        
-    const CMPXMedia& aMedia)
-    {
-    MPX_FUNC("CMPXDbCategory::ItemNameL");
-    
-    TMPXAttribute attribute;
-    switch(aCategory)
-        {
-        case EMPXGenre:
-            {
-            attribute = KMPXMediaMusicGenre;
-            break;
-            }
-        case EMPXComposer:
-            {
-            attribute = KMPXMediaMusicComposer;
-            break;
-            }
-        default:
-            {
-            User::Leave(KErrArgument);
-            break;
-            }
-        }
-    
-    if (aMedia.IsSupported(attribute))
-        {
-        return aMedia.ValueText(attribute).Left(KMCMaxTextLen);
-        }
-    else
-        {
-        return KNullDesC();
-        }
     }
 
 // ----------------------------------------------------------------------------

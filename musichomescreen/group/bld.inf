@@ -10,7 +10,6 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
-* NTT DOCOMO, INC - BUG 2358
 *
 * Description:  Build information file for MusicHomeScreen.
 *
@@ -31,11 +30,11 @@ PRJ_EXPORTS
 
 
 
-../data/suite.xml z:/private/101F4CD2/import/suites/musicsuite/suite.xml
-../data/music_matrix_items.xml z:/private/101F4CD2/import/suites/musicsuite/music_matrix_items.xml
+../data/suite.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/musicsuite/suite.xml
+../data/music_matrix_items.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/musicsuite/music_matrix_items.xml
 
-
-
+../data/suite.xml /epoc32/data/z/private/101F4CD2/import/suites/musicsuite/suite.xml
+../data/music_matrix_items.xml /epoc32/data/z/private/101F4CD2/import/suites/musicsuite/music_matrix_items.xml
 
 PRJ_EXTENSIONS
 

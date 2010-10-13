@@ -184,6 +184,7 @@ void CMPXCollectionViewHgPlaylistHelper::InitPlaylistL(CMPXCollectionPath& aPath
         CMPXCollectionPlaylist* playlist = CMPXCollectionPlaylist::NewL( aPath );
         CleanupStack::PushL( playlist );
 
+        playlist->SetShuffleEnabledL( aEnableShuffle );
         iPlaybackUtility->SetL( EPbPropertyRandomMode, aEnableShuffle );
         iPlaybackUtility->InitL( *playlist, ETrue );
         CleanupStack::PopAndDestroy( playlist );

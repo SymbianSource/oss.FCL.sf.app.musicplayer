@@ -254,6 +254,12 @@ class CMPXDbManager :
          * Checks if the spefified drive is a remove drive
          */      
         IMPORT_C TBool IsRemoteDrive(TDriveNumber aDrive);
+        
+        /**
+        * Recreate a specified database file.
+        * @param aDrive identifies the drive index ro recreate the database
+        */
+        IMPORT_C void RecreateDatabaseFileL(TInt aDrive);
 
     protected:
 
@@ -315,15 +321,6 @@ class CMPXDbManager :
         */
         IMPORT_C void EnsureRamSpaceL() ;
 
-        /**
-         * overloaded function for calls where string is allready formatted
-         * 
-         * @param  aQuery data base query string
-         * @return RSqlStatement
-         */
-        IMPORT_C RSqlStatement ExecuteSelectQueryL( const TDesC& aQuery );
-        
-        
         /**
         *  Move DBs from RAMDisk to disks
         */

@@ -91,13 +91,6 @@ public:
     * @return ETrue if host is messaging, EFalse otherwise
     */
     IMPORT_C TBool IsHostMessagingL();
-		
-	/**
-    * Check if the host application is calendar
-    * @since Symbian^3
-    * @return ETrue if host is calendar, EFalse otherwise
-    */
-    IMPORT_C TBool IsHostCalendarL();
 
     /**
     * Check if the host application is browser

@@ -329,8 +329,7 @@ EXPORT_C TUint32 MPXDbCommonUtil::GenerateUniqueIdL(
         extractPos = KMCPathStartPos;     // c:\..., include first '\' of the path
         }
 
-    HBufC* fileNameBuf = HBufC::NewLC(aName.Length()+KMCIntegerLen);
-	TPtr fileName(fileNameBuf->Des());
+    TBuf<KMaxFileName+KMCIntegerLen> fileName;
     if( extractPos )
         {
         // append volume's unique Id to path to maintain uniqueness
@@ -358,7 +357,7 @@ EXPORT_C TUint32 MPXDbCommonUtil::GenerateUniqueIdL(
     TInt narrowFileLen(0);
     TPtrC8 narrowFileName;
     #if defined(_UNICODE)
-        narrowFileLen = fileNameBuf->Des().Length() * 2;
+        narrowFileLen = fileName.Length() * 2;
         narrowFileName.Set((TUint8*)fileName.Ptr(), narrowFileLen);
     #else
         narrowFileLen = fileName.Length();
@@ -376,9 +375,6 @@ EXPORT_C TUint32 MPXDbCommonUtil::GenerateUniqueIdL(
     TUint32 uniqueId(0);
     uniqueId = aTableId << 28;
     uniqueId |= (ptr[3]&0x0F)<<24 | (ptr[2]<<16) | (ptr[1]<<8) | ptr[0];
-    
-    CleanupStack::PopAndDestroy(fileNameBuf);
-    
     return uniqueId;
     }
 

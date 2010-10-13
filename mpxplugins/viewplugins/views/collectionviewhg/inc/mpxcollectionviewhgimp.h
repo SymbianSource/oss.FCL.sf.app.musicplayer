@@ -122,7 +122,13 @@ public:
      * @ since 3.1
      */
     void LaunchMusicShopL();
-
+    
+   /**
+     * Launch Ovi music application.
+     *
+     */
+    void LaunchOviMusicShopL();
+    
     /**
      *  Saves selected album.
      *
@@ -891,6 +897,15 @@ private:
  	 */
     void DimAllOptions( TInt aResourceId, CEikMenuPane* aMenuPane );
 	
+    /*
+    * Check if MusicApp is present
+    */
+    TBool IsMusicAppInstalledL( const TUid& aAppUid );
+    
+    /*
+     * Display correct MusicShop option
+     */
+    void DisplayMusicShopOptions( CEikMenuPane* aMenuPane );
 private:    // Data
 
     MMPXCollectionUtility*      iCollectionUtility;
@@ -930,7 +945,7 @@ private:    // Data
     TInt                        iCurrentPlaylistOp;
     TInt                        iNumSongAddedToPlaylist;
     TMPXItemId                  iPlaylistId;
-    TInt                        iFirstIndexOnScreen;
+
     TInt                        iCurrentMediaLOp;   // current mediaL operation
     TInt                        iCurrentFindAllLOp; // current FindAllL operation
     TInt                        iLastDepth;
@@ -1003,6 +1018,8 @@ private:    // Data
     TInt iOperatorMusicStoreType;
     TInt iMusicStoreWebPage;
     HBufC16* iOperatorMusicStoreURI;
+    TBool iMusicStoreAppInstalled; //flag for music store application availability
+    
     HBufC16* iEducateUserURI; 
     TInt iEducatingPopupState ;       
     TBool iPopuponRefresh; 

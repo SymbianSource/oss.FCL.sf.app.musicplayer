@@ -819,6 +819,18 @@ void CMPXPodcastDbHandler::ReCreateDatabasesL()
     iDbManager->RecreateAllDatabasesL();
     }
 
+
+// ----------------------------------------------------------------------------
+// Re-create a specified database file
+// ----------------------------------------------------------------------------
+//
+void CMPXPodcastDbHandler::RecreateDatabaseFileL( TInt aDrive )
+    {
+    MPX_FUNC("CMPXPodcastDbHandler::RecreateDatabaseFileL");
+    MPX_DEBUG2( "CMPXPodcastDbHandler::RecreateDatabaseFileL drive: %i", aDrive );
+    iDbManager->RecreateDatabaseFileL( aDrive );  
+    }
+
 // ----------------------------------------------------------------------------
 // Set handler refresh status
 // ----------------------------------------------------------------------------

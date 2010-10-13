@@ -80,8 +80,7 @@ NONSHARABLE_CLASS( CMPXMetadataEditorDialog ) : public CAknForm,
                                                 public MMPXCollectionObserver,
                                                 public MMPXCollectionFindObserver,
                                                 public MMPXPlaybackCallback,
-                                                public MMPXCHelperObserver,
-                                                public MMPXPlaybackObserver
+                                                public MMPXCHelperObserver
     {
 public:
     // File Details headings
@@ -202,26 +201,7 @@ private: // from base class MMPXCollectionObserver
         const CMPXMedia& aMedia,
         TInt aError);
 
-private:
-
-    /**
-     * From MMPXPlaybackObserver
-     * Handle playback message
-     *
-     * @param aMessage playback message
-     * @param aErr system error code.
-     */
-    void HandlePlaybackMessage( CMPXMessage* aMessage, TInt aError );
-  
-    /**
-     *  Handle playback message
-     *
-     *  @param aMessage playback message
-     */
-    void DoHandlePlaybackMessageL( const CMPXMessage& aMessage );
-    
 private:  // Constructor
-
     /**
      * Default constructor.
      */

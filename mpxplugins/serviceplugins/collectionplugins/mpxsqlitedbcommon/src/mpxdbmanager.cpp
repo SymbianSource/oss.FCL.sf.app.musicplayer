@@ -229,10 +229,12 @@ void CMPXDbManager::DoBeginL()
     // transforms SQL error to KErrNotReady
     if( (err <= KSqlErrGeneral && err >= KSqlErrNotDb) || err == KSqlErrStmtExpired )
         {
+        MPX_DEBUG2("CMPXDbManager::DoBeginL - KErrNotReady, err=%d", err);
         User::Leave(KErrNotReady);
         }
     else
         {
+        MPX_DEBUG2("CMPXDbManager::DoBeginL, err=%d", err);
         User::LeaveIfError(err);
         }
     }
@@ -2856,18 +2858,6 @@ EXPORT_C void CMPXDbManager::EnsureRamSpaceL()
 #endif //__RAMDISK_PERF_ENABLE    
     }
 
-// ---------------------------------------------------------------------------
-// CMPXDbManager::ExecuteSelectQueryL
-// ---------------------------------------------------------------------------
-//
-EXPORT_C RSqlStatement CMPXDbManager::ExecuteSelectQueryL( const TDesC& aQuery ) 
-    {
-    MPX_FUNC("CMPXDatabase::ExecuteSelectQueryL( const TDesC& aQuery )");
-    HBufC* tmp( aQuery.AllocLC() );
-    RSqlStatement statement( ExecuteSelectQueryOnAllDrivesL( tmp->Des() ) );
-    CleanupStack::PopAndDestroy(tmp);
-    return statement;
-    }
 
 // ---------------------------------------------------------------------------
 // CMPXDbManager::EnsureDiskSpaceL
@@ -3100,5 +3090,57 @@ HBufC* CMPXDbManager::CreateFullFilenameL(TDriveUnit aDrive)
     MPX_DEBUG2("CMPXDbManager::CreateFullFilenameL filename = %S", filename); 
     return filename;
     }
+
+// ----------------------------------------------------------------------------
+// Recreate a specified database file. Delete physical file first and then
+// recreate it
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CMPXDbManager::RecreateDatabaseFileL(
+    TInt aDrive)
+    {
+    MPX_FUNC("CMPXDbManager::RecreateDatabaseFileL");    
+    MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL aDrive=%d", aDrive);
+    
+    TInt index = KErrNotFound;
+
+    if (aDrive == EDriveC)
+        {
+        index = iDatabaseHandles.Count();
+        }
+    else
+        {
+        TInt count(iDatabaseHandles.Count());
+        for (TInt i = 0; i < count; ++i)
+            {
+            if ( iDatabaseHandles[i].iDrive == aDrive )
+                {
+                index = i;
+                break;
+                }
+            }
+        }
+    if ( index >= 0 )
+        {
+        TInt delErr = BaflUtils::DeleteFile(iFs, 
+                *iDatabaseHandles[index].iOrigFullFilePath);
+        MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL DeleteFile delErr=%d", delErr);
+        MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL, iTargetFullFilePath = %s", 
+                iDatabaseHandles[index].iTargetFullFilePath);
+        MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL, iOrigFullFilePath = %s", 
+                iDatabaseHandles[index].iOrigFullFilePath);
+        MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL, index = %d", index);
+
+        User::LeaveIfError( delErr );  
+        
+        DoCreateDatabaseL( aDrive );
+        }
+    else
+        {
+        MPX_DEBUG2("CMPXDbManager::RecreateDatabaseFileL index = %d", index);
+        User::Leave(KErrNotFound);
+        }
+    }
+
 
 // End of File

@@ -69,17 +69,13 @@
 #include <mpxcollectionplugin.hrh>
 #include <mpxinternalcrkeys.h>
 #include <mpxuser.h>
-#include <drmuihandling.h>
-#include <mpxplaybackutility.h>
-
 #include "mpxcommonuihelper.h"
 #include "mpxmetadataeditordialog.h"
 #include "mpxmetadataeditordialog.hrh"
 #include "mpxmetadataeditordialog.hlp.hrh"
 #include "mpxlog.h"
-#include <mpxmessagegeneraldefs.h>
-#include <mpxplaybackmessage.h>
-#include <caf/caferr.h>
+#include <drmuihandling.h>
+#include <mpxplaybackutility.h>
 
 // CONSTANTS
 const TInt KMPXFileDetailsMaxTitleLen = 32;
@@ -197,7 +193,6 @@ EXPORT_C CMPXMetadataEditorDialog::~CMPXMetadataEditorDialog()
     delete iDrmInfo;
     if ( iPlaybackUtility ) 
         { 
-        iPlaybackUtility->RemoveObserverL( *this ); 
         iPlaybackUtility->CancelRequest(); 
         iPlaybackUtility->Close(); 
         } 
@@ -620,10 +615,6 @@ void CMPXMetadataEditorDialog::DoHandleMediaL(
             SetControlNumberL( EMPXMetadataEditorDlgCtrlIdTrackNumber,
                 iMedia->ValueText( KMPXMediaMusicAlbumTrack ),
                 KMPXSongDetailsTrackNumMin, KMPXSongDetailsTrackNumMax );
-				
-           // Fetch the genre
-           SetControlTextL( EMPXMetadataEditorDlgCtrlIdGenre,
-              iMedia->ValueText( KMPXMediaMusicGenre ), KNullDesC );  
 
             // Fetch the year
             TInt64 year(0);
@@ -634,15 +625,14 @@ void CMPXMetadataEditorDialog::DoHandleMediaL(
             TTime yearTime( year);
             iYear = yearTime.DateTime().Year ( );
             HBufC* yearBuf = HBufC::NewLC ( KMPXMaxTimeLength );
-            if ( iYear > 0)
-                {    
-                yearBuf->Des().AppendNum ( iYear );
-                }
+            yearBuf->Des().AppendNum ( iYear );
             SetControlNumberL ( EMPXMetadataEditorDlgCtrlIdYear, *yearBuf,
                     KMPXSongDetailsYearMin, KMPXSongDetailsYearMax );
             CleanupStack::PopAndDestroy ( yearBuf );
 
-           
+            // Fetch genre
+            FetchGenreL();
+
             // Fetch the comment
             SetControlTextL( EMPXMetadataEditorDlgCtrlIdComment,
                 iMedia->ValueText( KMPXMediaGeneralComment ), KNullDesC );
@@ -2462,7 +2452,6 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
         {
         // Get the playback utility instance from engine.
         iPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
-        iPlaybackUtility->AddObserverL( *this );
         MMPXSource* s = iPlaybackUtility->Source();
         if ( s )
             {
@@ -2482,6 +2471,28 @@ void CMPXMetadataEditorDialog::PreLayoutDynInitL()
                 CleanupStack::PopAndDestroy( &attrs );
             }  
         }
+    
+
+    // Podcasting is enabled
+    if ( !iDisablePodcasting )
+        {
+        iPopup = static_cast<CAknPopupField*>
+            ( ControlOrNull( EMPXMetadataEditorDlgCtrlIdLibrary ) );
+        iLibraryArr = new (ELeave) CDesCArrayFlat( 1 );
+        HBufC* custTxt = StringLoader::LoadLC( R_MPX_CUI_GENRE_SELECTION_MUSIC_TEXT );
+        iLibraryArr->AppendL( *custTxt );
+        CleanupStack::PopAndDestroy( custTxt );
+        custTxt = StringLoader::LoadLC( R_MPX_CUI_GENRE_SELECTION_PODCAST_TEXT );
+        iLibraryArr->AppendL( *custTxt );
+        CleanupStack::PopAndDestroy( custTxt );
+        iLibraryValueTextArray = CAknQueryValueTextArray::NewL();
+        iLibraryValueTextArray->SetArray( *iLibraryArr );
+        iLibraryTextValues = CAknQueryValueText::NewL();
+        iLibraryTextValues->SetArrayL( iLibraryValueTextArray );
+        iLibraryTextValues->SetCurrentValueIndex( iCurrentLibrary );
+        // Set values into popup fields
+        iPopup->SetQueryValueL( iLibraryTextValues ); // Moved up from below
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -2494,46 +2505,6 @@ void CMPXMetadataEditorDialog::PostLayoutDynInitL()
     MPX_FUNC( "CMPXMetadataEditorDialog::PostLayoutDynInitL" );
     CAknForm::PostLayoutDynInitL();
     SetEditableL( EFalse );
-    }
-
-// -----------------------------------------------------------------------------
-// CMPXMetadataEditorDialog::HandlePlaybackMessage
-// Handle playback message.
-// ---------------------------------------------------------------------------
-//
-void CMPXMetadataEditorDialog::HandlePlaybackMessage(
-    CMPXMessage* aMessage, TInt aError )
-    {
-    MPX_DEBUG2 ( "CMPXMetadataEditorDialog::HandlePlaybackMessage aError %d " ,aError );
-    if ( aError == KErrNone && aMessage )
-        {
-        TRAP_IGNORE( DoHandlePlaybackMessageL( *aMessage ) );
-        }
-    else if ( aError != KErrNone )
-        {
-        TryExitL( EAknSoftkeyExit );
-        }
-    }
-
-
-// ---------------------------------------------------------------------------
-// CMPXMetadataEditorDialog::HandlePlaybackMessage
-// Handle playback message.
-// ---------------------------------------------------------------------------
-//
-void CMPXMetadataEditorDialog::DoHandlePlaybackMessageL(
-    const CMPXMessage& aMessage )
-    {
-    MPX_FUNC( "CMPXMetadataEditorDialog::DoHandlePlaybackMessageL(CMPXMessage)" );
-
-    TMPXMessageId id( aMessage.ValueTObjectL<TMPXMessageId>( KMPXMessageGeneralId ) );
-    TInt value = aMessage.ValueTObjectL<TInt>( KMPXMessageGeneralEvent );
-    if ( KMPXMessageGeneral == id && 
-        ( ( value  == TMPXPlaybackMessage::EMediaChanged ) || ( value  == TMPXPlaybackMessage::ESkipping ) ) )
-        {
-        MPX_DEBUG1( "CMPXMetadataEditorDialog::DoHandlePlaybackMessageL Dismissing Details view - change in playing media" );
-        TryExitL( EAknSoftkeyExit );
-        }
     }
 
 // -----------------------------------------------------------------------------

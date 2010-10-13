@@ -3050,7 +3050,18 @@ void CMPXPodcastDbPlugin::DoGetCollectionCountL( const CMPXCommand& aCmd )
         }
 
     TInt drive = aCmd.ValueTObjectL<TInt>(KMPXCommandCollectionCountDrive);
-    TInt count = (TInt)iDbHandler->GetTotalCountL(drive);
+
+    TInt count = 0;
+    TRAPD( totalerr, count = (TInt)iDbHandler->GetTotalCountL(drive) );
+    MPX_DEBUG2( "CMPXPodcastDbPlugin::DoGetCollectionCountL, totalerr =%d", totalerr );
+    if ( totalerr == KErrCorrupt )
+        {
+        iDbHandler->CloseDatabaseL( drive );
+        iDbHandler->RecreateDatabaseFileL( drive );
+        iDbHandler->OpenDatabaseL( drive );
+        count = (TInt)iDbHandler->GetTotalCountL(drive);
+        }
+        
     ((CMPXMedia&)aCmd).SetTObjectValueL<TInt>(KMPXCommandCollectionCountValue, count);
     }
 

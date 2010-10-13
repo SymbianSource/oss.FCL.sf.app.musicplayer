@@ -308,7 +308,6 @@ CMPXCollectionViewHgImp::~CMPXCollectionViewHgImp()
     delete iCurrentCba;
     delete iIncrementalOpenUtil;
     delete iCachedSelectionIndex;
-    delete iCurrentSelectedIndex;
     FeatureManager::UnInitializeLib();
     delete iOperatorMusicStoreName ;
     if ( iOperatorMusicStoreURI )
@@ -460,8 +459,8 @@ void CMPXCollectionViewHgImp::ConstructL()
     delete repository;
     iGoToMusicShopOptionHidden =
         !static_cast<TBool>( flags & KMPXEnableGoToMusicShopOption );
-    iUsingNokiaService =
-        static_cast<TBool>( flags & KMPXEnableFindInMusicShopOption );
+    iUsingNokiaService = flags & KMPXEnableFindInMusicShopOption ? ETrue : EFalse;
+    
     MPX_DEBUG2( "CMPXCollectionViewHgImp::ConstructL(): iUsingNokiaService: %d", iUsingNokiaService );
     iDisablePodcasting = flags&KMPXDisablePodcastingOption ? ETrue : EFalse;
 
@@ -523,7 +522,10 @@ void CMPXCollectionViewHgImp::ConstructL()
                             KMPlayerRemoteReadPolicy,
                             KMPlayerRemoteWritePolicy );
         }
-
+    // Check if Music Store dll is in ROM
+    iMusicStoreAppInstalled = IsMusicAppInstalledL( TUid::Uid( iMusicStoreUID ) );
+    iUsingNokiaService&=iMusicStoreAppInstalled; 
+          
     iCachedSelectionIndex = new ( ELeave )CArrayFixFlat<TInt>( KMPXArrayGranularity );
     iIncrementalOpenUtil = CMPXCollectionOpenUtility::NewL( this );
 
@@ -1095,7 +1097,6 @@ void CMPXCollectionViewHgImp::DeleteSelectedItemsL(TInt aCommand)
                     {
                     iIsDeleting = ETrue;
                     iCollectionUiHelper->DeleteL( *path, this );
-                    iFirstIndexOnScreen = iContainer->FirstIndexOnScreen();               
                     }
                 else if( iContainer )
                     {
@@ -1272,7 +1273,7 @@ void CMPXCollectionViewHgImp::UpdateListBoxL(
             else if ( ( aIndex > 0 )
                 && ( aIndex < iContainer->CurrentListItemCount() ) )
                 {
-				iContainer->SetLbxCurrentItemIndexAndDraw( aIndex );
+                // No need to do anything here
                 }
             else
                 {
@@ -4289,16 +4290,7 @@ void CMPXCollectionViewHgImp::HandleOpenL(
             }
         else
             {
-            TInt topIndex = aIndex;
-            if ( iFirstIndexOnScreen > 0 )
-                {
-                topIndex = iFirstIndexOnScreen;
-                if ( aComplete )
-                    {
-                    iFirstIndexOnScreen = 0;
-                    }
-                }
-            UpdateListBoxL( aEntries, topIndex, aComplete );            
+            UpdateListBoxL( aEntries, aIndex, aComplete );
             }
 #else
         UpdateListBoxL( aEntries, aIndex, aComplete );
@@ -5572,7 +5564,7 @@ void CMPXCollectionViewHgImp::HandleCommandL( TInt aCommand )
             }
         case EMPXCmdGoToNokiaMusicShop:
             {
-            LaunchMusicShopL();
+            LaunchOviMusicShopL();
             break;
             }
         case EMPXCmdGoToOperatorMusicShop:
@@ -6376,16 +6368,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneAlbumL(
 					}
 				}
 					
-				//If Operator Music store exist, show the cascade menu with Nokia and Operator music store.
-				if ( iOperatorMusicStore )
-				    {
-				    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-				    }
-				else
-				    {
-				    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-				    }
-
+			DisplayMusicShopOptions(aMenuPane);	
 			break;
 			}
 
@@ -6508,15 +6491,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPanePlaylistL(
 			        aMenuPane->SetItemDimmed( EMPXCmdPlayItem, ETrue );
 			        }
 			    } 
-			if ( iOperatorMusicStore )
-			    {
-			    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-			    }
-			else
-			    {
-			    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-			    }
-
+			DisplayMusicShopOptions(aMenuPane);
 			break;
 			}
 
@@ -6630,14 +6605,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneGenreL(
                     }
                 }
             
-            if ( iOperatorMusicStore )
-                {
-                aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-                }
-            else
-                {
-                aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-                }
+            DisplayMusicShopOptions(aMenuPane);
 			break;
 			}
 
@@ -6714,14 +6682,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneSongsL(
 					aMenuPane->SetItemDimmed( EMPXCmdDelete, EFalse );
 					}
 				}
-			if ( iOperatorMusicStore )
-			    {
-			    aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
-			    }
-			else
-			    {
-			    aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
-			    }
+			DisplayMusicShopOptions(aMenuPane);
 			break;
 			}
 
@@ -6980,20 +6941,7 @@ void CMPXCollectionViewHgImp::DynInitMenuPaneL(
     CEikMenuPane* aMenuPane )
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::DynInitMenuPaneL" );
-    
-    if ( iContainer->IsTBoneView() )
-        {
-	    //makesure mediawall is not flicking before handling long tap
-	    TInt currentIndex( iContainer->CurrentLbxItemIndex() );
-	    MPX_DEBUG2( "CMPXCollectionViewHgImp::DynInitMenuPaneL currentIndex = %d", currentIndex );
-	    if (currentIndex == KErrNotFound)
-	        {
-	        MPX_DEBUG1( "DynInitMenuPaneL NOT handling stylus popup menu when flicking");        
-	        DimAllOptions(aResourceId, aMenuPane);
-	        return;
-	        }
-        }
-        
+
     CMPXCollectionViewListBoxArray* array =
         static_cast<CMPXCollectionViewListBoxArray*>(
         iContainer->ListBoxArray() );
@@ -7498,33 +7446,27 @@ void CMPXCollectionViewHgImp::ProcessCommandL(TInt aCommandId)
 void CMPXCollectionViewHgImp::LaunchMusicShopL()
     {
     MPX_FUNC( "CMPXCollectionViewHgImp::LaunchMusicShopL" );
-
-    if ( iMusicStoreUID != 0)
+    if (iOperatorMusicStore && !iMusicStoreAppInstalled) //Launch Operator Store
         {
-    TApaTaskList taskList( iCoeEnv->WsSession() );
-        TApaTask task = taskList.FindApp( TUid::Uid(iMusicStoreUID) );
-
-    if ( task.Exists() )
-        {
-        GfxTransEffect::BeginFullScreen( 
-        AknTransEffect::EApplicationStart,
-            TRect(), 
-            AknTransEffect::EParameterType, 
-            AknTransEffect::GfxTransParam( TUid::Uid(iMusicStoreUID),        
-            AknTransEffect::TParameter::EActivateExplicitContinue ));            
-        task.BringToForeground();
-        }
-    else
-        {
-        RApaLsSession session;
-        if ( KErrNone == session.Connect() )
+        if (iMusicStoreWebPage)
             {
-            CleanupClosePushL( session );
-            TThreadId threadId;
-                session.CreateDocument( KNullDesC, TUid::Uid(iMusicStoreUID), threadId );
-            CleanupStack::PopAndDestroy(&session);
+            LaunchOperatorURLMusicShopL();
+            }
+        else
+            {
+            if (iOperatorMusicStoreType)
+                {
+                LaunchOperatorJavaMusicShopL(iOperatorMusicStoreUID);
+                }
+            else
+                {
+                LaunchOperatorNativeMusicShopL();
                 }
             }
+        }
+    else //Launch Ovi Music Store
+        {
+        LaunchOviMusicShopL();
         }
     }
 
@@ -8546,7 +8488,6 @@ void CMPXCollectionViewHgImp::DimAllOptions(TInt aResourceId, CEikMenuPane* aMen
             aMenuPane->SetItemDimmed( EMPXCmdFindInMusicShop, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdSongDetails, ETrue );
             aMenuPane->SetItemDimmed( EMPXCmdPlaylistDetails, ETrue );
-			aMenuPane->SetItemDimmed( EMPXCmdUseAsCascade, ETrue ); 
             break;
             }
         case R_AVKON_MENUPANE_MARKABLE_LIST:
@@ -8555,5 +8496,95 @@ void CMPXCollectionViewHgImp::DimAllOptions(TInt aResourceId, CEikMenuPane* aMen
             break;
             }
         }    
+    }
+	
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::IsMusicAppInstalledL
+// -----------------------------------------------------------------------------
+//
+TBool CMPXCollectionViewHgImp::IsMusicAppInstalledL( const TUid& aAppUid )
+{
+    MPX_FUNC( "CMPXCollectionViewHgImp::IsMusicAppInstalledL" );
+    TBool response = EFalse;
+
+    RApaLsSession apaSession;
+    CleanupClosePushL( apaSession );
+    User::LeaveIfError( apaSession.Connect() );
+    apaSession.GetAllApps();
+
+    TApaAppInfo appInfo;
+    TInt err = apaSession.GetAppInfo( appInfo, aAppUid );
+    CleanupStack::PopAndDestroy( &apaSession );
+
+    if ( !err )
+        {
+    // app was found
+    response = ETrue;
+        }
+    MPX_DEBUG2( "CMPXCollectionViewHgImp::IsMusicAppInstalledL response = %d", response );
+    return response;
+}
+
+// -----------------------------------------------------------------------------
+// CMPXCollectionViewHgImp::DisplayMusicShopOptions
+// -----------------------------------------------------------------------------
+//
+void CMPXCollectionViewHgImp::DisplayMusicShopOptions(CEikMenuPane* aMenuPane)
+    {
+    if (iOperatorMusicStore && iMusicStoreAppInstalled)
+        {
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, EFalse); //Show the cascade menu with Ovi and operator store
+        }
+    else if ((iOperatorMusicStore && !iMusicStoreAppInstalled)
+            || (!iOperatorMusicStore && iMusicStoreAppInstalled))
+        {
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, EFalse); //Show "Go to Music Store"
+        }
+    else
+        {
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMultipleMusicShop, ETrue);
+        aMenuPane->SetItemDimmed(EMPXCmdGoToMusicShop, ETrue);
+        }
+    }
+    
+ 
+ // -----------------------------------------------------------------------------
+ // CMPXCollectionViewHgImp::LaunchOviMusicShopL
+ // Launch Ovi music shop application
+ // -----------------------------------------------------------------------------
+ //
+void CMPXCollectionViewHgImp::LaunchOviMusicShopL()
+    {
+    MPX_FUNC( "CMPXCollectionViewHgImp::LaunchOviMusicShopL" );
+    if (iMusicStoreUID != 0)
+        {
+        TApaTaskList taskList(iCoeEnv->WsSession());
+        TApaTask task = taskList.FindApp(TUid::Uid(iMusicStoreUID));
+
+        if (task.Exists())
+            {
+            GfxTransEffect::BeginFullScreen(
+                    AknTransEffect::EApplicationStart,
+                    TRect(),
+                    AknTransEffect::EParameterType,
+            		AknTransEffect::GfxTransParam( TUid::Uid(iMusicStoreUID),        
+                            AknTransEffect::TParameter::EActivateExplicitContinue));
+            task.BringToForeground();
+            }
+        else
+            {
+            RApaLsSession session;
+            if (KErrNone == session.Connect())
+                {
+                CleanupClosePushL(session);
+                TThreadId threadId;
+                session.CreateDocument(KNullDesC, TUid::Uid(iMusicStoreUID),
+                        threadId);
+                CleanupStack::PopAndDestroy(&session);
+                }
+            }
+        }
     }
 //  End of File

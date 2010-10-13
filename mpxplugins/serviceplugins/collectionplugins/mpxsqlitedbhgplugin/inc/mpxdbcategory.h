@@ -53,8 +53,7 @@ class CMPXDbCategory :
         /**
         * Add a category item. If the record already exists, its counter will
         * be incremented.
-        * @param aCategory category type
-        * @param aMedia: This is the media object to be entered into the row
+        * @param aName: This is the name to be entered into the row
         * @param aDriveId: The Drive Id the name (category) belongs
         * @param aNewRecord: indicates to the caller if a new record is created.
         *        ETrue if a new row is created in the table; otherwise EFalse.
@@ -62,9 +61,14 @@ class CMPXDbCategory :
         *        into consideration when generating the unique row id
         * @return The unique id of the row added.
         */
-        virtual TUint32 AddItemL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia, TInt aDriveId, TBool& aNewRecord,
+#ifdef ABSTRACTAUDIOALBUM_INCLUDED
+        virtual TUint32 AddItemL(const TDesC& aName, TInt aDriveId, TBool& aNewRecord,
             TBool aCaseSensitive = ETrue);
-		
+#else 
+        TUint32 AddItemL(const TDesC& aName, TInt aDriveId, TBool& aNewRecord,
+            TBool aCaseSensitive = ETrue);
+#endif // ABSTRACTAUDIOALBUM_INCLUDED
+
         /**
         * Get the name field for a given ID.
         * @param aId identifies the category item
@@ -86,7 +90,7 @@ class CMPXDbCategory :
         */
         void FindAllL(const CMPXMedia& aCriteria, const TArray<TMPXAttribute>& aAttrs,
             CMPXMediaArray& aMediaArray);
-        
+
         /**
         * Decrement the number of songs for the item. If the count gets to 0, remove
         * the item.
@@ -105,7 +109,7 @@ class CMPXDbCategory :
         virtual void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist, TBool aMtpInUse = EFalse);
 #else
-        virtual void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
+        void DecrementSongsForCategoryL(TUint32 aId, TInt aDriveId,
             CMPXMessageArray* aItemChangedMessages, TBool& aItemExist);
 #endif // ABSTRACTAUDIOALBUM_INCLUDED
         /**
@@ -179,8 +183,8 @@ class CMPXDbCategory :
         * @param aDriveId: The Drive Id the name (category) belongs
         * @param aItemChangedMessages: if valid on return contains a updated message if the
         * category was updated
-        */       
-        virtual void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
+        */
+        void UpdateItemL(TUint32 aId, const CMPXMedia& aMedia, TInt aDriveId, CMPXMessageArray* aItemChangedMessages);
 
     protected:
 
@@ -218,15 +222,6 @@ class CMPXDbCategory :
         void ProcessRecordsetL(const TArray<TMPXAttribute>& aAttrs,
             RSqlStatement& aRecordset, CMPXMediaArray& aMediaArray);
 
-    private:
-        /**
-        * Retrieve name from media object based on category
-        * @param aCategory the category to retrieve name
-        * @param aMedia media object
-        * @return name
-        */
-        TPtrC ItemNameL(TMPXGeneralCategory aCategory, const CMPXMedia& aMedia);
-        
     private:    // from MMPXTable
 
         /**

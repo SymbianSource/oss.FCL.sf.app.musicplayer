@@ -32,8 +32,8 @@ enum TMPXAutoPlaylistType
 
 const TInt KDBPluginUid = 0x101FFC3A;
 
-const TInt KMPXMaxRecentlyPlayedSongs = 40;
-const TInt KMPXMaxMostPlayedSongs = 40;
+const TInt KMPXMaxRecentlyPlayedSongs = 20;
+const TInt KMPXMaxMostPlayedSongs = 20;
 const TInt KMPXRecentlyAddedInterval = 7;
 
 const TInt KMCMaxTextLen          = 255; // Maximum field size for categories is 255

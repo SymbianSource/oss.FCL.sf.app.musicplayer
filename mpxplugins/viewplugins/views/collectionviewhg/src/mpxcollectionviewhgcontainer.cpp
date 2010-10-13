@@ -164,8 +164,7 @@ CMPXCollectionViewHgContainer::CMPXCollectionViewHgContainer(
 	iSetEmptyTextNeeded(EFalse),
 	iPopupListRect(TRect(0,0,0,0)),
 	iPreviousViewId(TUid::Uid(0)),
-	iDrawBackGround(EFalse),
-	iIsNowPlayingView(EFalse)
+	iDrawBackGround(EFalse)
     {
     }
 
@@ -801,15 +800,8 @@ void CMPXCollectionViewHgContainer::HandleResourceChange( TInt aType )
             SetRect( clientRect );
             iBgContext->SetRect(((CAknAppUi*)iCoeEnv->AppUi())->ApplicationRect());
 
- 			if ( iCurrentViewType == EMPXViewMediawall )
-				{
-				PrepareTboneViewL();
-				}
-			else
-				{
-	            // call HandleLbxItemAdditionL
-	            HandleLbxItemAdditionL();
-				}
+            // call HandleLbxItemAdditionL
+            HandleLbxItemAdditionL();
             }
         );
     if(iMediaWall)
@@ -1009,22 +1001,6 @@ TInt CMPXCollectionViewHgContainer::TopLbxItemIndex() const
     {
     MPX_FUNC( "CMPXCollectionViewHgContainer::TopLbxItemIndex" );
     return iTopIndex;
-    }
-
-
-// -----------------------------------------------------------------------------
-// Gets first listbox item index on screen(relative to the original listbox).
-// -----------------------------------------------------------------------------
-//
-TInt CMPXCollectionViewHgContainer::FirstIndexOnScreen() const
-    {
-    MPX_FUNC( "CMPXCollectionViewHgContainer::FirstIndexOnScreen" );
-    TInt index = 0;
-    if ( iListWidget )
-        {
-        index = iListWidget->FirstIndexOnScreen();
-        }
-    return index;
     }
 
 
@@ -1283,7 +1259,6 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
             TBool pbv = (iPreviousViewId == TUid::Uid(KMPXPluginTypePlaybackUid)) ? ETrue : EFalse;
             if ( pbv )
                 {
-                iIsNowPlayingView = ETrue;
             	iPreviousViewId = TUid::Uid(0);
             	SetupTransitionType(KMPXInterviewTransition, pbv);
                 }
@@ -1311,6 +1286,11 @@ void CMPXCollectionViewHgContainer::HandleLbxItemAdditionL()
                 {
                 RestoreSelectedAlbumItemL(mediaArray);
                 PrepareMediaWallWithListL( mediaArray, count );
+                // We need to adjust the CBA for this view.
+                if( iCbaHandler )
+                    {
+                    iCbaHandler->UpdateCba();
+                    }
                 break;
                 }
             case EMPXViewList:
@@ -1642,14 +1622,7 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
         // TODO. check if this is correct for all lists
         iListWidget->ClearFlags( CHgScroller::EHgScrollerKeyMarkingDisabled );
         iListWidget->SetFocus(ETrue);
-        if( iContext == EContextItemPlaylist )
-            {
-            iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerScrollBar);
-            }   
-        else
-            {
-            iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerLetterStripLite );
-            }
+        iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerLetterStripLite );
         iListWidget->DrawableWindow()->SetOrdinalPosition( -1 );
         iListWidget->DrawableWindow()->SetFaded(((CAknAppUi*)iCoeEnv->AppUi())->IsFaded(), RWindowTreeNode::EFadeIncludeChildren);
         ProvideDataWithoutThumbnailsL(aMediaArray);
@@ -1659,14 +1632,6 @@ void CMPXCollectionViewHgContainer::PrepareListL(const CMPXMediaArray& aMediaArr
         iListWidget->Reset();
         iListWidget->ResizeL( aCount );
         iListWidget->SetFocus(ETrue);
-        if( iContext == EContextItemPlaylist )
-            {
-            iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerScrollBar);
-            }   
-        else
-            {
-            iListWidget->SetScrollBarTypeL( CHgScroller::EHgScrollerLetterStripLite );
-            }
         ProvideDataWithoutThumbnailsL(aMediaArray);
         iListWidget->MakeVisible(ETrue);
         iListWidget->InitScreenL(clientRect);
@@ -1728,10 +1693,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallWithListL(const CMPXMediaArr
 
     ((CAknAppUi*)iCoeEnv->AppUi())->StatusPane()->MakeVisible(EFalse);
     iThumbnailManager->SetSizeL( EAudioGridThumbnailSize );
-    if( iCbaHandler )
-        {
-        iCbaHandler->UpdateCba();
-        }
+
     TRect clientRect = ((CAknView*)iView)->ClientRect();
 
     TAknLayoutRect mediawallLayout;
@@ -1861,10 +1823,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
     else if ( iMediaWall && iPrevViewType == EMPXViewTBone )
         {
         switchBuffer = CMPXCollectionViewHgSwitchBuffer::CreateBufferLC( *iMediaWall );
-        if (aMediaArray.Count()>1)
-            {
-            switchBuffer->SetIndexOffset(1);
-            }
+        switchBuffer->SetIndexOffset(1);
         }
     if( iMediaWall )
         {
@@ -1876,28 +1835,14 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
 
 	if (!iMediaWall)
 	    {
-	    if ( iIsNowPlayingView )
-	        {
-			// back from now playing view, create mediawall with empty albumart icon to avoid flickering
-	        iMediaWall = CHgVgMediaWall::NewL(
-	                appRect,
-	                aCount,
-	                CHgVgMediaWall::EHgVgMediaWallStyleCoverflowFullScreen,
-	                ETrue,
-	                this,
-	                CGulIcon::NewL( new CFbsBitmap()) );
-	        }
-	    else
-	        {
-	        iMediaWall = CHgVgMediaWall::NewL(
-	                appRect,
-	                aCount,
-	                CHgVgMediaWall::EHgVgMediaWallStyleCoverflowFullScreen,
-	                ETrue,
-	                this,
-	                DefaultIconL() );
-	        }
-    
+        iMediaWall = CHgVgMediaWall::NewL(
+                appRect,
+                aCount,
+                CHgVgMediaWall::EHgVgMediaWallStyleCoverflowFullScreen,
+                ETrue,
+                this,
+                DefaultIconL() );
+
         if( !iIsForeground )
             iMediaWall->HandleLosingForeground();
 
@@ -1975,16 +1920,7 @@ void CMPXCollectionViewHgContainer::PrepareMediaWallL(const CMPXMediaArray& aMed
         CleanupStack::PopAndDestroy( switchBuffer );
         switchBuffer = NULL;
         }
-	
-	if ( iIsNowPlayingView )
-	    {
-        iDefaultIconSet = EFalse;
-        iIsNowPlayingView = EFalse;
-	    }
-	else
-	    {
-        iDefaultIconSet = ETrue;
-	    }
+	iDefaultIconSet = ETrue;
 	CleanPrevView();
     }
 
@@ -2343,7 +2279,6 @@ void CMPXCollectionViewHgContainer::HandleOpenL( TInt aIndex )
             {
             // To open the selected album.
             iView->ProcessCommandL( EMPXCmdCommonEnterKey );
-            iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
             }
 
 		// Disable transition in reorder mode
@@ -4143,13 +4078,11 @@ void CMPXCollectionViewHgContainer::UpdatePathAndOpenL(TInt aIndex, TBool aSelec
 					}
 				else
 					{
-					iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
 					cpath->Set(aIndex-1); // actual selection
 					}
 				}
 			else
 				{
-				iPlaybackUtility->SetL( EPbPropertyRandomMode, EFalse ); 
 				cpath->Set(aIndex);
 				}
 			}
@@ -4737,7 +4670,7 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsDialogL( const CMPXMedia& aRes
         SetupTransitionType(KMPXInterviewTransition);
         BeginFullScreenAnimation();
         }
-    else if( !iLayoutSwitch && iMediaWall && ( iCurrentViewType == EMPXViewMediawall ) )
+    else if( !iLayoutSwitch && iMediaWall )
         {
         // Close mediawall "flip animation"
         iMediaWall->StartOpeningAnimationL( EFalse );
@@ -4773,7 +4706,6 @@ void CMPXCollectionViewHgContainer::ShowAlbumSongsL( const CMPXMedia& aAlbum )
 		listSize++;
 		indexAddition = 1;
 		}
-	currentList->Reset(); //clears any selection along with list reset	
 	// Add space for shuffle item if list contains more than one item.
 	currentList->ResizeL( listSize );
 

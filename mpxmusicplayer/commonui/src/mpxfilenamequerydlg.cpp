@@ -236,7 +236,6 @@ TKeyResponse CMPXFileNameQueryDlg::OfferKeyEventL( const TKeyEvent& aKeyEvent, T
     { 
     TKeyResponse response = EKeyWasNotConsumed;
     // consume 'enter' so it won't acknowledge the dialog
-
     TBool vkbOpen = EFalse;
     CAknQueryControl* queryControl = QueryControl();
     if ( queryControl )

@@ -150,7 +150,7 @@ void CMusicContentPublisher::ConstructL()
     MPX_DEBUG1("CMusicContentPublisher::ConstructL resources loaded");
     
     // connect to the skin server, to receive skin changed event.
-    User::LeaveIfError(iAknsSrvSession.Connect(this));
+    iAknsSrvSession.Connect(this);
     
     // enable skin.
     AknsUtils::InitSkinSupportL();

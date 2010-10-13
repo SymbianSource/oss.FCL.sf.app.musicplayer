@@ -3989,13 +3989,38 @@ void CMPXDbPlugin::DoGetCollectionCountL( const CMPXCommand& aCmd )
     switch(table)
         {
         case EMPXCollectionCountTrack:
-            count = (TInt)iDbHandler->GetMusicCountL(drive);
+            TRAPD( trackerr, count = (TInt)iDbHandler->GetMusicCountL(drive) );
+            MPX_DEBUG2( "CMPXDbPlugin::DoGetCollectionCountL, trackerr =%d", trackerr );
+            if ( trackerr == KErrCorrupt )
+                {
+                iDbHandler->CloseDatabaseL( drive );
+                iDbHandler->RecreateDatabaseFileL( drive );
+                iDbHandler->OpenDatabaseL( drive );
+                count = (TInt)iDbHandler->GetMusicCountL(drive);
+                }
+            
             break;
         case EMPXCollectionCountPlaylist:
-            count = (TInt)iDbHandler->GetPlaylistCountL(drive);
+            TRAPD( playlisterr, count = (TInt)iDbHandler->GetPlaylistCountL(drive) );
+            MPX_DEBUG2( "CMPXDbPlugin::DoGetCollectionCountL, playlisterr =%d", playlisterr );
+            if ( playlisterr == KErrCorrupt )
+                {
+                iDbHandler->CloseDatabaseL( drive );
+                iDbHandler->RecreateDatabaseFileL( drive );
+                iDbHandler->OpenDatabaseL( drive );
+                count = (TInt)iDbHandler->GetPlaylistCountL(drive);
+                }
             break;
         case EMPXCollectionCountTotal:
-            count = (TInt)iDbHandler->GetTotalCountL(drive);
+            TRAPD( totalerr, count = (TInt)iDbHandler->GetTotalCountL(drive) );
+            MPX_DEBUG2( "CMPXDbPlugin::DoGetCollectionCountL, totalerr =%d", totalerr );
+            if ( totalerr == KErrCorrupt )
+                {
+                iDbHandler->CloseDatabaseL( drive );
+                iDbHandler->RecreateDatabaseFileL( drive );
+                iDbHandler->OpenDatabaseL( drive );
+                count = (TInt)iDbHandler->GetTotalCountL(drive);
+                }
             break;
         default:
             User::Leave(KErrArgument);

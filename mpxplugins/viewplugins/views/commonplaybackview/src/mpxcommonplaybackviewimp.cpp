@@ -113,7 +113,6 @@
 // CONSTANTS
 const TInt KMPXOneSecInMilliSecs( 1000 );
 const TUid KMPXEqualizerViewImplementationId = { 0x101FFC77 };
-const TUid KMPXMetadataEditorDialogImplementationId  = { 0x101FFC83 };
 const TInt KMPXPostponeForHandleDelayedError( 1000000 ); // 1S
 const TInt KMPXPlaybackViewWindowBackground = -1;
 const TInt KMPXDelayForTNRequest( 3000000 ); // 3S
@@ -1633,7 +1632,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleErrorL( TInt aError )
     MPX_DEBUG1("CMPXPlaybackViewImp::HandleErrorL()");
     MPX_DEBUG1("    > Reset New Item Opened Flag");
     iNewItemOpened = EFalse;
-    iErrorOccured = EFalse;
+
     MPX_DEBUG1( "CMPXCommonPlaybackViewImp::HandleErrorL: Exiting");
     }
 
@@ -1982,7 +1981,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandlePlaybackMessage(
         }
     else if ( aError != KErrNone && iLastPBViewActivated )
         {
-        iErrorOccured = ETrue;
         TRAP_IGNORE( DoHandleErrorPlaybackMessageL( aError ) );
         }
     MPX_DEBUG2("<--CMPXCommonPlaybackViewImp::HandlePlaybackMessage(): aError = %d", aError);
@@ -2174,11 +2172,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleCommandL( TInt aCommand )
             }
         case EMPXPbvCmdSongDetails:
             {
-            if( !iErrorOccured )
-                {
-                LaunchFileDetailsDialogL();
-                }
-            
+            LaunchFileDetailsDialogL();
             break;
             }
         case EMPXPbvCmdPlay:
@@ -2723,6 +2717,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleForegroundEventL( TBool aForegrou
                                 {
                                 MPX_DEBUG1( "CMPXCommonPlaybackViewImp::HandleForegroundEventL requesting media" );
                                 RequestMediaL();
+                                UpdateTitlePaneL();
                                 }
                             }
                         }
@@ -2766,12 +2761,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::DynInitMenuPaneL(
         {
         case R_MPX_PLAYBACK_VIEW_MENU:
             {
-            if( iErrorOccured ) 
-                {
-                MPX_DEBUG2( "iErrorOccured %d" , iErrorOccured);
-                aMenuPane->SetItemDimmed( EMPXPbvCmdSongDetails, ETrue );
-                }
-            
             if ( iIsffButtonPressed )
                 {
                 iIsffButtonPressed = EFalse;
@@ -3019,8 +3008,7 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleLayoutChange()
             // since it'll mess up equilizer's screen
             if ( StatusPane()->CurrentLayoutResId() !=
                  R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT &&
-                 activeView != KMPXEqualizerViewImplementationId && 
-				 activeView != KMPXMetadataEditorDialogImplementationId )
+                 activeView != KMPXEqualizerViewImplementationId )
                 {
                 TRAP_IGNORE(
                     StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT ));
@@ -3079,10 +3067,6 @@ EXPORT_C void CMPXCommonPlaybackViewImp::HandleViewActivation(
     {
     MPX_FUNC_EX( "CMPXCommonPlaybackViewImp::HandleViewActivation VF" );
     iPBViewToBeActivated = ( KMPXPluginTypePlaybackUid == aCurrentViewType.iUid );
-	if(iPBViewToBeActivated)
-		{
-		HandleLayoutChange();
-		}
     MPX_DEBUG2( "CMPXCommonPlaybackViewImp::HandleViewActivation iPBViewToBeActivated %d", iPBViewToBeActivated );
     }
 // ---------------------------------------------------------------------------
@@ -3942,13 +3926,11 @@ EXPORT_C void CMPXCommonPlaybackViewImp::UpdateToolbarL()
                         if( pausePlayControl )
                         	{
 	                        TMPXPlaybackState state = iPlaybackUtility->StateL();
-	                        if ( state == EPbStatePlaying )
+	                        if ((state == EPbStateInitialising) || (state == EPbStatePlaying))
 	                           {
 	                           pausePlayControl->SetCurrentState(0, ETrue);
 	                           }
-	                        //get EPbStateInitialising when skipping to next, ignore it to remove play/pause key flicker 
-	                        //It is showing the state that was previously shown when EPbStateInitializing
-	                        else if ( state != EPbStateInitialising )
+	                        else
 	                           {
 	                           pausePlayControl->SetCurrentState(1, ETrue);
 	                           }

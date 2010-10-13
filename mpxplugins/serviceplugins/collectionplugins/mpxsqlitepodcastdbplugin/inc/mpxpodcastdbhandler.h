@@ -317,7 +317,12 @@ class CMPXPodcastDbHandler :
         * Recreate all podcast databases
         */
         void ReCreateDatabasesL();
-
+        
+        /**
+        * Recreate a specified database file.
+        */
+        void RecreateDatabaseFileL( TInt aDrive );
+                
         /**
         * Start a refresh operation
         */

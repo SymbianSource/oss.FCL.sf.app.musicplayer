@@ -532,15 +532,11 @@ void CMPXScreenSaverPluginContainer::DrawClockL( CBitmapContext& aGc )
         {
         clockTimePtr = KNullDesC;
         }
-    // time digifont does not contain arabic / indic etc numbers.
-    // If clock font is changed, or digifont starts supporting language-
-    // specific numbers, the commented-out call below should be restored
-    /*
     else
         {
         AknTextUtils::LanguageSpecificNumberConversion( clockTimePtr );
         }
-    */
+    
 
     // AM/PM text
     HBufC* ampmFormat = StringLoader::LoadLC( R_MPX_SCREENSAVER_AMPM );

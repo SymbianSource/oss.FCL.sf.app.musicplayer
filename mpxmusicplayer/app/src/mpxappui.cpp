@@ -2114,6 +2114,15 @@ void CMPXAppUi::HandleCommandParametersL( const TDesC8& aCommand )
             }
 
         iCmdActivatedViewTypeId = iProcessParameter->ActivatedViewTypeId();
+        
+        if ( iCmdActivatedViewTypeId == KMPXPluginTypeCollectionUid ) //Request to activate collection view by HomeScreen
+            {
+#ifdef RD_BROWSER_PROGRESSIVE_DOWNLOAD
+            iPdPbvStartedByBrowser = EFalse;
+#endif // RD_BROWSER_PROGRESSIVE_DOWNLOAD
+            iStandAlone = EFalse;        
+            } 
+            
         MPX_DEBUG2( "CMPXAppUi::HandleCommandParametersL activated view type= =0x%x",
             iCmdActivatedViewTypeId );
 

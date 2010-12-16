@@ -68,7 +68,7 @@ RESOURCE REGISTRY_INFO theInfo
                     implementation_uid = 0x101FFC3A;
                     version_no = 1;
                     display_name = "";
-                    default_data = "audio/mp3;audio/x-mp3;audio/mp4;audio/3gpp;audio/3gpp2;audio/wav;audio/x-wav;audio/x-au;audio/au;audio/3gp;audio/mpeg;audio/aac;audio/x-ms-wma;x-caf-audio/x-ms-wma;audio/x-pn-realaudio;audio/x-realaudio;audio/vnd.rn-realaudio";
+                    default_data = "audio/mp3;audio/x-mp3;audio/mp4;audio/3gpp;audio/3gpp2;audio/wav;audio/x-wav;audio/x-au;audio/au;audio/3gp;audio/mpeg;audio/aac;audio/x-ms-wma;x-caf-audio/x-ms-wma;audio/x-pn-realaudio;audio/x-realaudio;audio/vnd.rn-realaudio;audio/x-dolby-mp4";
                     opaque_data = "<s>*<e>.mp3;.aac;.3gp;.3gpp;.3g2;.3gpp2;.m4a;.wav;.mp4;.wma;.dcf;.odf;.asf;.m3u;.rm;.ra;.o4a;.dm;.3ga"
                                   "<t>"EMPXCollectionPluginMusic"</t>"
                                   "<i>"EMPXPluginPriorityHighest"</i>"

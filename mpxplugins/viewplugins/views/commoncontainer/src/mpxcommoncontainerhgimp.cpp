@@ -78,8 +78,6 @@ _LIT( KMPXDash, " - " );
 _LIT( KMPXSpace, " ");
 #endif //HG_MP_LOC_AVAILABLE
 _LIT( KMPXZeroDurationMark, "--");
-//_LIT( KMPXAlbumMimeType, "image/jpeg" );
-_LIT( KMPXAlbumMimeType, "audio/mpeg3" );
 
 //#ifndef HG_MP_LOC_AVAILABLE
 _LIT( KUnknown, "Unknown" );
@@ -1301,7 +1299,9 @@ void CMPXCommonContainerHgImp::ThumbnailReady(
 				const TDesC&   albumArtUri = *(iAlbumArtRequest->iAlbumArtUri);
 				TRAP_IGNORE
 				(
-				CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( albumArtUri, KMPXAlbumMimeType );
+				// ThumbnailManager has became stricter on mimetype, if it does not match, it would fail.
+				// so it is better to give KNullDesC if not sure
+				CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( albumArtUri, KNullDesC );
 				delete iAlbumArtRequest->iAlbumArtUri;
 				delete iAlbumArtRequest;
 				// Using negative index as priority will ensure that thumbnail requests
@@ -2280,7 +2280,9 @@ void CMPXCommonContainerHgImp::SetDetailThumbnailL(
 
 			if ( iRequestCount < KMaxThumbnailReq )
 				{
-				CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KMPXAlbumMimeType );
+				// ThumbnailManager has became stricter on mimetype, if it does not match, it would fail.
+				// so it is better to give KNullDesC if not sure
+                CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KNullDesC );
 				TInt reqId;
 				TInt ret = NULL;
 				// Set priority based on the index so that the smaller indexes are loaded first.

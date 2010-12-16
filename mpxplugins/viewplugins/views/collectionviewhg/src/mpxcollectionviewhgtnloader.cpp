@@ -21,9 +21,6 @@
 #include "mpxcollectionviewhgtnloader.h"
 #include "mpxlog.h"
 
-_LIT( KMPXAlbumMimeType, "audio/mpeg3" );
-
-
 // -----------------------------------------------------------------------------
 // CODEScrollerTNLoader::NewL()
 // -----------------------------------------------------------------------------
@@ -81,7 +78,9 @@ void CMpxTNLoader::LoadNextTNL()
         TInt index = iLoading[0]->iIndex;
         if( index >= 0 && iLoading[0]->iId == 0)
             {
-            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(iLoading[0]->iFileName, KMPXAlbumMimeType);
+            // ThumbnailManager has became stricter on mimetype, if it does not match, it would fail.
+            // so it is better to give KNullDesC if not sure
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( iLoading[0]->iFileName, KNullDesC );
             TRAPD(err, iLoading[0]->iId = iTnEngine->GetThumbnailL( *source, NULL, 1 ); )
         	MPX_DEBUG4( "GetThumbnailL: %d [%d,%d]", err, index, iLoading[0]->iId);
 			CleanupStack::PopAndDestroy(source);

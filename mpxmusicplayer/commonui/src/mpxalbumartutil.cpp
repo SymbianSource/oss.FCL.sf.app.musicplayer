@@ -30,8 +30,6 @@
 #include <thumbnaildata.h>
 #include <thumbnailobjectsource.h>
 
-_LIT( KMPXAlbumMimeType, "audio/mpeg3" );
-
 // ============================== MEMBER FUNCTIONS ============================
 
 // ----------------------------------------------------------------------------
@@ -300,7 +298,9 @@ void CMPXAlbumArtUtil::ExtractThumbnailL(
 #endif
         if (album.Compare( KNullDesC) != 0 )
             {
-            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KMPXAlbumMimeType );
+            // ThumbnailManager has became stricter on mimetype, if it does not match, it would fail.
+            // so it is better to give KNullDesC if not sure
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( album, KNullDesC );
             TInt ret = NULL;
             if(iThumbnailManager && iReqId >0)
                 {
